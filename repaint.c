@@ -39,7 +39,7 @@ void paint_rval_text(unsigned char * str, uint32_t rval,
 				(const char *)str,len);
 	y++;
 	if (rval & RS_ULINE)
-		XDrawLine(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.tx,x,y,x + len * fwidth,y);
+		XDrawLine(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.tx,x,y,x + len * jbxvt.X.font_width,y);
 
 	if (rval & RS_RVID) {
 		XSetForeground(jbxvt.X.dpy,jbxvt.X.gc.tx,jbxvt.X.color.fg);
@@ -69,7 +69,7 @@ static void paint_rvec_text(unsigned char * str,
 		str += i;
 		rvec += i;
 		len -= i;
-		x += i * fwidth;
+		x += i * jbxvt.X.font_width;
 	}
 }
 
@@ -84,8 +84,8 @@ void repaint(int row1, int row2, int col1, int col2)
 
 	str = (unsigned char *)malloc(cwidth + 1);
 	y = row1;
-	x1 = MARGIN + col1 * fwidth;
-	y1 = MARGIN + row1 * fheight;
+	x1 = MARGIN + col1 * jbxvt.X.font_width;
+	y1 = MARGIN + row1 * jbxvt.X.font_height;
 
 	/*  First do any 'scrolled off' lines that are visible.
 	 */
@@ -98,11 +98,11 @@ void repaint(int row1, int row2, int col1, int col2)
 			str[x] = s[x + col1] < ' ' ? ' ' : s[x + col1];
 		r = sl->sl_rend == NULL ? NULL : sl->sl_rend + col1;
 		paint_rvec_text(str,r,m,x1,y1);
-		x2 = x1 + m * fwidth;
-		width = (col2 - col1 + 1 - m) * fwidth;
+		x2 = x1 + m * jbxvt.X.font_width;
+		width = (col2 - col1 + 1 - m) * jbxvt.X.font_width;
 		if (width > 0)
-			XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,x2,y1,width,fheight,False);
-		y1 += fheight;
+			XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,x2,y1,width,jbxvt.X.font_height,False);
+		y1 += jbxvt.X.font_height;
 	}
 
 
@@ -123,11 +123,11 @@ void repaint(int row1, int row2, int col1, int col2)
 		m -= col1;
 		r = screen->rend[i][cwidth] == 0 ? NULL : screen->rend[i] + col1;
 		paint_rvec_text(str,r,m,x1,y1);
-		x2 = x1 + m * fwidth;
-		width = (col2 - col1 + 1 - m) * fwidth;
+		x2 = x1 + m * jbxvt.X.font_width;
+		width = (col2 - col1 + 1 - m) * jbxvt.X.font_width;
 		if (width > 0)
-			XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,x2,y1,width,fheight,False);
-		y1 += fheight;
+			XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,x2,y1,width,jbxvt.X.font_height,False);
+		y1 += jbxvt.X.font_height;
 	}
 	free(str);
 	show_selection(row1,row2,col1,col2);

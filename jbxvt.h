@@ -9,6 +9,7 @@
 
 struct JBXVT {
 	struct {
+		uint8_t font_height, font_width;
 		Display * dpy;
 		XFontStruct *font;
 		struct {
@@ -27,7 +28,8 @@ struct JBXVT {
 		uint32_t rstyle; // render style
 	} scr;
 	struct {
-		struct selst selend1, selend2, selanchor;
+		struct selst end1, end2, // selection endpoints
+			     anchor; //selection anchor
 	} sel;
 	struct {
 		bool save_rstyle:1;

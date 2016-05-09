@@ -24,12 +24,12 @@ void change_selection(struct selst * restrict ose1,
 		ose1 = ose2;
 		ose2 = se;
 	}
-	if (selcmp(&selend1,&selend2) <= 0) {
-		se1 = &selend1;
-		se2 = &selend2;
+	if (selcmp(&jbxvt.sel.end1,&jbxvt.sel.end2) <= 0) {
+		se1 = &jbxvt.sel.end1;
+		se2 = &jbxvt.sel.end2;
 	} else {
-		se1 = &selend2;
-		se2 = &selend1;
+		se1 = &jbxvt.sel.end2;
+		se2 = &jbxvt.sel.end1;
 	}
 
 	if ((n = selcmp(se1,ose1)) != 0) {
@@ -49,10 +49,10 @@ void change_selection(struct selst * restrict ose1,
 		/*  Invert the changed area
 		 */
 		for (row = row1; row <= row2; row++) {
-			y = MARGIN + row * fheight;
-			x1 = MARGIN + (row == rs ? cs * fwidth : 0);
-			x2 = MARGIN + ((row == re) ? ce : cwidth) * fwidth;
-			XFillRectangle(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.hl,x1,y,x2 - x1,fheight);
+			y = MARGIN + row * jbxvt.X.font_height;
+			x1 = MARGIN + (row == rs ? cs * jbxvt.X.font_width : 0);
+			x2 = MARGIN + ((row == re) ? ce : cwidth) * jbxvt.X.font_width;
+			XFillRectangle(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.hl,x1,y,x2 - x1,jbxvt.X.font_height);
 		}
 	}
 	if ((n = selcmp(se2,ose2)) != 0) {
@@ -72,10 +72,10 @@ void change_selection(struct selst * restrict ose1,
 		/*  Invert the changed area
 		 */
 		for (row = row1; row <= row2; row++) {
-			y = MARGIN + row * fheight;
-			x1 = MARGIN + (row == rs ? cs * fwidth : 0);
-			x2 = MARGIN + ((row == re) ? ce : cwidth) * fwidth;
-			XFillRectangle(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.hl,x1,y,x2 - x1,fheight);
+			y = MARGIN + row * jbxvt.X.font_height;
+			x1 = MARGIN + (row == rs ? cs * jbxvt.X.font_width : 0);
+			x2 = MARGIN + ((row == re) ? ce : cwidth) * jbxvt.X.font_width;
+			XFillRectangle(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.hl,x1,y,x2 - x1,jbxvt.X.font_height);
 		}
 	}
 }

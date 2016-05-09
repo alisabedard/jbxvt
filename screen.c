@@ -80,23 +80,15 @@ void scr_init(const unsigned int saved_lines)
 		sline[i] = NULL;
 	screen1.wrap=screen2.wrap=1;
 	screen = &screen1;
-	fwidth = XTextWidth(jbxvt.X.font,"M",1);
-	fheight = jbxvt.X.font->ascent + jbxvt.X.font->descent;
+	jbxvt.X.font_width = XTextWidth(jbxvt.X.font,"M",1);
+	jbxvt.X.font_height = jbxvt.X.font->ascent + jbxvt.X.font->descent;
 	scr_reset();
 }
 
 //  Handle a backspace
 void scr_backspace()
 {
-	if (screen->col == 0 && reverse_wrap && screen->row > 0) {
-		cursor();
-		screen->row--;
-		screen->col = cwidth - 1;
-		cursor();
-	} else if (screen->wrap_next && reverse_wrap)
-		screen->wrap_next = 0;
-	else
-		scr_move(-1,0,COL_RELATIVE|ROW_RELATIVE);
+	scr_move(-1,0,COL_RELATIVE|ROW_RELATIVE);
 }
 
 /*  Ring the bell
@@ -112,7 +104,7 @@ void scr_change_screen(const uint8_t direction)
 {
 	home_screen();
 	screen = (direction == HIGH) ? &screen2 : &screen1;
-	selend2.se_type = NOSEL;
+	jbxvt.sel.end2.se_type = NOSEL;
 	repaint(0,cheight - 1,0,cwidth - 1);
 	cursor();
 }
@@ -121,7 +113,14 @@ void scr_change_screen(const uint8_t direction)
  */
 void scr_change_rendition(const uint32_t style)
 {
-	jbxvt.scr.rstyle=style;
+	jbxvt.scr.rstyle = style ? jbxvt.scr.rstyle | style : 0;
+#if 0
+	if (!style)
+		  jbxvt.scr.rstyle=0;
+	else
+		  jstyle|=style;
+#endif
+	//jbxvt.scr.rstyle=style;
 #if 0
 	if (style == 0)
 		jbxvt.scr.rstyle &= ~RS_STYLE;
@@ -320,10 +319,10 @@ void scr_move_by(int y)
 	int n;
 
 	if (y >= 0){
-		y = (y - MARGIN) / fheight;
+		y = (y - MARGIN) / jbxvt.X.font_height;
 		n = jbxvt.scr.offset - y;
 	} else {
-		y = (-y - MARGIN) / fheight;
+		y = (-y - MARGIN) / jbxvt.X.font_height;
 		n = jbxvt.scr.offset + y;
 	}
 	change_offset(n);

@@ -28,18 +28,22 @@ void repair_damage(void)
 		if (event.type == NoExpose)
 			return;
 
-		row1 = (event.xgraphicsexpose.y - MARGIN) / fheight;
+		row1 = (event.xgraphicsexpose.y - MARGIN)
+			/ jbxvt.X.font_height;
 		if (row1 < 0)
 			row1 = 0;
 		row2 = (event.xgraphicsexpose.y
-			+ event.xgraphicsexpose.height - MARGIN) / fheight;
+			+ event.xgraphicsexpose.height - MARGIN)
+			/ jbxvt.X.font_height;
 		if (row2 >= cheight)
 			row2 = cheight - 1;
-		col1 = (event.xgraphicsexpose.x - MARGIN) / fwidth;
+		col1 = (event.xgraphicsexpose.x - MARGIN)
+			/ jbxvt.X.font_width;
 		if (col1 < 0)
 			col1 = 0;
 		col2 = (event.xgraphicsexpose.x
-			+ event.xgraphicsexpose.width - MARGIN) / fwidth;
+			+ event.xgraphicsexpose.width - MARGIN)
+			/ jbxvt.X.font_width;
 		if (col2 >= cwidth)
 			col2 = cwidth - 1;
 		repaint(row1,row2,col1,col2);

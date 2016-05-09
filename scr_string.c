@@ -80,8 +80,8 @@ void scr_string(unsigned char * restrict str, int len, int nlcount)
 			screen->wrap_next = 0;
 		}
 		check_selection(screen->row,screen->row);
-		x = MARGIN + fwidth * screen->col;
-		y = MARGIN + fheight * screen->row;
+		x = MARGIN + jbxvt.X.font_width * screen->col;
+		y = MARGIN + jbxvt.X.font_height * screen->row;
 		for (n = 0; str[n] >= ' '; n++)
 			;
 		n = n + screen->col > cwidth ? cwidth - screen->col : n;
@@ -92,11 +92,11 @@ void scr_string(unsigned char * restrict str, int len, int nlcount)
 				s[i] = s[i - n];
 				r[i] = r[i - n];
 			}
-			width = (cwidth - screen->col - n) * fwidth;
-			x2 = x + n * fwidth;
+			width = (cwidth - screen->col - n) * jbxvt.X.font_width;
+			x2 = x + n * jbxvt.X.font_width;
 			if (width > 0) {
 				XCopyArea(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.win.vt,jbxvt.X.gc.tx,
-					x,y,width,fheight,x2,y);
+					x,y,width,jbxvt.X.font_height,x2,y);
 				repair_damage();
 			}
 		}

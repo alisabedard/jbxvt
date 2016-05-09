@@ -29,8 +29,8 @@ void scr_reset(void)
 
 	XGetGeometry(jbxvt.X.dpy,jbxvt.X.win.vt,&root,
 		&x,&y,&width,&height,&u, &u);
-	int16_t cw = (width - 2 * MARGIN) / fwidth;
-	int16_t ch = (height - 2 * MARGIN) / fheight;
+	int16_t cw = (width - 2 * MARGIN) / jbxvt.X.font_width;
+	int16_t ch = (height - 2 * MARGIN) / jbxvt.X.font_height;
 
 	if (screen->text == NULL || cw != cwidth || ch != cheight) {
 

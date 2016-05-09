@@ -44,8 +44,8 @@ static void save_top_lines(uint8_t count)
 {
 	for (uint8_t i = 1; i <= count; i++) {
 		save_top_line(i);
-		save_top_lines_show_selection(&selend1, i);
-		save_top_lines_show_selection(&selend2, i);
+		save_top_lines_show_selection(&jbxvt.sel.end1, i);
+		save_top_lines_show_selection(&jbxvt.sel.end2, i);
 	}
 }
 
@@ -70,8 +70,8 @@ void scroll(int16_t row1, int16_t row2, int8_t count)
 		save_top_lines(count);
 		for (int16_t i = sline_max - count - 1; i >= 0; i--) {
 			sline[i + count] = sline[i];
-			set_selend_index(i, count, &selend1);
-			set_selend_index(i, count, &selend2);
+			set_selend_index(i, count, &jbxvt.sel.end1);
+			set_selend_index(i, count, &jbxvt.sel.end2);
 		}
 		for (uint8_t i = 0; i < count; i++) {
 			unsigned char * s = screen->text[i];
@@ -92,8 +92,8 @@ void scroll(int16_t row1, int16_t row2, int8_t count)
 			}
 			sl->sl_length = j;
 			sline[count - i - 1] = sl;
-			sel_scr_to_sav(&selend1, i, count);
-			sel_scr_to_sav(&selend2, i, count);
+			sel_scr_to_sav(&jbxvt.sel.end1, i, count);
+			sel_scr_to_sav(&jbxvt.sel.end2, i, count);
 			}
 		sline_top += count;
 		if (sline_top > sline_max)
@@ -107,23 +107,23 @@ void scroll(int16_t row1, int16_t row2, int8_t count)
 		for (uint8_t i = 0; i < count; i++, j++) {
 			save[i] = screen->text[j];
 			rend[i] = screen->rend[j];
-			if (selend1.se_type == SCREENSEL && selend1.se_index == j) {
+			if (jbxvt.sel.end1.se_type == SCREENSEL && jbxvt.sel.end1.se_index == j) {
 				show_selection(0,cheight - 1,0,cwidth - 1);
-				selend1.se_type = NOSEL;
+				jbxvt.sel.end1.se_type = NOSEL;
 			}
-			if (selend2.se_type == SCREENSEL && selend2.se_index == j) {
+			if (jbxvt.sel.end2.se_type == SCREENSEL && jbxvt.sel.end2.se_index == j) {
 				show_selection(0,cheight - 1,0,cwidth - 1);
-				selend2.se_type = NOSEL;
+				jbxvt.sel.end2.se_type = NOSEL;
 			}
 		}
 		row2++;
 		for (; j < row2; j++) {
 			screen->text[j - count] = screen->text[j];
 			screen->rend[j - count] = screen->rend[j];
-			if (selend1.se_type == SCREENSEL && selend1.se_index == j)
-				selend1.se_index = j - count;
-			if (selend2.se_type == SCREENSEL && selend2.se_index == j)
-				selend2.se_index = j - count;
+			if (jbxvt.sel.end1.se_type == SCREENSEL && jbxvt.sel.end1.se_index == j)
+				jbxvt.sel.end1.se_index = j - count;
+			if (jbxvt.sel.end2.se_type == SCREENSEL && jbxvt.sel.end2.se_index == j)
+				jbxvt.sel.end2.se_index = j - count;
 		}
 		for (uint8_t i = 0; i < count; i++) {
 			memset(save[i],0,cwidth + 1);
@@ -132,15 +132,15 @@ void scroll(int16_t row1, int16_t row2, int8_t count)
 			screen->rend[row2 - i - 1] = rend[i];
 		}
 		if (count < row2 - row1) {
-			y2 = MARGIN + row1 * fheight;
-			y1 = y2 + count * fheight;
-			uint16_t height = (row2 - row1 - count) * fheight;
+			y2 = MARGIN + row1 * jbxvt.X.font_height;
+			y1 = y2 + count * jbxvt.X.font_height;
+			uint16_t height = (row2 - row1 - count) * jbxvt.X.font_height;
 			XCopyArea(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.win.vt,jbxvt.X.gc.tx,
 				0,y1,pwidth,height,0,y2);
 			repair_damage();
 		}
-		uint16_t height = count * fheight;
-		y1 = MARGIN + (row2 - count) * fheight;
+		uint16_t height = count * jbxvt.X.font_height;
+		y1 = MARGIN + (row2 - count) * jbxvt.X.font_height;
 		XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,0,y1,pwidth,height,False);
 		return;
 	}
@@ -150,22 +150,22 @@ void scroll(int16_t row1, int16_t row2, int8_t count)
 		for (uint8_t i = 0; i < count; i++, j--) {
 			save[i] = screen->text[j];
 			rend[i] = screen->rend[j];
-			if (selend1.se_type == SCREENSEL && selend1.se_index == j) {
+			if (jbxvt.sel.end1.se_type == SCREENSEL && jbxvt.sel.end1.se_index == j) {
 				show_selection(0,cheight - 1,0,cwidth - 1);
-				selend1.se_type = NOSEL;
+				jbxvt.sel.end1.se_type = NOSEL;
 			}
-			if (selend2.se_type == SCREENSEL && selend2.se_index == j) {
+			if (jbxvt.sel.end2.se_type == SCREENSEL && jbxvt.sel.end2.se_index == j) {
 				show_selection(0,cheight - 1,0,cwidth - 1);
-				selend2.se_type = NOSEL;
+				jbxvt.sel.end2.se_type = NOSEL;
 			}
 		}
 		for (; j >= row1; j--) {
 			screen->text[j + count] = screen->text[j];
 			screen->rend[j + count] = screen->rend[j];
-			if (selend1.se_type == SCREENSEL && selend1.se_index == j)
-				selend1.se_index = j + count;
-			if (selend2.se_type == SCREENSEL && selend2.se_index == j)
-				selend2.se_index = j + count;
+			if (jbxvt.sel.end1.se_type == SCREENSEL && jbxvt.sel.end1.se_index == j)
+				jbxvt.sel.end1.se_index = j + count;
+			if (jbxvt.sel.end2.se_type == SCREENSEL && jbxvt.sel.end2.se_index == j)
+				jbxvt.sel.end2.se_index = j + count;
 		}
 		for (uint8_t i = 0; i < count; i++) {
 			memset(save[i],0,cwidth + 1);
@@ -174,15 +174,15 @@ void scroll(int16_t row1, int16_t row2, int8_t count)
 			screen->rend[row1 + i] = rend[i];
 		}
 		if (count < row2 - row1) {
-			y1 = MARGIN + row1 * fheight;
-			y2 = y1 + count * fheight;
-			uint16_t height = (row2 - row1 - count) * fheight;
+			y1 = MARGIN + row1 * jbxvt.X.font_height;
+			y2 = y1 + count * jbxvt.X.font_height;
+			uint16_t height = (row2 - row1 - count) * jbxvt.X.font_height;
 			XCopyArea(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.win.vt,jbxvt.X.gc.tx,
 				0,y1,pwidth,height,0,y2);
 			repair_damage();
 		}
-		uint16_t height = count * fheight;
-		y1 = MARGIN + row1 * fheight;
+		uint16_t height = count * jbxvt.X.font_height;
+		y1 = MARGIN + row1 * jbxvt.X.font_height;
 		XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,0,y1,pwidth,height,False);
 	}
 }

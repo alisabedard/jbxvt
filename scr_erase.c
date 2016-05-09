@@ -18,26 +18,26 @@ void scr_erase_line(int mode)
 	unsigned char *r, *s;
 
 	home_screen();
-	y = MARGIN + screen->row * fheight;
-	height = fheight;
+	y = MARGIN + screen->row * jbxvt.X.font_height;
+	height = jbxvt.X.font_height;
 	s = screen->text[screen->row];
 	r = screen->rend[screen->row];
 	switch (mode) {
 	    case START :
 		x = MARGIN;
-		width = (screen->col + 1) * fwidth;
+		width = (screen->col + 1) * jbxvt.X.font_width;
 		memset(s,0,screen->col + 1);
 		memset(r,0,screen->col + 1);
 		break;
 	    case END :
-		x = MARGIN + screen->col * fwidth;
-		width = (cwidth - screen->col) * fwidth;
+		x = MARGIN + screen->col * jbxvt.X.font_width;
+		width = (cwidth - screen->col) * jbxvt.X.font_width;
 		memset(s + screen->col,0,cwidth - screen->col + 1);
 		memset(r + screen->col,0,cwidth - screen->col);
 		break;
 	    case ENTIRE :
 		x = MARGIN;
-		width = cwidth * fwidth;
+		width = cwidth * jbxvt.X.font_width;
 		memset(s,0,cwidth + 1);
 		memset(r,0,cwidth);
 		break;
@@ -69,11 +69,11 @@ void scr_erase_screen(int mode)
 	home_screen();
 	screen->wrap_next = 0;
 	x = MARGIN;
-	width = fwidth * cwidth;
+	width = jbxvt.X.font_width * cwidth;
 	switch (mode) {
 	    case START :
 		y = MARGIN;
-		height = screen->row * fheight;
+		height = screen->row * jbxvt.X.font_height;
 		for (i = 0; i < screen->row; i++) {
 			memset(screen->text[i],0,cwidth + 1);
 			memset(screen->rend[i],0,cwidth + 1);
@@ -85,8 +85,8 @@ void scr_erase_screen(int mode)
 		break;
 	    case END :
 		if (screen->row != 0 || screen->col != 0) {
-			y = MARGIN + (screen->row + 1) * fheight;
-			height = (cheight - screen->row - 1) * fheight;
+			y = MARGIN + (screen->row + 1) * jbxvt.X.font_height;
+			height = (cheight - screen->row - 1) * jbxvt.X.font_height;
 			for (i = screen->row + 1; i < cheight; i++) {
 				memset(screen->text[i],0,cwidth + 1);
 				memset(screen->rend[i],0,cwidth + 1);
@@ -104,7 +104,7 @@ void scr_erase_screen(int mode)
 		 */
 	    case ENTIRE :
 		y = MARGIN;
-		height = cheight * fheight;
+		height = cheight * jbxvt.X.font_height;
 		if (screen == &screen1)
 			scroll1(cheight);
 		else

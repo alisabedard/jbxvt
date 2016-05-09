@@ -32,17 +32,19 @@ void scr_delete_characters(int count)
 	}
 	memset(s + cwidth - count,0,count);
 	memset(r + cwidth - count,0,count);
-	y = MARGIN + screen->row * fheight;
-	x2 = MARGIN + screen->col * fwidth;
-	x1 = x2 + count * fwidth;
-	width = (cwidth - count - screen->col) * fwidth;
+	y = MARGIN + screen->row * jbxvt.X.font_height;
+	x2 = MARGIN + screen->col * jbxvt.X.font_width;
+	x1 = x2 + count * jbxvt.X.font_width;
+	width = (cwidth - count - screen->col) * jbxvt.X.font_width;
 	if (width > 0) {
-		XCopyArea(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.win.vt,jbxvt.X.gc.tx,x1,y,width,fheight,x2,y);
+		XCopyArea(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.win.vt,
+			jbxvt.X.gc.tx,x1,y,width,jbxvt.X.font_height,x2,y);
 		repair_damage();
 	}
 	x1 = x2 + width;
-	width = count * fwidth;
-	XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,x1,y,width,fheight,False);
+	width = count * jbxvt.X.font_width;
+	XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,x1,y,width,
+		jbxvt.X.font_height,False);
 	screen->wrap_next = 0;
 	cursor();
 }

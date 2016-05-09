@@ -1,6 +1,7 @@
 #include "save_selection.h"
 
 #include "global.h"
+#include "jbxvt.h"
 #include "screen.h"
 #include "selcmp.h"
 #include "selection.h"
@@ -19,11 +20,11 @@ int8_t save_selection(void)
 	struct selst *se1, *se2;
 	struct slinest *sl;
 
-	if (selend1.se_type == NOSEL || selend2.se_type == NOSEL)
+	if (jbxvt.sel.end1.se_type == NOSEL || jbxvt.sel.end2.se_type == NOSEL)
 		return(-1);
-	if (selend1.se_type == selend2.se_type
-				&& selend1.se_index == selend2.se_index
-				&& selend1.se_col == selend2.se_col)
+	if (jbxvt.sel.end1.se_type == jbxvt.sel.end2.se_type
+				&& jbxvt.sel.end1.se_index == jbxvt.sel.end2.se_index
+				&& jbxvt.sel.end1.se_col == jbxvt.sel.end2.se_col)
 		return(-1);
 
 	if (selection_text != NULL)
@@ -31,12 +32,12 @@ int8_t save_selection(void)
 
 	/*  Set se1 and se2 to point to the first and second selection endpoints.
 	 */
-	if (selcmp(&selend1,&selend2) <= 0) {
-		se1 = &selend1;
-		se2 = &selend2;
+	if (selcmp(&jbxvt.sel.end1,&jbxvt.sel.end2) <= 0) {
+		se1 = &jbxvt.sel.end1;
+		se2 = &jbxvt.sel.end2;
 	} else {
-		se2 = &selend1;
-		se1 = &selend2;
+		se2 = &jbxvt.sel.end1;
+		se1 = &jbxvt.sel.end2;
 	}
 	str = (unsigned char *)malloc(total = 1);
 	if (se1->se_type == SAVEDSEL) {

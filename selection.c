@@ -64,20 +64,20 @@ void scr_clear_selection(void)
 		selection_length = 0;
 	}
 	show_selection(0,cheight - 1,0,cwidth - 1);
-	selend1.se_type = selend2.se_type = NOSEL;
+	jbxvt.sel.end1.se_type = jbxvt.sel.end2.se_type = NOSEL;
 }
 
 //  start a selection using the specified unit.
 void scr_start_selection(int x, int y, enum selunit unit)
 {
 	show_selection(0,cheight - 1,0,cwidth - 1);
-	int16_t col = (x - MARGIN) / fwidth;
-	int16_t row = (y - MARGIN) / fheight;
+	int16_t col = (x - MARGIN) / jbxvt.X.font_width;
+	int16_t row = (y - MARGIN) / jbxvt.X.font_height;
 	selection_unit = unit;
 	fix_rc(&row,&col);
-	rc_to_selend(row,col,&selanchor);
-	selend2 = selend1 = selanchor;
-	adjust_selection(&selend2);
+	rc_to_selend(row,col,&jbxvt.sel.anchor);
+	jbxvt.sel.end2 = jbxvt.sel.end1 = jbxvt.sel.anchor;
+	adjust_selection(&jbxvt.sel.end2);
 	show_selection(0,cheight - 1,0,cwidth - 1);
 }
 
@@ -201,12 +201,12 @@ void adjust_selection(struct selst * restrict include)
 	if (selection_unit == CHAR)
 		return;
 
-	if (selcmp(&selend1,&selend2) <= 0) {
-		se1 = &selend1;
-		se2 = &selend2;
+	if (selcmp(&jbxvt.sel.end1,&jbxvt.sel.end2) <= 0) {
+		se1 = &jbxvt.sel.end1;
+		se2 = &jbxvt.sel.end2;
 	} else {
-		se2 = &selend1;
-		se1 = &selend2;
+		se2 = &jbxvt.sel.end1;
+		se1 = &jbxvt.sel.end2;
 	}
 	if (selection_unit == WORD) {
 		int16_t i = se1->se_col;
@@ -252,7 +252,7 @@ void adjust_selection(struct selst * restrict include)
 			  i--;
 		se1->se_col = i;
 		i = se2->se_col;
-		if (se2 == include || selcmp(se2,&selanchor) == 0)
+		if (se2 == include || selcmp(se2,&jbxvt.sel.anchor) == 0)
 			  i++;
 		int16_t len;
 		if (se2->se_type == SCREENSEL) {
@@ -278,11 +278,11 @@ void check_selection(int row1, int row2)
 {
 	int r1, r2, x;
 
-	if (selend1.se_type == NOSEL || selend2.se_type == NOSEL)
+	if (jbxvt.sel.end1.se_type == NOSEL || jbxvt.sel.end2.se_type == NOSEL)
 		return;
 
-	r1 = selend1.se_type == SCREENSEL ? selend1.se_index : -1;
-	r2 = selend2.se_type == SCREENSEL ? selend2.se_index : -1;
+	r1 = jbxvt.sel.end1.se_type == SCREENSEL ? jbxvt.sel.end1.se_index : -1;
+	r2 = jbxvt.sel.end2.se_type == SCREENSEL ? jbxvt.sel.end2.se_index : -1;
 	if (r1 > r2) {
 		x = r1;
 		r1 = r2;
@@ -291,7 +291,7 @@ void check_selection(int row1, int row2)
 	if (row2 < r1 || row1 > r2)
 		return;
 	show_selection(0,cheight - 1,0,cwidth - 1);
-	selend2.se_type = NOSEL;
+	jbxvt.sel.end2.se_type = NOSEL;
 }
 
 /*  Paint any part of the selection that is between rows row1 and row2 inclusive
@@ -302,13 +302,13 @@ void show_selection(int row1, int row2, int col1, int col2)
 	int sr, sc, er, ec;
 	int x1, x2, y, row;
 
-	if (selend1.se_type == NOSEL || selend2.se_type == NOSEL)
+	if (jbxvt.sel.end1.se_type == NOSEL || jbxvt.sel.end2.se_type == NOSEL)
 		return;
-	if (selcmp(&selend1,&selend2) == 0)
+	if (selcmp(&jbxvt.sel.end1,&jbxvt.sel.end2) == 0)
 		return;
 	int16_t r1, c1, r2, c2;
-	selend_to_rc(&r1,&c1,&selend1);
-	selend_to_rc(&r2,&c2,&selend2);
+	selend_to_rc(&r1,&c1,&jbxvt.sel.end1);
+	selend_to_rc(&r2,&c2,&jbxvt.sel.end2);
 	col2++;
 
 	/*  Obtain initial and final endpoints for the selection.
@@ -342,12 +342,12 @@ void show_selection(int row1, int row2, int col1, int col2)
 
 	//  Paint in the reverse video:
 	for (row = sr; row <= er; row++) {
-		y = MARGIN + row * fheight;
-		x1 = MARGIN + (row == sr ? sc : col1) * fwidth;
-		x2 = MARGIN + ((row == er) ? ec : col2) * fwidth;
+		y = MARGIN + row * jbxvt.X.font_height;
+		x1 = MARGIN + (row == sr ? sc : col1) * jbxvt.X.font_width;
+		x2 = MARGIN + ((row == er) ? ec : col2) * jbxvt.X.font_width;
 		if (x2 > x1)
 			XFillRectangle(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.hl,
-				x1,y,x2 - x1,fheight);
+				x1,y,x2 - x1,jbxvt.X.font_height);
 	}
 }
 
