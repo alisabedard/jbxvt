@@ -8,8 +8,6 @@ unsigned char *send_nxt;	/* next character to be sent */
 int send_count;	/* number of characters waiting to be sent */
 int sline_top;	/* high water mark of saved scrolled lines */
 struct slinest **sline;	/* main array of saved lines */
-int offset;	/* current vertical offset for displaying saved lines */
-uint32_t rstyle;	/* rendition style and current character flags */
 uint8_t fheight;	/* height of a character in the font */
 uint8_t fwidth;	/* width of a font character */
 int		reverse_wrap;	/* reverse wrap allowed */

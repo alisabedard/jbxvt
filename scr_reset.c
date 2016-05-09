@@ -34,7 +34,7 @@ void scr_reset(void)
 
 	if (screen->text == NULL || cw != cwidth || ch != cheight) {
 
-		offset = 0;
+		jbxvt.scr.offset = 0;
 		/*  Recreate the screen backup arrays.
 		 *  The screen arrays are one byte wider than the screen and
 		 *  the last byte is used as a flag which is non-zero of the
@@ -148,7 +148,8 @@ void scr_reset(void)
 		screen->col = cwidth - 1;
 	if (screen->row >= cheight)
 		screen->row = cheight - 1;
-	sbar_show(cheight + sline_top - 1, offset, offset + cheight - 1);
+	sbar_show(cheight + sline_top - 1, jbxvt.scr.offset,
+		jbxvt.scr.offset + cheight - 1);
 	repaint(0,cheight - 1,0,cwidth - 1);
 	cursor();
 }

@@ -101,13 +101,13 @@ void scr_string(unsigned char * restrict str, int len, int nlcount)
 			}
 		}
 
-		paint_rval_text(str,rstyle,n,x,y);
+		paint_rval_text(str,jbxvt.scr.rstyle,n,x,y);
 		memcpy(screen->text[screen->row] + screen->col,str,n);
-		if (rstyle == 0)
+		if (jbxvt.scr.rstyle == 0)
 			memset(screen->rend[screen->row] + screen->col,0,n);
 		else {
 			for (i = 0; i < n; i++)
-				screen->rend[screen->row][screen->col + i] = rstyle;
+				screen->rend[screen->row][screen->col + i] = jbxvt.scr.rstyle;
 			screen->rend[screen->row][cwidth] = 1;
 		}
 		len -= n;

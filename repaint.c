@@ -89,7 +89,7 @@ void repaint(int row1, int row2, int col1, int col2)
 
 	/*  First do any 'scrolled off' lines that are visible.
 	 */
-	for (i = offset - 1 - row1; y <= row2 && i >= 0; y++, i--) {
+	for (i = jbxvt.scr.offset - 1 - row1; y <= row2 && i >= 0; y++, i--) {
 		sl = sline[i];
 		m = (col2 + 1) < sl->sl_length ? (col2 + 1) : sl->sl_length;
 		s = sl->sl_text;
@@ -108,7 +108,7 @@ void repaint(int row1, int row2, int col1, int col2)
 
 	/*  Now do the remainder from the current screen
 	 */
-	i = offset > row1 ? 0 : row1 - offset;
+	i = jbxvt.scr.offset > row1 ? 0 : row1 - jbxvt.scr.offset;
 	for (; y <= row2; y++, i++) {
 		s = screen->text[i];
 		m = col1 - 1;

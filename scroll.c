@@ -98,7 +98,8 @@ void scroll(int16_t row1, int16_t row2, int8_t count)
 		sline_top += count;
 		if (sline_top > sline_max)
 			sline_top = sline_max;
-		sbar_show(cheight + sline_top - 1, offset, offset + cheight - 1);
+		sbar_show(cheight + sline_top - 1, jbxvt.scr.offset,
+			jbxvt.scr.offset + cheight - 1);
 	}
 
 	if (count > 0) {

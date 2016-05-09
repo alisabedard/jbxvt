@@ -10,7 +10,7 @@ static uint8_t focus;	/* window has the keyboard focus */
 //  Draw the cursor at the current position.
 void cursor(void)
 {
-	if (offset > 0)
+	if (jbxvt.scr.offset > 0)
 		return;
 
 	const int x = MARGIN + fwidth * screen->col;

@@ -63,8 +63,6 @@ int cwidth;	/* width in characters */
 int cheight;	/* height in characters */
 
 
-static bool save_rstyle;	/* when it needs to be saved */
-
 static struct screenst save_screen;
 
 
@@ -123,16 +121,16 @@ void scr_change_screen(const uint8_t direction)
  */
 void scr_change_rendition(const uint32_t style)
 {
-	rstyle=style;
+	jbxvt.scr.rstyle=style;
 #if 0
 	if (style == 0)
-		rstyle &= ~RS_STYLE;
+		jbxvt.scr.rstyle &= ~RS_STYLE;
 #endif
 #if 0
 	if(!style)
-		  rstyle=0;
+		  jbxvt.scr.rstyle=0;
 	else
-		rstyle |= style;
+		jbxvt.scr.rstyle |= style;
 #endif
 }
 
@@ -188,7 +186,7 @@ void scr_save_cursor(void)
 {
 	save_screen.row = screen->row;
 	save_screen.col = screen->col;
-	save_rstyle = rstyle;
+	jbxvt.opt.save_rstyle = jbxvt.scr.rstyle;
 }
 
 /*  Restore the cursor position and rendition style.
@@ -203,7 +201,7 @@ scr_restore_cursor()
 	screen->col = save_screen.col;
 	if (screen->col >= cwidth)
 		screen->col = cwidth - 1;
-	scr_change_rendition(save_rstyle);
+	scr_change_rendition(jbxvt.opt.save_rstyle);
 	cursor();
 }
 
@@ -323,10 +321,10 @@ void scr_move_by(int y)
 
 	if (y >= 0){
 		y = (y - MARGIN) / fheight;
-		n = offset - y;
+		n = jbxvt.scr.offset - y;
 	} else {
 		y = (-y - MARGIN) / fheight;
-		n = offset + y;
+		n = jbxvt.scr.offset + y;
 	}
 	change_offset(n);
 }
@@ -358,8 +356,8 @@ void scr_report_position(void)
 //  Reposition the scrolled text so that the scrollbar is at the bottom.
 void home_screen(void)
 {
-	if (offset > 0) {
-		offset = 0;
+	if (jbxvt.scr.offset > 0) {
+		jbxvt.scr.offset = 0;
 		repaint(0,cheight - 1,0,cwidth - 1);
 		cursor();
 		sbar_show(cheight + sline_top - 1, 0, cheight - 1);

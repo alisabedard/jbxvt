@@ -1,6 +1,6 @@
 CFLAGS=-Os -march=native
 #CFLAGS+=-flto # doesn't work with clang
-CFLAGS=-ggdb
+#CFLAGS=-ggdb
 #CFLAGS+=-DDEBUG
 #CC=clang
 

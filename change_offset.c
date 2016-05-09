@@ -28,11 +28,11 @@ void change_offset(int16_t n)
 		n = sline_top;
 	if (n < 0)
 		n = 0;
-	if (n == offset)
+	if (n == jbxvt.scr.offset)
 		return;
 	cursor();
-	int16_t d = n - offset;
-	offset = n;
+	int16_t d = n - jbxvt.scr.offset;
+	jbxvt.scr.offset = n;
 	if (d > 0 && d < cheight) {
 		/*  Text has moved down by less than a screen so raster
 		 *  the lines that did not move off.
@@ -50,7 +50,7 @@ void change_offset(int16_t n)
 		repaint(0,cheight - 1,0,cwidth - 1);
 	cursor();
 	// Update current scrollbar position due to change
-	sbar_show(cheight + sline_top - 1, offset, offset + cheight - 1);
+	sbar_show(cheight + sline_top - 1, jbxvt.scr.offset, jbxvt.scr.offset + cheight - 1);
 }
 
 

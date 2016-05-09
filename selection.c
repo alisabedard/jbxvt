@@ -86,7 +86,7 @@ void scr_start_selection(int x, int y, enum selunit unit)
  */
 void rc_to_selend(const int16_t row, const int16_t col, struct selst * se)
 {
-	int i = (row - offset);
+	int i = (row - jbxvt.scr.offset);
 	if (i >= 0)
 		se->se_type = SCREENSEL;
 	else {
@@ -117,7 +117,7 @@ void fix_rc(int16_t * restrict rowp, int16_t * restrict colp)
 		row = cheight - 1;
 
 	if (selection_unit == CHAR) {
-		i = (row - offset);
+		i = (row - jbxvt.scr.offset);
 		if (i >= 0) {
 			s = screen->text[i];
 			if (col > 0 && s[col - 1] < ' ')
@@ -148,9 +148,9 @@ void selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
 
 	*colp = se->se_col;
 	if (se->se_type == SCREENSEL)
-		*rowp = se->se_index + offset;
+		*rowp = se->se_index + jbxvt.scr.offset;
 	else
-		*rowp = offset - se->se_index - 1;
+		*rowp = jbxvt.scr.offset - se->se_index - 1;
 }
 
 /*  Convert a section of displayed text line into a text string suitable for pasting.
