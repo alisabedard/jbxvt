@@ -27,8 +27,8 @@ int8_t save_selection(void)
 				&& jbxvt.sel.end1.se_col == jbxvt.sel.end2.se_col)
 		return(-1);
 
-	if (selection_text != NULL)
-		free(selection_text);
+	if (jbxvt.sel.text != NULL)
+		free(jbxvt.sel.text);
 
 	/*  Set se1 and se2 to point to the first and second selection endpoints.
 	 */
@@ -82,8 +82,8 @@ int8_t save_selection(void)
 		}
 	}
 	str[total - 1] = 0;
-	selection_text = str;
-	selection_length = total - 1;
+	jbxvt.sel.text = str;
+	jbxvt.sel.length = total - 1;
 	return(0);
 }
 

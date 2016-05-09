@@ -6,12 +6,6 @@
 #include <stdint.h>
 #include <X11/X.h>
 
-// text version of the current selection
-extern unsigned char * selection_text;
-
-// length of selection text:
-extern int selection_length;
-
 enum {
 	MAX_WIDTH = 250, // max width of selected lines
 	PROP_SIZE = 1024, // chunk size for retrieving the selection property
@@ -44,12 +38,12 @@ void fix_rc(int16_t * restrict rowp, int16_t * restrict colp);
 /*  Determine if the current selection overlaps row1-row2 and if it does then
  *  remove it from the screen.
  */
-void check_selection(int row1, int row2);
+void check_selection(const int16_t row1, const int16_t row2);
 
 /*  Paint any part of the selection that is between rows row1 and row2 inclusive
  *  and between cols col1 and col2 inclusive.
  */
-void show_selection(int row1, int row2, int col1, int col2);
+void show_selection(int16_t row1, int16_t row2, int16_t col1, int16_t col2);
 
 /*  Convert the selection into a row and column.
  */

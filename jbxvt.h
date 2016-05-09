@@ -36,6 +36,8 @@ struct JBXVT {
 		} sline;
 	} scr;
 	struct {
+		unsigned char * text;
+		uint16_t length;
 		struct selst end1, end2, // selection endpoints
 			     anchor; //selection anchor
 	} sel;

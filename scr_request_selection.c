@@ -10,8 +10,7 @@
  *  NULL then it is assumed to point to a time and we also return true for
  *  keyboard events that arrive after more than SEL_KEY_DEL after the time.
  */
-static Bool
-sel_pred(Display * restrict dpy __attribute__((unused)),
+static Bool sel_pred(Display * restrict dpy __attribute__((unused)),
 	XEvent * restrict ev, char * restrict arg)
 {
 	if (ev->type == SelectionNotify)
@@ -60,11 +59,11 @@ void scr_request_selection(int time, int x, int y)
 	if (x < 0 || x >= pwidth || y < 0 || y >= pheight)
 		return;
 
-	if (selection_text != NULL) {
+	if (jbxvt.sel.text != NULL) {
 
 		/* The selection is internal
 		 */
-		send_selection(selection_text,selection_length);
+		send_selection(jbxvt.sel.text,jbxvt.sel.length);
 		return;
 	}
 

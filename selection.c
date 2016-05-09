@@ -14,10 +14,6 @@
 #include <X11/Xatom.h>
 
 
-// Globals:
-unsigned char * selection_text;
-int selection_length;		/* length of selection text */
-
 // Static globals:
 static enum selunit selection_unit;	/* current unit of selection */
 
@@ -35,7 +31,7 @@ void scr_make_selection(const Time time)
 	/*  Place in CUT_BUFFER0 for backup.
 	 */
 	XChangeProperty(jbxvt.X.dpy,DefaultRootWindow(jbxvt.X.dpy),XA_CUT_BUFFER0,
-		XA_STRING,8,PropModeReplace,selection_text,selection_length);
+		XA_STRING,8,PropModeReplace,jbxvt.sel.text,jbxvt.sel.length);
 }
 
 /*  respond to a request for our current selection.
@@ -49,7 +45,7 @@ void scr_send_selection(const int time __attribute__((unused)),
 	if (target == XA_STRING) {
 		XChangeProperty(jbxvt.X.dpy,requestor,property,
 			XA_STRING,8,PropModeReplace,
-			selection_text,selection_length);
+			jbxvt.sel.text,jbxvt.sel.length);
 		event.xselection.property = property;
 	} else
 		event.xselection.property = None;
@@ -59,10 +55,10 @@ void scr_send_selection(const int time __attribute__((unused)),
 //  Clear the current selection.
 void scr_clear_selection(void)
 {
-	if (selection_text != NULL) {
-		free(selection_text);
-		selection_text = NULL;
-		selection_length = 0;
+	if (jbxvt.sel.text != NULL) {
+		free(jbxvt.sel.text);
+		jbxvt.sel.text = NULL;
+		jbxvt.sel.length = 0;
 	}
 	show_selection(0,cheight - 1,0,cwidth - 1);
 	jbxvt.sel.end1.se_type = jbxvt.sel.end2.se_type = NOSEL;
@@ -103,22 +99,20 @@ void rc_to_selend(const int16_t row, const int16_t col, struct selst * se)
  */
 void fix_rc(int16_t * restrict rowp, int16_t * restrict colp)
 {
-	int i, len, row, col;
-	unsigned char *s;
-
-	col = *colp;
+	int16_t col = *colp;
 	if (col < 0)
 		col = 0;
 	if (col > cwidth)
 		col = cwidth;
-	row = *rowp;
+	int16_t row = *rowp;
 	if (row < 0)
 		row = 0;
 	if (row >= cheight)
 		row = cheight - 1;
 
 	if (selection_unit == CHAR) {
-		i = (row - jbxvt.scr.offset);
+		int i = (row - jbxvt.scr.offset);
+		unsigned char * s;
 		if (i >= 0) {
 			s = screen->text[i];
 			if (col > 0 && s[col - 1] < ' ')
@@ -126,7 +120,7 @@ void fix_rc(int16_t * restrict rowp, int16_t * restrict colp)
 					col++;
 		} else {
 			i = -1 - i;
-			len = jbxvt.scr.sline.data[i]->sl_length;
+			const uint8_t len = jbxvt.scr.sline.data[i]->sl_length;
 			s = jbxvt.scr.sline.data[i]->sl_text;
 			if (col > 0 && s[col - 1] < ' ')
 				while (col <= len && s[col] < ' ')
@@ -148,10 +142,8 @@ void selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
 		return;
 
 	*colp = se->se_col;
-	if (se->se_type == SCREENSEL)
-		*rowp = se->se_index + jbxvt.scr.offset;
-	else
-		*rowp = jbxvt.scr.offset - se->se_index - 1;
+	*rowp = se->se_type == SCREENSEL ? se->se_index + jbxvt.scr.offset
+		: jbxvt.scr.offset - se->se_index - 1;
 }
 
 /*  Convert a section of displayed text line into a text string suitable for pasting.
@@ -197,11 +189,9 @@ unsigned char * convert_line(unsigned char * restrict str,
  */
 void adjust_selection(struct selst * restrict include)
 {
-	struct selst *se1, *se2;
-
 	if (selection_unit == CHAR)
 		return;
-
+	struct selst *se1, *se2;
 	if (selcmp(&jbxvt.sel.end1,&jbxvt.sel.end2) <= 0) {
 		se1 = &jbxvt.sel.end1;
 		se2 = &jbxvt.sel.end2;
@@ -210,11 +200,10 @@ void adjust_selection(struct selst * restrict include)
 		se1 = &jbxvt.sel.end2;
 	}
 	if (selection_unit == WORD) {
-		int16_t i = se1->se_col;
 		unsigned char * s = se1->se_type == SCREENSEL
 			? screen->text[se1->se_index]
 			: jbxvt.scr.sline.data[se1->se_index]->sl_text;
-		static int char_class[256] = {
+		static const int char_class[256] = {
 			32,   1,   1,   1,   1,   1,   1,   1,
 			1,  32,   1,   1,   1,   1,   1,   1,
 			1,   1,   1,   1,   1,   1,   1,   1,
@@ -248,7 +237,7 @@ void adjust_selection(struct selst * restrict include)
 			240, 241, 242, 243, 244, 245, 246, 247,
 			248, 249, 250, 251, 252, 253, 254, 255
 		};
-
+		int16_t i = se1->se_col;
 		while (i > 0 && char_class[s[i]] == char_class[s[i-1]])
 			  i--;
 		se1->se_col = i;
@@ -275,17 +264,17 @@ void adjust_selection(struct selst * restrict include)
 /*  Determine if the current selection overlaps row1-row2 and if it does then
  *  remove it from the screen.
  */
-void check_selection(int row1, int row2)
+void check_selection(const int16_t row1, const int16_t row2)
 {
-	int r1, r2, x;
 
 	if (jbxvt.sel.end1.se_type == NOSEL || jbxvt.sel.end2.se_type == NOSEL)
 		return;
-
-	r1 = jbxvt.sel.end1.se_type == SCREENSEL ? jbxvt.sel.end1.se_index : -1;
-	r2 = jbxvt.sel.end2.se_type == SCREENSEL ? jbxvt.sel.end2.se_index : -1;
+	int16_t r1 = jbxvt.sel.end1.se_type == SCREENSEL
+		? jbxvt.sel.end1.se_index : -1;
+	int16_t r2 = jbxvt.sel.end2.se_type == SCREENSEL
+		? jbxvt.sel.end2.se_index : -1;
 	if (r1 > r2) {
-		x = r1;
+		int16_t x = r1;
 		r1 = r2;
 		r2 = x;
 	}
@@ -298,11 +287,8 @@ void check_selection(int row1, int row2)
 /*  Paint any part of the selection that is between rows row1 and row2 inclusive
  *  and between cols col1 and col2 inclusive.
  */
-void show_selection(int row1, int row2, int col1, int col2)
+void show_selection(int16_t row1, int16_t row2, int16_t col1, int16_t col2)
 {
-	int sr, sc, er, ec;
-	int x1, x2, y, row;
-
 	if (jbxvt.sel.end1.se_type == NOSEL || jbxvt.sel.end2.se_type == NOSEL)
 		return;
 	if (selcmp(&jbxvt.sel.end1,&jbxvt.sel.end2) == 0)
@@ -312,8 +298,8 @@ void show_selection(int row1, int row2, int col1, int col2)
 	selend_to_rc(&r2,&c2,&jbxvt.sel.end2);
 	col2++;
 
-	/*  Obtain initial and final endpoints for the selection.
-	 */
+	//  Obtain initial and final endpoints for the selection.
+	int16_t sr, sc, er, ec;
 	if (r1 < r2 || (r1 == r2 && c1 <= c2)) {
 		sr = r1;
 		sc = c1;
@@ -340,12 +326,13 @@ void show_selection(int row1, int row2, int col1, int col2)
 
 	if (sr > er)
 		return;
-
 	//  Paint in the reverse video:
-	for (row = sr; row <= er; row++) {
-		y = MARGIN + row * jbxvt.X.font_height;
-		x1 = MARGIN + (row == sr ? sc : col1) * jbxvt.X.font_width;
-		x2 = MARGIN + ((row == er) ? ec : col2) * jbxvt.X.font_width;
+	for (int16_t row = sr; row <= er; row++) {
+		const int16_t y = MARGIN + row * jbxvt.X.font_height;
+		const int16_t x1 = MARGIN + (row == sr ? sc : col1)
+			* jbxvt.X.font_width;
+		const int16_t x2 = MARGIN + ((row == er) ? ec : col2)
+			* jbxvt.X.font_width;
 		if (x2 > x1)
 			XFillRectangle(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.hl,
 				x1,y,x2 - x1,jbxvt.X.font_height);

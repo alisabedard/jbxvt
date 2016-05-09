@@ -127,16 +127,14 @@ void scr_get_size(uint16_t * restrict width_p, uint16_t * restrict height_p)
 }
 
 
-/*  Return true if the character is one that can be handled by scr_string()
- */
+//  Return true if the character is one that can be handled by scr_string()
 int16_t is_string_char(int16_t c)
 {
 	c &= 0177;
 	return(c >= ' ' || c == '\n' || c == '\r' || c == '\t');
 }
 
-/*  Move the cursor down one line and scroll if necessary.
- */
+//  Move the cursor down one line and scroll if necessary.
 void scr_index(void)
 {
 	home_screen();
@@ -150,8 +148,7 @@ void scr_index(void)
 	cursor();
 }
 
-/*  Move the cursor up one line and scroll if necessary.
- */
+//  Move the cursor up one line and scroll if necessary.
 void scr_rindex(void)
 {
 	home_screen();
@@ -165,8 +162,7 @@ void scr_rindex(void)
 	cursor();
 }
 
-/*  Save the cursor position and rendition style.
- */
+//  Save the cursor position and rendition style.
 void scr_save_cursor(void)
 {
 	save_screen.row = screen->row;
@@ -174,10 +170,8 @@ void scr_save_cursor(void)
 	jbxvt.opt.save_rstyle = jbxvt.scr.rstyle;
 }
 
-/*  Restore the cursor position and rendition style.
- */
-void
-scr_restore_cursor()
+//  Restore the cursor position and rendition style.
+void scr_restore_cursor(void)
 {
 	cursor();
 	screen->row = save_screen.row;
@@ -190,8 +184,7 @@ scr_restore_cursor()
 	cursor();
 }
 
-/*  Delete count lines and scroll up the bottom of the screen to fill the gap
- */
+//  Delete count lines and scroll up the bottom of the screen to fill the gap
 void
 scr_delete_lines(count)
 int count;
@@ -289,9 +282,9 @@ void scr_efill(void)
 /*  Move the display so that line represented by scrollbar value y is at the top
  *  of the screen.
  */
-void scr_move_to(int y)
+void scr_move_to(int16_t y)
 {
-	int n, lnum;
+	int16_t n, lnum;
 
 	y = pheight - 1 - y;
 	lnum = y * (cheight + jbxvt.scr.sline.top - 1) / (pheight - 1);
@@ -300,7 +293,7 @@ void scr_move_to(int y)
 }
 
 //  Move the display by a distance represented by the value.
-void scr_move_by(int y)
+void scr_move_by(int16_t y)
 {
 	int n;
 
@@ -318,10 +311,8 @@ void scr_move_by(int y)
 //  Send the name of the current display to the command.
 void scr_report_display(void)
 {
-	char *dname;
+	char * restrict dname = DisplayString(jbxvt.X.dpy);
 	struct utsname ut;
-
-	dname = DisplayString(jbxvt.X.dpy);
 	(void)uname(&ut);
 
 	if (strncmp(dname, "unix:", 5) == 0)
