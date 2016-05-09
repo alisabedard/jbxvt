@@ -1,7 +1,7 @@
 #include "scr_erase.h"
 
 #include "cursor.h"
-#include "global.h"
+
 #include "jbxvt.h"
 #include "sbar.h"
 #include "screen.h"
@@ -116,7 +116,7 @@ void scr_erase_screen(int mode)
 		check_selection(0,cheight - 1);
 		XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,x,y,width,height,False);
 		cursor();
-		sbar_show(cheight + sline_top - 1, 0, cheight - 1);
+		sbar_show(cheight + jbxvt.scr.sline.top - 1, 0, cheight - 1);
 		break;
 	    default :
 		return;

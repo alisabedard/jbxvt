@@ -1,7 +1,7 @@
 #include "cmdtok.h"
 
 #include "command.h"
-#include "global.h"
+
 #include "jbxvt.h"
 #include "screen.h"
 #include "token.h"
@@ -42,18 +42,17 @@ static int get_com_char(const int flags)
 	unsigned char mask = is_eightbit() ? 0xff : 0x7f;
 	extern int errno;
 
-	if (com_stack_top > com_stack)
-		return(*--com_stack_top);
+	if (jbxvt.com.stack.top > jbxvt.com.stack.data)
+		return(*--jbxvt.com.stack.top);
 
-	if (com_buf_next < com_buf_top)
-		return(*com_buf_next++ & mask);
+	if (jbxvt.com.buf.next < jbxvt.com.buf.top)
+		return(*jbxvt.com.buf.next++ & mask);
 	else if (flags & BUF_ONLY)
 		return(GCC_NULL);
 
 	for (;;) {
 		FD_ZERO(&in_fdset);
 		while (XPending(jbxvt.X.dpy) == 0) {
-#if 0
 			if (FD_ISSET(x_fd,&in_fdset))
 				/*  If we get to this point something is wrong
 				 *  because there is X input available but no
@@ -61,35 +60,37 @@ static int get_com_char(const int flags)
 				 *  forever.
 				 */
 				quit(0);
-#endif
-			FD_SET(comm_fd,&in_fdset);
+			FD_SET(jbxvt.com.fd,&in_fdset);
 			FD_SET(x_fd,&in_fdset);
 			FD_ZERO(&out_fdset);
-			if (send_count > 0)
-				FD_SET(comm_fd,&out_fdset);
+			if (jbxvt.com.send_count > 0)
+				FD_SET(jbxvt.com.fd,&out_fdset);
 			do
-				sv = select(fd_width,&in_fdset,&out_fdset,NULL,NULL);
+				sv = select(jbxvt.com.width,
+					&in_fdset,&out_fdset,
+					NULL,NULL);
 			while (sv < 0 && errno == EINTR);
 			if (sv < 0) {
 				error("select failed");
 				quit(-1);
 			}
 
-			if (FD_ISSET(comm_fd,&out_fdset)) {
-				count = send_count < 100 ? send_count : 100;
-				count = write(comm_fd,send_nxt,count);
+			if (FD_ISSET(jbxvt.com.fd,&out_fdset)) {
+				count = jbxvt.com.send_count < 100
+					? jbxvt.com.send_count : 100;
+				count = write(jbxvt.com.fd,jbxvt.com.send_nxt,count);
 				if (count < 0) {
 					error("failed to write to command");
 					quit(-1);
 				}
-				send_count -= count;
-				send_nxt += count;
+				jbxvt.com.send_count -= count;
+				jbxvt.com.send_nxt += count;
 			}
 
-			if (FD_ISSET(comm_fd,&in_fdset))
+			if (FD_ISSET(jbxvt.com.fd,&in_fdset))
 				break;
 		}
-		if (FD_ISSET(comm_fd,&in_fdset))
+		if (FD_ISSET(jbxvt.com.fd,&in_fdset))
 			break;
 		XNextEvent(jbxvt.X.dpy,&event);
 		if (event.type == KeyPress) {
@@ -163,12 +164,12 @@ static int get_com_char(const int flags)
 		}
 	}
 
-	count = read(comm_fd,com_buf,COM_BUF_SIZE);
+	count = read(jbxvt.com.fd,jbxvt.com.buf.data,COM_BUF_SIZE);
 	if (count <= 0)
 		return errno == EWOULDBLOCK ? GCC_NULL : EOF;
-	com_buf_next = com_buf;
-	com_buf_top = com_buf + count;
-	return *com_buf_next++ & mask;
+	jbxvt.com.buf.next = jbxvt.com.buf.data;
+	jbxvt.com.buf.top = jbxvt.com.buf.data + count;
+	return *jbxvt.com.buf.next++ & mask;
 }
 
 

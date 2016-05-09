@@ -1,7 +1,7 @@
 #include "scr_move.h"
 
 #include "cursor.h"
-#include "global.h"
+
 #include "screen.h"
 #include "selection.h"
 

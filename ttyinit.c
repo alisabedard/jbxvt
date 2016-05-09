@@ -25,7 +25,7 @@
 
 #include "ttyinit.h"
 
-#include "global.h"
+
 #include "jbxvt.h"
 #include "init_display.h"
 #include "screen.h"
@@ -183,14 +183,6 @@ static int get_tslot();
 #endif /* BSD_UTMP */
 static char *get_pseudo_tty();
 #endif /* __STDC__ */
-
-/*  Global variables that are set up at the beginning and then not changed
- */
-#if 0
-extern Display		*display;
-extern int		comm_fd;	/* file descriptor connected to the command */
-extern int		fd_width;	/* Number of available file descriptors */
-#endif
 
 static int comm_pid = -1;		/* process id of child */
 static char *tty_name = NULL;	/* name of the slave teletype */
@@ -576,7 +568,7 @@ int run_command(char * command, char ** argv)
 
 	fcntl(ptyfd,F_SETFL,O_NDELAY);
 
-	fd_width = sysconf(_SC_OPEN_MAX);
+	jbxvt.com.width = sysconf(_SC_OPEN_MAX);
 	for (uint8_t i = 1; i <= 15; i++)
 		signal(i,catch_sig);
 	comm_pid = fork();
@@ -617,7 +609,7 @@ int run_command(char * command, char ** argv)
 			gid = -1;
 		fchown(ttyfd,uid,gid);
 		fchmod(ttyfd, 0620);
-		for (i = 0; i < fd_width; i++)
+		for (i = 0; i < jbxvt.com.width; i++)
 			if (i != ttyfd)
 				close(i);
 		// for stdin, stderr, stdout:
@@ -657,6 +649,7 @@ void tty_set_size(const int width, const int height)
 	wsize.ws_col = width;
 	wsize.ws_xpixel = 0;
 	wsize.ws_ypixel = 0;
-	ioctl((comm_pid == 0) ? 0 : comm_fd,TIOCSWINSZ,(char *)&wsize);
+	ioctl((comm_pid == 0) ? 0 : jbxvt.com.fd,
+		TIOCSWINSZ,(char *)&wsize);
 }
 #endif /* TIOCSWINSZ */

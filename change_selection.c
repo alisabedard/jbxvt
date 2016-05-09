@@ -1,6 +1,6 @@
 #include "change_selection.h"
 
-#include "global.h"
+
 #include "jbxvt.h"
 #include "screen.h"
 #include "selcmp.h"

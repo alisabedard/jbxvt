@@ -1,6 +1,6 @@
 #include "cursor.h"
 
-#include "global.h"
+
 #include "jbxvt.h"
 #include "screen.h"
 #include "xvt.h"

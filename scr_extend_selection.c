@@ -1,7 +1,7 @@
 #include "scr_extend_selection.h"
 
 #include "change_selection.h"
-#include "global.h"
+
 #include "jbxvt.h"
 #include "screen.h"
 #include "selection.h"

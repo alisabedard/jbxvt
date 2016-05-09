@@ -1,6 +1,6 @@
 #include "selection.h"
 
-#include "global.h"
+
 #include "jbxvt.h"
 #include "save_selection.h"
 #include "selcmp.h"
@@ -47,8 +47,9 @@ void scr_send_selection(const int time __attribute__((unused)),
 		.xselection.selection = XA_PRIMARY, .xselection.target = XA_STRING,
 		.xselection.requestor = requestor, .xselection.time = time };
 	if (target == XA_STRING) {
-		XChangeProperty(jbxvt.X.dpy,requestor,property,XA_STRING,8,PropModeReplace,
-				selection_text,selection_length);
+		XChangeProperty(jbxvt.X.dpy,requestor,property,
+			XA_STRING,8,PropModeReplace,
+			selection_text,selection_length);
 		event.xselection.property = property;
 	} else
 		event.xselection.property = None;
@@ -125,8 +126,8 @@ void fix_rc(int16_t * restrict rowp, int16_t * restrict colp)
 					col++;
 		} else {
 			i = -1 - i;
-			len = sline[i]->sl_length;
-			s = sline[i]->sl_text;
+			len = jbxvt.scr.sline.data[i]->sl_length;
+			s = jbxvt.scr.sline.data[i]->sl_text;
 			if (col > 0 && s[col - 1] < ' ')
 				while (col <= len && s[col] < ' ')
 					col++;
@@ -212,7 +213,7 @@ void adjust_selection(struct selst * restrict include)
 		int16_t i = se1->se_col;
 		unsigned char * s = se1->se_type == SCREENSEL
 			? screen->text[se1->se_index]
-			: sline[se1->se_index]->sl_text;
+			: jbxvt.scr.sline.data[se1->se_index]->sl_text;
 		static int char_class[256] = {
 			32,   1,   1,   1,   1,   1,   1,   1,
 			1,  32,   1,   1,   1,   1,   1,   1,
@@ -259,8 +260,8 @@ void adjust_selection(struct selst * restrict include)
 			s = screen->text[se2->se_index];
 			len = cwidth;
 		} else {
-			s = sline[se2->se_index]->sl_text;
-			len = sline[se2->se_index]->sl_length;
+			s = jbxvt.scr.sline.data[se2->se_index]->sl_text;
+			len = jbxvt.scr.sline.data[se2->se_index]->sl_length;
 		}
 		while (i < len && char_class[s[i]] == char_class[s[i-1]])
 			  i++;

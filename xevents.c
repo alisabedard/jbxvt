@@ -1,6 +1,6 @@
 #include "xevents.h"
 
-#include "global.h"
+
 #include "jbxvt.h"
 #include "token.h"
 #include <stdlib.h>

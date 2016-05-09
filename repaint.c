@@ -1,6 +1,6 @@
 #include "repaint.h"
 
-#include "global.h"
+
 #include "jbxvt.h"
 #include "screen.h"
 #include "selection.h"
@@ -90,7 +90,7 @@ void repaint(int row1, int row2, int col1, int col2)
 	/*  First do any 'scrolled off' lines that are visible.
 	 */
 	for (i = jbxvt.scr.offset - 1 - row1; y <= row2 && i >= 0; y++, i--) {
-		sl = sline[i];
+		sl = jbxvt.scr.sline.data[i];
 		m = (col2 + 1) < sl->sl_length ? (col2 + 1) : sl->sl_length;
 		s = sl->sl_text;
 		m -= col1;

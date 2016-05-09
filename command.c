@@ -26,7 +26,7 @@
 #include "command.h"
 
 #include "cmdtok.h"
-#include "global.h"
+
 #include "jbxvt.h"
 #include "screen.h"
 #include "token.h"
@@ -42,6 +42,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
+static unsigned char *send_buf; // chars waiting to be sent to the command
 
 static int app_cur_keys;/* flag to say cursor keys are in application mode */
 static int app_kp_keys;	/* flag to set application keypad keys */
@@ -209,13 +211,13 @@ void init_command(char * command, char ** argv)
 	assert(command);
 	assert(argv);
 
-	if ((comm_fd = run_command(command,argv)) < 0) {
+	if ((jbxvt.com.fd = run_command(command,argv)) < 0) {
 		sleep(1);
 		error("Quitting");
 		quit(1);
 	}
-	com_buf_next = com_buf_top = com_buf;
-	com_stack_top = com_stack;
+	jbxvt.com.buf.next = jbxvt.com.buf.top = jbxvt.com.buf.data;
+	jbxvt.com.stack.top = jbxvt.com.stack.data;
 	init_cmdtok();
 }
 
@@ -321,12 +323,11 @@ unsigned char * lookup_key(XEvent * restrict ev, int * restrict pcount)
  */
 void push_com_char(const int c)
 {
-	if (com_stack_top < com_stack + COM_PUSH_MAX)
-		*com_stack_top++ = c;
+	if (jbxvt.com.stack.top < jbxvt.com.stack.data + COM_PUSH_MAX)
+		*jbxvt.com.stack.top++ = c;
 }
 
-/*  Send count characters directly to the command.
- */
+//  Send count characters directly to the command.
 void send_string(unsigned char * buf, int count)
 {
 	unsigned char *s;
@@ -336,7 +337,7 @@ void send_string(unsigned char * buf, int count)
 	if (count == 0)
 		return;
 
-	if (send_count == 0) {
+	if (jbxvt.com.send_count == 0) {
 		if (send_buf != NULL) {
 			free(send_buf);
 			send_buf = NULL;
@@ -346,18 +347,18 @@ void send_string(unsigned char * buf, int count)
 		s1 = buf;
 		for (i = 0; i < count; i++, s1++, s2++)
 			*s2 = *s1;
-		send_nxt = send_buf;
-		send_count = count;
+		jbxvt.com.send_nxt = send_buf;
+		jbxvt.com.send_count = count;
 	} else {
-		s = (unsigned char *)malloc(send_count + count);
-		memcpy(s,send_nxt,send_count);
-		s2 = s + send_count;
+		s = (unsigned char *)malloc(jbxvt.com.send_count + count);
+		memcpy(s,jbxvt.com.send_nxt,jbxvt.com.send_count);
+		s2 = s + jbxvt.com.send_count;
 		s1 = buf;
 		for (i = 0; i < count; i++, s1++, s2++)
 			*s2 = *s1;
 		free(send_buf);
-		send_buf = send_nxt = s;
-		send_count += count;
+		send_buf = jbxvt.com.send_nxt = s;
+		jbxvt.com.send_count += count;
 	}
 }
 

@@ -1,7 +1,7 @@
 #include "change_offset.h"
 
 #include "cursor.h"
-#include "global.h"
+
 #include "jbxvt.h"
 #include "repaint.h"
 #include "repair_damage.h"
@@ -24,8 +24,8 @@ static void copy_repaint_repair(const int16_t d, const int16_t y1,
 //  Change the value of the scrolled screen offset and repaint the screen
 void change_offset(int16_t n)
 {
-	if (n > sline_top)
-		n = sline_top;
+	if (n > jbxvt.scr.sline.top)
+		n = jbxvt.scr.sline.top;
 	if (n < 0)
 		n = 0;
 	if (n == jbxvt.scr.offset)
@@ -50,7 +50,7 @@ void change_offset(int16_t n)
 		repaint(0,cheight - 1,0,cwidth - 1);
 	cursor();
 	// Update current scrollbar position due to change
-	sbar_show(cheight + sline_top - 1, jbxvt.scr.offset, jbxvt.scr.offset + cheight - 1);
+	sbar_show(cheight + jbxvt.scr.sline.top - 1, jbxvt.scr.offset, jbxvt.scr.offset + cheight - 1);
 }
 
 

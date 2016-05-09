@@ -1,7 +1,7 @@
 #include "scr_string.h"
 
 #include "cursor.h"
-#include "global.h"
+
 #include "jbxvt.h"
 #include "repaint.h"
 #include "repair_damage.h"

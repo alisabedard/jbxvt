@@ -1,6 +1,6 @@
 #include "init_display.h"
 
-#include "global.h"
+
 #include "jbxvt.h"
 #include "sbar.h"
 #include "screen.h"

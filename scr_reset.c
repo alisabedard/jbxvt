@@ -1,7 +1,7 @@
 #include "scr_reset.h"
 
 #include "cursor.h"
-#include "global.h"
+
 #include "jbxvt.h"
 #include "repaint.h"
 #include "sbar.h"
@@ -66,7 +66,7 @@ void scr_reset(void)
 			}
 			/* calculate working no. of lines.
 			 */
-			i = sline_top + screen1.row + 1;
+			i = jbxvt.scr.sline.top + screen1.row + 1;
 			j = i > ch ? ch - 1 : i - 1;
 			i = screen1.row;
 			screen1.row = j;
@@ -88,9 +88,9 @@ void scr_reset(void)
 						i = 0;
 					}
 				} else {
-					if (i >= sline_top)
+					if (i >= jbxvt.scr.sline.top)
 						break;
-					sl = sline[i];
+					sl = jbxvt.scr.sline.data[i];
 					n = cw < sl->sl_length ? cw : sl->sl_length;
 					memcpy(s1[j],sl->sl_text,n);
 					free(sl->sl_text);
@@ -106,11 +106,13 @@ void scr_reset(void)
 			}
 			if (onscreen)
 				abort();
-			for (j = i; j < sline_top; j++)
-				sline[j - i] = sline[j];
-			for (j = sline_top - i; j < sline_top; j++)
-				sline[j] = NULL;
-			sline_top -= i;
+			for (j = i; j < jbxvt.scr.sline.top; j++)
+				jbxvt.scr.sline.data[j - i]
+					= jbxvt.scr.sline.data[j];
+			for (j = jbxvt.scr.sline.top - i;
+				j < jbxvt.scr.sline.top; j++)
+				jbxvt.scr.sline.data[j] = NULL;
+			jbxvt.scr.sline.top -= i;
 
 			for (y = 0; y < cheight; y++) {
 				free(screen1.text[y]);
@@ -148,7 +150,7 @@ void scr_reset(void)
 		screen->col = cwidth - 1;
 	if (screen->row >= cheight)
 		screen->row = cheight - 1;
-	sbar_show(cheight + sline_top - 1, jbxvt.scr.offset,
+	sbar_show(cheight + jbxvt.scr.sline.top - 1, jbxvt.scr.offset,
 		jbxvt.scr.offset + cheight - 1);
 	repaint(0,cheight - 1,0,cwidth - 1);
 	cursor();

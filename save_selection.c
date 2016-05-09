@@ -1,6 +1,6 @@
 #include "save_selection.h"
 
-#include "global.h"
+
 #include "jbxvt.h"
 #include "screen.h"
 #include "selcmp.h"
@@ -43,7 +43,7 @@ int8_t save_selection(void)
 	if (se1->se_type == SAVEDSEL) {
 		col1 = se1->se_col;
 		for (i = se1->se_index; i >= 0; i--) {
-			sl = sline[i];
+			sl = jbxvt.scr.sline.data[i];
 			if (se2->se_type == SAVEDSEL && se2->se_index == i) {
 				col2 = se2->se_col - 1;
 				i = 0;			/* force loop exit */

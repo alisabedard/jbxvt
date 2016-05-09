@@ -1,7 +1,7 @@
 #include "scr_delete_characters.h"
 
 #include "cursor.h"
-#include "global.h"
+
 #include "jbxvt.h"
 #include "repair_damage.h"
 #include "screen.h"

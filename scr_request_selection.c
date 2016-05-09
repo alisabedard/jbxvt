@@ -1,6 +1,6 @@
 #include "scr_request_selection.h"
 
-#include "global.h"
+
 #include "jbxvt.h"
 #include "screen.h"
 #include "selection.h"

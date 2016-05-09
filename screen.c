@@ -36,7 +36,7 @@
 #include "change_offset.h"
 #include "command.h"
 #include "cursor.h"
-#include "global.h"
+
 #include "jbxvt.h"
 #include "repaint.h"
 #include "repair_damage.h"
@@ -72,12 +72,14 @@ static struct screenst save_screen;
 void scr_init(const unsigned int saved_lines)
 {
 	//  Initialise the array of lines that have scrolled of the top.
-	sline_max = saved_lines;
-	if (sline_max < MAX_SCROLL)
-		sline_max = MAX_SCROLL;
-	sline = (struct slinest **)malloc(sline_max * sizeof(struct slinest *));
-	for (uint16_t i = 0; i < sline_max; i++)
-		sline[i] = NULL;
+	jbxvt.scr.sline.max = saved_lines;
+	if (jbxvt.scr.sline.max < MAX_SCROLL)
+		jbxvt.scr.sline.max = MAX_SCROLL;
+	jbxvt.scr.sline.data = (struct slinest **)malloc(
+		jbxvt.scr.sline.max
+		* sizeof(struct slinest *));
+	for (uint16_t i = 0; i < jbxvt.scr.sline.max; i++)
+		jbxvt.scr.sline.data[i] = NULL;
 	screen1.wrap=screen2.wrap=1;
 	screen = &screen1;
 	jbxvt.X.font_width = XTextWidth(jbxvt.X.font,"M",1);
@@ -113,24 +115,8 @@ void scr_change_screen(const uint8_t direction)
  */
 void scr_change_rendition(const uint32_t style)
 {
+	// This allows combining styles, 0 resets
 	jbxvt.scr.rstyle = style ? jbxvt.scr.rstyle | style : 0;
-#if 0
-	if (!style)
-		  jbxvt.scr.rstyle=0;
-	else
-		  jstyle|=style;
-#endif
-	//jbxvt.scr.rstyle=style;
-#if 0
-	if (style == 0)
-		jbxvt.scr.rstyle &= ~RS_STYLE;
-#endif
-#if 0
-	if(!style)
-		  jbxvt.scr.rstyle=0;
-	else
-		jbxvt.scr.rstyle |= style;
-#endif
 }
 
 //  Return the width and height of the screen.
@@ -308,7 +294,7 @@ void scr_move_to(int y)
 	int n, lnum;
 
 	y = pheight - 1 - y;
-	lnum = y * (cheight + sline_top - 1) / (pheight - 1);
+	lnum = y * (cheight + jbxvt.scr.sline.top - 1) / (pheight - 1);
 	n = lnum - cheight + 1;
 	change_offset(n);
 }
@@ -359,7 +345,7 @@ void home_screen(void)
 		jbxvt.scr.offset = 0;
 		repaint(0,cheight - 1,0,cwidth - 1);
 		cursor();
-		sbar_show(cheight + sline_top - 1, 0, cheight - 1);
+		sbar_show(cheight + jbxvt.scr.sline.top - 1, 0, cheight - 1);
 	}
 }
 

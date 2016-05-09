@@ -25,7 +25,7 @@
 
 #include "xsetup.h"
 
-#include "global.h"
+
 #include "jbxvt.h"
 #include "init_display.h"
 #include "scr_reset.h"

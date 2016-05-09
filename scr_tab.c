@@ -1,7 +1,7 @@
 #include "scr_tab.h"
 
 #include "cursor.h"
-#include "global.h"
+
 #include "screen.h"
 #include "selection.h"
 

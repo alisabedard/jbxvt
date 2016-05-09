@@ -1,6 +1,6 @@
 #include "repair_damage.h"
 
-#include "global.h"
+
 #include "jbxvt.h"
 #include "repaint.h"
 #include "screen.h"
