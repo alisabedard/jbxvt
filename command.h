@@ -33,7 +33,7 @@
 #include <X11/Xlib.h>
 
 enum CommandLimits {
-	TKS_MAX =	16,	// max length of a string token
+	TKS_MAX =	128,	// max length of a string token
 	TK_MAX_ARGS =	8,	// max # of numeric arguments
 	NLMAX =		15,	// max number of lines to scroll
 	KBUFSIZE =	256,	// size of keyboard mapping buffer

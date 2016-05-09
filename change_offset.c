@@ -14,7 +14,8 @@ static void copy_repaint_repair(const int16_t d, const int16_t y1,
 	const int16_t y2, const int row1, const int row2)
 {
 	const uint16_t height = (cheight - d) * fheight;
-	XCopyArea(jbxvt.X.dpy, jbxvt.X.win.vt, jbxvt.X.win.vt, jbxvt.X.gc.tx, 0, y1,
+	XCopyArea(jbxvt.X.dpy, jbxvt.X.win.vt,
+		jbxvt.X.win.vt, jbxvt.X.gc.tx, 0, y1,
 		pwidth, height, 0, y2);
 	repaint(row1, row2, 0, cwidth-1);
 	repair_damage();
