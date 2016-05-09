@@ -28,13 +28,11 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
+#include "tokenst.h"
 #include "xeventst.h"
-#include <stdint.h>
 #include <X11/Xlib.h>
 
 enum CommandLimits {
-	TKS_MAX =	128,	// max length of a string token
-	TK_MAX_ARGS =	8,	// max # of numeric arguments
 	NLMAX =		15,	// max number of lines to scroll
 	KBUFSIZE =	256,	// size of keyboard mapping buffer
 	COM_BUF_SIZE =	512,	// size of command read buffer
@@ -48,21 +46,6 @@ enum CommandLimits {
 
 //  Flags used to control get_com_char();
 enum ComCharFlags {BUF_ONLY=1, GET_XEVENTS=2};
-
-/*  Structure used to represent a piece of input from the program
- *  or an interesting X event.
- */
-struct tokenst {
-	uint16_t tk_type;		/* the token type */
-	int32_t tk_private;		/* non zero for private control sequences */
-	unsigned char tk_char;		/* single (unprintable) character */
-	unsigned char tk_string[TKS_MAX + 1];/* the text for string tokens */
-	int16_t tk_nlcount;		/* number of newlines in the string */
-	uint16_t tk_length;		/* length of string */
-	int32_t tk_arg[TK_MAX_ARGS];/* first two numerical arguments */
-	int8_t tk_nargs:4;		/* number of numerical arguments */
-	int8_t tk_region:4;		/* terminal or scrollbar */
-};
 
 struct xeventst *pop_xevent(void);
 void cprintf(char *,...);

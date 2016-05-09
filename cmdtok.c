@@ -32,7 +32,7 @@ void init_cmdtok(void)
  *  returned.  If flags and GET_XEVENTS is true then GCC_NULL is returned
  *  when an X event arrives.
  */
-static int get_com_char(const int flags)
+static int16_t get_com_char(const int8_t flags)
 {
 	XEvent event;
 	struct xeventst *xe;
@@ -176,7 +176,7 @@ static int get_com_char(const int flags)
 //  Return an input token
 void get_token(struct tokenst * restrict tk)
 {
-	int c, i, n;
+	int16_t c, i, n;
 
 	tk->tk_private = 0;
 	tk->tk_type = TK_NULL;
