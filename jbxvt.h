@@ -46,7 +46,7 @@ struct JBXVT {
 		unsigned char * send_nxt; // next char to be sent
 		int send_count; // # chars waiting to be sent
 		int fd; // file descriptor connected to the command
-		int8_t width; // # file descriptors being used
+		int width; // # file descriptors being used
 		struct {
 			unsigned char data[COM_BUF_SIZE];
 			unsigned char *next, *top;
