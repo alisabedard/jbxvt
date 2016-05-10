@@ -59,12 +59,6 @@ enum { END, START, ENTIRE };
 
 extern struct screenst screen1, screen2, *screen;
 
-//  Screen state variables that are the same for both screens.
-extern int pwidth;	/* width in pixels */
-extern int pheight;	/* height in pixels */
-extern int cwidth;	/* width in characters */
-extern int cheight;	/* height in characters */
-
 void home_screen(void);
 int16_t is_string_char(int16_t c);
 void scr_backspace(void);

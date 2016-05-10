@@ -15,8 +15,8 @@ static Bool sel_pred(Display * restrict dpy __attribute__((unused)),
 {
 	if (ev->type == SelectionNotify)
 		return (True);
-	if (arg != NULL && ev->type == KeyPress &&
-				(ev->xkey.time - *(Time *)arg) > SEL_KEY_DEL)
+	if (arg != NULL && ev->type == KeyPress
+		&& (ev->xkey.time - *(Time *)arg) > SEL_KEY_DEL)
 		return (True);
 	return (False);
 }
@@ -56,7 +56,8 @@ void scr_request_selection(int time, int x, int y)
 
 	/*  First check that the release is within the window.
 	 */
-	if (x < 0 || x >= pwidth || y < 0 || y >= pheight)
+	if (x < 0 || x >= jbxvt.scr.pixels.width || y < 0
+		|| y >= jbxvt.scr.pixels.height)
 		return;
 
 	if (jbxvt.sel.text != NULL) {
@@ -95,7 +96,8 @@ void scr_request_selection(int time, int x, int y)
 	}
 
 	sel_property = XInternAtom(jbxvt.X.dpy,"VT_SELECTION",False);
-	XConvertSelection(jbxvt.X.dpy,XA_PRIMARY,XA_STRING,sel_property,jbxvt.X.win.vt,time);
+	XConvertSelection(jbxvt.X.dpy,XA_PRIMARY,
+		XA_STRING,sel_property,jbxvt.X.win.vt,time);
 	wait_for_selection(time);
 }
 
@@ -112,9 +114,10 @@ void scr_paste_primary(const int time __attribute__((unused)),
 		return;
 	nread = 0;
 	do {
-		if (XGetWindowProperty(jbxvt.X.dpy,window,property,nread / 4,
-			PROP_SIZE,True, AnyPropertyType,&actual_type,
-			&actual_format, &nitems,&bytes_after,&data) != Success)
+		if (XGetWindowProperty(jbxvt.X.dpy,window,property,
+			nread / 4, PROP_SIZE,True, AnyPropertyType,
+			&actual_type, &actual_format, &nitems,
+			&bytes_after,&data) != Success)
 			return;
 		if (actual_type != XA_STRING)
 			return;

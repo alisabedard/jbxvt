@@ -61,14 +61,14 @@ void scr_clear_selection(void)
 		jbxvt.sel.text = NULL;
 		jbxvt.sel.length = 0;
 	}
-	show_selection(0,cheight - 1,0,cwidth - 1);
+	show_selection(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
 	jbxvt.sel.end1.se_type = jbxvt.sel.end2.se_type = NOSEL;
 }
 
 //  start a selection using the specified unit.
 void scr_start_selection(int x, int y, enum selunit unit)
 {
-	show_selection(0,cheight - 1,0,cwidth - 1);
+	show_selection(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
 	int16_t col = (x - MARGIN) / jbxvt.X.font_width;
 	int16_t row = (y - MARGIN) / jbxvt.X.font_height;
 	selection_unit = unit;
@@ -76,7 +76,7 @@ void scr_start_selection(int x, int y, enum selunit unit)
 	rc_to_selend(row,col,&jbxvt.sel.anchor);
 	jbxvt.sel.end2 = jbxvt.sel.end1 = jbxvt.sel.anchor;
 	adjust_selection(&jbxvt.sel.end2);
-	show_selection(0,cheight - 1,0,cwidth - 1);
+	show_selection(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
 }
 
 
@@ -103,13 +103,13 @@ void fix_rc(int16_t * restrict rowp, int16_t * restrict colp)
 	int16_t col = *colp;
 	if (col < 0)
 		col = 0;
-	if (col > cwidth)
-		col = cwidth;
+	if (col > jbxvt.scr.chars.width)
+		col = jbxvt.scr.chars.width;
 	int16_t row = *rowp;
 	if (row < 0)
 		row = 0;
-	if (row >= cheight)
-		row = cheight - 1;
+	if (row >= jbxvt.scr.chars.height)
+		row = jbxvt.scr.chars.height - 1;
 
 	if (selection_unit == CHAR) {
 		int i = (row - jbxvt.scr.offset);
@@ -117,7 +117,7 @@ void fix_rc(int16_t * restrict rowp, int16_t * restrict colp)
 		if (i >= 0) {
 			s = screen->text[i];
 			if (col > 0 && s[col - 1] < ' ')
-				while (col < cwidth && s[col] < ' ')
+				while (col < jbxvt.scr.chars.width && s[col] < ' ')
 					col++;
 		} else {
 			i = -1 - i;
@@ -127,7 +127,7 @@ void fix_rc(int16_t * restrict rowp, int16_t * restrict colp)
 				while (col <= len && s[col] < ' ')
 					col++;
 			if (col > len)
-				col = cwidth;
+				col = jbxvt.scr.chars.width;
 		}
 	}
 	*colp = col;
@@ -160,7 +160,7 @@ unsigned char * convert_line(unsigned char * restrict str,
 	int i;
 	int newline;
 
-	newline = (i2 + 1 == cwidth) && (str[*lenp] == 0);
+	newline = (i2 + 1 == jbxvt.scr.chars.width) && (str[*lenp] == 0);
 	if (i2 >= *lenp)
 		i2 = *lenp - 1;
 	if (i2 - i1 >= MAX_WIDTH)
@@ -248,17 +248,17 @@ void adjust_selection(struct selst * restrict include)
 		int16_t len;
 		if (se2->se_type == SCREENSEL) {
 			s = screen->text[se2->se_index];
-			len = cwidth;
+			len = jbxvt.scr.chars.width;
 		} else {
 			s = jbxvt.scr.sline.data[se2->se_index]->sl_text;
 			len = jbxvt.scr.sline.data[se2->se_index]->sl_length;
 		}
 		while (i < len && char_class[s[i]] == char_class[s[i-1]])
 			  i++;
-		se2->se_col = (i > len) ? cwidth : i;
+		se2->se_col = (i > len) ? jbxvt.scr.chars.width : i;
 	} else if (selection_unit == LINE) {
 		se1->se_col = 0;
-		se2->se_col = cwidth;
+		se2->se_col = jbxvt.scr.chars.width;
 	}
 }
 
@@ -281,7 +281,7 @@ void check_selection(const int16_t row1, const int16_t row2)
 	}
 	if (row2 < r1 || row1 > r2)
 		return;
-	show_selection(0,cheight - 1,0,cwidth - 1);
+	show_selection(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
 	jbxvt.sel.end2.se_type = NOSEL;
 }
 

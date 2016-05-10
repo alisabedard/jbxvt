@@ -1,7 +1,6 @@
 #include "scr_refresh.h"
 
 #include "cursor.h"
-
 #include "jbxvt.h"
 #include "repaint.h"
 #include "screen.h"
@@ -19,23 +18,23 @@ void scr_refresh(int x, int y, int width, int height)
 		/ jbxvt.X.font_width - 1;
 	if (col1 < 0)
 		col1 = 0;
-	if (col1 >= cwidth)
-		col1 = cwidth - 1;
+	if (col1 >= jbxvt.scr.chars.width)
+		col1 = jbxvt.scr.chars.width - 1;
 	if (col2 < 0)
 		col2 = 0;
-	if (col2 >= cwidth)
-		col2 = cwidth - 1;
+	if (col2 >= jbxvt.scr.chars.width)
+		col2 = jbxvt.scr.chars.width - 1;
 	row1 = (y - MARGIN) / jbxvt.X.font_height;
 	row2 = (y + height - MARGIN + jbxvt.X.font_height - 1)
 		/ jbxvt.X.font_height - 1;
 	if (row1 < 0)
 		row1 = 0;
-	if (row1 >= cheight)
-		row1 = cheight - 1;
+	if (row1 >= jbxvt.scr.chars.height)
+		row1 = jbxvt.scr.chars.height - 1;
 	if (row2 < 0)
 		row2 = 0;
-	if (row2 >= cheight)
-		row2 = cheight - 1;
+	if (row2 >= jbxvt.scr.chars.height)
+		row2 = jbxvt.scr.chars.height - 1;
 	repaint(row1,row2,col1,col2);
 	if (screen->row >= row1 && screen->row <= row2 &&
 	    screen->col >= col1 && screen->col <= col2)

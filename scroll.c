@@ -35,7 +35,7 @@ static void save_top_line(uint8_t i)
 static void save_top_lines_show_selection(struct selst * restrict s, uint8_t i)
 {
 	if (s->se_type == SAVEDSEL && s->se_index == jbxvt.scr.sline.max - i) {
-		show_selection(0, cheight - 1, 0, cwidth - 1);
+		show_selection(0, jbxvt.scr.chars.height - 1, 0, jbxvt.scr.chars.width - 1);
 		s->se_type = NOSEL;
 	}
 }
@@ -78,14 +78,14 @@ void scroll(int16_t row1, int16_t row2, int8_t count)
 			unsigned char * s = screen->text[i];
 			unsigned char * r = screen->rend[i];
 			int16_t j;
-			for (j = cwidth - 1; j >= 0 && s[j] == 0; j--)
+			for (j = jbxvt.scr.chars.width - 1; j >= 0 && s[j] == 0; j--)
 				;
 			j++;
 			sl = (struct slinest *)malloc(sizeof(struct slinest));
 			sl->sl_text = (unsigned char *)malloc(j + 1);
 			memcpy(sl->sl_text,s,j);
-			sl->sl_text[j] = s[cwidth];
-			if (r[cwidth] == 0)
+			sl->sl_text[j] = s[jbxvt.scr.chars.width];
+			if (r[jbxvt.scr.chars.width] == 0)
 				sl->sl_rend = NULL;
 			else {
 				sl->sl_rend = (unsigned char *)malloc(j + 1);
@@ -99,8 +99,8 @@ void scroll(int16_t row1, int16_t row2, int8_t count)
 		jbxvt.scr.sline.top += count;
 		if (jbxvt.scr.sline.top > jbxvt.scr.sline.max)
 			jbxvt.scr.sline.top = jbxvt.scr.sline.max;
-		sbar_show(cheight + jbxvt.scr.sline.top - 1, jbxvt.scr.offset,
-			jbxvt.scr.offset + cheight - 1);
+		sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1, jbxvt.scr.offset,
+			jbxvt.scr.offset + jbxvt.scr.chars.height - 1);
 	}
 
 	if (count > 0) {
@@ -109,11 +109,11 @@ void scroll(int16_t row1, int16_t row2, int8_t count)
 			save[i] = screen->text[j];
 			rend[i] = screen->rend[j];
 			if (jbxvt.sel.end1.se_type == SCREENSEL && jbxvt.sel.end1.se_index == j) {
-				show_selection(0,cheight - 1,0,cwidth - 1);
+				show_selection(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
 				jbxvt.sel.end1.se_type = NOSEL;
 			}
 			if (jbxvt.sel.end2.se_type == SCREENSEL && jbxvt.sel.end2.se_index == j) {
-				show_selection(0,cheight - 1,0,cwidth - 1);
+				show_selection(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
 				jbxvt.sel.end2.se_type = NOSEL;
 			}
 		}
@@ -127,9 +127,9 @@ void scroll(int16_t row1, int16_t row2, int8_t count)
 				jbxvt.sel.end2.se_index = j - count;
 		}
 		for (uint8_t i = 0; i < count; i++) {
-			memset(save[i],0,cwidth + 1);
+			memset(save[i],0,jbxvt.scr.chars.width + 1);
 			screen->text[row2 - i - 1] = save[i];
-			memset(rend[i],0,cwidth + 1);
+			memset(rend[i],0,jbxvt.scr.chars.width + 1);
 			screen->rend[row2 - i - 1] = rend[i];
 		}
 		if (count < row2 - row1) {
@@ -137,12 +137,12 @@ void scroll(int16_t row1, int16_t row2, int8_t count)
 			y1 = y2 + count * jbxvt.X.font_height;
 			uint16_t height = (row2 - row1 - count) * jbxvt.X.font_height;
 			XCopyArea(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.win.vt,jbxvt.X.gc.tx,
-				0,y1,pwidth,height,0,y2);
+				0,y1,jbxvt.scr.pixels.width,height,0,y2);
 			repair_damage();
 		}
 		uint16_t height = count * jbxvt.X.font_height;
 		y1 = MARGIN + (row2 - count) * jbxvt.X.font_height;
-		XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,0,y1,pwidth,height,False);
+		XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,0,y1,jbxvt.scr.pixels.width,height,False);
 		return;
 	}
 	if (count < 0) {
@@ -152,11 +152,11 @@ void scroll(int16_t row1, int16_t row2, int8_t count)
 			save[i] = screen->text[j];
 			rend[i] = screen->rend[j];
 			if (jbxvt.sel.end1.se_type == SCREENSEL && jbxvt.sel.end1.se_index == j) {
-				show_selection(0,cheight - 1,0,cwidth - 1);
+				show_selection(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
 				jbxvt.sel.end1.se_type = NOSEL;
 			}
 			if (jbxvt.sel.end2.se_type == SCREENSEL && jbxvt.sel.end2.se_index == j) {
-				show_selection(0,cheight - 1,0,cwidth - 1);
+				show_selection(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
 				jbxvt.sel.end2.se_type = NOSEL;
 			}
 		}
@@ -169,9 +169,9 @@ void scroll(int16_t row1, int16_t row2, int8_t count)
 				jbxvt.sel.end2.se_index = j + count;
 		}
 		for (uint8_t i = 0; i < count; i++) {
-			memset(save[i],0,cwidth + 1);
+			memset(save[i],0,jbxvt.scr.chars.width + 1);
 			screen->text[row1 + i] = save[i];
-			memset(rend[i],0,cwidth + 1);
+			memset(rend[i],0,jbxvt.scr.chars.width + 1);
 			screen->rend[row1 + i] = rend[i];
 		}
 		if (count < row2 - row1) {
@@ -179,12 +179,12 @@ void scroll(int16_t row1, int16_t row2, int8_t count)
 			y2 = y1 + count * jbxvt.X.font_height;
 			uint16_t height = (row2 - row1 - count) * jbxvt.X.font_height;
 			XCopyArea(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.win.vt,jbxvt.X.gc.tx,
-				0,y1,pwidth,height,0,y2);
+				0,y1,jbxvt.scr.pixels.width,height,0,y2);
 			repair_damage();
 		}
 		uint16_t height = count * jbxvt.X.font_height;
 		y1 = MARGIN + row1 * jbxvt.X.font_height;
-		XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,0,y1,pwidth,height,False);
+		XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,0,y1,jbxvt.scr.pixels.width,height,False);
 	}
 }
 
@@ -229,14 +229,14 @@ void scroll1(uint8_t count)
 			s = screen1.text[i];
 			r = screen1.rend[i];
 			int16_t j;
-			for (j = cwidth - 1; j >= 0 && s[j] == 0; j--)
+			for (j = jbxvt.scr.chars.width - 1; j >= 0 && s[j] == 0; j--)
 				;
 			j++;
 			sl = (struct slinest *)malloc(sizeof(struct slinest));
 			sl->sl_text = (unsigned char *)malloc(j + 1);
 			memcpy(sl->sl_text,s,j);
-			sl->sl_text[j] = s[cwidth];
-			if (r[cwidth] == 0)
+			sl->sl_text[j] = s[jbxvt.scr.chars.width];
+			if (r[jbxvt.scr.chars.width] == 0)
 				sl->sl_rend = NULL;
 			else {
 				sl->sl_rend = (unsigned char *)malloc(j + 1);
@@ -254,15 +254,15 @@ void scroll1(uint8_t count)
 			save[i] = screen1.text[j];
 			rend[i] = screen1.rend[j];
 		}
-		for (; j < cheight; j++) {
+		for (; j < jbxvt.scr.chars.height; j++) {
 			screen1.text[j - n] = screen1.text[j];
 			screen1.rend[j - n] = screen1.rend[j];
 		}
 		for (uint8_t i = 0; i < n; i++) {
-			memset(save[i],0,cwidth + 1);
-			screen1.text[cheight - i - 1] = save[i];
-			memset(rend[i],0,cwidth + 1);
-			screen1.rend[cheight - i - 1] = rend[i];
+			memset(save[i],0,jbxvt.scr.chars.width + 1);
+			screen1.text[jbxvt.scr.chars.height - i - 1] = save[i];
+			memset(rend[i],0,jbxvt.scr.chars.width + 1);
+			screen1.rend[jbxvt.scr.chars.height - i - 1] = rend[i];
 		}
 	}
 }

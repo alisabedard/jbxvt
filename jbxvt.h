@@ -37,6 +37,12 @@ struct JBXVT {
 			uint16_t top; /* high water mark
 					       of saved scroll lines */
 		} sline;
+		struct {
+			uint16_t width, height;
+		} pixels;
+		struct {
+			uint8_t width, height;
+		} chars;
 	} scr;
 	struct {
 		unsigned char * text;

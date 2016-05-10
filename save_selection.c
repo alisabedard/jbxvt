@@ -1,6 +1,5 @@
 #include "save_selection.h"
 
-
 #include "jbxvt.h"
 #include "screen.h"
 #include "selcmp.h"
@@ -20,11 +19,12 @@ int8_t save_selection(void)
 	struct selst *se1, *se2;
 	struct slinest *sl;
 
-	if (jbxvt.sel.end1.se_type == NOSEL || jbxvt.sel.end2.se_type == NOSEL)
+	if (jbxvt.sel.end1.se_type == NOSEL
+		|| jbxvt.sel.end2.se_type == NOSEL)
 		return(-1);
 	if (jbxvt.sel.end1.se_type == jbxvt.sel.end2.se_type
-				&& jbxvt.sel.end1.se_index == jbxvt.sel.end2.se_index
-				&& jbxvt.sel.end1.se_col == jbxvt.sel.end2.se_col)
+		&& jbxvt.sel.end1.se_index == jbxvt.sel.end2.se_index
+		&& jbxvt.sel.end1.se_col == jbxvt.sel.end2.se_col)
 		return(-1);
 
 	if (jbxvt.sel.text != NULL)
@@ -48,7 +48,7 @@ int8_t save_selection(void)
 				col2 = se2->se_col - 1;
 				i = 0;			/* force loop exit */
 			} else
-				col2 = cwidth - 1;
+				col2 = jbxvt.scr.chars.width - 1;
 			len = sl->sl_length;
 			s = convert_line(sl->sl_text,&len,col1,col2);
 			str = (unsigned char *)realloc(str,total + len);
@@ -68,10 +68,11 @@ int8_t save_selection(void)
 			col1 = 0;
 		}
 		for (; i <= se2->se_index; i++) {
-			col2 = i == se2->se_index ? se2->se_col : cwidth;
+			col2 = i == se2->se_index ? se2->se_col
+				: jbxvt.scr.chars.width;
 			if (--col2 < 0)
 				break;
-			len = cwidth;
+			len = jbxvt.scr.chars.width;
 			s = convert_line(screen->text[i],&len,col1,col2);
 			str = (unsigned char *)realloc(str,total + len);
 			if (str == NULL)

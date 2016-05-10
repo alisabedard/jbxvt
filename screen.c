@@ -25,18 +25,9 @@
 
 #include "screen.h"
 
-#include <ctype.h>
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/utsname.h>
-#include <X11/Xatom.h>
-
 #include "change_offset.h"
 #include "command.h"
 #include "cursor.h"
-
 #include "jbxvt.h"
 #include "repaint.h"
 #include "repair_damage.h"
@@ -52,17 +43,11 @@
 #include "xsetup.h"
 #include "xvt.h"
 
-// Globals:
+#include <stdlib.h>
+#include <string.h>
+#include <sys/utsname.h>
 
 struct screenst screen1, screen2, *screen;
-
-//  Screen state variables that are the same for both screens.
-int pwidth;	/* width in pixels */
-int pheight;	/* height in pixels */
-int cwidth;	/* width in characters */
-int cheight;	/* height in characters */
-
-
 static struct screenst save_screen;
 
 
@@ -75,8 +60,8 @@ void scr_init(const unsigned int saved_lines)
 	jbxvt.scr.sline.max = saved_lines;
 	if (jbxvt.scr.sline.max < MAX_SCROLL)
 		jbxvt.scr.sline.max = MAX_SCROLL;
-	jbxvt.scr.sline.data = (struct slinest **)malloc(
-		jbxvt.scr.sline.max
+	jbxvt.scr.sline.data = (struct slinest **)
+		malloc( jbxvt.scr.sline.max
 		* sizeof(struct slinest *));
 	for (uint16_t i = 0; i < jbxvt.scr.sline.max; i++)
 		jbxvt.scr.sline.data[i] = NULL;
@@ -107,7 +92,7 @@ void scr_change_screen(const uint8_t direction)
 	home_screen();
 	screen = (direction == HIGH) ? &screen2 : &screen1;
 	jbxvt.sel.end2.se_type = NOSEL;
-	repaint(0,cheight - 1,0,cwidth - 1);
+	repaint(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
 	cursor();
 }
 
@@ -122,8 +107,8 @@ void scr_change_rendition(const uint32_t style)
 //  Return the width and height of the screen.
 void scr_get_size(uint16_t * restrict width_p, uint16_t * restrict height_p)
 {
-	*width_p = cwidth;
-	*height_p = cheight;
+	*width_p = jbxvt.scr.chars.width;
+	*height_p = jbxvt.scr.chars.height;
 }
 
 
@@ -175,11 +160,11 @@ void scr_restore_cursor(void)
 {
 	cursor();
 	screen->row = save_screen.row;
-	if (screen->row >= cheight)
-		screen->row = cheight - 1;
+	if (screen->row >= jbxvt.scr.chars.height)
+		screen->row = jbxvt.scr.chars.height - 1;
 	screen->col = save_screen.col;
-	if (screen->col >= cwidth)
-		screen->col = cwidth - 1;
+	if (screen->col >= jbxvt.scr.chars.width)
+		screen->col = jbxvt.scr.chars.width - 1;
 	scr_change_rendition(jbxvt.opt.save_rstyle);
 	cursor();
 }
@@ -234,8 +219,8 @@ int top, bottom;
 {
 	if (top < 0)
 		top = 0;
-	if (bottom >= cheight)
-		bottom = cheight - 1;
+	if (bottom >= jbxvt.scr.chars.height)
+		bottom = jbxvt.scr.chars.height - 1;
 	if (top > bottom)
 		return;
 
@@ -267,14 +252,14 @@ void scr_set_insert(int mode)
 //  Fill the screen with 'E's - useful for testing.
 void scr_efill(void)
 {
-	for (uint16_t y = 0; y < cheight; y++)
-		for (uint16_t x = 0; x < cwidth; x++) {
+	for (uint16_t y = 0; y < jbxvt.scr.chars.height; y++)
+		for (uint16_t x = 0; x < jbxvt.scr.chars.width; x++) {
 			screen->text[y][x] = 'E';
 			screen->rend[y][x] = 0;
 		}
 	home_screen();
-	check_selection(0,cheight - 1);
-	repaint(0,cheight - 1,0,cwidth - 1);
+	check_selection(0,jbxvt.scr.chars.height - 1);
+	repaint(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
 	cursor();
 }
 #endif//DEBUG
@@ -286,9 +271,10 @@ void scr_move_to(int16_t y)
 {
 	int16_t n, lnum;
 
-	y = pheight - 1 - y;
-	lnum = y * (cheight + jbxvt.scr.sline.top - 1) / (pheight - 1);
-	n = lnum - cheight + 1;
+	y = jbxvt.scr.pixels.height - 1 - y;
+	lnum = y * (jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1)
+		/ (jbxvt.scr.pixels.height - 1);
+	n = lnum - jbxvt.scr.chars.height + 1;
 	change_offset(n);
 }
 
@@ -334,9 +320,11 @@ void home_screen(void)
 {
 	if (jbxvt.scr.offset > 0) {
 		jbxvt.scr.offset = 0;
-		repaint(0,cheight - 1,0,cwidth - 1);
+		repaint(0,jbxvt.scr.chars.height - 1,0,
+			jbxvt.scr.chars.width - 1);
 		cursor();
-		sbar_show(cheight + jbxvt.scr.sline.top - 1, 0, cheight - 1);
+		sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1,
+			0, jbxvt.scr.chars.height - 1);
 	}
 }
 

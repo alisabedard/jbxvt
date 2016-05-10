@@ -41,7 +41,7 @@ void scr_string(unsigned char * restrict str, int len, int nlcount)
 		if (*str == '\n') {
 			if (screen->row == screen->bmargin)
 				scroll(screen->tmargin,screen->bmargin,1);
-			else if (screen->row < cheight - 1)
+			else if (screen->row < jbxvt.scr.chars.height - 1)
 				screen->row++;
 			check_selection(screen->row,screen->row);
 			screen->wrap_next = 0;
@@ -57,13 +57,13 @@ void scr_string(unsigned char * restrict str, int len, int nlcount)
 			continue;
 		}
 		if (*str == '\t') {
-			if (screen->col < cwidth - 1) {
+			if (screen->col < jbxvt.scr.chars.width - 1) {
 				s = screen->text[screen->row];
 				if (s[screen->col] == 0)
 					s[screen->col] = '\t';
 				screen->col++;
 				while (screen->col % 8 != 0
-					&& screen->col < cwidth - 1)
+					&& screen->col < jbxvt.scr.chars.width - 1)
 					screen->col++;
 			}
 			len--;
@@ -71,10 +71,10 @@ void scr_string(unsigned char * restrict str, int len, int nlcount)
 			continue;
 		}
 		if (screen->wrap_next) {
-			screen->text[screen->row][cwidth] = 1;
+			screen->text[screen->row][jbxvt.scr.chars.width] = 1;
 			if (screen->row == screen->bmargin)
 				scroll(screen->tmargin,screen->bmargin,1);
-			else if (screen->row < cheight - 1)
+			else if (screen->row < jbxvt.scr.chars.height - 1)
 				screen->row++;
 			screen->col = 0;
 			screen->wrap_next = 0;
@@ -84,15 +84,15 @@ void scr_string(unsigned char * restrict str, int len, int nlcount)
 		y = MARGIN + jbxvt.X.font_height * screen->row;
 		for (n = 0; str[n] >= ' '; n++)
 			;
-		n = n + screen->col > cwidth ? cwidth - screen->col : n;
+		n = n + screen->col > jbxvt.scr.chars.width ? jbxvt.scr.chars.width - screen->col : n;
 		if (screen->insert) {
 			s = screen->text[screen->row];
 			r = screen->rend[screen->row];
-			for (i = cwidth - 1; i >= screen->col + n; i--) {
+			for (i = jbxvt.scr.chars.width - 1; i >= screen->col + n; i--) {
 				s[i] = s[i - n];
 				r[i] = r[i - n];
 			}
-			width = (cwidth - screen->col - n) * jbxvt.X.font_width;
+			width = (jbxvt.scr.chars.width - screen->col - n) * jbxvt.X.font_width;
 			x2 = x + n * jbxvt.X.font_width;
 			if (width > 0) {
 				XCopyArea(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.win.vt,jbxvt.X.gc.tx,
@@ -108,28 +108,28 @@ void scr_string(unsigned char * restrict str, int len, int nlcount)
 		else {
 			for (i = 0; i < n; i++)
 				screen->rend[screen->row][screen->col + i] = jbxvt.scr.rstyle;
-			screen->rend[screen->row][cwidth] = 1;
+			screen->rend[screen->row][jbxvt.scr.chars.width] = 1;
 		}
 		len -= n;
 		str += n;
 		screen->col += n;
-		if (len > 0 && screen->col == cwidth && *str >= ' ') {
+		if (len > 0 && screen->col == jbxvt.scr.chars.width && *str >= ' ') {
 			if (screen->wrap) {
-				screen->text[screen->row][cwidth] = 1;
+				screen->text[screen->row][jbxvt.scr.chars.width] = 1;
 				if (screen->row == screen->bmargin)
 					scroll(screen->tmargin,screen->bmargin,1);
 				else
 					screen->row++;
 				screen->col = 0;
 			} else {
-				screen->col = cwidth - 1;
+				screen->col = jbxvt.scr.chars.width - 1;
 				cursor();
 				return;
 			}
 		}
 	}
-	if (screen->col == cwidth) {
-		screen->col = cwidth - 1;
+	if (screen->col == jbxvt.scr.chars.width) {
+		screen->col = jbxvt.scr.chars.width - 1;
 		screen->wrap_next = screen->wrap;
 	}
 	cursor();

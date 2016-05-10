@@ -32,7 +32,7 @@ void scr_reset(void)
 	int16_t cw = (width - 2 * MARGIN) / jbxvt.X.font_width;
 	int16_t ch = (height - 2 * MARGIN) / jbxvt.X.font_height;
 
-	if (screen->text == NULL || cw != cwidth || ch != cheight) {
+	if (screen->text == NULL || cw != jbxvt.scr.chars.width || ch != jbxvt.scr.chars.height) {
 
 		jbxvt.scr.offset = 0;
 		/*  Recreate the screen backup arrays.
@@ -73,15 +73,15 @@ void scr_reset(void)
 			onscreen = 1;
 			for (; j >= 0; j--) {
 				if (onscreen) {
-					n = cw < cwidth ? cw : cwidth;
+					n = cw < jbxvt.scr.chars.width ? cw : jbxvt.scr.chars.width;
 					memcpy(s1[j],screen1.text[i],n);
 					memcpy(s2[j],screen2.text[i],n);
 					memcpy(r1[j],screen1.rend[i],n);
 					memcpy(r2[j],screen2.rend[i],n);
-					s1[j][cw] = screen1.text[i][cwidth];
-					s2[j][cw] = screen2.text[i][cwidth];
-					r1[j][cw] = screen1.rend[i][cwidth];
-					r2[j][cw] = screen2.rend[i][cwidth];
+					s1[j][cw] = screen1.text[i][jbxvt.scr.chars.width];
+					s2[j][cw] = screen2.text[i][jbxvt.scr.chars.width];
+					r1[j][cw] = screen1.rend[i][jbxvt.scr.chars.width];
+					r2[j][cw] = screen2.rend[i][jbxvt.scr.chars.width];
 					i--;
 					if (i < 0) {
 						onscreen = 0;
@@ -114,7 +114,7 @@ void scr_reset(void)
 				jbxvt.scr.sline.data[j] = NULL;
 			jbxvt.scr.sline.top -= i;
 
-			for (y = 0; y < cheight; y++) {
+			for (y = 0; y < jbxvt.scr.chars.height; y++) {
 				free(screen1.text[y]);
 				free(screen2.text[y]);
 				free(screen1.rend[y]);
@@ -130,29 +130,29 @@ void scr_reset(void)
 		screen1.rend = r1;
 		screen2.rend = r2;
 
-		cwidth = cw;
-		cheight = ch;
-		pwidth = width;
-		pheight = height;
+		jbxvt.scr.chars.width = cw;
+		jbxvt.scr.chars.height = ch;
+		jbxvt.scr.pixels.width = width;
+		jbxvt.scr.pixels.height = height;
 		screen1.tmargin = 0;
-		screen1.bmargin = cheight - 1;
+		screen1.bmargin = jbxvt.scr.chars.height - 1;
 		screen1.decom = 0;
 		screen1.wrap_next = 0;
 		screen2.tmargin = 0;
-		screen2.bmargin = cheight - 1;
+		screen2.bmargin = jbxvt.scr.chars.height - 1;
 		screen2.decom = 0;
 		screen2.wrap_next = 0;
 		scr_start_selection(0,0,CHAR);
 	}
-	tty_set_size(cwidth,cheight);
+	tty_set_size(jbxvt.scr.chars.width,jbxvt.scr.chars.height);
 
-	if (screen->col >= cwidth)
-		screen->col = cwidth - 1;
-	if (screen->row >= cheight)
-		screen->row = cheight - 1;
-	sbar_show(cheight + jbxvt.scr.sline.top - 1, jbxvt.scr.offset,
-		jbxvt.scr.offset + cheight - 1);
-	repaint(0,cheight - 1,0,cwidth - 1);
+	if (screen->col >= jbxvt.scr.chars.width)
+		screen->col = jbxvt.scr.chars.width - 1;
+	if (screen->row >= jbxvt.scr.chars.height)
+		screen->row = jbxvt.scr.chars.height - 1;
+	sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1, jbxvt.scr.offset,
+		jbxvt.scr.offset + jbxvt.scr.chars.height - 1);
+	repaint(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
 	cursor();
 }
 

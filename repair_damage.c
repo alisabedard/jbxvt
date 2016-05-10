@@ -35,8 +35,8 @@ void repair_damage(void)
 		row2 = (event.xgraphicsexpose.y
 			+ event.xgraphicsexpose.height - MARGIN)
 			/ jbxvt.X.font_height;
-		if (row2 >= cheight)
-			row2 = cheight - 1;
+		if (row2 >= jbxvt.scr.chars.height)
+			row2 = jbxvt.scr.chars.height - 1;
 		col1 = (event.xgraphicsexpose.x - MARGIN)
 			/ jbxvt.X.font_width;
 		if (col1 < 0)
@@ -44,8 +44,8 @@ void repair_damage(void)
 		col2 = (event.xgraphicsexpose.x
 			+ event.xgraphicsexpose.width - MARGIN)
 			/ jbxvt.X.font_width;
-		if (col2 >= cwidth)
-			col2 = cwidth - 1;
+		if (col2 >= jbxvt.scr.chars.width)
+			col2 = jbxvt.scr.chars.width - 1;
 		repaint(row1,row2,col1,col2);
 	} while (event.xgraphicsexpose.count > 0);
 }

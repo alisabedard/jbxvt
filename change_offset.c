@@ -13,11 +13,12 @@
 static void copy_repaint_repair(const int16_t d, const int16_t y1,
 	const int16_t y2, const int row1, const int row2)
 {
-	const uint16_t height = (cheight - d) * jbxvt.X.font_height;
+	const uint16_t height = (jbxvt.scr.chars.height - d)
+		* jbxvt.X.font_height;
 	XCopyArea(jbxvt.X.dpy, jbxvt.X.win.vt,
 		jbxvt.X.win.vt, jbxvt.X.gc.tx, 0, y1,
-		pwidth, height, 0, y2);
-	repaint(row1, row2, 0, cwidth-1);
+		jbxvt.scr.pixels.width, height, 0, y2);
+	repaint(row1, row2, 0, jbxvt.scr.chars.width-1);
 	repair_damage();
 }
 
@@ -33,24 +34,28 @@ void change_offset(int16_t n)
 	cursor();
 	int16_t d = n - jbxvt.scr.offset;
 	jbxvt.scr.offset = n;
-	if (d > 0 && d < cheight) {
+	if (d > 0 && d < jbxvt.scr.chars.height) {
 		/*  Text has moved down by less than a screen so raster
 		 *  the lines that did not move off.
 		 */
-		copy_repaint_repair(d, MARGIN, MARGIN + d * jbxvt.X.font_height,
+		copy_repaint_repair(d, MARGIN,
+			MARGIN + d * jbxvt.X.font_height,
 			0, d - 1);
-	} else if (d < 0 && -d < cheight) {
+	} else if (d < 0 && -d < jbxvt.scr.chars.height) {
 		/*  Text has moved down by less than a screen so raster
 		 *  the lines that did not move off.
 		 */
 		d = -d;
-		copy_repaint_repair(d, MARGIN + d * jbxvt.X.font_height, MARGIN,
-			cheight - d, cheight - 1);
+		copy_repaint_repair(d, MARGIN + d * jbxvt.X.font_height,
+			MARGIN, jbxvt.scr.chars.height - d,
+			jbxvt.scr.chars.height - 1);
 	} else
-		repaint(0,cheight - 1,0,cwidth - 1);
+		repaint(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
 	cursor();
 	// Update current scrollbar position due to change
-	sbar_show(cheight + jbxvt.scr.sline.top - 1, jbxvt.scr.offset, jbxvt.scr.offset + cheight - 1);
+	sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1,
+		jbxvt.scr.offset, jbxvt.scr.offset
+		+ jbxvt.scr.chars.height - 1);
 }
 
 

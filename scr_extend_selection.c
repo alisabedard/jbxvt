@@ -26,7 +26,8 @@ void scr_extend_selection(int16_t x, int16_t y, const bool drag)
 
 	if (jbxvt.sel.end2.se_type == NOSEL) {
 		rc_to_selend(row,col,&jbxvt.sel.end2);
-		show_selection(0,cheight - 1,0,cwidth - 1);
+		show_selection(0,jbxvt.scr.chars.height - 1,
+			0,jbxvt.scr.chars.width - 1);
 		return;
 	}
 
@@ -52,11 +53,14 @@ void scr_extend_selection(int16_t x, int16_t y, const bool drag)
 			se = &jbxvt.sel.end2;
 		else if (r1 == r2) {
 			if (row < r1)
-				se = (c1 < c2) ? &jbxvt.sel.end1 : &jbxvt.sel.end2;
+				se = (c1 < c2) ? &jbxvt.sel.end1
+					: &jbxvt.sel.end2;
 			else if (row > r1)
-				se = (c1 > c2) ? &jbxvt.sel.end1 : &jbxvt.sel.end2;
+				se = (c1 > c2) ? &jbxvt.sel.end1
+					: &jbxvt.sel.end2;
 			else
-				se = abs(c1 - col) < abs(c2 - col) ? &jbxvt.sel.end1 : &jbxvt.sel.end2;
+				se = abs(c1 - col) < abs(c2 - col)
+					? &jbxvt.sel.end1 : &jbxvt.sel.end2;
 		} else
 			se = &jbxvt.sel.end2;
 		rc_to_selend(row,col,se);

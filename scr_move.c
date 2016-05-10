@@ -1,7 +1,7 @@
 #include "scr_move.h"
 
 #include "cursor.h"
-
+#include "jbxvt.h"
 #include "screen.h"
 #include "selection.h"
 
@@ -15,8 +15,8 @@ void scr_move(int x, int y, int relative)
 	screen->col = (relative & COL_RELATIVE) ? screen->col + x : x;
 	if (screen->col < 0)
 		screen->col = 0;
-	if (screen->col >= cwidth)
-		screen->col = cwidth - 1;
+	if (screen->col >= jbxvt.scr.chars.width)
+		screen->col = jbxvt.scr.chars.width - 1;
 
 	if (relative & ROW_RELATIVE) {
 		if (y > 0) {
@@ -42,8 +42,8 @@ void scr_move(int x, int y, int relative)
 	}
 	if (screen->row < 0)
 		screen->row = 0;
-	if (screen->row >= cheight)
-		screen->row = cheight - 1;
+	if (screen->row >= jbxvt.scr.chars.height)
+		screen->row = jbxvt.scr.chars.height - 1;
 
 	screen->wrap_next = 0;
 	check_selection(screen->row,screen->row);

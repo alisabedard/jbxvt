@@ -40,16 +40,13 @@ void paint_rval_text(unsigned char * str, uint32_t rval,
 				(const char *)str,len);
 	y++;
 	if (rval & RS_ULINE)
-		XDrawLine(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.tx,x,y,x + len * jbxvt.X.font_width,y);
+		XDrawLine(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.tx,
+			x,y,x + len * jbxvt.X.font_width,y);
 
 	if (rval & RS_RVID) {
 		XSetForeground(jbxvt.X.dpy,jbxvt.X.gc.tx,jbxvt.X.color.fg);
 		XSetBackground(jbxvt.X.dpy,jbxvt.X.gc.tx,jbxvt.X.color.bg);
 	}
-#if 0
-	if (rval & RS_BOLD)
-		XSetFont(jbxvt.X.dpy,jbxvt.X.gc.tx,jbxvt.X.font->fid);
-#endif
 }
 
 /* Display the string using the rendition vector at the screen coordinates
@@ -83,7 +80,7 @@ void repaint(int row1, int row2, int col1, int col2)
 	int x, y, x1, y1, x2, width, i, m;
 	struct slinest *sl;
 
-	str = (unsigned char *)malloc(cwidth + 1);
+	str = (unsigned char *)malloc(jbxvt.scr.chars.width + 1);
 	y = row1;
 	x1 = MARGIN + col1 * jbxvt.X.font_width;
 	y1 = MARGIN + row1 * jbxvt.X.font_height;
@@ -102,7 +99,8 @@ void repaint(int row1, int row2, int col1, int col2)
 		x2 = x1 + m * jbxvt.X.font_width;
 		width = (col2 - col1 + 1 - m) * jbxvt.X.font_width;
 		if (width > 0)
-			XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,x2,y1,width,jbxvt.X.font_height,False);
+			XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,
+				x2,y1,width,jbxvt.X.font_height,False);
 		y1 += jbxvt.X.font_height;
 	}
 
@@ -122,12 +120,14 @@ void repaint(int row1, int row2, int col1, int col2)
 			}
 		m++;
 		m -= col1;
-		r = screen->rend[i][cwidth] == 0 ? NULL : screen->rend[i] + col1;
+		r = screen->rend[i][jbxvt.scr.chars.width] == 0
+			? NULL : screen->rend[i] + col1;
 		paint_rvec_text(str,r,m,x1,y1);
 		x2 = x1 + m * jbxvt.X.font_width;
 		width = (col2 - col1 + 1 - m) * jbxvt.X.font_width;
 		if (width > 0)
-			XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,x2,y1,width,jbxvt.X.font_height,False);
+			XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,
+				x2,y1,width,jbxvt.X.font_height,False);
 		y1 += jbxvt.X.font_height;
 	}
 	free(str);
