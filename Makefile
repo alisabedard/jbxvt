@@ -1,8 +1,9 @@
-#CFLAGS=-Os -march=native
+CFLAGS=-Os
+#CFLAGS+=-march=native
 #CFLAGS+=-flto # doesn't work with clang
 #CFLAGS=-ggdb
 #CFLAGS+=-DDEBUG
-CC=clang
+#CC=clang
 
 exe=jbxvt
 
