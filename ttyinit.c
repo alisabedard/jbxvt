@@ -100,8 +100,26 @@
  * need to define any of these.
  */
 
-/*  Definitions that enable machine dependent parts of the code.
- */
+//  Definitions that enable machine dependent parts of the code.
+
+#ifdef NETBSD
+#define BSD_PTY
+#define BSD_UTMP
+#include <fcntl.h>
+#include <sys/file.h>
+#include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/ttycom.h>
+#include <termios.h>
+#include <ttyent.h>
+#include <util.h>
+#include <utmp.h>
+#include <utmpx.h>
+#define UTMP_FILE _PATH_UTMP
+#define TTYTAB _PATH_TTYS
+#define SCTTY_IOCTL
+#endif//NETBSD
+
 #ifdef SUNOS4
 #define BSD_PTY
 #define BSD_UTMP
@@ -221,6 +239,39 @@ static void catch_sig(const int sig)
 	kill(getpid(),sig);
 }
 
+#ifdef BSD_UTMP
+/*  Look up the tty name in the etc/ttytab file and return a slot number
+ *  that can be used to access the utmp file.  We cannot use ttyslot()
+ *  because the tty name is not that of fd 0.
+ */
+static int
+get_tslot(ttynam)
+char *ttynam;
+{
+	FILE *fs;
+	char buf[200], name[200];
+	int i;
+
+	if ((fs = fopen(TTYTAB,"r")) == NULL)
+		return(-1);
+	i = 1;
+	while (fgets(buf,200,fs) != NULL) {
+		if (*buf == '#')
+			continue;
+		if (sscanf(buf,"%s",name) != 1)
+			continue;
+		if (strcmp(ttynam,name) == 0) {
+			fclose(fs);
+			return(i);
+		}
+		i++;
+	}
+	fclose(fs);
+	return(-1);
+}
+#endif /* BSD_UTMP */
+
+
 //  Attempt to create and write an entry to the utmp file
 static void write_utmp(void)
 {
@@ -313,37 +364,6 @@ void quit(int status)
 	exit(status);
 }
 
-#ifdef BSD_UTMP
-/*  Look up the tty name in the etc/ttytab file and return a slot number
- *  that can be used to access the utmp file.  We cannot use ttyslot()
- *  because the tty name is not that of fd 0.
- */
-static int
-get_tslot(ttynam)
-char *ttynam;
-{
-	FILE *fs;
-	char buf[200], name[200];
-	int i;
-
-	if ((fs = fopen(TTYTAB,"r")) == NULL)
-		return(-1);
-	i = 1;
-	while (fgets(buf,200,fs) != NULL) {
-		if (*buf == '#')
-			continue;
-		if (sscanf(buf,"%s",name) != 1)
-			continue;
-		if (strcmp(ttynam,name) == 0) {
-			fclose(fs);
-			return(i);
-		}
-		i++;
-	}
-	fclose(fs);
-	return(-1);
-}
-#endif /* BSD_UTMP */
 
 /*  Acquire a pseudo teletype from the system.  The return value is the
  *  name of the slave part of the pair or NULL if unsucsessful.  If
@@ -555,7 +575,7 @@ static void child(const char * restrict command, char ** argv,
 		  gid = -1;
 	fchown(ttyfd,uid,gid);
 	fchmod(ttyfd, 0620);
-	for (i = 0; i < jbxvt.com.width; i++)
+	for (int i = 0; i < jbxvt.com.width; i++)
 		  if (i != ttyfd)
 			    close(i);
 	// for stdin, stderr, stdout:
@@ -590,7 +610,11 @@ int run_command(char * command, char ** argv)
 	if ((tty_name = get_pseudo_tty(&ptyfd,&ttyfd)) == NULL)
 		return(-1);
 
+#ifdef NETBSD
+	fcntl(ptyfd,F_SETFL,O_NONBLOCK);
+#else
 	fcntl(ptyfd,F_SETFL,O_NDELAY);
+#endif
 
 	jbxvt.com.width = sysconf(_SC_OPEN_MAX);
 	for (uint8_t i = 1; i <= 15; i++)
@@ -614,6 +638,7 @@ int run_command(char * command, char ** argv)
 /*  Tell the teletype handler what size the window is.  Called initially from
  *  the child and after a window size change from the parent.
  */
+#ifndef NETBSD
 #ifdef TIOCSWINSZ
 void tty_set_size(const int width, const int height)
 {
@@ -629,3 +654,4 @@ void tty_set_size(const int width, const int height)
 		TIOCSWINSZ,(char *)&wsize);
 }
 #endif /* TIOCSWINSZ */
+#endif//!NETBSD
