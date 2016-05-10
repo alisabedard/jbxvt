@@ -9,6 +9,9 @@
 #include <stdint.h>
 #include <X11/Xlib.h>
 
+// Use for all file descriptors:
+typedef int fd_t;
+
 struct JBXVT {
 	struct {
 		uint8_t font_height, font_width;
@@ -47,7 +50,7 @@ struct JBXVT {
 	struct {
 		unsigned char * send_nxt; // next char to be sent
 		int send_count; // # chars waiting to be sent
-		int fd; // file descriptor connected to the command
+		fd_t fd; // file descriptor connected to the command
 		int width; // # file descriptors being used
 		struct {
 			unsigned char data[COM_BUF_SIZE];

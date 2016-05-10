@@ -5,6 +5,7 @@
 #include "jbxvt.h"
 #include "screen.h"
 #include "selection.h"
+#include "show_selection.h"
 #include "xvt.h"
 
 #include <stdlib.h>

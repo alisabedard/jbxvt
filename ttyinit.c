@@ -147,42 +147,16 @@
 #endif /* HPUX */
 
 #ifdef LINUX
-//#include <asm-generic/ioctls.h>
 #include <pty.h>
 #include <stropts.h>
-//#include <utmp.h>
-//typedef utmp utmpx;
 #define SVR4_PTY
 #define SVR4_UTMP
-//#define SVR4_UTMPX
 #endif
 
 #ifdef UKC_LOCATIONS
 #include <loc.h>
 #define LOCTMPFILE	"/etc/loctmp"
 #endif /* UKC_LOCATIONS */
-
-#ifdef __STDC__
-static void catch_child(int);
-static void catch_sig(int);
-static void write_utmp(void);
-static void tidy_utmp(void);
-static void set_ttymodes(void);
-#ifdef BSD_UTMP
-static int get_tslot(char *);
-#endif /* BSD_UTMP */
-static char *get_pseudo_tty(int *,int *);
-#else /* __STDC__ */
-static void catch_child();
-static void catch_sig();
-static void write_utmp();
-static void tidy_utmp();
-static void set_ttymodes();
-#ifdef BSD_UTMP
-static int get_tslot();
-#endif /* BSD_UTMP */
-static char *get_pseudo_tty();
-#endif /* __STDC__ */
 
 static int comm_pid = -1;		/* process id of child */
 static char *tty_name = NULL;	/* name of the slave teletype */
@@ -204,8 +178,41 @@ catch_child(int sig __attribute__((unused)))
 	signal(SIGCHLD,catch_child);
 }
 
-/*  Catch a fatal signal and tidy up before quitting
- */
+// Tidy up the utmp entry etc prior to exiting.
+static void tidy_utmp(void)
+{
+#if defined(SVR4_UTMP) || defined(SVR4_UTMPX)
+	setutent();
+	if (getutid(&utent) == NULL)
+		return;
+	utent.ut_type = DEAD_PROCESS;
+	time((time_t *)&utent.ut_time);
+	pututline(&utent);
+#endif /* SVR4_UTMP || SVR4_UTMPX */
+#ifdef SVR4_UTMPX
+	updwtmp(WTMP_FILE,&utent);
+#endif /* SVR4_UTMPX */
+
+#ifdef BSD_UTMP
+	int ut_fd;
+
+	if (tslot < 0)
+		return;
+	if ((ut_fd = open(UTMP_FILE,O_WRONLY)) < 0)
+		return;
+
+	memset(&utent,0,sizeof(utent));
+	lseek(ut_fd,(long)(tslot * sizeof(struct utmp)),0);
+	write(ut_fd,(char *)&utent,sizeof(struct utmp));
+	close(ut_fd);
+#endif /* BSD_UTMP */
+
+#ifdef BSD_PTY
+	chmod(tty_name,0666);
+#endif /* BSD_PTY */
+}
+
+//  Catch a fatal signal and tidy up before quitting
 static void catch_sig(const int sig)
 {
 	tidy_utmp();
@@ -214,8 +221,7 @@ static void catch_sig(const int sig)
 	kill(getpid(),sig);
 }
 
-/*  Attempt to create and write an entry to the utmp file
- */
+//  Attempt to create and write an entry to the utmp file
 static void write_utmp(void)
 {
 	struct passwd *pw;
@@ -294,41 +300,6 @@ static void write_utmp(void)
 #endif /* BSD_UTMP */
 }
 
-/*  Tidy up the utmp entry etc prior to exiting.
- */
-static void
-tidy_utmp()
-{
-#if defined(SVR4_UTMP) || defined(SVR4_UTMPX)
-	setutent();
-	if (getutid(&utent) == NULL)
-		return;
-	utent.ut_type = DEAD_PROCESS;
-	time((time_t *)&utent.ut_time);
-	pututline(&utent);
-#endif /* SVR4_UTMP || SVR4_UTMPX */
-#ifdef SVR4_UTMPX
-	updwtmp(WTMP_FILE,&utent);
-#endif /* SVR4_UTMPX */
-
-#ifdef BSD_UTMP
-	int ut_fd;
-
-	if (tslot < 0)
-		return;
-	if ((ut_fd = open(UTMP_FILE,O_WRONLY)) < 0)
-		return;
-
-	memset(&utent,0,sizeof(utent));
-	lseek(ut_fd,(long)(tslot * sizeof(struct utmp)),0);
-	write(ut_fd,(char *)&utent,sizeof(struct utmp));
-	close(ut_fd);
-#endif /* BSD_UTMP */
-
-#ifdef BSD_PTY
-	chmod(tty_name,0666);
-#endif /* BSD_PTY */
-}
 
 //  Quit with the status after first removing our entry from the utmp file.
 void quit(int status)
@@ -547,10 +518,63 @@ set_ttymodes()
 #ifdef TIOCCONS
 	if (is_console())
 		if (ioctl(0,TIOCCONS,0) != 0) {
-			error("Could not set console");
-			perror("");
+			perror("Could not set console");
 		}
 #endif /* TIOCCONS */
+}
+
+static void child(const char * restrict command, char ** argv,
+	fd_t ttyfd)
+{
+	struct group *gr;
+	pid_t pgid;
+
+	if ((pgid = setsid()) < 0)
+		  perror("failed to start session");
+
+	/*  Having started a new session, we need to establish
+	 *  a controlling teletype for it.  On some systems
+	 *  this can be done with an ioctl but on others
+	 *  we need to re-open the slave tty.
+	 */
+#ifdef SCTTY_IOCTL
+	(void)ioctl(ttyfd,TIOCSCTTY,0);
+#else /* !SCTTY_IOCTL */
+	fd_t i = ttyfd;
+	if ((ttyfd = open(tty_name,O_RDWR)) < 0) {
+		fprintf(stderr, "Can't open teletype %s\n",tty_name);
+		exit(1);
+	}
+	close(i);
+#endif /* !SCTTY_IOCTL */
+	int uid, gid;
+	uid = getuid();
+	if ((gr = getgrnam("tty")) != NULL)
+		  gid = gr->gr_gid;
+	else
+		  gid = -1;
+	fchown(ttyfd,uid,gid);
+	fchmod(ttyfd, 0620);
+	for (i = 0; i < jbxvt.com.width; i++)
+		  if (i != ttyfd)
+			    close(i);
+	// for stdin, stderr, stdout:
+	fcntl(ttyfd, F_DUPFD, 0);
+	fcntl(ttyfd, F_DUPFD, 0);
+	fcntl(ttyfd, F_DUPFD, 0);
+	if (ttyfd > 2)
+		  close(ttyfd);
+#ifdef BSD_TTY
+	ioctl(0, TIOCSPGRP, (char *)&pgid);
+        setpgrp (0, pgid);
+#endif /* BSD_TTY */
+	set_ttymodes();
+	setgid(getgid());
+	setuid(uid);
+	execvp(command,argv);
+	perror("Could not execute command");
+	quit(1);
+
 }
 
 /*  Run the command in a subprocess and return a file descriptor for the
@@ -562,7 +586,7 @@ int run_command(char * command, char ** argv)
 	assert(command);
 	assert(argv);
 
-	int ptyfd, ttyfd;
+	fd_t ptyfd, ttyfd;
 	if ((tty_name = get_pseudo_tty(&ptyfd,&ttyfd)) == NULL)
 		return(-1);
 
@@ -579,57 +603,9 @@ int run_command(char * command, char ** argv)
 #ifdef DEBUG
 	fprintf(stderr, "command: %s, pid: %d\n", command, comm_pid);
 #endif//DEBUG
-	if (comm_pid == 0) {
-		struct group *gr;
-		pid_t pgid;
-
-		if ((pgid = setsid()) < 0)
-			perror("failed to start session");
-
-		/*  Having started a new session, we need to establish
-		 *  a controlling teletype for it.  On some systems
-		 *  this can be done with an ioctl but on others
-		 *  we need to re-open the slave tty.
-		 */
-#ifdef SCTTY_IOCTL
-		(void)ioctl(ttyfd,TIOCSCTTY,0);
-#else /* !SCTTY_IOCTL */
-		int i = ttyfd;
-		if ((ttyfd = open(tty_name,O_RDWR)) < 0) {
-			fprintf(stderr, "Can't open teletype %s\n",tty_name);
-			return(-1);
-		}
-		close(i);
-#endif /* !SCTTY_IOCTL */
-		int uid, gid;
-		uid = getuid();
-		if ((gr = getgrnam("tty")) != NULL)
-			gid = gr->gr_gid;
-		else
-			gid = -1;
-		fchown(ttyfd,uid,gid);
-		fchmod(ttyfd, 0620);
-		for (i = 0; i < jbxvt.com.width; i++)
-			if (i != ttyfd)
-				close(i);
-		// for stdin, stderr, stdout:
-		fcntl(ttyfd, F_DUPFD, 0);
-		fcntl(ttyfd, F_DUPFD, 0);
-		fcntl(ttyfd, F_DUPFD, 0);
-		if (ttyfd > 2)
-			close(ttyfd);
-#ifdef BSD_TTY
-		ioctl(0, TIOCSPGRP, (char *)&pgid);
-                setpgrp (0, pgid);
-#endif /* BSD_TTY */
-		set_ttymodes();
-		setgid(getgid());
-		setuid(uid);
-		argv[0] = command;
-		execvp(command,argv);
-		perror("Could not execute command");
-		quit(1);
-	}
+	argv[0] = command;
+	if (comm_pid == 0)
+		  child(command, argv, ttyfd);
 	signal(SIGCHLD,catch_child);
 	write_utmp();
 	return(ptyfd);

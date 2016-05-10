@@ -4,6 +4,7 @@
 #include "jbxvt.h"
 #include "screen.h"
 #include "selection.h"
+#include "show_selection.h"
 #include "slinest.h"
 #include "xvt.h"
 
