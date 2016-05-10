@@ -114,7 +114,7 @@ void scr_erase_screen(int mode)
 	    case ENTIRE :
 		y = MARGIN;
 		height = jbxvt.scr.chars.height * jbxvt.X.font_height;
-		if (screen == &screen1)
+		if (screen == &jbxvt.scr.s1)
 			scroll1(jbxvt.scr.chars.height);
 		else
 			for (i = 0; i < jbxvt.scr.chars.height; i++) {

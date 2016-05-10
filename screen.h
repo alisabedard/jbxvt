@@ -57,7 +57,7 @@ enum { END, START, ENTIRE };
 
 // Globals:
 
-extern struct screenst screen1, screen2, *screen;
+extern struct screenst *screen;
 
 void home_screen(void);
 int16_t is_string_char(int16_t c);
@@ -68,7 +68,8 @@ void scr_change_screen(const uint8_t direction);
 void scr_delete_lines(int);
 
 //  Return the width and height of the screen.
-void scr_get_size(uint16_t * restrict width_p, uint16_t * restrict height_p);
+void scr_get_size(uint16_t * restrict width_p,
+	uint16_t * restrict height_p);
 
 void scr_index(void);
 void scr_init(const unsigned int saved_lines);

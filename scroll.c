@@ -67,7 +67,7 @@ void scroll(int16_t row1, int16_t row2, int8_t count)
 	struct slinest *sl;
 
 
-	if (row1 == 0 && screen == &screen1 && count > 0) {
+	if (row1 == 0 && screen == &jbxvt.scr.s1 && count > 0) {
 		save_top_lines(count);
 		for (int16_t i = jbxvt.scr.sline.max - count - 1; i >= 0; i--) {
 			jbxvt.scr.sline.data[i + count] = jbxvt.scr.sline.data[i];
@@ -198,7 +198,7 @@ static uint8_t get_count(const uint8_t count, uint8_t * restrict n)
 	return count - *n;
 }
 
-/*  Scroll screen1 up by count lines saving lines as needed.  This is used
+/*  Scroll jbxvt.scr.s1 up by count lines saving lines as needed.  This is used
  *  after the screen size is reduced.
  */
 void scroll1(uint8_t count)
@@ -226,8 +226,8 @@ void scroll1(uint8_t count)
 			jbxvt.scr.sline.data[i + n] = jbxvt.scr.sline.data[i];
 		}
 		for (uint8_t i = 0; i < n; i++) {
-			s = screen1.text[i];
-			r = screen1.rend[i];
+			s = jbxvt.scr.s1.text[i];
+			r = jbxvt.scr.s1.rend[i];
 			int16_t j;
 			for (j = jbxvt.scr.chars.width - 1; j >= 0 && s[j] == 0; j--)
 				;
@@ -251,18 +251,18 @@ void scroll1(uint8_t count)
 
 		uint16_t j = 0;
 		for (uint8_t i = 0; i < n; i++, j++) {
-			save[i] = screen1.text[j];
-			rend[i] = screen1.rend[j];
+			save[i] = jbxvt.scr.s1.text[j];
+			rend[i] = jbxvt.scr.s1.rend[j];
 		}
 		for (; j < jbxvt.scr.chars.height; j++) {
-			screen1.text[j - n] = screen1.text[j];
-			screen1.rend[j - n] = screen1.rend[j];
+			jbxvt.scr.s1.text[j - n] = jbxvt.scr.s1.text[j];
+			jbxvt.scr.s1.rend[j - n] = jbxvt.scr.s1.rend[j];
 		}
 		for (uint8_t i = 0; i < n; i++) {
 			memset(save[i],0,jbxvt.scr.chars.width + 1);
-			screen1.text[jbxvt.scr.chars.height - i - 1] = save[i];
+			jbxvt.scr.s1.text[jbxvt.scr.chars.height - i - 1] = save[i];
 			memset(rend[i],0,jbxvt.scr.chars.width + 1);
-			screen1.rend[jbxvt.scr.chars.height - i - 1] = rend[i];
+			jbxvt.scr.s1.rend[jbxvt.scr.chars.height - i - 1] = rend[i];
 		}
 	}
 }

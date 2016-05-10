@@ -2,6 +2,7 @@
 #define JBXVT_H
 
 #include "command.h"
+#include "screenst.h"
 #include "selst.h"
 #include "slinest.h"
 
@@ -31,7 +32,8 @@ struct JBXVT {
 	struct {
 		int32_t offset; // current vert saved line
 		uint32_t rstyle; // render style
-		struct {
+		//struct screenst * screen;
+		struct { 
 			struct slinest **data; // saved lines
 			uint16_t max; // max # of saved lines
 			uint16_t top; /* high water mark
@@ -43,6 +45,7 @@ struct JBXVT {
 		struct {
 			uint8_t width, height;
 		} chars;
+		struct screenst s1, s2;
 	} scr;
 	struct {
 		unsigned char * text;

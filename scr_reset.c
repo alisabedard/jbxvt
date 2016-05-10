@@ -54,34 +54,34 @@ void scr_reset(void)
 			memset(r1[y],0,cw + 1);
 			memset(r2[y],0,cw + 1);
 		}
-		if (screen1.text != NULL) {
+		if (jbxvt.scr.s1.text != NULL) {
 
 			/*  Now fill up the screen from the old screen
 			    and saved lines.  */
-			if (screen1.row >= ch) {
+			if (jbxvt.scr.s1.row >= ch) {
 				/* scroll up to save any lines that will be lost.
 				 */
-				scroll1(screen1.row - ch + 1);
-				screen1.row = ch - 1;
+				scroll1(jbxvt.scr.s1.row - ch + 1);
+				jbxvt.scr.s1.row = ch - 1;
 			}
 			/* calculate working no. of lines.
 			 */
-			i = jbxvt.scr.sline.top + screen1.row + 1;
+			i = jbxvt.scr.sline.top + jbxvt.scr.s1.row + 1;
 			j = i > ch ? ch - 1 : i - 1;
-			i = screen1.row;
-			screen1.row = j;
+			i = jbxvt.scr.s1.row;
+			jbxvt.scr.s1.row = j;
 			onscreen = 1;
 			for (; j >= 0; j--) {
 				if (onscreen) {
 					n = cw < jbxvt.scr.chars.width ? cw : jbxvt.scr.chars.width;
-					memcpy(s1[j],screen1.text[i],n);
-					memcpy(s2[j],screen2.text[i],n);
-					memcpy(r1[j],screen1.rend[i],n);
-					memcpy(r2[j],screen2.rend[i],n);
-					s1[j][cw] = screen1.text[i][jbxvt.scr.chars.width];
-					s2[j][cw] = screen2.text[i][jbxvt.scr.chars.width];
-					r1[j][cw] = screen1.rend[i][jbxvt.scr.chars.width];
-					r2[j][cw] = screen2.rend[i][jbxvt.scr.chars.width];
+					memcpy(s1[j],jbxvt.scr.s1.text[i],n);
+					memcpy(s2[j],jbxvt.scr.s2.text[i],n);
+					memcpy(r1[j],jbxvt.scr.s1.rend[i],n);
+					memcpy(r2[j],jbxvt.scr.s2.rend[i],n);
+					s1[j][cw] = jbxvt.scr.s1.text[i][jbxvt.scr.chars.width];
+					s2[j][cw] = jbxvt.scr.s2.text[i][jbxvt.scr.chars.width];
+					r1[j][cw] = jbxvt.scr.s1.rend[i][jbxvt.scr.chars.width];
+					r2[j][cw] = jbxvt.scr.s2.rend[i][jbxvt.scr.chars.width];
 					i--;
 					if (i < 0) {
 						onscreen = 0;
@@ -115,33 +115,33 @@ void scr_reset(void)
 			jbxvt.scr.sline.top -= i;
 
 			for (y = 0; y < jbxvt.scr.chars.height; y++) {
-				free(screen1.text[y]);
-				free(screen2.text[y]);
-				free(screen1.rend[y]);
-				free(screen2.rend[y]);
+				free(jbxvt.scr.s1.text[y]);
+				free(jbxvt.scr.s2.text[y]);
+				free(jbxvt.scr.s1.rend[y]);
+				free(jbxvt.scr.s2.rend[y]);
 			}
-			free((void *)screen1.text);
-			free((void *)screen2.text);
-			free((void *)screen1.rend);
-			free((void *)screen2.rend);
+			free((void *)jbxvt.scr.s1.text);
+			free((void *)jbxvt.scr.s2.text);
+			free((void *)jbxvt.scr.s1.rend);
+			free((void *)jbxvt.scr.s2.rend);
 		}
-		screen1.text = s1;
-		screen2.text = s2;
-		screen1.rend = r1;
-		screen2.rend = r2;
+		jbxvt.scr.s1.text = s1;
+		jbxvt.scr.s2.text = s2;
+		jbxvt.scr.s1.rend = r1;
+		jbxvt.scr.s2.rend = r2;
 
 		jbxvt.scr.chars.width = cw;
 		jbxvt.scr.chars.height = ch;
 		jbxvt.scr.pixels.width = width;
 		jbxvt.scr.pixels.height = height;
-		screen1.tmargin = 0;
-		screen1.bmargin = jbxvt.scr.chars.height - 1;
-		screen1.decom = 0;
-		screen1.wrap_next = 0;
-		screen2.tmargin = 0;
-		screen2.bmargin = jbxvt.scr.chars.height - 1;
-		screen2.decom = 0;
-		screen2.wrap_next = 0;
+		jbxvt.scr.s1.tmargin = 0;
+		jbxvt.scr.s1.bmargin = jbxvt.scr.chars.height - 1;
+		jbxvt.scr.s1.decom = 0;
+		jbxvt.scr.s1.wrap_next = 0;
+		jbxvt.scr.s2.tmargin = 0;
+		jbxvt.scr.s2.bmargin = jbxvt.scr.chars.height - 1;
+		jbxvt.scr.s2.decom = 0;
+		jbxvt.scr.s2.wrap_next = 0;
 		scr_start_selection(0,0,CHAR);
 	}
 	tty_set_size(jbxvt.scr.chars.width,jbxvt.scr.chars.height);

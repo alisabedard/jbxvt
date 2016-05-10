@@ -47,7 +47,7 @@
 #include <string.h>
 #include <sys/utsname.h>
 
-struct screenst screen1, screen2, *screen;
+struct screenst *screen;
 static struct screenst save_screen;
 
 
@@ -65,8 +65,8 @@ void scr_init(const unsigned int saved_lines)
 		* sizeof(struct slinest *));
 	for (uint16_t i = 0; i < jbxvt.scr.sline.max; i++)
 		jbxvt.scr.sline.data[i] = NULL;
-	screen1.wrap=screen2.wrap=1;
-	screen = &screen1;
+	jbxvt.scr.s1.wrap=jbxvt.scr.s2.wrap=1;
+	screen = &jbxvt.scr.s1;
 	jbxvt.X.font_width = XTextWidth(jbxvt.X.font,"M",1);
 	jbxvt.X.font_height = jbxvt.X.font->ascent + jbxvt.X.font->descent;
 	scr_reset();
@@ -90,7 +90,7 @@ void scr_bell(void)
 void scr_change_screen(const uint8_t direction)
 {
 	home_screen();
-	screen = (direction == HIGH) ? &screen2 : &screen1;
+	screen = (direction == HIGH) ? &jbxvt.scr.s2 : &jbxvt.scr.s1;
 	jbxvt.sel.end2.se_type = NOSEL;
 	repaint(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
 	cursor();
