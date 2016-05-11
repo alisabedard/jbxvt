@@ -609,13 +609,7 @@ int run_command(char * command, char ** argv)
 	fd_t ptyfd, ttyfd;
 	if ((tty_name = get_pseudo_tty(&ptyfd,&ttyfd)) == NULL)
 		return(-1);
-
-#ifdef NETBSD
 	fcntl(ptyfd,F_SETFL,O_NONBLOCK);
-#else
-	fcntl(ptyfd,F_SETFL,O_NDELAY);
-#endif
-
 	jbxvt.com.width = sysconf(_SC_OPEN_MAX);
 	for (uint8_t i = 1; i <= 15; i++)
 		signal(i,catch_sig);

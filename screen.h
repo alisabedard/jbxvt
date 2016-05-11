@@ -30,19 +30,16 @@
 
 #include "screenst.h"
 
-#include <stdbool.h>
 #include <stdint.h>
 #include <X11/Xlib.h>
 
-/*  flags for scr_move()
- */
+//  flags for scr_move()
 #define COL_RELATIVE	1	/* column movement is relative */
 #define ROW_RELATIVE	2	/* row movement is relative */
 
 #define MAX_SCROLL	50	/* max number of lines that can scroll at once */
 
-/*  arguments to the screen delete functions
- */
+//  arguments to the screen delete functions
 enum { END, START, ENTIRE };
 
 //  rendition style flags:
@@ -70,7 +67,7 @@ void scr_get_size(uint16_t * restrict width_p,
 void scr_index(void);
 void scr_init(const unsigned int saved_lines);
 void scr_insert_lines(int);
-void scr_move_by(int16_t y);
+void scr_move_by(const int16_t y);
 void scr_move_to(int16_t y);
 void scr_paste_primary(int,Window,Atom);
 void scr_report_display(void);
@@ -78,13 +75,6 @@ void scr_report_position(void);
 void scr_restore_cursor(void);
 void scr_rindex(void);
 void scr_save_cursor(void);
-void scr_set_decom(int);
-void scr_set_insert(int);
-void scr_set_margins(int,int);
-void scr_set_wrap(int);
-
-#ifdef DEBUG
-void scr_efill(void);
-#endif//DEBUG
+void scr_set_margins(int16_t top, int16_t bottom);
 
 #endif//!SCREEN_H

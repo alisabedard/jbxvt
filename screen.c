@@ -202,7 +202,9 @@ int count;
 	home_screen();
 	cursor();
 	while (count > MAX_SCROLL) {
-		scroll(jbxvt.scr.current->row,jbxvt.scr.current->bmargin,-MAX_SCROLL);
+		scroll(jbxvt.scr.current->row,
+			jbxvt.scr.current->bmargin,
+			-MAX_SCROLL);
 		count -= MAX_SCROLL;
 	}
 	scroll(jbxvt.scr.current->row,jbxvt.scr.current->bmargin,-count);
@@ -210,11 +212,8 @@ int count;
 	cursor();
 }
 
-/*  Attempt to set the top ans bottom scroll margins.
- */
-void
-scr_set_margins(top,bottom)
-int top, bottom;
+//  Attempt to set the top ans bottom scroll margins.
+void scr_set_margins(int16_t top, int16_t bottom)
 {
 	if (top < 0)
 		top = 0;
@@ -227,41 +226,6 @@ int top, bottom;
 	jbxvt.scr.current->bmargin = bottom;
 	scr_move(0,0,0);
 }
-
-//  Set or unset automatic wrapping.
-void scr_set_wrap(int mode)
-{
-	jbxvt.scr.current->wrap = mode == HIGH;
-}
-
-//  Set or unset margin origin mode.
-void scr_set_decom(int mode)
-{
-	jbxvt.scr.current->decom = mode == HIGH;
-	scr_move(0,0,0);
-}
-
-//  Set or unset automatic insert mode.
-void scr_set_insert(int mode)
-{
-	jbxvt.scr.current->insert = mode == HIGH;
-}
-
-#ifdef DEBUG
-//  Fill the screen with 'E's - useful for testing.
-void scr_efill(void)
-{
-	for (uint16_t y = 0; y < jbxvt.scr.chars.height; y++)
-		for (uint16_t x = 0; x < jbxvt.scr.chars.width; x++) {
-			jbxvt.scr.current->text[y][x] = 'E';
-			jbxvt.scr.current->rend[y][x] = 0;
-		}
-	home_screen();
-	check_selection(0,jbxvt.scr.chars.height - 1);
-	repaint(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
-	cursor();
-}
-#endif//DEBUG
 
 /*  Move the display so that line represented by scrollbar value y is at the top
  *  of the screen.
@@ -278,18 +242,11 @@ void scr_move_to(int16_t y)
 }
 
 //  Move the display by a distance represented by the value.
-void scr_move_by(int16_t y)
+void scr_move_by(const int16_t y)
 {
-	int n;
-
-	if (y >= 0){
-		y = (y - MARGIN) / jbxvt.X.font_height;
-		n = jbxvt.scr.offset - y;
-	} else {
-		y = (-y - MARGIN) / jbxvt.X.font_height;
-		n = jbxvt.scr.offset + y;
-	}
-	change_offset(n);
+	change_offset(y >= 0
+		? jbxvt.scr.offset - (y - MARGIN) / jbxvt.X.font_height
+		: jbxvt.scr.offset + (-y - MARGIN) / jbxvt.X.font_height);
 }
 
 

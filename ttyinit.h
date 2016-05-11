@@ -34,7 +34,7 @@
 
 void quit(int) __attribute__((noreturn));
 #ifdef TIOCSWINSZ
-void tty_set_size(const int width,const int height);
+void tty_set_size(const int width, const int height);
 #else//!TIOCSWINSZ
 #define tty_set_size(w, h)
 #endif//TIOCSWINSZ

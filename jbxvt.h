@@ -30,7 +30,7 @@ struct JBXVT {
 		} color;
 	} X;
 	struct {
-		int32_t offset; // current vert saved line
+		int16_t offset; // current vert saved line
 		uint32_t rstyle; // render style
 		struct screenst * current;
 		struct { 

@@ -68,19 +68,19 @@ static enum ModeValue handle_reset(struct tokenst * restrict token)
 			set_cur_keys(mode);
 			break;
 		case 6 :
-			scr_set_decom(mode);
+			jbxvt.scr.current->decom = mode == HIGH;
 			break;
 		case 7 :
-			scr_set_wrap(mode);
+			jbxvt.scr.current->wrap = mode == HIGH;
 			break;
-		case 47 :		/* switch to main screen */
+		case 47: // switch to main screen
 			scr_change_screen(mode);
 			break;
 		}
 	} else if (token->tk_private == 0) {
 		switch (token->tk_arg[0]) {
-		    case 4 :
-			scr_set_insert(mode);
+		case 4 :
+			jbxvt.scr.current->insert = mode == HIGH;
 			break;
 		}
 	}
@@ -341,8 +341,10 @@ app_loop_head:
 		break;
 #ifdef DEBUG
 	case TK_DECSWH :		/* ESC # digit */
+#if 0
 		if (token.tk_arg[0] == '8')
 			  scr_efill();	/* fill screen with Es */
+#endif
 		break;
 #endif//DEBUG
 	case TK_DECSC :
