@@ -13,6 +13,8 @@ introduces many code cleanups.
 * uses smallest appropriate stdint types
 * build system rewrite vs xvt
 
-## Bugs
+## Known Issues
+* colors are lost on redraw
 Jbxvt is a work in progress, please report all bugs!
+
 
