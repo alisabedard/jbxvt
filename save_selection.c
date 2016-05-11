@@ -73,7 +73,7 @@ int8_t save_selection(void)
 			if (--col2 < 0)
 				break;
 			len = jbxvt.scr.chars.width;
-			s = convert_line(screen->text[i],&len,col1,col2);
+			s = convert_line(jbxvt.scr.current->text[i],&len,col1,col2);
 			str = (unsigned char *)realloc(str,total + len);
 			if (str == NULL)
 				abort();

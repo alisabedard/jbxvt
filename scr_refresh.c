@@ -36,8 +36,8 @@ void scr_refresh(int x, int y, int width, int height)
 	if (row2 >= jbxvt.scr.chars.height)
 		row2 = jbxvt.scr.chars.height - 1;
 	repaint(row1,row2,col1,col2);
-	if (screen->row >= row1 && screen->row <= row2 &&
-	    screen->col >= col1 && screen->col <= col2)
+	if (jbxvt.scr.current->row >= row1 && jbxvt.scr.current->row <= row2 &&
+	    jbxvt.scr.current->col >= col1 && jbxvt.scr.current->col <= col2)
 		cursor();
 }
 

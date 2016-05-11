@@ -32,7 +32,7 @@ void scr_reset(void)
 	int16_t cw = (width - 2 * MARGIN) / jbxvt.X.font_width;
 	int16_t ch = (height - 2 * MARGIN) / jbxvt.X.font_height;
 
-	if (screen->text == NULL || cw != jbxvt.scr.chars.width || ch != jbxvt.scr.chars.height) {
+	if (jbxvt.scr.current->text == NULL || cw != jbxvt.scr.chars.width || ch != jbxvt.scr.chars.height) {
 
 		jbxvt.scr.offset = 0;
 		/*  Recreate the screen backup arrays.
@@ -146,10 +146,10 @@ void scr_reset(void)
 	}
 	tty_set_size(jbxvt.scr.chars.width,jbxvt.scr.chars.height);
 
-	if (screen->col >= jbxvt.scr.chars.width)
-		screen->col = jbxvt.scr.chars.width - 1;
-	if (screen->row >= jbxvt.scr.chars.height)
-		screen->row = jbxvt.scr.chars.height - 1;
+	if (jbxvt.scr.current->col >= jbxvt.scr.chars.width)
+		jbxvt.scr.current->col = jbxvt.scr.chars.width - 1;
+	if (jbxvt.scr.current->row >= jbxvt.scr.chars.height)
+		jbxvt.scr.current->row = jbxvt.scr.chars.height - 1;
 	sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1, jbxvt.scr.offset,
 		jbxvt.scr.offset + jbxvt.scr.chars.height - 1);
 	repaint(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);

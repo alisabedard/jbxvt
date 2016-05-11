@@ -12,41 +12,41 @@ void scr_move(int x, int y, int relative)
 {
 	home_screen();
 	cursor();
-	screen->col = (relative & COL_RELATIVE) ? screen->col + x : x;
-	if (screen->col < 0)
-		screen->col = 0;
-	if (screen->col >= jbxvt.scr.chars.width)
-		screen->col = jbxvt.scr.chars.width - 1;
+	jbxvt.scr.current->col = (relative & COL_RELATIVE) ? jbxvt.scr.current->col + x : x;
+	if (jbxvt.scr.current->col < 0)
+		jbxvt.scr.current->col = 0;
+	if (jbxvt.scr.current->col >= jbxvt.scr.chars.width)
+		jbxvt.scr.current->col = jbxvt.scr.chars.width - 1;
 
 	if (relative & ROW_RELATIVE) {
 		if (y > 0) {
-			if (screen->row <= screen->bmargin
-				&& screen->row + y > screen->bmargin)
-				screen->row = screen->bmargin;
+			if (jbxvt.scr.current->row <= jbxvt.scr.current->bmargin
+				&& jbxvt.scr.current->row + y > jbxvt.scr.current->bmargin)
+				jbxvt.scr.current->row = jbxvt.scr.current->bmargin;
 			else
-				screen->row += y;
+				jbxvt.scr.current->row += y;
 		} else if (y < 0) {
-			if (screen->row >= screen->tmargin
-				&& screen->row + y < screen->tmargin)
-				screen->row = screen->tmargin;
+			if (jbxvt.scr.current->row >= jbxvt.scr.current->tmargin
+				&& jbxvt.scr.current->row + y < jbxvt.scr.current->tmargin)
+				jbxvt.scr.current->row = jbxvt.scr.current->tmargin;
 			else
-				screen->row += y;
+				jbxvt.scr.current->row += y;
 		}
 	} else {
-		if (screen->decom) {
-			screen->row = y + screen->tmargin;
-			if (screen->row > screen->bmargin)
-				screen->row = screen->bmargin;
+		if (jbxvt.scr.current->decom) {
+			jbxvt.scr.current->row = y + jbxvt.scr.current->tmargin;
+			if (jbxvt.scr.current->row > jbxvt.scr.current->bmargin)
+				jbxvt.scr.current->row = jbxvt.scr.current->bmargin;
 		} else
-			screen->row = y;
+			jbxvt.scr.current->row = y;
 	}
-	if (screen->row < 0)
-		screen->row = 0;
-	if (screen->row >= jbxvt.scr.chars.height)
-		screen->row = jbxvt.scr.chars.height - 1;
+	if (jbxvt.scr.current->row < 0)
+		jbxvt.scr.current->row = 0;
+	if (jbxvt.scr.current->row >= jbxvt.scr.chars.height)
+		jbxvt.scr.current->row = jbxvt.scr.chars.height - 1;
 
-	screen->wrap_next = 0;
-	check_selection(screen->row,screen->row);
+	jbxvt.scr.current->wrap_next = 0;
+	check_selection(jbxvt.scr.current->row,jbxvt.scr.current->row);
 	cursor();
 }
 

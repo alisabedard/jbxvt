@@ -67,7 +67,7 @@ void scroll(int16_t row1, int16_t row2, int8_t count)
 	struct slinest *sl;
 
 
-	if (row1 == 0 && screen == &jbxvt.scr.s1 && count > 0) {
+	if (row1 == 0 && jbxvt.scr.current == &jbxvt.scr.s1 && count > 0) {
 		save_top_lines(count);
 		for (int16_t i = jbxvt.scr.sline.max - count - 1; i >= 0; i--) {
 			jbxvt.scr.sline.data[i + count] = jbxvt.scr.sline.data[i];
@@ -75,8 +75,8 @@ void scroll(int16_t row1, int16_t row2, int8_t count)
 			set_selend_index(i, count, &jbxvt.sel.end2);
 		}
 		for (uint8_t i = 0; i < count; i++) {
-			unsigned char * s = screen->text[i];
-			unsigned char * r = screen->rend[i];
+			unsigned char * s = jbxvt.scr.current->text[i];
+			unsigned char * r = jbxvt.scr.current->rend[i];
 			int16_t j;
 			for (j = jbxvt.scr.chars.width - 1; j >= 0 && s[j] == 0; j--)
 				;
@@ -106,8 +106,8 @@ void scroll(int16_t row1, int16_t row2, int8_t count)
 	if (count > 0) {
 		int16_t j = row1;
 		for (uint8_t i = 0; i < count; i++, j++) {
-			save[i] = screen->text[j];
-			rend[i] = screen->rend[j];
+			save[i] = jbxvt.scr.current->text[j];
+			rend[i] = jbxvt.scr.current->rend[j];
 			if (jbxvt.sel.end1.se_type == SCREENSEL && jbxvt.sel.end1.se_index == j) {
 				show_selection(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
 				jbxvt.sel.end1.se_type = NOSEL;
@@ -119,8 +119,8 @@ void scroll(int16_t row1, int16_t row2, int8_t count)
 		}
 		row2++;
 		for (; j < row2; j++) {
-			screen->text[j - count] = screen->text[j];
-			screen->rend[j - count] = screen->rend[j];
+			jbxvt.scr.current->text[j - count] = jbxvt.scr.current->text[j];
+			jbxvt.scr.current->rend[j - count] = jbxvt.scr.current->rend[j];
 			if (jbxvt.sel.end1.se_type == SCREENSEL && jbxvt.sel.end1.se_index == j)
 				jbxvt.sel.end1.se_index = j - count;
 			if (jbxvt.sel.end2.se_type == SCREENSEL && jbxvt.sel.end2.se_index == j)
@@ -128,9 +128,9 @@ void scroll(int16_t row1, int16_t row2, int8_t count)
 		}
 		for (uint8_t i = 0; i < count; i++) {
 			memset(save[i],0,jbxvt.scr.chars.width + 1);
-			screen->text[row2 - i - 1] = save[i];
+			jbxvt.scr.current->text[row2 - i - 1] = save[i];
 			memset(rend[i],0,jbxvt.scr.chars.width + 1);
-			screen->rend[row2 - i - 1] = rend[i];
+			jbxvt.scr.current->rend[row2 - i - 1] = rend[i];
 		}
 		if (count < row2 - row1) {
 			y2 = MARGIN + row1 * jbxvt.X.font_height;
@@ -149,8 +149,8 @@ void scroll(int16_t row1, int16_t row2, int8_t count)
 		count = -count;
 		int16_t j = row2 - 1;
 		for (uint8_t i = 0; i < count; i++, j--) {
-			save[i] = screen->text[j];
-			rend[i] = screen->rend[j];
+			save[i] = jbxvt.scr.current->text[j];
+			rend[i] = jbxvt.scr.current->rend[j];
 			if (jbxvt.sel.end1.se_type == SCREENSEL && jbxvt.sel.end1.se_index == j) {
 				show_selection(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
 				jbxvt.sel.end1.se_type = NOSEL;
@@ -161,8 +161,8 @@ void scroll(int16_t row1, int16_t row2, int8_t count)
 			}
 		}
 		for (; j >= row1; j--) {
-			screen->text[j + count] = screen->text[j];
-			screen->rend[j + count] = screen->rend[j];
+			jbxvt.scr.current->text[j + count] = jbxvt.scr.current->text[j];
+			jbxvt.scr.current->rend[j + count] = jbxvt.scr.current->rend[j];
 			if (jbxvt.sel.end1.se_type == SCREENSEL && jbxvt.sel.end1.se_index == j)
 				jbxvt.sel.end1.se_index = j + count;
 			if (jbxvt.sel.end2.se_type == SCREENSEL && jbxvt.sel.end2.se_index == j)
@@ -170,9 +170,9 @@ void scroll(int16_t row1, int16_t row2, int8_t count)
 		}
 		for (uint8_t i = 0; i < count; i++) {
 			memset(save[i],0,jbxvt.scr.chars.width + 1);
-			screen->text[row1 + i] = save[i];
+			jbxvt.scr.current->text[row1 + i] = save[i];
 			memset(rend[i],0,jbxvt.scr.chars.width + 1);
-			screen->rend[row1 + i] = rend[i];
+			jbxvt.scr.current->rend[row1 + i] = rend[i];
 		}
 		if (count < row2 - row1) {
 			y1 = MARGIN + row1 * jbxvt.X.font_height;

@@ -115,7 +115,7 @@ void fix_rc(int16_t * restrict rowp, int16_t * restrict colp)
 		int i = (row - jbxvt.scr.offset);
 		unsigned char * s;
 		if (i >= 0) {
-			s = screen->text[i];
+			s = jbxvt.scr.current->text[i];
 			if (col > 0 && s[col - 1] < ' ')
 				while (col < jbxvt.scr.chars.width && s[col] < ' ')
 					col++;
@@ -202,7 +202,7 @@ void adjust_selection(struct selst * restrict include)
 	}
 	if (selection_unit == WORD) {
 		unsigned char * s = se1->se_type == SCREENSEL
-			? screen->text[se1->se_index]
+			? jbxvt.scr.current->text[se1->se_index]
 			: jbxvt.scr.sline.data[se1->se_index]->sl_text;
 		static const int char_class[256] = {
 			32,   1,   1,   1,   1,   1,   1,   1,
@@ -247,7 +247,7 @@ void adjust_selection(struct selst * restrict include)
 			  i++;
 		int16_t len;
 		if (se2->se_type == SCREENSEL) {
-			s = screen->text[se2->se_index];
+			s = jbxvt.scr.current->text[se2->se_index];
 			len = jbxvt.scr.chars.width;
 		} else {
 			s = jbxvt.scr.sline.data[se2->se_index]->sl_text;

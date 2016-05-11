@@ -109,7 +109,7 @@ void repaint(int row1, int row2, int col1, int col2)
 	 */
 	i = jbxvt.scr.offset > row1 ? 0 : row1 - jbxvt.scr.offset;
 	for (; y <= row2; y++, i++) {
-		s = screen->text[i];
+		s = jbxvt.scr.current->text[i];
 		m = col1 - 1;
 		for (x = col1; x <= col2; x++)
 			if (s[x] < ' ')
@@ -120,8 +120,8 @@ void repaint(int row1, int row2, int col1, int col2)
 			}
 		m++;
 		m -= col1;
-		r = screen->rend[i][jbxvt.scr.chars.width] == 0
-			? NULL : screen->rend[i] + col1;
+		r = jbxvt.scr.current->rend[i][jbxvt.scr.chars.width] == 0
+			? NULL : jbxvt.scr.current->rend[i] + col1;
 		paint_rvec_text(str,r,m,x1,y1);
 		x2 = x1 + m * jbxvt.X.font_width;
 		width = (col2 - col1 + 1 - m) * jbxvt.X.font_width;

@@ -47,9 +47,7 @@
 #include <string.h>
 #include <sys/utsname.h>
 
-struct screenst *screen;
 static struct screenst save_screen;
-
 
 /*  Perform any initialisation on the screen data structures.  Called just once
  *  at startup.  saved_lines is the number of saved lines.
@@ -66,7 +64,7 @@ void scr_init(const unsigned int saved_lines)
 	for (uint16_t i = 0; i < jbxvt.scr.sline.max; i++)
 		jbxvt.scr.sline.data[i] = NULL;
 	jbxvt.scr.s1.wrap=jbxvt.scr.s2.wrap=1;
-	screen = &jbxvt.scr.s1;
+	jbxvt.scr.current = &jbxvt.scr.s1;
 	jbxvt.X.font_width = XTextWidth(jbxvt.X.font,"M",1);
 	jbxvt.X.font_height = jbxvt.X.font->ascent + jbxvt.X.font->descent;
 	scr_reset();
@@ -90,7 +88,8 @@ void scr_bell(void)
 void scr_change_screen(const uint8_t direction)
 {
 	home_screen();
-	screen = (direction == HIGH) ? &jbxvt.scr.s2 : &jbxvt.scr.s1;
+	jbxvt.scr.current = (direction == HIGH)
+		? &jbxvt.scr.s2 : &jbxvt.scr.s1;
 	jbxvt.sel.end2.se_type = NOSEL;
 	repaint(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
 	cursor();
@@ -124,12 +123,12 @@ void scr_index(void)
 {
 	home_screen();
 	cursor();
-	if (screen->row == screen->bmargin)
-		scroll(screen->tmargin,screen->bmargin,1);
+	if (jbxvt.scr.current->row == jbxvt.scr.current->bmargin)
+		scroll(jbxvt.scr.current->tmargin,jbxvt.scr.current->bmargin,1);
 	else
-		screen->row++;
-	screen->wrap_next = 0;
-	check_selection(screen->row,screen->row);
+		jbxvt.scr.current->row++;
+	jbxvt.scr.current->wrap_next = 0;
+	check_selection(jbxvt.scr.current->row,jbxvt.scr.current->row);
 	cursor();
 }
 
@@ -138,20 +137,20 @@ void scr_rindex(void)
 {
 	home_screen();
 	cursor();
-	if (screen->row == screen->tmargin)
-		scroll(screen->tmargin,screen->bmargin,-1);
+	if (jbxvt.scr.current->row == jbxvt.scr.current->tmargin)
+		scroll(jbxvt.scr.current->tmargin,jbxvt.scr.current->bmargin,-1);
 	else
-		screen->row--;
-	screen->wrap_next = 0;
-	check_selection(screen->row,screen->row);
+		jbxvt.scr.current->row--;
+	jbxvt.scr.current->wrap_next = 0;
+	check_selection(jbxvt.scr.current->row,jbxvt.scr.current->row);
 	cursor();
 }
 
 //  Save the cursor position and rendition style.
 void scr_save_cursor(void)
 {
-	save_screen.row = screen->row;
-	save_screen.col = screen->col;
+	save_screen.row = jbxvt.scr.current->row;
+	save_screen.col = jbxvt.scr.current->col;
 	jbxvt.opt.save_rstyle = jbxvt.scr.rstyle;
 }
 
@@ -159,12 +158,12 @@ void scr_save_cursor(void)
 void scr_restore_cursor(void)
 {
 	cursor();
-	screen->row = save_screen.row;
-	if (screen->row >= jbxvt.scr.chars.height)
-		screen->row = jbxvt.scr.chars.height - 1;
-	screen->col = save_screen.col;
-	if (screen->col >= jbxvt.scr.chars.width)
-		screen->col = jbxvt.scr.chars.width - 1;
+	jbxvt.scr.current->row = save_screen.row;
+	if (jbxvt.scr.current->row >= jbxvt.scr.chars.height)
+		jbxvt.scr.current->row = jbxvt.scr.chars.height - 1;
+	jbxvt.scr.current->col = save_screen.col;
+	if (jbxvt.scr.current->col >= jbxvt.scr.chars.width)
+		jbxvt.scr.current->col = jbxvt.scr.chars.width - 1;
 	scr_change_rendition(jbxvt.opt.save_rstyle);
 	cursor();
 }
@@ -174,17 +173,17 @@ void
 scr_delete_lines(count)
 int count;
 {
-	if (count > screen->bmargin - screen->row + 1)
+	if (count > jbxvt.scr.current->bmargin - jbxvt.scr.current->row + 1)
 		return;
 
 	home_screen();
 	cursor();
 	while (count > MAX_SCROLL) {
-		scroll(screen->row,screen->bmargin,MAX_SCROLL);
+		scroll(jbxvt.scr.current->row,jbxvt.scr.current->bmargin,MAX_SCROLL);
 		count -= MAX_SCROLL;
 	}
-	scroll(screen->row,screen->bmargin,count);
-	screen->wrap_next = 0;
+	scroll(jbxvt.scr.current->row,jbxvt.scr.current->bmargin,count);
+	jbxvt.scr.current->wrap_next = 0;
 	cursor();
 }
 
@@ -195,19 +194,19 @@ void
 scr_insert_lines(count)
 int count;
 {
-	if (screen->row > screen->bmargin)
+	if (jbxvt.scr.current->row > jbxvt.scr.current->bmargin)
 		return;
-	if (count > screen->bmargin - screen->row + 1)
-		count = screen->bmargin - screen->row + 1;
+	if (count > jbxvt.scr.current->bmargin - jbxvt.scr.current->row + 1)
+		count = jbxvt.scr.current->bmargin - jbxvt.scr.current->row + 1;
 
 	home_screen();
 	cursor();
 	while (count > MAX_SCROLL) {
-		scroll(screen->row,screen->bmargin,-MAX_SCROLL);
+		scroll(jbxvt.scr.current->row,jbxvt.scr.current->bmargin,-MAX_SCROLL);
 		count -= MAX_SCROLL;
 	}
-	scroll(screen->row,screen->bmargin,-count);
-	screen->wrap_next = 0;
+	scroll(jbxvt.scr.current->row,jbxvt.scr.current->bmargin,-count);
+	jbxvt.scr.current->wrap_next = 0;
 	cursor();
 }
 
@@ -224,28 +223,28 @@ int top, bottom;
 	if (top > bottom)
 		return;
 
-	screen->tmargin = top;
-	screen->bmargin = bottom;
+	jbxvt.scr.current->tmargin = top;
+	jbxvt.scr.current->bmargin = bottom;
 	scr_move(0,0,0);
 }
 
 //  Set or unset automatic wrapping.
 void scr_set_wrap(int mode)
 {
-	screen->wrap = mode == HIGH;
+	jbxvt.scr.current->wrap = mode == HIGH;
 }
 
 //  Set or unset margin origin mode.
 void scr_set_decom(int mode)
 {
-	screen->decom = mode == HIGH;
+	jbxvt.scr.current->decom = mode == HIGH;
 	scr_move(0,0,0);
 }
 
 //  Set or unset automatic insert mode.
 void scr_set_insert(int mode)
 {
-	screen->insert = mode == HIGH;
+	jbxvt.scr.current->insert = mode == HIGH;
 }
 
 #ifdef DEBUG
@@ -254,8 +253,8 @@ void scr_efill(void)
 {
 	for (uint16_t y = 0; y < jbxvt.scr.chars.height; y++)
 		for (uint16_t x = 0; x < jbxvt.scr.chars.width; x++) {
-			screen->text[y][x] = 'E';
-			screen->rend[y][x] = 0;
+			jbxvt.scr.current->text[y][x] = 'E';
+			jbxvt.scr.current->rend[y][x] = 0;
 		}
 	home_screen();
 	check_selection(0,jbxvt.scr.chars.height - 1);
@@ -312,7 +311,8 @@ void scr_report_display(void)
 //  Report the current cursor position.
 void scr_report_position(void)
 {
-	cprintf("\033[%d;%dR",screen->row + 1,screen->col + 1);
+	cprintf("\033[%d;%dR",jbxvt.scr.current->row + 1,
+		jbxvt.scr.current->col + 1);
 }
 
 //  Reposition the scrolled text so that the scrollbar is at the bottom.

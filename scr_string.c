@@ -24,75 +24,75 @@ void scr_string(unsigned char * restrict str, int len, int nlcount)
 	home_screen();
 	cursor();
 	if (nlcount > 0) {
-		if (screen->row > screen->bmargin)
+		if (jbxvt.scr.current->row > jbxvt.scr.current->bmargin)
 			nlcount = 0;
 		else
-			nlcount -= screen->bmargin - screen->row;
+			nlcount -= jbxvt.scr.current->bmargin - jbxvt.scr.current->row;
 		if (nlcount < 0)
 			nlcount = 0;
-		else if (nlcount > screen->row - screen->tmargin)
-			nlcount = screen->row - screen->tmargin;
+		else if (nlcount > jbxvt.scr.current->row - jbxvt.scr.current->tmargin)
+			nlcount = jbxvt.scr.current->row - jbxvt.scr.current->tmargin;
 		if (nlcount > MAX_SCROLL)
 			nlcount = MAX_SCROLL;
-		scroll(screen->tmargin,screen->bmargin,nlcount);
-		screen->row -= nlcount;
+		scroll(jbxvt.scr.current->tmargin,jbxvt.scr.current->bmargin,nlcount);
+		jbxvt.scr.current->row -= nlcount;
 	}
 	while (len > 0) {
 		if (*str == '\n') {
-			if (screen->row == screen->bmargin)
-				scroll(screen->tmargin,screen->bmargin,1);
-			else if (screen->row < jbxvt.scr.chars.height - 1)
-				screen->row++;
-			check_selection(screen->row,screen->row);
-			screen->wrap_next = 0;
+			if (jbxvt.scr.current->row == jbxvt.scr.current->bmargin)
+				scroll(jbxvt.scr.current->tmargin,jbxvt.scr.current->bmargin,1);
+			else if (jbxvt.scr.current->row < jbxvt.scr.chars.height - 1)
+				jbxvt.scr.current->row++;
+			check_selection(jbxvt.scr.current->row,jbxvt.scr.current->row);
+			jbxvt.scr.current->wrap_next = 0;
 			len--;
 			str++;
 			continue;
 		}
 		if (*str == '\r') {
-			screen->col = 0;
-			screen->wrap_next = 0;
+			jbxvt.scr.current->col = 0;
+			jbxvt.scr.current->wrap_next = 0;
 			len--;
 			str++;
 			continue;
 		}
 		if (*str == '\t') {
-			if (screen->col < jbxvt.scr.chars.width - 1) {
-				s = screen->text[screen->row];
-				if (s[screen->col] == 0)
-					s[screen->col] = '\t';
-				screen->col++;
-				while (screen->col % 8 != 0
-					&& screen->col < jbxvt.scr.chars.width - 1)
-					screen->col++;
+			if (jbxvt.scr.current->col < jbxvt.scr.chars.width - 1) {
+				s = jbxvt.scr.current->text[jbxvt.scr.current->row];
+				if (s[jbxvt.scr.current->col] == 0)
+					s[jbxvt.scr.current->col] = '\t';
+				jbxvt.scr.current->col++;
+				while (jbxvt.scr.current->col % 8 != 0
+					&& jbxvt.scr.current->col < jbxvt.scr.chars.width - 1)
+					jbxvt.scr.current->col++;
 			}
 			len--;
 			str++;
 			continue;
 		}
-		if (screen->wrap_next) {
-			screen->text[screen->row][jbxvt.scr.chars.width] = 1;
-			if (screen->row == screen->bmargin)
-				scroll(screen->tmargin,screen->bmargin,1);
-			else if (screen->row < jbxvt.scr.chars.height - 1)
-				screen->row++;
-			screen->col = 0;
-			screen->wrap_next = 0;
+		if (jbxvt.scr.current->wrap_next) {
+			jbxvt.scr.current->text[jbxvt.scr.current->row][jbxvt.scr.chars.width] = 1;
+			if (jbxvt.scr.current->row == jbxvt.scr.current->bmargin)
+				scroll(jbxvt.scr.current->tmargin,jbxvt.scr.current->bmargin,1);
+			else if (jbxvt.scr.current->row < jbxvt.scr.chars.height - 1)
+				jbxvt.scr.current->row++;
+			jbxvt.scr.current->col = 0;
+			jbxvt.scr.current->wrap_next = 0;
 		}
-		check_selection(screen->row,screen->row);
-		x = MARGIN + jbxvt.X.font_width * screen->col;
-		y = MARGIN + jbxvt.X.font_height * screen->row;
+		check_selection(jbxvt.scr.current->row,jbxvt.scr.current->row);
+		x = MARGIN + jbxvt.X.font_width * jbxvt.scr.current->col;
+		y = MARGIN + jbxvt.X.font_height * jbxvt.scr.current->row;
 		for (n = 0; str[n] >= ' '; n++)
 			;
-		n = n + screen->col > jbxvt.scr.chars.width ? jbxvt.scr.chars.width - screen->col : n;
-		if (screen->insert) {
-			s = screen->text[screen->row];
-			r = screen->rend[screen->row];
-			for (i = jbxvt.scr.chars.width - 1; i >= screen->col + n; i--) {
+		n = n + jbxvt.scr.current->col > jbxvt.scr.chars.width ? jbxvt.scr.chars.width - jbxvt.scr.current->col : n;
+		if (jbxvt.scr.current->insert) {
+			s = jbxvt.scr.current->text[jbxvt.scr.current->row];
+			r = jbxvt.scr.current->rend[jbxvt.scr.current->row];
+			for (i = jbxvt.scr.chars.width - 1; i >= jbxvt.scr.current->col + n; i--) {
 				s[i] = s[i - n];
 				r[i] = r[i - n];
 			}
-			width = (jbxvt.scr.chars.width - screen->col - n) * jbxvt.X.font_width;
+			width = (jbxvt.scr.chars.width - jbxvt.scr.current->col - n) * jbxvt.X.font_width;
 			x2 = x + n * jbxvt.X.font_width;
 			if (width > 0) {
 				XCopyArea(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.win.vt,jbxvt.X.gc.tx,
@@ -102,35 +102,35 @@ void scr_string(unsigned char * restrict str, int len, int nlcount)
 		}
 
 		paint_rval_text(str,jbxvt.scr.rstyle,n,x,y);
-		memcpy(screen->text[screen->row] + screen->col,str,n);
+		memcpy(jbxvt.scr.current->text[jbxvt.scr.current->row] + jbxvt.scr.current->col,str,n);
 		if (jbxvt.scr.rstyle == 0)
-			memset(screen->rend[screen->row] + screen->col,0,n);
+			memset(jbxvt.scr.current->rend[jbxvt.scr.current->row] + jbxvt.scr.current->col,0,n);
 		else {
 			for (i = 0; i < n; i++)
-				screen->rend[screen->row][screen->col + i] = jbxvt.scr.rstyle;
-			screen->rend[screen->row][jbxvt.scr.chars.width] = 1;
+				jbxvt.scr.current->rend[jbxvt.scr.current->row][jbxvt.scr.current->col + i] = jbxvt.scr.rstyle;
+			jbxvt.scr.current->rend[jbxvt.scr.current->row][jbxvt.scr.chars.width] = 1;
 		}
 		len -= n;
 		str += n;
-		screen->col += n;
-		if (len > 0 && screen->col == jbxvt.scr.chars.width && *str >= ' ') {
-			if (screen->wrap) {
-				screen->text[screen->row][jbxvt.scr.chars.width] = 1;
-				if (screen->row == screen->bmargin)
-					scroll(screen->tmargin,screen->bmargin,1);
+		jbxvt.scr.current->col += n;
+		if (len > 0 && jbxvt.scr.current->col == jbxvt.scr.chars.width && *str >= ' ') {
+			if (jbxvt.scr.current->wrap) {
+				jbxvt.scr.current->text[jbxvt.scr.current->row][jbxvt.scr.chars.width] = 1;
+				if (jbxvt.scr.current->row == jbxvt.scr.current->bmargin)
+					scroll(jbxvt.scr.current->tmargin,jbxvt.scr.current->bmargin,1);
 				else
-					screen->row++;
-				screen->col = 0;
+					jbxvt.scr.current->row++;
+				jbxvt.scr.current->col = 0;
 			} else {
-				screen->col = jbxvt.scr.chars.width - 1;
+				jbxvt.scr.current->col = jbxvt.scr.chars.width - 1;
 				cursor();
 				return;
 			}
 		}
 	}
-	if (screen->col == jbxvt.scr.chars.width) {
-		screen->col = jbxvt.scr.chars.width - 1;
-		screen->wrap_next = screen->wrap;
+	if (jbxvt.scr.current->col == jbxvt.scr.chars.width) {
+		jbxvt.scr.current->col = jbxvt.scr.chars.width - 1;
+		jbxvt.scr.current->wrap_next = jbxvt.scr.current->wrap;
 	}
 	cursor();
 }

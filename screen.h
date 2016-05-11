@@ -55,10 +55,6 @@ enum { END, START, ENTIRE };
 #define RS_LOW		(1<<5) // low intensity
 #define RS_ITALIC	(1<<6)
 
-// Globals:
-
-extern struct screenst *screen;
-
 void home_screen(void);
 int16_t is_string_char(int16_t c);
 void scr_backspace(void);

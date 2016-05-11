@@ -32,7 +32,7 @@ struct JBXVT {
 	struct {
 		int32_t offset; // current vert saved line
 		uint32_t rstyle; // render style
-		//struct screenst * screen;
+		struct screenst * current;
 		struct { 
 			struct slinest **data; // saved lines
 			uint16_t max; // max # of saved lines
