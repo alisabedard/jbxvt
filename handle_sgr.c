@@ -39,43 +39,111 @@ void handle_sgr(struct tokenst * restrict token)
 			scr_change_rendition(RS_RVID);
 			break;
 			// FG Colors:
-		case 30: set_fg("black"); break;
-		case 31: set_fg("red3"); break;
-		case 32: set_fg("green3"); break;
-		case 33: set_fg("yellow3"); break;
-		case 34: set_fg("blue3"); break;
-		case 35: set_fg("magenta3"); break;
-		case 36: set_fg("cyan3"); break;
-		case 37: set_fg("grey90"); break;
-		case 39: reset_fg(); break;
-			 // BG Colors:
-		case 40: set_bg("black"); break;
-		case 41: set_bg("red3"); break;
-		case 42: set_bg("green3"); break;
-		case 43: set_bg("yellow3"); break;
-		case 44: set_bg("blue3"); break;
-		case 45: set_bg("magenta3"); break;
-		case 46: set_bg("cyan3"); break;
-		case 47: set_bg("grey90"); break;
-		case 49: reset_bg(); break;
+		case 30: 
+			scr_change_rendition(RS_F0);
+ 			break;
+		case 31:
+			scr_change_rendition(RS_F1);
+			break;
+		case 32:
+			scr_change_rendition(RS_F2);
+			break;
+		case 33:
+			scr_change_rendition(RS_F3);
+			break;
+		case 34:
+			scr_change_rendition(RS_F4);
+			break;
+		case 35:
+			scr_change_rendition(RS_F5);
+			break;
+		case 36:
+			scr_change_rendition(RS_F6);
+			break;
+		case 37:
+			scr_change_rendition(RS_F7);
+			break;
+		case 39:
+			scr_change_rendition(RS_FR);
+			break;
+			// BG Colors:
+		case 40:
+			scr_change_rendition(RS_B0);
+			break;
+		case 41:
+			scr_change_rendition(RS_B1);
+			break;
+		case 42:
+			scr_change_rendition(RS_B2);
+			break;
+		case 43:
+			scr_change_rendition(RS_B3);
+			break;
+		case 44:
+			scr_change_rendition(RS_B4);
+			break;
+		case 45:
+			scr_change_rendition(RS_B5);
+			break;
+		case 46:
+			scr_change_rendition(RS_B6);
+			break;
+		case 47:
+			scr_change_rendition(RS_B7);
+			break;
+		case 49: 
+			scr_change_rendition(RS_BR);
+			break;
 			// Bright FG Colors:
-		case 90: set_fg("grey"); break;
-		case 91: set_fg("red"); break;
-		case 92: set_fg("green"); break;
-		case 93: set_fg("yellow"); break;
-		case 94: set_fg("blue"); break;
-		case 95: set_fg("magenta"); break;
-		case 96: set_fg("cyan"); break;
-		case 97: set_fg("white"); break;
-			// Bright BG Colors:
-		case 100: set_bg("grey"); break;
-		case 101: set_bg("red"); break;
-		case 102: set_bg("green"); break;
-		case 103: set_bg("yellow"); break;
-		case 104: set_bg("blue"); break;
-		case 105: set_bg("magenta"); break;
-		case 106: set_bg("cyan"); break;
-		case 107: set_bg("white"); break;
+		case 90:
+			scr_change_rendition(RS_BF|RS_F0);
+			break;
+		case 91:
+			scr_change_rendition(RS_BF|RS_F1);
+			break;
+		case 92:
+			scr_change_rendition(RS_BF|RS_F2);
+			break;
+		case 93:
+			scr_change_rendition(RS_BF|RS_F3);
+			break;
+		case 94:
+			scr_change_rendition(RS_BF|RS_F4);
+			break;
+		case 95:
+			scr_change_rendition(RS_BF|RS_F5);
+			break;
+		case 96:
+			scr_change_rendition(RS_BF|RS_F6);
+			break;
+		case 97:
+			scr_change_rendition(RS_BF|RS_F7);
+			break;
+			// Bright BG BColors:
+		case 100:
+			scr_change_rendition(RS_BB|RS_B0);
+			break;
+		case 101:
+			scr_change_rendition(RS_BB|RS_B1);
+			break;
+		case 102:
+			scr_change_rendition(RS_BB|RS_B2);
+			break;
+		case 103:
+			scr_change_rendition(RS_BB|RS_B3);
+			break;
+		case 104:
+			scr_change_rendition(RS_BB|RS_B4);
+			break;
+		case 105:
+			scr_change_rendition(RS_BB|RS_B5);
+			break;
+		case 106:
+			scr_change_rendition(RS_BB|RS_B6);
+			break;
+		case 107:
+			scr_change_rendition(RS_BB|RS_B7);
+			break;
 
 		default:
 			// reset_color();

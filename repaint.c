@@ -1,6 +1,6 @@
 #include "repaint.h"
 
-
+#include "color.h"
 #include "jbxvt.h"
 #include "screen.h"
 #include "selection.h"
@@ -9,44 +9,121 @@
 #include "xvt.h"
 
 #include <stdlib.h>
-#include <X11/Xlib.h>
 
 // ascii value representing a pound in at least some fonts:
 enum { POUND = 036 };
 
-/*  Paint the text using the rendition value at the screen position.
- */
+
+static void set_rval_colors(const uint32_t rval)
+{
+	// normal foregrounds:
+	if (rval & RS_F0)
+		  set_fg(COLOR_0);
+	else if (rval & RS_F1)
+		  set_fg(COLOR_1);
+	else if (rval & RS_F2)
+		  set_fg(COLOR_2);
+	else if (rval & RS_F3)
+		  set_fg(COLOR_3);
+	else if (rval & RS_F4)
+		  set_fg(COLOR_4);
+	else if (rval & RS_F5)
+		  set_fg(COLOR_5);
+	else if (rval & RS_F6)
+		  set_fg(COLOR_6);
+	else if (rval & RS_F7)
+		  set_fg(COLOR_7);
+	else if (rval & RS_FR)
+		  reset_fg();
+	else if (rval & RS_BF) {
+		// bright foregrounds:
+		if (rval & RS_F0)
+		  	  set_fg(BCOLOR_0);
+		else if (rval & RS_F1)
+		  	  set_fg(BCOLOR_1);
+		else if (rval & RS_F2)
+		  	  set_fg(BCOLOR_2);
+		else if (rval & RS_F3)
+		  	  set_fg(BCOLOR_3);
+		else if (rval & RS_F4)
+		  	  set_fg(BCOLOR_4);
+		else if (rval & RS_F5)
+		  	  set_fg(BCOLOR_5);
+		else if (rval & RS_F6)
+		  	  set_fg(BCOLOR_6);
+		else if (rval & RS_F7)
+		  	  set_fg(BCOLOR_7);
+	}
+	// normal backgrounds:
+	if (rval & RS_B0)
+		  set_bg(COLOR_0);
+	else if (rval & RS_B1)
+		  set_bg(COLOR_1);
+	else if (rval & RS_B2)
+		  set_bg(COLOR_2);
+	else if (rval & RS_B3)
+		  set_bg(COLOR_3);
+	else if (rval & RS_B4)
+		  set_bg(COLOR_4);
+	else if (rval & RS_B5)
+		  set_bg(COLOR_5);
+	else if (rval & RS_B6)
+		  set_bg(COLOR_6);
+	else if (rval & RS_B7)
+		  set_bg(COLOR_7);
+	else if (rval & RS_BR)
+		  reset_bg();
+	else if (rval & RS_BB) {
+		// bright backgrounds:
+		if (rval & RS_B0)
+		  	  set_bg(BCOLOR_0);
+		else if (rval & RS_B1)
+		  	  set_bg(BCOLOR_1);
+		else if (rval & RS_B2)
+		  	  set_bg(BCOLOR_2);
+		else if (rval & RS_B3)
+		  	  set_bg(BCOLOR_3);
+		else if (rval & RS_B4)
+		  	  set_bg(BCOLOR_4);
+		else if (rval & RS_B5)
+		  	  set_bg(BCOLOR_5);
+		else if (rval & RS_B6)
+		  	  set_bg(BCOLOR_6);
+		else if (rval & RS_B7)
+		  	  set_bg(BCOLOR_7);
+	}
+}
+
+//  Paint the text using the rendition value at the screen position.
 void paint_rval_text(unsigned char * str, uint32_t rval,
 	int len, int x, int y)
 {
-	bool overstrike = false;
+	XGCValues v;
+	set_rval_colors(rval);
+	XGetGCValues(jbxvt.X.dpy, jbxvt.X.gc.tx,
+		GCForeground|GCBackground, &v);
+	if (rval & RS_RVID) { // Reverse looked up colors.
+		XSetForeground(jbxvt.X.dpy, jbxvt.X.gc.tx, v.background);
+		XSetBackground(jbxvt.X.dpy, jbxvt.X.gc.tx, v.foreground);
+	}
+	const bool overstrike=(rval & RS_BOLD);
+	y+= jbxvt.X.font->ascent;
 
-	if (rval & RS_RVID) {
-		XSetForeground(jbxvt.X.dpy,jbxvt.X.gc.tx,jbxvt.X.color.bg);
-		XSetBackground(jbxvt.X.dpy,jbxvt.X.gc.tx,jbxvt.X.color.fg);
-	}
-	if (rval & RS_BOLD) {
-			overstrike = true;
-			y +=  jbxvt.X.font->ascent;
-			XSetFont(jbxvt.X.dpy,jbxvt.X.gc.tx,jbxvt.X.font->fid);
-	} else {
-		overstrike=false;
-		y +=  jbxvt.X.font->ascent;
-	}
+	// Draw text with background:
 	XDrawImageString(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.tx,x,y,
 		(const char *)str,len);
-	if (overstrike)
+	if (overstrike) // Fake bold:
 		  XDrawString(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.tx,x + 1,y,
 				(const char *)str,len);
-	y++;
+	y++; // Advance for underline.
 	if (rval & RS_ULINE)
 		XDrawLine(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.tx,
 			x,y,x + len * jbxvt.X.font_width,y);
-
-	if (rval & RS_RVID) {
-		XSetForeground(jbxvt.X.dpy,jbxvt.X.gc.tx,jbxvt.X.color.fg);
-		XSetBackground(jbxvt.X.dpy,jbxvt.X.gc.tx,jbxvt.X.color.bg);
+	if (rval & RS_RVID) { // Undo reversal.
+		XSetForeground(jbxvt.X.dpy, jbxvt.X.gc.tx, v.foreground);
+		XSetBackground(jbxvt.X.dpy, jbxvt.X.gc.tx, v.background);
 	}
+
 }
 
 /* Display the string using the rendition vector at the screen coordinates

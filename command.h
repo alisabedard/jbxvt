@@ -57,7 +57,6 @@ void push_xevent(struct xeventst *);
 void send_string(unsigned char *,int);
 void set_cur_keys(int);
 void set_kp_keys(int);
-void set_sun_function_keys(int);
 
 #ifdef TK_DEBUG
 void show_token(struct tokenst *);

@@ -221,31 +221,20 @@ void init_command(char * command, char ** argv)
 	init_cmdtok();
 }
 
-/*  Set the current cursor keys mode.
- */
+//  Set the current cursor keys mode.
 void set_cur_keys(const int mode)
 {
 	app_cur_keys = (mode == HIGH);
 }
 
-/*  Set the current keypad keys mode.
- */
+//  Set the current keypad keys mode.
 void set_kp_keys(const int mode)
 {
 	app_kp_keys = (mode == HIGH);
 }
 
-/*  Enable or disable the use of Sun function key mapping.
- */
-void set_sun_function_keys(const int value)
-{
-	sun_function_keys = value;
-}
-
-/*  Look up function key keycode
-*/
-static char *
-get_keycode_value(struct keymapst * restrict keymaptable,
+//  Look up function key keycode
+static char * get_keycode_value(struct keymapst * restrict keymaptable,
 	KeySym keysym, char * buf, const int use_alternate)
 {
 	struct keymapst *km;
@@ -278,32 +267,32 @@ get_keycode_value(struct keymapst * restrict keymaptable,
 	return NULL;
 }
 
+static char * get_s(const KeySym keysym, char * restrict kbuf)
+{
+	if (IsFunctionKey(keysym) || IsMiscFunctionKey(keysym)
+		|| keysym == XK_Next || keysym == XK_Prior)
+		return get_keycode_value(func_key_table,keysym,
+			kbuf,sun_function_keys);
+	else if (IsCursorKey(keysym) || IsPFKey(keysym))
+		return get_keycode_value(other_key_table,keysym,
+			kbuf,app_cur_keys);
+	return get_keycode_value(kp_key_table,keysym,
+		kbuf,app_kp_keys);
+}
+
 /*  Convert the keypress event into a string.
  */
 unsigned char * lookup_key(XEvent * restrict ev, int * restrict pcount)
 {
 	KeySym keysym;
-	int count;
 	static char kbuf[KBUFSIZE];
-	char *s;
-	unsigned char *str;
 
-	count = XLookupString(&ev->xkey,kbuf,KBUFSIZE,&keysym,NULL);
-	s = NULL;
-
-	if (IsFunctionKey(keysym) || IsMiscFunctionKey(keysym)
-					|| keysym == XK_Next || keysym == XK_Prior)
-		s = get_keycode_value(func_key_table,keysym,kbuf,sun_function_keys);
-	else if (IsCursorKey(keysym) || IsPFKey(keysym))
-		s = get_keycode_value(other_key_table,keysym,kbuf,app_cur_keys);
-	else
-		s = get_keycode_value(kp_key_table,keysym,kbuf,app_kp_keys);
-
-	if (s != NULL) {
-		*pcount = strlen((char *)s);
-		str = (unsigned char *)s;
+	const int count = XLookupString(&ev->xkey,kbuf,KBUFSIZE,&keysym,NULL);
+	char *s = get_s(keysym, kbuf);
+	if (s) {
+		*pcount = strlen(s);
+ 	       	return (unsigned char *)s;
 	} else {
-		str = (unsigned char *)kbuf;
 		if ((ev->xkey.state & Mod1Mask) && (count == 1)) {
 			if (is_eightbit()) {
 				kbuf[0] |= 0200;
@@ -315,8 +304,8 @@ unsigned char * lookup_key(XEvent * restrict ev, int * restrict pcount)
 			}
 		} else
 			*pcount = count;
+		return (unsigned char *)kbuf;
 	}
-	return (str);
 }
 
 /*  Push an input character back into the input queue.
