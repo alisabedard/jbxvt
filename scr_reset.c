@@ -1,21 +1,16 @@
 #include "scr_reset.h"
 
 #include "cursor.h"
-
 #include "jbxvt.h"
 #include "repaint.h"
 #include "sbar.h"
-#include "screen.h"
-#include "screenst.h"
 #include "scroll.h"
 #include "selection.h"
-#include "slinest.h"
 #include "ttyinit.h"
 #include "xvt.h"
 
 #include <stdlib.h>
 #include <string.h>
-#include <X11/Xlib.h>
 
 /*  Reset the screen - called whenever the screen needs to be repaired completely.
  */
@@ -32,7 +27,8 @@ void scr_reset(void)
 	int16_t cw = (width - 2 * MARGIN) / jbxvt.X.font_width;
 	int16_t ch = (height - 2 * MARGIN) / jbxvt.X.font_height;
 
-	if (jbxvt.scr.current->text == NULL || cw != jbxvt.scr.chars.width || ch != jbxvt.scr.chars.height) {
+	if (jbxvt.scr.current->text == NULL || cw != jbxvt.scr.chars.width
+		|| ch != jbxvt.scr.chars.height) {
 
 		jbxvt.scr.offset = 0;
 		/*  Recreate the screen backup arrays.
