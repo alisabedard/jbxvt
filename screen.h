@@ -34,13 +34,17 @@
 #include <X11/Xlib.h>
 
 //  flags for scr_move()
-#define COL_RELATIVE	1	/* column movement is relative */
-#define ROW_RELATIVE	2	/* row movement is relative */
+enum ScrMoveFlags {
+	COL_RELATIVE = 1, // column movement is relative
+	ROW_RELATIVE = 2  // row movement is relative
+};
 
-#define MAX_SCROLL	50	/* max number of lines that can scroll at once */
+enum {
+	MAX_SCROLL = 50 // max # lines that can scroll at once
+};
 
 //  arguments to the screen delete functions
-enum { END, START, ENTIRE };
+enum ScrDelArg { END, START, ENTIRE };
 
 //  rendition style flags:
 #define RS_NONE	0		/* Normal */
