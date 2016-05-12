@@ -3,7 +3,8 @@
 
 #include <stdint.h>
 
-void scroll(int16_t row1, int16_t row2, int8_t count);
+void scroll(const uint8_t row1, const uint8_t row2,
+	const int8_t count);
 
 void scroll1(uint8_t count);
 

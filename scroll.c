@@ -57,8 +57,11 @@ static void set_selend_index(const uint8_t i, const uint8_t count,
 		  s->se_index = i + count;
 }
 
-static void scroll_up(int8_t row1, int8_t row2, int8_t count)
+static void scroll_up(uint8_t row1, uint8_t row2, int8_t count)
 {
+#ifdef DEBUG
+	printf("count: %d, row1: %d, row2: %d\n", count, row1, row2);
+#endif//DEBUG
 	if (row1 == 0 && jbxvt.scr.current == &jbxvt.scr.s1) {
 		save_top_lines(count);
 		for (int16_t i = jbxvt.scr.sline.max - count - 1;
@@ -153,7 +156,7 @@ static void scroll_up(int8_t row1, int8_t row2, int8_t count)
 		0,y1,jbxvt.scr.pixels.width,height,False);
 }
 
-static void scroll_down(int8_t row1, int8_t row2, int8_t count)
+static void scroll_down(uint8_t row1, uint8_t row2, int8_t count)
 {
 	count = -count;
 	int16_t j = row2 - 1;
@@ -213,7 +216,7 @@ static void scroll_down(int8_t row1, int8_t row2, int8_t count)
  *  scrolling is up for a +ve count and down for a -ve count.
  *  count is limited to a maximum of MAX_SCROLL lines.
  */
-void scroll(int16_t row1, int16_t row2, int8_t count)
+void scroll(const uint8_t row1, const uint8_t row2, const int8_t count)
 {
 	if(count<0) {
 		scroll_down(row1, row2, count);
@@ -234,7 +237,7 @@ static uint8_t get_count(const uint8_t count, uint8_t * restrict n)
 /*  Scroll jbxvt.scr.s1 up by count lines saving lines as needed.  This is used
  *  after the screen size is reduced.
  */
-void scroll1(uint8_t count)
+void scroll1(uint8_t count) // unsigned as only going up
 {
 	uint8_t n;
 	unsigned char *save[MAX_SCROLL], *rend[MAX_SCROLL];
