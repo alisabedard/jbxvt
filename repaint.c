@@ -10,10 +10,6 @@
 
 #include <stdlib.h>
 
-// ascii value representing a pound in at least some fonts:
-enum { POUND = 036 };
-
-
 static void set_rval_colors(const uint32_t rval)
 {
 	// normal foregrounds:
