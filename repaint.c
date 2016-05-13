@@ -10,6 +10,10 @@
 
 #include <stdlib.h>
 
+#ifdef DEBUG
+#include <stdio.h>
+#endif//DEBUG
+
 static void set_rval_colors(const uint32_t rval)
 {
 	// normal foregrounds:
@@ -92,7 +96,7 @@ static void set_rval_colors(const uint32_t rval)
 
 //  Paint the text using the rendition value at the screen position.
 void paint_rval_text(unsigned char * restrict str, uint32_t rval,
-	unsigned int len, int x, int y)
+	uint8_t len, int16_t x, int16_t y)
 {
 	set_rval_colors(rval);
 	XGCValues v;
@@ -116,7 +120,7 @@ void paint_rval_text(unsigned char * restrict str, uint32_t rval,
 			x,y,x + len * jbxvt.X.font_width,y);
 	reset_color();
 }
-#include <stdio.h>
+
 // Display the string using the rendition vector at the screen coordinates
 static void paint_rvec_text(unsigned char * str,
 	uint32_t * rvec, unsigned int len,
@@ -164,8 +168,8 @@ void repaint(int row1, int row2, int col1, int col2)
 		m -= col1;
 		for (unsigned int x = 0; x < m; x++)
 			str[x] = s[x + col1] < ' ' ? ' ' : s[x + col1];
-		uint32_t * r = !sl->sl_rend ? NULL : sl->sl_rend + col1;
-		paint_rvec_text(str,r,m,x1,y1);
+		paint_rvec_text(str,sl->sl_rend?sl->sl_rend+col1:NULL,
+			m,x1,y1);
 		const int x2 = x1 + m * jbxvt.X.font_width;
 		const unsigned int width = (col2 - col1 + 1 - m)
 			* jbxvt.X.font_width;
@@ -189,10 +193,16 @@ void repaint(int row1, int row2, int col1, int col2)
 			}
 		m++;
 		m -= col1;
+#if 0
 		uint32_t * r = jbxvt.scr.current->rend[i]
 			[jbxvt.scr.chars.width] == 0
 			? NULL : jbxvt.scr.current->rend[i] + col1;
 		paint_rvec_text(str,r,m,x1,y1);
+#endif
+		paint_rvec_text(str, jbxvt.scr.current->rend[i]
+			[jbxvt.scr.chars.width]
+			? jbxvt.scr.current->rend[i] + col1 : NULL,
+			m, x1, y1);
 		const int x2 = x1 + m * jbxvt.X.font_width;
 		const unsigned int width = (col2 - col1 + 1 - m)
 			* jbxvt.X.font_width;

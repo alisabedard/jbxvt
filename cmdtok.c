@@ -135,7 +135,7 @@ static int16_t get_com_char(const int8_t flags)
 			    default :
 				continue;
 			}
-			xe = (struct xeventst *)malloc(sizeof(struct xeventst));
+			xe = calloc(1, sizeof(struct xeventst));
 			xe->xe_type = event.type;
 			xe->xe_time = event.xselection.time;
 			xe->xe_detail = event.xfocus.detail;

@@ -3,6 +3,10 @@
 #include "color.h"
 #include "screen.h"
 
+#ifdef DEBUG_SGR
+#include <stdio.h>
+#endif//DEBUG_SGR
+
 void handle_sgr(struct tokenst * restrict token)
 {
 	if (token->tk_nargs == 0) {
@@ -10,16 +14,16 @@ void handle_sgr(struct tokenst * restrict token)
 		return;
 	}
 	for (uint8_t i = 0; i < token->tk_nargs; i++) {
-#ifdef DEBUG
+#ifdef DEBUG_SGR
 			fprintf(stderr, "tk_arg[%d]: %d\n", i,
 				token->tk_arg[i]);
-#endif//DEBUG
+#endif//DEBUG_SGR
 		switch (token->tk_arg[i]) {
 		case 0 :
 			scr_change_rendition(RS_NONE);
-#ifdef DEBUG
+#ifdef DEBUG_SGR
 			fprintf(stderr, "--RS_NONE--\n");
-#endif//DEBUG
+#endif//DEBUG_SGR
 			reset_color();
 			break;
 		case 1 :

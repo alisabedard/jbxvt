@@ -36,10 +36,10 @@ void scr_reset(void)
 		 *  the last byte is used as a flag which is non-zero of the
 		 *  line wrapped automatically.
 		 */
-		s1 = (unsigned char **)malloc(ch * sizeof(unsigned char *));
-		s2 = (unsigned char **)malloc(ch * sizeof(unsigned char *));
-		r1 = malloc(ch * sizeof(uint32_t *));
-		r2 = malloc(ch * sizeof(uint32_t *));
+		s1 = (unsigned char **)malloc(ch * sizeof(void*));
+		s2 = (unsigned char **)malloc(ch * sizeof(void*));
+		r1 = malloc(ch * sizeof(void*));
+		r2 = malloc(ch * sizeof(void*));
 		for (y = 0; y < ch; y++) {
 			s1[y] = calloc(cw + 1, 1);
 			s2[y] = calloc(cw + 1, 1);
@@ -68,8 +68,10 @@ void scr_reset(void)
 						? cw : jbxvt.scr.chars.width;
 					memcpy(s1[j],jbxvt.scr.s1.text[i],n);
 					memcpy(s2[j],jbxvt.scr.s2.text[i],n);
-					memcpy(r1[j],jbxvt.scr.s1.rend[i],n);
-					memcpy(r2[j],jbxvt.scr.s2.rend[i],n);
+					memcpy(r1[j],jbxvt.scr.s1.rend[i],
+						n * sizeof(uint32_t));
+					memcpy(r2[j],jbxvt.scr.s2.rend[i],
+						n * sizeof(uint32_t));
 					s1[j][cw]
 						= jbxvt.scr.s1.text[i]
 						[jbxvt.scr.chars.width];
@@ -95,12 +97,14 @@ void scr_reset(void)
 						? cw : sl->sl_length;
 					memcpy(s1[j],sl->sl_text,n);
 					free(sl->sl_text);
-					if (sl->sl_rend != NULL) {
-						memcpy(r1[j],sl->sl_rend,n);
+					if (sl->sl_rend) {
+						memcpy(r1[j],sl->sl_rend,
+							n*sizeof(uint32_t));
 						r1[j][cw] =
 							sl->sl_rend
 							[sl->sl_length];
 						free(sl->sl_rend);
+						sl->sl_rend=NULL;
 					}
 					free((void *)sl);
 					i++;
@@ -154,8 +158,6 @@ void scr_reset(void)
 	sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1,
 		jbxvt.scr.offset, jbxvt.scr.offset
 		+ jbxvt.scr.chars.height - 1);
-	/* The following causes rendition style colors to be lost
-	   or corrupted when the terminal window is clicked.  */
 	repaint(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
 	cursor();
 }

@@ -10,6 +10,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef DEBUG
+#include <stdio.h>
+#endif//DEBUG
+
 static void sel_scr_to_sav(struct selst * restrict s,
 	const int i, const int count)
 {
@@ -83,14 +87,14 @@ static void scroll_up(int row1, int row2, int count)
 				  ;
 			j++;
 			struct slinest *sl = malloc(sizeof(struct slinest));
-			sl->sl_text = (unsigned char *)malloc(j + 1);
+			sl->sl_text = malloc(j+1);
 			memcpy(sl->sl_text,s,j);
 			sl->sl_text[j] = s[jbxvt.scr.chars.width];
-			if (r[jbxvt.scr.chars.width] == 0)
+			if (!r[jbxvt.scr.chars.width])
 				  sl->sl_rend = NULL;
 			else {
-				sl->sl_rend = malloc(j + 1);
-				memcpy(sl->sl_rend,r,j);
+				sl->sl_rend = malloc((j + 1)*sizeof(uint32_t));
+				memcpy(sl->sl_rend,r,j*sizeof(uint32_t));
 			}
 			sl->sl_length = j;
 			jbxvt.scr.sline.data[count - i - 1] = sl;
@@ -139,7 +143,7 @@ static void scroll_up(int row1, int row2, int count)
 	for (int i = 0; i < count; i++) {
 		memset(save[i],0,jbxvt.scr.chars.width + 1);
 		jbxvt.scr.current->text[row2 - i - 1] = save[i];
-		memset(rend[i],0,jbxvt.scr.chars.width + 1);
+		memset(rend[i],0,(jbxvt.scr.chars.width + 1)*sizeof(uint32_t));
 		jbxvt.scr.current->rend[row2 - i - 1] = rend[i];
 	}
 	int y1;

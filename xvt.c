@@ -391,6 +391,8 @@ int main(int argc, char ** argv)
 {
 	char *command = NULL;
 	char **com_argv = NULL;
+	// Silence some valgrind warnings:
+	jbxvt.X.win.vt=jbxvt.X.win.sb=jbxvt.X.win.main=0;
 #ifdef DEBUG
 	printf("Size of tokenst: %lu\n", sizeof(struct tokenst));
 #endif//DEBUG
@@ -429,11 +431,7 @@ int main(int argc, char ** argv)
 	map_window();
 	char *shell_argv[2]; // here to not lose scope.
 	if(!command) {
-		command=getenv("SHELL");
-		assert(command);
-		shell_argv[0] = (char *)malloc(strlen(command) + 2);
-		sprintf(shell_argv[0],"%s%s",is_logshell() ? "-" : "",
-			command);
+		command = shell_argv[0] = getenv("SHELL");
 		shell_argv[1] = NULL;
 		com_argv = shell_argv;
 	}
