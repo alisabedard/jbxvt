@@ -19,7 +19,7 @@ void scr_string(unsigned char * restrict str, int len, int nlcount)
 {
 	int x, x2, y, n, i;
 	unsigned int width;
-	unsigned char *s, *r;
+	unsigned char *s;
 
 	home_screen();
 	cursor();
@@ -27,23 +27,31 @@ void scr_string(unsigned char * restrict str, int len, int nlcount)
 		if (jbxvt.scr.current->row > jbxvt.scr.current->bmargin)
 			nlcount = 0;
 		else
-			nlcount -= jbxvt.scr.current->bmargin - jbxvt.scr.current->row;
+			nlcount -= jbxvt.scr.current->bmargin
+				- jbxvt.scr.current->row;
 		if (nlcount < 0)
 			nlcount = 0;
-		else if (nlcount > jbxvt.scr.current->row - jbxvt.scr.current->tmargin)
-			nlcount = jbxvt.scr.current->row - jbxvt.scr.current->tmargin;
+		else if (nlcount > jbxvt.scr.current->row
+			- jbxvt.scr.current->tmargin)
+			nlcount = jbxvt.scr.current->row
+				- jbxvt.scr.current->tmargin;
 		if (nlcount > MAX_SCROLL)
 			nlcount = MAX_SCROLL;
-		scroll(jbxvt.scr.current->tmargin,jbxvt.scr.current->bmargin,nlcount);
+		scroll(jbxvt.scr.current->tmargin,
+			jbxvt.scr.current->bmargin,nlcount);
 		jbxvt.scr.current->row -= nlcount;
 	}
 	while (len > 0) {
 		if (*str == '\n') {
-			if (jbxvt.scr.current->row == jbxvt.scr.current->bmargin)
-				scroll(jbxvt.scr.current->tmargin,jbxvt.scr.current->bmargin,1);
-			else if (jbxvt.scr.current->row < jbxvt.scr.chars.height - 1)
+			if (jbxvt.scr.current->row
+				== jbxvt.scr.current->bmargin)
+				scroll(jbxvt.scr.current->tmargin,
+					jbxvt.scr.current->bmargin,1);
+			else if (jbxvt.scr.current->row
+				< jbxvt.scr.chars.height - 1)
 				jbxvt.scr.current->row++;
-			check_selection(jbxvt.scr.current->row,jbxvt.scr.current->row);
+			check_selection(jbxvt.scr.current->row,
+				jbxvt.scr.current->row);
 			jbxvt.scr.current->wrap_next = 0;
 			len--;
 			str++;
@@ -57,13 +65,16 @@ void scr_string(unsigned char * restrict str, int len, int nlcount)
 			continue;
 		}
 		if (*str == '\t') {
-			if (jbxvt.scr.current->col < jbxvt.scr.chars.width - 1) {
-				s = jbxvt.scr.current->text[jbxvt.scr.current->row];
+			if (jbxvt.scr.current->col
+				< jbxvt.scr.chars.width - 1) {
+				s = jbxvt.scr.current->text
+					[jbxvt.scr.current->row];
 				if (s[jbxvt.scr.current->col] == 0)
 					s[jbxvt.scr.current->col] = '\t';
 				jbxvt.scr.current->col++;
 				while (jbxvt.scr.current->col % 8 != 0
-					&& jbxvt.scr.current->col < jbxvt.scr.chars.width - 1)
+					&& jbxvt.scr.current->col
+					< jbxvt.scr.chars.width - 1)
 					jbxvt.scr.current->col++;
 			}
 			len--;
@@ -71,10 +82,14 @@ void scr_string(unsigned char * restrict str, int len, int nlcount)
 			continue;
 		}
 		if (jbxvt.scr.current->wrap_next) {
-			jbxvt.scr.current->text[jbxvt.scr.current->row][jbxvt.scr.chars.width] = 1;
-			if (jbxvt.scr.current->row == jbxvt.scr.current->bmargin)
-				scroll(jbxvt.scr.current->tmargin,jbxvt.scr.current->bmargin,1);
-			else if (jbxvt.scr.current->row < jbxvt.scr.chars.height - 1)
+			jbxvt.scr.current->text[jbxvt.scr.current->row]
+				[jbxvt.scr.chars.width] = 1;
+			if (jbxvt.scr.current->row
+				== jbxvt.scr.current->bmargin)
+				scroll(jbxvt.scr.current->tmargin,
+					jbxvt.scr.current->bmargin,1);
+			else if (jbxvt.scr.current->row
+				< jbxvt.scr.chars.height - 1)
 				jbxvt.scr.current->row++;
 			jbxvt.scr.current->col = 0;
 			jbxvt.scr.current->wrap_next = 0;
@@ -84,45 +99,61 @@ void scr_string(unsigned char * restrict str, int len, int nlcount)
 		y = MARGIN + jbxvt.X.font_height * jbxvt.scr.current->row;
 		for (n = 0; str[n] >= ' '; n++)
 			;
-		n = n + jbxvt.scr.current->col > jbxvt.scr.chars.width ? jbxvt.scr.chars.width - jbxvt.scr.current->col : n;
+		n = n + jbxvt.scr.current->col > jbxvt.scr.chars.width
+			? jbxvt.scr.chars.width - jbxvt.scr.current->col : n;
+		uint32_t *r;
 		if (jbxvt.scr.current->insert) {
 			s = jbxvt.scr.current->text[jbxvt.scr.current->row];
 			r = jbxvt.scr.current->rend[jbxvt.scr.current->row];
-			for (i = jbxvt.scr.chars.width - 1; i >= jbxvt.scr.current->col + n; i--) {
+			for (i = jbxvt.scr.chars.width - 1;
+				i >= jbxvt.scr.current->col + n; i--) {
 				s[i] = s[i - n];
 				r[i] = r[i - n];
 			}
-			width = (jbxvt.scr.chars.width - jbxvt.scr.current->col - n) * jbxvt.X.font_width;
+			width = (jbxvt.scr.chars.width
+				- jbxvt.scr.current->col - n)
+				* jbxvt.X.font_width;
 			x2 = x + n * jbxvt.X.font_width;
 			if (width > 0) {
-				XCopyArea(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.win.vt,jbxvt.X.gc.tx,
+				XCopyArea(jbxvt.X.dpy,jbxvt.X.win.vt,
+					jbxvt.X.win.vt,jbxvt.X.gc.tx,
 					x,y,width,jbxvt.X.font_height,x2,y);
 				repair_damage();
 			}
 		}
 
 		paint_rval_text(str,jbxvt.scr.rstyle,n,x,y);
-		memcpy(jbxvt.scr.current->text[jbxvt.scr.current->row] + jbxvt.scr.current->col,str,n);
+		memcpy(jbxvt.scr.current->text[jbxvt.scr.current->row]
+			+ jbxvt.scr.current->col,str,n);
 		if (jbxvt.scr.rstyle == 0)
-			memset(jbxvt.scr.current->rend[jbxvt.scr.current->row] + jbxvt.scr.current->col,0,n);
+			memset(jbxvt.scr.current->rend[jbxvt.scr.current->row]
+				+ jbxvt.scr.current->col,0,n);
 		else {
 			for (i = 0; i < n; i++)
-				jbxvt.scr.current->rend[jbxvt.scr.current->row][jbxvt.scr.current->col + i] = jbxvt.scr.rstyle;
-			jbxvt.scr.current->rend[jbxvt.scr.current->row][jbxvt.scr.chars.width] = 1;
+				jbxvt.scr.current->rend[jbxvt.scr.current->row]
+					[jbxvt.scr.current->col + i]
+					= jbxvt.scr.rstyle;
+			jbxvt.scr.current->rend[jbxvt.scr.current->row]
+				[jbxvt.scr.chars.width] = 1;
 		}
 		len -= n;
 		str += n;
 		jbxvt.scr.current->col += n;
-		if (len > 0 && jbxvt.scr.current->col == jbxvt.scr.chars.width && *str >= ' ') {
+		if (len > 0 && jbxvt.scr.current->col
+			== jbxvt.scr.chars.width && *str >= ' ') {
 			if (jbxvt.scr.current->wrap) {
-				jbxvt.scr.current->text[jbxvt.scr.current->row][jbxvt.scr.chars.width] = 1;
-				if (jbxvt.scr.current->row == jbxvt.scr.current->bmargin)
-					scroll(jbxvt.scr.current->tmargin,jbxvt.scr.current->bmargin,1);
+				jbxvt.scr.current->text[jbxvt.scr.current->row]
+					[jbxvt.scr.chars.width] = 1;
+				if (jbxvt.scr.current->row
+					== jbxvt.scr.current->bmargin)
+					scroll(jbxvt.scr.current->tmargin,
+						jbxvt.scr.current->bmargin,1);
 				else
 					jbxvt.scr.current->row++;
 				jbxvt.scr.current->col = 0;
 			} else {
-				jbxvt.scr.current->col = jbxvt.scr.chars.width - 1;
+				jbxvt.scr.current->col
+					= jbxvt.scr.chars.width - 1;
 				cursor();
 				return;
 			}

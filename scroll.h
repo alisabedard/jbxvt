@@ -3,9 +3,9 @@
 
 #include <stdint.h>
 
-void scroll(const uint8_t row1, const uint8_t row2,
-	const int8_t count);
+void scroll(const int row1, const int row2,
+	const int count);
 
-void scroll1(uint8_t count);
+void scroll1(int count);
 
 #endif//!JBXVT_SCROLL_H

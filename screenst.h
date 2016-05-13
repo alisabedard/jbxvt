@@ -8,9 +8,10 @@
  */
 struct screenst {
 	unsigned char **text;	/* backup copy of screen->text */
-	unsigned char **rend;	/* character rendition styles etc. */
-	int16_t row;	/* cursor position */
-	int16_t col;	/* ditto */
+	//unsigned char **rend;	/* character rendition styles etc. */
+	uint32_t **rend; // rendition styles
+	int row;	/* cursor position */
+	int col;	/* ditto */
 	int tmargin;	/* top scroll margin */
 	int bmargin;	/* bottom scroll margin */
 	bool decom:1;	/* origin mode flag */

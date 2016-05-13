@@ -32,6 +32,7 @@ struct JBXVT {
 	struct {
 		int16_t offset; // current vert saved line
 		uint32_t rstyle; // render style
+		uint32_t saved_rstyle; // saved render style
 		struct screenst * current;
 		struct { 
 			struct slinest **data; // saved lines
@@ -53,9 +54,6 @@ struct JBXVT {
 		struct selst end1, end2, // selection endpoints
 			     anchor; //selection anchor
 	} sel;
-	struct {
-		bool save_rstyle:1;
-	} opt;
 	struct {
 		unsigned char * send_nxt; // next char to be sent
 		int send_count; // # chars waiting to be sent

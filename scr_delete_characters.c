@@ -14,7 +14,6 @@
 void scr_delete_characters(int count)
 {
 	int x1, x2, y, width, i;
-	unsigned char *r, *s;
 
 	if (count > jbxvt.scr.chars.width - jbxvt.scr.current->col)
 		count = jbxvt.scr.chars.width - jbxvt.scr.current->col;
@@ -24,8 +23,8 @@ void scr_delete_characters(int count)
 	home_screen();
 	cursor();
 	check_selection(jbxvt.scr.current->row,jbxvt.scr.current->row);
-	s = jbxvt.scr.current->text[jbxvt.scr.current->row];
-	r = jbxvt.scr.current->rend[jbxvt.scr.current->row];
+	unsigned char * s = jbxvt.scr.current->text[jbxvt.scr.current->row];
+	uint32_t * r = jbxvt.scr.current->rend[jbxvt.scr.current->row];
 	for (i = jbxvt.scr.current->col + count; i < jbxvt.scr.chars.width; i++) {
 		s[i - count] = s[i];
 		r[i - count] = r[i];

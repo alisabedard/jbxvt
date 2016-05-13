@@ -11,7 +11,7 @@
 #include <string.h>
 
 static void sel_scr_to_sav(struct selst * restrict s,
-	const uint8_t i, const uint8_t count)
+	const int i, const int count)
 {
 	if (s->se_type == SCREENSEL && s->se_index == i) {
 		s->se_type = SAVEDSEL;
@@ -19,18 +19,21 @@ static void sel_scr_to_sav(struct selst * restrict s,
 	}
 }
 
-static void save_top_line(const uint8_t i)
+static void save_top_line(const int i)
 {
-	struct slinest * sl = jbxvt.scr.sline.data[jbxvt.scr.sline.max - i];
-	if(!sl) return;
-	free(sl->sl_text);
-	if (sl->sl_rend != NULL)
-		  free(sl->sl_rend);
-	free((void *)sl);
+	struct slinest ** s = &jbxvt.scr.sline.data[jbxvt.scr.sline.max - i];
+	if(*s) {
+		if((*s)->sl_rend) {
+			free((*s)->sl_rend);
+			(*s)->sl_rend = NULL;
+		}
+		free(*s);
+		*s = NULL;
+	}
 }
 
 static void save_top_lines_show_selection(struct selst * restrict s,
-	const uint8_t i)
+	const int i)
 {
 	if (s->se_type == SAVEDSEL
 		&& s->se_index == jbxvt.scr.sline.max - i) {
@@ -41,40 +44,40 @@ static void save_top_lines_show_selection(struct selst * restrict s,
 }
 
 // Save lines that scroll of the top of the screen.
-static void save_top_lines(uint8_t count)
+static void save_top_lines(int count)
 {
-	for (uint8_t i = 1; i <= count; i++) {
+	for (int i = 1; i <= count; i++) {
 		save_top_line(i);
 		save_top_lines_show_selection(&jbxvt.sel.end1, i);
 		save_top_lines_show_selection(&jbxvt.sel.end2, i);
 	}
 }
 
-static void set_selend_index(const uint8_t i, const uint8_t count,
+static void set_selend_index(const int i, const int count,
 	struct selst * restrict s)
 {
 	if (s->se_type == SAVEDSEL && s->se_index == i)
 		  s->se_index = i + count;
 }
 
-static void scroll_up(uint8_t row1, uint8_t row2, int8_t count)
+static void scroll_up(int row1, int row2, int count)
 {
 #ifdef DEBUG
 	printf("count: %d, row1: %d, row2: %d\n", count, row1, row2);
 #endif//DEBUG
 	if (row1 == 0 && jbxvt.scr.current == &jbxvt.scr.s1) {
 		save_top_lines(count);
-		for (int16_t i = jbxvt.scr.sline.max - count - 1;
+		for (int i = jbxvt.scr.sline.max - count - 1;
 			i >= 0; i--) {
 			jbxvt.scr.sline.data[i + count]
 				= jbxvt.scr.sline.data[i];
 			set_selend_index(i, count, &jbxvt.sel.end1);
 			set_selend_index(i, count, &jbxvt.sel.end2);
 		}
-		for (uint8_t i = 0; i < count; i++) {
+		for (int i = 0; i < count; i++) {
 			unsigned char * s = jbxvt.scr.current->text[i];
-			unsigned char * r = jbxvt.scr.current->rend[i];
-			int16_t j;
+			uint32_t * r = jbxvt.scr.current->rend[i];
+			int j;
 			for (j = jbxvt.scr.chars.width - 1;
 				j >= 0 && s[j] == 0; j--)
 				  ;
@@ -86,7 +89,7 @@ static void scroll_up(uint8_t row1, uint8_t row2, int8_t count)
 			if (r[jbxvt.scr.chars.width] == 0)
 				  sl->sl_rend = NULL;
 			else {
-				sl->sl_rend = (unsigned char *)malloc(j + 1);
+				sl->sl_rend = malloc(j + 1);
 				memcpy(sl->sl_rend,r,j);
 			}
 			sl->sl_length = j;
@@ -101,9 +104,10 @@ static void scroll_up(uint8_t row1, uint8_t row2, int8_t count)
 			jbxvt.scr.offset, jbxvt.scr.offset
 			+ jbxvt.scr.chars.height - 1);
 	}
-	int16_t j = row1;
-	unsigned char *save[MAX_SCROLL], *rend[MAX_SCROLL];
-	for (uint8_t i = 0; i < count; i++, j++) {
+	int j = row1;
+	unsigned char *save[MAX_SCROLL];
+	uint32_t *rend[MAX_SCROLL];
+	for (int i = 0; i < count; i++, j++) {
 		save[i] = jbxvt.scr.current->text[j];
 		rend[i] = jbxvt.scr.current->rend[j];
 		if (jbxvt.sel.end1.se_type == SCREENSEL
@@ -132,36 +136,37 @@ static void scroll_up(uint8_t row1, uint8_t row2, int8_t count)
 			&& jbxvt.sel.end2.se_index == j)
 			  jbxvt.sel.end2.se_index = j - count;
 	}
-	for (uint8_t i = 0; i < count; i++) {
+	for (int i = 0; i < count; i++) {
 		memset(save[i],0,jbxvt.scr.chars.width + 1);
 		jbxvt.scr.current->text[row2 - i - 1] = save[i];
 		memset(rend[i],0,jbxvt.scr.chars.width + 1);
 		jbxvt.scr.current->rend[row2 - i - 1] = rend[i];
 	}
-	int16_t y1;
+	int y1;
 	if (count < row2 - row1) {
-		const int16_t y2 = MARGIN + row1
+		const int y2 = MARGIN + row1
 			* jbxvt.X.font_height;
 		y1 = y2 + count * jbxvt.X.font_height;
-		uint16_t height = (row2 - row1 - count)
+		int height = (row2 - row1 - count)
 			* jbxvt.X.font_height;
 		XCopyArea(jbxvt.X.dpy,jbxvt.X.win.vt,
 			jbxvt.X.win.vt,jbxvt.X.gc.tx,
 			0,y1,jbxvt.scr.pixels.width,height,0,y2);
 		repair_damage();
 	}
-	uint16_t height = count * jbxvt.X.font_height;
+	int height = count * jbxvt.X.font_height;
 	y1 = MARGIN + (row2 - count) * jbxvt.X.font_height;
 	XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,
 		0,y1,jbxvt.scr.pixels.width,height,False);
 }
 
-static void scroll_down(uint8_t row1, uint8_t row2, int8_t count)
+static void scroll_down(int row1, int row2, int count)
 {
 	count = -count;
-	int16_t j = row2 - 1;
-	unsigned char *save[MAX_SCROLL], *rend[MAX_SCROLL];
-	for (uint8_t i = 0; i < count; i++, j--) {
+	int j = row2 - 1;
+	uint32_t *rend[MAX_SCROLL];
+	unsigned char *save[MAX_SCROLL];
+	for (int i = 0; i < count; i++, j--) {
 		save[i] = jbxvt.scr.current->text[j];
 		rend[i] = jbxvt.scr.current->rend[j];
 		if (jbxvt.sel.end1.se_type == SCREENSEL
@@ -189,24 +194,24 @@ static void scroll_down(uint8_t row1, uint8_t row2, int8_t count)
 			&& jbxvt.sel.end2.se_index == j)
 			  jbxvt.sel.end2.se_index = j + count;
 	}
-	for (uint8_t i = 0; i < count; i++) {
+	for (int i = 0; i < count; i++) {
 		memset(save[i],0,jbxvt.scr.chars.width + 1);
 		jbxvt.scr.current->text[row1 + i] = save[i];
 		memset(rend[i],0,jbxvt.scr.chars.width + 1);
 		jbxvt.scr.current->rend[row1 + i] = rend[i];
 	}
-	int16_t y1, y2;
+	int y1, y2;
 	if (count < row2 - row1) {
 		y1 = MARGIN + row1 * jbxvt.X.font_height;
 		y2 = y1 + count * jbxvt.X.font_height;
-		uint16_t height = (row2 - row1 - count)
+		int height = (row2 - row1 - count)
 			* jbxvt.X.font_height;
 		XCopyArea(jbxvt.X.dpy,jbxvt.X.win.vt,
 			jbxvt.X.win.vt,jbxvt.X.gc.tx,
 			0,y1,jbxvt.scr.pixels.width,height,0,y2);
 		repair_damage();
 	}
-	uint16_t height = count * jbxvt.X.font_height;
+	int height = count * jbxvt.X.font_height;
 	y1 = MARGIN + row1 * jbxvt.X.font_height;
 	XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,0,y1,
 		jbxvt.scr.pixels.width,height,False);
@@ -216,7 +221,7 @@ static void scroll_down(uint8_t row1, uint8_t row2, int8_t count)
  *  scrolling is up for a +ve count and down for a -ve count.
  *  count is limited to a maximum of MAX_SCROLL lines.
  */
-void scroll(const uint8_t row1, const uint8_t row2, const int8_t count)
+void scroll(const int row1, const int row2, const int count)
 {
 	if(count<0) {
 		scroll_down(row1, row2, count);
@@ -225,7 +230,7 @@ void scroll(const uint8_t row1, const uint8_t row2, const int8_t count)
 	scroll_up(row1, row2, count);
 }
 
-static uint8_t get_count(const uint8_t count, uint8_t * restrict n)
+static int get_count(const int count, int * restrict n)
 {
 	/*  If count is greater than MAX_SCROLL then scroll in
 	 *  installements.
@@ -237,17 +242,18 @@ static uint8_t get_count(const uint8_t count, uint8_t * restrict n)
 /*  Scroll jbxvt.scr.s1 up by count lines saving lines as needed.  This is used
  *  after the screen size is reduced.
  */
-void scroll1(uint8_t count) // unsigned as only going up
+void scroll1(int count) // unsigned as only going up
 {
-	uint8_t n;
-	unsigned char *save[MAX_SCROLL], *rend[MAX_SCROLL];
+	int n;
+	unsigned char *save[MAX_SCROLL];
+	uint32_t *rend[MAX_SCROLL];
 	struct slinest *sl;
-	unsigned char *r, *s;
+	unsigned char *s;
 
 	while (count > 0) {
 		count=get_count(count, &n);
 		//  Save lines that scroll of the top of the screen.
-		for (uint8_t i = 1; i <= n; i++) {
+		for (int i = 1; i <= n; i++) {
 			sl = jbxvt.scr.sline.data[jbxvt.scr.sline.max - i];
 			if(!sl) continue;
 			free(sl->sl_text);
@@ -255,13 +261,13 @@ void scroll1(uint8_t count) // unsigned as only going up
 				  free(sl->sl_rend);
 			free(sl);
 		}
-		for (int16_t i = jbxvt.scr.sline.max - n - 1; i >= 0; i--) {
+		for (int i = jbxvt.scr.sline.max - n - 1; i >= 0; i--) {
 			jbxvt.scr.sline.data[i + n] = jbxvt.scr.sline.data[i];
 		}
-		for (uint8_t i = 0; i < n; i++) {
+		for (int i = 0; i < n; i++) {
 			s = jbxvt.scr.s1.text[i];
-			r = jbxvt.scr.s1.rend[i];
-			int16_t j;
+			uint32_t * r = jbxvt.scr.s1.rend[i];
+			int j;
 			for (j = jbxvt.scr.chars.width - 1;
 				j >= 0 && s[j] == 0; j--)
 				;
@@ -273,7 +279,7 @@ void scroll1(uint8_t count) // unsigned as only going up
 			if (r[jbxvt.scr.chars.width] == 0)
 				sl->sl_rend = NULL;
 			else {
-				sl->sl_rend = (unsigned char *)malloc(j + 1);
+				sl->sl_rend = malloc(j + 1);
 				memcpy(sl->sl_rend,r,j);
 			}
 			sl->sl_length = j;
@@ -283,8 +289,8 @@ void scroll1(uint8_t count) // unsigned as only going up
 		if (jbxvt.scr.sline.top > jbxvt.scr.sline.max)
 			jbxvt.scr.sline.top = jbxvt.scr.sline.max;
 
-		uint16_t j = 0;
-		for (uint8_t i = 0; i < n; i++, j++) {
+		int j = 0;
+		for (int i = 0; i < n; i++, j++) {
 			save[i] = jbxvt.scr.s1.text[j];
 			rend[i] = jbxvt.scr.s1.rend[j];
 		}
@@ -292,7 +298,7 @@ void scroll1(uint8_t count) // unsigned as only going up
 			jbxvt.scr.s1.text[j - n] = jbxvt.scr.s1.text[j];
 			jbxvt.scr.s1.rend[j - n] = jbxvt.scr.s1.rend[j];
 		}
-		for (uint8_t i = 0; i < n; i++) {
+		for (int i = 0; i < n; i++) {
 			memset(save[i],0,jbxvt.scr.chars.width + 1);
 			jbxvt.scr.s1.text[jbxvt.scr.chars.height - i - 1]
 				= save[i];

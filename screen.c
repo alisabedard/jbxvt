@@ -151,7 +151,7 @@ void scr_save_cursor(void)
 {
 	save_screen.row = jbxvt.scr.current->row;
 	save_screen.col = jbxvt.scr.current->col;
-	jbxvt.opt.save_rstyle = jbxvt.scr.rstyle;
+	jbxvt.scr.saved_rstyle = jbxvt.scr.rstyle;
 }
 
 //  Restore the cursor position and rendition style.
@@ -164,22 +164,23 @@ void scr_restore_cursor(void)
 	jbxvt.scr.current->col = save_screen.col;
 	if (jbxvt.scr.current->col >= jbxvt.scr.chars.width)
 		jbxvt.scr.current->col = jbxvt.scr.chars.width - 1;
-	scr_change_rendition(jbxvt.opt.save_rstyle);
+	scr_change_rendition(jbxvt.scr.saved_rstyle);
 	cursor();
 }
 
 //  Delete count lines and scroll up the bottom of the screen to fill the gap
-void
-scr_delete_lines(count)
-int count;
+void scr_delete_lines(int count)
 {
-	if (count > jbxvt.scr.current->bmargin - jbxvt.scr.current->row + 1)
+	if (count > jbxvt.scr.current->bmargin
+		- jbxvt.scr.current->row + 1)
 		return;
 
 	home_screen();
 	cursor();
 	while (count > MAX_SCROLL) {
-		scroll(jbxvt.scr.current->row,jbxvt.scr.current->bmargin,MAX_SCROLL);
+		scroll(jbxvt.scr.current->row,
+			jbxvt.scr.current->bmargin,
+			MAX_SCROLL);
 		count -= MAX_SCROLL;
 	}
 	scroll(jbxvt.scr.current->row,jbxvt.scr.current->bmargin,count);
@@ -190,14 +191,14 @@ int count;
 /*  Insert count blank lines at the current position and scroll the lower lines
  *  down.
  */
-void
-scr_insert_lines(count)
-int count;
+void scr_insert_lines(int count)
 {
 	if (jbxvt.scr.current->row > jbxvt.scr.current->bmargin)
 		return;
-	if (count > jbxvt.scr.current->bmargin - jbxvt.scr.current->row + 1)
-		count = jbxvt.scr.current->bmargin - jbxvt.scr.current->row + 1;
+	if (count > jbxvt.scr.current->bmargin
+		- jbxvt.scr.current->row + 1)
+		count = jbxvt.scr.current->bmargin
+			- jbxvt.scr.current->row + 1;
 
 	home_screen();
 	cursor();

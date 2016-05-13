@@ -12,22 +12,22 @@
 #include <stdlib.h>
 #include <string.h>
 
-/*  Reset the screen - called whenever the screen needs to be repaired completely.
- */
+/*  Reset the screen - called whenever the screen
+    needs to be repaired completely.  */
 void scr_reset(void)
 {
 	Window root;
-	int x, y, n, i, j, onscreen;
 	unsigned int width, height, u;
-	unsigned char **r1, **r2, **s1, **s2;
+	unsigned char **s1, **s2;
+	uint32_t **r1, **r2;
 	struct slinest *sl;
 
+	int x, y;
 	XGetGeometry(jbxvt.X.dpy,jbxvt.X.win.vt,&root,
 		&x,&y,&width,&height,&u, &u);
-	int16_t cw = (width - 2 * MARGIN) / jbxvt.X.font_width;
-	int16_t ch = (height - 2 * MARGIN) / jbxvt.X.font_height;
-
-	if (jbxvt.scr.current->text == NULL || cw != jbxvt.scr.chars.width
+	int cw = (width - 2 * MARGIN) / jbxvt.X.font_width;
+	int ch = (height - 2 * MARGIN) / jbxvt.X.font_height;
+	if (!jbxvt.scr.current->text || cw != jbxvt.scr.chars.width
 		|| ch != jbxvt.scr.chars.height) {
 
 		jbxvt.scr.offset = 0;
@@ -38,46 +38,50 @@ void scr_reset(void)
 		 */
 		s1 = (unsigned char **)malloc(ch * sizeof(unsigned char *));
 		s2 = (unsigned char **)malloc(ch * sizeof(unsigned char *));
-		r1 = (unsigned char **)malloc(ch * sizeof(unsigned char *));
-		r2 = (unsigned char **)malloc(ch * sizeof(unsigned char *));
+		r1 = malloc(ch * sizeof(uint32_t *));
+		r2 = malloc(ch * sizeof(uint32_t *));
 		for (y = 0; y < ch; y++) {
-			s1[y] = (unsigned char *)malloc(cw + 1);
-			s2[y] = (unsigned char *)malloc(cw + 1);
-			r1[y] = (unsigned char *)malloc(cw + 1);
-			r2[y] = (unsigned char *)malloc(cw + 1);
-			memset(s1[y],0,cw + 1);
-			memset(s2[y],0,cw + 1);
-			memset(r1[y],0,cw + 1);
-			memset(r2[y],0,cw + 1);
+			s1[y] = calloc(cw + 1, 1);
+			s2[y] = calloc(cw + 1, 1);
+			r1[y] = calloc(cw + 1, sizeof(uint32_t));
+			r2[y] = calloc(cw + 1, sizeof(uint32_t));
 		}
-		if (jbxvt.scr.s1.text != NULL) {
+		if (jbxvt.scr.s1.text) {
 
 			/*  Now fill up the screen from the old screen
 			    and saved lines.  */
 			if (jbxvt.scr.s1.row >= ch) {
-				/* scroll up to save any lines that will be lost.
-				 */
+				// scroll up to save any lines that will be lost.
 				scroll1(jbxvt.scr.s1.row - ch + 1);
 				jbxvt.scr.s1.row = ch - 1;
 			}
-			/* calculate working no. of lines.
-			 */
-			i = jbxvt.scr.sline.top + jbxvt.scr.s1.row + 1;
-			j = i > ch ? ch - 1 : i - 1;
+			// calculate working no. of lines.
+			int i = jbxvt.scr.sline.top + jbxvt.scr.s1.row + 1;
+			int j = i > ch ? ch - 1 : i - 1;
 			i = jbxvt.scr.s1.row;
 			jbxvt.scr.s1.row = j;
-			onscreen = 1;
+			bool onscreen = true;
 			for (; j >= 0; j--) {
+				int n;
 				if (onscreen) {
-					n = cw < jbxvt.scr.chars.width ? cw : jbxvt.scr.chars.width;
+					n = cw < jbxvt.scr.chars.width
+						? cw : jbxvt.scr.chars.width;
 					memcpy(s1[j],jbxvt.scr.s1.text[i],n);
 					memcpy(s2[j],jbxvt.scr.s2.text[i],n);
 					memcpy(r1[j],jbxvt.scr.s1.rend[i],n);
 					memcpy(r2[j],jbxvt.scr.s2.rend[i],n);
-					s1[j][cw] = jbxvt.scr.s1.text[i][jbxvt.scr.chars.width];
-					s2[j][cw] = jbxvt.scr.s2.text[i][jbxvt.scr.chars.width];
-					r1[j][cw] = jbxvt.scr.s1.rend[i][jbxvt.scr.chars.width];
-					r2[j][cw] = jbxvt.scr.s2.rend[i][jbxvt.scr.chars.width];
+					s1[j][cw]
+						= jbxvt.scr.s1.text[i]
+						[jbxvt.scr.chars.width];
+					s2[j][cw]
+						= jbxvt.scr.s2.text[i]
+						[jbxvt.scr.chars.width];
+					r1[j][cw]
+						= jbxvt.scr.s1.rend[i]
+						[jbxvt.scr.chars.width];
+					r2[j][cw]
+						= jbxvt.scr.s2.rend[i]
+						[jbxvt.scr.chars.width];
 					i--;
 					if (i < 0) {
 						onscreen = 0;
@@ -87,13 +91,15 @@ void scr_reset(void)
 					if (i >= jbxvt.scr.sline.top)
 						break;
 					sl = jbxvt.scr.sline.data[i];
-					n = cw < sl->sl_length ? cw : sl->sl_length;
+					n = cw < sl->sl_length
+						? cw : sl->sl_length;
 					memcpy(s1[j],sl->sl_text,n);
 					free(sl->sl_text);
 					if (sl->sl_rend != NULL) {
 						memcpy(r1[j],sl->sl_rend,n);
 						r1[j][cw] =
-							sl->sl_rend[sl->sl_length];
+							sl->sl_rend
+							[sl->sl_length];
 						free(sl->sl_rend);
 					}
 					free((void *)sl);
@@ -109,7 +115,6 @@ void scr_reset(void)
 				j < jbxvt.scr.sline.top; j++)
 				jbxvt.scr.sline.data[j] = NULL;
 			jbxvt.scr.sline.top -= i;
-
 			for (y = 0; y < jbxvt.scr.chars.height; y++) {
 				free(jbxvt.scr.s1.text[y]);
 				free(jbxvt.scr.s2.text[y]);
@@ -146,8 +151,11 @@ void scr_reset(void)
 		jbxvt.scr.current->col = jbxvt.scr.chars.width - 1;
 	if (jbxvt.scr.current->row >= jbxvt.scr.chars.height)
 		jbxvt.scr.current->row = jbxvt.scr.chars.height - 1;
-	sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1, jbxvt.scr.offset,
-		jbxvt.scr.offset + jbxvt.scr.chars.height - 1);
+	sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1,
+		jbxvt.scr.offset, jbxvt.scr.offset
+		+ jbxvt.scr.chars.height - 1);
+	/* The following causes rendition style colors to be lost
+	   or corrupted when the terminal window is clicked.  */
 	repaint(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
 	cursor();
 }

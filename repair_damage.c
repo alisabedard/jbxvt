@@ -22,8 +22,7 @@ void repair_damage(void)
 	int row1, row2, col1, col2;
 
 	do {
-		/*  Get the next graphics exposure or noexposure event.
-		 */
+		//  Get the next graphics exposure or noexposure event.
 		XIfEvent(jbxvt.X.dpy,&event,grexornoex,NULL);
 		if (event.type == NoExpose)
 			return;

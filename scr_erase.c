@@ -14,13 +14,12 @@
 void scr_erase_line(int mode)
 {
 	int i, x, y, width, height;
-	unsigned char *r, *s;
 
 	home_screen();
 	y = MARGIN + jbxvt.scr.current->row * jbxvt.X.font_height;
 	height = jbxvt.X.font_height;
-	s = jbxvt.scr.current->text[jbxvt.scr.current->row];
-	r = jbxvt.scr.current->rend[jbxvt.scr.current->row];
+	unsigned char * s = jbxvt.scr.current->text[jbxvt.scr.current->row];
+	uint32_t * r = jbxvt.scr.current->rend[jbxvt.scr.current->row];
 	switch (mode) {
 	    case START :
 		x = MARGIN;
