@@ -162,6 +162,7 @@ void repaint(int row1, int row2, int col1, int col2)
 	for (i = jbxvt.scr.offset - 1 - row1;
 		y <= row2 && i >= 0; y++, i--) {
 		struct slinest * sl = jbxvt.scr.sline.data[i];
+		if(!sl) continue; // prevent segfault
 		unsigned int m = (col2 + 1) < sl->sl_length
 			? (col2 + 1) : sl->sl_length;
 		unsigned char * s = sl->sl_text;

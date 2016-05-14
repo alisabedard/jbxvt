@@ -27,10 +27,15 @@ static void save_top_line(const int i)
 {
 	struct slinest ** s = &jbxvt.scr.sline.data[jbxvt.scr.sline.max - i];
 	if(*s) {
+		if((*s)->sl_text) {
+			free((*s)->sl_text);
+			(*s)->sl_text = NULL;
+		}
 		if((*s)->sl_rend) {
 			free((*s)->sl_rend);
 			(*s)->sl_rend = NULL;
 		}
+		(*s)->sl_length = 0;
 		free(*s);
 		*s = NULL;
 	}
