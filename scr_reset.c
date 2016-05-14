@@ -130,23 +130,14 @@ void scr_reset(void)
 			free((void *)jbxvt.scr.s1.rend);
 			free((void *)jbxvt.scr.s2.rend);
 		}
-		jbxvt.scr.s1.text = s1;
-		jbxvt.scr.s2.text = s2;
-		jbxvt.scr.s1.rend = r1;
-		jbxvt.scr.s2.rend = r2;
-
 		jbxvt.scr.chars.width = cw;
 		jbxvt.scr.chars.height = ch;
 		jbxvt.scr.pixels.width = width;
 		jbxvt.scr.pixels.height = height;
-		jbxvt.scr.s1.tmargin = 0;
-		jbxvt.scr.s1.bmargin = jbxvt.scr.chars.height - 1;
-		jbxvt.scr.s1.decom = 0;
-		jbxvt.scr.s1.wrap_next = 0;
-		jbxvt.scr.s2.tmargin = 0;
-		jbxvt.scr.s2.bmargin = jbxvt.scr.chars.height - 1;
-		jbxvt.scr.s2.decom = 0;
-		jbxvt.scr.s2.wrap_next = 0;
+		jbxvt.scr.s1=(struct screenst){.text = s1, .rend = r1,
+			.bmargin=jbxvt.scr.chars.height-1};
+		jbxvt.scr.s2=(struct screenst){.text = s2, .rend = r2,
+			.bmargin=jbxvt.scr.chars.height-1};
 		scr_start_selection(0,0,CHAR);
 	}
 	tty_set_size(jbxvt.scr.chars.width,jbxvt.scr.chars.height);
