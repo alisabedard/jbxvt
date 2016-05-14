@@ -341,10 +341,7 @@ app_loop_head:
 		break;
 #ifdef DEBUG
 	case TK_DECSWH :		/* ESC # digit */
-#if 0
-		if (token.tk_arg[0] == '8')
-			  scr_efill();	/* fill screen with Es */
-#endif
+		fputs("TK_DECSWH", stderr);
 		break;
 #endif//DEBUG
 	case TK_DECSC :
@@ -391,14 +388,11 @@ int main(int argc, char ** argv)
 {
 	char *command = NULL;
 	char **com_argv = NULL;
-	// Silence some valgrind warnings:
-	jbxvt.X.win.vt=jbxvt.X.win.sb=jbxvt.X.win.main=0;
 #ifdef DEBUG
 	printf("Size of tokenst: %lu\n", sizeof(struct tokenst));
 #endif//DEBUG
 
-	/* Make a copy of the command line argument array
-	 */
+	// Make a copy of the command line argument array
 	char **iargv = (char **)malloc((argc + 1) * sizeof(char *));
 	{
 		uint8_t i;
@@ -435,7 +429,6 @@ int main(int argc, char ** argv)
 		shell_argv[1] = NULL;
 		com_argv = shell_argv;
 	}
-	fix_environment();
 #ifdef DEBUG
 	fprintf(stderr, "Command: %s\n", command);
 #endif//DEBUG

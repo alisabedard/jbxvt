@@ -283,8 +283,9 @@ void scroll1(int count) // unsigned as only going up
 			if (r[jbxvt.scr.chars.width] == 0)
 				sl->sl_rend = NULL;
 			else {
-				sl->sl_rend = malloc(j + 1);
-				memcpy(sl->sl_rend,r,j);
+				sl->sl_rend = malloc((j + 1)
+					*sizeof(uint32_t));
+				memcpy(sl->sl_rend,r,(j*sizeof(uint32_t)));
 			}
 			sl->sl_length = j;
 			jbxvt.scr.sline.data[n - i - 1] = sl;

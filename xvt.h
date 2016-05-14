@@ -28,13 +28,13 @@
 
 #define VERSION "2.2"	/* Overall release number of the current version */
 
-enum { MARGIN = 2 };	/* gap between the text and the window edges */
+enum { MARGIN = 1 };	/* gap between the text and the window edges */
 
 /*  Some wired in defaults so we can run without any external resources.
  */
 #define DEF_FONT "lucidasanstypewriter-10"
 #define FIXED_FONT "fixed"	/* last resort font */
-#define DEF_SAVED_LINES 512	/* number of saved lines that have scrolled of the top */
+#define DEF_SAVED_LINES 24 /* number of saved lines that have scrolled of the top */
 //#define TERM_ENV "TERM=xterm"
 #define TERM_ENV "TERM=xterm"
 #define COMMAND "/bin/sh"	/* default command to run */

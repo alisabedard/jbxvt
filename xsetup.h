@@ -32,7 +32,6 @@
 
 extern XSizeHints sizehints;
 
-void fix_environment(void);
 int resize_window(void);
 void switch_scrollbar(void);
 void change_window_name(unsigned char *);

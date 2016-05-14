@@ -70,61 +70,6 @@ inline bool is_eightbit(void)
 	return(eight_bit_input);
 }
 
-/*  Utility function to return a malloced copy of a string.
- */
-__attribute__((malloc))
-static char * scopy(char * restrict str)
-{
-	const size_t sz = strlen(str) + 1;
-	char * s = malloc(sz);
-	memcpy(s, str, sz);
-	return s;
-}
-
-/*  Do any necessary preprocessing of the environment ready for passing to
- *  the command.
- */
-void fix_environment(void)
-{
-	int i, j, k;
-	uint16_t cols, lines;
-	char **com_env;
-	extern char **environ;
-	static char *elist[] = {
-		"TERM=",
-		"DISPLAY=",
-		"WINDOWID=",
-		"COLUMNS=",
-		"LINES=",
-		NULL
-	};
-	char buf[500];
-
-
-	for (i = 0; environ[i] != NULL; i++)
-		;
-	com_env = (char **)malloc((i + 4) * sizeof(char *));
-	for (i = j = 0; environ[i] != NULL; i++) {
-		for (k = 0; elist[k] != NULL; k++)
-			if (strncmp(elist[k],environ[i],strlen(elist[k])) == 0)
-				break;
-		if (elist[k] == NULL)
-			com_env[j++] = environ[i];
-	}
-	com_env[j++] = scopy(TERM_ENV);
-	sprintf(buf,"DISPLAY=%s",DisplayString(jbxvt.X.dpy));
-	com_env[j++] = scopy(buf);
-	sprintf(buf,"WINDOWID=%d",(int)jbxvt.X.win.main);
-	com_env[j++] = scopy(buf);
-	scr_get_size(&cols,&lines);
-	sprintf(buf,"LINES=%d",lines);
-	com_env[j++] = scopy(buf);
-	sprintf(buf,"COLUMNS=%d",cols);
-	com_env[j++] = scopy(buf);
-	com_env[j] = NULL;
-	environ = com_env;
-}
-
 //  Map the window
 void map_window(void)
 {
