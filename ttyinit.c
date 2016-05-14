@@ -351,11 +351,6 @@ static void write_utmp(void)
 #endif /* BSD_UTMP */
 }
 
-static void cleanup()
-{
-	XCloseDisplay(jbxvt.X.dpy);
-}
-
 //  Quit with the status after first removing our entry from the utmp file.
 void quit(int status)
 {
@@ -365,8 +360,6 @@ void quit(int status)
 		sleep(5); // Allow user to see the error
 		abort();
 	}
-	else
-		  cleanup();
 	exit(status);
 }
 
