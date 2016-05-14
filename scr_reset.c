@@ -12,24 +12,65 @@
 #include <stdlib.h>
 #include <string.h>
 
+static void free_visible_screens(void)
+{
+	for(uint16_t y = 0; y < jbxvt.scr.chars.height; y++) {
+		free(jbxvt.scr.s1.text[y]);
+		free(jbxvt.scr.s2.text[y]);
+		free(jbxvt.scr.s1.rend[y]);
+		free(jbxvt.scr.s2.rend[y]);
+	}
+	free((void *)jbxvt.scr.s1.text);
+	free((void *)jbxvt.scr.s2.text);
+	free((void *)jbxvt.scr.s1.rend);
+	free((void *)jbxvt.scr.s2.rend);
+}
+
+static void reset_row_col(void)
+{
+	if (jbxvt.scr.current->col >= jbxvt.scr.chars.width)
+		jbxvt.scr.current->col = jbxvt.scr.chars.width - 1;
+	if (jbxvt.scr.current->row >= jbxvt.scr.chars.height)
+		jbxvt.scr.current->row = jbxvt.scr.chars.height - 1;
+}
+
+static void fill_and_scroll(const uint8_t ch)
+{
+	/*  Now fill up the screen from the old screen
+	    and saved lines.  */
+	if (jbxvt.scr.s1.row >= ch) {
+		// scroll up to save any lines that will be lost.
+		scroll1(jbxvt.scr.s1.row - ch + 1);
+		jbxvt.scr.s1.row = ch - 1;
+	}
+}
+
+static void get_cwh(uint8_t * restrict cw, uint8_t * restrict ch,
+	uint16_t * restrict pw, uint16_t * restrict ph)
+{
+	int d;
+	unsigned int w, h, u;
+	Window dw;
+
+	XGetGeometry(jbxvt.X.dpy, jbxvt.X.win.vt, &dw, &d, &d,
+		&w, &h, &u, &u);
+	*cw = (w-(MARGIN<<1))/jbxvt.X.font_width;
+	*ch = (h-(MARGIN<<1))/jbxvt.X.font_height;
+	*pw = w;
+	*ph = h;
+}
+
 /*  Reset the screen - called whenever the screen
     needs to be repaired completely.  */
 void scr_reset(void)
 {
-	Window root;
-	unsigned int width, height, u;
-	unsigned char **s1, **s2;
-	uint32_t **r1, **r2;
-	struct slinest *sl;
-
-	int x, y;
-	XGetGeometry(jbxvt.X.dpy,jbxvt.X.win.vt,&root,
-		&x,&y,&width,&height,&u, &u);
-	int cw = (width - 2 * MARGIN) / jbxvt.X.font_width;
-	int ch = (height - 2 * MARGIN) / jbxvt.X.font_height;
+	uint8_t cw, ch;
+	uint16_t width, height;
+	get_cwh(&cw, &ch, &width, &height);
 	if (!jbxvt.scr.current->text || cw != jbxvt.scr.chars.width
 		|| ch != jbxvt.scr.chars.height) {
-
+		unsigned char **s1, **s2;
+		uint32_t **r1, **r2;
 		jbxvt.scr.offset = 0;
 		/*  Recreate the screen backup arrays.
 		 *  The screen arrays are one byte wider than the screen and
@@ -40,21 +81,14 @@ void scr_reset(void)
 		s2 = (unsigned char **)malloc(ch * sizeof(void*));
 		r1 = malloc(ch * sizeof(void*));
 		r2 = malloc(ch * sizeof(void*));
-		for (y = 0; y < ch; y++) {
+		for (uint8_t y = 0; y < ch; y++) {
 			s1[y] = calloc(cw + 1, 1);
 			s2[y] = calloc(cw + 1, 1);
 			r1[y] = calloc(cw + 1, sizeof(uint32_t));
 			r2[y] = calloc(cw + 1, sizeof(uint32_t));
 		}
 		if (jbxvt.scr.s1.text) {
-
-			/*  Now fill up the screen from the old screen
-			    and saved lines.  */
-			if (jbxvt.scr.s1.row >= ch) {
-				// scroll up to save any lines that will be lost.
-				scroll1(jbxvt.scr.s1.row - ch + 1);
-				jbxvt.scr.s1.row = ch - 1;
-			}
+			fill_and_scroll(ch);
 			// calculate working no. of lines.
 			int i = jbxvt.scr.sline.top + jbxvt.scr.s1.row + 1;
 			int j = i > ch ? ch - 1 : i - 1;
@@ -92,7 +126,8 @@ void scr_reset(void)
 				} else {
 					if (i >= jbxvt.scr.sline.top)
 						break;
-					sl = jbxvt.scr.sline.data[i];
+					struct slinest *sl
+						= jbxvt.scr.sline.data[i];
 					n = cw < sl->sl_length
 						? cw : sl->sl_length;
 					memcpy(s1[j],sl->sl_text,n);
@@ -119,16 +154,7 @@ void scr_reset(void)
 				j < jbxvt.scr.sline.top; j++)
 				jbxvt.scr.sline.data[j] = NULL;
 			jbxvt.scr.sline.top -= i;
-			for (y = 0; y < jbxvt.scr.chars.height; y++) {
-				free(jbxvt.scr.s1.text[y]);
-				free(jbxvt.scr.s2.text[y]);
-				free(jbxvt.scr.s1.rend[y]);
-				free(jbxvt.scr.s2.rend[y]);
-			}
-			free((void *)jbxvt.scr.s1.text);
-			free((void *)jbxvt.scr.s2.text);
-			free((void *)jbxvt.scr.s1.rend);
-			free((void *)jbxvt.scr.s2.rend);
+			free_visible_screens();
 		}
 		jbxvt.scr.chars.width = cw;
 		jbxvt.scr.chars.height = ch;
@@ -141,11 +167,7 @@ void scr_reset(void)
 		scr_start_selection(0,0,CHAR);
 	}
 	tty_set_size(jbxvt.scr.chars.width,jbxvt.scr.chars.height);
-
-	if (jbxvt.scr.current->col >= jbxvt.scr.chars.width)
-		jbxvt.scr.current->col = jbxvt.scr.chars.width - 1;
-	if (jbxvt.scr.current->row >= jbxvt.scr.chars.height)
-		jbxvt.scr.current->row = jbxvt.scr.chars.height - 1;
+	reset_row_col();
 	sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1,
 		jbxvt.scr.offset, jbxvt.scr.offset
 		+ jbxvt.scr.chars.height - 1);
