@@ -185,8 +185,7 @@ static struct utmp utent;	/* our current utmp entry */
 
 /*  Catch a SIGCHLD signal and exit if the direct child has died.
  */
-static void
-catch_child(int sig __attribute__((unused)))
+static void catch_child(int sig __attribute__((unused)))
 {
 	int status;
 
@@ -231,12 +230,9 @@ static void tidy_utmp(void)
 }
 
 //  Catch a fatal signal and tidy up before quitting
-static void catch_sig(const int sig)
+static void catch_sig(const int sig __attribute__((unused)))
 {
-	tidy_utmp();
-	signal(sig,SIG_DFL);
-	setuid(getuid());
-	kill(getpid(),sig);
+	quit(0);
 }
 
 #ifdef BSD_UTMP
@@ -362,7 +358,6 @@ void quit(int status)
 	}
 	exit(status);
 }
-
 
 /*  Acquire a pseudo teletype from the system.  The return value is the
  *  name of the slave part of the pair or NULL if unsucsessful.  If
