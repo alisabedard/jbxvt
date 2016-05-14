@@ -314,9 +314,11 @@ app_loop_head:
 			  n = 1;
 		scr_insert_characters(n);
 		break;
+#if 0
 	case TK_DA :
 		cprintf("\033[?6c");	/* I am a VT102 */
 		break;
+#endif
 	case TK_TBC :
 		break;
 	case TK_SET :
@@ -370,9 +372,11 @@ app_loop_head:
 		break;
 	case TK_SS3 :
 		break;
+#if 0
 	case TK_DECID :
 		cprintf("\033[?6c");	/* I am a VT102 */
 		break;
+#endif
 	}
 #ifdef TK_DEBUG
 	show_token(&token);
