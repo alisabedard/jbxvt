@@ -21,7 +21,8 @@ void scr_move(int x, int y, int relative)
 
 	if (relative & ROW_RELATIVE) {
 		if (y > 0) {
-			if (jbxvt.scr.current->row <= jbxvt.scr.current->bmargin
+			if (jbxvt.scr.current->row
+				<= jbxvt.scr.current->bmargin
 				&& jbxvt.scr.current->row + y
 				> jbxvt.scr.current->bmargin)
 				jbxvt.scr.current->row
@@ -29,7 +30,8 @@ void scr_move(int x, int y, int relative)
 			else
 				jbxvt.scr.current->row += y;
 		} else if (y < 0) {
-			if (jbxvt.scr.current->row >= jbxvt.scr.current->tmargin
+			if (jbxvt.scr.current->row
+				>= jbxvt.scr.current->tmargin
 				&& jbxvt.scr.current->row + y
 				< jbxvt.scr.current->tmargin)
 				jbxvt.scr.current->row
@@ -39,7 +41,8 @@ void scr_move(int x, int y, int relative)
 		}
 	} else {
 		if (jbxvt.scr.current->decom) {
-			jbxvt.scr.current->row = y + jbxvt.scr.current->tmargin;
+			jbxvt.scr.current->row = y
+				+ jbxvt.scr.current->tmargin;
 			if (jbxvt.scr.current->row
 				> jbxvt.scr.current->bmargin)
 				jbxvt.scr.current->row
@@ -53,7 +56,8 @@ void scr_move(int x, int y, int relative)
 		jbxvt.scr.current->row = jbxvt.scr.chars.height - 1;
 
 	jbxvt.scr.current->wrap_next = 0;
-	check_selection(jbxvt.scr.current->row,jbxvt.scr.current->row);
+	check_selection(jbxvt.scr.current->row,
+		jbxvt.scr.current->row);
 	cursor();
 }
 
