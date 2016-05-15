@@ -4,7 +4,7 @@
 #include "jbxvt.h"
 #include "sbar.h"
 #include "screen.h"
-#include "scroll.h"
+#include "scroll_up.h"
 #include "selection.h"
 #include "xvt.h"
 
@@ -123,7 +123,7 @@ void scr_erase_screen(int mode)
 		y = MARGIN;
 		height = jbxvt.scr.chars.height * jbxvt.X.font_height;
 		if (jbxvt.scr.current == &jbxvt.scr.s1)
-			scroll1(jbxvt.scr.chars.height);
+			scroll_up(jbxvt.scr.chars.height);
 		else
 			for (i = 0; i < jbxvt.scr.chars.height; i++) {
 				memset(jbxvt.scr.current->text[i],0,

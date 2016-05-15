@@ -5,7 +5,7 @@
 #include "log.h"
 #include "repaint.h"
 #include "sbar.h"
-#include "scroll.h"
+#include "scroll_up.h"
 #include "selection.h"
 #include "ttyinit.h"
 #include "xvt.h"
@@ -62,9 +62,20 @@ static void fill_and_scroll(const uint8_t ch)
 	    and saved lines.  */
 	if (jbxvt.scr.s1.row >= ch) {
 		// scroll up to save any lines that will be lost.
-		scroll1(jbxvt.scr.s1.row - ch + 1);
+		scroll_up(jbxvt.scr.s1.row - ch + 1);
 		jbxvt.scr.s1.row = ch - 1;
 	}
+}
+
+static void init_screen_elements(struct screenst * restrict scr,
+	unsigned char ** restrict text, uint32_t ** restrict rend)
+{
+	scr->bmargin = jbxvt.scr.chars.height - 1;
+	scr->decom = false;
+	scr->rend = rend;
+	scr->text = text;
+	scr->tmargin = 0;
+	scr->wrap_next = false;
 }
 
 static void get_cwh(uint8_t * restrict cw, uint8_t * restrict ch,
@@ -81,6 +92,65 @@ static void get_cwh(uint8_t * restrict cw, uint8_t * restrict ch,
 	*ch = (h-m)/jbxvt.X.font_height;
 	*pw = w;
 	*ph = h;
+}
+
+static int save_data_on_screen(uint8_t cw, int i, const int j,
+	bool * restrict onscreen, unsigned char ** restrict s1,
+	uint32_t ** restrict r1, unsigned char ** restrict s2,
+	uint32_t ** restrict r2)
+{
+	uint8_t n = cw < jbxvt.scr.chars.width
+		? cw : jbxvt.scr.chars.width;
+	memcpy(s1[j],jbxvt.scr.s1.text[i],n);
+	memcpy(s2[j],jbxvt.scr.s2.text[i],n);
+	memcpy(r1[j],jbxvt.scr.s1.rend[i],
+		n * sizeof(uint32_t));
+	memcpy(r2[j],jbxvt.scr.s2.rend[i],
+		n * sizeof(uint32_t));
+	s1[j][cw]
+		= jbxvt.scr.s1.text[i]
+		[jbxvt.scr.chars.width];
+	s2[j][cw]
+		= jbxvt.scr.s2.text[i]
+		[jbxvt.scr.chars.width];
+	r1[j][cw]
+		= jbxvt.scr.s1.rend[i]
+		[jbxvt.scr.chars.width];
+	r2[j][cw]
+		= jbxvt.scr.s2.rend[i]
+		[jbxvt.scr.chars.width];
+	i--;
+	if (i < 0) {
+		*onscreen = false;
+		i = 0;
+	}
+	return i;
+}
+
+static int handle_offscreen_data(const uint8_t cw,
+	const int i, const int j,
+	unsigned char ** restrict s1,
+	uint32_t ** restrict r1)
+{
+	if (i >= jbxvt.scr.sline.top)
+		  return i;
+	struct slinest *sl
+		= jbxvt.scr.sline.data[i];
+	const uint8_t n = cw < sl->sl_length
+		? cw : sl->sl_length;
+	memcpy(s1[j],sl->sl_text,n);
+	free(sl->sl_text);
+	if (sl->sl_rend) {
+		memcpy(r1[j],sl->sl_rend,
+			n*sizeof(uint32_t));
+		r1[j][cw] =
+			sl->sl_rend
+			[sl->sl_length];
+		free(sl->sl_rend);
+		sl->sl_rend=NULL;
+	}
+	free((void *)sl);
+	return i + 1;
 }
 
 /*  Reset the screen - called whenever the screen
@@ -118,56 +188,12 @@ void scr_reset(void)
 			i = jbxvt.scr.s1.row;
 			jbxvt.scr.s1.row = j;
 			bool onscreen = true;
-			for (; j >= 0; j--) {
-				int n;
-				if (onscreen) {
-					n = cw < jbxvt.scr.chars.width
-						? cw : jbxvt.scr.chars.width;
-					memcpy(s1[j],jbxvt.scr.s1.text[i],n);
-					memcpy(s2[j],jbxvt.scr.s2.text[i],n);
-					memcpy(r1[j],jbxvt.scr.s1.rend[i],
-						n * sizeof(uint32_t));
-					memcpy(r2[j],jbxvt.scr.s2.rend[i],
-						n * sizeof(uint32_t));
-					s1[j][cw]
-						= jbxvt.scr.s1.text[i]
-						[jbxvt.scr.chars.width];
-					s2[j][cw]
-						= jbxvt.scr.s2.text[i]
-						[jbxvt.scr.chars.width];
-					r1[j][cw]
-						= jbxvt.scr.s1.rend[i]
-						[jbxvt.scr.chars.width];
-					r2[j][cw]
-						= jbxvt.scr.s2.rend[i]
-						[jbxvt.scr.chars.width];
-					i--;
-					if (i < 0) {
-						onscreen = 0;
-						i = 0;
-					}
-				} else {
-					if (i >= jbxvt.scr.sline.top)
-						  break;
-					struct slinest *sl
-						= jbxvt.scr.sline.data[i];
-					n = cw < sl->sl_length
-						? cw : sl->sl_length;
-					memcpy(s1[j],sl->sl_text,n);
-					free(sl->sl_text);
-					if (sl->sl_rend) {
-						memcpy(r1[j],sl->sl_rend,
-							n*sizeof(uint32_t));
-						r1[j][cw] =
-							sl->sl_rend
-							[sl->sl_length];
-						free(sl->sl_rend);
-						sl->sl_rend=NULL;
-					}
-					free((void *)sl);
-					i++;
-				}
-			}
+			for (; j >= 0; j--)
+				  i = onscreen ? save_data_on_screen(cw, i,
+					  j, &onscreen, s1, r1, s2, r2)
+					  : handle_offscreen_data(cw, i, j,
+						  s1, r1);
+		
 			if (onscreen)
 				  abort();
 			for (j = i; j < jbxvt.scr.sline.top; j++)
@@ -184,21 +210,8 @@ void scr_reset(void)
 		jbxvt.scr.chars.height = ch;
 		jbxvt.scr.pixels.width = width;
 		jbxvt.scr.pixels.height = height;
-
-                jbxvt.scr.s1.bmargin = jbxvt.scr.chars.height - 1;
-		jbxvt.scr.s1.decom = false;
-		jbxvt.scr.s1.rend = r1;
-		jbxvt.scr.s1.text = s1;
-		jbxvt.scr.s1.tmargin = 0;
-		jbxvt.scr.s1.wrap_next = false;
-
-                jbxvt.scr.s2.bmargin = jbxvt.scr.chars.height - 1;
-		jbxvt.scr.s2.decom = false;
-		jbxvt.scr.s2.rend = r2;
-		jbxvt.scr.s2.text = s2;
-		jbxvt.scr.s2.tmargin = 0;
-		jbxvt.scr.s2.wrap_next = false;
-
+		init_screen_elements(&jbxvt.scr.s1, s1, r1);
+		init_screen_elements(&jbxvt.scr.s2, s2, r2);
 		scr_start_selection(0,0,CHAR);
 	}
 	tty_set_size(jbxvt.scr.chars.width,jbxvt.scr.chars.height);
