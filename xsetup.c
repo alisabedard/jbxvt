@@ -91,11 +91,14 @@ void map_window(void)
  */
 int resize_window(void)
 {
-	Window root;
 	int x, y;
-	unsigned int width, height, bdr_width, depth;
-
-	XGetGeometry(jbxvt.X.dpy,jbxvt.X.win.main,&root,&x,&y,&width,&height,&bdr_width,&depth);
+	unsigned int width, height;
+	{
+		Window r;
+		unsigned int u;
+		XGetGeometry(jbxvt.X.dpy,jbxvt.X.win.main,&r,
+			&x,&y,&width,&height,&u,&u);
+	}
 	if (show_scrollbar) {
 		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.sb,SBAR_WIDTH - 1,height);
 		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.vt,width - SBAR_WIDTH,height);

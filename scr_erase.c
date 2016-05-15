@@ -34,13 +34,14 @@ void scr_erase_line(int mode)
 		memset(s + jbxvt.scr.current->col,0,
 			jbxvt.scr.chars.width - jbxvt.scr.current->col + 1);
 		memset(r + jbxvt.scr.current->col,0,
-			jbxvt.scr.chars.width - jbxvt.scr.current->col);
+			(jbxvt.scr.chars.width - jbxvt.scr.current->col)
+			*sizeof(uint32_t));
 		break;
 	    case ENTIRE :
 		x = MARGIN;
 		width = jbxvt.scr.chars.width * jbxvt.X.font_width;
 		memset(s,0,jbxvt.scr.chars.width + 1);
-		memset(r,0,jbxvt.scr.chars.width);
+		memset(r,0,jbxvt.scr.chars.width*sizeof(uint32_t));
 		break;
 	    default :
 		return;
@@ -49,12 +50,13 @@ void scr_erase_line(int mode)
 	 *  rendition.
 	 */
 	r[jbxvt.scr.chars.width] = 0;
-	for (i = 0; i < jbxvt.scr.chars.width; i++)
+	for (i = 0; i < jbxvt.scr.chars.width; i++) {
 		if (r[i] != 0) {
 			r[jbxvt.scr.chars.width] = 1;
 			break;
 		}
-	cursor();
+	}
+	cursor(); //clear
 	check_selection(jbxvt.scr.current->row,jbxvt.scr.current->row);
 	XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,x,y,width,height,False);
 	jbxvt.scr.current->wrap_next = 0;
@@ -76,8 +78,11 @@ void scr_erase_screen(int mode)
 		y = MARGIN;
 		height = jbxvt.scr.current->row * jbxvt.X.font_height;
 		for (i = 0; i < jbxvt.scr.current->row; i++) {
-			memset(jbxvt.scr.current->text[i],0,jbxvt.scr.chars.width + 1);
-			memset(jbxvt.scr.current->rend[i],0,jbxvt.scr.chars.width + 1);
+			memset(jbxvt.scr.current->text[i],0,
+				jbxvt.scr.chars.width + 1);
+			memset(jbxvt.scr.current->rend[i],0,
+				(jbxvt.scr.chars.width + 1)
+				*sizeof(uint32_t));
 		}
 		check_selection(0,jbxvt.scr.current->row - 1);
 		if (height > 0)
@@ -86,16 +91,20 @@ void scr_erase_screen(int mode)
 		scr_erase_line(mode);
 		break;
 	    case END :
-		if (jbxvt.scr.current->row != 0 || jbxvt.scr.current->col != 0) {
-			y = MARGIN + (jbxvt.scr.current->row + 1) * jbxvt.X.font_height;
-			height = (jbxvt.scr.chars.height - jbxvt.scr.current->row - 1)
+		if (jbxvt.scr.current->row != 0
+			|| jbxvt.scr.current->col != 0) {
+			y = MARGIN + (jbxvt.scr.current->row + 1)
 				* jbxvt.X.font_height;
-			for (i = jbxvt.scr.current->row + 1; i < jbxvt.scr.chars.height;
-				i++) {
+			height = (jbxvt.scr.chars.height
+				- jbxvt.scr.current->row - 1)
+				* jbxvt.X.font_height;
+			for (i = jbxvt.scr.current->row + 1;
+				i < jbxvt.scr.chars.height; i++) {
 				memset(jbxvt.scr.current->text[i],0,
 					jbxvt.scr.chars.width + 1);
 				memset(jbxvt.scr.current->rend[i],0,
-					jbxvt.scr.chars.width + 1);
+					(jbxvt.scr.chars.width + 1)
+					*sizeof(uint32_t));
 			}
 			check_selection(jbxvt.scr.current->row + 1,
 				jbxvt.scr.chars.height - 1);
@@ -120,11 +129,13 @@ void scr_erase_screen(int mode)
 				memset(jbxvt.scr.current->text[i],0,
 					jbxvt.scr.chars.width + 1);
 				memset(jbxvt.scr.current->rend[i],0,
-					jbxvt.scr.chars.width + 1);
+					(jbxvt.scr.chars.width + 1)
+					*sizeof(uint32_t));
 			}
 		cursor();
 		check_selection(0,jbxvt.scr.chars.height - 1);
-		XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,x,y,width,height,False);
+		XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,
+			x,y,width,height,False);
 		cursor();
 		sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1,
 			0, jbxvt.scr.chars.height - 1);

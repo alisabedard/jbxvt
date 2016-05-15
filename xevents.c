@@ -1,8 +1,9 @@
 #include "xevents.h"
 
-
 #include "jbxvt.h"
+#include "log.h"
 #include "token.h"
+
 #include <stdlib.h>
 
 static void handle_motion_notify(struct tokenst * restrict tk,
@@ -122,7 +123,7 @@ bool handle_xevents(struct tokenst * restrict tk)
 {
 	struct xeventst *xe = pop_xevent();
 	if(!xe) return false;
-	if (jbxvt.X.win.vt && xe->xe_window == jbxvt.X.win.vt)
+	if (xe->xe_window == jbxvt.X.win.vt)
 		  tk->tk_region = SCREEN;
 	else if (xe->xe_window == jbxvt.X.win.sb)
 		  tk->tk_region = SCROLLBAR;

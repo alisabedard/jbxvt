@@ -31,6 +31,7 @@
 #include "handle_sgr.h"
 #include "init_display.h"
 #include "jbxvt.h"
+#include "log.h"
 #include "sbar.h"
 #include "scr_delete_characters.h"
 #include "scr_erase.h"
@@ -61,6 +62,7 @@ static bool size_set; // flag set once the window size has been set
 
 static enum ModeValue handle_reset(struct tokenst * restrict token)
 {
+	LOG("handle_reset()");
 	enum ModeValue mode = (token->tk_type == TK_SET) ? HIGH : LOW;
 	if (token->tk_private == '?') {
 		switch (token->tk_arg[0]) {
@@ -90,6 +92,7 @@ static enum ModeValue handle_reset(struct tokenst * restrict token)
 static void handle_cup(struct tokenst * restrict token,
 	int16_t * restrict x, int16_t * restrict y) // Position cursor
 {
+	LOG("handle_cup()");
 	if (token->tk_nargs == 1) {
 		*x = 0;
 		*y = token->tk_arg[0] ? token->tk_arg[0] - 1 : 0;
@@ -121,6 +124,7 @@ static void handle_txtpar(struct tokenst * restrict token)
 	case 46: // log file
 	case 50: // font
 	default:
+		LOG("unhandled txtpar: %d", token->tk_arg[0]);
 		break;
 	}
 
@@ -129,6 +133,7 @@ static void handle_txtpar(struct tokenst * restrict token)
 /* set top and bottom margins */
 static void handle_decstbm(struct tokenst * restrict token)
 {
+	LOG("handle_decstbm()");
 	if (token->tk_private == '?')
 		  //  xterm uses this combination to reset parameters.
 		  return;
@@ -143,6 +148,7 @@ static void handle_decstbm(struct tokenst * restrict token)
 
 static void handle_tk_char(const unsigned char tk_char)
 {
+	LOG("handle_tk_char(%c)", tk_char);
 	switch (tk_char) {
 	case '\n' :
 		scr_index();
@@ -164,6 +170,7 @@ static void handle_tk_char(const unsigned char tk_char)
 
 static void handle_tk_expose(struct tokenst * restrict t)
 {
+	LOG("handle_tk_expose()");
 	switch (t->tk_region) {
 	case SCREEN :
 		if (!size_set) {
@@ -186,6 +193,7 @@ static void handle_tk_expose(struct tokenst * restrict t)
 
 static void app_loop(void)
 {
+	LOG("app_loop");
 	struct tokenst token;
 	int32_t n;
 	int16_t x, y;
@@ -314,12 +322,11 @@ app_loop_head:
 			  n = 1;
 		scr_insert_characters(n);
 		break;
-#if 0
 	case TK_DA :
-		cprintf("\033[?6c");	/* I am a VT102 */
+		LOG("TK_DA");
 		break;
-#endif
 	case TK_TBC :
+		LOG("TK_TBC");
 		break;
 	case TK_SET :
 	case TK_RESET :
@@ -329,6 +336,7 @@ app_loop_head:
 		handle_sgr(&token);
 		break;
 	case TK_DSR :		/* request for information */
+		LOG("TK_DSR");
 		switch (token.tk_arg[0]) {
 		case 6 :
 			scr_report_position();
@@ -372,11 +380,10 @@ app_loop_head:
 		break;
 	case TK_SS3 :
 		break;
-#if 0
 	case TK_DECID :
+		LOG("TK_DECID");
 		cprintf("\033[?6c");	/* I am a VT102 */
 		break;
-#endif
 	}
 #ifdef TK_DEBUG
 	show_token(&token);

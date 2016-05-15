@@ -28,7 +28,7 @@
 
 #define VERSION "2.2"	/* Overall release number of the current version */
 
-enum { MARGIN = 1 };	/* gap between the text and the window edges */
+enum { MARGIN = 2 };	/* gap between the text and the window edges */
 
 /*  Some wired in defaults so we can run without any external resources.
  */

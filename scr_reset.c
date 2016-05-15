@@ -2,6 +2,7 @@
 
 #include "cursor.h"
 #include "jbxvt.h"
+#include "log.h"
 #include "repaint.h"
 #include "sbar.h"
 #include "scroll.h"
@@ -9,21 +10,42 @@
 #include "ttyinit.h"
 #include "xvt.h"
 
+#include <assert.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-static void free_visible_screens(void)
+static void free_visible_screens(uint8_t ch)
 {
-	for(uint16_t y = 0; y < jbxvt.scr.chars.height; y++) {
+	LOG("free_visible_screens(%d)", ch);
+	ch=ch<jbxvt.scr.chars.height?ch:jbxvt.scr.chars.height;
+	//for(uint8_t y = 0; y < jbxvt.scr.chars.height; y++) {
+	for(uint8_t y = 0; y < ch; y++) {
+		LOG("y:%d of sch:%d\tch:%d", y,
+			jbxvt.scr.chars.height, ch);
+		assert(jbxvt.scr.s1.text[y]);
 		free(jbxvt.scr.s1.text[y]);
+
+		assert(jbxvt.scr.s2.text[y]);
 		free(jbxvt.scr.s2.text[y]);
+
+		assert(jbxvt.scr.s1.rend[y]);
 		free(jbxvt.scr.s1.rend[y]);
+
+		assert(jbxvt.scr.s2.rend[y]);
 		free(jbxvt.scr.s2.rend[y]);
 	}
-	free((void *)jbxvt.scr.s1.text);
-	free((void *)jbxvt.scr.s2.text);
-	free((void *)jbxvt.scr.s1.rend);
-	free((void *)jbxvt.scr.s2.rend);
+	assert(jbxvt.scr.s1.text);
+	free(jbxvt.scr.s1.text);
+
+	assert(jbxvt.scr.s2.text);
+	free(jbxvt.scr.s2.text);
+
+	assert(jbxvt.scr.s1.rend);
+	free(jbxvt.scr.s1.rend);
+
+	assert(jbxvt.scr.s2.rend);
+	free(jbxvt.scr.s2.rend);
 }
 
 static void reset_row_col(void)
@@ -54,8 +76,9 @@ static void get_cwh(uint8_t * restrict cw, uint8_t * restrict ch,
 
 	XGetGeometry(jbxvt.X.dpy, jbxvt.X.win.vt, &dw, &d, &d,
 		&w, &h, &u, &u);
-	*cw = (w-(MARGIN<<1))/jbxvt.X.font_width;
-	*ch = (h-(MARGIN<<1))/jbxvt.X.font_height;
+	const uint8_t m = MARGIN * 2;
+	*cw = (w-m)/jbxvt.X.font_width;
+	*ch = (h-m)/jbxvt.X.font_height;
 	*pw = w;
 	*ph = h;
 }
@@ -81,7 +104,7 @@ void scr_reset(void)
 		s2 = (unsigned char **)malloc(ch * sizeof(void*));
 		r1 = malloc(ch * sizeof(void*));
 		r2 = malloc(ch * sizeof(void*));
-		for (uint8_t y = 0; y < ch; y++) {
+		for (uint16_t y = 0; y < ch; y++) {
 			s1[y] = calloc(cw + 1, 1);
 			s2[y] = calloc(cw + 1, 1);
 			r1[y] = calloc(cw + 1, sizeof(uint32_t));
@@ -125,7 +148,7 @@ void scr_reset(void)
 					}
 				} else {
 					if (i >= jbxvt.scr.sline.top)
-						break;
+						  break;
 					struct slinest *sl
 						= jbxvt.scr.sline.data[i];
 					n = cw < sl->sl_length
@@ -146,24 +169,36 @@ void scr_reset(void)
 				}
 			}
 			if (onscreen)
-				abort();
+				  abort();
 			for (j = i; j < jbxvt.scr.sline.top; j++)
-				jbxvt.scr.sline.data[j - i]
-					= jbxvt.scr.sline.data[j];
+				  jbxvt.scr.sline.data[j - i]
+					  = jbxvt.scr.sline.data[j];
 			for (j = jbxvt.scr.sline.top - i;
 				j < jbxvt.scr.sline.top; j++)
-				jbxvt.scr.sline.data[j] = NULL;
+				  jbxvt.scr.sline.data[j] = NULL;
 			jbxvt.scr.sline.top -= i;
-			free_visible_screens();
+			free_visible_screens(ch);
 		}
+
 		jbxvt.scr.chars.width = cw;
 		jbxvt.scr.chars.height = ch;
 		jbxvt.scr.pixels.width = width;
 		jbxvt.scr.pixels.height = height;
-		jbxvt.scr.s1=(struct screenst){.text = s1, .rend = r1,
-			.bmargin=jbxvt.scr.chars.height-1};
-		jbxvt.scr.s2=(struct screenst){.text = s2, .rend = r2,
-			.bmargin=jbxvt.scr.chars.height-1};
+
+                jbxvt.scr.s1.bmargin = jbxvt.scr.chars.height - 1;
+		jbxvt.scr.s1.decom = false;
+		jbxvt.scr.s1.rend = r1;
+		jbxvt.scr.s1.text = s1;
+		jbxvt.scr.s1.tmargin = 0;
+		jbxvt.scr.s1.wrap_next = false;
+
+                jbxvt.scr.s2.bmargin = jbxvt.scr.chars.height - 1;
+		jbxvt.scr.s2.decom = false;
+		jbxvt.scr.s2.rend = r2;
+		jbxvt.scr.s2.text = s2;
+		jbxvt.scr.s2.tmargin = 0;
+		jbxvt.scr.s2.wrap_next = false;
+
 		scr_start_selection(0,0,CHAR);
 	}
 	tty_set_size(jbxvt.scr.chars.width,jbxvt.scr.chars.height);
