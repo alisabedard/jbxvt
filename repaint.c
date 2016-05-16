@@ -1,7 +1,9 @@
 #include "repaint.h"
 
 #include "color.h"
+#include "cursor.h"
 #include "jbxvt.h"
+#include "log.h"
 #include "screen.h"
 #include "selection.h"
 #include "show_selection.h"
@@ -9,10 +11,6 @@
 #include "xvt.h"
 
 #include <stdlib.h>
-
-#ifdef DEBUG
-#include <stdio.h>
-#endif//DEBUG
 
 static void set_rval_colors(const uint32_t rval)
 {
@@ -112,8 +110,8 @@ void paint_rval_text(unsigned char * restrict str, uint32_t rval,
 	XDrawImageString(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.tx,x,y,
 		(const char *)str,len);
 	if (rval & RS_BOLD) // Fake bold:
-		  XDrawString(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.tx,x + 1,y,
-				(const char *)str,len);
+		  XDrawString(jbxvt.X.dpy,jbxvt.X.win.vt,
+			  jbxvt.X.gc.tx,x + 1,y, (const char *)str,len);
 	y++; // Advance for underline.
 	if (rval & RS_ULINE)
 		XDrawLine(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.tx,
@@ -126,6 +124,7 @@ static void paint_rvec_text(unsigned char * str,
 	uint32_t * rvec, unsigned int len,
 	int x, int y)
 {
+	LOG("paint_rvec_text()");
 	if (rvec == NULL) {
 		paint_rval_text(str,0,len,x,y);
 		return;
@@ -135,10 +134,6 @@ static void paint_rvec_text(unsigned char * str,
 		for (i = 0; i < len; i++)
 			if (rvec[i] != rvec[0])
 				break;
-#ifdef DEBUG
-		fprintf(stderr, "paint_rval_text: r:%x,i:%d,x:%d,y:%d\n",
-			rvec[0], i, x, y);
-#endif//DEBUG
 		paint_rval_text(str,rvec[0],i,x,y);
 		str += i;
 		rvec += i;
@@ -147,12 +142,11 @@ static void paint_rvec_text(unsigned char * str,
 	}
 }
 
-/* Repaint the box delimited by row1 to row2 and col1 to col2 of the displayed
- * screen from the backup screen.
- */
-
+/* Repaint the box delimited by row1 to row2 and col1 to col2
+   of the displayed screen from the backup screen.  */
 void repaint(int row1, int row2, int col1, int col2)
 {
+	LOG("repaint(%d, %d, %d, %d)", row1, row2, col1, col2);
 	unsigned char * str = malloc(jbxvt.scr.chars.width + 1);
 	int y = row1;
 	int x1 = MARGIN + col1 * jbxvt.X.font_width;
@@ -179,12 +173,13 @@ void repaint(int row1, int row2, int col1, int col2)
 				x2,y1,width,jbxvt.X.font_height,False);
 		y1 += jbxvt.X.font_height;
 	}
-
+// This causes some stale display problems
 	//  Now do the remainder from the current screen
 	i = jbxvt.scr.offset > row1 ? 0 : row1 - jbxvt.scr.offset;
 	for (; y <= row2; y++, i++) {
 		unsigned char * s = jbxvt.scr.current->text[i];
-		unsigned int m = col1 - 1;
+		int m = col1 - 1;
+#if 0
 		for (int x = col1; x <= col2; x++)
 			if (s[x] < ' ')
 				str[x - col1] = ' ';
@@ -192,14 +187,25 @@ void repaint(int row1, int row2, int col1, int col2)
 				str[x - col1] = s[x];
 				m = x;
 			}
+#endif
+		if(jbxvt.scr.current->row == y) {
+			//y++;
+			y1+=jbxvt.X.font_height;
+			cursor();
+			continue;
+		}
+		for(uint8_t x = col1; x <= col2; x++) {
+			if (s[x] == '\0') {
+				break;
+			} else if (s[x] < ' ') {
+				str[x - col1] = ' ';
+			} else {
+				str[x - col1] = s[x];
+				m = x;
+			}
+		}
 		m++;
 		m -= col1;
-#if 0
-		uint32_t * r = jbxvt.scr.current->rend[i]
-			[jbxvt.scr.chars.width] == 0
-			? NULL : jbxvt.scr.current->rend[i] + col1;
-		paint_rvec_text(str,r,m,x1,y1);
-#endif
 		paint_rvec_text(str, jbxvt.scr.current->rend[i]
 			[jbxvt.scr.chars.width]
 			? jbxvt.scr.current->rend[i] + col1 : NULL,
@@ -212,6 +218,7 @@ void repaint(int row1, int row2, int col1, int col2)
 				x2,y1,width,jbxvt.X.font_height,False);
 		y1 += jbxvt.X.font_height;
 	}
+	//cursor();
 	free(str);
 	show_selection(row1,row2,col1,col2);
 }

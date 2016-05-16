@@ -15,36 +15,26 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* FIXME:  There is a memory leak when screen size changes.
+   Attempts to fix by freeing previous larger size causes
+   segmentation fault.  */
 static void free_visible_screens(uint8_t ch)
 {
-	LOG("free_visible_screens(%d)", ch);
-	ch=ch<jbxvt.scr.chars.height?ch:jbxvt.scr.chars.height;
-	//for(uint8_t y = 0; y < jbxvt.scr.chars.height; y++) {
+	LOG("free_visible_screens(%d), sch: %d", ch,
+		jbxvt.scr.chars.height);
+	// Avoid segfault when screen size changes:
+	ch=ch>jbxvt.scr.chars.height?jbxvt.scr.chars.height:ch;
 	for(uint8_t y = 0; y < ch; y++) {
 		LOG("y:%d of sch:%d\tch:%d", y,
 			jbxvt.scr.chars.height, ch);
-		assert(jbxvt.scr.s1.text[y]);
 		free(jbxvt.scr.s1.text[y]);
-
-		assert(jbxvt.scr.s2.text[y]);
 		free(jbxvt.scr.s2.text[y]);
-
-		assert(jbxvt.scr.s1.rend[y]);
 		free(jbxvt.scr.s1.rend[y]);
-
-		assert(jbxvt.scr.s2.rend[y]);
 		free(jbxvt.scr.s2.rend[y]);
 	}
-	assert(jbxvt.scr.s1.text);
 	free(jbxvt.scr.s1.text);
-
-	assert(jbxvt.scr.s2.text);
 	free(jbxvt.scr.s2.text);
-
-	assert(jbxvt.scr.s1.rend);
 	free(jbxvt.scr.s1.rend);
-
-	assert(jbxvt.scr.s2.rend);
 	free(jbxvt.scr.s2.rend);
 }
 
@@ -99,26 +89,19 @@ static int save_data_on_screen(uint8_t cw, int i, const int j,
 	uint32_t ** restrict r1, unsigned char ** restrict s2,
 	uint32_t ** restrict r2)
 {
+	// truncate to fit:
 	uint8_t n = cw < jbxvt.scr.chars.width
 		? cw : jbxvt.scr.chars.width;
+	// copy contents:
 	memcpy(s1[j],jbxvt.scr.s1.text[i],n);
 	memcpy(s2[j],jbxvt.scr.s2.text[i],n);
-	memcpy(r1[j],jbxvt.scr.s1.rend[i],
-		n * sizeof(uint32_t));
-	memcpy(r2[j],jbxvt.scr.s2.rend[i],
-		n * sizeof(uint32_t));
-	s1[j][cw]
-		= jbxvt.scr.s1.text[i]
-		[jbxvt.scr.chars.width];
-	s2[j][cw]
-		= jbxvt.scr.s2.text[i]
-		[jbxvt.scr.chars.width];
-	r1[j][cw]
-		= jbxvt.scr.s1.rend[i]
-		[jbxvt.scr.chars.width];
-	r2[j][cw]
-		= jbxvt.scr.s2.rend[i]
-		[jbxvt.scr.chars.width];
+	memcpy(r1[j],jbxvt.scr.s1.rend[i], n * sizeof(uint32_t));
+	memcpy(r2[j],jbxvt.scr.s2.rend[i], n * sizeof(uint32_t));
+	// copy end byte for wrap flag:
+	s1[j][cw] = jbxvt.scr.s1.text[i][jbxvt.scr.chars.width];
+	s2[j][cw] = jbxvt.scr.s2.text[i][jbxvt.scr.chars.width];
+	r1[j][cw] = jbxvt.scr.s1.rend[i][jbxvt.scr.chars.width];
+	r2[j][cw] = jbxvt.scr.s2.rend[i][jbxvt.scr.chars.width];
 	i--;
 	if (i < 0) {
 		*onscreen = false;
@@ -140,6 +123,7 @@ static int handle_offscreen_data(const uint8_t cw,
 		? cw : sl->sl_length;
 	memcpy(s1[j],sl->sl_text,n);
 	free(sl->sl_text);
+	sl->sl_text=NULL;
 	if (sl->sl_rend) {
 		memcpy(r1[j],sl->sl_rend,
 			n*sizeof(uint32_t));
@@ -147,9 +131,8 @@ static int handle_offscreen_data(const uint8_t cw,
 			sl->sl_rend
 			[sl->sl_length];
 		free(sl->sl_rend);
-		sl->sl_rend=NULL;
 	}
-	free((void *)sl);
+	free(sl);
 	return i + 1;
 }
 
@@ -170,10 +153,10 @@ void scr_reset(void)
 		 *  the last byte is used as a flag which is non-zero of the
 		 *  line wrapped automatically.
 		 */
-		s1 = (unsigned char **)malloc(ch * sizeof(void*));
-		s2 = (unsigned char **)malloc(ch * sizeof(void*));
-		r1 = malloc(ch * sizeof(void*));
-		r2 = malloc(ch * sizeof(void*));
+		s1 = malloc(ch * sizeof(void*));
+		s2 = malloc(ch * sizeof(void*));
+		r1 = malloc(ch * sizeof(uint32_t*));
+		r2 = malloc(ch * sizeof(uint32_t*));
 		for (uint16_t y = 0; y < ch; y++) {
 			s1[y] = calloc(cw + 1, 1);
 			s2[y] = calloc(cw + 1, 1);
@@ -219,7 +202,8 @@ void scr_reset(void)
 	sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1,
 		jbxvt.scr.offset, jbxvt.scr.offset
 		+ jbxvt.scr.chars.height - 1);
-	repaint(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
+	repaint(0, jbxvt.scr.chars.height - 1,
+		0, jbxvt.scr.chars.width - 1);
 	cursor();
 }
 

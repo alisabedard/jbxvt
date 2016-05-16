@@ -26,8 +26,9 @@
 #include "xsetup.h"
 
 
-#include "jbxvt.h"
 #include "init_display.h"
+#include "jbxvt.h"
+#include "log.h"
 #include "scr_reset.h"
 #include "screen.h"
 #include "sbar.h"
@@ -82,7 +83,6 @@ void map_window(void)
 	 */
 	XMaskEvent(jbxvt.X.dpy,ExposureMask,&(XEvent){});
 	resize_window();
-	scr_reset();
 }
 
 /*  Called after a possible window size change.  If the window size has changed
@@ -91,6 +91,7 @@ void map_window(void)
  */
 int resize_window(void)
 {
+	LOG("resize_window()");
 	int x, y;
 	unsigned int width, height;
 	{
@@ -104,12 +105,14 @@ int resize_window(void)
 		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.vt,width - SBAR_WIDTH,height);
 	} else
 		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.vt,width,height);
+	scr_reset();
 	return(1);
 }
 
 //  Toggle scrollbar.
 void switch_scrollbar(void)
 {
+	LOG("switch_scrollbar()");
 	Window root;
 	int x, y;
 	unsigned int width, height, bdr_width, depth;
@@ -145,6 +148,7 @@ void switch_scrollbar(void)
  */
 void change_window_name(unsigned char * str)
 {
+	LOG("change_window_name(%s)", str);
 	XTextProperty name;
 
 	if (XStringListToTextProperty((char **)&str,1,&name) == 0) {
@@ -158,6 +162,7 @@ void change_window_name(unsigned char * str)
 //  Change the icon name.
 void change_icon_name(unsigned char * str)
 {
+	LOG("change_icon_name(%s)", str);
 	XTextProperty name;
 
 	if (XStringListToTextProperty((char **)&str,1,&name) == 0) {

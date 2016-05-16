@@ -8,7 +8,6 @@
  */
 struct screenst {
 	unsigned char **text;	/* backup copy of screen->text */
-	//unsigned char **rend;	/* character rendition styles etc. */
 	uint32_t **rend; // rendition styles
 	int row;	/* cursor position */
 	int col;	/* ditto */

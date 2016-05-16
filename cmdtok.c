@@ -59,7 +59,7 @@ static int16_t get_com_char(const int8_t flags)
 				 *  events.  Exit the program to avoid looping
 				 *  forever.
 				 */
-				quit(0);
+				quit(1);
 			FD_SET(jbxvt.com.fd,&in_fdset);
 			FD_SET(x_fd,&in_fdset);
 			FD_ZERO(&out_fdset);

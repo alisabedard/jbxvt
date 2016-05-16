@@ -58,7 +58,7 @@ struct JBXVT jbxvt;
 
 extern int debugging;
 
-static bool size_set; // flag set once the window size has been set
+//static bool size_set; // flag set once the window size has been set
 
 static enum ModeValue handle_reset(struct tokenst * restrict token)
 {
@@ -148,7 +148,6 @@ static void handle_decstbm(struct tokenst * restrict token)
 
 static void handle_tk_char(const unsigned char tk_char)
 {
-	LOG("handle_tk_char(%c)", tk_char);
 	switch (tk_char) {
 	case '\n' :
 		scr_index();
@@ -170,6 +169,7 @@ static void handle_tk_char(const unsigned char tk_char)
 
 static void handle_tk_expose(struct tokenst * restrict t)
 {
+	static bool size_set;
 	LOG("handle_tk_expose()");
 	switch (t->tk_region) {
 	case SCREEN :
@@ -221,7 +221,6 @@ app_loop_head:
 		break;
 	case TK_RESIZE :
 		resize_window();
-		scr_reset();
 		break;
 	case TK_TXTPAR :		/* change title or icon name */
 		handle_txtpar(&token);
@@ -349,11 +348,9 @@ app_loop_head:
 	case TK_DECSTBM:
 		handle_decstbm(&token);
 		break;
-#ifdef DEBUG
 	case TK_DECSWH :		/* ESC # digit */
-		fputs("TK_DECSWH", stderr);
+		LOG("TK_DECSWH");
 		break;
-#endif//DEBUG
 	case TK_DECSC :
 		scr_save_cursor();
 		break;

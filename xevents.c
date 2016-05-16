@@ -163,6 +163,7 @@ bool handle_xevents(struct tokenst * restrict tk)
 		tk->tk_nargs = 4;
 		break;
 	case ConfigureNotify :
+		LOG("ConfigureNotify");
 		tk->tk_type = TK_RESIZE;
 		tk->tk_nargs = 0;
 		break;

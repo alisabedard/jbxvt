@@ -1,7 +1,7 @@
 #include "repair_damage.h"
 
-
 #include "jbxvt.h"
+#include "log.h"
 #include "repaint.h"
 #include "screen.h"
 #include "xvt.h"
@@ -18,6 +18,7 @@ static Bool grexornoex(Display * restrict dpy __attribute__((unused)),
  */
 void repair_damage(void)
 {
+	LOG("repair_damage()");
 	XEvent event;
 	int row1, row2, col1, col2;
 

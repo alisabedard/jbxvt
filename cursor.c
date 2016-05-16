@@ -15,10 +15,12 @@ void cursor(void)
 
 	const int x = MARGIN + jbxvt.X.font_width * jbxvt.scr.current->col;
 	const int y = MARGIN + jbxvt.X.font_height * jbxvt.scr.current->row;
-	XFillRectangle(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.cu,x,y,jbxvt.X.font_width,jbxvt.X.font_height);
+	XFillRectangle(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.cu,
+		x,y,jbxvt.X.font_width,jbxvt.X.font_height);
 	if (focus == 0)
-		XFillRectangle(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.cu,x + 1,y + 1,
-			jbxvt.X.font_width - 2,jbxvt.X.font_height - 2);
+		XFillRectangle(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.cu,
+			x + 1,y + 1, jbxvt.X.font_width - 2,
+			jbxvt.X.font_height - 2);
 }
 
 /*  Indicate a change of keyboard focus.  type is 1 for entry events and 2 for

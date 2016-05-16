@@ -36,7 +36,6 @@ enum { MARGIN = 2 };	/* gap between the text and the window edges */
 #define FIXED_FONT "fixed"	/* last resort font */
 #define DEF_SAVED_LINES 512 /* number of saved lines that have
 			       scrolled off the top */
-//#define TERM_ENV "TERM=xterm"
 #define TERM_ENV "TERM=xterm"
 #define COMMAND "/bin/sh"	/* default command to run */
 

@@ -15,7 +15,6 @@
 static void sel_scr_to_sav(struct selst * restrict s,
 	const int i, const int count)
 {
-	LOG("sel_scr_to_save()");
 	if (s->se_type == SCREENSEL && s->se_index == i) {
 		s->se_type = SAVEDSEL;
 		s->se_index = count - i - 1;
@@ -24,22 +23,13 @@ static void sel_scr_to_sav(struct selst * restrict s,
 
 static void free_top_line(const int i)
 {
-	LOG("free_top_lines()");
+	LOG("free_top_line()");
 	struct slinest ** s = &jbxvt.scr.sline.data[jbxvt.scr.sline.max - i];
 	if(*s) {
-		if((*s)->sl_length == 0)
-			  return;
-		if((*s)->sl_text) {
-			free((*s)->sl_text);
-			(*s)->sl_text = NULL;
-		}
-		if((*s)->sl_rend) {
-			free((*s)->sl_rend);
-			(*s)->sl_rend = NULL;
-		}
+		free((*s)->sl_text);
+		free((*s)->sl_rend);
 		(*s)->sl_length = 0;
 		free(*s);
-		*s = NULL;
 	}
 }
 

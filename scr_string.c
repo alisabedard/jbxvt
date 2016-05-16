@@ -3,6 +3,7 @@
 #include "cursor.h"
 
 #include "jbxvt.h"
+#include "log.h"
 #include "repaint.h"
 #include "repair_damage.h"
 #include "screen.h"
@@ -17,6 +18,7 @@
  */
 void scr_string(unsigned char * restrict str, int len, int nlcount)
 {
+	LOG("scr_string(%s, len: %d, nlcount: %d)", str, len, nlcount);
 	int x, x2, y, n, i;
 	unsigned int width;
 	unsigned char *s;
@@ -101,8 +103,8 @@ void scr_string(unsigned char * restrict str, int len, int nlcount)
 			;
 		n = n + jbxvt.scr.current->col > jbxvt.scr.chars.width
 			? jbxvt.scr.chars.width - jbxvt.scr.current->col : n;
-		uint32_t *r;
 		if (jbxvt.scr.current->insert) {
+			uint32_t *r;
 			s = jbxvt.scr.current->text[jbxvt.scr.current->row];
 			r = jbxvt.scr.current->rend[jbxvt.scr.current->row];
 			for (i = jbxvt.scr.chars.width - 1;
@@ -121,13 +123,24 @@ void scr_string(unsigned char * restrict str, int len, int nlcount)
 				repair_damage();
 			}
 		}
-
-		paint_rval_text(str,jbxvt.scr.rstyle,n,x,y);
+		
+//		memset(jbxvt.scr.current->text[jbxvt.scr.current->row]
+//			+ jbxvt.scr.current->col,0,jbxvt.scr.chars.width);
 		memcpy(jbxvt.scr.current->text[jbxvt.scr.current->row]
 			+ jbxvt.scr.current->col,str,n);
+//		jbxvt.scr.current->text[jbxvt.scr.current->row]
+//			[jbxvt.scr.current->col + n] = '#';
+		jbxvt.scr.current->text[jbxvt.scr.current->row]
+			[jbxvt.scr.current->col + n] = '\0';
+		LOG("n: %d, strlen: %lu", n, strlen((const char *)
+			jbxvt.scr.current->text[jbxvt.scr.current->row]));
+			
+		paint_rval_text(str,jbxvt.scr.rstyle,n,x,y);
 		if (jbxvt.scr.rstyle == 0)
-			memset(jbxvt.scr.current->rend[jbxvt.scr.current->row]
-				+ jbxvt.scr.current->col,0,n);
+			memset(jbxvt.scr.current->rend
+				[jbxvt.scr.current->row]
+				+ jbxvt.scr.current->col,
+				0,n*sizeof(uint32_t));
 		else {
 			for (i = 0; i < n; i++)
 				jbxvt.scr.current->rend[jbxvt.scr.current->row]
