@@ -440,6 +440,7 @@ int main(int argc, char ** argv)
 #ifdef DEBUG
 	fprintf(stderr, "Command: %s\n", command);
 #endif//DEBUG
+	setenv("TERM", TERM_ENV, true);
 	init_command(command,com_argv);
 	app_loop();
 

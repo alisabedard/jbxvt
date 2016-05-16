@@ -173,31 +173,21 @@ void repaint(int row1, int row2, int col1, int col2)
 				x2,y1,width,jbxvt.X.font_height,False);
 		y1 += jbxvt.X.font_height;
 	}
-// This causes some stale display problems
-	//  Now do the remainder from the current screen
+
+	// Do the remainder from the current screen:
 	i = jbxvt.scr.offset > row1 ? 0 : row1 - jbxvt.scr.offset;
 	for (; y <= row2; y++, i++) {
 		unsigned char * s = jbxvt.scr.current->text[i];
 		int m = col1 - 1;
-#if 0
-		for (int x = col1; x <= col2; x++)
-			if (s[x] < ' ')
-				str[x - col1] = ' ';
-			else {
-				str[x - col1] = s[x];
-				m = x;
-			}
-#endif
-		if(jbxvt.scr.current->row == y) {
-			//y++;
-			y1+=jbxvt.X.font_height;
+		/* Ensure that stale data on the cursor line
+		   is not displayed, particularly in vi:  */
+		if(jbxvt.scr.current->row == y && col1 == 0) {
 			cursor();
+			y1+=jbxvt.X.font_height;
 			continue;
 		}
 		for(uint8_t x = col1; x <= col2; x++) {
-			if (s[x] == '\0') {
-				break;
-			} else if (s[x] < ' ') {
+			if (s[x] < ' ') {
 				str[x - col1] = ' ';
 			} else {
 				str[x - col1] = s[x];
@@ -218,7 +208,6 @@ void repaint(int row1, int row2, int col1, int col2)
 				x2,y1,width,jbxvt.X.font_height,False);
 		y1 += jbxvt.X.font_height;
 	}
-	//cursor();
 	free(str);
 	show_selection(row1,row2,col1,col2);
 }

@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 enum TokenLimits {
-	TKS_MAX =	512,	// max length of a string token
+	TKS_MAX =	64,	// max length of a string token
 	TK_MAX_ARGS =	8	// max # of numeric arguments
 };
 

@@ -25,12 +25,15 @@ static void free_visible_screens(uint8_t ch)
 	// Avoid segfault when screen size changes:
 	ch=ch>jbxvt.scr.chars.height?jbxvt.scr.chars.height:ch;
 	for(uint8_t y = 0; y < ch; y++) {
-		LOG("y:%d of sch:%d\tch:%d", y,
-			jbxvt.scr.chars.height, ch);
+		LOG("y:%d of sch:%d\tch:%d", y, jbxvt.scr.chars.height, ch);
+		assert(jbxvt.scr.s1.text[y]);
 		free(jbxvt.scr.s1.text[y]);
+		assert(jbxvt.scr.s2.text[y]);
 		free(jbxvt.scr.s2.text[y]);
-		free(jbxvt.scr.s1.rend[y]);
-		free(jbxvt.scr.s2.rend[y]);
+		if(jbxvt.scr.s1.rend[y])
+			free(jbxvt.scr.s1.rend[y]);
+		if(jbxvt.scr.s2.rend[y])
+			free(jbxvt.scr.s2.rend[y]);
 	}
 	free(jbxvt.scr.s1.text);
 	free(jbxvt.scr.s2.text);
@@ -125,11 +128,8 @@ static int handle_offscreen_data(const uint8_t cw,
 	free(sl->sl_text);
 	sl->sl_text=NULL;
 	if (sl->sl_rend) {
-		memcpy(r1[j],sl->sl_rend,
-			n*sizeof(uint32_t));
-		r1[j][cw] =
-			sl->sl_rend
-			[sl->sl_length];
+		memcpy(r1[j],sl->sl_rend, n*sizeof(uint32_t));
+		r1[j][cw] = sl->sl_rend [sl->sl_length];
 		free(sl->sl_rend);
 	}
 	free(sl);
@@ -176,7 +176,6 @@ void scr_reset(void)
 					  j, &onscreen, s1, r1, s2, r2)
 					  : handle_offscreen_data(cw, i, j,
 						  s1, r1);
-		
 			if (onscreen)
 				  abort();
 			for (j = i; j < jbxvt.scr.sline.top; j++)

@@ -1,7 +1,6 @@
 #include "scr_string.h"
 
 #include "cursor.h"
-
 #include "jbxvt.h"
 #include "log.h"
 #include "repaint.h"
@@ -96,13 +95,16 @@ void scr_string(unsigned char * restrict str, int len, int nlcount)
 			jbxvt.scr.current->col = 0;
 			jbxvt.scr.current->wrap_next = 0;
 		}
-		check_selection(jbxvt.scr.current->row,jbxvt.scr.current->row);
+		check_selection(jbxvt.scr.current->row,
+			jbxvt.scr.current->row);
 		x = MARGIN + jbxvt.X.font_width * jbxvt.scr.current->col;
 		y = MARGIN + jbxvt.X.font_height * jbxvt.scr.current->row;
 		for (n = 0; str[n] >= ' '; n++)
 			;
-		n = n + jbxvt.scr.current->col > jbxvt.scr.chars.width
-			? jbxvt.scr.chars.width - jbxvt.scr.current->col : n;
+		n = n + jbxvt.scr.current->col
+			> jbxvt.scr.chars.width
+			? jbxvt.scr.chars.width
+			- jbxvt.scr.current->col : n;
 		if (jbxvt.scr.current->insert) {
 			uint32_t *r;
 			s = jbxvt.scr.current->text[jbxvt.scr.current->row];
@@ -124,14 +126,14 @@ void scr_string(unsigned char * restrict str, int len, int nlcount)
 			}
 		}
 		
-//		memset(jbxvt.scr.current->text[jbxvt.scr.current->row]
-//			+ jbxvt.scr.current->col,0,jbxvt.scr.chars.width);
 		memcpy(jbxvt.scr.current->text[jbxvt.scr.current->row]
 			+ jbxvt.scr.current->col,str,n);
-//		jbxvt.scr.current->text[jbxvt.scr.current->row]
-//			[jbxvt.scr.current->col + n] = '#';
-		jbxvt.scr.current->text[jbxvt.scr.current->row]
-			[jbxvt.scr.current->col + n] = '\0';
+		/* Clear memory cells which are not part of the
+			desired output string.  */
+		memset(jbxvt.scr.current->text[jbxvt.scr.current->row]
+			+ jbxvt.scr.current->col + n, 0,
+			jbxvt.scr.chars.width
+			- jbxvt.scr.current->col - n);
 		LOG("n: %d, strlen: %lu", n, strlen((const char *)
 			jbxvt.scr.current->text[jbxvt.scr.current->row]));
 			

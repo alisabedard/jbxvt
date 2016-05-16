@@ -40,7 +40,7 @@ enum ScrMoveFlags {
 };
 
 enum {
-	MAX_SCROLL = 50 // max # lines that can scroll at once
+	MAX_SCROLL = 64 // max # lines that can scroll at once
 };
 
 //  arguments to the screen delete functions
@@ -92,14 +92,14 @@ enum ScrDelArg { END, START, ENTIRE };
 #define COLOR_7 "grey90"
 
 // Bright colors:
-#define BCOLOR_0 "black"
+#define BCOLOR_0 "grey10"
 #define BCOLOR_1 "red3"
 #define BCOLOR_2 "green3"
 #define BCOLOR_3 "yellow3"
 #define BCOLOR_4 "blue3"
 #define BCOLOR_5 "magenta3"
 #define BCOLOR_6 "cyan3"
-#define BCOLOR_7 "grey90"
+#define BCOLOR_7 "white"
 
 void home_screen(void);
 int16_t is_string_char(int16_t c);
