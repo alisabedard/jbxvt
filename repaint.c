@@ -179,13 +179,6 @@ void repaint(int row1, int row2, int col1, int col2)
 	for (; y <= row2; y++, i++) {
 		unsigned char * s = jbxvt.scr.current->text[i];
 		int m = col1 - 1;
-		/* Ensure that stale data on the cursor line
-		   is not displayed, particularly in vi:  */
-		if(jbxvt.scr.current->row == y && col1 == 0) {
-			cursor();
-			y1+=jbxvt.X.font_height;
-			continue;
-		}
 		for(uint8_t x = col1; x <= col2; x++) {
 			if (s[x] < ' ') {
 				str[x - col1] = ' ';
