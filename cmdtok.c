@@ -71,16 +71,17 @@ static int16_t get_com_char(const int8_t flags)
 					NULL,NULL);
 			while (sv < 0 && errno == EINTR);
 			if (sv < 0) {
-				error("select failed");
+				perror("select failed");
 				quit(-1);
 			}
 
 			if (FD_ISSET(jbxvt.com.fd,&out_fdset)) {
 				count = jbxvt.com.send_count < 100
 					? jbxvt.com.send_count : 100;
-				count = write(jbxvt.com.fd,jbxvt.com.send_nxt,count);
+				count = write(jbxvt.com.fd,
+					jbxvt.com.send_nxt,count);
 				if (count < 0) {
-					error("failed to write to command");
+					perror("failed to write to command");
 					quit(-1);
 				}
 				jbxvt.com.send_count -= count;
@@ -146,7 +147,8 @@ static int16_t get_com_char(const int8_t flags)
 			xe = (struct xeventst *)malloc(sizeof(struct xeventst));
 			xe->xe_type = event.type;
 			xe->xe_window = event.xany.window;
-			if (event.type == Expose || event.type == GraphicsExpose) {
+			if (event.type == Expose
+				|| event.type == GraphicsExpose) {
 				xe->xe_x = event.xexpose.x;
 				xe->xe_y = event.xexpose.y;
 				xe->xe_width = event.xexpose.width;

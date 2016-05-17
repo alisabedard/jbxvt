@@ -34,7 +34,6 @@
 #include "sbar.h"
 #include "xvt.h"
 
-#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -144,45 +143,20 @@ void switch_scrollbar(void)
 	}
 }
 
-/*  Change the window name displayed in the title bar.
- */
-void change_window_name(unsigned char * str)
+// Change window and/or icon name:
+void change_name(unsigned char * restrict str, const bool window,
+	const bool icon)
 {
-	LOG("change_window_name(%s)", str);
+	LOG("change_name(%s, %d, %d)", str, window, icon);
 	XTextProperty name;
 
-	if (XStringListToTextProperty((char **)&str,1,&name) == 0) {
-		error("cannot allocate window name");
-		return;
+	if (XStringListToTextProperty((char **)&str,1,&name)) {
+		if(window)
+			XSetWMName(jbxvt.X.dpy,jbxvt.X.win.main,&name);
+		if(icon)
+			XSetWMIconName(jbxvt.X.dpy,jbxvt.X.win.main,&name);
+		XFree(name.value);
 	}
-	XSetWMName(jbxvt.X.dpy,jbxvt.X.win.main,&name);
-	XFree(name.value);
-}
 
-//  Change the icon name.
-void change_icon_name(unsigned char * str)
-{
-	LOG("change_icon_name(%s)", str);
-	XTextProperty name;
-
-	if (XStringListToTextProperty((char **)&str,1,&name) == 0) {
-		error("cannot allocate icon name");
-		return;
-	}
-	XSetWMIconName(jbxvt.X.dpy,jbxvt.X.win.main,&name);
-	XFree(name.value);
-}
-
-/*  Print an error message.
- */
-/*VARARGS1*/
-void error(char *fmt,...)
-{
-	va_list args;
-	va_start(args,fmt);
-	vfprintf(stderr,fmt,args);
-	va_end(args);
-	fprintf(stderr,"\n");
-	fflush(stderr);
 }
 

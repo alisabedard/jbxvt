@@ -120,13 +120,6 @@
 #define SCTTY_IOCTL
 #endif//NETBSD
 
-#ifdef SUNOS4
-#define BSD_PTY
-#define BSD_UTMP
-#define TTYTAB "/etc/ttytab"	/* File to search for tty utmp slot number */
-#define SCTTY_IOCTL
-#endif /* SUNOS */
-
 #ifdef SUNOS5
 #include <sys/stropts.h>
 #include <sys/file.h>
@@ -136,33 +129,12 @@
 #define SVR4_PTY
 #endif /* SUNOS5 */
 
-#ifdef OSF1
-#include <sys/ioctl.h>
-#define SVR4_UTMP
-#define BSD_PTY
-#define SCTTY_IOCTL
-#endif /* OSF1 */
-
 #ifdef AIX3
 #include <sys/ioctl.h>
 #include <sys/stropts.h>
 #define SVR4_UTMP
 #define BSD_PTY
 #endif /* AIX3 */
-
-#ifdef ULTRIX
-#include <sys/ioctl.h>
-#include <sgtty.h>
-#define BSD_PTY
-#define BSD_TTY
-#define BSD_UTMP
-#define TTYTAB "/etc/ttys"	/* File to search for tty utmp slot number */
-#endif /* ULTRIX */
-
-#ifdef HPUX
-#define SVR4_UTMP
-#define BSD_PTY
-#endif /* HPUX */
 
 #ifdef LINUX
 #include <pty.h>
@@ -171,21 +143,17 @@
 #define SVR4_UTMP
 #endif
 
-#ifdef UKC_LOCATIONS
-#include <loc.h>
-#define LOCTMPFILE	"/etc/loctmp"
-#endif /* UKC_LOCATIONS */
+static int comm_pid = -1;	// process id of child
+static char *tty_name = NULL;	// name of the slave teletype
+static struct utmp utent;	// our current utmp entry
 
-static int comm_pid = -1;		/* process id of child */
-static char *tty_name = NULL;	/* name of the slave teletype */
 #ifdef BSD_UTMP
-static int tslot = -1;		/* index to our slot in the utmp file */
+static int tslot = -1;		// index to our slot in the utmp file
 #endif /* BSD_UTMP */
-static struct utmp utent;	/* our current utmp entry */
 
-/*  Catch a SIGCHLD signal and exit if the direct child has died.
- */
-static void catch_child(int sig __attribute__((unused)))
+
+//  Catch a SIGCHLD signal and exit if the direct child has died.
+static void catch_child(const int sig __attribute__((unused)))
 {
 	int status;
 
@@ -240,9 +208,7 @@ static void catch_sig(const int sig __attribute__((unused)))
  *  that can be used to access the utmp file.  We cannot use ttyslot()
  *  because the tty name is not that of fd 0.
  */
-static int
-get_tslot(ttynam)
-char *ttynam;
+static int get_tslot(char * restrict ttynam)
 {
 	FILE *fs;
 	char buf[200], name[200];
@@ -303,7 +269,8 @@ static void write_utmp(void)
 	pw = getpwuid(getuid());
 	if (pw != NULL)
 		strncpy(utentx.ut_name,pw->pw_name,sizeof(utent.ut_name));
-	strncpy(utentx.ut_host,XDisplayString(jbxvt.X.dpy),sizeof(utentx.ut_host));
+	strncpy(utentx.ut_host,XDisplayString(jbxvt.X.dpy),
+		sizeof(utentx.ut_host));
 	utentx.ut_syslen = strlen(utentx.ut_host) + 1;
 	time(&utentx.ut_xtime);
 	getutmp(&utentx,&utent);
@@ -321,7 +288,8 @@ static void write_utmp(void)
 	int ut_fd;
 
 	if ((tslot = get_tslot(tty_name + 5)) < 0)
-		error("can't locate tty %s in %s",tty_name,TTYTAB);
+		fprintf(stderr, "can't locate tty %s in %s",
+			tty_name,TTYTAB);
 
 	/*  Attempt to write an entry into the utmp file.
 	 */
@@ -369,22 +337,21 @@ get_pseudo_tty(pmaster,pslave)
 int *pmaster, *pslave;
 {
 #ifdef BSD_PTY
-	int mfd, sfd;
 	char *s3, *s4;
 	static char ptyc3[] = "pqrstuvwxyz";
 	static char ptyc4[] = "0123456789abcdef";
 	static char ptynam[] = "/dev/ptyxx";
 	static char ttynam[] = "/dev/ttyxx";
 
-	/*  First find a master pty that we can open.
-	 */
-	mfd = -1;
+	//  First find a master pty that we can open.
+	int mfd = -1;
 	for (s3 = ptyc3; *s3 != 0; s3++) {
 		for (s4 = ptyc4; *s4 != 0; s4++) {
 			ptynam[8] = ttynam[8] = *s3;
 			ptynam[9] = ttynam[9] = *s4;
 			if ((mfd = open(ptynam,O_RDWR)) >= 0) {
-				if (geteuid() == 0 || access(ttynam,R_OK|W_OK) == 0)
+				if (geteuid() == 0
+					|| access(ttynam,R_OK|W_OK) == 0)
 					break;
 				else {
 					close(mfd);
@@ -396,30 +363,28 @@ int *pmaster, *pslave;
 			break;
 	}
 	if (mfd < 0) {
-		error("Can't open a pseudo teletype");
-		return(NULL);
-	}
-	if ((sfd = open(ttynam,O_RDWR)) < 0) {
-		error("could not open slave tty %s",ttynam);
+		fprintf(stderr, "Can't open a pseudo teletype");
 		return(NULL);
 	}
 #endif /* BSD_PTY */
 
 #ifdef SVR4_PTY
 	char *ttynam;
-	int mfd, sfd;
-
-	if ((mfd = open("/dev/ptmx",O_RDWR)) < 0) {
-		error("Can't open a pseudo teletype");
+	int mfd = open("/dev/ptmx", O_RDWR);;
+	if (mfd < 0) {
+		fprintf(stderr, "Can't open a pseudo teletype");
 		return(NULL);
 	}
 	grantpt(mfd);
 	unlockpt(mfd);
 	ttynam = ptsname(mfd);
-	if ((sfd = open(ttynam,O_RDWR)) < 0) {
-		error("could not open slave tty %s",ttynam);
+#endif /* SVR4_PTY */
+	int sfd = open(ttynam,O_RDWR);
+	if (sfd < 0) {
+		fprintf(stderr, "could not open slave tty %s",ttynam);
 		return(NULL);
 	}
+#ifdef SVR4_PTY
 	ioctl(sfd,I_PUSH,"ptem");
 	ioctl(sfd,I_PUSH,"ldterm");
 #endif /* SVR4_PTY */

@@ -107,14 +107,13 @@ static void handle_txtpar(struct tokenst * restrict token)
 {
 	switch (token->tk_arg[0]) {
 	case 0 :
-		change_window_name(token->tk_string);
-		change_icon_name(token->tk_string);
+		change_name(token->tk_string, true, true);
 		break;
 	case 1 :
-		change_icon_name(token->tk_string);
+		change_name(token->tk_string, false, true);
 		break;
 	case 2 :
-		change_window_name(token->tk_string);
+		change_name(token->tk_string, true, false);
 		break;
 	case 4: // change colors
 	case 12: // cursor color

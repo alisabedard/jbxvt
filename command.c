@@ -213,7 +213,7 @@ void init_command(char * command, char ** argv)
 
 	if ((jbxvt.com.fd = run_command(command,argv)) < 0) {
 		sleep(1);
-		error("Quitting");
+		perror("Quitting");
 		quit(1);
 	}
 	jbxvt.com.buf.next = jbxvt.com.buf.top = jbxvt.com.buf.data;

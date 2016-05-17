@@ -1,4 +1,4 @@
-CFLAGS=-Os
+#CFLAGS=-Os
 #CFLAGS+=-march=native
 #CFLAGS+=-flto # doesn't work with clang
 #CFLAGS=-ggdb -O0

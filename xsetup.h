@@ -32,11 +32,13 @@
 
 extern XSizeHints sizehints;
 
-int resize_window(void);
 void switch_scrollbar(void);
-void change_window_name(unsigned char *);
-void change_icon_name(unsigned char *);
-void error(char *,...);
+
+// Change window and/or icon name:
+void change_name(unsigned char * restrict str, const bool window,
+	const bool icon);
+
+int resize_window(void);
 void send_auth(void);
 void map_window(void);
 bool is_logshell(void);

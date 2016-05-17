@@ -10,6 +10,7 @@
 #include "xsetup.h"
 #include "xvt.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <X11/Xatom.h>
@@ -27,7 +28,7 @@ void scr_make_selection(const Time time)
 
 	XSetSelectionOwner(jbxvt.X.dpy,XA_PRIMARY,jbxvt.X.win.vt,time);
 	if (XGetSelectionOwner(jbxvt.X.dpy,XA_PRIMARY) != jbxvt.X.win.vt)
-		error("Could not get primary selection");
+		fprintf(stderr, "Could not get primary selection");
 
 	/*  Place in CUT_BUFFER0 for backup.
 	 */

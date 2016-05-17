@@ -62,7 +62,7 @@ static uint8_t extract_nonX_args(int argc, char ** argv)
 		if (strcmp(argv[i],"-name") == 0) {
 			if (argv[++i])
 				jbxvt_name = argv[i];
-			else error("missing -name argument");
+			else fprintf(stderr, "missing -name argument");
 		} else if (strcmp(argv[i],"-C") == 0
 			|| strcmp(argv[i],"-console") == 0) {
 			console_flag = 1;
@@ -113,11 +113,11 @@ static void create_window(int argc, char ** argv)
 		0, jbxvt.X.color.fg,jbxvt.X.color.bg);
 
 	if (XStringListToTextProperty(&argv[0],1,&wname) == 0) {
-		error("cannot allocate window name");
+		perror("cannot allocate window name");
 		exit(1);
 	}
 	if (XStringListToTextProperty(&argv[0],1,&iname) == 0) {
-		error("cannot allocate icon name");
+		perror("cannot allocate icon name");
 		exit(1);
 	}
 	class.res_name = argv[0];
