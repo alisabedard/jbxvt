@@ -322,7 +322,7 @@ void quit(int status)
 	if(status) {
 		perror("Exited abnormally");
 		sleep(5); // Allow user to see the error
-		abort();
+		abort(); // Dump core
 	}
 	exit(status);
 }
@@ -332,9 +332,7 @@ void quit(int status)
  *  successful then the master and slave file descriptors are returned
  *  via the arguments.
  */
-static char *
-get_pseudo_tty(pmaster,pslave)
-int *pmaster, *pslave;
+static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 {
 #ifdef BSD_PTY
 	char *s3, *s4;
@@ -344,7 +342,7 @@ int *pmaster, *pslave;
 	static char ttynam[] = "/dev/ttyxx";
 
 	//  First find a master pty that we can open.
-	int mfd = -1;
+	fd_t mfd = -1;
 	for (s3 = ptyc3; *s3 != 0; s3++) {
 		for (s4 = ptyc4; *s4 != 0; s4++) {
 			ptynam[8] = ttynam[8] = *s3;
@@ -369,17 +367,16 @@ int *pmaster, *pslave;
 #endif /* BSD_PTY */
 
 #ifdef SVR4_PTY
-	char *ttynam;
-	int mfd = open("/dev/ptmx", O_RDWR);;
+	const fd_t mfd = open("/dev/ptmx", O_RDWR);;
 	if (mfd < 0) {
 		fprintf(stderr, "Can't open a pseudo teletype");
 		return(NULL);
 	}
 	grantpt(mfd);
 	unlockpt(mfd);
-	ttynam = ptsname(mfd);
+	char * ttynam = ptsname(mfd);
 #endif /* SVR4_PTY */
-	int sfd = open(ttynam,O_RDWR);
+	const fd_t sfd = open(ttynam,O_RDWR);
 	if (sfd < 0) {
 		fprintf(stderr, "could not open slave tty %s",ttynam);
 		return(NULL);
@@ -394,39 +391,44 @@ int *pmaster, *pslave;
 	return(ttynam);
 }
 
-/*  Initialise the terminal attributes.
- */
-static void
-set_ttymodes()
+//  Initialise the terminal attributes.
+static void set_ttymodes(void)
 {
 	uint16_t width, height;
 
 #ifndef BSD_TTY
 
-	/*  Set the terminal using the standard System V termios interface
-	 */
+	//  Set the terminal using the standard System V termios interface
 	static struct termios term;
 
 	memset((char *)&term,0,sizeof(term));
+	
+#ifdef TTYDEF_IFLAG
+	term.c_iflag = TTYDEF_IFLAG;
+#else//!TTYDEF_IFLAG
 	term.c_iflag = BRKINT | IGNPAR | ICRNL | IXON;
 #ifdef IMAXBEL
 	term.c_iflag |= IMAXBEL;
 #endif /* IMAXBEL */
 	if (!is_eightbit())
 		term.c_iflag |= ISTRIP;
+#endif//TTYDEF_IFLAG
+
 	term.c_oflag = OPOST | ONLCR;
+
+#ifdef TTYDEF_CFLAG
+	term.c_cflag = TTYDEF_CFLAG;
+#else//!TTYDEF_OFLAG
+	term.c_cflag = TTYDEF_CFLAG | TTYDEF_SPEED
 	term.c_cflag = B9600 | CREAD;
 	if (!is_eightbit())
 		term.c_cflag |=  PARENB | CS7;
 	else
 		term.c_cflag |= CS8;
+#endif//TTYDEF_CFLAG
+
 	term.c_lflag = ISIG | IEXTEN | ICANON | ECHO | ECHOE | ECHOK;
-#ifdef ECHOCTL
-	term.c_lflag |= ECHOCTL;
-#endif /* ECHOCTL */
-#ifdef ECHOKE
-	term.c_lflag |= ECHOKE;
-#endif /* ECHOKE */
+
 	term.c_cc[VINTR] = 003;		/* ^C */
 	term.c_cc[VQUIT] = 034;		/* ^\ */
 	term.c_cc[VERASE] = 0177;	/* DEL */
@@ -490,7 +492,7 @@ set_ttymodes()
 
 	lmode = LCRTBS | LCRTERA | LCTLECH | LPASS8 | LCRTKIL;
 	(void)ioctl(0,TIOCLSET,&lmode);
-#endif /* BSD_TTY */
+#endif// BSD_TTY
 
 	scr_get_size(&width,&height);
 	tty_set_size(width,height);
@@ -499,16 +501,15 @@ set_ttymodes()
 		if (ioctl(0,TIOCCONS,0) != 0) {
 			perror("Could not set console");
 		}
-#endif /* TIOCCONS */
+#endif// TIOCCONS
 }
 
 static void child(const char * restrict command, char ** argv,
 	fd_t ttyfd)
 {
-	struct group *gr;
-	pid_t pgid;
+	const pid_t pgid = setsid();;
 
-	if ((pgid = setsid()) < 0)
+	if (pgid < 0)
 		  perror("failed to start session");
 
 	/*  Having started a new session, we need to establish
@@ -526,12 +527,11 @@ static void child(const char * restrict command, char ** argv,
 	}
 	close(i);
 #endif /* !SCTTY_IOCTL */
-	int uid, gid;
-	uid = getuid();
-	if ((gr = getgrnam("tty")) != NULL)
-		  gid = gr->gr_gid;
-	else
-		  gid = -1;
+
+	const int uid = getuid();
+	struct group * gr = getgrnam("tty");
+	const int gid = gr ? (int)gr->gr_gid : -1;
+
 	fchown(ttyfd,uid,gid);
 	fchmod(ttyfd, 0620);
 	for (int i = 0; i < jbxvt.com.width; i++)
@@ -566,8 +566,9 @@ int run_command(char * command, char ** argv)
 	assert(argv);
 
 	fd_t ptyfd, ttyfd;
-	if ((tty_name = get_pseudo_tty(&ptyfd,&ttyfd)) == NULL)
-		return(-1);
+	tty_name = get_pseudo_tty(&ptyfd, &ttyfd);
+	if (!tty_name)
+		  return -1;
 	fcntl(ptyfd,F_SETFL,O_NONBLOCK);
 	jbxvt.com.width = sysconf(_SC_OPEN_MAX);
 	for (uint8_t i = 1; i <= 15; i++)
