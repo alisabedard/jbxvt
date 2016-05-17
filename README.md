@@ -1,9 +1,10 @@
 # jbxvt
-Fork of XVT terminal emulator for X11
+jbxvt is a fork of XVT terminal emulator for X11,
+      focusing on usability and minimal resource usage.  
 
 ## About
-jbxvt is based on xvt 2.1.  jbxvt upgrades the code base to the C99 standard and
-introduces many code cleanups.
+jbxvt is based on xvt 2.1.  jbxvt upgrades the code base
+to the C99 standard and introduces many code cleanups.
 
 ## Features
 * uses less memory than rxvt and rxvt-unicode
@@ -14,7 +15,9 @@ introduces many code cleanups.
 * build system rewrite vs xvt
 
 ## Known Issues
-* colors are lost on redraw
+* text is sometimes lost on expose events, particularly with vim running
+* scrolling up in vim leaves stale last line 
+
 Jbxvt is a work in progress, please report all bugs!
 
 
