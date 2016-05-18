@@ -4,6 +4,7 @@
 #include "jbxvt.h"
 #include "sbar.h"
 #include "screen.h"
+#include "ttyinit.h"
 #include "xsetup.h"
 #include "xvt.h"
 
@@ -77,13 +78,15 @@ static uint8_t extract_nonX_args(int argc, char ** argv)
 __attribute__((noreturn))
 static int io_error_handler(Display * restrict dpy __attribute__((unused)))
 {
-	exit(1);
+	fprintf(stderr, "I/O error");
+	quit(1);
 }
 
+__attribute__((noreturn))
 static int error_handler(Display * restrict dpy __attribute__((unused)),
 	XErrorEvent * restrict evp __attribute__((unused)))
 {
-	return io_error_handler(NULL);
+	quit(1);
 }
 
 static void setup_sizehints(void)
