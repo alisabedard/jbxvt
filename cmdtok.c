@@ -1,7 +1,6 @@
 #include "cmdtok.h"
 
 #include "command.h"
-
 #include "jbxvt.h"
 #include "screen.h"
 #include "token.h"
@@ -12,14 +11,13 @@
 #include "xsetup.h"
 
 #include <errno.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/select.h>
 #include <unistd.h>
 
 
-static int x_fd;
+static fd_t x_fd;
 
 void init_cmdtok(void)
 {
@@ -34,23 +32,21 @@ void init_cmdtok(void)
  */
 static int16_t get_com_char(const int8_t flags)
 {
-	XEvent event;
-	struct xeventst *xe;
-	fd_set in_fdset, out_fdset;
-	unsigned char *s;
-	int count, sv;
-	unsigned char mask = is_eightbit() ? 0xff : 0x7f;
-	extern int errno;
-
 	if (jbxvt.com.stack.top > jbxvt.com.stack.data)
 		return(*--jbxvt.com.stack.top);
 
+	const uint8_t mask = is_eightbit() ? 0xff : 0x7f;
+
 	if (jbxvt.com.buf.next < jbxvt.com.buf.top)
 		return(*jbxvt.com.buf.next++ & mask);
-	else if (flags & BUF_ONLY)
+
+	if (flags & BUF_ONLY)
 		return(GCC_NULL);
 
+	int count;
+
 	for (;;) {
+		fd_set in_fdset;
 		FD_ZERO(&in_fdset);
 		while (XPending(jbxvt.X.dpy) == 0) {
 			if (FD_ISSET(x_fd,&in_fdset))
@@ -62,9 +58,11 @@ static int16_t get_com_char(const int8_t flags)
 				quit(1);
 			FD_SET(jbxvt.com.fd,&in_fdset);
 			FD_SET(x_fd,&in_fdset);
+			fd_set out_fdset;
 			FD_ZERO(&out_fdset);
 			if (jbxvt.com.send_count > 0)
 				FD_SET(jbxvt.com.fd,&out_fdset);
+			int sv;
 			do
 				sv = select(jbxvt.com.width,
 					&in_fdset,&out_fdset,
@@ -93,9 +91,11 @@ static int16_t get_com_char(const int8_t flags)
 		}
 		if (FD_ISSET(jbxvt.com.fd,&in_fdset))
 			break;
+		XEvent event;
 		XNextEvent(jbxvt.X.dpy,&event);
+		struct xeventst *xe;
 		if (event.type == KeyPress) {
-			s = lookup_key(&event,&count);
+			unsigned char *s = lookup_key(&event,&count);
 			if (count != 0)
 				send_string(s,count);
 		} else if (event.type == ClientMessage) {
