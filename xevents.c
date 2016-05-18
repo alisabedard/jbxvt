@@ -4,6 +4,7 @@
 #include "log.h"
 #include "token.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 
 static void handle_motion_notify(struct tokenst * restrict tk,
@@ -39,33 +40,46 @@ static void handle_button_release(struct tokenst * restrict tk,
 {
 	if (xe->xe_window == jbxvt.X.win.sb) {
 		switch (xe->xe_button) {
-		case Button1 :
+		case Button1:
+		case Button5:
 			tk->tk_type = TK_SBUP;
 			tk->tk_arg[0] = xe->xe_y;
 			tk->tk_nargs = 1;
 			break;
-		case Button3 :
+		case Button3:
+		case Button4:
 			tk->tk_type = TK_SBDOWN;
 			tk->tk_arg[0] = xe->xe_y;
 			tk->tk_nargs = 1;
 			break;
 		}
 	} else if (xe->xe_window == jbxvt.X.win.vt
-		&& (xe->xe_state & ControlMask) == 0) {
+		&& !(xe->xe_state & ControlMask)) {
 		switch (xe->xe_button) {
-		case Button1 :
-		case Button3 :
+		case Button1:
+		case Button3:
 			tk->tk_type = TK_SELECT;
 			tk->tk_arg[0] = xe->xe_time;
 			tk->tk_nargs = 1;
 			break;
-		case Button2 :
+		case Button2:
 			tk->tk_type = TK_SELINSRT;
 			tk->tk_arg[0] = xe->xe_time;
 			tk->tk_arg[1] = xe->xe_x;
 			tk->tk_arg[2] = xe->xe_y;
 			tk->tk_nargs = 3;
 			break;
+		case Button4:
+			tk->tk_type = TK_SBDOWN;
+			tk->tk_arg[0] = xe->xe_y;
+			tk->tk_nargs = 1;
+			break;
+		case Button5:
+			tk->tk_type = TK_SBUP;
+			tk->tk_arg[0] = xe->xe_y;
+			tk->tk_nargs = 1;
+			break;
+
 		}
 	}
 }
