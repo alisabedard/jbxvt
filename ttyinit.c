@@ -31,7 +31,6 @@
 #include "screen.h"
 #include "xsetup.h"
 
-#include <assert.h>
 #include <fcntl.h>
 #include <grp.h>
 #include <pwd.h>
@@ -401,30 +400,20 @@ static void set_ttymodes(void)
 	static struct termios term;
 
 	memset((char *)&term,0,sizeof(term));
-	
-#ifdef TTYDEF_IFLAG
-	term.c_iflag = TTYDEF_IFLAG;
-#else//!TTYDEF_IFLAG
 	term.c_iflag = BRKINT | IGNPAR | ICRNL | IXON;
 #ifdef IMAXBEL
 	term.c_iflag |= IMAXBEL;
 #endif /* IMAXBEL */
 	if (!is_eightbit())
 		term.c_iflag |= ISTRIP;
-#endif//TTYDEF_IFLAG
 
 	term.c_oflag = OPOST | ONLCR;
 
-#ifdef TTYDEF_CFLAG
-	term.c_cflag = TTYDEF_CFLAG;
-#else//!TTYDEF_OFLAG
-	term.c_cflag = TTYDEF_CFLAG | TTYDEF_SPEED
 	term.c_cflag = B9600 | CREAD;
 	if (!is_eightbit())
 		term.c_cflag |=  PARENB | CS7;
 	else
 		term.c_cflag |= CS8;
-#endif//TTYDEF_CFLAG
 
 	term.c_lflag = ISIG | IEXTEN | ICANON | ECHO | ECHOE | ECHOK;
 
@@ -507,7 +496,8 @@ static void child(const char * restrict command, char ** argv,
 	fd_t ttyfd)
 {
 	const pid_t pgid = setsid();
-	assert(pgid >= 0);
+	if(pgid < 0) // cannot create new session
+		  abort();
 	/*  Having started a new session, we need to establish
 	 *  a controlling teletype for it.  On some systems
 	 *  this can be done with an ioctl but on others
@@ -517,7 +507,8 @@ static void child(const char * restrict command, char ** argv,
 #else//!SCTTY_IOCTL
 	fd_t i = ttyfd;
 	ttyfd = open(tty_name, O_RDWR);
-	assert(ttyfd >= 0);
+	if(ttyfd < 0) // cannot open tty
+		  abort();
 	close(i);
 #endif//!SCTTY_IOCTL
 
@@ -556,9 +547,6 @@ static void child(const char * restrict command, char ** argv,
  */
 int run_command(char * command, char ** argv)
 {
-	assert(command);
-	assert(argv);
-
 	fd_t ptyfd, ttyfd;
 	tty_name = get_pseudo_tty(&ptyfd, &ttyfd);
 	if (!tty_name)
