@@ -40,7 +40,7 @@ void tty_set_size(const uint8_t width, const uint8_t height);
 #else//!TIOCSWINSZ
 #define tty_set_size(w, h)
 #endif//TIOCSWINSZ
-int run_command(char *, char **);
+int run_command(char ** restrict argv);
 
 #endif//!TTYINIT_H
 

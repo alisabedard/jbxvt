@@ -395,7 +395,6 @@ static void set_ttymodes(void)
 	uint16_t width, height;
 
 #ifndef BSD_TTY
-
 	//  Set the terminal using the standard System V termios interface
 	static struct termios term;
 
@@ -492,8 +491,7 @@ static void set_ttymodes(void)
 #endif// TIOCCONS
 }
 
-static void child(const char * restrict command, char ** argv,
-	fd_t ttyfd)
+static void child(char ** restrict argv, fd_t ttyfd)
 {
 	const pid_t pgid = setsid();
 	if(pgid < 0) // cannot create new session
@@ -534,18 +532,16 @@ static void child(const char * restrict command, char ** argv,
 	set_ttymodes();
 	setgid(getgid());
 	setuid(uid);
-	execvp(command,argv);
+	execvp(argv[0],argv);
 	perror("Could not execute command");
 	quit(1);
-
 }
-
 
 /*  Run the command in a subprocess and return a file descriptor for the
  *  master end of the pseudo-teletype pair with the command talking to
  *  the slave.
  */
-int run_command(char * command, char ** argv)
+int run_command(char ** argv)
 {
 	fd_t ptyfd, ttyfd;
 	tty_name = get_pseudo_tty(&ptyfd, &ttyfd);
@@ -561,11 +557,10 @@ int run_command(char * command, char ** argv)
 		return(-1);
 	}
 #ifdef DEBUG
-	fprintf(stderr, "command: %s, pid: %d\n", command, comm_pid);
+	fprintf(stderr, "command: %s, pid: %d\n", argv[0], comm_pid);
 #endif//DEBUG
-	argv[0] = command;
 	if (comm_pid == 0)
-		  child(command, argv, ttyfd);
+		  child(argv, ttyfd);
 	signal(SIGCHLD,catch_child);
 	write_utmp();
 	return(ptyfd);

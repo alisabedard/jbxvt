@@ -202,12 +202,12 @@ struct xeventst * pop_xevent(void)
 /*  Initialise the command connection.  This should be called after the X
  *  server connection is established.
  */
-void init_command(char * command, char ** argv)
+void init_command(char ** restrict argv)
 {
 	//  Enable the delete window protocol:
 	init_wm_del_win();
 
-	if ((jbxvt.com.fd = run_command(command,argv)) < 0) {
+	if ((jbxvt.com.fd = run_command(argv)) < 0) {
 		sleep(1);
 		perror("Quitting");
 		quit(1);

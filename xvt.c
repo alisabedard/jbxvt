@@ -385,18 +385,31 @@ app_loop_head:
 	goto app_loop_head;
 }
 
+// returns new command value
+static char ** process_exec_flag(int * restrict argc, char ** argv)
+{
+	/*  Look for a -e flag and if it is there use it to initialise
+	 *  the command and its arguments.  */
+	uint8_t i;
+	char ** com_argv = NULL;
+
+	for (i = 0; i < *argc; i++)
+		  if (strcmp(argv[i],"-e") == 0)
+			    break;
+	if (i < *argc - 1) {
+		argv[i] = NULL;
+		com_argv = argv + i + 1;
+		*argc = i;
+	}
+
+	return com_argv;
+}
+
 /*  Run the command in a subprocess and return a file descriptor for the
  *  master end of the pseudo-teletype pair with the command talking to
- *  the slave.
- */
+ *  the slave.  */
 int main(int argc, char ** argv)
 {
-	char *command = NULL;
-	char **com_argv = NULL;
-#ifdef DEBUG
-	printf("Size of tokenst: %lu\n", sizeof(struct tokenst));
-#endif//DEBUG
-
 	// Make a copy of the command line argument array
 	char **iargv = (char **)malloc((argc + 1) * sizeof(char *));
 	{
@@ -409,36 +422,21 @@ int main(int argc, char ** argv)
 		iargv[i] = NULL;
 	}
 
-	/*  Look for a -e flag and if it is there use it to initialise
-	 *  the command and its arguments.
-	 */
-	{
-		uint8_t i;
-
-		for (i = 0; i < argc; i++)
-			  if (strcmp(argv[i],"-e") == 0)
-				    break;
-		if (i < argc - 1) {
-			argv[i] = NULL;
-			com_argv = argv + i + 1;
-			command = argv[i + 1];
-			argc = i;
-		}
-	}
-
+	char ** com_argv = process_exec_flag(&argc, argv);
+	
 	init_display(argc,argv,argc,iargv);
 	map_window();
 	char *shell_argv[2]; // here to not lose scope.
-	if(!command) {
-		command = shell_argv[0] = getenv("SHELL");
+	if(!com_argv) {
+		shell_argv[0] = getenv("SHELL");
 		shell_argv[1] = NULL;
 		com_argv = shell_argv;
 	}
 #ifdef DEBUG
-	fprintf(stderr, "Command: %s\n", command);
+	fprintf(stderr, "Command: %s\n", com_argv[0]);
 #endif//DEBUG
 	setenv("TERM", TERM_ENV, true);
-	init_command(command,com_argv);
+	init_command(com_argv);
 	app_loop();
 
 	return 0;

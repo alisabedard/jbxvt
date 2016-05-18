@@ -49,7 +49,7 @@ enum ComCharFlags {BUF_ONLY=1, GET_XEVENTS=2};
 
 struct xeventst *pop_xevent(void);
 void cprintf(char *,...);
-void init_command(char *,char **);
+void init_command(char ** restrict argv);
 unsigned char *lookup_key(XEvent *,int *);
 void push_com_char(int);
 void push_xevent(struct xeventst *);
