@@ -4,7 +4,6 @@
 #include "log.h"
 #include "screen.h"
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -40,7 +39,8 @@ static void free_invisible_lines(const uint16_t n)
 
 static int16_t get_line_width(const uint16_t i)
 {
-	assert(jbxvt.scr.s1.text[i]);
+	if(!jbxvt.scr.s1.text[i])
+		  return 0; // line does not exist
 	int16_t w = jbxvt.scr.chars.width - 1;
 	while(w >= 0 && !jbxvt.scr.s1.text[i][w])
 		  w++;
@@ -64,7 +64,8 @@ void scroll_up(uint16_t count) // unsigned as only going up
 			struct slinest * sl = (struct slinest *)
 				malloc(sizeof(struct slinest));
 			sl->sl_text = (unsigned char *)malloc(j + 1);
-			assert(jbxvt.scr.s1.text[i]);
+			if(!jbxvt.scr.s1.text[i])
+				  abort();
 			memcpy(sl->sl_text,jbxvt.scr.s1.text[i],j);
 			sl->sl_text[j] = jbxvt.scr.s1.text[i]
 				[jbxvt.scr.chars.width];

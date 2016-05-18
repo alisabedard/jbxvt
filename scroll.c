@@ -8,7 +8,6 @@
 #include "show_selection.h"
 #include "xvt.h"
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -225,12 +224,14 @@ static void scroll_down(uint8_t row1, uint8_t row2, int8_t count)
 void scroll(const uint8_t row1, const uint8_t row2, const int16_t count)
 {
 	LOG("scroll(%d, %d, %d)", row1, row2, count);
-	assert(row1 <= row2);
-	assert(count < MAX_SCROLL);
-	if(count<0) {
-		scroll_down(row1, row2, count);
-		return;
+	// Sanitize input:
+	if((row1 <= row2) && (count < MAX_SCROLL)) {
+		// Negative is down:
+		if(count<0) {
+			scroll_down(row1, row2, count);
+			return;
+		}
+		scroll_up(row1, row2, count);
 	}
-	scroll_up(row1, row2, count);
 }
 

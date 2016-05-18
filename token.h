@@ -70,6 +70,7 @@ enum { MAINWIN, SCREEN, SCROLLBAR };
 #define TK_CUF		'C'	/* cursor back */
 #define TK_CUB		'D'	/* cursor back */
 #define TK_CUP		'H'	/* position cursor */
+
 #define TK_ED		'J'	/* erase to start or end of screen */
 #define TK_EL		'K'	/* erase to start or end of line */
 #define TK_IL		'L'	/* insert lines */

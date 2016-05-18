@@ -26,8 +26,8 @@
 #include "command.h"
 
 #include "cmdtok.h"
-
 #include "jbxvt.h"
+#include "log.h"
 #include "screen.h"
 #include "token.h"
 #include "xeventst.h"
@@ -36,7 +36,6 @@
 #include "ttyinit.h"
 #include "wm_del_win.h"
 
-#include <assert.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -207,9 +206,6 @@ void init_command(char * command, char ** argv)
 {
 	//  Enable the delete window protocol:
 	init_wm_del_win();
-
-	assert(command);
-	assert(argv);
 
 	if ((jbxvt.com.fd = run_command(command,argv)) < 0) {
 		sleep(1);

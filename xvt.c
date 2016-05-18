@@ -25,9 +25,10 @@
 
 #include "xvt.h"
 
-#include "cursor.h"
+#include "cmdtok.h"
 #include "color.h"
 #include "command.h"
+#include "cursor.h"
 #include "handle_sgr.h"
 #include "init_display.h"
 #include "jbxvt.h"
@@ -49,7 +50,6 @@
 #include "ttyinit.h"
 #include "xsetup.h"
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -57,8 +57,6 @@
 struct JBXVT jbxvt;
 
 extern int debugging;
-
-//static bool size_set; // flag set once the window size has been set
 
 static enum ModeValue handle_reset(struct tokenst * restrict token)
 {

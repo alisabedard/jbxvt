@@ -10,7 +10,6 @@
 #include "ttyinit.h"
 #include "xvt.h"
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -26,9 +25,7 @@ static void free_visible_screens(uint8_t ch)
 	ch=ch>jbxvt.scr.chars.height?jbxvt.scr.chars.height:ch;
 	for(uint8_t y = 0; y < ch; y++) {
 		LOG("y:%d of sch:%d\tch:%d", y, jbxvt.scr.chars.height, ch);
-		assert(jbxvt.scr.s1.text[y]);
 		free(jbxvt.scr.s1.text[y]);
-		assert(jbxvt.scr.s2.text[y]);
 		free(jbxvt.scr.s2.text[y]);
 		if(jbxvt.scr.s1.rend[y])
 			free(jbxvt.scr.s1.rend[y]);
