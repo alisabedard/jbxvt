@@ -244,8 +244,7 @@ static void write_utmp(void)
 	utent.ut_type = USER_PROCESS;
 	strncpy(utent.ut_id,tty_name + 8,sizeof(utent.ut_id));
 	strncpy(utent.ut_line,tty_name + 5,sizeof(utent.ut_line));
-	pw = getpwuid(getuid());
-	if (pw != NULL)
+	if((pw = getpwuid(getuid())))
 		strncpy(utent.ut_name,pw->pw_name,sizeof(utent.ut_name));
 	strncpy(utent.ut_host,XDisplayString(jbxvt.X.dpy),sizeof(utent.ut_host));
 	time((time_t *)&utent.ut_time);
@@ -507,26 +506,20 @@ static void set_ttymodes(void)
 static void child(const char * restrict command, char ** argv,
 	fd_t ttyfd)
 {
-	const pid_t pgid = setsid();;
-
-	if (pgid < 0)
-		  perror("failed to start session");
-
+	const pid_t pgid = setsid();
+	assert(pgid >= 0);
 	/*  Having started a new session, we need to establish
 	 *  a controlling teletype for it.  On some systems
 	 *  this can be done with an ioctl but on others
-	 *  we need to re-open the slave tty.
-	 */
+	 *  we need to re-open the slave tty.  */
 #ifdef SCTTY_IOCTL
 	(void)ioctl(ttyfd,TIOCSCTTY,0);
-#else /* !SCTTY_IOCTL */
+#else//!SCTTY_IOCTL
 	fd_t i = ttyfd;
-	if ((ttyfd = open(tty_name,O_RDWR)) < 0) {
-		fprintf(stderr, "Can't open teletype %s\n",tty_name);
-		exit(1);
-	}
+	ttyfd = open(tty_name, O_RDWR);
+	assert(ttyfd >= 0);
 	close(i);
-#endif /* !SCTTY_IOCTL */
+#endif//!SCTTY_IOCTL
 
 	const int uid = getuid();
 	struct group * gr = getgrnam("tty");
@@ -555,6 +548,7 @@ static void child(const char * restrict command, char ** argv,
 	quit(1);
 
 }
+
 
 /*  Run the command in a subprocess and return a file descriptor for the
  *  master end of the pseudo-teletype pair with the command talking to
@@ -594,7 +588,7 @@ int run_command(char * command, char ** argv)
  */
 #ifndef NETBSD
 #ifdef TIOCSWINSZ
-void tty_set_size(const int width, const int height)
+void tty_set_size(const uint8_t width, const uint8_t height)
 {
 	struct winsize wsize;
 

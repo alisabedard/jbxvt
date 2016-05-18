@@ -28,13 +28,15 @@
 #ifndef TTYINIT_H
 #define TTYINIT_H
 
+#include <stdint.h>
+
 #ifdef LINUX
 #include <asm-generic/ioctls.h>
 #endif//LINUX
 
 void quit(int) __attribute__((noreturn));
 #ifdef TIOCSWINSZ
-void tty_set_size(const int width, const int height);
+void tty_set_size(const uint8_t width, const uint8_t height);
 #else//!TIOCSWINSZ
 #define tty_set_size(w, h)
 #endif//TIOCSWINSZ

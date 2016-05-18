@@ -1,6 +1,5 @@
 #include "selection.h"
 
-
 #include "jbxvt.h"
 #include "save_selection.h"
 #include "selcmp.h"
@@ -205,44 +204,10 @@ void adjust_selection(struct selst * restrict include)
 		unsigned char * s = se1->se_type == SCREENSEL
 			? jbxvt.scr.current->text[se1->se_index]
 			: jbxvt.scr.sline.data[se1->se_index]->sl_text;
-		static const int char_class[256] = {
-			32,   1,   1,   1,   1,   1,   1,   1,
-			1,  32,   1,   1,   1,   1,   1,   1,
-			1,   1,   1,   1,   1,   1,   1,   1,
-			1,   1,   1,   1,   1,   1,   1,   1,
-			32,  33,  34,  35,  36,  37,  38,  39,
-			40,  41,  42,  43,  44,  45,  46,  47,
-			48,  48,  48,  48,  48,  48,  48,  48,
-			48,  48,  58,  59,  60,  61,  62,  63,
-			64,  48,  48,  48,  48,  48,  48,  48,
-			48,  48,  48,  48,  48,  48,  48,  48,
-			48,  48,  48,  48,  48,  48,  48,  48,
-			48,  48,  48,  91,  92,  93,  94,  48,
-			96,  48,  48,  48,  48,  48,  48,  48,
-			48,  48,  48,  48,  48,  48,  48,  48,
-			48,  48,  48,  48,  48,  48,  48,  48,
-			48,  48,  48, 123, 124, 125, 126,   1,
-			1,   1,   1,   1,   1,   1,   1,   1,
-			1,   1,   1,   1,   1,   1,   1,   1,
-			1,   1,   1,   1,   1,   1,   1,   1,
-			1,   1,   1,   1,   1,   1,   1,   1,
-			160, 161, 162, 163, 164, 165, 166, 167,
-			168, 169, 170, 171, 172, 173, 174, 175,
-			176, 177, 178, 179, 180, 181, 182, 183,
-			184, 185, 186, 187, 188, 189, 190, 191,
-			192, 193, 194, 195, 196, 197, 198, 199,
-			200, 201, 202, 203, 204, 205, 206, 207,
-			208, 209, 210, 211, 212, 213, 214, 215,
-			216, 217, 218, 219, 220, 221, 222, 223,
-			224, 225, 226, 227, 228, 229, 230, 231,
-			232, 233, 234, 235, 236, 237, 238, 239,
-			240, 241, 242, 243, 244, 245, 246, 247,
-			248, 249, 250, 251, 252, 253, 254, 255
-		};
 		int16_t i = se1->se_col;
-		while (i > 0 && char_class[s[i]] == char_class[s[i-1]])
+		while (i && s[i] != ' ')
 			  i--;
-		se1->se_col = i;
+		se1->se_col = i?i+1:0;
 		i = se2->se_col;
 		if (se2 == include || selcmp(se2,&jbxvt.sel.anchor) == 0)
 			  i++;
@@ -254,9 +219,10 @@ void adjust_selection(struct selst * restrict include)
 			s = jbxvt.scr.sline.data[se2->se_index]->sl_text;
 			len = jbxvt.scr.sline.data[se2->se_index]->sl_length;
 		}
-		while (i < len && char_class[s[i]] == char_class[s[i-1]])
+
+		while (i < len && s[i] != ' ' && s[i] != '\n' && s[i])
 			  i++;
-		se2->se_col = (i > len) ? jbxvt.scr.chars.width : i;
+		se2->se_col = i;
 	} else if (selection_unit == LINE) {
 		se1->se_col = 0;
 		se2->se_col = jbxvt.scr.chars.width;
