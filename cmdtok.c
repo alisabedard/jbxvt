@@ -50,18 +50,18 @@ static int16_t get_com_char(const int8_t flags)
 		FD_ZERO(&in_fdset);
 		while (XPending(jbxvt.X.dpy) == 0) {
 			if (FD_ISSET(x_fd,&in_fdset))
-				/*  If we get to this point something is wrong
-				 *  because there is X input available but no
-				 *  events.  Exit the program to avoid looping
-				 *  forever.
-				 */
-				quit(1);
+				  /*  If we get to this point something is wrong
+				   *  because there is X input available but no
+				   *  events.  Exit the program to avoid looping
+				   *  forever.
+				   */
+				  quit(1);
 			FD_SET(jbxvt.com.fd,&in_fdset);
 			FD_SET(x_fd,&in_fdset);
 			fd_set out_fdset;
 			FD_ZERO(&out_fdset);
 			if (jbxvt.com.send_count > 0)
-				FD_SET(jbxvt.com.fd,&out_fdset);
+				  FD_SET(jbxvt.com.fd,&out_fdset);
 			int sv;
 			do {
 				sv = select(jbxvt.com.width,
@@ -88,25 +88,30 @@ static int16_t get_com_char(const int8_t flags)
 			}
 
 			if (FD_ISSET(jbxvt.com.fd,&in_fdset))
-				break;
+				  break;
 		}
 		if (FD_ISSET(jbxvt.com.fd,&in_fdset))
-			break;
+			  break;
 		XEvent event;
 		XNextEvent(jbxvt.X.dpy,&event);
 		struct xeventst *xe;
-		if (event.type == KeyPress) {
-			unsigned char *s = lookup_key(&event,&count);
+		unsigned char * s;
+		switch (event.type) {
+		case KeyPress:
+			s = lookup_key(&event, &count);
 			if (count != 0)
-				send_string(s,count);
-		} else if (event.type == ClientMessage) {
+				  send_string(s, count);
+			break;
+		case ClientMessage:
 			if (event.xclient.format == 32
 				&& event.xclient.data.l[0]
 				== (long)get_wm_del_win())
-				quit(0);
-		} else if (event.type == MappingNotify) {
+				  quit(0);
+			break;
+		case MappingNotify:
 			XRefreshKeyboardMapping(&event.xmapping);
-		} else if (event.type == SelectionRequest) {
+			break;
+		case SelectionRequest:
 			xe = (struct xeventst *)malloc(sizeof(struct xeventst));
 			xe->xe_type = event.type;
 			xe->xe_window = event.xselectionrequest.owner;
@@ -116,8 +121,9 @@ static int16_t get_com_char(const int8_t flags)
 			xe->xe_property = event.xselectionrequest.property;
 			push_xevent(xe);
 			if (flags & GET_XEVENTS)
-				return(GCC_NULL);
-		} else if (event.type == SelectionNotify) {
+				  return(GCC_NULL);
+			break;
+		case SelectionNotify:
 			xe = (struct xeventst *)malloc(sizeof(struct xeventst));
 			xe->xe_type = event.type;
 			xe->xe_time = event.xselection.time;
@@ -125,16 +131,18 @@ static int16_t get_com_char(const int8_t flags)
 			xe->xe_property = event.xselection.property;
 			push_xevent(xe);
 			if (flags & GET_XEVENTS)
-				return(GCC_NULL);
-		} else if (event.type == FocusIn || event.type == FocusOut) {
+				  return(GCC_NULL);
+			break;
+		case FocusIn:
+		case FocusOut:
 			if (event.xfocus.mode != NotifyNormal)
-				continue;
+				  continue;
 			switch (event.xfocus.detail) {
-			    case NotifyAncestor :
-			    case NotifyInferior :
-			    case NotifyNonlinear :
+			case NotifyAncestor :
+			case NotifyInferior :
+			case NotifyNonlinear :
 				break;
-			    default :
+			default :
 				continue;
 			}
 			xe = calloc(1, sizeof(struct xeventst));
@@ -143,8 +151,9 @@ static int16_t get_com_char(const int8_t flags)
 			xe->xe_detail = event.xfocus.detail;
 			push_xevent(xe);
 			if (flags & GET_XEVENTS)
-				return(GCC_NULL);
-		} else {
+				  return(GCC_NULL);
+			break;
+		default:
 			xe = (struct xeventst *)malloc(sizeof(struct xeventst));
 			xe->xe_type = event.type;
 			xe->xe_window = event.xany.window;
@@ -163,7 +172,7 @@ static int16_t get_com_char(const int8_t flags)
 			}
 			push_xevent(xe);
 			if (flags & GET_XEVENTS)
-				return(GCC_NULL);
+				  return(GCC_NULL);
 		}
 	}
 
@@ -184,13 +193,12 @@ void get_token(struct tokenst * restrict tk)
 	if(handle_xevents(tk))
 		  return;
 
-	int16_t c;
-	if ((c = get_com_char(GET_XEVENTS)) == GCC_NULL) {
+	int16_t c = get_com_char(GET_XEVENTS);
+	switch (c) {
+	case GCC_NULL:
 		tk->tk_type = TK_NULL;
 		return;
-	}
-
-	if (c == EOF) {
+	case EOF:
 		tk->tk_type = TK_EOF;
 		return;
 	}
