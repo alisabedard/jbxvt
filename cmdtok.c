@@ -2,6 +2,7 @@
 
 #include "command.h"
 #include "jbxvt.h"
+#include "log.h"
 #include "screen.h"
 #include "token.h"
 #include "ttyinit.h"
@@ -15,7 +16,6 @@
 #include <stdlib.h>
 #include <sys/select.h>
 #include <unistd.h>
-
 
 static fd_t x_fd;
 
@@ -63,11 +63,12 @@ static int16_t get_com_char(const int8_t flags)
 			if (jbxvt.com.send_count > 0)
 				FD_SET(jbxvt.com.fd,&out_fdset);
 			int sv;
-			do
+			do {
 				sv = select(jbxvt.com.width,
 					&in_fdset,&out_fdset,
 					NULL,NULL);
-			while (sv < 0 && errno == EINTR);
+			} while (sv < 0 && errno == EINTR);
+
 			if (sv < 0) {
 				perror("select failed");
 				quit(-1);
@@ -174,16 +175,16 @@ static int16_t get_com_char(const int8_t flags)
 	return *jbxvt.com.buf.next++ & mask;
 }
 
-
 //  Return an input token
 void get_token(struct tokenst * restrict tk)
 {
-	int16_t c, i, n;
-
 	tk->tk_private = 0;
 	tk->tk_type = TK_NULL;
+
 	if(handle_xevents(tk))
 		  return;
+
+	int16_t c;
 	if ((c = get_com_char(GET_XEVENTS)) == GCC_NULL) {
 		tk->tk_type = TK_NULL;
 		return;
@@ -193,8 +194,9 @@ void get_token(struct tokenst * restrict tk)
 		tk->tk_type = TK_EOF;
 		return;
 	}
+
 	if (is_string_char(c)) {
-		i = 0;
+		uint16_t i = 0;
 		tk->tk_nlcount = 0;
 		do {
 			tk->tk_string[i++] = c;
@@ -210,41 +212,43 @@ void get_token(struct tokenst * restrict tk)
 		if (c != GCC_NULL)
 			push_com_char(c);
 	} else if (c == ESC) {
+		uint16_t i;
 		c = get_com_char(0);
-		if (c == '[') {
+		switch(c) {
+		case '[':
 			c = get_com_char(0);
 			if (c >= '<' && c <= '?') {
 				tk->tk_private = c;
 				c = get_com_char(0);
 			}
 
-			/*  read any numerical arguments
-			 */
+			//  read any numerical arguments
 			i = 0;
 			do {
-				n = 0;
+				uint16_t n = 0;
 				while (c >= '0' && c <= '9') {
 					n = n * 10 + c - '0';
 					c = get_com_char(0);
 				}
 				if (i < TK_MAX_ARGS)
-					tk->tk_arg[i++] = n;
+					  tk->tk_arg[i++] = n;
 				if (c == ESC)
-					push_com_char(c);
+					  push_com_char(c);
 				if (c < ' ')
-					return;
+					  return;
 				if (c < '@')
-					c = get_com_char(0);
+					  c = get_com_char(0);
 			} while (c < '@' && c >= ' ');
 			if (c == ESC)
-				push_com_char(c);
+				  push_com_char(c);
 			if (c < ' ')
-				return;
+				  return;
 			tk->tk_nargs = i;
 			tk->tk_type = c;
-		} else if (c == ']') {
+			break;
+		case ']':
 			c = get_com_char(0);
-			n = 0;
+			uint16_t n = 0;
 			while (c >= '0' && c <= '9') {
 				n = n * 10 + c - '0';
 				c = get_com_char(0);
@@ -255,44 +259,52 @@ void get_token(struct tokenst * restrict tk)
 			i = 0;
 			while ((c & 0177) >= ' ' && i < TKS_MAX) {
 				if (c >= ' ')
-					tk->tk_string[i++] = c;
+					  tk->tk_string[i++] = c;
 				c = get_com_char(0);
 			}
 			tk->tk_length = i;
 			tk->tk_string[i] = 0;
 			tk->tk_type = TK_TXTPAR;
-		} else if (c == '#' || c == '(' || c == ')') {
+			break;
+		case '#':
+		case '(':
+		case ')':
 			tk->tk_type = c;
 			c = get_com_char(0);
 			tk->tk_arg[0] = c;
 			tk->tk_nargs = 1;
-		} else if (c == '7' || c == '8' || c == '=' || c == '>') {
+			break;
+		case '7':
+		case '8':
+		case '=':
+		case '>':
 			tk->tk_type = c;
 			tk->tk_nargs = 0;
-		} else {
+			break;
+		default:
 			switch (c) {
-			    case 'D' :
+			case 'D' :
 				tk->tk_type = TK_IND;
 				break;
-			    case 'E' :
+			case 'E' :
 				tk->tk_type = TK_NEL;
 				break;
-			    case 'H' :
+			case 'H' :
 				tk->tk_type = TK_HTS;
 				break;
-			    case 'M' :
+			case 'M' :
 				tk->tk_type = TK_RI;
 				break;
-			    case 'N' :
+			case 'N' :
 				tk->tk_type = TK_SS2;
 				break;
-			    case 'O' :
+			case 'O' :
 				tk->tk_type = TK_SS3;
 				break;
-			    case 'Z' :
+			case 'Z' :
 				tk->tk_type = TK_DECID;
 				break;
-			    default :
+			default :
 				return;
 			}
 		}
