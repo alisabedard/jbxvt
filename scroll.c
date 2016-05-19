@@ -74,7 +74,7 @@ static void scroll_up(uint8_t row1, uint8_t row2, int8_t count)
 			set_selend_index(i, count, &jbxvt.sel.end2);
 		}
 		for (uint8_t i = 0; i < count; i++) {
-			unsigned char * s = jbxvt.scr.current->text[i];
+			uint8_t * s = jbxvt.scr.current->text[i];
 			uint32_t * r = jbxvt.scr.current->rend[i];
 			int j;
 			for (j = jbxvt.scr.chars.width - 1;
@@ -104,7 +104,7 @@ static void scroll_up(uint8_t row1, uint8_t row2, int8_t count)
 			+ jbxvt.scr.chars.height - 1);
 	}
 	int j = row1;
-	unsigned char *save[MAX_SCROLL];
+	uint8_t *save[MAX_SCROLL];
 	uint32_t *rend[MAX_SCROLL];
 	for (int i = 0; i < count; i++, j++) {
 		save[i] = jbxvt.scr.current->text[j];
@@ -165,7 +165,7 @@ static void scroll_down(uint8_t row1, uint8_t row2, int8_t count)
 	count = -count;
 	int j = row2 - 1;
 	uint32_t *rend[MAX_SCROLL];
-	unsigned char *save[MAX_SCROLL];
+	uint8_t *save[MAX_SCROLL];
 	for (int i = 0; i < count; i++, j--) {
 		save[i] = jbxvt.scr.current->text[j];
 		rend[i] = jbxvt.scr.current->rend[j];

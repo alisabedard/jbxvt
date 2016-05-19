@@ -14,7 +14,7 @@
  */
 int8_t save_selection(void)
 {
-	unsigned char *str, *s;
+	uint8_t *str, *s;
 	int i, len, total, col1, col2;
 	struct selst *se1, *se2;
 	struct slinest *sl;
@@ -39,7 +39,7 @@ int8_t save_selection(void)
 		se2 = &jbxvt.sel.end1;
 		se1 = &jbxvt.sel.end2;
 	}
-	str = (unsigned char *)malloc(total = 1);
+	str = (uint8_t *)malloc(total = 1);
 	if (se1->se_type == SAVEDSEL) {
 		col1 = se1->se_col;
 		for (i = se1->se_index; i >= 0; i--) {
@@ -51,7 +51,7 @@ int8_t save_selection(void)
 				col2 = jbxvt.scr.chars.width - 1;
 			len = sl->sl_length;
 			s = convert_line(sl->sl_text,&len,col1,col2);
-			str = (unsigned char *)realloc(str,total + len);
+			str = (uint8_t *)realloc(str,total + len);
 			if (str == NULL)
 				abort();
 			strncpy((char *)str + total - 1,(char *)s,len);
@@ -74,7 +74,7 @@ int8_t save_selection(void)
 				break;
 			len = jbxvt.scr.chars.width;
 			s = convert_line(jbxvt.scr.current->text[i],&len,col1,col2);
-			str = (unsigned char *)realloc(str,total + len);
+			str = (uint8_t *)realloc(str,total + len);
 			if (str == NULL)
 				abort();
 			strncpy((char *)str + total - 1,(char *)s,len);

@@ -142,7 +142,7 @@
 #define SVR4_UTMP
 #endif
 
-static int comm_pid = -1;	// process id of child
+static pid_t comm_pid = -1;	// process id of child
 static char *tty_name = NULL;	// name of the slave teletype
 static struct utmp utent;	// our current utmp entry
 
@@ -283,7 +283,7 @@ static void write_utmp(void)
 #define UTMP_FILE	"/etc/utmp"
 #endif /* !UTMP_FILE */
 
-	int ut_fd;
+	fd_t ut_fd;
 
 	if ((tslot = get_tslot(tty_name + 5)) < 0)
 		fprintf(stderr, "can't locate tty %s in %s",
@@ -510,9 +510,9 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	close(i);
 #endif//!SCTTY_IOCTL
 
-	const int uid = getuid();
+	const uid_t uid = getuid();
 	struct group * gr = getgrnam("tty");
-	const int gid = gr ? (int)gr->gr_gid : -1;
+	const gid_t gid = gr ? (int)gr->gr_gid : -1;
 
 	fchown(ttyfd,uid,gid);
 	fchmod(ttyfd, 0620);

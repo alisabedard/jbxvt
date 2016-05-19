@@ -58,7 +58,7 @@ static void fill_and_scroll(const uint8_t ch)
 }
 
 static void init_screen_elements(struct screenst * restrict scr,
-	unsigned char ** restrict text, uint32_t ** restrict rend)
+	uint8_t ** restrict text, uint32_t ** restrict rend)
 {
 	scr->bmargin = jbxvt.scr.chars.height - 1;
 	scr->decom = false;
@@ -85,8 +85,8 @@ static void get_cwh(uint8_t * restrict cw, uint8_t * restrict ch,
 }
 
 static int save_data_on_screen(uint8_t cw, int i, const int j,
-	bool * restrict onscreen, unsigned char ** restrict s1,
-	uint32_t ** restrict r1, unsigned char ** restrict s2,
+	bool * restrict onscreen, uint8_t ** restrict s1,
+	uint32_t ** restrict r1, uint8_t ** restrict s2,
 	uint32_t ** restrict r2)
 {
 	// truncate to fit:
@@ -112,7 +112,7 @@ static int save_data_on_screen(uint8_t cw, int i, const int j,
 
 static int handle_offscreen_data(const uint8_t cw,
 	const int i, const int j,
-	unsigned char ** restrict s1,
+	uint8_t ** restrict s1,
 	uint32_t ** restrict r1)
 {
 	if (i >= jbxvt.scr.sline.top)
@@ -142,7 +142,7 @@ void scr_reset(void)
 	get_cwh(&cw, &ch, &width, &height);
 	if (!jbxvt.scr.current->text || cw != jbxvt.scr.chars.width
 		|| ch != jbxvt.scr.chars.height) {
-		unsigned char **s1, **s2;
+		uint8_t **s1, **s2;
 		uint32_t **r1, **r2;
 		jbxvt.scr.offset = 0;
 		/*  Recreate the screen backup arrays.

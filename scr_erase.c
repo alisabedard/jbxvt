@@ -18,7 +18,7 @@ void scr_erase_line(int mode)
 	home_screen();
 	y = MARGIN + jbxvt.scr.current->row * jbxvt.X.font_height;
 	height = jbxvt.X.font_height;
-	unsigned char * s = jbxvt.scr.current->text[jbxvt.scr.current->row];
+	uint8_t * s = jbxvt.scr.current->text[jbxvt.scr.current->row];
 	uint32_t * r = jbxvt.scr.current->rend[jbxvt.scr.current->row];
 	switch (mode) {
 	    case START :

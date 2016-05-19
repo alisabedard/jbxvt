@@ -144,7 +144,7 @@ void switch_scrollbar(void)
 }
 
 // Change window and/or icon name:
-void change_name(unsigned char * restrict str, const bool window,
+void change_name(uint8_t * restrict str, const bool window,
 	const bool icon)
 {
 	LOG("change_name(%s, %d, %d)", str, window, icon);

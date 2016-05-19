@@ -7,7 +7,7 @@
 /*  Structure describing the current state of the screen.
  */
 struct screenst {
-	unsigned char **text;	/* backup copy of screen->text */
+	uint8_t **text;	/* backup copy of screen->text */
 	uint32_t **rend; // rendition styles
 	int32_t row;	/* cursor position */
 	int32_t col;	/* ditto */

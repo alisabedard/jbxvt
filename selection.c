@@ -113,7 +113,7 @@ void fix_rc(int16_t * restrict rowp, int16_t * restrict colp)
 
 	if (selection_unit == CHAR) {
 		int i = (row - jbxvt.scr.offset);
-		unsigned char * s;
+		uint8_t * s;
 		if (i >= 0) {
 			s = jbxvt.scr.current->text[i];
 			if (col > 0 && s[col - 1] < ' ')
@@ -152,11 +152,11 @@ void selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
  *  convert and i2 is the last.  The length of the returned string is returned
  *  in *lenp;
  */
-unsigned char * convert_line(unsigned char * restrict str,
+uint8_t * convert_line(uint8_t * restrict str,
 	int * restrict lenp, int i1, int i2)
 {
-	static unsigned char buf[MAX_WIDTH + 3];
-	unsigned char *s;
+	static uint8_t buf[MAX_WIDTH + 3];
+	uint8_t *s;
 	int i;
 	int newline;
 
@@ -201,7 +201,7 @@ void adjust_selection(struct selst * restrict include)
 		se1 = &jbxvt.sel.end2;
 	}
 	if (selection_unit == WORD) {
-		unsigned char * s = se1->se_type == SCREENSEL
+		uint8_t * s = se1->se_type == SCREENSEL
 			? jbxvt.scr.current->text[se1->se_index]
 			: jbxvt.scr.sline.data[se1->se_index]->sl_text;
 		int16_t i = se1->se_col;

@@ -61,7 +61,7 @@ void scr_start_selection(int x, int y, enum selunit unit);
  *  convert and i2 is the last.  The length of the returned string is returned
  *  in *lenp;
  */
-unsigned char * convert_line(unsigned char * restrict str,
+uint8_t * convert_line(uint8_t * restrict str,
 	int * restrict lenp, int i1, int i2);
 
 #endif//!JBXVT_SELECTION_H

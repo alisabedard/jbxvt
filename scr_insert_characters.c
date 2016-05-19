@@ -21,7 +21,7 @@ void scr_insert_characters(int count)
 	home_screen();
 	cursor();
 	check_selection(jbxvt.scr.current->row,jbxvt.scr.current->row);
-	unsigned char * s = jbxvt.scr.current->text[jbxvt.scr.current->row];
+	uint8_t * s = jbxvt.scr.current->text[jbxvt.scr.current->row];
 	uint32_t * r = jbxvt.scr.current->rend[jbxvt.scr.current->row];
 	for (i = jbxvt.scr.chars.width - 1;
 		i >= jbxvt.scr.current->col + count; i--) {

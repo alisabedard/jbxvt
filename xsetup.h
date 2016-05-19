@@ -28,6 +28,7 @@
 #define XSETUP_H
 
 #include <stdbool.h>
+#include <stdint.h>
 #include <X11/Xutil.h>
 
 extern XSizeHints sizehints;
@@ -35,7 +36,7 @@ extern XSizeHints sizehints;
 void switch_scrollbar(void);
 
 // Change window and/or icon name:
-void change_name(unsigned char * restrict str, const bool window,
+void change_name(uint8_t * restrict str, const bool window,
 	const bool icon);
 
 int resize_window(void);

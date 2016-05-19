@@ -13,14 +13,13 @@
 #include <string.h>
 
 /*  Display the string at the current position.  nlcount is the number of new lines
- *  in the string.
- */
-void scr_string(unsigned char * restrict str, int len, int nlcount)
+ *  in the string.  */
+void scr_string(uint8_t * restrict str, int len, int nlcount)
 {
 	LOG("scr_string(%s, len: %d, nlcount: %d)", str, len, nlcount);
 	int x, x2, y, n, i;
 	unsigned int width;
-	unsigned char *s;
+	uint8_t *s;
 
 	home_screen();
 	cursor();

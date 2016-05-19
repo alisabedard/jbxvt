@@ -63,7 +63,7 @@ void scroll_up(uint16_t count) // unsigned as only going up
 			int16_t j = get_line_width(i);
 			struct slinest * sl = (struct slinest *)
 				malloc(sizeof(struct slinest));
-			sl->sl_text = (unsigned char *)malloc(j + 1);
+			sl->sl_text = (uint8_t *)malloc(j + 1);
 			if(!jbxvt.scr.s1.text[i])
 				  abort();
 			memcpy(sl->sl_text,jbxvt.scr.s1.text[i],j);

@@ -50,10 +50,10 @@ enum ComCharFlags {BUF_ONLY=1, GET_XEVENTS=2};
 struct xeventst *pop_xevent(void);
 void cprintf(char *,...);
 void init_command(char ** restrict argv);
-unsigned char *lookup_key(XEvent *,int *);
+uint8_t *lookup_key(XEvent *,int *);
 void push_com_char(int);
 void push_xevent(struct xeventst *);
-void send_string(unsigned char *,int);
+void send_string(uint8_t *,int);
 void set_cur_keys(int);
 void set_kp_keys(int);
 

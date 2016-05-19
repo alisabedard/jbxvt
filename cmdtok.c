@@ -95,7 +95,7 @@ static int16_t get_com_char(const int8_t flags)
 		XEvent event;
 		XNextEvent(jbxvt.X.dpy,&event);
 		struct xeventst *xe;
-		unsigned char * s;
+		uint8_t * s;
 		switch (event.type) {
 		case KeyPress:
 			s = lookup_key(&event, &count);

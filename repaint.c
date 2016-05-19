@@ -93,7 +93,7 @@ static void set_rval_colors(const uint32_t rval)
 }
 
 //  Paint the text using the rendition value at the screen position.
-void paint_rval_text(unsigned char * restrict str, uint32_t rval,
+void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 	uint8_t len, int16_t x, int16_t y)
 {
 	set_rval_colors(rval);
@@ -120,7 +120,7 @@ void paint_rval_text(unsigned char * restrict str, uint32_t rval,
 }
 
 // Display the string using the rendition vector at the screen coordinates
-static void paint_rvec_text(unsigned char * str,
+static void paint_rvec_text(uint8_t * str,
 	uint32_t * rvec, unsigned int len,
 	int x, int y)
 {
@@ -147,7 +147,7 @@ static void paint_rvec_text(unsigned char * str,
 void repaint(int row1, int row2, int col1, int col2)
 {
 	LOG("repaint(%d, %d, %d, %d)", row1, row2, col1, col2);
-	unsigned char * str = malloc(jbxvt.scr.chars.width + 1);
+	uint8_t * str = malloc(jbxvt.scr.chars.width + 1);
 	int y = row1;
 	int x1 = MARGIN + col1 * jbxvt.X.font_width;
 	int y1 = MARGIN + row1 * jbxvt.X.font_height;
@@ -159,7 +159,7 @@ void repaint(int row1, int row2, int col1, int col2)
 		if(!sl) continue; // prevent segfault
 		unsigned int m = (col2 + 1) < sl->sl_length
 			? (col2 + 1) : sl->sl_length;
-		unsigned char * s = sl->sl_text;
+		uint8_t * s = sl->sl_text;
 		m -= col1;
 		for (unsigned int x = 0; x < m; x++)
 			str[x] = s[x + col1] < ' ' ? ' ' : s[x + col1];
@@ -177,7 +177,7 @@ void repaint(int row1, int row2, int col1, int col2)
 	// Do the remainder from the current screen:
 	i = jbxvt.scr.offset > row1 ? 0 : row1 - jbxvt.scr.offset;
 	for (; y <= row2; y++, i++) {
-		unsigned char * s = jbxvt.scr.current->text[i];
+		uint8_t * s = jbxvt.scr.current->text[i];
 		int m = col1 - 1;
 		for(uint8_t x = col1; x <= col2; x++) {
 			if (s[x] < ' ') {

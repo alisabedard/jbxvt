@@ -37,7 +37,7 @@ static void wait_for_selection(Time time)
 }
 
 //  Send the selection to the command after converting LF to CR.
-static void send_selection(unsigned char * str, const uint16_t count)
+static void send_selection(uint8_t * str, const uint16_t count)
 {
 	for (uint16_t i = 0; i < count; i++)
 		if (str[i] == '\n')
@@ -50,7 +50,7 @@ static void use_cut_buffer(void)
 	Atom actual_type;
 	int actual_format;
 	unsigned long nitems, bytes_after, nread;
-	unsigned char *data;
+	uint8_t *data;
 
 	nread = 0;
 	do {
@@ -103,7 +103,7 @@ void scr_paste_primary(const Window window, const Atom property)
 	unsigned long nread = 0, bytes_after;
 	do {
 		Atom actual_type;
-		unsigned char * data;
+		uint8_t * data;
 		unsigned long nitems;
 		if ((XGetWindowProperty(jbxvt.X.dpy,window,property,
 			nread / 4, PROP_SIZE,True, AnyPropertyType,

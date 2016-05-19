@@ -49,23 +49,23 @@ struct JBXVT {
 		struct screenst s1, s2;
 	} scr;
 	struct {
-		unsigned char * text;
+		uint8_t * text;
 		uint16_t length;
 		struct selst end1, end2, // selection endpoints
 			     anchor; //selection anchor
 	} sel;
 	struct {
-		unsigned char * send_nxt; // next char to be sent
+		uint8_t * send_nxt; // next char to be sent
 		int send_count; // # chars waiting to be sent
 		fd_t fd; // file descriptor connected to the command
 		int width; // # file descriptors being used
 		struct {
-			unsigned char data[COM_BUF_SIZE];
-			unsigned char *next, *top;
+			uint8_t data[COM_BUF_SIZE];
+			uint8_t *next, *top;
 		} buf;
 		struct {
-			unsigned char data[COM_PUSH_MAX];
-			unsigned char *top;
+			uint8_t data[COM_PUSH_MAX];
+			uint8_t *top;
 		} stack;
 	} com;
 };

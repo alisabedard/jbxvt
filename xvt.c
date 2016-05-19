@@ -143,7 +143,7 @@ static void handle_decstbm(struct tokenst * restrict token)
 
 }
 
-static void handle_tk_char(const unsigned char tk_char)
+static void handle_tk_char(const uint8_t tk_char)
 {
 	switch (tk_char) {
 	case '\n': // handle line feed
