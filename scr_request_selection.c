@@ -1,7 +1,7 @@
 #include "scr_request_selection.h"
 
-
 #include "jbxvt.h"
+#include "log.h"
 #include "screen.h"
 #include "selection.h"
 
@@ -21,8 +21,6 @@ static Bool sel_pred(Display * restrict dpy __attribute__((unused)),
 	return (False);
 }
 
-
-
 /*  Wait for the selection to arrive and move it to the head of the
  *  queue.  We wait until we either get the selection or we get
  *  keyboard input that was generated more than SEL_KEY_DEL after time.
@@ -39,59 +37,55 @@ static void wait_for_selection(Time time)
 }
 
 //  Send the selection to the command after converting LF to CR.
-static void send_selection(unsigned char * str, const int count)
+static void send_selection(unsigned char * str, const uint16_t count)
 {
-	int i;
-
-	for (i = 0; i < count; i++)
+	for (uint16_t i = 0; i < count; i++)
 		if (str[i] == '\n')
 			str[i] = '\r';
 	send_string(str,count);
 }
 
+static void use_cut_buffer(void)
+{
+	Atom actual_type;
+	int actual_format;
+	unsigned long nitems, bytes_after, nread;
+	unsigned char *data;
+
+	nread = 0;
+	do {
+		if (XGetWindowProperty(jbxvt.X.dpy,
+			DefaultRootWindow(jbxvt.X.dpy),
+			XA_CUT_BUFFER0, nread / 4,PROP_SIZE,
+			False, XA_STRING,&actual_type,
+			&actual_format, &nitems,&bytes_after,
+			&data) != Success || nitems == 0
+			|| !data)
+			  return;
+		send_selection(data,nitems);
+		nread += nitems;
+		XFree(data);
+	} while (bytes_after > 0);
+}
+
 //  Request the current primary selection
-void scr_request_selection(int time, int x, int y)
+void scr_request_selection(int time, int16_t x, int16_t y)
 {
 	Atom sel_property;
 
-	/*  First check that the release is within the window.
-	 */
+	//  First check that the release is within the window.
 	if (x < 0 || x >= jbxvt.scr.pixels.width || y < 0
 		|| y >= jbxvt.scr.pixels.height)
 		return;
 
-	if (jbxvt.sel.text != NULL) {
-
-		/* The selection is internal
-		 */
+	if (jbxvt.sel.text) { // the selection is internal
 		send_selection(jbxvt.sel.text,jbxvt.sel.length);
 		return;
 	}
 
 	if (XGetSelectionOwner(jbxvt.X.dpy,XA_PRIMARY) == None) {
-
-		/*  No primary selection so use the cut buffer.
-		 */
-		Atom actual_type;
-		int actual_format;
-		unsigned long nitems, bytes_after, nread;
-		unsigned char *data;
-
-		nread = 0;
-		do {
-			if (XGetWindowProperty(jbxvt.X.dpy,
-				DefaultRootWindow(jbxvt.X.dpy),
-				XA_CUT_BUFFER0, nread / 4,PROP_SIZE,
-				False, XA_STRING,&actual_type,
-				&actual_format, &nitems,&bytes_after,
-				&data) != Success)
-				return;
-			if (nitems == 0 || data == NULL)
-				return;
-			send_selection(data,nitems);
-			nread += nitems;
-			XFree(data);
-		} while (bytes_after > 0);
+		//  No primary selection so use the cut buffer.
+		use_cut_buffer();
 		return;
 	}
 
@@ -102,26 +96,21 @@ void scr_request_selection(int time, int x, int y)
 }
 
 //  Respond to a notification that a primary selection has been sent
-void scr_paste_primary(const int time __attribute__((unused)),
-	const Window window, const Atom property)
+void scr_paste_primary(const Window window, const Atom property)
 {
-	Atom actual_type;
-	int actual_format;
-	unsigned long nitems, bytes_after, nread;
-	unsigned char *data;
-
 	if (property == None)
 		return;
-	nread = 0;
+	unsigned long nread = 0, bytes_after;
 	do {
-		if (XGetWindowProperty(jbxvt.X.dpy,window,property,
+		Atom actual_type;
+		unsigned char * data;
+		unsigned long nitems;
+		if ((XGetWindowProperty(jbxvt.X.dpy,window,property,
 			nread / 4, PROP_SIZE,True, AnyPropertyType,
-			&actual_type, &actual_format, &nitems,
+			&actual_type, &(int){0}, &nitems,
 			&bytes_after,&data) != Success)
-			return;
-		if (actual_type != XA_STRING)
-			return;
-		if (nitems == 0 || data == NULL)
+			|| actual_type != XA_STRING || nitems == 0
+			|| !data)
 			return;
 		send_selection(data,nitems);
 		nread += nitems;

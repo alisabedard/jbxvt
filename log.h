@@ -4,6 +4,8 @@
 #include <stdio.h>
 
 #define MARK fprintf(stderr, "MARK: %s:%d\n", __FILE__, __LINE__)
+#define MARK_I(i) fprintf(stderr, "MARK: %s:%d value: %d\n",\
+       	__FILE__, __LINE__, i)
 
 #ifdef DEBUG
 

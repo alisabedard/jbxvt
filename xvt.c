@@ -146,20 +146,20 @@ static void handle_decstbm(struct tokenst * restrict token)
 static void handle_tk_char(const unsigned char tk_char)
 {
 	switch (tk_char) {
-	case '\n' :
+	case '\n': // handle line feed
 		scr_index();
 		break;
-	case '\r' :
+	case '\r': // handle carriage return
 		scr_move(0,0,ROW_RELATIVE);
 		break;
-	case '\b' :
-		scr_backspace();
+	case '\b': // handle a backspace
+		scr_move(-1,0,COL_RELATIVE|ROW_RELATIVE);
 		break;
-	case '\t' :
+	case '\t': // handle tab
 		scr_tab();
 		break;
-	case '\007' :	/* bell */
-		scr_bell();
+	case '\007': // ring the bell
+		XBell(jbxvt.X.dpy,0);
 		break;
 	}
 }
@@ -261,8 +261,8 @@ app_loop_head:
 			token.tk_arg[1],token.tk_arg[2]);
 		break;
 	case TK_SELNOTIFY :
-		scr_paste_primary(token.tk_arg[0],
-			token.tk_arg[1],token.tk_arg[2]);
+		// arg 0 is time, unused
+		scr_paste_primary(token.tk_arg[1],token.tk_arg[2]);
 		break;
 	case TK_CUU :	/* cursor up */
 		n = token.tk_arg[0];
@@ -412,15 +412,13 @@ int main(int argc, char ** argv)
 {
 	// Make a copy of the command line argument array
 	char **iargv = (char **)malloc((argc + 1) * sizeof(char *));
-	{
-		uint8_t i;
+	uint8_t i;
 
-		for (i = 0; i < argc; i++) {
-			iargv[i] = (char *)malloc(strlen(argv[i]) + 1);
-			strcpy(iargv[i],argv[i]);
-		}
-		iargv[i] = NULL;
+	for (i = 0; i < argc; i++) {
+		iargv[i] = (char *)malloc(strlen(argv[i]) + 1);
+		strcpy(iargv[i],argv[i]);
 	}
+	iargv[i] = NULL;
 
 	char ** com_argv = process_exec_flag(&argc, argv);
 	

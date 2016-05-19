@@ -43,6 +43,7 @@
 #include "xsetup.h"
 #include "xvt.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/utsname.h>
@@ -50,41 +51,24 @@
 static struct screenst save_screen;
 
 /*  Perform any initialisation on the screen data structures.  Called just once
- *  at startup.  saved_lines is the number of saved lines.
- */
-void scr_init(const unsigned int saved_lines)
+ *  at startup.  saved_lines is the number of saved lines.  */
+void scr_init(void)
 {
-	//  Initialise the array of lines that have scrolled of the top.
-	jbxvt.scr.sline.max = saved_lines;
+	// Initialise the array of lines that have scrolled off the top.
+	jbxvt.scr.sline.max = DEF_SAVED_LINES;
 	if (jbxvt.scr.sline.max < MAX_SCROLL)
 		jbxvt.scr.sline.max = MAX_SCROLL;
-	jbxvt.scr.sline.data = (struct slinest **)
-		malloc( jbxvt.scr.sline.max
-		* sizeof(struct slinest *));
-	for (uint16_t i = 0; i < jbxvt.scr.sline.max; i++)
-		jbxvt.scr.sline.data[i] = NULL;
+	jbxvt.scr.sline.data = calloc(jbxvt.scr.sline.max,
+		sizeof(void*));
 	jbxvt.scr.s1.wrap=jbxvt.scr.s2.wrap=1;
 	jbxvt.scr.current = &jbxvt.scr.s1;
 	jbxvt.X.font_width = XTextWidth(jbxvt.X.font,"M",1);
-	jbxvt.X.font_height = jbxvt.X.font->ascent + jbxvt.X.font->descent;
+	jbxvt.X.font_height = jbxvt.X.font->ascent
+		+ jbxvt.X.font->descent;
 	scr_reset();
 }
 
-//  Handle a backspace
-void scr_backspace()
-{
-	scr_move(-1,0,COL_RELATIVE|ROW_RELATIVE);
-}
-
-/*  Ring the bell
- */
-void scr_bell(void)
-{
-	XBell(jbxvt.X.dpy,0);
-}
-
-/*  Change between the alternate and the main screens
- */
+//  Change between the alternate and the main screens
 void scr_change_screen(const uint8_t direction)
 {
 	home_screen();
@@ -95,8 +79,7 @@ void scr_change_screen(const uint8_t direction)
 	cursor();
 }
 
-/*  Change the rendition style.
- */
+//  Change the rendition style.
 void scr_change_rendition(const uint32_t style)
 {
 	// This allows combining styles, 0 resets
@@ -169,7 +152,7 @@ void scr_restore_cursor(void)
 }
 
 //  Delete count lines and scroll up the bottom of the screen to fill the gap
-void scr_delete_lines(int count)
+void scr_delete_lines(uint8_t count)
 {
 	if (count > jbxvt.scr.current->bmargin
 		- jbxvt.scr.current->row + 1)
@@ -188,10 +171,21 @@ void scr_delete_lines(int count)
 	cursor();
 }
 
+static void scroll_lower_lines(int8_t count)
+{
+	while (count > MAX_SCROLL) {
+		scroll(jbxvt.scr.current->row,
+			jbxvt.scr.current->bmargin,
+			-MAX_SCROLL);
+		count -= MAX_SCROLL;
+	}
+	scroll(jbxvt.scr.current->row,
+		jbxvt.scr.current->bmargin,-count);
+}
+
 /*  Insert count blank lines at the current position and scroll the lower lines
- *  down.
- */
-void scr_insert_lines(int count)
+ *  down.  */
+void scr_insert_lines(int8_t count)
 {
 	if (jbxvt.scr.current->row > jbxvt.scr.current->bmargin)
 		return;
@@ -202,13 +196,7 @@ void scr_insert_lines(int count)
 
 	home_screen();
 	cursor();
-	while (count > MAX_SCROLL) {
-		scroll(jbxvt.scr.current->row,
-			jbxvt.scr.current->bmargin,
-			-MAX_SCROLL);
-		count -= MAX_SCROLL;
-	}
-	scroll(jbxvt.scr.current->row,jbxvt.scr.current->bmargin,-count);
+	scroll_lower_lines(count);
 	jbxvt.scr.current->wrap_next = 0;
 	cursor();
 }
@@ -229,8 +217,7 @@ void scr_set_margins(int16_t top, int16_t bottom)
 }
 
 /*  Move the display so that line represented by scrollbar value y is at the top
- *  of the screen.
- */
+ *  of the screen.  */
 void scr_move_to(int16_t y)
 {
 	int16_t n, lnum;

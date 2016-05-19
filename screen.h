@@ -103,22 +103,19 @@ enum ScrDelArg { END, START, ENTIRE };
 
 void home_screen(void);
 int16_t is_string_char(int16_t c);
-void scr_backspace(void);
-void scr_bell(void);
 void scr_change_rendition(const uint32_t style);
 void scr_change_screen(const uint8_t direction);
-void scr_delete_lines(int);
+void scr_delete_lines(uint8_t count);
 
 //  Return the width and height of the screen.
 void scr_get_size(uint16_t * restrict width_p,
 	uint16_t * restrict height_p);
 
 void scr_index(void);
-void scr_init(const unsigned int saved_lines);
-void scr_insert_lines(int);
+void scr_init(void);
+void scr_insert_lines(int8_t count);
 void scr_move_by(const int16_t y);
 void scr_move_to(int16_t y);
-void scr_paste_primary(int,Window,Atom);
 void scr_report_display(void);
 void scr_report_position(void);
 void scr_restore_cursor(void);
