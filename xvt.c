@@ -410,19 +410,9 @@ static char ** process_exec_flag(int * restrict argc, char ** argv)
  *  the slave.  */
 int main(int argc, char ** argv)
 {
-	// Make a copy of the command line argument array
-	char **iargv = (char **)malloc((argc + 1) * sizeof(char *));
-	uint8_t i;
-
-	for (i = 0; i < argc; i++) {
-		iargv[i] = (char *)malloc(strlen(argv[i]) + 1);
-		strcpy(iargv[i],argv[i]);
-	}
-	iargv[i] = NULL;
-
 	char ** com_argv = process_exec_flag(&argc, argv);
 	
-	init_display(argc,argv,argc,iargv);
+	init_display(argc,argv);
 	map_window();
 	char *shell_argv[2]; // here to not lose scope.
 	if(!com_argv) {

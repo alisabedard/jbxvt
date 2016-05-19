@@ -66,7 +66,7 @@ static uint8_t extract_nonX_args(int argc, char ** argv)
 			else fprintf(stderr, "missing -name argument");
 		} else if (strcmp(argv[i],"-C") == 0
 			|| strcmp(argv[i],"-console") == 0) {
-			console_flag = 1;
+			console_flag = true;
 		} else
 			argv[j++] = argv[i];
 	}
@@ -103,7 +103,7 @@ static void setup_sizehints(void)
 
 
 //  Open the window.
-static void create_window(int argc, char ** argv)
+static void create_window(const uint8_t argc, char ** argv)
 {
 	XTextProperty wname, iname;
 	XClassHint class;
@@ -173,14 +173,12 @@ static void setup_gcs(Display * d, Window w)
 	jbxvt.X.gc.cu = XCreateGC(d, w, GCFunction|GCPlaneMask, &gcv);
 }
 
-void init_display(int argc, char ** argv, int iargc, char ** iargv)
+void init_display(uint8_t argc, char ** argv)
 {
 	argc = extract_nonX_args(argc,argv);
 	jbxvt.X.dpy = XOpenDisplay(NULL);
 	if(!jbxvt.X.dpy) {
-		fprintf(stderr, "%s",
-			"Cannot open display, make sure environment variable"
-			" DISPLAY is set");
+		perror("DISPLAY");
 		exit(1);
 	}
 	uint8_t screen = DefaultScreen(jbxvt.X.dpy);
@@ -191,7 +189,7 @@ void init_display(int argc, char ** argv, int iargc, char ** iargv)
 
 	setup_sizehints();
 
-	create_window(iargc, iargv);
+	create_window(argc, argv);
 	jbxvt.X.color.fg = jbxvt.X.color.cursor = WhitePixel(jbxvt.X.dpy, screen);
 	jbxvt.X.color.bg = BlackPixel(jbxvt.X.dpy, screen);
 	setup_gcs(jbxvt.X.dpy, jbxvt.X.win.main);
