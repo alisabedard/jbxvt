@@ -53,14 +53,6 @@ void scr_extend_selection(int16_t x, int16_t y, const bool drag)
 	int16_t col = (x - MARGIN) / jbxvt.X.font_width;
 	int16_t row = (y - MARGIN) / jbxvt.X.font_height;
 	fix_rc(&row,&col);
-
-	if (jbxvt.sel.end2.se_type == NOSEL) {
-		rc_to_selend(row,col,&jbxvt.sel.end2);
-		show_selection(0,jbxvt.scr.chars.height - 1,
-			0,jbxvt.scr.chars.width - 1);
-		return;
-	}
-
 	// Save current end points:
 	struct selst sesave1 = jbxvt.sel.end1;
 	struct selst sesave2 = jbxvt.sel.end2;
