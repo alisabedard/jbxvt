@@ -400,19 +400,11 @@ static void set_ttymodes(void)
 
 	memset((char *)&term,0,sizeof(term));
 	term.c_iflag = BRKINT | IGNPAR | ICRNL | IXON;
-#ifdef IMAXBEL
-	term.c_iflag |= IMAXBEL;
-#endif /* IMAXBEL */
-	if (!is_eightbit())
-		term.c_iflag |= ISTRIP;
 
 	term.c_oflag = OPOST | ONLCR;
 
-	term.c_cflag = B9600 | CREAD;
-	if (!is_eightbit())
-		term.c_cflag |=  PARENB | CS7;
-	else
-		term.c_cflag |= CS8;
+	//term.c_cflag = B9600 | CREAD | CS8;
+	term.c_cflag = B230400 | CREAD | CS8;
 
 	term.c_lflag = ISIG | IEXTEN | ICANON | ECHO | ECHOE | ECHOK;
 

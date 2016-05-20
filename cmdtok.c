@@ -35,10 +35,8 @@ static int16_t get_com_char(const int8_t flags)
 	if (jbxvt.com.stack.top > jbxvt.com.stack.data)
 		return(*--jbxvt.com.stack.top);
 
-	const uint8_t mask = is_eightbit() ? 0xff : 0x7f;
-
 	if (jbxvt.com.buf.next < jbxvt.com.buf.top)
-		return(*jbxvt.com.buf.next++ & mask);
+		return(*jbxvt.com.buf.next++);
 
 	if (flags & BUF_ONLY)
 		return(GCC_NULL);
@@ -181,7 +179,7 @@ static int16_t get_com_char(const int8_t flags)
 		return errno == EWOULDBLOCK ? GCC_NULL : EOF;
 	jbxvt.com.buf.next = jbxvt.com.buf.data;
 	jbxvt.com.buf.top = jbxvt.com.buf.data + count;
-	return *jbxvt.com.buf.next++ & mask;
+	return *jbxvt.com.buf.next++;
 }
 
 //  Return an input token

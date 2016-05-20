@@ -73,15 +73,26 @@ static enum ModeValue handle_reset(struct tokenst * restrict token)
 		case 7 :
 			jbxvt.scr.current->wrap = mode == HIGH;
 			break;
+#if 0
+		case 12:
+			//scr_change_screen(mode);
+			break;
+#endif
 		case 47: // switch to main screen
 			scr_change_screen(mode);
 			break;
+		case 1049: // Fix stale chars in vi
+			scr_change_screen(mode);
+			break;
+
+		default: MARK_I(token->tk_arg[0]);
 		}
 	} else if (token->tk_private == 0) {
 		switch (token->tk_arg[0]) {
 		case 4 :
 			jbxvt.scr.current->insert = mode == HIGH;
 			break;
+		default: MARK_I(token->tk_arg[0]);
 		}
 	}
 	return mode;
@@ -166,21 +177,23 @@ static void handle_tk_char(const uint8_t tk_char)
 
 static void handle_tk_expose(struct tokenst * restrict t)
 {
-	static bool size_set;
+//	static bool size_set;
 	LOG("handle_tk_expose()");
 	switch (t->tk_region) {
 	case SCREEN :
-		if (!size_set) {
-
-			/*  Force a full reset if an exposure event
-			 *  arrives after a resize.
-			 */
-			scr_reset();
-			size_set = 1;
-		} else {
+		scr_refresh(t->tk_arg[0],t->tk_arg[1],
+			t->tk_arg[2],t->tk_arg[3]);
+#if 0
+		if(size_set)
 			scr_refresh(t->tk_arg[0],t->tk_arg[1],
 				t->tk_arg[2],t->tk_arg[3]);
+		else {
+			/*  Force a full reset if an exposure event
+			 *  arrives after a resize.  */
+			scr_reset();
+			size_set = 1;
 		}
+#endif
 		break;
 	case SCROLLBAR :
 		sbar_reset();

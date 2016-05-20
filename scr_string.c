@@ -16,7 +16,9 @@
  *  in the string.  */
 void scr_string(uint8_t * restrict str, int len, int nlcount)
 {
+#ifdef SCR_DEBUG
 	LOG("scr_string(%s, len: %d, nlcount: %d)", str, len, nlcount);
+#endif//SCR_DEBUG
 	int x, x2, y, n, i;
 	unsigned int width;
 	uint8_t *s;
@@ -133,8 +135,10 @@ void scr_string(uint8_t * restrict str, int len, int nlcount)
 			+ jbxvt.scr.current->col + n, 0,
 			jbxvt.scr.chars.width
 			- jbxvt.scr.current->col - n);
+#ifdef SCR_DEBUG
 		LOG("n: %d, strlen: %lu", n, strlen((const char *)
 			jbxvt.scr.current->text[jbxvt.scr.current->row]));
+#endif//SCR_DEBUG
 			
 		paint_rval_text(str,jbxvt.scr.rstyle,n,x,y);
 		if (jbxvt.scr.rstyle == 0)

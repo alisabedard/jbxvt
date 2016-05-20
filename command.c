@@ -290,14 +290,8 @@ uint8_t * lookup_key(XEvent * restrict ev, int * restrict pcount)
  	       	return (uint8_t *)s;
 	} else {
 		if ((ev->xkey.state & Mod1Mask) && (count == 1)) {
-			if (is_eightbit()) {
-				kbuf[0] |= 0200;
-				*pcount = 1;
-			} else {
-				kbuf[1] = kbuf[0];
-				kbuf[0] = '\033';
-				*pcount = 2;
-			}
+			kbuf[0] |= 0200;
+			*pcount = 1;
 		} else
 			*pcount = count;
 		return (uint8_t *)kbuf;

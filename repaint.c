@@ -121,16 +121,15 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 
 // Display the string using the rendition vector at the screen coordinates
 static void paint_rvec_text(uint8_t * str,
-	uint32_t * rvec, unsigned int len,
+	uint32_t * rvec, uint16_t len,
 	int x, int y)
 {
-	LOG("paint_rvec_text()");
 	if (rvec == NULL) {
 		paint_rval_text(str,0,len,x,y);
 		return;
 	}
 	while (len > 0) {
-		unsigned int i;
+		uint16_t i;
 		for (i = 0; i < len; i++)
 			if (rvec[i] != rvec[0])
 				break;
@@ -160,6 +159,7 @@ void repaint(int row1, int row2, int col1, int col2)
 		unsigned int m = (col2 + 1) < sl->sl_length
 			? (col2 + 1) : sl->sl_length;
 		uint8_t * s = sl->sl_text;
+		puts((const char *)s);
 		m -= col1;
 		for (unsigned int x = 0; x < m; x++)
 			str[x] = s[x + col1] < ' ' ? ' ' : s[x + col1];
@@ -189,10 +189,14 @@ void repaint(int row1, int row2, int col1, int col2)
 		}
 		m++;
 		m -= col1;
-		paint_rvec_text(str, jbxvt.scr.current->rend[i]
-			[jbxvt.scr.chars.width]
-			? jbxvt.scr.current->rend[i] + col1 : NULL,
-			m, x1, y1);
+		LOG("%s", str);
+//		if(i>0) // fixes vi
+			paint_rvec_text(str, jbxvt.scr.current->rend[i]
+				[jbxvt.scr.chars.width]
+				? jbxvt.scr.current->rend[i] + col1 : NULL,
+				m, x1, y1);
+//		else if 
+//			  cursor();
 		const int x2 = x1 + m * jbxvt.X.font_width;
 		const unsigned int width = (col2 - col1 + 1 - m)
 			* jbxvt.X.font_width;

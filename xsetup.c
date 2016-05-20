@@ -41,8 +41,6 @@
 #include <X11/Xutil.h>
 
 static bool logshell;		/* flag nonzero if using a login shell */
-static bool eight_bit_input = true;	/* eight bit input enabled */
-
 static bool show_scrollbar = true;	/* scroll-bar displayed if true */
 
 #define OPTABLESIZE	26
@@ -62,12 +60,6 @@ XSizeHints sizehints = {
 inline bool is_logshell(void)
 {
 	return(logshell);
-}
-
-//  Return true is we are handling eight bit characters.
-inline bool is_eightbit(void)
-{
-	return(eight_bit_input);
 }
 
 //  Map the window

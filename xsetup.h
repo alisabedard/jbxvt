@@ -43,7 +43,6 @@ int resize_window(void);
 void send_auth(void);
 void map_window(void);
 bool is_logshell(void);
-bool is_eightbit(void);
 void usage(int);
 
 #endif//XSETUP_H

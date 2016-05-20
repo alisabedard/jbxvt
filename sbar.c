@@ -1,3 +1,4 @@
+// Changes copyright 2016, Jeffrey E. Bedard <jefbed@gmail.com>
 /*  Copyright 1992 John Bovey, University of Kent at Canterbury.
  *
  *  Redistribution and use in source code and/or executable forms, with
@@ -47,7 +48,8 @@ void sbar_reset(void)
 	sbar_show(sbar.last_length, sbar.last_low, sbar.last_high);
 }
 
-//  Redraw the scrollbar to show the area from low to high proportional to length.
+/*  Redraw the scrollbar to show the area from low to high,
+    proportional to length.  */
 void sbar_show(const uint8_t length, const uint8_t low,
 	const uint8_t high)
 {
