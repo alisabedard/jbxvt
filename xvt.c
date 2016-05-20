@@ -73,26 +73,22 @@ static enum ModeValue handle_reset(struct tokenst * restrict token)
 		case 7 :
 			jbxvt.scr.current->wrap = mode == HIGH;
 			break;
-#if 0
-		case 12:
-			//scr_change_screen(mode);
-			break;
-#endif
 		case 47: // switch to main screen
 			scr_change_screen(mode);
 			break;
 		case 1049: // Fix stale chars in vi
 			scr_change_screen(mode);
 			break;
-
-		default: MARK_I(token->tk_arg[0]);
+		default:
+			LOG("Unhandled: %d\n", token->tk_arg[0]);
 		}
 	} else if (token->tk_private == 0) {
 		switch (token->tk_arg[0]) {
 		case 4 :
 			jbxvt.scr.current->insert = mode == HIGH;
 			break;
-		default: MARK_I(token->tk_arg[0]);
+		default:
+			LOG("Unhandled: %d\n", token->tk_arg[0]);
 		}
 	}
 	return mode;

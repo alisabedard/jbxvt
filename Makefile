@@ -2,9 +2,9 @@ CFLAGS+=-Os
 CFLAGS+=-Werror
 #CFLAGS+=-march=native
 #CFLAGS+=-flto # doesn't work with clang
-CFLAGS+=-ggdb
-CFLAGS+=-DDEBUG
-CFLAGS+=-DTK_DEBUG
+#CFLAGS+=-ggdb
+#CFLAGS+=-DDEBUG
+#CFLAGS+=-DTK_DEBUG
 #CC=clang
 
 exe=jbxvt

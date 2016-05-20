@@ -190,13 +190,10 @@ void repaint(int row1, int row2, int col1, int col2)
 		m++;
 		m -= col1;
 		LOG("%s", str);
-//		if(i>0) // fixes vi
-			paint_rvec_text(str, jbxvt.scr.current->rend[i]
-				[jbxvt.scr.chars.width]
-				? jbxvt.scr.current->rend[i] + col1 : NULL,
-				m, x1, y1);
-//		else if 
-//			  cursor();
+		paint_rvec_text(str, jbxvt.scr.current->rend[i]
+			[jbxvt.scr.chars.width]
+			? jbxvt.scr.current->rend[i] + col1 : NULL,
+			m, x1, y1);
 		const int x2 = x1 + m * jbxvt.X.font_width;
 		const unsigned int width = (col2 - col1 + 1 - m)
 			* jbxvt.X.font_width;
