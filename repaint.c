@@ -159,7 +159,6 @@ void repaint(int row1, int row2, int col1, int col2)
 		unsigned int m = (col2 + 1) < sl->sl_length
 			? (col2 + 1) : sl->sl_length;
 		uint8_t * s = sl->sl_text;
-		puts((const char *)s);
 		m -= col1;
 		for (unsigned int x = 0; x < m; x++)
 			str[x] = s[x + col1] < ' ' ? ' ' : s[x + col1];
