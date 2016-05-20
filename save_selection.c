@@ -9,10 +9,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-/*  Convert the currently marked screen selection as a text string and save it
- *  as the current saved selection.  0 is returned for a success, -1 for a failure.
- */
-int8_t save_selection(void)
+/*  Convert the currently marked screen selection as a text string
+    and save it as the current saved selection.  true is returned
+    for a success, false for a failure.  */
+bool save_selection(void)
 {
 	uint8_t *str, *s;
 	int i, len, total, col1, col2;
@@ -21,17 +21,17 @@ int8_t save_selection(void)
 
 	if (jbxvt.sel.end1.se_type == NOSEL
 		|| jbxvt.sel.end2.se_type == NOSEL)
-		return(-1);
+		return -1;
 	if (jbxvt.sel.end1.se_type == jbxvt.sel.end2.se_type
 		&& jbxvt.sel.end1.se_index == jbxvt.sel.end2.se_index
 		&& jbxvt.sel.end1.se_col == jbxvt.sel.end2.se_col)
-		return(-1);
+		return -1;
 
-	if (jbxvt.sel.text != NULL)
+	if (jbxvt.sel.text)
 		free(jbxvt.sel.text);
 
-	/*  Set se1 and se2 to point to the first and second selection endpoints.
-	 */
+	/*  Set se1 and se2 to point to the first
+	    and second selection endpoints.  */
 	if (selcmp(&jbxvt.sel.end1,&jbxvt.sel.end2) <= 0) {
 		se1 = &jbxvt.sel.end1;
 		se2 = &jbxvt.sel.end2;
@@ -39,7 +39,7 @@ int8_t save_selection(void)
 		se2 = &jbxvt.sel.end1;
 		se1 = &jbxvt.sel.end2;
 	}
-	str = (uint8_t *)malloc(total = 1);
+	str = malloc(total = 1);
 	if (se1->se_type == SAVEDSEL) {
 		col1 = se1->se_col;
 		for (i = se1->se_index; i >= 0; i--) {
@@ -75,8 +75,8 @@ int8_t save_selection(void)
 			len = jbxvt.scr.chars.width;
 			s = convert_line(jbxvt.scr.current->text[i],&len,col1,col2);
 			str = (uint8_t *)realloc(str,total + len);
-			if (str == NULL)
-				abort();
+			if(!str)
+				  abort();
 			strncpy((char *)str + total - 1,(char *)s,len);
 			total += len;
 			col1 = 0;
@@ -85,7 +85,7 @@ int8_t save_selection(void)
 	str[total - 1] = 0;
 	jbxvt.sel.text = str;
 	jbxvt.sel.length = total - 1;
-	return(0);
+	return 0;
 }
 
 

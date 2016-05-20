@@ -22,7 +22,7 @@ static enum selunit selection_unit;	/* current unit of selection */
  */
 void scr_make_selection(const Time time)
 {
-	if (save_selection() < 0)
+	if (!save_selection())
 		return;
 
 	XSetSelectionOwner(jbxvt.X.dpy,XA_PRIMARY,jbxvt.X.win.vt,time);

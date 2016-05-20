@@ -28,10 +28,8 @@
 #ifndef SBAR_H
 #define SBAR_H
 
-#include <stdint.h>
-
 void sbar_reset(void);
-void sbar_show(const uint8_t length, const uint8_t low,
-	const uint8_t high);
+void sbar_show(int length, const int low,
+	const int high);
 
 #endif//!SBAR_H

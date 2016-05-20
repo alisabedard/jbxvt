@@ -56,7 +56,7 @@
 
 struct JBXVT jbxvt;
 
-extern int debugging;
+static bool jbxvt_size_set;
 
 static enum ModeValue handle_reset(struct tokenst * restrict token)
 {
@@ -173,23 +173,18 @@ static void handle_tk_char(const uint8_t tk_char)
 
 static void handle_tk_expose(struct tokenst * restrict t)
 {
-//	static bool size_set;
 	LOG("handle_tk_expose()");
 	switch (t->tk_region) {
 	case SCREEN :
-		scr_refresh(t->tk_arg[0],t->tk_arg[1],
-			t->tk_arg[2],t->tk_arg[3]);
-#if 0
-		if(size_set)
+		if(jbxvt_size_set)
 			scr_refresh(t->tk_arg[0],t->tk_arg[1],
 				t->tk_arg[2],t->tk_arg[3]);
 		else {
 			/*  Force a full reset if an exposure event
 			 *  arrives after a resize.  */
 			scr_reset();
-			size_set = 1;
+			jbxvt_size_set = true;
 		}
-#endif
 		break;
 	case SCROLLBAR :
 		sbar_reset();
@@ -216,19 +211,20 @@ app_loop_head:
 	case TK_EOF :
 		quit(0);
 		break;
-	case TK_ENTRY :	/* keyboard focus changed */
+	case TK_ENTRY :	// keyboard focus changed
 		scr_focus(1,token.tk_arg[0]);
 		break;
 	case TK_FOCUS :
 		scr_focus(2,token.tk_arg[0]);
 		break;
-	case TK_EXPOSE :	/* window exposed */
+	case TK_EXPOSE: // window exposed
 		handle_tk_expose(&token);
 		break;
 	case TK_RESIZE :
+		jbxvt_size_set = false;
 		resize_window();
 		break;
-	case TK_TXTPAR :		/* change title or icon name */
+	case TK_TXTPAR:	// change title or icon name
 		handle_txtpar(&token);
 		break;
 	case TK_SBSWITCH :
