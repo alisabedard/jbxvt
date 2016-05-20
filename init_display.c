@@ -194,6 +194,6 @@ void init_display(uint8_t argc, char ** argv)
 	jbxvt.X.color.bg = BlackPixel(jbxvt.X.dpy, screen);
 	setup_gcs(jbxvt.X.dpy, jbxvt.X.win.main);
 	scr_init();
-	sbar_init();
+	sbar_reset();
 }
 

@@ -27,11 +27,8 @@
 
 #include "jbxvt.h"
 
-#include <stdint.h>
-#include <X11/Xlib.h>
-
 static struct {
-	unsigned int width, height;
+	uint16_t width, height;
 	uint16_t mtop, mbot; // marked area
 	// most recent arguments to sbar_show:
 	uint8_t last_length, last_low, last_high;
@@ -40,20 +37,21 @@ static struct {
 //  Redraw the scrollbar after a size change
 void sbar_reset(void)
 {
-	int d;
-	unsigned int u;
+	int32_t d;
+	uint32_t u;
 
-	XGetGeometry(jbxvt.X.dpy, jbxvt.X.win.sb, &(Window){0},&d,&d,&sbar.width,
-		&sbar.height, &u, &u);
+	XGetGeometry(jbxvt.X.dpy, jbxvt.X.win.sb, &(Window){0},&d,&d,
+		(unsigned int *)&sbar.width,
+		(unsigned int *)&sbar.height, &u, &u);
 	sbar.mbot = -1;	/* force a redraw */
 	sbar_show(sbar.last_length, sbar.last_low, sbar.last_high);
 }
 
 //  Redraw the scrollbar to show the area from low to high proportional to length.
-void sbar_show(const unsigned int length, const unsigned int low,
-	const unsigned int high)
+void sbar_show(const uint8_t length, const uint8_t low,
+	const uint8_t high)
 {
-	unsigned int top, bot;
+	uint16_t top, bot;
 
 	if (!length) return;
 
@@ -67,12 +65,14 @@ void sbar_show(const unsigned int length, const unsigned int low,
 	if (top == sbar.mtop && bot == sbar.mbot)
 		return;
 	if (top > 0)
-		XClearArea(jbxvt.X.dpy,jbxvt.X.win.sb,0,0,sbar.width,top - 1,False);
+		XClearArea(jbxvt.X.dpy,jbxvt.X.win.sb,0,0,
+			sbar.width,top - 1, false);
 	if (bot >= top)
-		XFillRectangle(jbxvt.X.dpy, jbxvt.X.win.sb, jbxvt.X.gc.sb, 0,
-			top, sbar.width, bot - top + 1);
+		XFillRectangle(jbxvt.X.dpy, jbxvt.X.win.sb,
+			jbxvt.X.gc.sb, 0, top, sbar.width,
+			bot - top + 1);
 	if (bot < sbar.height - 1)
-		XClearArea(jbxvt.X.dpy,jbxvt.X.win.sb,0,bot + 1, sbar.width,
-			sbar.height - bot - 1,False);
+		XClearArea(jbxvt.X.dpy,jbxvt.X.win.sb,0,bot + 1,
+			sbar.width, sbar.height - bot - 1, false);
 }
 
