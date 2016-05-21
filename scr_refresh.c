@@ -1,10 +1,13 @@
+/*  Copyright 2016, Jeffrey E. Bedard
+    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+
 #include "scr_refresh.h"
 
+#include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"
 #include "repaint.h"
 #include "screen.h"
-#include "xvt.h"
 
 /*  Refresh the region of the screen delimited by the aruments.  Used to
  *  repair after minor exposure events.

@@ -1,3 +1,6 @@
+/*  Copyright 2016, Jeffrey E. Bedard
+    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+
 #include "selcmp.h"
 
 /*  Compare the two selections and return -1, 0 or 1 depending on

@@ -1,11 +1,14 @@
+/*  Copyright 2016, Jeffrey E. Bedard
+    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+
 #include "scr_delete_characters.h"
 
+#include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"
 #include "repair_damage.h"
 #include "screen.h"
 #include "selection.h"
-#include "xvt.h"
 
 #include <string.h>
 

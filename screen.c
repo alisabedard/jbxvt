@@ -1,32 +1,11 @@
-/*  Copyright 1992, 1994 John Bovey, University of Kent at Canterbury.
- *
- *  Redistribution and use in source code and/or executable forms, with
- *  or without modification, are permitted provided that the following
- *  condition is met:
- *
- *  Any redistribution must retain the above copyright notice, this
- *  condition and the following disclaimer, either as part of the
- *  program source code included in the redistribution or in human-
- *  readable materials provided with the redistribution.
- *
- *  THIS SOFTWARE IS PROVIDED "AS IS".  Any express or implied
- *  warranties concerning this software are disclaimed by the copyright
- *  holder to the fullest extent permitted by applicable law.  In no
- *  event shall the copyright-holder be liable for any damages of any
- *  kind, however caused and on any theory of liability, arising in any
- *  way out of the use of, or inability to use, this software.
- *
- *  -------------------------------------------------------------------
- *
- *  In other words, do not misrepresent my work as your own work, and
- *  do not sue me if it causes problems.  Feel free to do anything else
- *  you wish with it.
- */
+/*  Copyright 2016, Jeffrey E. Bedard
+    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.  */
 
 #include "screen.h"
 
 #include "change_offset.h"
 #include "command.h"
+#include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"
 #include "repaint.h"
@@ -72,7 +51,7 @@ void scr_init(void)
 void scr_change_screen(const uint8_t direction)
 {
 	home_screen();
-	jbxvt.scr.current = (direction == HIGH)
+	jbxvt.scr.current = (direction == JBXVT_MODE_HIGH)
 		? &jbxvt.scr.s2 : &jbxvt.scr.s1;
 	jbxvt.sel.end2.se_type = NOSEL;
 	repaint(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
@@ -137,16 +116,22 @@ void scr_save_cursor(void)
 	jbxvt.scr.saved_rstyle = jbxvt.scr.rstyle;
 }
 
+static void adj_cursor_wh(int16_t * restrict grc,
+	int16_t src, int16_t chw)
+{
+	*grc = src;
+	if (*grc >= chw)
+		  *grc = chw - 1;
+}
+
 //  Restore the cursor position and rendition style.
 void scr_restore_cursor(void)
 {
 	cursor();
-	jbxvt.scr.current->row = save_screen.row;
-	if (jbxvt.scr.current->row >= jbxvt.scr.chars.height)
-		jbxvt.scr.current->row = jbxvt.scr.chars.height - 1;
-	jbxvt.scr.current->col = save_screen.col;
-	if (jbxvt.scr.current->col >= jbxvt.scr.chars.width)
-		jbxvt.scr.current->col = jbxvt.scr.chars.width - 1;
+	adj_cursor_wh(&jbxvt.scr.current->row, save_screen.row,
+		jbxvt.scr.chars.height);
+	adj_cursor_wh(&jbxvt.scr.current->col, save_screen.col,
+		jbxvt.scr.chars.width);
 	scr_change_rendition(jbxvt.scr.saved_rstyle);
 	cursor();
 }

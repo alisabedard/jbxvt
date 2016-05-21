@@ -1,17 +1,21 @@
+/*  Copyright 2016, Jeffrey E. Bedard
+    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+
 #include "show_selection.h"
 
+#include "config.h"
 #include "jbxvt.h"
 #include "selcmp.h"
 #include "selection.h"
 #include "selst.h"
-#include "xvt.h"
 
 /*  Paint any part of the selection that is between rows row1 and row2 inclusive
  *  and between cols col1 and col2 inclusive.
  */
 void show_selection(int16_t row1, int16_t row2, int16_t col1, int16_t col2)
 {
-	if (jbxvt.sel.end1.se_type == NOSEL || jbxvt.sel.end2.se_type == NOSEL)
+	if (jbxvt.sel.end1.se_type == NOSEL
+		|| jbxvt.sel.end2.se_type == NOSEL)
 		return;
 	if (selcmp(&jbxvt.sel.end1,&jbxvt.sel.end2) == 0)
 		return;

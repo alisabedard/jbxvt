@@ -1,13 +1,15 @@
+/*  Copyright 2016, Jeffrey E. Bedard
+    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+
 #include "change_offset.h"
 
+#include "config.h"
 #include "cursor.h"
-
 #include "jbxvt.h"
 #include "repaint.h"
 #include "repair_damage.h"
 #include "sbar.h"
 #include "screen.h"
-#include "xvt.h"
 
 // Text has moved down by less than a screen, render lines that remain
 static void copy_repaint_repair(const int16_t d, const int16_t y1,

@@ -28,6 +28,7 @@
 #include "cmdtok.h"
 #include "color.h"
 #include "command.h"
+#include "config.h"
 #include "cursor.h"
 #include "handle_sgr.h"
 #include "init_display.h"
@@ -61,17 +62,18 @@ static bool jbxvt_size_set;
 static enum ModeValue handle_reset(struct tokenst * restrict token)
 {
 	LOG("handle_reset()");
-	enum ModeValue mode = (token->tk_type == TK_SET) ? HIGH : LOW;
+	enum ModeValue mode = (token->tk_type == TK_SET)
+		? JBXVT_MODE_HIGH : JBXVT_MODE_LOW;
 	if (token->tk_private == '?') {
 		switch (token->tk_arg[0]) {
 		case 1 :
 			set_cur_keys(mode);
 			break;
 		case 6 :
-			jbxvt.scr.current->decom = mode == HIGH;
+			jbxvt.scr.current->decom = mode == JBXVT_MODE_HIGH;
 			break;
 		case 7 :
-			jbxvt.scr.current->wrap = mode == HIGH;
+			jbxvt.scr.current->wrap = mode == JBXVT_MODE_HIGH;
 			break;
 		case 47: // switch to main screen
 			scr_change_screen(mode);
@@ -85,7 +87,7 @@ static enum ModeValue handle_reset(struct tokenst * restrict token)
 	} else if (token->tk_private == 0) {
 		switch (token->tk_arg[0]) {
 		case 4 :
-			jbxvt.scr.current->insert = mode == HIGH;
+			jbxvt.scr.current->insert = mode == JBXVT_MODE_HIGH;
 			break;
 		default:
 			LOG("Unhandled: %d\n", token->tk_arg[0]);
@@ -212,10 +214,10 @@ app_loop_head:
 		quit(0);
 		break;
 	case TK_ENTRY :	// keyboard focus changed
-		scr_focus(1,token.tk_arg[0]);
+		scr_focus(token.tk_arg[0]|SCR_FOCUS_ENTRY);
 		break;
 	case TK_FOCUS :
-		scr_focus(2,token.tk_arg[0]);
+		scr_focus(token.tk_arg[0]|SCR_FOCUS_FOCUS);
 		break;
 	case TK_EXPOSE: // window exposed
 		handle_tk_expose(&token);
@@ -360,10 +362,10 @@ app_loop_head:
 		scr_restore_cursor();
 		break;
 	case TK_DECPAM :
-		set_kp_keys(HIGH);
+		set_kp_keys(JBXVT_MODE_HIGH);
 		break;
 	case TK_DECPNM :
-		set_kp_keys(LOW);
+		set_kp_keys(JBXVT_MODE_LOW);
 		break;
 	case TK_IND :		/* Index (same as \n) */
 		scr_index();

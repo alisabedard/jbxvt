@@ -1,12 +1,14 @@
+/*  Copyright 2016, Jeffrey E. Bedard
+    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+
 #include "scr_extend_selection.h"
 
+#include "config.h"
 #include "change_selection.h"
-
 #include "jbxvt.h"
 #include "screen.h"
 #include "selection.h"
 #include "show_selection.h"
-#include "xvt.h"
 
 #include <stdlib.h>
 

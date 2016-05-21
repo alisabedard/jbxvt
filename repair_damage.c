@@ -1,21 +1,22 @@
+/*  Copyright 2016, Jeffrey E. Bedard
+    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+
 #include "repair_damage.h"
 
+#include "config.h"
 #include "jbxvt.h"
 #include "log.h"
 #include "repaint.h"
 #include "screen.h"
-#include "xvt.h"
 
-/*  Return true if the event is a graphics exposure or noexposure.
- */
+//  Return true if the event is a graphics exposure or noexposure.
 static Bool grexornoex(Display * restrict dpy __attribute__((unused)),
 	XEvent * restrict ev, char * restrict arg __attribute__((unused)))
 {
 	return(ev->type == GraphicsExpose || ev->type == NoExpose);
 }
 
-/*  Check for and repair any damage after copying an area of the window.
- */
+//  Check for and repair any damage after copying an area of the window.
 void repair_damage(void)
 {
 	LOG("repair_damage()");
@@ -49,5 +50,3 @@ void repair_damage(void)
 		repaint(row1,row2,col1,col2);
 	} while (event.xgraphicsexpose.count > 0);
 }
-
-

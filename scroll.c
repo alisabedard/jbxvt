@@ -1,12 +1,15 @@
+/*  Copyright 2016, Jeffrey E. Bedard
+    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+
 #include "scroll.h"
 
+#include "config.h"
 #include "jbxvt.h"
 #include "log.h"
 #include "repair_damage.h"
 #include "sbar.h"
 #include "screen.h"
 #include "show_selection.h"
-#include "xvt.h"
 
 #include <stdlib.h>
 #include <string.h>

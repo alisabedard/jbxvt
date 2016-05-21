@@ -1,3 +1,6 @@
+/*  Copyright 2016, Jeffrey E. Bedard
+    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+
 #ifndef SCR_INSERT_CHARACTERS_H
 #define SCR_INSERT_CHARACTERS_H
 

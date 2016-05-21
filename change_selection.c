@@ -1,15 +1,16 @@
+/*  Copyright 2016, Jeffrey E. Bedard
+    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+
 #include "change_selection.h"
 
-
+#include "config.h"
 #include "jbxvt.h"
 #include "screen.h"
 #include "selcmp.h"
 #include "selection.h"
-#include "xvt.h"
 
 /*  Repaint the displayed selection to reflect the new value.  ose1 and ose2
- *  are assumed to represent the currently displayed selection endpoints.
- */
+ *  are assumed to represent the currently displayed selection endpoints.  */
 void change_selection(struct selst * restrict ose1,
 	struct selst * restrict ose2)
 {

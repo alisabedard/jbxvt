@@ -1,12 +1,14 @@
+/*  Copyright 2016, Jeffrey E. Bedard
+    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+
 #include "init_display.h"
 
-
+#include "config.h"
 #include "jbxvt.h"
 #include "sbar.h"
 #include "screen.h"
 #include "ttyinit.h"
 #include "xsetup.h"
-#include "xvt.h"
 
 #include <stdio.h>
 #include <stdlib.h>

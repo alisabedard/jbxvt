@@ -1,5 +1,9 @@
+/*  Copyright 2016, Jeffrey E. Bedard
+    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+
 #include "scr_reset.h"
 
+#include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"
 #include "log.h"
@@ -8,7 +12,6 @@
 #include "scroll_up.h"
 #include "selection.h"
 #include "ttyinit.h"
-#include "xvt.h"
 
 #include <stdio.h>
 #include <stdlib.h>

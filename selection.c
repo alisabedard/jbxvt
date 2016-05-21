@@ -1,5 +1,9 @@
+/*  Copyright 2016, Jeffrey E. Bedard
+    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+
 #include "selection.h"
 
+#include "config.h"
 #include "jbxvt.h"
 #include "save_selection.h"
 #include "selcmp.h"
@@ -7,7 +11,6 @@
 #include "slinest.h"
 #include "show_selection.h"
 #include "xsetup.h"
-#include "xvt.h"
 
 #include <stdio.h>
 #include <stdlib.h>
