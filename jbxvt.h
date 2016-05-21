@@ -68,6 +68,9 @@ struct JBXVT {
 			uint8_t *top;
 		} stack;
 	} com;
+	struct { // bool 1 bit masks only
+		bool show_scrollbar:1;
+	} opt;
 };
 
 extern struct JBXVT jbxvt; // in jbxvt.c

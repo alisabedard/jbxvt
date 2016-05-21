@@ -115,11 +115,12 @@ static void create_window(char * name)
 		0, 0, sizehints.width, sizehints.height,0,
 		jbxvt.X.color.fg, jbxvt.X.color.bg);
 
-	// show scrollbar:
-	XMoveWindow(jbxvt.X.dpy,jbxvt.X.win.vt,SBAR_WIDTH,0);
-	XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.vt,
-		sizehints.width - SBAR_WIDTH,
-		sizehints.height);
+	if(jbxvt.opt.show_scrollbar) { // show scrollbar:
+		XMoveWindow(jbxvt.X.dpy,jbxvt.X.win.vt,SBAR_WIDTH,0);
+		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.vt,
+			sizehints.width - SBAR_WIDTH,
+			sizehints.height);
+	}
 
 	cursor = XCreateFontCursor(jbxvt.X.dpy,XC_xterm);
 	XDefineCursor(jbxvt.X.dpy,jbxvt.X.win.vt,cursor);

@@ -3,6 +3,7 @@
 #include "cursor.h"
 #include "jbxvt.h"
 #include "screen.h"
+#include "scr_reset.h"
 #include "selection.h"
 
 /*  Move the cursor to a new position.  The relative argument is a pair of
@@ -14,10 +15,7 @@ void scr_move(int x, int y, int relative)
 	cursor();
 	jbxvt.scr.current->col = (relative & COL_RELATIVE)
 		? jbxvt.scr.current->col + x : x;
-	if (jbxvt.scr.current->col < 0)
-		jbxvt.scr.current->col = 0;
-	if (jbxvt.scr.current->col >= jbxvt.scr.chars.width)
-		jbxvt.scr.current->col = jbxvt.scr.chars.width - 1;
+	reset_row_col();
 
 	if (relative & ROW_RELATIVE) {
 		if (y > 0) {
@@ -50,10 +48,7 @@ void scr_move(int x, int y, int relative)
 		} else
 			jbxvt.scr.current->row = y;
 	}
-	if (jbxvt.scr.current->row < 0)
-		jbxvt.scr.current->row = 0;
-	if (jbxvt.scr.current->row >= jbxvt.scr.chars.height)
-		jbxvt.scr.current->row = jbxvt.scr.chars.height - 1;
+	reset_row_col();
 
 	jbxvt.scr.current->wrap_next = 0;
 	check_selection(jbxvt.scr.current->row,

@@ -41,10 +41,14 @@ static void free_visible_screens(uint8_t ch)
 	free(jbxvt.scr.s2.rend);
 }
 
-static void reset_row_col(void)
+void reset_row_col(void)
 {
+	if (jbxvt.scr.current->col < 0)
+		jbxvt.scr.current->col = 0;
 	if (jbxvt.scr.current->col >= jbxvt.scr.chars.width)
 		jbxvt.scr.current->col = jbxvt.scr.chars.width - 1;
+	if (jbxvt.scr.current->row < 0)
+		jbxvt.scr.current->row = 0;
 	if (jbxvt.scr.current->row >= jbxvt.scr.chars.height)
 		jbxvt.scr.current->row = jbxvt.scr.chars.height - 1;
 }

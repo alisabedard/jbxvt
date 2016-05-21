@@ -5,5 +5,6 @@
 #define SCR_RESET_H
 
 void scr_reset(void);
+void reset_row_col(void);
 
 #endif//!SCR_RESET_H

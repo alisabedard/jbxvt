@@ -18,9 +18,6 @@
 #include <X11/Xutil.h>
 
 static bool logshell;		/* flag nonzero if using a login shell */
-static bool show_scrollbar = true;	/* scroll-bar displayed if true */
-
-#define OPTABLESIZE	26
 
 XSizeHints sizehints = {
 	PMinSize | PResizeInc | PBaseSize,
@@ -68,7 +65,7 @@ int resize_window(void)
 		XGetGeometry(jbxvt.X.dpy,jbxvt.X.win.main,&r,
 			&x,&y,&width,&height,&u,&u);
 	}
-	if (show_scrollbar) {
+	if (jbxvt.opt.show_scrollbar) {
 		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.sb,SBAR_WIDTH - 1,height);
 		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.vt,width - SBAR_WIDTH,height);
 	} else
@@ -87,7 +84,7 @@ void switch_scrollbar(void)
 
 	XGetGeometry(jbxvt.X.dpy,jbxvt.X.win.main,&root,
 		&x,&y,&width,&height,&bdr_width,&depth);
-	if (show_scrollbar) {
+	if (jbxvt.opt.show_scrollbar) {
 		XUnmapWindow(jbxvt.X.dpy,jbxvt.X.win.sb);
 		XMoveWindow(jbxvt.X.dpy,jbxvt.X.win.vt,0,0);
 		width -= SBAR_WIDTH;
@@ -97,7 +94,6 @@ void switch_scrollbar(void)
 		sizehints.flags = USSize | PMinSize | PResizeInc | PBaseSize;
 		XSetWMNormalHints(jbxvt.X.dpy,jbxvt.X.win.main,&sizehints);
 		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.main,width,height);
-		show_scrollbar = 0;
 	} else {
 		XMapWindow(jbxvt.X.dpy,jbxvt.X.win.sb);
 		XMoveWindow(jbxvt.X.dpy,jbxvt.X.win.vt,SBAR_WIDTH,0);
@@ -108,8 +104,8 @@ void switch_scrollbar(void)
 		sizehints.flags = USSize | PMinSize | PResizeInc | PBaseSize;
 		XSetWMNormalHints(jbxvt.X.dpy,jbxvt.X.win.main,&sizehints);
 		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.main,width,height);
-		show_scrollbar = 1;
 	}
+	jbxvt.opt.show_scrollbar ^= true;
 }
 
 // Change window and/or icon name:
