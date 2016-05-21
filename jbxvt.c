@@ -15,12 +15,24 @@ struct JBXVT jbxvt;
 // returns new command value if specified
 static char ** parse_command_line(const int argc, char ** argv)
 {
-	const char * optstr = "cehvs";
+	const char * optstr = "b:c:eF:f:ehvs";
 	int8_t opt;
 	while((opt=getopt(argc, argv, optstr)) != -1) {
 		switch (opt) {
+		case 'b': // background color
+			jbxvt.opt.bg = optarg;
+			break;
+		case 'c': // cursor color
+			jbxvt.opt.cu = optarg;
+			break;
 		case 'e': // exec
 			return argv + optind;
+		case 'F': // font
+			jbxvt.opt.font = optarg;
+			break;
+		case 'f': // foreground color
+			jbxvt.opt.fg = optarg;
+			break;
 		case 's': // use scrollbar
 			jbxvt.opt.show_scrollbar=true;
 			break;

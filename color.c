@@ -2,17 +2,24 @@
 
 #include "jbxvt.h"
 
-static unsigned long set_color(const char * restrict color, GC gc,
-	const unsigned long vm)
+// returns pixel value for specified color
+pixel_t get_pixel(const char * restrict color)
 {
 	XColor c;
 
 	XAllocNamedColor(jbxvt.X.dpy, jbxvt.X.color.map, color,
 		&c, &(XColor){});
-	XChangeGC(jbxvt.X.dpy, gc, vm, &(XGCValues){
-		.foreground=c.pixel, .background=c.pixel});
 
 	return c.pixel;
+}
+
+static void set_color(const char * restrict color, GC gc,
+	const unsigned long vm)
+{
+	const pixel_t p = get_pixel(color);
+
+	XChangeGC(jbxvt.X.dpy, gc, vm, &(XGCValues){
+		.foreground=p, .background=p});
 }
 
 void reset_fg(void)

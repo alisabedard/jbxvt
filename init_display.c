@@ -56,9 +56,16 @@ static int error_handler(Display * restrict dpy __attribute__((unused)),
 	quit(1);
 }
 
+static void setup_font(void)
+{
+	jbxvt.X.font = XLoadQueryFont(jbxvt.X.dpy,
+		jbxvt.opt.font?jbxvt.opt.font:DEF_FONT); // if specified
+	if(!jbxvt.X.font) // fallback
+		  jbxvt.X.font = XLoadQueryFont(jbxvt.X.dpy, FIXED_FONT);
+}
+
 static void setup_sizehints(void)
 {
-	jbxvt.X.font = XLoadQueryFont(jbxvt.X.dpy, DEF_FONT);
 	sizehints.width_inc = XTextWidth(jbxvt.X.font, "M", 1);
 	sizehints.height_inc = jbxvt.X.font->ascent + jbxvt.X.font->descent;
 	sizehints.width = 80 * sizehints.width_inc;
@@ -76,6 +83,7 @@ static void create_window(char * name)
 	XWMHints wmhints;
 	Cursor cursor;
 
+	setup_sizehints();
 	jbxvt.X.win.main = XCreateSimpleWindow(jbxvt.X.dpy,
 		DefaultRootWindow(jbxvt.X.dpy),
 		sizehints.x,sizehints.y,sizehints.width,sizehints.height,
@@ -112,7 +120,7 @@ static void create_window(char * name)
 	XSelectInput(jbxvt.X.dpy,jbxvt.X.win.sb,SB_EVENTS);
 
 	jbxvt.X.win.vt = XCreateSimpleWindow(jbxvt.X.dpy, jbxvt.X.win.main,
-		0, 0, sizehints.width, sizehints.height,0,
+		0, 0, sizehints.width, sizehints.height, 0,
 		jbxvt.X.color.fg, jbxvt.X.color.bg);
 
 	if(jbxvt.opt.show_scrollbar) { // show scrollbar:
@@ -143,6 +151,16 @@ static void setup_gcs(Display * d, Window w)
 	jbxvt.X.gc.cu = XCreateGC(d, w, GCFunction|GCPlaneMask, &gcv);
 }
 
+static void init_jbxvt_colors(void)
+{
+	jbxvt.X.color.map = DefaultColormap(jbxvt.X.dpy, jbxvt.X.screen);
+	const pixel_t wp = WhitePixel(jbxvt.X.dpy, jbxvt.X.screen);
+	jbxvt.X.color.fg = jbxvt.opt.fg?get_pixel(jbxvt.opt.fg):wp;
+	jbxvt.X.color.cursor = jbxvt.opt.cu?get_pixel(jbxvt.opt.cu):wp;
+	const pixel_t bp = BlackPixel(jbxvt.X.dpy, jbxvt.X.screen);
+	jbxvt.X.color.bg = jbxvt.opt.bg?get_pixel(jbxvt.opt.bg):bp;
+}
+
 void init_display(char * name)
 {
 	jbxvt.X.dpy = XOpenDisplay(NULL);
@@ -150,18 +168,16 @@ void init_display(char * name)
 		perror("DISPLAY");
 		exit(1);
 	}
-	uint8_t screen = DefaultScreen(jbxvt.X.dpy);
-	jbxvt.X.color.map = DefaultColormap(jbxvt.X.dpy, screen);
+
+	jbxvt.X.screen = DefaultScreen(jbxvt.X.dpy);
+	init_jbxvt_colors();
 
 	XSetErrorHandler(error_handler);
 	XSetIOErrorHandler(io_error_handler);
-
-	setup_sizehints();
-
+	setup_font();
 	create_window(name);
-	jbxvt.X.color.fg = jbxvt.X.color.cursor = WhitePixel(jbxvt.X.dpy, screen);
-	jbxvt.X.color.bg = BlackPixel(jbxvt.X.dpy, screen);
 	setup_gcs(jbxvt.X.dpy, jbxvt.X.win.main);
+
 	scr_init();
 	sbar_reset();
 }

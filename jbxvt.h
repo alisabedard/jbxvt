@@ -1,6 +1,7 @@
 #ifndef JBXVT_H
 #define JBXVT_H
 
+#include "color.h"
 #include "command.h"
 #include "screenst.h"
 #include "selst.h"
@@ -15,7 +16,6 @@ typedef int fd_t;
 
 struct JBXVT {
 	struct {
-		uint8_t font_height, font_width;
 		Display * dpy;
 		XFontStruct *font;
 		struct {
@@ -26,14 +26,15 @@ struct JBXVT {
 		} gc;
 		struct {
 			Colormap map;
-			unsigned long bg, fg, cursor;
+			pixel_t bg, fg, cursor;
 		} color;
+		uint8_t font_height, font_width, screen;
 	} X;
 	struct {
-		int16_t offset; // current vert saved line
+		struct screenst * current;
 		uint32_t rstyle; // render style
 		uint32_t saved_rstyle; // saved render style
-		struct screenst * current;
+		struct screenst s1, s2;
 		struct { 
 			struct slinest **data; // saved lines
 			uint16_t max; // max # of saved lines
@@ -46,29 +47,30 @@ struct JBXVT {
 		struct {
 			uint8_t width, height;
 		} chars;
-		struct screenst s1, s2;
+		int16_t offset; // current vert saved line
 	} scr;
 	struct {
 		uint8_t * text;
-		uint16_t length;
 		struct selst end1, end2, // selection endpoints
 			     anchor; //selection anchor
+		uint16_t length;
 	} sel;
 	struct {
 		uint8_t * send_nxt; // next char to be sent
-		int send_count; // # chars waiting to be sent
 		fd_t fd; // file descriptor connected to the command
-		int width; // # file descriptors being used
+		fd_t width; // # file descriptors being used
 		struct {
-			uint8_t data[COM_BUF_SIZE];
 			uint8_t *next, *top;
+			uint8_t data[COM_BUF_SIZE];
 		} buf;
 		struct {
-			uint8_t data[COM_PUSH_MAX];
 			uint8_t *top;
+			uint8_t data[COM_PUSH_MAX];
 		} stack;
+		int8_t send_count; // # chars waiting to be sent
 	} com;
-	struct { // bool 1 bit masks only
+	struct {
+		char *bg, *fg, *cu, *font;
 		bool show_scrollbar:1;
 	} opt;
 };
