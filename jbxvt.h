@@ -70,6 +70,6 @@ struct JBXVT {
 	} com;
 };
 
-extern struct JBXVT jbxvt; // in xvt.c
+extern struct JBXVT jbxvt; // in jbxvt.c
 
 #endif//!JBXVT_H

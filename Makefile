@@ -20,7 +20,8 @@ CFLAGS+=-DLINUX
 
 LIBS+=-lX11
 
-OBJS=change_offset.o change_selection.o cmdtok.o color.o command.o
+OBJS=jbxvt.o
+OBJS+=change_offset.o change_selection.o cmdtok.o color.o command.o
 OBJS+=cursor.o init_display.o repaint.o repair_damage.o save_selection.o
 OBJS+=sbar.o scr_delete_characters.o scr_erase.o scr_extend_selection.o
 OBJS+=scr_insert_characters.o scr_move.o scr_refresh.o

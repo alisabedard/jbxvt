@@ -7,4 +7,6 @@
 // arguments to set and reset functions.
 enum ModeValue { JBXVT_MODE_LOW, JBXVT_MODE_HIGH };
 
+void jbxvt_app_loop(void);
+
 #endif//!XVT_H

@@ -187,8 +187,6 @@ void init_command(char ** restrict argv)
 	wm_del_win();
 
 	if ((jbxvt.com.fd = run_command(argv)) < 0) {
-		sleep(1);
-		perror("Quitting");
 		quit(1);
 	}
 	jbxvt.com.buf.next = jbxvt.com.buf.top = jbxvt.com.buf.data;
