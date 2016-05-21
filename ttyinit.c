@@ -475,12 +475,6 @@ static void set_ttymodes(void)
 
 	scr_get_size(&width,&height);
 	tty_set_size(width,height);
-#ifdef TIOCCONS
-	if (is_console())
-		if (ioctl(0,TIOCCONS,0) != 0) {
-			perror("Could not set console");
-		}
-#endif// TIOCCONS
 }
 
 static void child(char ** restrict argv, fd_t ttyfd)

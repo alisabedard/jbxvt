@@ -16,17 +16,6 @@
 #include <X11/cursorfont.h>
 #include <X11/Xutil.h>
 
-
-static char * jbxvt_name;
-
-static bool console_flag;
-
-//  Return if this window should be a console.
-inline bool is_console(void)
-{
-	return(console_flag);
-}
-
 #define XVT_CLASS	"JBXvt"
 
 #define MW_EVENTS	(	KeyPressMask |\
@@ -51,30 +40,6 @@ inline bool is_console(void)
 				ButtonPressMask \
 			)
 
-
-/*  Take a pass through the arguments extracting any that do not correspond
- *  to X resources.  Recognised arguments are removed from the list and
- *  the new value of argc is returned.
- */
-static uint8_t extract_nonX_args(int argc, char ** argv)
-{
-	uint8_t i, j;
-
-	jbxvt_name = argv[0];
-	for (j = i = 1; i < argc; i++) {
-		if (strcmp(argv[i],"-name") == 0) {
-			if (argv[++i])
-				jbxvt_name = argv[i];
-			else fprintf(stderr, "missing -name argument");
-		} else if (strcmp(argv[i],"-C") == 0
-			|| strcmp(argv[i],"-console") == 0) {
-			console_flag = true;
-		} else
-			argv[j++] = argv[i];
-	}
-	argv[j] = NULL;
-	return(j);
-}
 
 //  Error handling function, tidy up and then exit.
 __attribute__((noreturn))
@@ -103,9 +68,8 @@ static void setup_sizehints(void)
 	sizehints.flags |= USSize;
 }
 
-
 //  Open the window.
-static void create_window(const uint8_t argc, char ** argv)
+static void create_window(char * name)
 {
 	XTextProperty wname, iname;
 	XClassHint class;
@@ -117,31 +81,34 @@ static void create_window(const uint8_t argc, char ** argv)
 		sizehints.x,sizehints.y,sizehints.width,sizehints.height,
 		0, jbxvt.X.color.fg,jbxvt.X.color.bg);
 
-	if (XStringListToTextProperty(&argv[0],1,&wname) == 0) {
+	if (XStringListToTextProperty(&name,1,&wname) == 0) {
 		perror("cannot allocate window name");
 		exit(1);
 	}
-	if (XStringListToTextProperty(&argv[0],1,&iname) == 0) {
+	if (XStringListToTextProperty(&name,1,&iname) == 0) {
 		perror("cannot allocate icon name");
 		exit(1);
 	}
-	class.res_name = argv[0];
+	class.res_name = name;
 	class.res_class = XVT_CLASS;
 	wmhints.input = True;
 	wmhints.initial_state = NormalState;
 	wmhints.flags = InputHint | StateHint;
-	XSetWMProperties(jbxvt.X.dpy,jbxvt.X.win.main,&wname,&iname,argv,argc,
-		&sizehints,&wmhints,&class);
+	XSetWMProperties(jbxvt.X.dpy, jbxvt.X.win.main, &wname,
+		&iname, &name, 1, &sizehints, &wmhints, &class);
 	XFree(iname.value);
 	XFree(wname.value);
+
 	XSelectInput(jbxvt.X.dpy,jbxvt.X.win.main,MW_EVENTS);
 
 	jbxvt.X.win.sb = XCreateSimpleWindow(jbxvt.X.dpy,
 		jbxvt.X.win.main, -1, -1,
 		SBAR_WIDTH - 1, sizehints.height, 1,
 		jbxvt.X.color.fg, jbxvt.X.color.bg);
+
 	cursor = XCreateFontCursor(jbxvt.X.dpy,XC_sb_v_double_arrow);
 	XDefineCursor(jbxvt.X.dpy,jbxvt.X.win.sb,cursor);
+
 	XSelectInput(jbxvt.X.dpy,jbxvt.X.win.sb,SB_EVENTS);
 
 	jbxvt.X.win.vt = XCreateSimpleWindow(jbxvt.X.dpy, jbxvt.X.win.main,
@@ -175,9 +142,8 @@ static void setup_gcs(Display * d, Window w)
 	jbxvt.X.gc.cu = XCreateGC(d, w, GCFunction|GCPlaneMask, &gcv);
 }
 
-void init_display(uint8_t argc, char ** argv)
+void init_display(char * name)
 {
-	argc = extract_nonX_args(argc,argv);
 	jbxvt.X.dpy = XOpenDisplay(NULL);
 	if(!jbxvt.X.dpy) {
 		perror("DISPLAY");
@@ -191,7 +157,7 @@ void init_display(uint8_t argc, char ** argv)
 
 	setup_sizehints();
 
-	create_window(argc, argv);
+	create_window(name);
 	jbxvt.X.color.fg = jbxvt.X.color.cursor = WhitePixel(jbxvt.X.dpy, screen);
 	jbxvt.X.color.bg = BlackPixel(jbxvt.X.dpy, screen);
 	setup_gcs(jbxvt.X.dpy, jbxvt.X.win.main);

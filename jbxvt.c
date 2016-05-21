@@ -5,29 +5,32 @@
 #include "xsetup.h"
 #include "xvt.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 struct JBXVT jbxvt;
 
-// returns new command value
-static char ** process_exec_flag(int * restrict argc, char ** argv)
+// returns new command value if specified
+static char ** parse_command_line(const int argc, char ** argv)
 {
-	/*  Look for a -e flag and if it is there use it to initialise
-	 *  the command and its arguments.  */
-	uint8_t i;
-	char ** com_argv = NULL;
-
-	for (i = 0; i < *argc; i++)
-		  if (strcmp(argv[i],"-e") == 0)
-			    break;
-	if (i < *argc - 1) {
-		argv[i] = NULL;
-		com_argv = argv + i + 1;
-		*argc = i;
+	const char * optstr = "cehv";
+	int8_t opt;
+	while((opt=getopt(argc, argv, optstr)) != -1) {
+		switch (opt) {
+		case 'e': // exec
+			return argv + optind;
+		case 'v': // version
+			fprintf(stdout, "%s %s\n", argv[0], VERSION);
+			exit(0);
+		case 'h': // help
+		default:
+			fprintf(stdout, "%s -[%s]\n", argv[0], optstr);
+			exit(0);
+		}
 	}
-
-	return com_argv;
+	return NULL;
 }
 
 /*  Run the command in a subprocess and return a file descriptor for the
@@ -35,9 +38,8 @@ static char ** process_exec_flag(int * restrict argc, char ** argv)
  *  the slave.  */
 int main(int argc, char ** argv)
 {
-	char ** com_argv = process_exec_flag(&argc, argv);
-	
-	init_display(argc,argv);
+	char ** com_argv = parse_command_line(argc, argv);
+	init_display(argv[0]);
 	map_window();
 	char *shell_argv[2]; // here to not lose scope.
 	if(!com_argv) {
@@ -45,9 +47,6 @@ int main(int argc, char ** argv)
 		shell_argv[1] = NULL;
 		com_argv = shell_argv;
 	}
-#ifdef DEBUG
-	fprintf(stderr, "Command: %s\n", com_argv[0]);
-#endif//DEBUG
 	setenv("TERM", TERM_ENV, true);
 	init_command(com_argv);
 	jbxvt_app_loop();

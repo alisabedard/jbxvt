@@ -11,7 +11,7 @@
 #define TERM_ENV "xterm" // TERM env var to set
 #define COMMAND "/bin/sh" // default command to run
 
-enum { 	SBAR_WIDTH = 12, // width of scroll bar
+enum { 	SBAR_WIDTH = 10, // width of scroll bar
 	MARGIN = 2, // gap between the text and the window edges
 	DEF_SAVED_LINES = 75 // # lines of scroll history
 };
