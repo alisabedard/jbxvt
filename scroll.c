@@ -9,6 +9,7 @@
 #include "repair_damage.h"
 #include "sbar.h"
 #include "screen.h"
+#include "selection.h"
 #include "show_selection.h"
 
 #include <stdlib.h>
@@ -23,37 +24,19 @@ static void sel_scr_to_sav(struct selst * restrict s,
 	}
 }
 
-static void free_top_line(const int i)
-{
-	LOG("free_top_line()");
-	struct slinest ** s = &jbxvt.scr.sline.data[jbxvt.scr.sline.max - i];
-	if(*s) {
-		free((*s)->sl_text);
-		free((*s)->sl_rend);
-		(*s)->sl_length = 0;
-		free(*s);
-	}
-}
-
-static void clear_selection(struct selst * restrict s, const int i)
-{
-	LOG("clear_selection()");
-	if (s->se_type == SAVEDSEL
-		&& s->se_index == jbxvt.scr.sline.max - i) {
-		show_selection(0, jbxvt.scr.chars.height - 1, 0,
-			jbxvt.scr.chars.width - 1);
-		s->se_type = NOSEL;
-	}
-}
-
 // Save lines that scroll off the top of the screen.
 static void free_top_lines(int count)
 {
 	LOG("free_top_lines()");
 	for (int i = 1; i <= count; i++) {
-		free_top_line(i);
-		clear_selection(&jbxvt.sel.end1, i);
-		clear_selection(&jbxvt.sel.end2, i);
+		struct slinest ** s = &jbxvt.scr.sline.data
+			[jbxvt.scr.sline.max - i];
+		if(*s) {
+			free((*s)->sl_text);
+			free((*s)->sl_rend);
+			(*s)->sl_length = 0;
+			free(*s);
+		}
 	}
 }
 
@@ -62,6 +45,28 @@ static void set_selend_index(const int i, const int count,
 {
 	if (s->se_type == SAVEDSEL && s->se_index == i)
 		  s->se_index = i + count;
+}
+
+static void transmogrify(const int j, const int8_t count)
+{
+	jbxvt.scr.current->text[j + count]
+		= jbxvt.scr.current->text[j];
+	jbxvt.scr.current->rend[j + count]
+		= jbxvt.scr.current->rend[j];
+	if (jbxvt.sel.end1.se_type == SCREENSEL
+		&& jbxvt.sel.end1.se_index == j)
+		  jbxvt.sel.end1.se_index = j + count;
+	if (jbxvt.sel.end2.se_type == SCREENSEL
+		&& jbxvt.sel.end2.se_index == j)
+		  jbxvt.sel.end2.se_index = j + count;
+}
+
+static void ck_sel_on_scr(const int j)
+{
+	// clear selection if it scrolls off screen:
+	if (jbxvt.sel.end1.se_index == j
+		|| jbxvt.sel.end2.se_index == j)
+		  scr_clear_selection();
 }
 
 static void scroll_up(uint8_t row1, uint8_t row2, int8_t count)
@@ -112,43 +117,22 @@ static void scroll_up(uint8_t row1, uint8_t row2, int8_t count)
 	for (int i = 0; i < count; i++, j++) {
 		save[i] = jbxvt.scr.current->text[j];
 		rend[i] = jbxvt.scr.current->rend[j];
-		if (jbxvt.sel.end1.se_type == SCREENSEL
-			&& jbxvt.sel.end1.se_index == j) {
-			show_selection(0,jbxvt.scr.chars.height - 1,
-				0, jbxvt.scr.chars.width - 1);
-			jbxvt.sel.end1.se_type = NOSEL;
-		}
-		if (jbxvt.sel.end2.se_type == SCREENSEL
-			&& jbxvt.sel.end2.se_index == j) {
-			show_selection(0,jbxvt.scr.chars.height - 1,
-				0, jbxvt.scr.chars.width - 1);
-			jbxvt.sel.end2.se_type = NOSEL;
-		}
+		ck_sel_on_scr(j);
 	}
-	row2++;
-	for (; j < row2; j++) {
-		jbxvt.scr.current->text[j - count]
-			= jbxvt.scr.current->text[j];
-		jbxvt.scr.current->rend[j - count]
-			= jbxvt.scr.current->rend[j];
-		if (jbxvt.sel.end1.se_type == SCREENSEL
-			&& jbxvt.sel.end1.se_index == j)
-			  jbxvt.sel.end1.se_index = j - count;
-		if (jbxvt.sel.end2.se_type == SCREENSEL
-			&& jbxvt.sel.end2.se_index == j)
-			  jbxvt.sel.end2.se_index = j - count;
-	}
+
+	for(row2++; j < row2; j++)
+		transmogrify(j, -count);
+
 	for (int i = 0; i < count; i++) {
 		memset(save[i],0,jbxvt.scr.chars.width + 1);
 		jbxvt.scr.current->text[row2 - i - 1] = save[i];
 		memset(rend[i],0,(jbxvt.scr.chars.width + 1)*sizeof(uint32_t));
 		jbxvt.scr.current->rend[row2 - i - 1] = rend[i];
 	}
-	int y1;
 	if (count < row2 - row1) {
-		const int y2 = MARGIN + row1
+		const int16_t y2 = MARGIN + row1
 			* jbxvt.X.font_height;
-		y1 = y2 + count * jbxvt.X.font_height;
+		const int16_t y1 = y2 + count * jbxvt.X.font_height;
 		int height = (row2 - row1 - count)
 			* jbxvt.X.font_height;
 		XCopyArea(jbxvt.X.dpy,jbxvt.X.win.vt,
@@ -156,10 +140,10 @@ static void scroll_up(uint8_t row1, uint8_t row2, int8_t count)
 			0,y1,jbxvt.scr.pixels.width,height,0,y2);
 		repair_damage();
 	}
-	int height = count * jbxvt.X.font_height;
-	y1 = MARGIN + (row2 - count) * jbxvt.X.font_height;
+	const int16_t y = MARGIN + (row2 - count) * jbxvt.X.font_height;
 	XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,
-		0,y1,jbxvt.scr.pixels.width,height,False);
+		0, y, jbxvt.scr.pixels.width,
+		count * jbxvt.X.font_height,False);
 }
 
 static void scroll_down(uint8_t row1, uint8_t row2, int8_t count)
@@ -172,31 +156,10 @@ static void scroll_down(uint8_t row1, uint8_t row2, int8_t count)
 	for (int i = 0; i < count; i++, j--) {
 		save[i] = jbxvt.scr.current->text[j];
 		rend[i] = jbxvt.scr.current->rend[j];
-		if (jbxvt.sel.end1.se_type == SCREENSEL
-			&& jbxvt.sel.end1.se_index == j) {
-			show_selection(0,jbxvt.scr.chars.height - 1,
-				0,jbxvt.scr.chars.width - 1);
-			jbxvt.sel.end1.se_type = NOSEL;
-		}
-		if (jbxvt.sel.end2.se_type == SCREENSEL
-			&& jbxvt.sel.end2.se_index == j) {
-			show_selection(0,jbxvt.scr.chars.height - 1,
-				0,jbxvt.scr.chars.width - 1);
-			jbxvt.sel.end2.se_type = NOSEL;
-		}
+		ck_sel_on_scr(j);
 	}
-	for (; j >= row1; j--) {
-		jbxvt.scr.current->text[j + count]
-			= jbxvt.scr.current->text[j];
-		jbxvt.scr.current->rend[j + count]
-			= jbxvt.scr.current->rend[j];
-		if (jbxvt.sel.end1.se_type == SCREENSEL
-			&& jbxvt.sel.end1.se_index == j)
-			  jbxvt.sel.end1.se_index = j + count;
-		if (jbxvt.sel.end2.se_type == SCREENSEL
-			&& jbxvt.sel.end2.se_index == j)
-			  jbxvt.sel.end2.se_index = j + count;
-	}
+	for (; j >= row1; j--)
+		transmogrify(j, count);
 	for (int i = 0; i < count; i++) {
 		memset(save[i],0,jbxvt.scr.chars.width + 1);
 		jbxvt.scr.current->text[row1 + i] = save[i];

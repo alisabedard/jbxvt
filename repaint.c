@@ -103,7 +103,7 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 	XGCValues v;
 	XGetGCValues(jbxvt.X.dpy, jbxvt.X.gc.tx,
 		GCForeground|GCBackground, &v);
-	if (rval & RS_RVID) { // Reverse looked up colors.
+	if (rval & RS_RVID || rval & RS_BLINK) { // Reverse looked up colors.
 		XSetForeground(jbxvt.X.dpy, jbxvt.X.gc.tx, v.background);
 		XSetBackground(jbxvt.X.dpy, jbxvt.X.gc.tx, v.foreground);
 	}
@@ -115,8 +115,8 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 	if (rval & RS_BOLD) // Fake bold:
 		  XDrawString(jbxvt.X.dpy,jbxvt.X.win.vt,
 			  jbxvt.X.gc.tx,x + 1,y, (const char *)str,len);
-	y++; // Advance for underline.
-	if (rval & RS_ULINE)
+	y++; // Advance for underline, use underline for italic.
+	if (rval & RS_ULINE || rval & RS_ITALIC)
 		XDrawLine(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.tx,
 			x,y,x + len * jbxvt.X.font_width,y);
 	reset_color();

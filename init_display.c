@@ -40,22 +40,6 @@
 				ButtonPressMask \
 			)
 
-
-//  Error handling function, tidy up and then exit.
-__attribute__((noreturn))
-static int io_error_handler(Display * restrict dpy __attribute__((unused)))
-{
-	fprintf(stderr, "I/O error");
-	quit(1);
-}
-
-__attribute__((noreturn))
-static int error_handler(Display * restrict dpy __attribute__((unused)),
-	XErrorEvent * restrict evp __attribute__((unused)))
-{
-	quit(1);
-}
-
 static void setup_font(void)
 {
 	jbxvt.X.font = XLoadQueryFont(jbxvt.X.dpy,
@@ -75,53 +59,56 @@ static void setup_sizehints(void)
 	sizehints.flags |= USSize;
 }
 
-//  Open the window.
-static void create_window(char * name)
+static void setup_properties(char * name)
 {
-	XTextProperty wname, iname;
-	XClassHint class;
-	XWMHints wmhints;
-	Cursor cursor;
+	XClassHint class = { .res_name = name, .res_class = XVT_CLASS };
+	XWMHints wmhints = { .input = true, .initial_state = NormalState,
+		.flags = InputHint | StateHint};
+	XTextProperty winame;
+	XStringListToTextProperty(&name, 1, &winame);
+	XSetWMProperties(jbxvt.X.dpy, jbxvt.X.win.main, &winame,
+		&winame, &name, 1, &sizehints, &wmhints, &class);
+	XFree(winame.value);
+}
 
-	setup_sizehints();
+static void create_main_window(void)
+{
 	jbxvt.X.win.main = XCreateSimpleWindow(jbxvt.X.dpy,
 		DefaultRootWindow(jbxvt.X.dpy),
 		sizehints.x,sizehints.y,sizehints.width,sizehints.height,
 		0, jbxvt.X.color.fg,jbxvt.X.color.bg);
-
-	if (XStringListToTextProperty(&name,1,&wname) == 0) {
-		perror("cannot allocate window name");
-		exit(1);
-	}
-	if (XStringListToTextProperty(&name,1,&iname) == 0) {
-		perror("cannot allocate icon name");
-		exit(1);
-	}
-	class.res_name = name;
-	class.res_class = XVT_CLASS;
-	wmhints.input = True;
-	wmhints.initial_state = NormalState;
-	wmhints.flags = InputHint | StateHint;
-	XSetWMProperties(jbxvt.X.dpy, jbxvt.X.win.main, &wname,
-		&iname, &name, 1, &sizehints, &wmhints, &class);
-	XFree(iname.value);
-	XFree(wname.value);
-
 	XSelectInput(jbxvt.X.dpy,jbxvt.X.win.main,MW_EVENTS);
+}
 
+static void create_sb_window(void)
+{
 	jbxvt.X.win.sb = XCreateSimpleWindow(jbxvt.X.dpy,
 		jbxvt.X.win.main, -1, -1,
 		SBAR_WIDTH - 1, sizehints.height, 1,
 		jbxvt.X.color.fg, jbxvt.X.color.bg);
-
-	cursor = XCreateFontCursor(jbxvt.X.dpy,XC_sb_v_double_arrow);
-	XDefineCursor(jbxvt.X.dpy,jbxvt.X.win.sb,cursor);
-
 	XSelectInput(jbxvt.X.dpy,jbxvt.X.win.sb,SB_EVENTS);
+	XDefineCursor(jbxvt.X.dpy,jbxvt.X.win.sb,
+		XCreateFontCursor(jbxvt.X.dpy, XC_sb_v_double_arrow));
+}
 
+static void create_vt_window(void)
+{
 	jbxvt.X.win.vt = XCreateSimpleWindow(jbxvt.X.dpy, jbxvt.X.win.main,
 		0, 0, sizehints.width, sizehints.height, 0,
 		jbxvt.X.color.fg, jbxvt.X.color.bg);
+	XDefineCursor(jbxvt.X.dpy,jbxvt.X.win.vt,
+		XCreateFontCursor(jbxvt.X.dpy, XC_xterm));
+	XSelectInput(jbxvt.X.dpy,jbxvt.X.win.vt,VT_EVENTS);
+}
+
+//  Open the window.
+static void create_window(char * name)
+{
+	setup_sizehints();
+	create_main_window();
+	setup_properties(name);
+	create_sb_window();
+	create_vt_window();
 
 	if(jbxvt.opt.show_scrollbar) { // show scrollbar:
 		XMoveWindow(jbxvt.X.dpy,jbxvt.X.win.vt,SBAR_WIDTH,0);
@@ -130,9 +117,6 @@ static void create_window(char * name)
 			sizehints.height);
 	}
 
-	cursor = XCreateFontCursor(jbxvt.X.dpy,XC_xterm);
-	XDefineCursor(jbxvt.X.dpy,jbxvt.X.win.vt,cursor);
-	XSelectInput(jbxvt.X.dpy,jbxvt.X.win.vt,VT_EVENTS);
 }
 
 static void setup_gcs(Display * d, Window w)
@@ -171,9 +155,6 @@ void init_display(char * name)
 
 	jbxvt.X.screen = DefaultScreen(jbxvt.X.dpy);
 	init_jbxvt_colors();
-
-	XSetErrorHandler(error_handler);
-	XSetIOErrorHandler(io_error_handler);
 	setup_font();
 	create_window(name);
 	setup_gcs(jbxvt.X.dpy, jbxvt.X.win.main);
