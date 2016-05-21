@@ -1,9 +1,14 @@
+/*  Copyright 2016, Jeffrey E. Bedard
+    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+
 #include "scr_request_selection.h"
 
 #include "jbxvt.h"
 #include "log.h"
 #include "screen.h"
 #include "selection.h"
+
+#include <X11/Xatom.h>
 
 /*  Predicate function used when waiting for selection events.  If arg is
  *  NULL then we return true for Selection Notify events.  If arg is not

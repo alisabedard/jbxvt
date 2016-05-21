@@ -184,7 +184,7 @@ struct xeventst * pop_xevent(void)
 void init_command(char ** restrict argv)
 {
 	//  Enable the delete window protocol:
-	init_wm_del_win();
+	wm_del_win();
 
 	if ((jbxvt.com.fd = run_command(argv)) < 0) {
 		sleep(1);

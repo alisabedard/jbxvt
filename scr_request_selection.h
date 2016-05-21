@@ -1,7 +1,9 @@
+/*  Copyright 2016, Jeffrey E. Bedard
+    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+
 #ifndef SCR_REQ_SEL_H
 #define SCR_REQ_SEL_H
 
-#include <X11/Xatom.h>
 #include <X11/Xlib.h>
 
 //  Request the current primary selection

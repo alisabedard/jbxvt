@@ -106,7 +106,7 @@ static int16_t get_com_char(const int8_t flags)
 		case ClientMessage:
 			if (event.xclient.format == 32
 				&& event.xclient.data.l[0]
-				== (long)get_wm_del_win())
+				== (long)wm_del_win())
 				  quit(0);
 			break;
 		case MappingNotify:
