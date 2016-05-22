@@ -151,15 +151,15 @@
 #include <pty.h>
 #include <stropts.h>
 #include <utmp.h>
-#define SVR4_PTY
+#define POSIX_PTY
 #define SVR4_UTMP
 #endif
 
 static pid_t comm_pid = -1;	// process id of child
 static char *tty_name = NULL;	// name of the slave teletype
-#ifdef BSD_UTMP
+#if defined(BSD_UTMP) || defined(SVR4_UTMP)
 static struct utmp utent;	// our current utmp entry
-#endif//BSD_UTMP
+#endif//BSD_UTMP||SVR4_UTMP
 
 #ifdef BSD_UTMP
 static int tslot = -1;		// index to our slot in the utmp file
@@ -435,7 +435,7 @@ static void set_ttymodes(void)
 
 	term.c_oflag = OPOST | ONLCR;
 
-	term.c_cflag = CLOCAL;
+	term.c_cflag = CLOCAL | B9600;
 
 	term.c_lflag = ISIG | IEXTEN | ICANON | ECHO | ECHOE | ECHOK;
 

@@ -2,7 +2,7 @@ CFLAGS+=-Os
 CFLAGS+=-Werror
 #CFLAGS+=-march=native
 #CFLAGS+=-flto # doesn't work with clang
-CFLAGS+=-ggdb
+#CFLAGS+=-ggdb
 #CFLAGS+=-DDEBUG
 #CFLAGS+=-DTK_DEBUG
 #CC=clang
@@ -15,13 +15,13 @@ exe=jbxvt
 #LIBS+=-L/usr/X11R7/lib -Wl,-R/usr/X11R7/lib
 
 # Uncomment for FreeBSD:
-CFLAGS+=-DFREEBSD
-CFLAGS+=-I/usr/local/include
-LIBS+=-L/usr/local/lib
+#CFLAGS+=-DFREEBSD
+#CFLAGS+=-I/usr/local/include
+#LIBS+=-L/usr/local/lib
 
 
 # Uncomment for GNU/Linux:
-#CFLAGS+=-DLINUX
+CFLAGS+=-DLINUX
 
 LIBS+=-lX11
 
