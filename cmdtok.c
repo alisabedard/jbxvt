@@ -70,10 +70,12 @@ static int16_t get_com_char(const int8_t flags)
 					NULL,NULL);
 			} while (sv < 0 && errno == EINTR);
 
+#ifndef FREEBSD
 			if (sv < 0) {
 				perror("select failed");
 				quit(-1);
 			}
+#endif//!FREEBSD
 
 			if (FD_ISSET(jbxvt.com.fd,&out_fdset)) {
 				count = jbxvt.com.send_count < 100

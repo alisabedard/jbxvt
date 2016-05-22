@@ -41,9 +41,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <termios.h>
 #include <time.h>
 #include <unistd.h>
-#include <utmp.h>
 
 /*  NOTES ON PORTING
  *
@@ -119,6 +119,18 @@
 #define SCTTY_IOCTL
 #endif//NETBSD
 
+#ifdef FREEBSD
+#define POSIX_PTY
+#include <sys/ttycom.h>
+#include <termios.h>
+#include <ttyent.h>
+#ifndef I_PUSH
+#define I_PUSH 2
+#endif//!IPUSH
+#define TTYTAB _PATH_TTYS
+#define SCTTY_IOCTL
+#endif//FREEBSD
+
 #ifdef SUNOS5
 #include <sys/stropts.h>
 #include <sys/file.h>
@@ -138,13 +150,16 @@
 #ifdef LINUX
 #include <pty.h>
 #include <stropts.h>
+#include <utmp.h>
 #define SVR4_PTY
 #define SVR4_UTMP
 #endif
 
 static pid_t comm_pid = -1;	// process id of child
 static char *tty_name = NULL;	// name of the slave teletype
+#ifdef BSD_UTMP
 static struct utmp utent;	// our current utmp entry
+#endif//BSD_UTMP
 
 #ifdef BSD_UTMP
 static int tslot = -1;		// index to our slot in the utmp file
@@ -236,8 +251,9 @@ static int get_tslot(char * restrict ttynam)
 //  Attempt to create and write an entry to the utmp file
 static void write_utmp(void)
 {
+#if defined(SVR4_UTMP) || defined(BSD_UTMP)
 	struct passwd *pw;
-
+#endif
 #ifdef SVR4_UTMP
 	memset(&utent,0,sizeof(utent));
 	utent.ut_type = USER_PROCESS;
@@ -245,7 +261,8 @@ static void write_utmp(void)
 	strncpy(utent.ut_line,tty_name + 5,sizeof(utent.ut_line));
 	if((pw = getpwuid(getuid())))
 		strncpy(utent.ut_name,pw->pw_name,sizeof(utent.ut_name));
-	strncpy(utent.ut_host,XDisplayString(jbxvt.X.dpy),sizeof(utent.ut_host));
+	strncpy(utent.ut_host,XDisplayString(jbxvt.X.dpy),
+		sizeof(utent.ut_host));
 	time((time_t *)&utent.ut_time);
 	pututline(&utent);
 	endutent();
@@ -317,11 +334,13 @@ static void write_utmp(void)
 void quit(int status)
 {
 	tidy_utmp();
+#ifdef DEBUG
 	if(status) {
 		perror("Exited abnormally");
 		sleep(5); // Allow user to see the error
 		abort(); // Dump core
 	}
+#endif//DEBUG
 	exit(status);
 }
 
@@ -359,7 +378,7 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 			break;
 	}
 	if (mfd < 0) {
-		fprintf(stderr, "Can't open a pseudo teletype");
+		perror("Can't open a pseudo teletype");
 		return(NULL);
 	}
 #endif /* BSD_PTY */
@@ -367,22 +386,36 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 #ifdef SVR4_PTY
 	const fd_t mfd = open("/dev/ptmx", O_RDWR);;
 	if (mfd < 0) {
-		fprintf(stderr, "Can't open a pseudo teletype");
+		perror("Can't open a pseudo teletype");
 		return(NULL);
 	}
 	grantpt(mfd);
 	unlockpt(mfd);
 	char * ttynam = ptsname(mfd);
 #endif /* SVR4_PTY */
-	const fd_t sfd = open(ttynam,O_RDWR);
+#ifdef POSIX_PTY
+	const fd_t mfd = posix_openpt(O_RDWR);
+	if (mfd < 0) {
+		perror("Can't open ptty");
+		exit(1);
+	}
+	grantpt(mfd);
+	unlockpt(mfd);
+	char *ttynam = ptsname(mfd);
+#endif//POSIX_PTY
+	const fd_t sfd = open((const char *)ttynam,O_RDWR);
 	if (sfd < 0) {
 		fprintf(stderr, "could not open slave tty %s",ttynam);
-		return(NULL);
+		exit(1);
 	}
 #ifdef SVR4_PTY
 	ioctl(sfd,I_PUSH,"ptem");
 	ioctl(sfd,I_PUSH,"ldterm");
 #endif /* SVR4_PTY */
+#ifdef POSIX_PTY
+	ioctl(sfd,2,"ptem");
+	ioctl(sfd,2,"ldterm");
+#endif
 
 	*pslave = sfd;
 	*pmaster = mfd;
@@ -398,13 +431,11 @@ static void set_ttymodes(void)
 	//  Set the terminal using the standard System V termios interface
 	static struct termios term;
 
-	memset((char *)&term,0,sizeof(term));
 	term.c_iflag = BRKINT | IGNPAR | ICRNL | IXON;
 
 	term.c_oflag = OPOST | ONLCR;
 
-	//term.c_cflag = B9600 | CREAD | CS8;
-	term.c_cflag = B230400 | CREAD | CS8;
+	term.c_cflag = CLOCAL;
 
 	term.c_lflag = ISIG | IEXTEN | ICANON | ECHO | ECHOE | ECHOK;
 
@@ -480,8 +511,10 @@ static void set_ttymodes(void)
 static void child(char ** restrict argv, fd_t ttyfd)
 {
 	const pid_t pgid = setsid();
-	if(pgid < 0) // cannot create new session
-		  abort();
+	if(pgid < 0) { // cannot create new session
+		perror("Cannot create new session");
+		exit(1);
+	}
 	/*  Having started a new session, we need to establish
 	 *  a controlling teletype for it.  On some systems
 	 *  this can be done with an ioctl but on others
@@ -494,7 +527,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	if(ttyfd < 0) // cannot open tty
 		  abort();
 	close(i);
-#endif//!SCTTY_IOCTL
+#endif//SCTTY_IOCTL
 
 	const uid_t uid = getuid();
 	struct group * gr = getgrnam("tty");
@@ -555,7 +588,7 @@ int run_command(char ** argv)
 /*  Tell the teletype handler what size the window is.  Called initially from
  *  the child and after a window size change from the parent.
  */
-#ifndef NETBSD
+#if !defined(NETBSD) && !defined(FREEBSD)
 #ifdef TIOCSWINSZ
 void tty_set_size(const uint8_t width, const uint8_t height)
 {
