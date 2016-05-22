@@ -157,7 +157,7 @@ static void catch_child(const int sig __attribute__((unused)))
 	int status;
 
 	if (wait(&status) == comm_pid)
-		quit(0);
+		quit(status);
 
 	signal(SIGCHLD,catch_child);
 }
