@@ -1,11 +1,12 @@
 CFLAGS+=-Os
-CFLAGS+=-Werror
+#CFLAGS+=-Werror
 #CFLAGS+=-march=native
 #CFLAGS+=-flto # doesn't work with clang
 #CFLAGS+=-ggdb
 #CFLAGS+=-DDEBUG
 #CFLAGS+=-DTK_DEBUG
 #CC=clang
+PREFIX=/usr
 
 exe=jbxvt
 
@@ -13,6 +14,7 @@ exe=jbxvt
 #CFLAGS+=-DNETBSD
 #CFLAGS+=-I/usr/X11R7/include
 #LIBS+=-L/usr/X11R7/lib -Wl,-R/usr/X11R7/lib
+#PREFIX=/usr/local
 
 # Uncomment for FreeBSD:
 #CFLAGS+=-DFREEBSD
@@ -38,9 +40,10 @@ CFLAGS+=-Wall -Wextra
 $(exe): $(OBJS)
 	$(CC) -o $(exe) $(OBJS) $(LIBS)
 	ls -l $(exe) >> sz.log; tail sz.log
-PREFIX=/usr
+bindest=$(DESTDIR)$(PREFIX)/bin
 install:
-	install -D $(exe) $(DESTDIR)$(PREFIX)/bin
+	install -d $(bindest)
+	install -s $(exe) $(bindest)
 clean:
 	rm -f $(exe) $(OBJS)
 

@@ -51,37 +51,29 @@ static int16_t get_com_char(const int8_t flags)
 		FD_ZERO(&in_fdset);
 		while (XPending(jbxvt.X.dpy) == 0) {
 			if (FD_ISSET(x_fd,&in_fdset))
-				  /*  If we get to this point something is wrong
-				   *  because there is X input available but no
-				   *  events.  Exit the program to avoid looping
-				   *  forever.
-				   */
-				  quit(1);
+				/*  If we get to this point something is wrong
+				 *  because there is X input available but no
+				 *  events.  Exit the program to avoid looping
+				 *  forever.
+				 */
+				quit(1);
 			FD_SET(jbxvt.com.fd,&in_fdset);
 			FD_SET(x_fd,&in_fdset);
 			fd_set out_fdset;
 			FD_ZERO(&out_fdset);
 			if (jbxvt.com.send_count > 0)
-				  FD_SET(jbxvt.com.fd,&out_fdset);
+				FD_SET(jbxvt.com.fd,&out_fdset);
 			int sv;
 			do {
 				sv = select(jbxvt.com.width,
-					&in_fdset,&out_fdset,
-					NULL,NULL);
+						&in_fdset,&out_fdset,
+						NULL,NULL);
 			} while (sv < 0 && errno == EINTR);
-
-#ifndef FREEBSD
-			if (sv < 0) {
-				perror("select failed");
-				quit(-1);
-			}
-#endif//!FREEBSD
-
 			if (FD_ISSET(jbxvt.com.fd,&out_fdset)) {
 				count = jbxvt.com.send_count < 100
 					? jbxvt.com.send_count : 100;
 				count = write(jbxvt.com.fd,
-					jbxvt.com.send_nxt,count);
+						jbxvt.com.send_nxt,count);
 				if (count < 0) {
 					perror("failed to write to command");
 					quit(-1);
@@ -89,9 +81,8 @@ static int16_t get_com_char(const int8_t flags)
 				jbxvt.com.send_count -= count;
 				jbxvt.com.send_nxt += count;
 			}
-
 			if (FD_ISSET(jbxvt.com.fd,&in_fdset))
-				  break;
+				break;
 		}
 		if (FD_ISSET(jbxvt.com.fd,&in_fdset))
 			  break;

@@ -102,21 +102,11 @@
 //  Definitions that enable machine dependent parts of the code.
 
 #ifdef NETBSD
-#define BSD_PTY
-#define BSD_UTMP
-#include <fcntl.h>
-#include <sys/file.h>
+#define POSIX_PTY
 #include <sys/ioctl.h>
-#include <sys/stat.h>
 #include <sys/ttycom.h>
-#include <termios.h>
 #include <ttyent.h>
 #include <util.h>
-#include <utmp.h>
-#include <utmpx.h>
-#define UTMP_FILE _PATH_UTMP
-#define TTYTAB _PATH_TTYS
-#define SCTTY_IOCTL
 #endif//NETBSD
 
 #ifdef FREEBSD
@@ -379,20 +369,10 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 	}
 	if (mfd < 0) {
 		perror("Can't open a pseudo teletype");
-		return(NULL);
+		exit(1);
 	}
 #endif /* BSD_PTY */
 
-#ifdef SVR4_PTY
-	const fd_t mfd = open("/dev/ptmx", O_RDWR);;
-	if (mfd < 0) {
-		perror("Can't open a pseudo teletype");
-		return(NULL);
-	}
-	grantpt(mfd);
-	unlockpt(mfd);
-	char * ttynam = ptsname(mfd);
-#endif /* SVR4_PTY */
 #ifdef POSIX_PTY
 	const fd_t mfd = posix_openpt(O_RDWR);
 	if (mfd < 0) {
@@ -408,6 +388,7 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 		fprintf(stderr, "could not open slave tty %s",ttynam);
 		exit(1);
 	}
+#if 0
 #ifdef SVR4_PTY
 	ioctl(sfd,I_PUSH,"ptem");
 	ioctl(sfd,I_PUSH,"ldterm");
@@ -415,8 +396,8 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 #ifdef POSIX_PTY
 	ioctl(sfd,2,"ptem");
 	ioctl(sfd,2,"ldterm");
+#endif//POSIX_PTY
 #endif
-
 	*pslave = sfd;
 	*pmaster = mfd;
 	return(ttynam);
@@ -435,7 +416,9 @@ static void set_ttymodes(void)
 
 	term.c_oflag = OPOST | ONLCR;
 
-	term.c_cflag = CLOCAL | B9600;
+	// NetBSD needs CREAD
+	// Linux needs B9600
+	term.c_cflag = CREAD | CLOCAL | B9600;
 
 	term.c_lflag = ISIG | IEXTEN | ICANON | ECHO | ECHOE | ECHOK;
 
@@ -510,7 +493,13 @@ static void set_ttymodes(void)
 
 static void child(char ** restrict argv, fd_t ttyfd)
 {
+#ifndef NETBSD
 	const pid_t pgid = setsid();
+#else//NETBSD
+	const pid_t pgid = getsid(getpid());
+#endif//!NETBSD
+
+//#define pgid 0
 	if(pgid < 0) { // cannot create new session
 		perror("Cannot create new session");
 		exit(1);
@@ -519,15 +508,19 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	 *  a controlling teletype for it.  On some systems
 	 *  this can be done with an ioctl but on others
 	 *  we need to re-open the slave tty.  */
-#ifdef SCTTY_IOCTL
+#ifdef TIOCSCTTY
 	(void)ioctl(ttyfd,TIOCSCTTY,0);
-#else//!SCTTY_IOCTL
+#else//!TIOCSCTTY
 	fd_t i = ttyfd;
 	ttyfd = open(tty_name, O_RDWR);
 	if(ttyfd < 0) // cannot open tty
-		  abort();
+		exit(1);
 	close(i);
-#endif//SCTTY_IOCTL
+#endif//TIOCSCTTY
+
+#ifdef NETBSD
+	//tcsetpgrp(ttyfd, pgid);
+#endif//NETBSD
 
 	const uid_t uid = getuid();
 	struct group * gr = getgrnam("tty");
