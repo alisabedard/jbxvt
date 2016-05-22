@@ -51,13 +51,16 @@ enum RenditionStyleFlags {
 	RS_B6 = (1<<21),
 	RS_B7 = (1<<22),
 	RS_BR = (1<<23),
-	// bright foreground:
+	// bright foreground: masks above colors
 	RS_BF = (1<<24),
-	// bright background:
-	RS_BB = (1<<25)
+	// bright background: masks above colors
+	RS_BB = (1<<25),
+	// 256 color support bits, 4 bit number to specify multiplier
+	RS_C0 = (1<<26),
+	RS_C1 = (1<<27),
+	RS_C2 = (1<<28),
+	RS_C3 = (1<<29),
 };
-
-// not enough bits for bright backgrounds
 
 // Normal colors:
 #define COLOR_0 "black"
@@ -133,6 +136,6 @@ void scr_restore_cursor(void);
 void scr_save_cursor(void);
 
 //  Attempt to set the top ans bottom scroll margins.
-void scr_set_margins(uint16_t top, uint16_t bottom);
+void scr_set_margins(const uint16_t top, const uint16_t bottom);
 
 #endif//!SCREEN_H

@@ -44,7 +44,7 @@ static int16_t get_com_char(const int8_t flags)
 	if (flags & BUF_ONLY)
 		return(GCC_NULL);
 
-	int count;
+	int16_t count;
 
 	for (;;) {
 		fd_set in_fdset;

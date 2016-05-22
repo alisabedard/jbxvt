@@ -6,6 +6,9 @@
 
 #include "tokenst.h"
 #include "xeventst.h"
+#include "xvt.h"
+
+#include <stdbool.h>
 #include <X11/Xlib.h>
 
 enum CommandLimits {
@@ -13,25 +16,36 @@ enum CommandLimits {
 	KBUFSIZE =	256,	// size of keyboard mapping buffer
 	COM_BUF_SIZE =	512,	// size of command read buffer
 	COM_PUSH_MAX =	20,	// max # chars to push back to input queue
-	MP_INTERVAL = 500	// multi-press interval in ms
+	MP_INTERVAL = 	500	// multi-press interval in ms
 };
 
 //  Special character returned by get_com_char().
-#define GCC_NULL	0x100		/* Input buffer is empty */
-#define ESC		033
+enum ComCharReturn {
+	GCC_NULL = 0x100, // Input buffer is empty
+	ESC = 0x33
+};
 
 //  Flags used to control get_com_char();
 enum ComCharFlags {BUF_ONLY=1, GET_XEVENTS=2};
 
 struct xeventst *pop_xevent(void);
 void cprintf(char *,...);
+
+/*  Initialise the command connection.  This should be called after the X
+ *  server connection is established.  */
 void init_command(char ** restrict argv);
-uint8_t *lookup_key(XEvent *,int *);
+
+// Convert the keypress event into a string
+uint8_t *lookup_key(XEvent * restrict ev, int16_t * restrict pcount);
+
 void push_com_char(int);
 void push_xevent(struct xeventst *);
 void send_string(uint8_t *,int);
-void set_cur_keys(int);
-void set_kp_keys(int);
+
+// Set key mode for cursor keys if is_cursor, else for keypad keys
+void set_keys(const enum ModeValue mode, const bool is_cursor);
+#define set_cur_keys(mode) set_keys(mode, true)
+#define set_kp_keys(mode) set_keys(mode, false)
 
 #ifdef TK_DEBUG
 void show_token(struct tokenst *);

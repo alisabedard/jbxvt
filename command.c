@@ -8,11 +8,11 @@
 #include "log.h"
 #include "screen.h"
 #include "token.h"
+#include "ttyinit.h"
+#include "wm_del_win.h"
 #include "xeventst.h"
 #include "xsetup.h"
 #include "xvt.h"
-#include "ttyinit.h"
-#include "wm_del_win.h"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -179,8 +179,7 @@ struct xeventst * pop_xevent(void)
 }
 
 /*  Initialise the command connection.  This should be called after the X
- *  server connection is established.
- */
+ *  server connection is established.  */
 void init_command(char ** restrict argv)
 {
 	//  Enable the delete window protocol:
@@ -194,16 +193,14 @@ void init_command(char ** restrict argv)
 	init_cmdtok();
 }
 
-//  Set the current cursor keys mode.
-void set_cur_keys(const int mode)
+// Set key mode for cursor keys if is_cursor, else for keypad keys
+void set_keys(const enum ModeValue mode, const bool is_cursor)
 {
-	command.keys.app_cur = (mode == JBXVT_MODE_HIGH);
-}
-
-//  Set the current keypad keys mode.
-void set_kp_keys(const int mode)
-{
-	command.keys.app_kp = (mode == JBXVT_MODE_HIGH);
+	const bool v = (mode == JBXVT_MODE_HIGH);
+	if(is_cursor)
+		  command.keys.app_cur = v;
+	else
+		  command.keys.app_kp = v;
 }
 
 //  Look up function key keycode
@@ -254,12 +251,13 @@ static char * get_s(const KeySym keysym, char * restrict kbuf)
 }
 
 //  Convert the keypress event into a string.
-uint8_t * lookup_key(XEvent * restrict ev, int * restrict pcount)
+uint8_t * lookup_key(XEvent * restrict ev, int16_t * restrict pcount)
 {
 	KeySym keysym;
 	static char kbuf[KBUFSIZE];
 
-	const int count = XLookupString(&ev->xkey,kbuf,KBUFSIZE,&keysym,NULL);
+	const int count = XLookupString(&ev->xkey,
+		kbuf, KBUFSIZE, &keysym, NULL);
 	char *s = get_s(keysym, kbuf);
 	if (s) {
 		*pcount = strlen(s);
@@ -335,9 +333,7 @@ void cprintf(char *fmt,...)
 //  Print out a token's numerical arguments. Just used by show_token()
 static void show_token_args(struct tokenst * restrict tk)
 {
-	int i;
-
-	for (i = 0; i < tk->tk_nargs; i++) {
+	for (uint8_t i = 0; i < tk->tk_nargs; i++) {
 		if (i == 0)
 			printf(" (%d",tk->tk_arg[i]);
 		else
