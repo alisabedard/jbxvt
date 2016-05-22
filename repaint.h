@@ -8,7 +8,8 @@
 
 /* Repaint the box delimited by row1 to row2 and col1 to col2 of the displayed
  * screen from the backup screen.  */
-void repaint(int row1, int row2, int col1, int col2);
+void repaint(const uint8_t row1, const uint8_t row2,
+	const uint8_t col1, const uint8_t col2);
 
 //  Paint the text using the rendition value at the screen position.
 void paint_rval_text(uint8_t * restrict str, uint32_t rval,

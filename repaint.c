@@ -144,9 +144,30 @@ static void paint_rvec_text(uint8_t * str,
 	}
 }
 
+static int repaint_generic(const int x1, const int y1,
+	const int m, const int col1, const int col2,
+	uint8_t * restrict str, uint32_t * rend)
+{
+	paint_rvec_text(str, rend ? rend + col1 : NULL, m, x1, y1);
+	const int x2 = x1 + m * jbxvt.X.font_width;
+	const unsigned int width = (col2 - col1 + 1 - m)
+		* jbxvt.X.font_width;
+	if (width > 0)
+		  XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,
+			  x2,y1,width,jbxvt.X.font_height,False);
+	return y1 + jbxvt.X.font_height;
+}
+
+__attribute__((const))
+static uint8_t convert_char(const uint8_t c)
+{
+	return c < ' ' ? ' ' : c;
+}
+
 /* Repaint the box delimited by row1 to row2 and col1 to col2
    of the displayed screen from the backup screen.  */
-void repaint(int row1, int row2, int col1, int col2)
+void repaint(const uint8_t row1, const uint8_t row2,
+	const uint8_t col1, const uint8_t col2)
 {
 	LOG("repaint(%d, %d, %d, %d)", row1, row2, col1, col2);
 	uint8_t * str = malloc(jbxvt.scr.chars.width + 1);
@@ -154,26 +175,22 @@ void repaint(int row1, int row2, int col1, int col2)
 	int x1 = MARGIN + col1 * jbxvt.X.font_width;
 	int y1 = MARGIN + row1 * jbxvt.X.font_height;
 	int i;
+	LOG("y:%d, x1:%d, y1:%d, i1: %d, i2 %d\n",
+		y, x1, y1, jbxvt.scr.offset - 1 - row1,
+		row1 - jbxvt.scr.offset);
 	//  First do any 'scrolled off' lines that are visible.
 	for (i = jbxvt.scr.offset - 1 - row1;
 		y <= row2 && i >= 0; y++, i--) {
 		struct slinest * sl = jbxvt.scr.sline.data[i];
 		if(!sl) continue; // prevent segfault
-		unsigned int m = (col2 + 1) < sl->sl_length
+		uint16_t m = (col2 + 1) < sl->sl_length
 			? (col2 + 1) : sl->sl_length;
 		uint8_t * s = sl->sl_text;
 		m -= col1;
-		for (unsigned int x = 0; x < m; x++)
-			str[x] = s[x + col1] < ' ' ? ' ' : s[x + col1];
-		paint_rvec_text(str,sl->sl_rend?sl->sl_rend+col1:NULL,
-			m,x1,y1);
-		const int x2 = x1 + m * jbxvt.X.font_width;
-		const unsigned int width = (col2 - col1 + 1 - m)
-			* jbxvt.X.font_width;
-		if (width > 0)
-			XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,
-				x2,y1,width,jbxvt.X.font_height,False);
-		y1 += jbxvt.X.font_height;
+		for (uint16_t x = 0; x < m; x++)
+			  str[x] = convert_char(s[x + col1]);
+		y1 = repaint_generic(x1, y1, m, col1,
+			col2, str, sl->sl_rend);
 	}
 
 	// Do the remainder from the current screen:
@@ -181,28 +198,13 @@ void repaint(int row1, int row2, int col1, int col2)
 	for (; y <= row2; y++, i++) {
 		uint8_t * s = jbxvt.scr.current->text[i];
 		int m = col1 - 1;
-		for(uint8_t x = col1; x <= col2; x++) {
-			if (s[x] < ' ') {
-				str[x - col1] = ' ';
-			} else {
-				str[x - col1] = s[x];
-				m = x;
-			}
-		}
+		for(uint8_t x = col1; x <= col2; x++)
+			if((str[x - col1] = convert_char(s[x]))==' ')
+				  m = x;
 		m++;
 		m -= col1;
-		LOG("%s", str);
-		paint_rvec_text(str, jbxvt.scr.current->rend[i]
-			[jbxvt.scr.chars.width]
-			? jbxvt.scr.current->rend[i] + col1 : NULL,
-			m, x1, y1);
-		const int x2 = x1 + m * jbxvt.X.font_width;
-		const unsigned int width = (col2 - col1 + 1 - m)
-			* jbxvt.X.font_width;
-		if (width > 0)
-			XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,
-				x2,y1,width,jbxvt.X.font_height,False);
-		y1 += jbxvt.X.font_height;
+		y1 = repaint_generic(x1, y1, m, col1, col2, str,
+			jbxvt.scr.current->rend[i]);
 	}
 	free(str);
 	show_selection(row1,row2,col1,col2);
