@@ -22,38 +22,40 @@ enum {
 //  arguments to the screen delete functions
 enum ScrDelArg { END, START, ENTIRE };
 
-//  rendition style flags:
-#define RS_NONE	0		/* Normal */
-#define RS_BOLD		1/* Bold face */
-#define RS_ULINE	(1<<1)	/* underline */
-#define RS_BLINK	(1<<2)	/* blinking */
-#define RS_RVID		(1<<3) /* reverse video */
-#define RS_ITALIC	(1<<4)
-#define RS_LOW		(1<<5) // low intensity
-// For colors:
-// foreground:
-#define RS_F0		(1<<6)
-#define RS_F1		(1<<7)
-#define RS_F2		(1<<8)
-#define RS_F3		(1<<9)
-#define RS_F4		(1<<10)
-#define RS_F5		(1<<11)
-#define RS_F6		(1<<12)
-#define RS_F7		(1<<13)
-#define RS_FR		(1<<14) // reset
-// background:
-#define RS_B0		(1<<15)
-#define RS_B1		(1<<16)
-#define RS_B2		(1<<17)
-#define RS_B3		(1<<18)
-#define RS_B4		(1<<19)
-#define RS_B5		(1<<20)
-#define RS_B6		(1<<21)
-#define RS_B7		(1<<22)
-#define RS_BR		(1<<23) // reset
-
-#define RS_BF		(1<<24) // bright foreground
-#define RS_BB		(1<<25) // bright background
+enum RenditionStyleFlags {
+	RS_NONE = 0,
+	RS_BOLD = 1,
+	RS_ULINE = (1<<1),	
+	RS_BLINK = (1<<2),	
+	RS_RVID = (1<<3),
+	RS_ITALIC = (1<<4),
+	RS_LOW = (1<<5), 
+	// colors:
+	// foreground:
+	RS_F0 = (1<<6),
+	RS_F1 = (1<<7),
+	RS_F2 = (1<<8),
+	RS_F3 = (1<<9),
+	RS_F4 = (1<<10),
+	RS_F5 = (1<<11),
+	RS_F6 = (1<<12),
+	RS_F7 = (1<<13),
+	RS_FR = (1<<14),
+	// background:
+	RS_B0 = (1<<15),
+	RS_B1 = (1<<16),
+	RS_B2 = (1<<17),
+	RS_B3 = (1<<18),
+	RS_B4 = (1<<19),
+	RS_B5 = (1<<20),
+	RS_B6 = (1<<21),
+	RS_B7 = (1<<22),
+	RS_BR = (1<<23),
+	// bright foreground:
+	RS_BF = (1<<24),
+	// bright background:
+	RS_BB = (1<<25)
+};
 
 // not enough bits for bright backgrounds
 
@@ -78,7 +80,11 @@ enum ScrDelArg { END, START, ENTIRE };
 #define BCOLOR_7 "white"
 
 void home_screen(void);
+
+
+//  Return true if the character is one that can be handled by scr_string()
 int16_t is_string_char(int16_t c);
+
 void scr_change_rendition(const uint32_t style);
 void scr_change_screen(const uint8_t direction);
 void scr_delete_lines(uint8_t count);
@@ -87,7 +93,12 @@ void scr_delete_lines(uint8_t count);
 void scr_get_size(uint16_t * restrict width_p,
 	uint16_t * restrict height_p);
 
-void scr_index(void);
+/* Move the cursor up if mod is positive or down if mod is negative,
+   by mod number of lines and scroll if necessary.  */
+void scr_index_by(const int8_t mod);
+#define scr_index() scr_index_by(1)
+#define scr_rindex() scr_index_by(-1)
+
 void scr_init(void);
 void scr_insert_lines(int8_t count);
 void scr_move_by(const int16_t y);
@@ -95,8 +106,7 @@ void scr_move_to(int16_t y);
 void scr_report_display(void);
 void scr_report_position(void);
 void scr_restore_cursor(void);
-void scr_rindex(void);
 void scr_save_cursor(void);
-void scr_set_margins(int16_t top, int16_t bottom);
+void scr_set_margins(uint16_t top, uint16_t bottom);
 
 #endif//!SCREEN_H

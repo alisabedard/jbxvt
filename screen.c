@@ -80,32 +80,22 @@ int16_t is_string_char(int16_t c)
 	return(c >= ' ' || c == '\n' || c == '\r' || c == '\t');
 }
 
-//  Move the cursor down one line and scroll if necessary.
-void scr_index(void)
+/* Move the cursor up if mod is positive or down if mod is negative,
+   by mod number of lines and scroll if necessary.  */
+void scr_index_by(const int8_t mod)
 {
 	home_screen();
 	cursor();
-	if (jbxvt.scr.current->row == jbxvt.scr.current->bmargin)
-		scroll(jbxvt.scr.current->tmargin,jbxvt.scr.current->bmargin,1);
+	if (jbxvt.scr.current->row == (mod > 0 ? jbxvt.scr.current->bmargin
+		: jbxvt.scr.current->tmargin))
+		scroll(jbxvt.scr.current->tmargin,
+			jbxvt.scr.current->bmargin, mod);
 	else
-		jbxvt.scr.current->row++;
+		jbxvt.scr.current->row += mod;
 	jbxvt.scr.current->wrap_next = 0;
 	check_selection(jbxvt.scr.current->row,jbxvt.scr.current->row);
 	cursor();
-}
 
-//  Move the cursor up one line and scroll if necessary.
-void scr_rindex(void)
-{
-	home_screen();
-	cursor();
-	if (jbxvt.scr.current->row == jbxvt.scr.current->tmargin)
-		scroll(jbxvt.scr.current->tmargin,jbxvt.scr.current->bmargin,-1);
-	else
-		jbxvt.scr.current->row--;
-	jbxvt.scr.current->wrap_next = 0;
-	check_selection(jbxvt.scr.current->row,jbxvt.scr.current->row);
-	cursor();
 }
 
 //  Save the cursor position and rendition style.
