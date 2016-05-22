@@ -30,7 +30,7 @@
 static struct screenst save_screen;
 
 /*  Perform any initialisation on the screen data structures.  Called just once
- *  at startup.  saved_lines is the number of saved lines.  */
+ *  at startup. */
 void scr_init(void)
 {
 	// Initialise the array of lines that have scrolled off the top.

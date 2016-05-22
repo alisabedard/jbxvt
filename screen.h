@@ -85,8 +85,13 @@ void home_screen(void);
 //  Return true if the character is one that can be handled by scr_string()
 int16_t is_string_char(int16_t c);
 
+//  Change the rendition style.
 void scr_change_rendition(const uint32_t style);
+
+//  Change between the alternate and the main screens
 void scr_change_screen(const uint8_t direction);
+
+//  Delete count lines and scroll up the bottom of the screen to fill the gap
 void scr_delete_lines(uint8_t count);
 
 //  Return the width and height of the screen.
@@ -99,14 +104,35 @@ void scr_index_by(const int8_t mod);
 #define scr_index() scr_index_by(1)
 #define scr_rindex() scr_index_by(-1)
 
+/*  Perform any initialisation on the screen data structures.  Called just once
+ *  at startup. */ 
 void scr_init(void);
+
+/*  Insert count blank lines at the current position and scroll the lower lines
+ *  down.  */
 void scr_insert_lines(int8_t count);
+
+/*  Move the display so that line represented by scrollbar value y is at the top
+ *  of the screen.  */
 void scr_move_by(const int16_t y);
+
+/*  Move the display so that line represented by scrollbar value y is at the top
+ *  of the screen.  */
 void scr_move_to(int16_t y);
+
+//  Send the name of the current display to the command.
 void scr_report_display(void);
+
+//  Report the current cursor position.
 void scr_report_position(void);
+
+//  Restore the cursor position and rendition style.
 void scr_restore_cursor(void);
+
+//  Save the cursor position and rendition style.
 void scr_save_cursor(void);
+
+//  Attempt to set the top ans bottom scroll margins.
 void scr_set_margins(uint16_t top, uint16_t bottom);
 
 #endif//!SCREEN_H
