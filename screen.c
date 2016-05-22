@@ -187,17 +187,14 @@ void scr_insert_lines(int8_t count)
 }
 
 //  Attempt to set the top ans bottom scroll margins.
-void scr_set_margins(int16_t top, int16_t bottom)
+void scr_set_margins(const uint16_t top, const uint16_t bottom)
 {
-	if (top < 0)
-		top = 0;
-	if (bottom >= jbxvt.scr.chars.height)
-		bottom = jbxvt.scr.chars.height - 1;
-	if (top > bottom)
-		return;
+	const uint16_t b = bottom >= jbxvt.scr.chars.height
+		? jbxvt.scr.chars.height - 1 : bottom;
+	if (top > b) return;
 
 	jbxvt.scr.current->tmargin = top;
-	jbxvt.scr.current->bmargin = bottom;
+	jbxvt.scr.current->bmargin = b;
 	scr_move(0,0,0);
 }
 
@@ -205,13 +202,11 @@ void scr_set_margins(int16_t top, int16_t bottom)
  *  of the screen.  */
 void scr_move_to(int16_t y)
 {
-	int16_t n, lnum;
-
 	y = jbxvt.scr.pixels.height - 1 - y;
-	lnum = y * (jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1)
+	const int16_t lnum = y * (jbxvt.scr.chars.height
+		+ jbxvt.scr.sline.top - 1)
 		/ (jbxvt.scr.pixels.height - 1);
-	n = lnum - jbxvt.scr.chars.height + 1;
-	change_offset(n);
+	change_offset(lnum - jbxvt.scr.chars.height + 1);
 }
 
 //  Move the display by a distance represented by the value.
