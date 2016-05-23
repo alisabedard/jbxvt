@@ -188,6 +188,34 @@ uint8_t * convert_line(uint8_t * restrict str,
 	return (buf);
 }
 
+static void adj_sel_to_word(struct selst * include,
+	struct selst * se1, struct selst * se2)
+{
+	uint8_t * s = se1->se_type == SCREENSEL
+		? jbxvt.scr.current->text[se1->se_index]
+		: jbxvt.scr.sline.data[se1->se_index]->sl_text;
+	int16_t i = se1->se_col;
+	while (i && s[i] != ' ')
+		  i--;
+	se1->se_col = i?i+1:0;
+	i = se2->se_col;
+	if (se2 == include || selcmp(se2,&jbxvt.sel.anchor) == 0)
+		  i++;
+	int16_t len;
+	if (se2->se_type == SCREENSEL) {
+		s = jbxvt.scr.current->text[se2->se_index];
+		len = jbxvt.scr.chars.width;
+	} else {
+		s = jbxvt.scr.sline.data[se2->se_index]->sl_text;
+		len = jbxvt.scr.sline.data[se2->se_index]->sl_length;
+	}
+
+	while (i < len && s[i] != ' ' && s[i] != '\n' && s[i])
+		  i++;
+	se2->se_col = i;
+
+}
+
 /*  Adjust the selection to a word or line boundary. If the include endpoint is
  *  non NULL then the selection is forced to be large enough to include it.
  */
@@ -203,30 +231,9 @@ void adjust_selection(struct selst * restrict include)
 		se2 = &jbxvt.sel.end1;
 		se1 = &jbxvt.sel.end2;
 	}
-	if (selection_unit == WORD) {
-		uint8_t * s = se1->se_type == SCREENSEL
-			? jbxvt.scr.current->text[se1->se_index]
-			: jbxvt.scr.sline.data[se1->se_index]->sl_text;
-		int16_t i = se1->se_col;
-		while (i && s[i] != ' ')
-			  i--;
-		se1->se_col = i?i+1:0;
-		i = se2->se_col;
-		if (se2 == include || selcmp(se2,&jbxvt.sel.anchor) == 0)
-			  i++;
-		int16_t len;
-		if (se2->se_type == SCREENSEL) {
-			s = jbxvt.scr.current->text[se2->se_index];
-			len = jbxvt.scr.chars.width;
-		} else {
-			s = jbxvt.scr.sline.data[se2->se_index]->sl_text;
-			len = jbxvt.scr.sline.data[se2->se_index]->sl_length;
-		}
-
-		while (i < len && s[i] != ' ' && s[i] != '\n' && s[i])
-			  i++;
-		se2->se_col = i;
-	} else if (selection_unit == LINE) {
+	if (selection_unit == WORD)
+		  adj_sel_to_word(include, se1, se2);
+	else if (selection_unit == LINE) {
 		se1->se_col = 0;
 		se2->se_col = jbxvt.scr.chars.width;
 	}
