@@ -164,7 +164,7 @@ static void catch_child(const int sig __attribute__((unused)))
 	int status;
 
 	if (wait(&status) == comm_pid)
-		quit(status);
+		quit(status, NULL);
 
 	signal(SIGCHLD,catch_child);
 }
@@ -212,7 +212,7 @@ static void tidy_utmp(void)
 //  Catch a fatal signal and tidy up before quitting
 static void catch_sig(const int sig __attribute__((unused)))
 {
-	quit(0);
+	quit(0, "Caught signal");
 }
 
 #ifdef BSD_UTMP
@@ -253,7 +253,6 @@ static void write_utmp(void)
 	struct passwd *pw;
 #endif
 #ifdef SVR4_UTMP
-	memset(&utent,0,sizeof(utent));
 	utent.ut_type = USER_PROCESS;
 	strncpy(utent.ut_id,tty_name + 8,sizeof(utent.ut_id));
 	strncpy(utent.ut_line,tty_name + 5,sizeof(utent.ut_line));
@@ -335,16 +334,11 @@ static void write_utmp(void)
 }
 
 //  Quit with the status after first removing our entry from the utmp file.
-void quit(int status)
+void quit(const int8_t status, const char * restrict msg)
 {
 	tidy_utmp();
-#ifdef DEBUG
-	if(status) {
-		perror("Exited abnormally");
-		sleep(5); // Allow user to see the error
-		abort(); // Dump core
-	}
-#endif//DEBUG
+	if(msg)
+		  perror(msg);
 	exit(status);
 }
 
@@ -381,22 +375,15 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 		if (mfd >= 0)
 			break;
 	}
-	if (mfd < 0) {
-		perror("Can't open a pseudo teletype");
-		exit(1);
-	}
 #endif /* BSD_PTY */
 
 #ifdef POSIX_PTY
 	const fd_t mfd = posix_openpt(O_RDWR);
-	if (mfd < 0) {
-		perror("Can't open ptty");
-#ifdef LINUX
-		syscall(SYS_exit, 1);
-#else//!LINUX
-		exit(1);
-#endif//LINUX
-	}
+#endif//POSIX_PTY
+	if (mfd < 0) 
+		  quit(1, "Cannot open pseudo tty");
+
+#ifdef POSIX_PTY
 	grantpt(mfd);
 	unlockpt(mfd);
 	char *ttynam = ptsname(mfd);
@@ -407,14 +394,9 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 #else//!LINUX
 	const fd_t sfd = open((const char *)ttynam,O_RDWR);
 #endif//LINUX
-	if (sfd < 0) {
-		fprintf(stderr, "could not open slave tty %s",ttynam);
-#ifdef LINUX
-		syscall(SYS_exit, 1);
-#else//!LINUX
-		exit(1);
-#endif//LINUX
-	}
+
+	if (sfd < 0)
+		quit(1, "Cannot open slave tty");
 	*pslave = sfd;
 	*pmaster = mfd;
 	return(ttynam);
@@ -520,15 +502,9 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	const pid_t pgid = getsid(getpid());
 #endif//!NETBSD
 
-//#define pgid 0
-	if(pgid < 0) { // cannot create new session
-		perror("Cannot create new session");
-#ifdef LINUX
-		syscall(SYS_exit, 1);
-#else//!LINUX
-		exit(1);
-#endif//LINUX
-	}
+	if(pgid < 0)
+		  quit(1, "Cannot create new session");
+
 	/*  Having started a new session, we need to establish
 	 *  a controlling teletype for it.  On some systems
 	 *  this can be done with an ioctl but on others
@@ -544,16 +520,12 @@ static void child(char ** restrict argv, fd_t ttyfd)
 
 #ifdef LINUX
 	ttyfd = syscall(SYS_open, tty_name, O_RDWR);
-#else
+#else//!TIOCSCTTY
 	ttyfd = open(tty_name, O_RDWR);
 #endif//LINUX
 
-	if(ttyfd < 0) // cannot open tty
-#ifdef LINUX
-		syscall(SYS_exit, 1);
-#else//!LINUX
-		exit(1);
-#endif//LINUX
+	if (ttyfd < 0)
+		  quit(1, "Cannot open tty");
 
 #ifdef LINUX
 	syscall(SYS_close, i);
@@ -561,10 +533,6 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	close(i);
 #endif//LINUX
 #endif//TIOCSCTTY
-
-#ifdef NETBSD
-	//tcsetpgrp(ttyfd, pgid);
-#endif//NETBSD
 
 #ifdef LINUX
 	const uid_t uid = syscall(SYS_getuid);
@@ -590,6 +558,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
 #else//!LINUX
 			    close(i);
 #endif//LINUX
+
 	// for stdin, stderr, stdout:
 #ifndef LINUX
 	fcntl(ttyfd, F_DUPFD, 0);
@@ -600,8 +569,14 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	syscall(SYS_fcntl, ttyfd, F_DUPFD, 0);
 	syscall(SYS_fcntl, ttyfd, F_DUPFD, 0);
 #endif//!LINIX
+
 	if (ttyfd > 2)
+#ifdef LINUX
+		  syscall(SYS_close, ttyfd);
+#else
 		  close(ttyfd);
+#endif//LINUX
+
 #ifdef BSD_TTY
 	ioctl(0, TIOCSPGRP, (char *)&pgid);
         setpgrp (0, pgid);
@@ -615,12 +590,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
 #endif//LINUX
 
 	execvp(argv[0],argv);
-	perror("Could not execute command");
-#ifdef LINUX
-	syscall(SYS_exit, 1);
-#else//!LINUX
-	quit(1);
-#endif//LINUX
+	quit(1, "Cannot execute command");
 }
 
 /*  Run the command in a subprocess and return a file descriptor for the
@@ -641,17 +611,15 @@ int run_command(char ** argv)
 
 	jbxvt.com.width = sysconf(_SC_OPEN_MAX);
 	for (uint8_t i = 1; i <= 15; i++)
-		signal(i,catch_sig);
+		signal(i, catch_sig);
 
 #ifdef LINUX
 	comm_pid = syscall(SYS_fork);
 #else//!LINUX
 	comm_pid = fork();
 #endif//LINUX
-	if (comm_pid < 0) {
-		perror("Can't fork");
-		return(-1);
-	}
+	if (comm_pid < 0)
+		  quit(1, "Cannot fork");
 #ifdef DEBUG
 	fprintf(stderr, "command: %s, pid: %d\n", argv[0], comm_pid);
 #endif//DEBUG
@@ -669,16 +637,16 @@ int run_command(char ** argv)
 #ifdef TIOCSWINSZ
 void tty_set_size(const uint8_t width, const uint8_t height)
 {
-	struct winsize wsize;
 
 	if (comm_pid < 0)
 		return;
-	wsize.ws_row = height;
-	wsize.ws_col = width;
-	wsize.ws_xpixel = 0;
-	wsize.ws_ypixel = 0;
-	ioctl((comm_pid == 0) ? 0 : jbxvt.com.fd,
-		TIOCSWINSZ,(char *)&wsize);
+	struct winsize wsize = {.ws_row = height, .ws_col = width};
+	const fd_t f = comm_pid == 0 ? 0 : jbxvt.com.fd;
+#ifdef LINUX
+	syscall(SYS_ioctl, f, TIOCSWINSZ, &wsize);
+#else//!LINUX
+	ioctl(f, TIOCSWINSZ, &wsize);
+#endif//LINUX
 }
-#endif /* TIOCSWINSZ */
-#endif//!NETBSD
+#endif//TIOCSWINSZ
+#endif//!NETBSD&&!FREEBSD

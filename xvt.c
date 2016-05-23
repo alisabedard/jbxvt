@@ -209,7 +209,7 @@ app_loop_head:
 		handle_tk_char(token.tk_char);
 		break;
 	case TK_EOF :
-		quit(0);
+		quit(0, NULL);
 		break;
 	case TK_ENTRY :	// keyboard focus changed
 		scr_focus(token.tk_arg[0]|SCR_FOCUS_ENTRY);

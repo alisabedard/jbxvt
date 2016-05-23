@@ -34,7 +34,8 @@
 #include <asm-generic/ioctls.h>
 #endif//LINUX
 
-void quit(int) __attribute__((noreturn));
+void quit(const int8_t status, const char * restrict msg)
+	__attribute__((noreturn));
 #ifdef TIOCSWINSZ
 void tty_set_size(const uint8_t width, const uint8_t height);
 #else//!TIOCSWINSZ

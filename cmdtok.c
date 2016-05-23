@@ -50,13 +50,6 @@ static int16_t get_com_char(const int8_t flags)
 		fd_set in_fdset;
 		FD_ZERO(&in_fdset);
 		while (XPending(jbxvt.X.dpy) == 0) {
-			if (FD_ISSET(x_fd,&in_fdset))
-				/*  If we get to this point something is wrong
-				 *  because there is X input available but no
-				 *  events.  Exit the program to avoid looping
-				 *  forever.
-				 */
-				quit(1);
 			FD_SET(jbxvt.com.fd,&in_fdset);
 			FD_SET(x_fd,&in_fdset);
 			fd_set out_fdset;
@@ -74,10 +67,8 @@ static int16_t get_com_char(const int8_t flags)
 					? jbxvt.com.send_count : 100;
 				count = write(jbxvt.com.fd,
 						jbxvt.com.send_nxt,count);
-				if (count < 0) {
-					perror("failed to write to command");
-					quit(-1);
-				}
+				if (count < 0)
+					quit(1, "Failed to write to command");
 				jbxvt.com.send_count -= count;
 				jbxvt.com.send_nxt += count;
 			}
@@ -100,7 +91,7 @@ static int16_t get_com_char(const int8_t flags)
 			if (event.xclient.format == 32
 				&& event.xclient.data.l[0]
 				== (long)wm_del_win())
-				  quit(0);
+				  quit(0, NULL);
 			break;
 		case MappingNotify:
 			XRefreshKeyboardMapping(&event.xmapping);
