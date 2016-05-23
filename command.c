@@ -78,29 +78,6 @@ static struct keymapst func_key_table[] = {
 	{XK_F10,	{KS_TYPE_XTERM,21},	{KS_TYPE_SUN,233}},
 	{XK_F11,	{KS_TYPE_XTERM,23},	{KS_TYPE_SUN,192}},
 	{XK_F12,	{KS_TYPE_XTERM,24},	{KS_TYPE_SUN,193}},
-	{XK_F13,	{KS_TYPE_XTERM,25},	{KS_TYPE_SUN,194}},
-	{XK_F14,	{KS_TYPE_XTERM,26},	{KS_TYPE_SUN,195}},
-	{XK_F15,	{KS_TYPE_XTERM,28},	{KS_TYPE_SUN,196}},
-	{XK_F16,	{KS_TYPE_XTERM,29},	{KS_TYPE_SUN,197}},
-	{XK_F17,	{KS_TYPE_XTERM,31},	{KS_TYPE_SUN,198}},
-	{XK_F18,	{KS_TYPE_XTERM,32},	{KS_TYPE_SUN,199}},
-	{XK_F19,	{KS_TYPE_XTERM,33},	{KS_TYPE_SUN,200}},
-	{XK_F20,	{KS_TYPE_XTERM,34},	{KS_TYPE_SUN,201}},
-	{XK_F21,	{KS_TYPE_NONE,0},	{KS_TYPE_SUN,208}},
-	{XK_F22,	{KS_TYPE_NONE,0},	{KS_TYPE_SUN,209}},
-	{XK_F23,	{KS_TYPE_NONE,0},	{KS_TYPE_SUN,210}},
-	{XK_F24,	{KS_TYPE_NONE,0},	{KS_TYPE_SUN,211}},
-	{XK_F25,	{KS_TYPE_NONE,0},	{KS_TYPE_SUN,212}},
-	{XK_F26,	{KS_TYPE_NONE,0},	{KS_TYPE_SUN,213}},
-	{XK_F27,	{KS_TYPE_NONE,0},	{KS_TYPE_SUN,214}},
-	{XK_F28,	{KS_TYPE_NONE,0},	{KS_TYPE_SUN,215}},
-	{XK_F29,	{KS_TYPE_NONE,0},	{KS_TYPE_SUN,216}},
-	{XK_F30,	{KS_TYPE_NONE,0},	{KS_TYPE_SUN,217}},
-	{XK_F31,	{KS_TYPE_NONE,0},	{KS_TYPE_SUN,218}},
-	{XK_F32,	{KS_TYPE_NONE,0},	{KS_TYPE_SUN,219}},
-	{XK_F33,	{KS_TYPE_NONE,0},	{KS_TYPE_SUN,220}},
-	{XK_F34,	{KS_TYPE_NONE,0},	{KS_TYPE_SUN,221}},
-	{XK_F35,	{KS_TYPE_NONE,0},	{KS_TYPE_SUN,222}},
 	{XK_Find,	{KS_TYPE_XTERM,1},	{KS_TYPE_SUN,1}},
 	{XK_Insert,	{KS_TYPE_XTERM,2},	{KS_TYPE_SUN,2}},
 	{XK_Delete,	{KS_TYPE_XTERM,3},	{KS_TYPE_SUN,3}},
@@ -240,13 +217,13 @@ static char * get_s(const KeySym keysym, char * restrict kbuf)
 {
 	if (IsFunctionKey(keysym) || IsMiscFunctionKey(keysym)
 		|| keysym == XK_Next || keysym == XK_Prior)
-		return get_keycode_value(func_key_table,keysym,
-			kbuf,command.keys.sun_fn);
+		return get_keycode_value(func_key_table, keysym,
+			kbuf, command.keys.sun_fn);
 	else if (IsCursorKey(keysym) || IsPFKey(keysym))
-		return get_keycode_value(other_key_table,keysym,
-			kbuf,command.keys.app_cur);
-	return get_keycode_value(kp_key_table,keysym,
-		kbuf,command.keys.app_kp);
+		return get_keycode_value(other_key_table, keysym,
+			kbuf, command.keys.app_cur);
+	return get_keycode_value(kp_key_table, keysym,
+		kbuf, command.keys.app_kp);
 }
 
 //  Convert the keypress event into a string.
@@ -262,11 +239,8 @@ uint8_t * lookup_key(XEvent * restrict ev, int16_t * restrict pcount)
 		*pcount = strlen(s);
  	       	return (uint8_t *)s;
 	} else {
-		if ((ev->xkey.state & Mod1Mask) && (count == 1)) {
-			kbuf[0] |= 0200;
-			*pcount = 1;
-		} else
-			*pcount = count;
+		*pcount = ((ev->xkey.state & Mod1Mask) && (count == 1))
+			? 1 : count;
 		return (uint8_t *)kbuf;
 	}
 }
@@ -279,33 +253,30 @@ void push_com_char(const int c)
 }
 
 //  Send count characters directly to the command.
-void send_string(uint8_t * buf, int count)
+void send_string(uint8_t * restrict buf, const uint8_t count)
 {
-	uint8_t *s;
-	uint8_t *s1, *s2;
-	int i;
-
-	if (count == 0)
+	if (!count)
 		return;
 
+	uint8_t *s1, *s2;
 	if (jbxvt.com.send_count == 0) {
-		if (command.send != NULL) {
+		if (command.send) {
 			free(command.send);
 			command.send = NULL;
 		}
 		command.send = (uint8_t *)malloc(count);
 		s2 = command.send;
 		s1 = buf;
-		for (i = 0; i < count; i++, s1++, s2++)
+		for (uint8_t i = 0; i < count; i++, s1++, s2++)
 			*s2 = *s1;
 		jbxvt.com.send_nxt = command.send;
 		jbxvt.com.send_count = count;
 	} else {
-		s = (uint8_t *)malloc(jbxvt.com.send_count + count);
+		uint8_t * s = malloc(jbxvt.com.send_count + count);
 		memcpy(s,jbxvt.com.send_nxt,jbxvt.com.send_count);
 		s2 = s + jbxvt.com.send_count;
 		s1 = buf;
-		for (i = 0; i < count; i++, s1++, s2++)
+		for (uint8_t i = 0; i < count; i++, s1++, s2++)
 			*s2 = *s1;
 		free(command.send);
 		command.send = jbxvt.com.send_nxt = s;
@@ -314,8 +285,7 @@ void send_string(uint8_t * buf, int count)
 }
 
 /*  Send printf formatted output to the command.  Only used for small ammounts
- *  of data.
- */
+ *  of data.  */
 /*VARARGS1*/
 void cprintf(char *fmt,...)
 {

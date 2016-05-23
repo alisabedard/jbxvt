@@ -40,7 +40,9 @@ uint8_t *lookup_key(XEvent * restrict ev, int16_t * restrict pcount);
 
 void push_com_char(int);
 void push_xevent(struct xeventst *);
-void send_string(uint8_t *,int);
+
+//  Send count characters directly to the command.
+void send_string(uint8_t * restrict buf, const uint8_t count);
 
 // Set key mode for cursor keys if is_cursor, else for keypad keys
 void set_keys(const enum ModeValue mode, const bool is_cursor);
