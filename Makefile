@@ -1,14 +1,13 @@
 CFLAGS+=-Os
 #CFLAGS+=-Werror
-#CFLAGS+=-march=native
 #CFLAGS+=-flto # doesn't work with clang
 #CFLAGS+=-ggdb
 #CFLAGS+=-DDEBUG
 #CFLAGS+=-DTK_DEBUG
 #CC=clang
-PREFIX=/usr
 
 exe=jbxvt
+PREFIX=/usr
 
 # Uncomment for NetBSD:
 #CFLAGS+=-DNETBSD
@@ -18,13 +17,14 @@ exe=jbxvt
 #PREFIX=/usr/local
 
 # Uncomment for FreeBSD:
-#CFLAGS+=-DFREEBSD
+#CFLAGS+=-DFREEBSD -D_BSD_SOURCE -D__BSD_VISIBLE
 #CFLAGS+=-I/usr/local/include
 #LIBS+=-L/usr/local/lib
+#PREFIX=/usr/local
 
 
 # Uncomment for GNU/Linux:
-CFLAGS+=-DLINUX
+CFLAGS+=-DLINUX -D__USE_MISC
 
 LIBS+=-lX11
 

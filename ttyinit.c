@@ -40,10 +40,10 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/syscall.h>
 #include <sys/wait.h>
 #include <termios.h>
 #include <time.h>
-#define __USE_MISC
 #include <unistd.h>
 
 /*  NOTES ON PORTING
@@ -108,8 +108,6 @@
 #include <sys/syscall.h>
 #include <sys/ttycom.h>
 #include <ttyent.h>
-#include <unistd.h>
-#include <util.h>
 #endif//NETBSD
 
 #ifdef FREEBSD
@@ -121,7 +119,6 @@
 #define I_PUSH 2
 #endif//!IPUSH
 #define TTYTAB _PATH_TTYS
-#define SCTTY_IOCTL
 #endif//FREEBSD
 
 #ifdef SUNOS5
