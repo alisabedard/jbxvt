@@ -18,10 +18,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/select.h>
-#ifdef LINUX
-#define __USE_MISC
-#endif//LINUX
 #include <sys/syscall.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 static fd_t x_fd;
@@ -54,6 +52,8 @@ static int16_t get_com_char(const int8_t flags)
 		fd_set in_fdset;
 		FD_ZERO(&in_fdset);
 		while (XPending(jbxvt.X.dpy) == 0) {
+			if (FD_ISSET(x_fd, &in_fdset))
+				quit(1, "Infinite loop");
 			FD_SET(jbxvt.com.fd,&in_fdset);
 			FD_SET(x_fd,&in_fdset);
 			fd_set out_fdset;
@@ -68,9 +68,10 @@ static int16_t get_com_char(const int8_t flags)
 #else//!SYS_select
 				sv = select(jbxvt.com.width,
 						&in_fdset,&out_fdset,
-						NULL,NULL);
+						NULL, NULL);
 #endif//SYS_select
 			} while (sv < 0 && errno == EINTR);
+			
 			if (FD_ISSET(jbxvt.com.fd,&out_fdset)) {
 				count = jbxvt.com.send_count < 100
 					? jbxvt.com.send_count : 100;
