@@ -21,8 +21,7 @@
 // Static globals:
 static enum selunit selection_unit;	/* current unit of selection */
 
-/*  Make the selection currently delimited by the selection end markers.
- */
+//  Make the selection currently delimited by the selection end markers.
 void scr_make_selection(const Time time)
 {
 	if (!save_selection())
@@ -32,14 +31,12 @@ void scr_make_selection(const Time time)
 	if (XGetSelectionOwner(jbxvt.X.dpy,XA_PRIMARY) != jbxvt.X.win.vt)
 		fprintf(stderr, "Could not get primary selection");
 
-	/*  Place in CUT_BUFFER0 for backup.
-	 */
+	//  Place in CUT_BUFFER0 for backup.
 	XChangeProperty(jbxvt.X.dpy,DefaultRootWindow(jbxvt.X.dpy),XA_CUT_BUFFER0,
 		XA_STRING,8,PropModeReplace,jbxvt.sel.text,jbxvt.sel.length);
 }
 
-/*  respond to a request for our current selection.
- */
+//  respond to a request for our current selection.
 void scr_send_selection(const int time __attribute__((unused)),
 	const int requestor, const int target, const int property)
 {
@@ -83,8 +80,7 @@ void scr_start_selection(int x, int y, enum selunit unit)
 }
 
 
-/*  Convert a row and column coordinates into a selection endpoint.
- */
+//  Convert a row and column coordinates into a selection endpoint.
 void rc_to_selend(const int16_t row, const int16_t col, struct selst * se)
 {
 	int i = (row - jbxvt.scr.offset);
@@ -210,7 +206,7 @@ static void adj_sel_to_word(struct selst * include,
 		len = jbxvt.scr.sline.data[se2->se_index]->sl_length;
 	}
 
-	while (i < len && s[i] != ' ' && s[i] != '\n' && s[i])
+	while (i < len && s[i] && s[i] != ' ' && s[i] != '\n')
 		  i++;
 	se2->se_col = i;
 

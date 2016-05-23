@@ -148,10 +148,8 @@ static void init_jbxvt_colors(void)
 void init_display(char * name)
 {
 	jbxvt.X.dpy = XOpenDisplay(NULL);
-	if(!jbxvt.X.dpy) {
-		perror("DISPLAY");
-		exit(1);
-	}
+	if(!jbxvt.X.dpy)
+		  quit(1, "DISPLAY");
 
 	jbxvt.X.screen = DefaultScreen(jbxvt.X.dpy);
 	init_jbxvt_colors();

@@ -105,8 +105,10 @@
 #ifdef NETBSD
 #define POSIX_PTY
 #include <sys/ioctl.h>
+#include <sys/syscall.h>
 #include <sys/ttycom.h>
 #include <ttyent.h>
+#include <unistd.h>
 #include <util.h>
 #endif//NETBSD
 
@@ -178,11 +180,11 @@ static void tidy_utmp(void)
 		return;
 	utent.ut_type = DEAD_PROCESS;
 
-#ifdef LINUX
+#ifdef SYS_time
 	syscall(SYS_time, &utent.ut_time);
-#else//!LINUX
+#else//!SYS_time
 	time((time_t *)&utent.ut_time);
-#endif//LINUX
+#endif//SYS_time
 
 	pututline(&utent);
 #endif /* SVR4_UTMP || SVR4_UTMPX */
@@ -195,13 +197,34 @@ static void tidy_utmp(void)
 
 	if (tslot < 0)
 		return;
+
+#ifdef SYS_open
+	if ((ut_fd = syscall(SYS_open, UTMP_FILE, O_WRONLY)) < 0)
+#else//!SYS_open
 	if ((ut_fd = open(UTMP_FILE,O_WRONLY)) < 0)
+#endif//SYS_open
 		return;
 
 	memset(&utent,0,sizeof(utent));
+
+#ifdef SYS_lseek
+	syscall(SYS_lseek, ut_fd, tslot * sizeof(struct utmp), 0);
+#else//!SYS_lseek
 	lseek(ut_fd,(long)(tslot * sizeof(struct utmp)),0);
+#endif//SYS_lseek
+
+#ifdef SYS_write
+	syscall(SYS_write, ut_fd, &utent, sizeof(struct utmp));
+#else//!SYS_write
 	write(ut_fd,(char *)&utent,sizeof(struct utmp));
+#endif//SYS_write
+
+#ifdef SYS_close
+	syscall(SYS_close, ut_fd);
+#else//!SYS_close
 	close(ut_fd);
+#endif//SYS_close
+
 #endif /* BSD_UTMP */
 
 #ifdef BSD_PTY
@@ -256,16 +279,22 @@ static void write_utmp(void)
 	utent.ut_type = USER_PROCESS;
 	strncpy(utent.ut_id,tty_name + 8,sizeof(utent.ut_id));
 	strncpy(utent.ut_line,tty_name + 5,sizeof(utent.ut_line));
+
+#ifdef SYS_getuid
+	if((pw = getpwuid(syscall(SYS_getuid))))
+#else//!SYS_getuid
 	if((pw = getpwuid(getuid())))
+#endif//SYS_getuid
 		strncpy(utent.ut_name,pw->pw_name,sizeof(utent.ut_name));
+
 	strncpy(utent.ut_host,XDisplayString(jbxvt.X.dpy),
 		sizeof(utent.ut_host));
 
-#ifdef LINUX
+#ifdef SYS_time
 	syscall(SYS_time, &utent.ut_time);
-#else
+#else//!SYS_time
 	time((time_t *)&utent.ut_time);
-#endif
+#endif//SYS_time
 
 	pututline(&utent);
 	endutent();
@@ -337,8 +366,15 @@ static void write_utmp(void)
 void quit(const int8_t status, const char * restrict msg)
 {
 	tidy_utmp();
-	if(msg)
-		  perror(msg);
+	if(msg) {
+#ifdef SYS_write
+		  syscall(SYS_write, STDERR_FILENO, msg, strlen(msg));
+		  syscall(SYS_write, STDERR_FILENO, "\n", 1);
+#else//!SYS_write
+		  fputs(msg, stderr);
+		  fputc('\n', stderr);
+#endif//SYS_write
+	}
 	exit(status);
 }
 
@@ -389,11 +425,11 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 	char *ttynam = ptsname(mfd);
 #endif//POSIX_PTY
 
-#ifdef LINUX
+#ifdef SYS_open
 	const fd_t sfd = syscall(SYS_open, ttynam, O_RDWR);
-#else//!LINUX
+#else//!SYS_open
 	const fd_t sfd = open((const char *)ttynam,O_RDWR);
-#endif//LINUX
+#endif//SYS_open
 
 	if (sfd < 0)
 		quit(1, "Cannot open slave tty");
@@ -493,13 +529,19 @@ static void set_ttymodes(void)
 static void child(char ** restrict argv, fd_t ttyfd)
 {
 #ifndef NETBSD
-#ifdef LINUX
+
+#ifdef SYS_setsid
 	const pid_t pgid = syscall(SYS_setsid);
-#else//!LINUX
+#else//!SYS_setsid
 	const pid_t pgid = setsid();
-#endif//LINUX
+#endif//SYS_setsid
+
 #else//NETBSD
+#if defined(SYS_getsid) && defined(SYS_getpid)
+	const pid_t pgid = syscall(SYS_getsid, syscall(SYS_getpid));
+#else
 	const pid_t pgid = getsid(getpid());
+#endif//SYS_getsid&&SYS_getpid
 #endif//!NETBSD
 
 	if(pgid < 0)
@@ -510,84 +552,99 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	 *  this can be done with an ioctl but on others
 	 *  we need to re-open the slave tty.  */
 #ifdef TIOCSCTTY
-#ifdef LINUX
+
+#ifdef SYS_ioctl
 	syscall(SYS_ioctl, ttyfd, TIOCSCTTY, 0);
-#else//!LINUX
+#else//!SYS_ioctl
 	(void)ioctl(ttyfd,TIOCSCTTY,0);
-#endif//LINUX
+#endif//SYS_ioctl
+
 #else//!TIOCSCTTY
+
 	fd_t i = ttyfd;
 
-#ifdef LINUX
+#ifdef SYS_open
 	ttyfd = syscall(SYS_open, tty_name, O_RDWR);
-#else//!TIOCSCTTY
+#else//!SYS_open
 	ttyfd = open(tty_name, O_RDWR);
-#endif//LINUX
+#endif//SYS_open
 
 	if (ttyfd < 0)
 		  quit(1, "Cannot open tty");
 
-#ifdef LINUX
+#ifdef SYS_close
 	syscall(SYS_close, i);
-#else
+#else//!SYS_close
 	close(i);
-#endif//LINUX
+#endif//SYS_close
+
 #endif//TIOCSCTTY
 
-#ifdef LINUX
+#ifdef SYS_getuid
 	const uid_t uid = syscall(SYS_getuid);
-#else//!LINUX
+#else//!SYS_getuid
 	const uid_t uid = getuid();
-#endif//LINUX
+#endif//SYS_getuid
 
 	struct group * gr = getgrnam("tty");
 	const gid_t gid = gr ? (int)gr->gr_gid : -1;
 
-#ifdef LINUX
+#ifdef SYS_fchown
 	syscall(SYS_fchown, ttyfd, uid, gid);
 	syscall(SYS_fchmod, ttyfd, 0620);
-#else//!LINUX
+#else//!SYS_fchown
 	fchown(ttyfd,uid,gid);
 	fchmod(ttyfd, 0620);
-#endif//LINUX
+#endif//SYS_fchown
 
 	for (int i = 0; i < jbxvt.com.width; i++)
 		  if (i != ttyfd)
-#ifdef LINUX
+#ifdef SYS_close
 			    syscall(SYS_close, i);
-#else//!LINUX
+#else//!SYS_close
 			    close(i);
-#endif//LINUX
+#endif//SYS_close
 
 	// for stdin, stderr, stdout:
-#ifndef LINUX
-	fcntl(ttyfd, F_DUPFD, 0);
-	fcntl(ttyfd, F_DUPFD, 0);
-	fcntl(ttyfd, F_DUPFD, 0);
-#else//LINUX
+#ifdef SYS_fcntl
 	syscall(SYS_fcntl, ttyfd, F_DUPFD, 0);
 	syscall(SYS_fcntl, ttyfd, F_DUPFD, 0);
 	syscall(SYS_fcntl, ttyfd, F_DUPFD, 0);
-#endif//!LINIX
+#else//!SYS_fcntl
+	fcntl(ttyfd, F_DUPFD, 0);
+	fcntl(ttyfd, F_DUPFD, 0);
+	fcntl(ttyfd, F_DUPFD, 0);
+#endif//SYS_fcntl
 
-	if (ttyfd > 2)
-#ifdef LINUX
+	if (ttyfd > 2) {
+#ifdef SYS_close
 		  syscall(SYS_close, ttyfd);
-#else
+#else//!SYS_close
 		  close(ttyfd);
-#endif//LINUX
+#endif//SYS_close
+	}
 
 #ifdef BSD_TTY
+
+#ifdef SYS_ioctl
+	syscall(SYS_ioctl, 0, TIOCSPGRP, &pgid);
+#else//!SYS_ioctl
 	ioctl(0, TIOCSPGRP, (char *)&pgid);
-        setpgrp (0, pgid);
+#endif//SYS_ioctl
+
+#ifdef SYS_setpgid
+	syscall(SYS_setpgid, 0, pgid);
+#else//!SYS_setpgid
+        setpgid(0, pgid);
+#endif//SYS_setpgid
 #endif /* BSD_TTY */
 	set_ttymodes();
 
-#ifdef LINUX
+#ifdef SYS_setuid
 	syscall(SYS_setuid, uid);
-#else//!LINUX
+#else//!SYS_setuid
 	setuid(uid);
-#endif//LINUX
+#endif//SYS_setuid
 
 	execvp(argv[0],argv);
 	quit(1, "Cannot execute command");
@@ -602,21 +659,22 @@ int run_command(char ** argv)
 	tty_name = get_pseudo_tty(&ptyfd, &ttyfd);
 	if (!tty_name)
 		  return -1;
-#ifndef LINUX
-	fcntl(ptyfd,F_SETFL,O_NONBLOCK);
-#else//LINUX
+#ifdef SYS_fcntl
 	syscall(SYS_fcntl, ptyfd, F_SETFL, O_NONBLOCK);
-#endif//!LINUX
+#else//!SYS_fcntl
+	fcntl(ptyfd,F_SETFL,O_NONBLOCK);
+#endif//SYS_fcntl
 
 	jbxvt.com.width = sysconf(_SC_OPEN_MAX);
 	for (uint8_t i = 1; i <= 15; i++)
 		signal(i, catch_sig);
 
-#ifdef LINUX
+#ifdef SYS_fork
 	comm_pid = syscall(SYS_fork);
-#else//!LINUX
+#else//!SYS_fork
 	comm_pid = fork();
-#endif//LINUX
+#endif//SYS_fork
+
 	if (comm_pid < 0)
 		  quit(1, "Cannot fork");
 #ifdef DEBUG
@@ -641,11 +699,12 @@ void tty_set_size(const uint8_t width, const uint8_t height)
 		return;
 	struct winsize wsize = {.ws_row = height, .ws_col = width};
 	const fd_t f = comm_pid == 0 ? 0 : jbxvt.com.fd;
-#ifdef LINUX
+
+#ifdef SYS_ioctl
 	syscall(SYS_ioctl, f, TIOCSWINSZ, &wsize);
-#else//!LINUX
+#else//!SYS_ioctl
 	ioctl(f, TIOCSWINSZ, &wsize);
-#endif//LINUX
+#endif//SYS_ioctl
 }
 #endif//TIOCSWINSZ
 #endif//!NETBSD&&!FREEBSD

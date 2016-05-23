@@ -2,6 +2,7 @@
 
 #include "config.h"
 #include "init_display.h"
+#include "ttyinit.h"
 #include "xsetup.h"
 #include "xvt.h"
 
@@ -38,11 +39,11 @@ static char ** parse_command_line(const int argc, char ** argv)
 			break;
 		case 'v': // version
 			fprintf(stdout, "%s %s\n", argv[0], VERSION);
-			exit(0);
+			quit(0, NULL);
 		case 'h': // help
 		default:
 			fprintf(stdout, "%s -[%s]\n", argv[0], optstr);
-			exit(0);
+			quit(0, NULL);
 		}
 	}
 	return NULL;

@@ -20,8 +20,8 @@
 #include <sys/select.h>
 #ifdef LINUX
 #define __USE_MISC
-#include <sys/syscall.h>
 #endif//LINUX
+#include <sys/syscall.h>
 #include <unistd.h>
 
 static fd_t x_fd;
@@ -62,14 +62,14 @@ static int16_t get_com_char(const int8_t flags)
 				FD_SET(jbxvt.com.fd,&out_fdset);
 			int sv;
 			do {
-#ifdef LINUX
+#ifdef SYS_select
 				sv = syscall(SYS_select, jbxvt.com.width,
 					&in_fdset, &out_fdset, NULL, NULL);
-#else//!LINUX
+#else//!SYS_select
 				sv = select(jbxvt.com.width,
 						&in_fdset,&out_fdset,
 						NULL,NULL);
-#endif//LINUX
+#endif//SYS_select
 			} while (sv < 0 && errno == EINTR);
 			if (FD_ISSET(jbxvt.com.fd,&out_fdset)) {
 				count = jbxvt.com.send_count < 100
