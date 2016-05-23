@@ -104,22 +104,19 @@
 
 #ifdef NETBSD
 #define POSIX_PTY
-#include <sys/ioctl.h>
-#include <sys/syscall.h>
 #include <sys/ttycom.h>
-#include <ttyent.h>
 #endif//NETBSD
 
 #ifdef FREEBSD
 #define POSIX_PTY
-#include <sys/ttycom.h>
 #include <termios.h>
-#include <ttyent.h>
-#ifndef I_PUSH
-#define I_PUSH 2
-#endif//!IPUSH
 #define TTYTAB _PATH_TTYS
 #endif//FREEBSD
+
+#ifdef _BSD_SOURCE
+#include <sys/ttycom.h>
+#include <ttyent.h>
+#endif
 
 #ifdef SUNOS5
 #include <sys/stropts.h>
@@ -140,7 +137,6 @@
 #ifdef LINUX
 #include <pty.h>
 #include <stropts.h>
-#include <sys/syscall.h>
 #include <utmp.h>
 #define POSIX_PTY
 #define SVR4_UTMP
