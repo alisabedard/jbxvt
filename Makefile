@@ -12,6 +12,7 @@ exe=jbxvt
 
 # Uncomment for NetBSD:
 #CFLAGS+=-DNETBSD
+#CFLAGS+=-Wno-missing-field-initializers
 #CFLAGS+=-I/usr/X11R7/include
 #LIBS+=-L/usr/X11R7/lib -Wl,-R/usr/X11R7/lib
 #PREFIX=/usr/local
