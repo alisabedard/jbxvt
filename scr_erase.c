@@ -6,6 +6,7 @@
 #include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"
+#include "log.h"
 #include "sbar.h"
 #include "screen.h"
 #include "scroll_up.h"
@@ -15,16 +16,18 @@
 
 static int16_t zero_line(uint8_t * restrict str,
 	uint32_t * restrict rend, uint16_t * restrict width,
-	const int16_t col, const size_t sz)
+	uint8_t sz, const uint8_t col)
 {
-	memset(str, 0, sz + 1);
-	memset(rend, 0, (sz + 1) * sizeof(uint32_t));
+	sz++;
+	fprintf(stderr, "%d, %d\n", sz, col);
+	memset(str, 0, sz);
+	memset(rend, 0, sz * sizeof(uint32_t));
 	*width = sz * jbxvt.X.font_width;
 	return MARGIN + col * jbxvt.X.font_width;
 }
 
 //  erase part or the whole of a line
-void scr_erase_line(int mode)
+static void scr_erase_line(int mode)
 {
 	home_screen();
 	XRectangle g;
@@ -35,16 +38,17 @@ void scr_erase_line(int mode)
 	size_t sz;
 	switch (mode) {
 	    case START:
-		    sz = jbxvt.scr.current->col + 1;
-		    g.x = zero_line(s, r, &g.width, 0, sz);
+		    sz = jbxvt.scr.current->col;
+		    g.x = zero_line(s, r, &g.width, sz, 0);
 		    break;
 	    case END:
 		    sz = jbxvt.scr.chars.width - jbxvt.scr.current->col;
-		    g.x = zero_line(s, r, &g.width, jbxvt.scr.current->col, sz);
+		    g.x = zero_line(s, r, &g.width, sz, jbxvt.scr.current->col);
+		    g.width+=jbxvt.X.font_width;
 		    break;
 	    case ENTIRE:
 		    sz = jbxvt.scr.chars.width;
-		    g.x = zero_line(s, r, &g.width, 0, sz);
+		    g.x = zero_line(s, r, &g.width, sz, 0);
 		    break;
 	    default:
 		    return;

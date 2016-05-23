@@ -322,7 +322,7 @@ void cprintf(char *fmt,...)
 {
 	va_list args;
 	va_start(args,fmt);
-	static uint8_t buf[1024];
+	static uint8_t buf[64];
 	vsnprintf((char *)buf, sizeof(buf), fmt, args);
 	va_end(args);
 	send_string(buf,strlen((char *)buf));
