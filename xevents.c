@@ -38,6 +38,14 @@ static void handle_motion_notify(struct tokenst * restrict tk,
 
 }
 
+static void sbop(struct tokenst * restrict tk, struct xeventst * restrict xe,
+	const bool up)
+{
+	tk->tk_type = up ? TK_SBUP : TK_SBDOWN;
+	tk->tk_arg[0] = xe->xe_y;
+	tk->tk_nargs = 1;
+}
+
 static void handle_button_release(struct tokenst * restrict tk,
 	struct xeventst * restrict xe)
 {
@@ -45,15 +53,11 @@ static void handle_button_release(struct tokenst * restrict tk,
 		switch (xe->xe_button) {
 		case Button1:
 		case Button5:
-			tk->tk_type = TK_SBUP;
-			tk->tk_arg[0] = xe->xe_y;
-			tk->tk_nargs = 1;
+			sbop(tk, xe, true);
 			break;
 		case Button3:
 		case Button4:
-			tk->tk_type = TK_SBDOWN;
-			tk->tk_arg[0] = xe->xe_y;
-			tk->tk_nargs = 1;
+			sbop(tk, xe, false);
 			break;
 		}
 	} else if (xe->xe_window == jbxvt.X.win.vt
@@ -73,14 +77,10 @@ static void handle_button_release(struct tokenst * restrict tk,
 			tk->tk_nargs = 3;
 			break;
 		case Button4:
-			tk->tk_type = TK_SBDOWN;
-			tk->tk_arg[0] = xe->xe_y;
-			tk->tk_nargs = 1;
+			sbop(tk, xe, false);
 			break;
 		case Button5:
-			tk->tk_type = TK_SBUP;
-			tk->tk_arg[0] = xe->xe_y;
-			tk->tk_nargs = 1;
+			sbop(tk, xe, true);
 			break;
 
 		}
