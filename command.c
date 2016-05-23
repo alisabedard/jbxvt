@@ -239,8 +239,12 @@ uint8_t * lookup_key(XEvent * restrict ev, int16_t * restrict pcount)
 		*pcount = strlen(s);
  	       	return (uint8_t *)s;
 	} else {
-		*pcount = ((ev->xkey.state & Mod1Mask) && (count == 1))
-			? 1 : count;
+		if((ev->xkey.state & Mod1Mask) && (count == 1)) {
+			kbuf[0] |= 0200;
+			*pcount = 1;
+		} else
+			*pcount = count;
+
 		return (uint8_t *)kbuf;
 	}
 }
@@ -291,7 +295,7 @@ void cprintf(char *fmt,...)
 {
 	va_list args;
 	va_start(args,fmt);
-	static uint8_t buf[64];
+	static uint8_t buf[128];
 	vsnprintf((char *)buf, sizeof(buf), fmt, args);
 	va_end(args);
 	send_string(buf,strlen((char *)buf));
