@@ -14,65 +14,61 @@
 
 #include <string.h>
 
-static int16_t zero_line(uint8_t * restrict str,
-	uint32_t * restrict rend, uint16_t * restrict width,
-	uint8_t sz, const uint8_t col)
-{
-	sz++;
-	fprintf(stderr, "%d, %d\n", sz, col);
-	memset(str, 0, sz);
-	memset(rend, 0, sz * sizeof(uint32_t));
-	*width = sz * jbxvt.X.font_width;
-	return MARGIN + col * jbxvt.X.font_width;
-}
-
 //  erase part or the whole of a line
-static void scr_erase_line(int mode)
+void scr_erase_line(const int8_t mode)
 {
+	int i, x, y, width, height;
+
 	home_screen();
-	XRectangle g;
-	g.y = MARGIN + jbxvt.scr.current->row * jbxvt.X.font_height;
-	g.height = jbxvt.X.font_height;
+	y = MARGIN + jbxvt.scr.current->row * jbxvt.X.font_height;
+	height = jbxvt.X.font_height;
 	uint8_t * s = jbxvt.scr.current->text[jbxvt.scr.current->row];
 	uint32_t * r = jbxvt.scr.current->rend[jbxvt.scr.current->row];
-	size_t sz;
 	switch (mode) {
-	    case START:
-		    sz = jbxvt.scr.current->col;
-		    g.x = zero_line(s, r, &g.width, sz, 0);
-		    break;
-	    case END:
-		    sz = jbxvt.scr.chars.width - jbxvt.scr.current->col;
-		    g.x = zero_line(s, r, &g.width, sz, jbxvt.scr.current->col);
-		    g.width+=jbxvt.X.font_width;
-		    break;
-	    case ENTIRE:
-		    sz = jbxvt.scr.chars.width;
-		    g.x = zero_line(s, r, &g.width, sz, 0);
-		    break;
-	    default:
-		    return;
+	    case START :
+		x = MARGIN;
+		width = (jbxvt.scr.current->col + 1) * jbxvt.X.font_width;
+		memset(s,0,jbxvt.scr.current->col + 1);
+		memset(r,0,jbxvt.scr.current->col + 1);
+		break;
+	    case END :
+		x = MARGIN + jbxvt.scr.current->col * jbxvt.X.font_width;
+		width = (jbxvt.scr.chars.width - jbxvt.scr.current->col)
+			* jbxvt.X.font_width;
+		memset(s + jbxvt.scr.current->col,0,
+			jbxvt.scr.chars.width - jbxvt.scr.current->col + 1);
+		memset(r + jbxvt.scr.current->col,0,
+			(jbxvt.scr.chars.width - jbxvt.scr.current->col)
+			*sizeof(uint32_t));
+		break;
+	    case ENTIRE :
+		x = MARGIN;
+		width = jbxvt.scr.chars.width * jbxvt.X.font_width;
+		memset(s,0,jbxvt.scr.chars.width + 1);
+		memset(r,0,jbxvt.scr.chars.width*sizeof(uint32_t));
+		break;
+	    default :
+		return;
 	}
 	/*  patch in the final rendition flag if there is any non-zero
 	 *  rendition.
 	 */
 	r[jbxvt.scr.chars.width] = 0;
-	for (uint8_t i = 0; i < jbxvt.scr.chars.width; i++) {
+	for (i = 0; i < jbxvt.scr.chars.width; i++) {
 		if (r[i] != 0) {
 			r[jbxvt.scr.chars.width] = 1;
 			break;
 		}
 	}
 	cursor(); //clear
-	check_selection(jbxvt.scr.current->row, jbxvt.scr.current->row);
-	XClearArea(jbxvt.X.dpy, jbxvt.X.win.vt, g.x, g.y,
-		g.width, g.height, False);
+	check_selection(jbxvt.scr.current->row,jbxvt.scr.current->row);
+	XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,x,y,width,height,False);
 	jbxvt.scr.current->wrap_next = 0;
 	cursor();
 }
 
 //  erase part or the whole of the screen
-void scr_erase_screen(int mode)
+void scr_erase_screen(const int8_t mode)
 {
 	home_screen();
 	jbxvt.scr.current->wrap_next = 0;
