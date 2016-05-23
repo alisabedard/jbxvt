@@ -25,7 +25,6 @@
 
 #include "ttyinit.h"
 
-
 #include "jbxvt.h"
 #include "init_display.h"
 #include "screen.h"
