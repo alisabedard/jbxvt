@@ -58,8 +58,7 @@ void scr_erase_line(const int8_t mode)
 		return;
 	}
 	/*  patch in the final rendition flag if there is any non-zero
-	 *  rendition.
-	 */
+	 *  rendition.  */
 	r[jbxvt.scr.chars.width] = 0;
 	for (uint16_t i = 0; i < jbxvt.scr.chars.width; i++) {
 		if (r[i] != 0) {
