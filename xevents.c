@@ -87,6 +87,25 @@ static void handle_button_release(struct tokenst * restrict tk,
 	}
 }
 
+static void handle_button1_press(struct tokenst * restrict tk,
+	struct xeventst * restrict xe)
+{
+	static unsigned int time1, time2;
+	if (xe->xe_time - time2
+		< MP_INTERVAL) {
+		time1 = 0;
+		time2 = 0;
+		tk->tk_type = TK_SELLINE;
+	} else if (xe->xe_time - time1
+		< MP_INTERVAL) {
+		time2 = xe->xe_time;
+		tk->tk_type = TK_SELWORD;
+	} else {
+		time1 = xe->xe_time;
+		tk->tk_type = TK_SELSTART;
+	}
+}
+
 static void handle_button_press(struct tokenst * restrict tk,
 	struct xeventst * restrict xe)
 {
@@ -98,22 +117,9 @@ static void handle_button_press(struct tokenst * restrict tk,
 	}
 	if (xe->xe_window == jbxvt.X.win.vt
 		&& (xe->xe_state & ControlMask) == 0) {
-		static unsigned int time1, time2;
 		switch (xe->xe_button) {
 		case Button1 :
-			if (xe->xe_time - time2
-				< MP_INTERVAL) {
-				time1 = 0;
-				time2 = 0;
-				tk->tk_type = TK_SELLINE;
-			} else if (xe->xe_time - time1
-				< MP_INTERVAL) {
-				time2 = xe->xe_time;
-				tk->tk_type = TK_SELWORD;
-			} else {
-				time1 = xe->xe_time;
-				tk->tk_type = TK_SELSTART;
-			}
+			handle_button1_press(tk, xe);
 			break;
 		case Button2 :
 			tk->tk_type = TK_NULL;

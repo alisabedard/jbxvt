@@ -158,17 +158,22 @@ static void scroll_lower_lines(int8_t count)
 		jbxvt.scr.current->bmargin,-count);
 }
 
+static int8_t get_insertion_count(const int8_t count)
+{
+	if (count > jbxvt.scr.current->bmargin
+		- jbxvt.scr.current->row + 1)
+		return jbxvt.scr.current->bmargin
+			- jbxvt.scr.current->row + 1;
+	return count;
+}
+
 /*  Insert count blank lines at the current position and scroll the lower lines
  *  down.  */
 void scr_insert_lines(int8_t count)
 {
 	if (jbxvt.scr.current->row > jbxvt.scr.current->bmargin)
 		return;
-	if (count > jbxvt.scr.current->bmargin
-		- jbxvt.scr.current->row + 1)
-		count = jbxvt.scr.current->bmargin
-			- jbxvt.scr.current->row + 1;
-
+	count = get_insertion_count(count);
 	home_screen();
 	cursor();
 	scroll_lower_lines(count);
@@ -207,7 +212,6 @@ void scr_move_by(const int16_t y)
 		: jbxvt.scr.offset + (-y - MARGIN) / jbxvt.X.font_height);
 }
 
-
 //  Send the name of the current display to the command.
 void scr_report_display(void)
 {
@@ -215,7 +219,7 @@ void scr_report_display(void)
 	struct utsname ut;
 	(void)uname(&ut);
 
-	if (strncmp(dname, "unix:", 5) == 0)
+	if (!strncmp(dname, "unix:", 5))
 		cprintf("%s%s\r",ut.nodename,dname + 4);
 	else if (dname[0] == ':')
 		cprintf("%s%s\r",ut.nodename,dname);
