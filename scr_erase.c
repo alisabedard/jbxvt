@@ -14,38 +14,45 @@
 
 #include <string.h>
 
+static void zero_line(uint8_t * restrict s,
+	uint32_t * restrict r, uint16_t sz)
+{
+	sz++;
+	memset(s, 0, sz);
+	memset(r, 0, sz * sizeof(uint32_t));
+}
+
+static void get_horz_geo(int16_t * restrict x, uint16_t * restrict w,
+	const uint16_t sz, const uint16_t col)
+{
+	*x = MARGIN + col * jbxvt.X.font_width;
+	*w = sz * jbxvt.X.font_width;
+}
+
 //  erase part or the whole of a line
 void scr_erase_line(const int8_t mode)
 {
-	int i, x, y, width, height;
-
 	home_screen();
-	y = MARGIN + jbxvt.scr.current->row * jbxvt.X.font_height;
-	height = jbxvt.X.font_height;
+	XRectangle g;
+	g.y = MARGIN + jbxvt.scr.current->row * jbxvt.X.font_height;
+	g.height = jbxvt.X.font_height;
 	uint8_t * s = jbxvt.scr.current->text[jbxvt.scr.current->row];
 	uint32_t * r = jbxvt.scr.current->rend[jbxvt.scr.current->row];
 	switch (mode) {
 	    case START :
-		x = MARGIN;
-		width = (jbxvt.scr.current->col + 1) * jbxvt.X.font_width;
-		memset(s,0,jbxvt.scr.current->col + 1);
-		memset(r,0,jbxvt.scr.current->col + 1);
+		get_horz_geo(&g.x, &g.width, jbxvt.scr.current->col, 0);
+		zero_line(s, r, jbxvt.scr.current->col);
 		break;
 	    case END :
-		x = MARGIN + jbxvt.scr.current->col * jbxvt.X.font_width;
-		width = (jbxvt.scr.chars.width - jbxvt.scr.current->col)
-			* jbxvt.X.font_width;
-		memset(s + jbxvt.scr.current->col,0,
-			jbxvt.scr.chars.width - jbxvt.scr.current->col + 1);
-		memset(r + jbxvt.scr.current->col,0,
-			(jbxvt.scr.chars.width - jbxvt.scr.current->col)
-			*sizeof(uint32_t));
+		get_horz_geo(&g.x, &g.width, jbxvt.scr.chars.width
+			- jbxvt.scr.current->col, jbxvt.scr.current->col);
+		zero_line(s + jbxvt.scr.current->col,
+			r + jbxvt.scr.current->col,
+			jbxvt.scr.chars.width - jbxvt.scr.current->col);
 		break;
 	    case ENTIRE :
-		x = MARGIN;
-		width = jbxvt.scr.chars.width * jbxvt.X.font_width;
-		memset(s,0,jbxvt.scr.chars.width + 1);
-		memset(r,0,jbxvt.scr.chars.width*sizeof(uint32_t));
+		get_horz_geo(&g.x, &g.width, jbxvt.scr.chars.width, 0);
+		zero_line(s, r, jbxvt.scr.chars.width);
 		break;
 	    default :
 		return;
@@ -54,7 +61,7 @@ void scr_erase_line(const int8_t mode)
 	 *  rendition.
 	 */
 	r[jbxvt.scr.chars.width] = 0;
-	for (i = 0; i < jbxvt.scr.chars.width; i++) {
+	for (uint16_t i = 0; i < jbxvt.scr.chars.width; i++) {
 		if (r[i] != 0) {
 			r[jbxvt.scr.chars.width] = 1;
 			break;
@@ -62,7 +69,8 @@ void scr_erase_line(const int8_t mode)
 	}
 	cursor(); //clear
 	check_selection(jbxvt.scr.current->row,jbxvt.scr.current->row);
-	XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,x,y,width,height,False);
+	XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt, g.x, g.y,
+		g.width, g.height, false);
 	jbxvt.scr.current->wrap_next = 0;
 	cursor();
 }
