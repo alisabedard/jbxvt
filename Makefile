@@ -24,7 +24,7 @@ PREFIX=/usr
 
 
 # Uncomment for GNU/Linux:
-CFLAGS+=-DLINUX -D__USE_MISC
+CFLAGS+=-DLINUX -D_GNU_SOURCE
 
 LIBS+=-lX11
 
