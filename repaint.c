@@ -124,11 +124,10 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 
 // Display the string using the rendition vector at the screen coordinates
 static void paint_rvec_text(uint8_t * str,
-	uint32_t * rvec, uint16_t len,
-	int x, int y)
+	uint32_t * rvec, uint16_t len, XPoint p)
 {
 	if (rvec == NULL) {
-		paint_rval_text(str,0,len,x,y);
+		paint_rval_text(str, 0, len, p.x, p.y);
 		return;
 	}
 	while (len > 0) {
@@ -136,26 +135,26 @@ static void paint_rvec_text(uint8_t * str,
 		for (i = 0; i < len; i++)
 			if (rvec[i] != rvec[0])
 				break;
-		paint_rval_text(str,rvec[0],i,x,y);
+		paint_rval_text(str,rvec[0], i, p.x, p.y);
 		str += i;
 		rvec += i;
 		len -= i;
-		x += i * jbxvt.X.font_width;
+		p.x += i * jbxvt.X.font_width;
 	}
 }
 
-static int repaint_generic(const int x1, const int y1,
+static int repaint_generic(const XPoint p,
 	const int m, const int col1, const int col2,
 	uint8_t * restrict str, uint32_t * rend)
 {
-	paint_rvec_text(str, rend ? rend + col1 : NULL, m, x1, y1);
-	const int x2 = x1 + m * jbxvt.X.font_width;
+	paint_rvec_text(str, rend ? rend + col1 : NULL, m, p);
+	const int x = p.x + m * jbxvt.X.font_width;
 	const unsigned int width = (col2 - col1 + 1 - m)
 		* jbxvt.X.font_width;
 	if (width > 0)
-		  XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,
-			  x2,y1,width,jbxvt.X.font_height,False);
-	return y1 + jbxvt.X.font_height;
+		  XClearArea(jbxvt.X.dpy, jbxvt.X.win.vt, x, p.y,
+			  width, jbxvt.X.font_height, false);
+	return p.y + jbxvt.X.font_height;
 }
 
 __attribute__((const))
@@ -189,7 +188,7 @@ void repaint(const uint8_t row1, const uint8_t row2,
 		m -= col1;
 		for (uint16_t x = 0; x < m; x++)
 			  str[x] = convert_char(s[x + col1]);
-		y1 = repaint_generic(x1, y1, m, col1,
+		y1 = repaint_generic((XPoint){x1, y1}, m, col1,
 			col2, str, sl->sl_rend);
 	}
 
@@ -203,7 +202,7 @@ void repaint(const uint8_t row1, const uint8_t row2,
 				  m = x;
 		m++;
 		m -= col1;
-		y1 = repaint_generic(x1, y1, m, col1, col2, str,
+		y1 = repaint_generic((XPoint){x1, y1}, m, col1, col2, str,
 			jbxvt.scr.current->rend[i]);
 	}
 	free(str);
