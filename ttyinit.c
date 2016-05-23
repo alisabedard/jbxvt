@@ -595,8 +595,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
 
 /*  Run the command in a subprocess and return a file descriptor for the
  *  master end of the pseudo-teletype pair with the command talking to
- *  the slave.
- */
+ *  the slave.  */
 int run_command(char ** argv)
 {
 	fd_t ptyfd, ttyfd;
