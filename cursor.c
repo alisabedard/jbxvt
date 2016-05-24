@@ -49,15 +49,14 @@ enum ScreenFocusFlags {
 
 /*  Indicate a change of keyboard focus.  Type is 1 if focusing in,
     2 for entry events, and 4 for focus events.  */
-static uint8_t focus(const uint8_t flags, uint8_t cursor_focus)
+static void focus(const uint8_t flags, uint8_t * restrict cursor_focus)
 {
-	cursor(CURSOR_DRAW); // clear via invert gc
+	draw_cursor(*cursor_focus); // clear via invert gc
 	if(flags & SCR_FOCUS_IN)
-		  cursor_focus |= flags>>1;
+		  *cursor_focus |= flags>>1;
 	else
-		  cursor_focus &= ~(flags>>1);
-	cursor(CURSOR_DRAW); // draw
-	return cursor_focus;
+		  *cursor_focus &= ~(flags>>1);
+	draw_cursor(*cursor_focus); // draw
 }
 
 void cursor(const enum CursorOp op)
@@ -71,18 +70,16 @@ void cursor(const enum CursorOp op)
 		draw_cursor(cursor_focus);
 		break;
 	case CURSOR_ENTRY_IN:
-		cursor_focus = focus(SCR_FOCUS_IN|SCR_FOCUS_ENTRY,
-			cursor_focus);
+		focus(SCR_FOCUS_IN|SCR_FOCUS_ENTRY, &cursor_focus);
 		break;
 	case CURSOR_ENTRY_OUT:
-		cursor_focus = focus(SCR_FOCUS_ENTRY, cursor_focus);
+		focus(SCR_FOCUS_ENTRY, &cursor_focus);
 		break;
 	case CURSOR_FOCUS_IN:
-		cursor_focus = focus(SCR_FOCUS_IN|SCR_FOCUS_FOCUS,
-			cursor_focus);
+		focus(SCR_FOCUS_IN|SCR_FOCUS_FOCUS, &cursor_focus);
 		break;
 	case CURSOR_FOCUS_OUT:
-		cursor_focus = focus(SCR_FOCUS_FOCUS, cursor_focus);
+		focus(SCR_FOCUS_FOCUS, &cursor_focus);
 		break;
 	case CURSOR_RESTORE:
 		restore(&saved_screen, saved_rstyle);
