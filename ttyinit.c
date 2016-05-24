@@ -390,12 +390,31 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 		for (s4 = ptyc4; *s4 != 0; s4++) {
 			ptynam[8] = ttynam[8] = *s3;
 			ptynam[9] = ttynam[9] = *s4;
+#ifdef SYS_open
+			if ((mfd = syscall(SYS_open, ptynam,O_RDWR)) >= 0) {
+#else//!SYS_open
 			if ((mfd = open(ptynam,O_RDWR)) >= 0) {
+#endif//SYS_open
+
+#ifdef SYS_geteuid
+				if (syscall(SYS_geteuid) == 0
+#else//!SYS_geteuid
 				if (geteuid() == 0
+#endif//SYS_geteuid
+
+#ifdef SYS_access
+					|| syscall(SYS_access, ttynam,
+				       		R_OK|W_OK) == 0)
+#else//!SYS_access
 					|| access(ttynam,R_OK|W_OK) == 0)
+#endif//SYS_access
 					break;
 				else {
+#ifdef SYS_close
+					syscall(SYS_close, mfd);
+#else//!SYS_close
 					close(mfd);
+#endif//SYS_close
 					mfd = -1;
 				}
 			}
@@ -425,9 +444,20 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 
 	if (sfd < 0)
 		quit(1, "Cannot open slave tty");
+
+#ifdef POSIX_PTY
+#ifdef SYS_ioctl
+	syscall(SYS_ioctl, sfd, I_PUSH, "ptem");
+	syscall(SYS_ioctl,sfd, I_PUSH, "ldterm");
+#else//!SYS_ioctl
+	ioctl(sfd, I_PUSH, "ptem");
+	ioctl(sfd, I_PUSH, "ldterm");
+#endif//SYS_ioctl
+#endif//POSIX_PTY
+
 	*pslave = sfd;
 	*pmaster = mfd;
-	return(ttynam);
+	return ttynam;
 }
 
 //  Initialise the terminal attributes.
@@ -445,7 +475,7 @@ static void set_ttymodes(void)
 
 	// NetBSD needs CREAD
 	// Linux needs B9600
-	term.c_cflag = CREAD | CLOCAL | B9600;
+	term.c_cflag = CREAD | CLOCAL | B9600 | CS8;
 
 	term.c_lflag = ISIG | IEXTEN | ICANON | ECHO | ECHOE | ECHOK;
 
@@ -531,7 +561,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
 #else//NETBSD
 #if defined(SYS_getsid) && defined(SYS_getpid)
 	const pid_t pgid = syscall(SYS_getsid, syscall(SYS_getpid));
-#else
+#else//!(SYS_getsid&&SYS_getpid)
 	const pid_t pgid = getsid(getpid());
 #endif//SYS_getsid&&SYS_getpid
 #endif//!NETBSD
