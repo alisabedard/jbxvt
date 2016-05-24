@@ -98,7 +98,7 @@ static void set_rval_colors(const uint32_t rval)
 
 //  Paint the text using the rendition value at the screen position.
 void paint_rval_text(uint8_t * restrict str, uint32_t rval,
-	uint8_t len, int16_t x, int16_t y)
+	uint8_t len, Dim p)
 {
 	set_rval_colors(rval);
 	XGCValues v;
@@ -108,27 +108,29 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 		XSetForeground(jbxvt.X.dpy, jbxvt.X.gc.tx, v.background);
 		XSetBackground(jbxvt.X.dpy, jbxvt.X.gc.tx, v.foreground);
 	}
-	y+= jbxvt.X.font->ascent;
+	p.y+= jbxvt.X.font->ascent;
 
 	// Draw text with background:
-	XDrawImageString(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.tx,x,y,
+	XDrawImageString(jbxvt.X.dpy,jbxvt.X.win.vt,
+		jbxvt.X.gc.tx, p.x, p.y,
 		(const char *)str,len);
 	if (rval & RS_BOLD) // Fake bold:
 		  XDrawString(jbxvt.X.dpy,jbxvt.X.win.vt,
-			  jbxvt.X.gc.tx,x + 1,y, (const char *)str,len);
-	y++; // Advance for underline, use underline for italic.
+			  jbxvt.X.gc.tx, p.x + 1, p.y,
+			  (const char *)str,len);
+	p.y++; // Advance for underline, use underline for italic.
 	if (rval & RS_ULINE || rval & RS_ITALIC)
-		XDrawLine(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.tx,
-			x,y,x + len * jbxvt.X.font_width,y);
+		XDrawLine(jbxvt.X.dpy, jbxvt.X.win.vt, jbxvt.X.gc.tx,
+			p.x, p.y, p.x + len * jbxvt.X.font_width, p.y);
 	reset_color();
 }
 
 // Display the string using the rendition vector at the screen coordinates
 static void paint_rvec_text(uint8_t * str,
-	uint32_t * rvec, uint16_t len, XPoint p)
+	uint32_t * rvec, uint16_t len, Dim p)
 {
 	if (rvec == NULL) {
-		paint_rval_text(str, 0, len, p.x, p.y);
+		paint_rval_text(str, 0, len, p);
 		return;
 	}
 	while (len > 0) {
@@ -136,7 +138,7 @@ static void paint_rvec_text(uint8_t * str,
 		for (i = 0; i < len; i++)
 			if (rvec[i] != rvec[0])
 				break;
-		paint_rval_text(str,rvec[0], i, p.x, p.y);
+		paint_rval_text(str,rvec[0], i, p);
 		str += i;
 		rvec += i;
 		len -= i;
@@ -144,7 +146,7 @@ static void paint_rvec_text(uint8_t * str,
 	}
 }
 
-static int repaint_generic(const XPoint p,
+static int repaint_generic(const Dim p,
 	const int m, const int col1, const int col2,
 	uint8_t * restrict str, uint32_t * rend)
 {
@@ -189,7 +191,7 @@ void repaint(const uint8_t row1, const uint8_t row2,
 		m -= col1;
 		for (uint16_t x = 0; x < m; x++)
 			  str[x] = convert_char(s[x + col1]);
-		y1 = repaint_generic((XPoint){x1, y1}, m, col1,
+		y1 = repaint_generic((Dim){.x=x1, .y=y1}, m, col1,
 			col2, str, sl->sl_rend);
 	}
 
@@ -201,7 +203,7 @@ void repaint(const uint8_t row1, const uint8_t row2,
 		for (x = col1; x <= col2; x++)
 			  str[x - col1] = convert_char(s[x]);
 		const uint16_t m = x - col1;
-		y1 = repaint_generic((XPoint){x1, y1}, m, col1, col2, str,
+		y1 = repaint_generic((Dim){.x=x1, .y=y1}, m, col1, col2, str,
 			jbxvt.scr.current->rend[i]);
 	}
 	free(str);

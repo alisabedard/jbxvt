@@ -4,6 +4,7 @@
 #ifndef SCREEN_H
 #define SCREEN_H
 
+#include "jbxvt.h"
 #include "screenst.h"
 
 #include <stdint.h>
@@ -85,7 +86,7 @@ enum RenditionStyleFlags {
 void home_screen(void);
 
 //  Return true if the character is one that can be handled by scr_string()
-int16_t is_string_char(int16_t c);
+bool is_string_char(int16_t c);
 
 //  Change the rendition style.
 void scr_change_rendition(const uint32_t style);
@@ -96,9 +97,8 @@ void scr_change_screen(const uint8_t direction);
 //  Delete count lines and scroll up the bottom of the screen to fill the gap
 void scr_delete_lines(const uint8_t count);
 
-//  Return the width and height of the screen.
-void scr_get_size(uint16_t * restrict width_p,
-	uint16_t * restrict height_p);
+//  Set the width and height of the screen in d.
+void scr_get_size(Dim * restrict d);
 
 /* Move the cursor up if mod is positive or down if mod is negative,
    by mod number of lines and scroll if necessary.  */

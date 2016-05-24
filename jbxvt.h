@@ -14,6 +14,24 @@
 // Use for all file descriptors:
 typedef int fd_t;
 
+typedef struct Dim {
+	union {
+		int16_t x;
+		uint16_t r; // row
+		uint16_t row; // row
+		uint16_t w; // width
+		uint16_t width; // width
+	};
+	union {
+		int16_t y;
+		uint16_t c; // column
+		uint16_t col; // column
+		uint16_t column; // column
+		uint16_t h; // height
+		uint16_t height; // height
+	};
+} Dim;
+
 struct JBXVT {
 	struct {
 		Display * dpy;

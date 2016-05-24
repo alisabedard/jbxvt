@@ -465,8 +465,6 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 //  Initialise the terminal attributes.
 static void set_ttymodes(void)
 {
-	uint16_t width, height;
-
 #ifndef BSD_TTY
 	//  Set the terminal using the standard System V termios interface
 	static struct termios term;
@@ -546,8 +544,9 @@ static void set_ttymodes(void)
 	(void)ioctl(0,TIOCLSET,&lmode);
 #endif// BSD_TTY
 
-	scr_get_size(&width,&height);
-	tty_set_size(width,height);
+	Dim d;
+	scr_get_size(&d);
+	tty_set_size(d.w, d.h);
 }
 
 static void child(char ** restrict argv, fd_t ttyfd)

@@ -22,9 +22,10 @@ void scr_string(uint8_t * restrict str, int len, int nlcount)
 #ifdef SCR_DEBUG
 	LOG("scr_string(%s, len: %d, nlcount: %d)", str, len, nlcount);
 #endif//SCR_DEBUG
-	int x, x2, y, n, i;
-	unsigned int width;
 	uint8_t *s;
+	int x2, n, i;
+	unsigned int width;
+	Dim p;
 
 	home_screen();
 	cursor(CURSOR_DRAW);
@@ -101,8 +102,8 @@ void scr_string(uint8_t * restrict str, int len, int nlcount)
 		}
 		check_selection(jbxvt.scr.current->row,
 			jbxvt.scr.current->row);
-		x = MARGIN + jbxvt.X.font_width * jbxvt.scr.current->col;
-		y = MARGIN + jbxvt.X.font_height * jbxvt.scr.current->row;
+		p.x = MARGIN + jbxvt.X.font_width * jbxvt.scr.current->col;
+		p.y = MARGIN + jbxvt.X.font_height * jbxvt.scr.current->row;
 		for (n = 0; str[n] >= ' '; n++)
 			;
 		n = n + jbxvt.scr.current->col
@@ -121,11 +122,12 @@ void scr_string(uint8_t * restrict str, int len, int nlcount)
 			width = (jbxvt.scr.chars.width
 				- jbxvt.scr.current->col - n)
 				* jbxvt.X.font_width;
-			x2 = x + n * jbxvt.X.font_width;
+			x2 = p.x + n * jbxvt.X.font_width;
 			if (width > 0) {
-				XCopyArea(jbxvt.X.dpy,jbxvt.X.win.vt,
-					jbxvt.X.win.vt,jbxvt.X.gc.tx,
-					x,y,width,jbxvt.X.font_height,x2,y);
+				XCopyArea(jbxvt.X.dpy, jbxvt.X.win.vt,
+					jbxvt.X.win.vt, jbxvt.X.gc.tx,
+					p.x, p.y, width,
+					jbxvt.X.font_height, x2, p.y);
 				repair_damage();
 			}
 		}
@@ -143,7 +145,7 @@ void scr_string(uint8_t * restrict str, int len, int nlcount)
 			jbxvt.scr.current->text[jbxvt.scr.current->row]));
 #endif//SCR_DEBUG
 			
-		paint_rval_text(str,jbxvt.scr.rstyle,n,x,y);
+		paint_rval_text(str,jbxvt.scr.rstyle,n,p);
 		if (jbxvt.scr.rstyle == 0)
 			memset(jbxvt.scr.current->rend
 				[jbxvt.scr.current->row]

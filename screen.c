@@ -65,16 +65,15 @@ void scr_change_rendition(const uint32_t style)
 	jbxvt.scr.rstyle = style ? jbxvt.scr.rstyle | style : 0;
 }
 
-//  Return the width and height of the screen.
-void scr_get_size(uint16_t * restrict width_p, uint16_t * restrict height_p)
+//  Set the width and height of the screen in d.
+void scr_get_size(Dim * restrict d)
 {
-	*width_p = jbxvt.scr.chars.width;
-	*height_p = jbxvt.scr.chars.height;
+	d->w = jbxvt.scr.chars.width;
+	d->h = jbxvt.scr.chars.height;
 }
 
-
 //  Return true if the character is one that can be handled by scr_string()
-int16_t is_string_char(int16_t c)
+bool is_string_char(int16_t c)
 {
 	c &= 0177;
 	return(c >= ' ' || c == '\n' || c == '\r' || c == '\t');
@@ -137,7 +136,7 @@ static int8_t get_insertion_count(const int8_t count)
 {
 	const int8_t i = jbxvt.scr.current->bmargin
 		- jbxvt.scr.current->row + 1;
-	return count > i ? i : count;
+	return constrain(i, count);
 }
 
 /*  Insert count blank lines at the current position and scroll the lower lines
@@ -152,7 +151,7 @@ void scr_insert_lines(const int8_t count)
 	cursor(CURSOR_DRAW);
 }
 
-//  Attempt to set the top ans bottom scroll margins.
+//  Attempt to set the top and bottom scroll margins.
 void scr_set_margins(const uint16_t top, const uint16_t bottom)
 {
 	const uint16_t b = bottom >= jbxvt.scr.chars.height
