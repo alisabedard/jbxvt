@@ -26,12 +26,9 @@
 #include "xvt.h"
 
 #include "cmdtok.h"
-#include "color.h"
 #include "command.h"
-#include "config.h"
 #include "cursor.h"
 #include "handle_sgr.h"
-#include "init_display.h"
 #include "jbxvt.h"
 #include "log.h"
 #include "sbar.h"
@@ -271,23 +268,19 @@ app_loop_head:
 		break;
 	case TK_CUU :	/* cursor up */
 		n = token.tk_arg[0];
-		n = n == 0 ? -1 : -n;
-		scr_move(0,n,ROW_RELATIVE | COL_RELATIVE);
+		scr_move(0, n?-n:-1, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_CUD :	/* cursor down */
 		n = token.tk_arg[0];
-		n = n == 0 ? 1 : n;
-		scr_move(0,n,ROW_RELATIVE | COL_RELATIVE);
+		scr_move(0, n?n:1, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_CUF :	/* cursor forward */
 		n = token.tk_arg[0];
-		n = n == 0 ? 1 : n;
-		scr_move(n,0,ROW_RELATIVE | COL_RELATIVE);
+		scr_move(n?n:1, 0, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_CUB :	/* cursor back */
 		n = token.tk_arg[0];
-		n = n == 0 ? -1 : -n;
-		scr_move(n,0,ROW_RELATIVE | COL_RELATIVE);
+		scr_move(n?-n:-1, 0, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_HVP :
 	case TK_CUP :	/* position cursor */
@@ -301,27 +294,19 @@ app_loop_head:
 		break;
 	case TK_IL :
 		n = token.tk_arg[0];
-		if (n == 0)
-			  n = 1;
-		scr_insert_lines(n);
+		scr_insert_lines(n?n:1);
 		break;
 	case TK_DL :
 		n = token.tk_arg[0];
-		if (n == 0)
-			  n = 1;
-		scr_delete_lines(n);
+		scr_delete_lines(n?n:1);
 		break;
 	case TK_DCH :
 		n = token.tk_arg[0];
-		if (n == 0)
-			  n = 1;
-		scr_delete_characters(n);
+		scr_delete_characters(n?n:1);
 		break;
 	case TK_ICH :
 		n = token.tk_arg[0];
-		if (n == 0)
-			  n = 1;
-		scr_insert_characters(n);
+		scr_insert_characters(n?n:1);
 		break;
 	case TK_DA :
 		LOG("TK_DA");
