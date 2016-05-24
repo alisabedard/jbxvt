@@ -4,20 +4,18 @@
 #ifndef JBXVT_CURSOR_H
 #define JBXVT_CURSOR_H
 
-#include <stdbool.h>
-#include <stdint.h>
-
-//  Draw the cursor at the current position.
-void cursor(void);
-
-enum ScreenFocusFlags {
-	SCR_FOCUS_IN = 1,
-	SCR_FOCUS_ENTRY = 2,
-	SCR_FOCUS_FOCUS = 4
+enum CursorOp {
+	CURSOR_DRAW,
+	CURSOR_SAVE,
+	CURSOR_RESTORE,
+	CURSOR_REPORT,
+	CURSOR_FOCUS_IN,
+	CURSOR_FOCUS_OUT,
+	CURSOR_ENTRY_IN,
+	CURSOR_ENTRY_OUT
 };
 
-/*  Indicate a change of keyboard focus.  Type is 1 if focusing in,
-    2 for entry events, and 4 for focus events.  */
-void scr_focus(const uint8_t flags);
+//  Draw the cursor at the current position.
+void cursor(const enum CursorOp op);
 
 #endif//!JBXVT_CURSOR_H

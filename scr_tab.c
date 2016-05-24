@@ -14,7 +14,7 @@ void scr_tab(void)
 	home_screen();
 	if (jbxvt.scr.current->col == jbxvt.scr.chars.width - 1)
 		return;
-	cursor();
+	cursor(CURSOR_DRAW);
 	check_selection(jbxvt.scr.current->row,
 		jbxvt.scr.current->row);
 	if (jbxvt.scr.current->text[jbxvt.scr.current->row]
@@ -26,7 +26,7 @@ void scr_tab(void)
 		&& jbxvt.scr.current->col
 		< jbxvt.scr.chars.width - 1)
 		jbxvt.scr.current->col++;
-	cursor();
+	cursor(CURSOR_DRAW);
 }
 
 

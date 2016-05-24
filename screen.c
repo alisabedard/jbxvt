@@ -27,7 +27,6 @@
 #include <string.h>
 #include <sys/utsname.h>
 
-static struct screenst save_screen;
 
 /*  Perform any initialisation on the screen data structures.  Called just once
  *  at startup. */
@@ -41,7 +40,7 @@ void scr_init(void)
 		sizeof(void*));
 	jbxvt.scr.s1.wrap=jbxvt.scr.s2.wrap=1;
 	jbxvt.scr.current = &jbxvt.scr.s1;
-	jbxvt.X.font_width = XTextWidth(jbxvt.X.font,"M",1);
+	jbxvt.X.font_width = XTextWidth(jbxvt.X.font, "M", 1);
 	jbxvt.X.font_height = jbxvt.X.font->ascent
 		+ jbxvt.X.font->descent;
 	scr_reset();
@@ -54,8 +53,9 @@ void scr_change_screen(const uint8_t direction)
 	jbxvt.scr.current = (direction == JBXVT_MODE_HIGH)
 		? &jbxvt.scr.s2 : &jbxvt.scr.s1;
 	jbxvt.sel.end2.se_type = NOSEL;
-	repaint(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
-	cursor();
+	repaint(0, jbxvt.scr.chars.height - 1, 0,
+		jbxvt.scr.chars.width - 1);
+	cursor(CURSOR_DRAW);
 }
 
 //  Change the rendition style.
@@ -83,7 +83,7 @@ int16_t is_string_char(int16_t c)
 static void hsc(void)
 {
 	home_screen();
-	cursor();
+	cursor(CURSOR_DRAW);
 }
 
 /* Move the cursor up if mod is positive or down if mod is negative,
@@ -99,36 +99,8 @@ void scr_index_by(const int8_t mod)
 		jbxvt.scr.current->row += mod;
 	jbxvt.scr.current->wrap_next = 0;
 	check_selection(jbxvt.scr.current->row,jbxvt.scr.current->row);
-	cursor();
+	cursor(CURSOR_DRAW);
 
-}
-
-//  Save the cursor position and rendition style.
-void scr_save_cursor(void)
-{
-	save_screen.row = jbxvt.scr.current->row;
-	save_screen.col = jbxvt.scr.current->col;
-	jbxvt.scr.saved_rstyle = jbxvt.scr.rstyle;
-}
-
-static void adj_cursor_wh(int16_t * restrict grc,
-	int16_t src, int16_t chw)
-{
-	*grc = src;
-	if (*grc >= chw)
-		  *grc = chw - 1;
-}
-
-//  Restore the cursor position and rendition style.
-void scr_restore_cursor(void)
-{
-	cursor();
-	adj_cursor_wh(&jbxvt.scr.current->row, save_screen.row,
-		jbxvt.scr.chars.height);
-	adj_cursor_wh(&jbxvt.scr.current->col, save_screen.col,
-		jbxvt.scr.chars.width);
-	scr_change_rendition(jbxvt.scr.saved_rstyle);
-	cursor();
 }
 
 static uint8_t scroll_up_scr_bot(uint8_t count, const bool up)
@@ -152,7 +124,7 @@ void scr_delete_lines(const uint8_t count)
 	scroll(jbxvt.scr.current->row,jbxvt.scr.current->bmargin,
 		scroll_up_scr_bot(count, true));
 	jbxvt.scr.current->wrap_next = 0;
-	cursor();
+	cursor(CURSOR_DRAW);
 }
 
 static void scroll_lower_lines(const int8_t count)
@@ -177,7 +149,7 @@ void scr_insert_lines(const int8_t count)
 	hsc();
 	scroll_lower_lines(get_insertion_count(count));
 	jbxvt.scr.current->wrap_next = 0;
-	cursor();
+	cursor(CURSOR_DRAW);
 }
 
 //  Attempt to set the top ans bottom scroll margins.
@@ -230,13 +202,6 @@ void scr_report_display(void)
 		cprintf("%s\r",dname);
 }
 
-//  Report the current cursor position.
-void scr_report_position(void)
-{
-	cprintf("\033[%d;%dR",jbxvt.scr.current->row + 1,
-		jbxvt.scr.current->col + 1);
-}
-
 //  Reposition the scrolled text so that the scrollbar is at the bottom.
 void home_screen(void)
 {
@@ -244,7 +209,7 @@ void home_screen(void)
 		jbxvt.scr.offset = 0;
 		repaint(0,jbxvt.scr.chars.height - 1, 0,
 			jbxvt.scr.chars.width - 1);
-		cursor();
+		cursor(CURSOR_DRAW);
 		sbar_show(jbxvt.scr.chars.height
 			+ jbxvt.scr.sline.top - 1,
 			0, jbxvt.scr.chars.height - 1);

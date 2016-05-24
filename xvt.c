@@ -212,10 +212,10 @@ app_loop_head:
 		quit(0, NULL);
 		break;
 	case TK_ENTRY :	// keyboard focus changed
-		scr_focus(token.tk_arg[0]|SCR_FOCUS_ENTRY);
+		cursor(token.tk_arg[0] ? CURSOR_ENTRY_IN : CURSOR_ENTRY_OUT);
 		break;
 	case TK_FOCUS :
-		scr_focus(token.tk_arg[0]|SCR_FOCUS_FOCUS);
+		cursor(token.tk_arg[0] ? CURSOR_FOCUS_IN : CURSOR_FOCUS_OUT);
 		break;
 	case TK_EXPOSE: // window exposed
 		handle_tk_expose(&token);
@@ -340,7 +340,7 @@ app_loop_head:
 		LOG("TK_DSR");
 		switch (token.tk_arg[0]) {
 		case 6 :
-			scr_report_position();
+			cursor(CURSOR_REPORT);
 			break;
 		case 7 :	/* display name */
 			scr_report_display();
@@ -354,10 +354,10 @@ app_loop_head:
 		LOG("TK_DECSWH");
 		break;
 	case TK_DECSC :
-		scr_save_cursor();
+		cursor(CURSOR_SAVE);
 		break;
 	case TK_DECRC :
-		scr_restore_cursor();
+		cursor(CURSOR_RESTORE);
 		break;
 	case TK_DECPAM :
 		set_kp_keys(JBXVT_MODE_HIGH);

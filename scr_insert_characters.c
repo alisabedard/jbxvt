@@ -20,7 +20,7 @@ void scr_insert_characters(int16_t count)
 		  return;
 
 	home_screen();
-	cursor();
+	cursor(CURSOR_DRAW);
 	check_selection(jbxvt.scr.current->row,jbxvt.scr.current->row);
 	uint8_t * s = jbxvt.scr.current->text[jbxvt.scr.current->row];
 	uint32_t * r = jbxvt.scr.current->rend[jbxvt.scr.current->row];
@@ -44,6 +44,6 @@ void scr_insert_characters(int16_t count)
 	XClearArea(jbxvt.X.dpy, jbxvt.X.win.vt, p.x, p.y,
 		count * jbxvt.X.font_width, jbxvt.X.font_height, False);
 	jbxvt.scr.current->wrap_next = 0;
-	cursor();
+	cursor(CURSOR_DRAW);
 }
 

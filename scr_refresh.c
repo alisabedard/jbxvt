@@ -41,6 +41,6 @@ void scr_refresh(int x, int y, int width, int height)
 	repaint(row1,row2,col1,col2);
 	if (jbxvt.scr.current->row >= row1 && jbxvt.scr.current->row <= row2 &&
 	    jbxvt.scr.current->col >= col1 && jbxvt.scr.current->col <= col2)
-		cursor();
+		cursor(CURSOR_DRAW);
 }
 

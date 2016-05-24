@@ -27,7 +27,7 @@ void scr_string(uint8_t * restrict str, int len, int nlcount)
 	uint8_t *s;
 
 	home_screen();
-	cursor();
+	cursor(CURSOR_DRAW);
 	if (nlcount > 0) {
 		if (jbxvt.scr.current->row > jbxvt.scr.current->bmargin)
 			nlcount = 0;
@@ -175,7 +175,7 @@ void scr_string(uint8_t * restrict str, int len, int nlcount)
 			} else {
 				jbxvt.scr.current->col
 					= jbxvt.scr.chars.width - 1;
-				cursor();
+				cursor(CURSOR_DRAW);
 				return;
 			}
 		}
@@ -184,7 +184,7 @@ void scr_string(uint8_t * restrict str, int len, int nlcount)
 		jbxvt.scr.current->col = jbxvt.scr.chars.width - 1;
 		jbxvt.scr.current->wrap_next = jbxvt.scr.current->wrap;
 	}
-	cursor();
+	cursor(CURSOR_DRAW);
 }
 
 

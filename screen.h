@@ -84,7 +84,6 @@ enum RenditionStyleFlags {
 
 void home_screen(void);
 
-
 //  Return true if the character is one that can be handled by scr_string()
 int16_t is_string_char(int16_t c);
 
@@ -106,7 +105,6 @@ void scr_get_size(uint16_t * restrict width_p,
 void scr_index_by(const int8_t mod);
 #define scr_index() scr_index_by(1)
 #define scr_rindex() scr_index_by(-1)
-
 /*  Perform any initialisation on the screen data structures.  Called just once
  *  at startup. */ 
 void scr_init(void);
@@ -126,16 +124,6 @@ void scr_move_to(int16_t y);
 //  Send the name of the current display to the command.
 void scr_report_display(void);
 
-//  Report the current cursor position.
-void scr_report_position(void);
-
-//  Restore the cursor position and rendition style.
-void scr_restore_cursor(void);
-
-//  Save the cursor position and rendition style.
-void scr_save_cursor(void);
-
 //  Attempt to set the top ans bottom scroll margins.
 void scr_set_margins(const uint16_t top, const uint16_t bottom);
-
 #endif//!SCREEN_H

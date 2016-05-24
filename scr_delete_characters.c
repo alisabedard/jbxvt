@@ -21,7 +21,7 @@ void scr_delete_characters(int count)
 		return;
 
 	home_screen();
-	cursor();
+	cursor(CURSOR_DRAW);
 	check_selection(jbxvt.scr.current->row,jbxvt.scr.current->row);
 	uint8_t * s = jbxvt.scr.current->text[jbxvt.scr.current->row];
 	uint32_t * r = jbxvt.scr.current->rend[jbxvt.scr.current->row];
@@ -47,7 +47,7 @@ void scr_delete_characters(int count)
 	XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,x1,y,width,
 		jbxvt.X.font_height,False);
 	jbxvt.scr.current->wrap_next = 0;
-	cursor();
+	cursor(CURSOR_DRAW);
 }
 
 

@@ -12,7 +12,7 @@
 void scr_move(int x, int y, int relative)
 {
 	home_screen();
-	cursor();
+	cursor(CURSOR_DRAW);
 	jbxvt.scr.current->col = (relative & COL_RELATIVE)
 		? jbxvt.scr.current->col + x : x;
 	reset_row_col();
@@ -53,6 +53,6 @@ void scr_move(int x, int y, int relative)
 	jbxvt.scr.current->wrap_next = 0;
 	check_selection(jbxvt.scr.current->row,
 		jbxvt.scr.current->row);
-	cursor();
+	cursor(CURSOR_DRAW);
 }
 

@@ -66,12 +66,12 @@ void scr_erase_line(const int8_t mode)
 			break;
 		}
 	}
-	cursor(); //clear
+	cursor(CURSOR_DRAW); //clear
 	check_selection(jbxvt.scr.current->row,jbxvt.scr.current->row);
 	XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt, g.x, g.y,
 		g.width, g.height, false);
 	jbxvt.scr.current->wrap_next = 0;
-	cursor();
+	cursor(CURSOR_DRAW);
 }
 
 //  erase part or the whole of the screen
@@ -133,11 +133,11 @@ void scr_erase_screen(const int8_t mode)
 				memset(jbxvt.scr.current->rend[i],0,
 					wsz * sizeof(uint32_t));
 			}
-		cursor();
+		cursor(CURSOR_DRAW);
 		check_selection(0,jbxvt.scr.chars.height - 1);
 		XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,
 			x,y,width,height,False);
-		cursor();
+		cursor(CURSOR_DRAW);
 		sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1,
 			0, jbxvt.scr.chars.height - 1);
 		break;

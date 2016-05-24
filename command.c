@@ -15,10 +15,8 @@
 #include "xvt.h"
 
 #include <stdarg.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 static struct {
 	// chars waiting to be sent to the command:
@@ -129,11 +127,11 @@ static struct KeyMaps kp_key_table[]={
 };
 
 //  Push a mini X event onto the queue
-void push_xevent(struct xeventst *xe)
+void push_xevent(struct xeventst * xe)
 {
 	xe->xe_next = command.xev.start;
 	xe->xe_prev = NULL;
-	if (xe->xe_next != NULL)
+	if (xe->xe_next)
 		xe->xe_next->xe_prev = xe;
 	else
 		command.xev.last = xe;
@@ -141,17 +139,14 @@ void push_xevent(struct xeventst *xe)
 
 struct xeventst * pop_xevent(void)
 {
-	struct xeventst *xe;
-
-	if (command.xev.last == NULL)
-		return(NULL);
-
-	xe = command.xev.last;
-	command.xev.last = xe->xe_prev;
-	if (command.xev.last != NULL)
-		command.xev.last->xe_next = NULL;
-	else
-		command.xev.start = NULL;
+	struct xeventst * xe = command.xev.last;
+	if(xe) {
+		command.xev.last = xe->xe_prev;
+		if (command.xev.last)
+			  command.xev.last->xe_next = NULL;
+		else
+			  command.xev.start = NULL;
+	}
 	return(xe);
 }
 
@@ -183,12 +178,10 @@ void set_keys(const enum ModeValue mode, const bool is_cursor)
 static char * get_keycode_value(struct KeyMaps * restrict keymaptable,
 	KeySym keysym, char * buf, const int use_alternate)
 {
-	struct KeyMaps *km;
-	struct KeyStrings *ks;
-
-	for (km = keymaptable; km->km_keysym != 0; km++) {
+	for (struct KeyMaps * km = keymaptable; km->km_keysym != 0; km++) {
 		if (km->km_keysym == keysym) {
-			ks = use_alternate ? &km->km_alt : &km->km_normal;
+			struct KeyStrings * ks = use_alternate
+				? &km->km_alt : &km->km_normal;
 			switch (ks->ks_type) {
 			    case KS_TYPE_NONE:
 				return NULL;

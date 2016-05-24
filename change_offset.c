@@ -33,7 +33,7 @@ void change_offset(int16_t n)
 		n = 0;
 	if (n == jbxvt.scr.offset)
 		return;
-	cursor();
+	cursor(CURSOR_DRAW);
 	int16_t d = n - jbxvt.scr.offset;
 	jbxvt.scr.offset = n;
 	if (d > 0 && d < jbxvt.scr.chars.height) {
@@ -52,7 +52,7 @@ void change_offset(int16_t n)
 	} else
 		repaint(0,jbxvt.scr.chars.height - 1,0,
 			jbxvt.scr.chars.width - 1);
-	cursor();
+	cursor(CURSOR_DRAW);
 	// Update current scrollbar position due to change
 	sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1,
 		jbxvt.scr.offset, jbxvt.scr.offset

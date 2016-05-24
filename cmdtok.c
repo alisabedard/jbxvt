@@ -29,6 +29,92 @@ void init_cmdtok(void)
 	  x_fd = XConnectionNumber(jbxvt.X.dpy);
 }
 
+static int16_t handle_xev(XEvent * event, int16_t * restrict count,
+	const int8_t flags)
+{
+	struct xeventst * xe;
+	uint8_t * s;
+
+	switch (event->type) {
+	case KeyPress:
+		s = lookup_key(event, count);
+		if (count) send_string(s, *count);
+		break;
+	case ClientMessage:
+		if (event->xclient.format == 32
+			&& event->xclient.data.l[0]
+			== (long)wm_del_win())
+			  quit(0, NULL);
+		break;
+	case MappingNotify:
+		XRefreshKeyboardMapping(&event->xmapping);
+		break;
+	case SelectionRequest:
+		xe = (struct xeventst *)malloc(sizeof(struct xeventst));
+		xe->xe_type = event->type;
+		xe->xe_window = event->xselectionrequest.owner;
+		xe->xe_time = event->xselectionrequest.time;
+		xe->xe_requestor = event->xselectionrequest.requestor;
+		xe->xe_target = event->xselectionrequest.target;
+		xe->xe_property = event->xselectionrequest.property;
+		push_xevent(xe);
+		if (flags & GET_XEVENTS)
+			  return(GCC_NULL);
+		break;
+	case SelectionNotify:
+		xe = (struct xeventst *)malloc(sizeof(struct xeventst));
+		xe->xe_type = event->type;
+		xe->xe_time = event->xselection.time;
+		xe->xe_requestor = event->xselection.requestor;
+		xe->xe_property = event->xselection.property;
+		push_xevent(xe);
+		if (flags & GET_XEVENTS)
+			  return(GCC_NULL);
+		break;
+	case FocusIn:
+	case FocusOut:
+		if (event->xfocus.mode != NotifyNormal)
+			  return 0;
+		switch (event->xfocus.detail) {
+		case NotifyAncestor :
+		case NotifyInferior :
+		case NotifyNonlinear :
+			break;
+		default :
+			return 0;
+		}
+		xe = calloc(1, sizeof(struct xeventst));
+		xe->xe_type = event->type;
+		xe->xe_time = event->xselection.time;
+		xe->xe_detail = event->xfocus.detail;
+		push_xevent(xe);
+		if (flags & GET_XEVENTS)
+			  return(GCC_NULL);
+		break;
+	default:
+		xe = (struct xeventst *)malloc(sizeof(struct xeventst));
+		xe->xe_type = event->type;
+		xe->xe_window = event->xany.window;
+		if (event->type == Expose
+			|| event->type == GraphicsExpose) {
+			xe->xe_x = event->xexpose.x;
+			xe->xe_y = event->xexpose.y;
+			xe->xe_width = event->xexpose.width;
+			xe->xe_height = event->xexpose.height;
+		} else {
+			xe->xe_time = event->xbutton.time;
+			xe->xe_x = event->xbutton.x;
+			xe->xe_y = event->xbutton.y;
+			xe->xe_state = event->xbutton.state;
+			xe->xe_button = event->xbutton.button;
+		}
+		push_xevent(xe);
+		if (flags & GET_XEVENTS)
+			  return(GCC_NULL);
+	}
+	return 0;
+}
+
 /*  Return the next input character after first passing any keyboard input
  *  to the command.  If flags & BUF_ONLY is true then only buffered characters are
  *  returned and once the buffer is empty the special value GCC_NULL is
@@ -96,86 +182,9 @@ static int16_t get_com_char(const int8_t flags)
 			  break;
 		XEvent event;
 		XNextEvent(jbxvt.X.dpy,&event);
-		struct xeventst *xe;
-		uint8_t * s;
-		switch (event.type) {
-		case KeyPress:
-			s = lookup_key(&event, &count);
-			if (count != 0)
-				  send_string(s, count);
-			break;
-		case ClientMessage:
-			if (event.xclient.format == 32
-				&& event.xclient.data.l[0]
-				== (long)wm_del_win())
-				  quit(0, NULL);
-			break;
-		case MappingNotify:
-			XRefreshKeyboardMapping(&event.xmapping);
-			break;
-		case SelectionRequest:
-			xe = (struct xeventst *)malloc(sizeof(struct xeventst));
-			xe->xe_type = event.type;
-			xe->xe_window = event.xselectionrequest.owner;
-			xe->xe_time = event.xselectionrequest.time;
-			xe->xe_requestor = event.xselectionrequest.requestor;
-			xe->xe_target = event.xselectionrequest.target;
-			xe->xe_property = event.xselectionrequest.property;
-			push_xevent(xe);
-			if (flags & GET_XEVENTS)
-				  return(GCC_NULL);
-			break;
-		case SelectionNotify:
-			xe = (struct xeventst *)malloc(sizeof(struct xeventst));
-			xe->xe_type = event.type;
-			xe->xe_time = event.xselection.time;
-			xe->xe_requestor = event.xselection.requestor;
-			xe->xe_property = event.xselection.property;
-			push_xevent(xe);
-			if (flags & GET_XEVENTS)
-				  return(GCC_NULL);
-			break;
-		case FocusIn:
-		case FocusOut:
-			if (event.xfocus.mode != NotifyNormal)
-				  continue;
-			switch (event.xfocus.detail) {
-			case NotifyAncestor :
-			case NotifyInferior :
-			case NotifyNonlinear :
-				break;
-			default :
-				continue;
-			}
-			xe = calloc(1, sizeof(struct xeventst));
-			xe->xe_type = event.type;
-			xe->xe_time = event.xselection.time;
-			xe->xe_detail = event.xfocus.detail;
-			push_xevent(xe);
-			if (flags & GET_XEVENTS)
-				  return(GCC_NULL);
-			break;
-		default:
-			xe = (struct xeventst *)malloc(sizeof(struct xeventst));
-			xe->xe_type = event.type;
-			xe->xe_window = event.xany.window;
-			if (event.type == Expose
-				|| event.type == GraphicsExpose) {
-				xe->xe_x = event.xexpose.x;
-				xe->xe_y = event.xexpose.y;
-				xe->xe_width = event.xexpose.width;
-				xe->xe_height = event.xexpose.height;
-			} else {
-				xe->xe_time = event.xbutton.time;
-				xe->xe_x = event.xbutton.x;
-				xe->xe_y = event.xbutton.y;
-				xe->xe_state = event.xbutton.state;
-				xe->xe_button = event.xbutton.button;
-			}
-			push_xevent(xe);
-			if (flags & GET_XEVENTS)
-				  return(GCC_NULL);
-		}
+		const int16_t xev_ret = handle_xev(&event, &count, flags);
+		if (xev_ret)
+			  return xev_ret;
 	}
 
 	count = read(jbxvt.com.fd,jbxvt.com.buf.data,COM_BUF_SIZE);

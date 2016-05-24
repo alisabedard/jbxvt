@@ -207,6 +207,6 @@ void scr_reset(void)
 		+ jbxvt.scr.chars.height - 1);
 	repaint(0, jbxvt.scr.chars.height - 1,
 		0, jbxvt.scr.chars.width - 1);
-	cursor();
+	cursor(CURSOR_DRAW);
 }
 
