@@ -94,22 +94,23 @@ void rc_to_selend(const int16_t row, const int16_t col, struct selst * se)
 	se->se_col = col;
 }
 
+static int16_t constrain(const int16_t rc, const uint8_t lim)
+{
+	if (rc < 0)
+		  return 0;
+	else if (rc >= lim)
+		  return lim - 1;
+	return rc;
+}
+
+
 /*  Fix the coordinates so that they are within the screen and do not lie within
  *  empty space.
  */
 void fix_rc(int16_t * restrict rowp, int16_t * restrict colp)
 {
-	int16_t col = *colp;
-	if (col < 0)
-		col = 0;
-	if (col > jbxvt.scr.chars.width)
-		col = jbxvt.scr.chars.width;
-	int16_t row = *rowp;
-	if (row < 0)
-		row = 0;
-	if (row >= jbxvt.scr.chars.height)
-		row = jbxvt.scr.chars.height - 1;
-
+	int16_t col = constrain(*colp, jbxvt.scr.chars.width);
+	int16_t row = constrain(*rowp, jbxvt.scr.chars.height);
 	if (selection_unit == CHAR) {
 		int i = (row - jbxvt.scr.offset);
 		uint8_t * s;
@@ -146,34 +147,31 @@ void selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
 		: jbxvt.scr.offset - se->se_index - 1;
 }
 
-/*  Convert a section of displayed text line into a text string suitable for pasting.
- *  *lenp is the length of the input string, i1 is index of the first character to
- *  convert and i2 is the last.  The length of the returned string is returned
- *  in *lenp;
- */
+/*  Convert a section of displayed text line into a text string suitable
+    for pasting. *lenp is the length of the input string, i1 is index
+    of the first character to convert and i2 is the last.  The length
+    of the returned string is returned in *lenp; */
 uint8_t * convert_line(uint8_t * restrict str,
-	int * restrict lenp, int i1, int i2)
+	int * restrict lenp, uint8_t i1, uint8_t i2)
 {
-	static uint8_t buf[MAX_WIDTH + 3];
-	uint8_t *s;
-	int i;
-	int newline;
-
-	newline = (i2 + 1 == jbxvt.scr.chars.width) && (str[*lenp] == 0);
+	// set this before i2 is modified
+	const bool newline = (i2 + 1 == jbxvt.scr.chars.width)
+		&& (str[*lenp] == 0);
 	if (i2 >= *lenp)
 		i2 = *lenp - 1;
 	if (i2 - i1 >= MAX_WIDTH)
 		i2 = i1 + MAX_WIDTH;
 	while (i2 >= i1 && str[i2] == 0)
 		i2--;
-	s = buf;
-	for (i = i1; i <= i2; i++) {
-		if (str[i] >= ' ')
-			*s++ = str[i];
-		else if (str[i] == '\t') {
+	static uint8_t buf[MAX_WIDTH + 3];
+	uint8_t *s = buf;
+	for (; i1 <= i2; i1++) {
+		if (str[i1] >= ' ')
+			*s++ = str[i1];
+		else if (str[i1] == '\t') {
 			*s++ = '\t';
-			while (i < i2 && str[i + 1] == 0)
-				i++;
+			while (i1 < i2 && str[i1 + 1] == 0)
+				i1++;
 		} else
 			*s++ = ' ';
 	}
@@ -182,6 +180,15 @@ uint8_t * convert_line(uint8_t * restrict str,
 	*s = 0;
 	*lenp = s - buf;
 	return (buf);
+}
+
+static uint16_t sel_s(struct selst * restrict se2, uint8_t ** s)
+{
+	const bool ss = se2->se_type == SCREENSEL;
+	*s = ss ? jbxvt.scr.current->text[se2->se_index]
+		: jbxvt.scr.sline.data[se2->se_index]->sl_text;
+	return ss ? jbxvt.scr.chars.width
+		: jbxvt.scr.sline.data[se2->se_index]->sl_length;
 }
 
 static void adj_sel_to_word(struct selst * include,
@@ -195,17 +202,9 @@ static void adj_sel_to_word(struct selst * include,
 		  i--;
 	se1->se_col = i?i+1:0;
 	i = se2->se_col;
-	if (se2 == include || selcmp(se2,&jbxvt.sel.anchor) == 0)
+	if (se2 == include || !selcmp(se2,&jbxvt.sel.anchor))
 		  i++;
-	int16_t len;
-	if (se2->se_type == SCREENSEL) {
-		s = jbxvt.scr.current->text[se2->se_index];
-		len = jbxvt.scr.chars.width;
-	} else {
-		s = jbxvt.scr.sline.data[se2->se_index]->sl_text;
-		len = jbxvt.scr.sline.data[se2->se_index]->sl_length;
-	}
-
+	const uint16_t len = sel_s(se2, &s);
 	while (i < len && s[i] && s[i] != ' ' && s[i] != '\n')
 		  i++;
 	se2->se_col = i;
@@ -254,7 +253,8 @@ void check_selection(const int16_t row1, const int16_t row2)
 	}
 	if (row2 < r1 || row1 > r2)
 		return;
-	show_selection(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
+	show_selection(0, jbxvt.scr.chars.height - 1,
+		0, jbxvt.scr.chars.width - 1);
 	jbxvt.sel.end2.se_type = NOSEL;
 }
 
