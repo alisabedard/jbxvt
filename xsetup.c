@@ -20,14 +20,10 @@
 static bool logshell;		/* flag nonzero if using a login shell */
 
 XSizeHints sizehints = {
-	PMinSize | PResizeInc | PBaseSize,
-	0, 0, 80, 24,	/* x, y, width and height */
-	1, 1,		/* Min width and height */
-	0, 0,		/* Max width and height */
-	1, 1,		/* Width and height increments */
-	{0, 0}, {0, 0},	/* Aspect ratio - not used */
-	2 * MARGIN, 2 * MARGIN,		/* base size */
-	0
+	.flags = PMinSize | PResizeInc | PBaseSize,
+	.width = 80, .height = 24, .min_width = 1, .min_height = 1,
+	.width_inc = 1, .height_inc = 1, .base_width = MARGIN<<1,
+	.base_height = MARGIN<<1
 };
 
 //  Return true if we should be running a login shell.

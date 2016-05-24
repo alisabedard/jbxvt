@@ -38,7 +38,7 @@ void scr_init(void)
 		jbxvt.scr.sline.max = MAX_SCROLL;
 	jbxvt.scr.sline.data = calloc(jbxvt.scr.sline.max,
 		sizeof(void*));
-	jbxvt.scr.s1.wrap=jbxvt.scr.s2.wrap=1;
+	jbxvt.scr.s1.wrap = jbxvt.scr.s2.wrap=1;
 	jbxvt.scr.current = &jbxvt.scr.s1;
 	jbxvt.X.font_width = XTextWidth(jbxvt.X.font, "M", 1);
 	jbxvt.X.font_height = jbxvt.X.font->ascent

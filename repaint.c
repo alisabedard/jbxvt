@@ -14,6 +14,7 @@
 #include "slinest.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 static void set_rval_colors(const uint32_t rval)
 {
@@ -196,12 +197,10 @@ void repaint(const uint8_t row1, const uint8_t row2,
 	i = jbxvt.scr.offset > row1 ? 0 : row1 - jbxvt.scr.offset;
 	for (; y <= row2; y++, i++) {
 		uint8_t * s = jbxvt.scr.current->text[i];
-		int m = col1 - 1;
-		for(uint8_t x = col1; x <= col2; x++)
-			if((str[x - col1] = convert_char(s[x]))==' ')
-				  m = x;
-		m++;
-		m -= col1;
+		uint8_t x;
+		for (x = col1; x <= col2; x++)
+			  str[x - col1] = convert_char(s[x]);
+		const uint16_t m = x - col1;
 		y1 = repaint_generic((XPoint){x1, y1}, m, col1, col2, str,
 			jbxvt.scr.current->rend[i]);
 	}

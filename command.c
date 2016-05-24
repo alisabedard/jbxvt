@@ -289,9 +289,10 @@ void cprintf(char *fmt,...)
 	va_list args;
 	va_start(args,fmt);
 	static uint8_t buf[128];
-	vsnprintf((char *)buf, sizeof(buf), fmt, args);
+	// + 1 to include \0 terminator.  
+	const int l = vsnprintf((char *)buf, sizeof(buf), fmt, args) + 1;
 	va_end(args);
-	send_string(buf,strlen((char *)buf));
+	send_string(buf, l);
 }
 
 

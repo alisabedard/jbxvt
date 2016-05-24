@@ -77,4 +77,8 @@ struct JBXVT {
 
 extern struct JBXVT jbxvt; // in jbxvt.c
 
+// constrain rc between 0 and lim, return new value
+uint16_t constrain(const int16_t rc, const uint8_t lim)
+	__attribute__((const));
+
 #endif//!JBXVT_H

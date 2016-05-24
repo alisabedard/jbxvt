@@ -59,12 +59,11 @@ void scr_clear_selection(void);
 // start selection using specified unit:
 void scr_start_selection(int x, int y, enum selunit unit);
 
-/*  Convert a section of displayed text line into a text string suitable for pasting.
- *  *lenp is the length of the input string, i1 is index of the first character to
- *  convert and i2 is the last.  The length of the returned string is returned
- *  in *lenp;
- */
+/*  Convert a section of displayed text line into a text string suitable
+    for pasting. *lenp is the length of the input string, i1 is index
+    of the first character to convert and i2 is the last.  The length
+    of the returned string is returned in *lenp; */
 uint8_t * convert_line(uint8_t * restrict str,
-	int * restrict lenp, int i1, int i2);
+	uint16_t * restrict lenp, uint8_t i1, uint8_t i2);
 
 #endif//!JBXVT_SELECTION_H

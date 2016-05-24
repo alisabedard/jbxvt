@@ -18,7 +18,8 @@
 bool save_selection(void)
 {
 	uint8_t *str, *s;
-	int i, len, total, col1, col2;
+	uint16_t len;
+	int i, total, col1, col2;
 	struct selst *se1, *se2;
 	struct slinest *sl;
 

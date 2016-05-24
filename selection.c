@@ -94,19 +94,8 @@ void rc_to_selend(const int16_t row, const int16_t col, struct selst * se)
 	se->se_col = col;
 }
 
-static int16_t constrain(const int16_t rc, const uint8_t lim)
-{
-	if (rc < 0)
-		  return 0;
-	else if (rc >= lim)
-		  return lim - 1;
-	return rc;
-}
-
-
 /*  Fix the coordinates so that they are within the screen and do not lie within
- *  empty space.
- */
+ *  empty space.  */
 void fix_rc(int16_t * restrict rowp, int16_t * restrict colp)
 {
 	int16_t col = constrain(*colp, jbxvt.scr.chars.width);
@@ -134,8 +123,7 @@ void fix_rc(int16_t * restrict rowp, int16_t * restrict colp)
 	*rowp = row;
 }
 
-/*  Convert the selection into a row and column.
- */
+//  Convert the selection into a row and column.
 void selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
 	struct selst * restrict se)
 {
@@ -147,22 +135,30 @@ void selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
 		: jbxvt.scr.offset - se->se_index - 1;
 }
 
+__attribute__((pure))
+static uint8_t compute_i2(uint8_t * restrict str, const uint16_t len,
+	const uint8_t i1, uint8_t i2)
+{
+	if (i2 >= len)
+		i2 = len - 1;
+	if (i2 - i1 >= MAX_WIDTH)
+		i2 = i1 + MAX_WIDTH;
+	while (i2 >= i1 && str[i2] == 0)
+		i2--;
+	return i2;
+}
+
 /*  Convert a section of displayed text line into a text string suitable
     for pasting. *lenp is the length of the input string, i1 is index
     of the first character to convert and i2 is the last.  The length
     of the returned string is returned in *lenp; */
 uint8_t * convert_line(uint8_t * restrict str,
-	int * restrict lenp, uint8_t i1, uint8_t i2)
+	uint16_t * restrict lenp, uint8_t i1, uint8_t i2)
 {
 	// set this before i2 is modified
 	const bool newline = (i2 + 1 == jbxvt.scr.chars.width)
 		&& (str[*lenp] == 0);
-	if (i2 >= *lenp)
-		i2 = *lenp - 1;
-	if (i2 - i1 >= MAX_WIDTH)
-		i2 = i1 + MAX_WIDTH;
-	while (i2 >= i1 && str[i2] == 0)
-		i2--;
+	i2 = compute_i2(str, *lenp, i1, i2);
 	static uint8_t buf[MAX_WIDTH + 3];
 	uint8_t *s = buf;
 	for (; i1 <= i2; i1++) {

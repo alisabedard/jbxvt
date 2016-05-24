@@ -52,6 +52,16 @@ static char ** parse_command_line(const int argc, char ** argv)
 	return NULL;
 }
 
+// constrain rc between 0 and lim, return new value
+uint16_t constrain(const int16_t rc, const uint8_t lim)
+{
+	if (rc < 0)
+		  return 0;
+	else if (rc >= lim)
+		  return lim - 1;
+	return rc;
+}
+
 /*  Run the command in a subprocess and return a file descriptor for the
  *  master end of the pseudo-teletype pair with the command talking to
  *  the slave.  */
