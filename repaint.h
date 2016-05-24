@@ -8,10 +8,9 @@
 
 #include <stdint.h>
 
-/* Repaint the box delimited by row1 to row2 and col1 to col2 of the displayed
- * screen from the backup screen.  */
-void repaint(const uint8_t row1, const uint8_t row2,
-	const uint8_t col1, const uint8_t col2);
+/* Repaint the box delimited by rc1.r to rc2.r and rc1.c to rc2.c
+   of the displayed screen from the backup screen.  */
+void repaint(Dim rc1, Dim rc2);
 
 //  Paint the text using the rendition value at the screen position.
 void paint_rval_text(uint8_t * restrict str, uint32_t rval,

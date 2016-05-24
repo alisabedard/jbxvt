@@ -205,8 +205,8 @@ void scr_reset(void)
 	sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1,
 		jbxvt.scr.offset, jbxvt.scr.offset
 		+ jbxvt.scr.chars.height - 1);
-	repaint(0, jbxvt.scr.chars.height - 1,
-		0, jbxvt.scr.chars.width - 1);
+	repaint((Dim){}, (Dim){.r=jbxvt.scr.chars.height - 1,
+		.c=jbxvt.scr.chars.width - 1});
 	cursor(CURSOR_DRAW);
 }
 

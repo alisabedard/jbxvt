@@ -53,8 +53,8 @@ void scr_change_screen(const uint8_t direction)
 	jbxvt.scr.current = (direction == JBXVT_MODE_HIGH)
 		? &jbxvt.scr.s2 : &jbxvt.scr.s1;
 	jbxvt.sel.end2.se_type = NOSEL;
-	repaint(0, jbxvt.scr.chars.height - 1, 0,
-		jbxvt.scr.chars.width - 1);
+	repaint((Dim){}, (Dim){.r = jbxvt.scr.chars.height - 1,
+		.c = jbxvt.scr.chars.width - 1});
 	cursor(CURSOR_DRAW);
 }
 
@@ -206,8 +206,8 @@ void home_screen(void)
 {
 	if (jbxvt.scr.offset) {
 		jbxvt.scr.offset = 0;
-		repaint(0,jbxvt.scr.chars.height - 1, 0,
-			jbxvt.scr.chars.width - 1);
+		repaint((Dim){}, (Dim){.r = jbxvt.scr.chars.height - 1,
+			.c = jbxvt.scr.chars.width - 1});
 		cursor(CURSOR_DRAW);
 		sbar_show(jbxvt.scr.chars.height
 			+ jbxvt.scr.sline.top - 1,

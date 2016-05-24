@@ -20,7 +20,7 @@ static void copy_repaint_repair(const int16_t d, const int16_t y1,
 	XCopyArea(jbxvt.X.dpy, jbxvt.X.win.vt,
 		jbxvt.X.win.vt, jbxvt.X.gc.tx, 0, y1,
 		jbxvt.scr.pixels.width, height, 0, y2);
-	repaint(row1, row2, 0, jbxvt.scr.chars.width-1);
+	repaint((Dim){.r=row1}, (Dim){.r=row2, .c=jbxvt.scr.chars.width-1});
 	repair_damage();
 }
 
@@ -50,8 +50,8 @@ void change_offset(int16_t n)
 			MARGIN, jbxvt.scr.chars.height - d,
 			jbxvt.scr.chars.height - 1);
 	} else
-		repaint(0,jbxvt.scr.chars.height - 1,0,
-			jbxvt.scr.chars.width - 1);
+		  repaint((Dim){}, (Dim){.r=jbxvt.scr.chars.height-1,
+			  .c=jbxvt.scr.chars.width-1});
 	cursor(CURSOR_DRAW);
 	// Update current scrollbar position due to change
 	sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1,

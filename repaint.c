@@ -147,12 +147,12 @@ static void paint_rvec_text(uint8_t * str,
 }
 
 static int repaint_generic(const Dim p,
-	const int m, const int col1, const int col2,
+	const int m, const int c1, const int c2,
 	uint8_t * restrict str, uint32_t * rend)
 {
-	paint_rvec_text(str, rend ? rend + col1 : NULL, m, p);
+	paint_rvec_text(str, rend ? rend + c1 : NULL, m, p);
 	const int x = p.x + m * jbxvt.X.font_width;
-	const unsigned int width = (col2 - col1 + 1 - m)
+	const unsigned int width = (c2 - c1 + 1 - m)
 		* jbxvt.X.font_width;
 	if (width > 0)
 		  XClearArea(jbxvt.X.dpy, jbxvt.X.win.vt, x, p.y,
@@ -166,48 +166,48 @@ static uint8_t convert_char(const uint8_t c)
 	return c < ' ' ? ' ' : c;
 }
 
-/* Repaint the box delimited by row1 to row2 and col1 to col2
+/* Repaint the box delimited by rc1.r to rc2.r and rc1.c to rc2.c
    of the displayed screen from the backup screen.  */
-void repaint(const uint8_t row1, const uint8_t row2,
-	const uint8_t col1, const uint8_t col2)
+void repaint(Dim rc1, Dim rc2)
 {
-	LOG("repaint(%d, %d, %d, %d)", row1, row2, col1, col2);
+	LOG("repaint(%d, %d, %d, %d)", rc1.r, rc2.r, rc1.c, rc2.c);
 	uint8_t * str = malloc(jbxvt.scr.chars.width + 1);
-	int y = row1;
-	int x1 = MARGIN + col1 * jbxvt.X.font_width;
-	int y1 = MARGIN + row1 * jbxvt.X.font_height;
+	int y = rc1.r;
+	int x1 = MARGIN + rc1.c * jbxvt.X.font_width;
+	int y1 = MARGIN + rc1.r * jbxvt.X.font_height;
 	int i;
 	LOG("y:%d, x1:%d, y1:%d, i1: %d, i2 %d\n",
-		y, x1, y1, jbxvt.scr.offset - 1 - row1,
-		row1 - jbxvt.scr.offset);
+		y, x1, y1, jbxvt.scr.offset - 1 - rc1.r,
+		rc1.r - jbxvt.scr.offset);
 	//  First do any 'scrolled off' lines that are visible.
-	for (i = jbxvt.scr.offset - 1 - row1;
-		y <= row2 && i >= 0; y++, i--) {
+	for (i = jbxvt.scr.offset - 1 - rc1.r;
+		y <= rc2.r && i >= 0; y++, i--) {
 		struct slinest * sl = jbxvt.scr.sline.data[i];
 		if(!sl) continue; // prevent segfault
-		uint16_t m = (col2 + 1) < sl->sl_length
-			? (col2 + 1) : sl->sl_length;
+		uint16_t m = (rc2.c + 1) < sl->sl_length
+			? (rc2.c + 1) : sl->sl_length;
 		uint8_t * s = sl->sl_text;
-		m -= col1;
+		m -= rc1.c;
 		for (uint16_t x = 0; x < m; x++)
-			  str[x] = convert_char(s[x + col1]);
-		y1 = repaint_generic((Dim){.x=x1, .y=y1}, m, col1,
-			col2, str, sl->sl_rend);
+			  str[x] = convert_char(s[x + rc1.c]);
+		y1 = repaint_generic((Dim){.x=x1, .y=y1}, m, rc1.c,
+			rc2.c, str, sl->sl_rend);
 	}
 
 	// Do the remainder from the current screen:
-	i = jbxvt.scr.offset > row1 ? 0 : row1 - jbxvt.scr.offset;
-	for (; y <= row2; y++, i++) {
+	i = jbxvt.scr.offset > rc1.r ? 0 : rc1.r - jbxvt.scr.offset;
+	for (; y <= rc2.r; y++, i++) {
 		uint8_t * s = jbxvt.scr.current->text[i];
 		uint8_t x;
-		for (x = col1; x <= col2; x++)
-			  str[x - col1] = convert_char(s[x]);
-		const uint16_t m = x - col1;
-		y1 = repaint_generic((Dim){.x=x1, .y=y1}, m, col1, col2, str,
+		for (x = rc1.c; x <= rc2.c; x++)
+			  str[x - rc1.c] = convert_char(s[x]);
+		const uint16_t m = x - rc1.c;
+		y1 = repaint_generic((Dim){.x=x1, .y=y1}, m,
+			rc1.c, rc2.c, str,
 			jbxvt.scr.current->rend[i]);
 	}
 	free(str);
-	show_selection(row1,row2,col1,col2);
+	show_selection(rc1.r,rc2.r,rc1.c,rc2.c);
 }
 
 

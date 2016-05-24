@@ -15,10 +15,10 @@
 //  Delete count characters from the current position.
 void scr_delete_characters(int count)
 {
-	if (count > jbxvt.scr.chars.width - jbxvt.scr.current->col)
-		count = jbxvt.scr.chars.width - jbxvt.scr.current->col;
-	if (count <= 0)
-		return;
+	count = constrain(count, jbxvt.scr.chars.width
+		- jbxvt.scr.current->col);
+	if(!count)
+		  return;
 
 	home_screen();
 	cursor(CURSOR_DRAW);
@@ -49,5 +49,4 @@ void scr_delete_characters(int count)
 	jbxvt.scr.current->wrap_next = 0;
 	cursor(CURSOR_DRAW);
 }
-
 

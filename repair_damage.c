@@ -21,32 +21,23 @@ void repair_damage(void)
 {
 	LOG("repair_damage()");
 	XEvent event;
-	int row1, row2, col1, col2;
-
 	do {
 		//  Get the next graphics exposure or noexposure event.
 		XIfEvent(jbxvt.X.dpy,&event,grexornoex,NULL);
 		if (event.type == NoExpose)
 			return;
 
-		row1 = (event.xgraphicsexpose.y - MARGIN)
-			/ jbxvt.X.font_height;
-		if (row1 < 0)
-			row1 = 0;
-		row2 = (event.xgraphicsexpose.y
+		Dim rc1, rc2;
+		rc1.r = constrain((event.xgraphicsexpose.y - MARGIN)
+			/ jbxvt.X.font_height, jbxvt.scr.chars.height);
+		rc2.r = constrain((event.xgraphicsexpose.y
 			+ event.xgraphicsexpose.height - MARGIN)
-			/ jbxvt.X.font_height;
-		if (row2 >= jbxvt.scr.chars.height)
-			row2 = jbxvt.scr.chars.height - 1;
-		col1 = (event.xgraphicsexpose.x - MARGIN)
-			/ jbxvt.X.font_width;
-		if (col1 < 0)
-			col1 = 0;
-		col2 = (event.xgraphicsexpose.x
+			/ jbxvt.X.font_height, jbxvt.scr.chars.height);
+		rc1.c = constrain((event.xgraphicsexpose.x - MARGIN)
+			/ jbxvt.X.font_width, jbxvt.scr.chars.width);
+		rc2.c = constrain((event.xgraphicsexpose.x
 			+ event.xgraphicsexpose.width - MARGIN)
-			/ jbxvt.X.font_width;
-		if (col2 >= jbxvt.scr.chars.width)
-			col2 = jbxvt.scr.chars.width - 1;
-		repaint(row1,row2,col1,col2);
+			/ jbxvt.X.font_width, jbxvt.scr.chars.width);
+		repaint(rc1, rc2);
 	} while (event.xgraphicsexpose.count > 0);
 }
