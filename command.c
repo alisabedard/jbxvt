@@ -268,7 +268,7 @@ void send_string(uint8_t * restrict buf, const uint8_t count)
 			free(command.send);
 			command.send = NULL;
 		}
-		command.send = (uint8_t *)malloc(count);
+		command.send = malloc(count);
 		s2 = command.send;
 		s1 = buf;
 		for (uint8_t i = 0; i < count; i++, s1++, s2++)

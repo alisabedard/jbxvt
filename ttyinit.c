@@ -445,15 +445,15 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 	if (sfd < 0)
 		quit(1, "Cannot open slave tty");
 
-#ifdef POSIX_PTY
+#if defined(POSIX_PTY) && defined(I_PUSH)
 #ifdef SYS_ioctl
 	syscall(SYS_ioctl, sfd, I_PUSH, "ptem");
-	syscall(SYS_ioctl,sfd, I_PUSH, "ldterm");
+	syscall(SYS_ioctl, sfd, I_PUSH, "ldterm");
 #else//!SYS_ioctl
 	ioctl(sfd, I_PUSH, "ptem");
 	ioctl(sfd, I_PUSH, "ldterm");
 #endif//SYS_ioctl
-#endif//POSIX_PTY
+#endif//POSIX_PTY&&I_PUSH
 
 	*pslave = sfd;
 	*pmaster = mfd;
