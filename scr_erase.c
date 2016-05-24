@@ -22,36 +22,38 @@ static void zero_line(uint8_t * restrict s,
 	memset(r, 0, sz * sizeof(uint32_t));
 }
 
-static void get_horz_geo(int16_t * restrict x, uint16_t * restrict w,
+static void get_horz_geo(Dim * restrict h,
 	const uint16_t sz, const uint16_t col)
 {
-	*x = MARGIN + col * jbxvt.X.font_width;
-	*w = sz * jbxvt.X.font_width;
+	h->x = MARGIN + col * jbxvt.X.font_width;
+	h->w = sz * jbxvt.X.font_width;
 }
 
 //  erase part or the whole of a line
 void scr_erase_line(const int8_t mode)
 {
 	home_screen();
-	XRectangle g;
-	g.y = MARGIN + jbxvt.scr.current->row * jbxvt.X.font_height;
-	g.height = jbxvt.X.font_height;
+	Dim v = {
+		.y = MARGIN + jbxvt.scr.current->row * jbxvt.X.font_height,
+		.height = jbxvt.X.font_height
+	};
 	uint8_t * s = jbxvt.scr.current->text[jbxvt.scr.current->row];
 	uint32_t * r = jbxvt.scr.current->rend[jbxvt.scr.current->row];
+	Dim h;
 	switch (mode) {
 	    case START :
-		get_horz_geo(&g.x, &g.width, jbxvt.scr.current->col, 0);
+		get_horz_geo(&h, jbxvt.scr.current->col, 0);
 		zero_line(s, r, jbxvt.scr.current->col);
 		break;
 	    case END :
-		get_horz_geo(&g.x, &g.width, jbxvt.scr.chars.width
+		get_horz_geo(&h, jbxvt.scr.chars.width
 			- jbxvt.scr.current->col, jbxvt.scr.current->col);
 		zero_line(s + jbxvt.scr.current->col,
 			r + jbxvt.scr.current->col,
 			jbxvt.scr.chars.width - jbxvt.scr.current->col);
 		break;
 	    case ENTIRE :
-		get_horz_geo(&g.x, &g.width, jbxvt.scr.chars.width, 0);
+		get_horz_geo(&h, jbxvt.scr.chars.width, 0);
 		zero_line(s, r, jbxvt.scr.chars.width);
 		break;
 	    default :
@@ -68,8 +70,8 @@ void scr_erase_line(const int8_t mode)
 	}
 	cursor(CURSOR_DRAW); //clear
 	check_selection(jbxvt.scr.current->row,jbxvt.scr.current->row);
-	XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt, g.x, g.y,
-		g.width, g.height, false);
+	XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt, h.x, v.y,
+		h.width, v.height, false);
 	jbxvt.scr.current->wrap_next = 0;
 	cursor(CURSOR_DRAW);
 }

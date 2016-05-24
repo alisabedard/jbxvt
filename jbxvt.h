@@ -19,16 +19,16 @@ typedef struct Dim {
 		int16_t x;
 		uint16_t r; // row
 		uint16_t row; // row
-		uint16_t w; // width
-		uint16_t width; // width
+		uint16_t h; // height
+		uint16_t height; // height
 	};
 	union {
 		int16_t y;
 		uint16_t c; // column
 		uint16_t col; // column
 		uint16_t column; // column
-		uint16_t h; // height
-		uint16_t height; // height
+		uint16_t w; // width
+		uint16_t width; // width
 	};
 } Dim;
 
