@@ -95,7 +95,7 @@ void scr_change_rendition(const uint32_t style);
 void scr_change_screen(const uint8_t direction);
 
 //  Delete count lines and scroll up the bottom of the screen to fill the gap
-void scr_delete_lines(uint8_t count);
+void scr_delete_lines(const uint8_t count);
 
 //  Return the width and height of the screen.
 void scr_get_size(uint16_t * restrict width_p,
@@ -113,7 +113,7 @@ void scr_init(void);
 
 /*  Insert count blank lines at the current position and scroll the lower lines
  *  down.  */
-void scr_insert_lines(int8_t count);
+void scr_insert_lines(const int8_t count);
 
 /*  Move the display so that line represented by scrollbar value y is at the top
  *  of the screen.  */

@@ -131,55 +131,51 @@ void scr_restore_cursor(void)
 	cursor();
 }
 
+static uint8_t scroll_up_scr_bot(uint8_t count, const bool up)
+{
+	while (count > MAX_SCROLL) {
+		scroll(jbxvt.scr.current->row,
+			jbxvt.scr.current->bmargin,
+			up?MAX_SCROLL:-MAX_SCROLL);
+		count -= MAX_SCROLL;
+	}
+	return up?count:-count;
+}
+
 //  Delete count lines and scroll up the bottom of the screen to fill the gap
-void scr_delete_lines(uint8_t count)
+void scr_delete_lines(const uint8_t count)
 {
 	if (count > jbxvt.scr.current->bmargin
 		- jbxvt.scr.current->row + 1)
 		return;
-
 	hsc();
-	while (count > MAX_SCROLL) {
-		scroll(jbxvt.scr.current->row,
-			jbxvt.scr.current->bmargin,
-			MAX_SCROLL);
-		count -= MAX_SCROLL;
-	}
-	scroll(jbxvt.scr.current->row,jbxvt.scr.current->bmargin,count);
+	scroll(jbxvt.scr.current->row,jbxvt.scr.current->bmargin,
+		scroll_up_scr_bot(count, true));
 	jbxvt.scr.current->wrap_next = 0;
 	cursor();
 }
 
-static void scroll_lower_lines(int8_t count)
+static void scroll_lower_lines(const int8_t count)
 {
-	while (count > MAX_SCROLL) {
-		scroll(jbxvt.scr.current->row,
-			jbxvt.scr.current->bmargin,
-			-MAX_SCROLL);
-		count -= MAX_SCROLL;
-	}
-	scroll(jbxvt.scr.current->row,
-		jbxvt.scr.current->bmargin,-count);
+	scroll(jbxvt.scr.current->row, jbxvt.scr.current->bmargin,
+		scroll_up_scr_bot(count, false));
 }
 
 static int8_t get_insertion_count(const int8_t count)
 {
-	if (count > jbxvt.scr.current->bmargin
-		- jbxvt.scr.current->row + 1)
-		return jbxvt.scr.current->bmargin
-			- jbxvt.scr.current->row + 1;
-	return count;
+	const int8_t i = jbxvt.scr.current->bmargin
+		- jbxvt.scr.current->row + 1;
+	return count > i ? i : count;
 }
 
 /*  Insert count blank lines at the current position and scroll the lower lines
  *  down.  */
-void scr_insert_lines(int8_t count)
+void scr_insert_lines(const int8_t count)
 {
 	if (jbxvt.scr.current->row > jbxvt.scr.current->bmargin)
 		return;
-	count = get_insertion_count(count);
 	hsc();
-	scroll_lower_lines(count);
+	scroll_lower_lines(get_insertion_count(count));
 	jbxvt.scr.current->wrap_next = 0;
 	cursor();
 }
@@ -196,8 +192,8 @@ void scr_set_margins(const uint16_t top, const uint16_t bottom)
 	scr_move(0,0,0);
 }
 
-/*  Move the display so that line represented by scrollbar value y is at the top
- *  of the screen.  */
+/*  Move the display so that line represented by scrollbar value y
+    is at the top of the screen.  */
 void scr_move_to(int16_t y)
 {
 	y = jbxvt.scr.pixels.height - 1 - y;
@@ -244,12 +240,13 @@ void scr_report_position(void)
 //  Reposition the scrolled text so that the scrollbar is at the bottom.
 void home_screen(void)
 {
-	if (jbxvt.scr.offset > 0) {
+	if (jbxvt.scr.offset) {
 		jbxvt.scr.offset = 0;
-		repaint(0,jbxvt.scr.chars.height - 1,0,
+		repaint(0,jbxvt.scr.chars.height - 1, 0,
 			jbxvt.scr.chars.width - 1);
 		cursor();
-		sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1,
+		sbar_show(jbxvt.scr.chars.height
+			+ jbxvt.scr.sline.top - 1,
 			0, jbxvt.scr.chars.height - 1);
 	}
 }
