@@ -445,6 +445,7 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 	if (sfd < 0)
 		quit(1, "Cannot open slave tty");
 
+#ifdef HPUX // The following seems to only affect HPUX:
 #if defined(POSIX_PTY) && defined(I_PUSH)
 #ifdef SYS_ioctl
 	syscall(SYS_ioctl, sfd, I_PUSH, "ptem");
@@ -454,6 +455,7 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 	ioctl(sfd, I_PUSH, "ldterm");
 #endif//SYS_ioctl
 #endif//POSIX_PTY&&I_PUSH
+#endif//HPUX
 
 	*pslave = sfd;
 	*pmaster = mfd;

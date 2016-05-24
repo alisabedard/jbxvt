@@ -52,8 +52,10 @@ static int16_t get_com_char(const int8_t flags)
 		fd_set in_fdset;
 		FD_ZERO(&in_fdset);
 		while (XPending(jbxvt.X.dpy) == 0) {
+#ifdef DEBUG
 			if (FD_ISSET(x_fd, &in_fdset))
 				quit(1, "Infinite loop");
+#endif//DEBUG
 			FD_SET(jbxvt.com.fd,&in_fdset);
 			FD_SET(x_fd,&in_fdset);
 			fd_set out_fdset;
@@ -75,8 +77,13 @@ static int16_t get_com_char(const int8_t flags)
 			if (FD_ISSET(jbxvt.com.fd,&out_fdset)) {
 				count = jbxvt.com.send_count < 100
 					? jbxvt.com.send_count : 100;
+#ifdef SYS_write
+				count = syscall(SYS_write, jbxvt.com.fd,
+					jbxvt.com.send_nxt, count);
+#else//!SYS_write
 				count = write(jbxvt.com.fd,
 						jbxvt.com.send_nxt,count);
+#endif//SYS_write
 				if (count < 0)
 					quit(1, "Failed to write to command");
 				jbxvt.com.send_count -= count;
