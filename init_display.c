@@ -149,7 +149,7 @@ void init_display(char * name)
 {
 	jbxvt.X.dpy = XOpenDisplay(NULL);
 	if(!jbxvt.X.dpy)
-		  quit(1, "DISPLAY");
+		  quit(1, QUIT_DISPLAY);
 
 	jbxvt.X.screen = DefaultScreen(jbxvt.X.dpy);
 	init_jbxvt_colors();

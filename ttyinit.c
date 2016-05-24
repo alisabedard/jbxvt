@@ -227,7 +227,7 @@ static void tidy_utmp(void)
 //  Catch a fatal signal and tidy up before quitting
 static void catch_sig(const int sig __attribute__((unused)))
 {
-	quit(0, "Caught signal");
+	quit(1, QUIT_SIGNAL);
 }
 
 #ifdef BSD_UTMP
@@ -428,7 +428,7 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 	const fd_t mfd = posix_openpt(O_RDWR);
 #endif//POSIX_PTY
 	if (mfd < 0) 
-		  quit(1, "Cannot open pseudo tty");
+		  quit(1, QUIT_TTY);
 
 #ifdef POSIX_PTY
 	grantpt(mfd);
@@ -443,7 +443,7 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 #endif//SYS_open
 
 	if (sfd < 0)
-		quit(1, "Cannot open slave tty");
+		quit(1, QUIT_TTY);
 
 #ifdef HPUX // The following seems to only affect HPUX:
 #if defined(POSIX_PTY) && defined(I_PUSH)
@@ -569,7 +569,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
 #endif//!NETBSD
 
 	if(pgid < 0)
-		  quit(1, "Cannot create new session");
+		  quit(1, QUIT_SESSION);
 
 	/*  Having started a new session, we need to establish
 	 *  a controlling teletype for it.  On some systems
@@ -594,7 +594,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
 #endif//SYS_open
 
 	if (ttyfd < 0)
-		  quit(1, "Cannot open tty");
+		  quit(1, QUIT_TTY);
 
 #ifdef SYS_close
 	syscall(SYS_close, i);
@@ -671,7 +671,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
 #endif//SYS_setuid
 
 	execvp(argv[0],argv);
-	quit(1, "Cannot execute command");
+	quit(1, QUIT_SESSION);
 }
 
 /*  Run the command in a subprocess and return a file descriptor for the
@@ -700,7 +700,7 @@ int run_command(char ** argv)
 #endif//SYS_fork
 
 	if (comm_pid < 0)
-		  quit(1, "Cannot fork");
+		  quit(1, QUIT_SESSION);
 #ifdef DEBUG
 	fprintf(stderr, "command: %s, pid: %d\n", argv[0], comm_pid);
 #endif//DEBUG

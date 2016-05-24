@@ -54,7 +54,7 @@ static int16_t get_com_char(const int8_t flags)
 		while (XPending(jbxvt.X.dpy) == 0) {
 #ifdef DEBUG
 			if (FD_ISSET(x_fd, &in_fdset))
-				quit(1, "Infinite loop");
+				quit(1, QUIT_ERROR);
 #endif//DEBUG
 			FD_SET(jbxvt.com.fd,&in_fdset);
 			FD_SET(x_fd,&in_fdset);
