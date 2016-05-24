@@ -80,12 +80,17 @@ int16_t is_string_char(int16_t c)
 	return(c >= ' ' || c == '\n' || c == '\r' || c == '\t');
 }
 
+static void hsc(void)
+{
+	home_screen();
+	cursor();
+}
+
 /* Move the cursor up if mod is positive or down if mod is negative,
    by mod number of lines and scroll if necessary.  */
 void scr_index_by(const int8_t mod)
 {
-	home_screen();
-	cursor();
+	hsc();
 	if (jbxvt.scr.current->row == (mod > 0 ? jbxvt.scr.current->bmargin
 		: jbxvt.scr.current->tmargin))
 		scroll(jbxvt.scr.current->tmargin,
@@ -133,8 +138,7 @@ void scr_delete_lines(uint8_t count)
 		- jbxvt.scr.current->row + 1)
 		return;
 
-	home_screen();
-	cursor();
+	hsc();
 	while (count > MAX_SCROLL) {
 		scroll(jbxvt.scr.current->row,
 			jbxvt.scr.current->bmargin,
@@ -174,8 +178,7 @@ void scr_insert_lines(int8_t count)
 	if (jbxvt.scr.current->row > jbxvt.scr.current->bmargin)
 		return;
 	count = get_insertion_count(count);
-	home_screen();
-	cursor();
+	hsc();
 	scroll_lower_lines(count);
 	jbxvt.scr.current->wrap_next = 0;
 	cursor();
@@ -217,7 +220,11 @@ void scr_report_display(void)
 {
 	char * restrict dname = DisplayString(jbxvt.X.dpy);
 	struct utsname ut;
-	(void)uname(&ut);
+#ifdef SYS_uname
+	syscall(SYS_uname, &ut);
+#else//!SYS_uname
+	uname(&ut);
+#endif//SYS_uname
 
 	if (!strncmp(dname, "unix:", 5))
 		cprintf("%s%s\r",ut.nodename,dname + 4);

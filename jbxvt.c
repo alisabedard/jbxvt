@@ -16,7 +16,7 @@ struct JBXVT jbxvt;
 // returns new command value if specified
 static char ** parse_command_line(const int argc, char ** argv)
 {
-	const char * optstr = "b:c:eF:f:ehvs";
+	static const char * optstr = "b:c:eF:f:ehvS:s";
 	int8_t opt;
 	while((opt=getopt(argc, argv, optstr)) != -1) {
 		switch (opt) {
@@ -33,6 +33,9 @@ static char ** parse_command_line(const int argc, char ** argv)
 			break;
 		case 'f': // foreground color
 			jbxvt.opt.fg = optarg;
+			break;
+		case 'S': // scroll history
+			jbxvt.scr.sline.max = atoi(optarg);
 			break;
 		case 's': // use scrollbar
 			jbxvt.opt.show_scrollbar=true;
