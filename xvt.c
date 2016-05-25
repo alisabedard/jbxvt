@@ -234,19 +234,24 @@ app_loop_head:
 	case TK_SBDOWN :
 		scr_move_by(-token.tk_arg[0]); break;
 	case TK_SELSTART :
-		scr_start_selection(token.tk_arg[0],token.tk_arg[1],CHAR);
+		scr_start_selection((Dim){.x = token.tk_arg[0],
+			.y = token.tk_arg[1]}, CHAR);
 		break;
 	case TK_SELEXTND :
-		scr_extend_selection(token.tk_arg[0],token.tk_arg[1],0);
+		scr_extend_selection((Dim){.x = token.tk_arg[0],
+			.y = token.tk_arg[1]}, false);
 		break;
 	case TK_SELDRAG :
-		scr_extend_selection(token.tk_arg[0],token.tk_arg[1],1);
+		scr_extend_selection((Dim){.x = token.tk_arg[0],
+			.y = token.tk_arg[1]}, true);
 		break;
 	case TK_SELWORD :
-		scr_start_selection(token.tk_arg[0],token.tk_arg[1],WORD);
+		scr_start_selection((Dim){.x = token.tk_arg[0],
+			.y = token.tk_arg[1]}, WORD);
 		break;
 	case TK_SELLINE :
-		scr_start_selection(token.tk_arg[0],token.tk_arg[1],LINE);
+		scr_start_selection((Dim){.x = token.tk_arg[0],
+			.y = token.tk_arg[1]}, LINE);
 		break;
 	case TK_SELECT :
 		scr_make_selection(token.tk_arg[0]);
@@ -255,12 +260,12 @@ app_loop_head:
 		scr_clear_selection();
 		break;
 	case TK_SELREQUEST :
-		scr_send_selection(token.tk_arg[0],token.tk_arg[1],
-			token.tk_arg[2],token.tk_arg[3]);
+		scr_send_selection(token.tk_arg[0], token.tk_arg[1],
+			token.tk_arg[2], token.tk_arg[3]);
 		break;
 	case TK_SELINSRT :
 		scr_request_selection(token.tk_arg[0],
-			token.tk_arg[1],token.tk_arg[2]);
+			token.tk_arg[1], token.tk_arg[2]);
 		break;
 	case TK_SELNOTIFY :
 		// arg 0 is time, unused

@@ -4,6 +4,7 @@
 #ifndef JBXVT_SELECTION_H
 #define JBXVT_SELECTION_H
 
+#include "jbxvt.h"
 #include "selst.h"
 
 #include <stdint.h>
@@ -16,13 +17,8 @@ enum {
 			    before a selection arrives. */
 };
 
-/*  The current selection unit
- */
-enum selunit {
-	CHAR,
-	WORD,
-	LINE
-};
+//  The current selection unit
+enum selunit { CHAR, WORD, LINE };
 
 //  respond to a request for our current selection.
 void scr_send_selection(const int time __attribute__((unused)),
@@ -32,13 +28,11 @@ void scr_send_selection(const int time __attribute__((unused)),
 void scr_make_selection(const Time time);
 
 /*  Fix the coordinates so that they are within the screen and do not lie within
- *  empty space.
- */
-void fix_rc(int16_t * restrict rowp, int16_t * restrict colp);
+ *  empty space.  */
+void fix_rc(Dim * restrict rc);
 
 /*  Determine if the current selection overlaps row1-row2 and if it does then
- *  remove it from the screen.
- */
+ *  remove it from the screen.  */
 void check_selection(const int16_t row1, const int16_t row2);
 
 //  Convert the selection into a row and column.
@@ -57,7 +51,7 @@ void adjust_selection(struct selst * restrict include);
 void scr_clear_selection(void);
 
 // start selection using specified unit:
-void scr_start_selection(int x, int y, enum selunit unit);
+void scr_start_selection(const Dim p, enum selunit unit);
 
 /*  Convert a section of displayed text line into a text string suitable
     for pasting. *lenp is the length of the input string, i1 is index

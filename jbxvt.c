@@ -53,7 +53,7 @@ static char ** parse_command_line(const int argc, char ** argv)
 }
 
 // constrain rc between 0 and lim, return new value
-uint16_t constrain(const int16_t rc, const uint8_t lim)
+unsigned int constrain(const int rc, const int lim)
 {
 	if (rc < 0)
 		  return 0;

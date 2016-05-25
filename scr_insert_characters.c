@@ -29,9 +29,7 @@ void scr_insert_characters(int16_t count)
 		s[i] = s[i - count];
 		r[i] = r[i - count];
 	}
-	memset(s + jbxvt.scr.current->col,0,count);
-	memset(r + jbxvt.scr.current->col,0,count);
-	const XPoint p = { .x = MARGIN + jbxvt.scr.current->col
+	const Dim p = { .x = MARGIN + jbxvt.scr.current->col
 		* jbxvt.X.font_width, .y = MARGIN + jbxvt.scr.current->row
 			* jbxvt.X.font_height};
 	const uint16_t width = (jbxvt.scr.chars.width - count

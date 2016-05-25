@@ -14,21 +14,22 @@
 // Use for all file descriptors:
 typedef int fd_t;
 
+// Structure for dimensional data:
 typedef struct Dim {
 	union {
 		int16_t x;
-		uint16_t r; // row
-		uint16_t row; // row
-		uint16_t h; // height
-		uint16_t height; // height
+		int16_t r; // row
+		int16_t row;
+		int16_t h; // height
+		uint16_t height;
 	};
 	union {
 		int16_t y;
-		uint16_t c; // column
-		uint16_t col; // column
-		uint16_t column; // column
+		int16_t c; // column
+		int16_t col; // column
+		int16_t column;
 		uint16_t w; // width
-		uint16_t width; // width
+		uint16_t width;
 	};
 } Dim;
 
@@ -53,18 +54,13 @@ struct JBXVT {
 		uint32_t rstyle; // render style
 		uint32_t saved_rstyle; // saved render style
 		struct screenst s1, s2;
-		struct { 
+		struct {
 			struct slinest **data; // saved lines
 			uint16_t max; // max # of saved lines
 			uint16_t top; /* high water mark
 					       of saved scroll lines */
 		} sline;
-		struct {
-			uint16_t width, height;
-		} pixels;
-		struct {
-			uint8_t width, height;
-		} chars;
+		Dim pixels, chars;
 		int16_t offset; // current vert saved line
 	} scr;
 	struct {
@@ -96,7 +92,8 @@ struct JBXVT {
 extern struct JBXVT jbxvt; // in jbxvt.c
 
 // constrain rc between 0 and lim, return new value
-uint16_t constrain(const int16_t rc, const uint8_t lim)
+// use more generic int type as this is used in various places.
+unsigned int constrain(const int rc, const int lim)
 	__attribute__((const));
 
 #endif//!JBXVT_H

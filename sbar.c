@@ -7,7 +7,7 @@
 #include "log.h"
 
 static struct {
-	int width, height;
+	Dim d;
 	int mtop, mbot; // marked area
 	// most recent arguments to sbar_show:
 	int last_low, last_high, last_length;
@@ -18,10 +18,12 @@ void sbar_reset(void)
 {
 	int32_t d;
 	uint32_t u;
+	unsigned int w, h;
 
-	XGetGeometry(jbxvt.X.dpy, jbxvt.X.win.sb, &(Window){0},&d,&d,
-		(unsigned int *)&sbar.width,
-		(unsigned int *)&sbar.height, &u, &u);
+	XGetGeometry(jbxvt.X.dpy, jbxvt.X.win.sb, &(Window){0},
+		&d, &d, &w, &h, &u, &u);
+	sbar.d.w = w;
+	sbar.d.h = h;
 	sbar.mbot = -1;	/* force a redraw */
 	sbar_show(sbar.last_length, sbar.last_low, sbar.last_high);
 }
@@ -37,22 +39,22 @@ void sbar_show(int length, const int low,
 	sbar.last_low = low;
 	sbar.last_high = high;
 
-	int top = sbar.height - sbar.height*high/length;
-	int bot = sbar.height - sbar.height*low/length;
+	int top = sbar.d.height - sbar.d.height*high/length;
+	int bot = sbar.d.height - sbar.d.height*low/length;
 
 	if (top == sbar.mtop && bot == sbar.mbot)
 		return;
 	if (top > 0)
 		XClearArea(jbxvt.X.dpy,jbxvt.X.win.sb,0,0,
-			sbar.width,top - 1, false);
+			sbar.d.width,top - 1, false);
 	if (bot >= top)
 		XFillRectangle(jbxvt.X.dpy, jbxvt.X.win.sb,
-			jbxvt.X.gc.sb, 0, top, sbar.width,
+			jbxvt.X.gc.sb, 0, top, sbar.d.width,
 			bot - top + 1);
-	if (bot < sbar.height)
+	if (bot < sbar.d.height)
 		XClearArea(jbxvt.X.dpy,jbxvt.X.win.sb,0,bot + 1,
-			sbar.width, sbar.height - bot - 1, false);
+			sbar.d.width, sbar.d.height - bot - 1, false);
 	LOG("L:%d, l:%d, h:%d, t:%d, b:%d, h:%d\n", length, low, high,
-		top, bot, sbar.height);
+		top, bot, sbar.d.height);
 }
 

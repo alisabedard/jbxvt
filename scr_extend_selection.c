@@ -47,23 +47,22 @@ static struct selst * get_nearest_endpoint(const int16_t row,
 }
 
 //  Extend the selection.
-void scr_extend_selection(int16_t x, int16_t y, const bool drag)
+void scr_extend_selection(const Dim p, const bool drag)
 {
 	if (jbxvt.sel.end1.se_type == NOSEL)
 		return;
-
-	int16_t col = (x - MARGIN) / jbxvt.X.font_width;
-	int16_t row = (y - MARGIN) / jbxvt.X.font_height;
-	fix_rc(&row,&col);
+	Dim rc = { .col = (p.x - MARGIN) / jbxvt.X.font_width,
+		.row = (p.y - MARGIN) / jbxvt.X.font_height };
+	fix_rc(&rc);
 	// Save current end points:
 	struct selst sesave1 = jbxvt.sel.end1;
 	struct selst sesave2 = jbxvt.sel.end2;
 
 	if (drag) 
-		  handle_drag(row, col);
+		  handle_drag(rc.r, rc.c);
 	else {
-		struct selst * se = get_nearest_endpoint(row, col);
-		rc_to_selend(row,col,se);
+		struct selst * se = get_nearest_endpoint(rc.r, rc.c);
+		rc_to_selend(rc.r, rc.c, se);
 		adjust_selection(se);
 	}
 

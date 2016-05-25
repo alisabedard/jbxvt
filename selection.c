@@ -26,11 +26,7 @@ void scr_make_selection(const Time time)
 {
 	if (!save_selection())
 		return;
-
-	XSetSelectionOwner(jbxvt.X.dpy,XA_PRIMARY,jbxvt.X.win.vt,time);
-	if (XGetSelectionOwner(jbxvt.X.dpy,XA_PRIMARY) != jbxvt.X.win.vt)
-		fprintf(stderr, "Could not get primary selection");
-
+	XSetSelectionOwner(jbxvt.X.dpy, XA_PRIMARY, jbxvt.X.win.vt, time);
 	//  Place in CUT_BUFFER0 for backup.
 	XChangeProperty(jbxvt.X.dpy,DefaultRootWindow(jbxvt.X.dpy),XA_CUT_BUFFER0,
 		XA_STRING,8,PropModeReplace,jbxvt.sel.text,jbxvt.sel.length);
@@ -41,8 +37,10 @@ void scr_send_selection(const int time __attribute__((unused)),
 	const int requestor, const int target, const int property)
 {
 	XEvent event = { .xselection.type = SelectionNotify,
-		.xselection.selection = XA_PRIMARY, .xselection.target = XA_STRING,
-		.xselection.requestor = requestor, .xselection.time = time };
+		.xselection.selection = XA_PRIMARY,
+		.xselection.target = XA_STRING,
+		.xselection.requestor = requestor,
+		.xselection.time = time };
 	if (target == XA_STRING) {
 		XChangeProperty(jbxvt.X.dpy,requestor,property,
 			XA_STRING,8,PropModeReplace,
@@ -56,27 +54,29 @@ void scr_send_selection(const int time __attribute__((unused)),
 //  Clear the current selection.
 void scr_clear_selection(void)
 {
-	if (jbxvt.sel.text != NULL) {
+	if (jbxvt.sel.text) {
 		free(jbxvt.sel.text);
 		jbxvt.sel.text = NULL;
 		jbxvt.sel.length = 0;
 	}
-	show_selection(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
+	show_selection(0, jbxvt.scr.chars.height - 1,
+		0, jbxvt.scr.chars.width - 1);
 	jbxvt.sel.end1.se_type = jbxvt.sel.end2.se_type = NOSEL;
 }
 
 //  start a selection using the specified unit.
-void scr_start_selection(int x, int y, enum selunit unit)
+void scr_start_selection(Dim p, enum selunit unit)
 {
-	show_selection(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
-	int16_t col = (x - MARGIN) / jbxvt.X.font_width;
-	int16_t row = (y - MARGIN) / jbxvt.X.font_height;
+	const Dim sc = jbxvt.scr.chars;
+	show_selection(0, sc.h - 1, 0, sc.w - 1);
+	Dim rc = { .x = (p.x - MARGIN) / jbxvt.X.font_width,
+		.y = (p.y - MARGIN) / jbxvt.X.font_height};
 	selection_unit = unit;
-	fix_rc(&row,&col);
-	rc_to_selend(row,col,&jbxvt.sel.anchor);
+	fix_rc(&rc);
+	rc_to_selend(rc.row, rc.col, &jbxvt.sel.anchor);
 	jbxvt.sel.end2 = jbxvt.sel.end1 = jbxvt.sel.anchor;
 	adjust_selection(&jbxvt.sel.end2);
-	show_selection(0,jbxvt.scr.chars.height - 1,0,jbxvt.scr.chars.width - 1);
+	show_selection(0, sc.h - 1, 0, sc.w - 1);
 }
 
 
@@ -96,31 +96,32 @@ void rc_to_selend(const int16_t row, const int16_t col, struct selst * se)
 
 /*  Fix the coordinates so that they are within the screen and do not lie within
  *  empty space.  */
-void fix_rc(int16_t * restrict rowp, int16_t * restrict colp)
+void fix_rc(Dim * restrict rc)
 {
-	int16_t col = constrain(*colp, jbxvt.scr.chars.width);
-	int16_t row = constrain(*rowp, jbxvt.scr.chars.height);
+	int16_t c = constrain(rc->col, jbxvt.scr.chars.width);
+	int16_t r = constrain(rc->row, jbxvt.scr.chars.height);
 	if (selection_unit == CHAR) {
-		int i = (row - jbxvt.scr.offset);
+		int i = (r - jbxvt.scr.offset);
 		uint8_t * s;
 		if (i >= 0) {
 			s = jbxvt.scr.current->text[i];
-			if (col > 0 && s[col - 1] < ' ')
-				while (col < jbxvt.scr.chars.width && s[col] < ' ')
-					col++;
+			if (c && s[c - 1] < ' ')
+				while (c < jbxvt.scr.chars.width
+					&& s[c] < ' ')
+					c++;
 		} else {
 			i = -1 - i;
 			const uint8_t len = jbxvt.scr.sline.data[i]->sl_length;
 			s = jbxvt.scr.sline.data[i]->sl_text;
-			if (col > 0 && s[col - 1] < ' ')
-				while (col <= len && s[col] < ' ')
-					col++;
-			if (col > len)
-				col = jbxvt.scr.chars.width;
+			if (c && s[c - 1] < ' ')
+				while (c <= len && s[c] < ' ')
+					c++;
+			if (c > len)
+				c = jbxvt.scr.chars.width;
 		}
 	}
-	*colp = col;
-	*rowp = row;
+	rc->c = c;
+	rc->r = r;
 }
 
 //  Convert the selection into a row and column.
