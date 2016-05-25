@@ -16,9 +16,8 @@ static struct {
 //  Redraw the scrollbar after a size change
 void sbar_reset(void)
 {
-	int32_t d;
-	uint32_t u;
-	unsigned int w, h;
+	int d;
+	unsigned int w, h, u;
 
 	XGetGeometry(jbxvt.X.dpy, jbxvt.X.win.sb, &(Window){0},
 		&d, &d, &w, &h, &u, &u);

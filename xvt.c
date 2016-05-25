@@ -174,8 +174,10 @@ static void handle_tk_expose(struct tokenst * restrict t)
 	switch (t->tk_region) {
 	case SCREEN :
 		if(jbxvt_size_set)
-			scr_refresh(t->tk_arg[0],t->tk_arg[1],
-				t->tk_arg[2],t->tk_arg[3]);
+			scr_refresh((Dim){.x = t->tk_arg[0],
+				.y = t->tk_arg[1]}, (Dim){
+				.width = t->tk_arg[2],
+				.height = t->tk_arg[3]});
 		else {
 			/*  Force a full reset if an exposure event
 			 *  arrives after a resize.  */

@@ -154,8 +154,8 @@ void scr_insert_lines(const int8_t count)
 //  Attempt to set the top and bottom scroll margins.
 void scr_set_margins(const uint16_t top, const uint16_t bottom)
 {
-	const uint16_t b = bottom >= jbxvt.scr.chars.height
-		? jbxvt.scr.chars.height - 1 : bottom;
+	const uint16_t b = constrain(bottom, jbxvt.scr.chars.height);
+
 	if (top > b) return;
 
 	jbxvt.scr.current->tmargin = top;
@@ -177,9 +177,7 @@ void scr_move_to(int16_t y)
 //  Move the display by a distance represented by the value.
 void scr_move_by(const int16_t y)
 {
-	change_offset(y >= 0
-		? jbxvt.scr.offset - (y - MARGIN) / jbxvt.X.font_height
-		: jbxvt.scr.offset + (-y - MARGIN) / jbxvt.X.font_height);
+	change_offset(jbxvt.scr.offset - y/jbxvt.X.font_height);
 }
 
 //  Send the name of the current display to the command.

@@ -12,40 +12,48 @@
 
 #include <string.h>
 
+static void copy_area(const int16_t * restrict x, const int16_t y,
+	const uint16_t width)
+{
+	if (width > 0) {
+		XCopyArea(jbxvt.X.dpy, jbxvt.X.win.vt, jbxvt.X.win.vt,
+			jbxvt.X.gc.tx, x[0], y, width,
+			jbxvt.X.font_height, x[1], y);
+		repair_damage();
+	}
+}
+
 //  Delete count characters from the current position.
 void scr_delete_characters(int count)
 {
-	count = constrain(count, jbxvt.scr.chars.width
-		- jbxvt.scr.current->col);
-	if(!count)
-		  return;
-
+	const uint8_t scw = jbxvt.scr.chars.width;
+	const Dim c = { // current cursor position
+		.col = jbxvt.scr.current->col,
+		.row = jbxvt.scr.current->row
+	};
+	count = constrain(count, scw - c.row);
+	if(!count) return;
 	home_screen();
 	cursor(CURSOR_DRAW);
-	check_selection(jbxvt.scr.current->row,jbxvt.scr.current->row);
-	uint8_t * s = jbxvt.scr.current->text[jbxvt.scr.current->row];
-	uint32_t * r = jbxvt.scr.current->rend[jbxvt.scr.current->row];
-	for (uint8_t i = jbxvt.scr.current->col + count;
-		i < jbxvt.scr.chars.width; i++) {
+	check_selection(c.r, c.r);
+	uint8_t * s = jbxvt.scr.current->text[c.row];
+	uint32_t * r = jbxvt.scr.current->rend[c.row];
+	for (uint8_t i = c.col + count; i < scw; i++) {
 		s[i - count] = s[i];
 		r[i - count] = r[i];
 	}
-	memset(s + jbxvt.scr.chars.width - count,0,count);
-	memset(r + jbxvt.scr.chars.width - count,0,count);
-	int16_t y = MARGIN + jbxvt.scr.current->row * jbxvt.X.font_height;
-	int16_t x2 = MARGIN + jbxvt.scr.current->col * jbxvt.X.font_width;
-	int16_t x1 = x2 + count * jbxvt.X.font_width;
-	uint16_t width = (jbxvt.scr.chars.width - count - jbxvt.scr.current->col)
-		* jbxvt.X.font_width;
-	if (width > 0) {
-		XCopyArea(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.win.vt,
-			jbxvt.X.gc.tx,x1,y,width,jbxvt.X.font_height,x2,y);
-		repair_damage();
-	}
-	x1 = x2 + width;
-	width = count * jbxvt.X.font_width;
-	XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,x1,y,width,
-		jbxvt.X.font_height,False);
+	memset(s + scw - count, 0, count);
+	memset(r + scw - count, 0, count);
+	const Dim f = { .w = jbxvt.X.font_width,
+		.h = jbxvt.X.font_height };
+	const int16_t y = MARGIN + c.row * f.height;
+	int16_t x[2] = {[1] = MARGIN + c.col * f.width};
+	x[0] = x[1] + count * f.w;
+	const uint16_t width = (scw - count - c.col) * f.w;
+	copy_area(x, y, width);
+	x[0] = x[1] + width;
+	XClearArea(jbxvt.X.dpy, jbxvt.X.win.vt, x[0], y,
+		count * jbxvt.X.font_width, f.height, false);
 	jbxvt.scr.current->wrap_next = 0;
 	cursor(CURSOR_DRAW);
 }
