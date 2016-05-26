@@ -76,13 +76,10 @@ static struct KeyMaps func_key_table[] = {
 	{XK_F10,	{KS_TYPE_XTERM,21},	{KS_TYPE_SUN,233}},
 	{XK_F11,	{KS_TYPE_XTERM,23},	{KS_TYPE_SUN,192}},
 	{XK_F12,	{KS_TYPE_XTERM,24},	{KS_TYPE_SUN,193}},
-	{XK_Find,	{KS_TYPE_XTERM,1},	{KS_TYPE_SUN,1}},
 	{XK_Insert,	{KS_TYPE_XTERM,2},	{KS_TYPE_SUN,2}},
 	{XK_Delete,	{KS_TYPE_XTERM,3},	{KS_TYPE_SUN,3}},
-	{XK_Select,	{KS_TYPE_XTERM,4},	{KS_TYPE_SUN,4}},
-	{XK_Prior,	{KS_TYPE_XTERM,5},	{KS_TYPE_SUN,5}},
-	{XK_Next,	{KS_TYPE_XTERM,6},	{KS_TYPE_SUN,6}},
-	{XK_Help,	{KS_TYPE_XTERM,28},	{KS_TYPE_SUN,196}},
+	{XK_Page_Up,	{KS_TYPE_XTERM,5},	{KS_TYPE_SUN,5}},
+	{XK_Page_Down,	{KS_TYPE_XTERM,6},	{KS_TYPE_SUN,6}},
 	{XK_Menu,	{KS_TYPE_XTERM,29},	{KS_TYPE_SUN,197}},
 	{0,		{KS_TYPE_NONE,0},	{KS_TYPE_NONE,0}}
 };
