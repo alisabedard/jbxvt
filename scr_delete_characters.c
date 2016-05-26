@@ -6,6 +6,7 @@
 #include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"
+#include "log.h"
 #include "repair_damage.h"
 #include "screen.h"
 #include "selection.h"
@@ -26,12 +27,13 @@ static void copy_area(const int16_t * restrict x, const int16_t y,
 //  Delete count characters from the current position.
 void scr_delete_characters(int count)
 {
+	LOG("scr_delete_characters(%d)", count);
 	const uint8_t scw = jbxvt.scr.chars.width;
 	const Dim c = { // current cursor position
 		.col = jbxvt.scr.current->col,
 		.row = jbxvt.scr.current->row
 	};
-	count = constrain(count, scw - c.row);
+	count = constrain(count, scw - c.row + 1);
 	if(!count) return;
 	home_screen();
 	cursor(CURSOR_DRAW);

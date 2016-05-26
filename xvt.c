@@ -65,10 +65,10 @@ static enum ModeValue handle_reset(struct tokenst * restrict token)
 			set_cur_keys(mode);
 			break;
 		case 6 :
-			jbxvt.scr.current->decom = mode == JBXVT_MODE_HIGH;
+			jbxvt.scr.current->decom = (mode == JBXVT_MODE_HIGH);
 			break;
 		case 7 :
-			jbxvt.scr.current->wrap = mode == JBXVT_MODE_HIGH;
+			jbxvt.scr.current->wrap = (mode == JBXVT_MODE_HIGH);
 			break;
 		case 47: // switch to main screen
 			scr_change_screen(mode);
@@ -91,20 +91,6 @@ static enum ModeValue handle_reset(struct tokenst * restrict token)
 	return mode;
 }
 
-static void handle_cup(struct tokenst * restrict token,
-	int16_t * restrict x, int16_t * restrict y) // Position cursor
-{
-	LOG("handle_cup()");
-	if (token->tk_nargs == 1) {
-		*x = 0;
-		*y = token->tk_arg[0] ? token->tk_arg[0] - 1 : 0;
-	} else {
-		*y = token->tk_arg[0] - 1;
-		*x = token->tk_arg[1] - 1;
-	}
-	scr_move(*x,*y,0);
-}
-
 static void handle_txtpar(struct tokenst * restrict token)
 {
 	switch (token->tk_arg[0]) {
@@ -117,6 +103,7 @@ static void handle_txtpar(struct tokenst * restrict token)
 	case 2 :
 		change_name(token->tk_string, true, false);
 		break;
+#ifdef DEBUG
 	case 4: // change colors
 	case 12: // cursor color
 	case 13: // pointer color
@@ -127,23 +114,8 @@ static void handle_txtpar(struct tokenst * restrict token)
 	default:
 		LOG("unhandled txtpar: %d", token->tk_arg[0]);
 		break;
+#endif//DEBUG
 	}
-
-}
-
-/* set top and bottom margins */
-static void handle_decstbm(struct tokenst * restrict token)
-{
-	LOG("handle_decstbm()");
-	if (token->tk_private == '?')
-		  //  xterm uses this combination to reset parameters.
-		  return;
-	if (token->tk_nargs < 2 || token->tk_arg[0]
-		>= token->tk_arg[1])
-		  scr_set_margins(0,10000);
-	else
-		  scr_set_margins(token->tk_arg[0]
-			  - 1,token->tk_arg[1] - 1);
 
 }
 
@@ -168,7 +140,7 @@ static void handle_tk_char(const uint8_t tk_char)
 	}
 }
 
-static void handle_tk_expose(struct tokenst * restrict t)
+static void handle_tk_expose(struct tokenst * restrict t __attribute__((unused)))
 {
 	LOG("handle_tk_expose()");
 	switch (t->tk_region) {
@@ -196,18 +168,20 @@ void jbxvt_app_loop(void)
 	LOG("app_loop");
 	struct tokenst token;
 	int32_t n;
-	int16_t x, y;
 app_loop_head:
 	get_token(&token);
 	switch (token.tk_type) {
 	case TK_STRING :
+		LOG("TK_STRING");
 		scr_string(token.tk_string,token.tk_length,
 			token.tk_nlcount);
 		break;
 	case TK_CHAR :
+		LOG("TK_CHAR");
 		handle_tk_char(token.tk_char);
 		break;
 	case TK_EOF :
+		LOG("TK_EOF");
 		quit(0, NULL);
 		break;
 	case TK_ENTRY :	// keyboard focus changed
@@ -256,62 +230,83 @@ app_loop_head:
 			.y = token.tk_arg[1]}, LINE);
 		break;
 	case TK_SELECT :
+		LOG("TK_SELECT");
 		scr_make_selection(token.tk_arg[0]);
 		break;
 	case TK_SELCLEAR :
+		LOG("TK_SELCLEAR");
 		scr_clear_selection();
 		break;
 	case TK_SELREQUEST :
+		LOG("TK_SELREQUEST");
 		scr_send_selection(token.tk_arg[0], token.tk_arg[1],
 			token.tk_arg[2], token.tk_arg[3]);
 		break;
 	case TK_SELINSRT :
+		LOG("TK_SELINSRT");
 		scr_request_selection(token.tk_arg[0],
 			token.tk_arg[1], token.tk_arg[2]);
 		break;
 	case TK_SELNOTIFY :
+		LOG("TK_SELNOTIFY");
 		// arg 0 is time, unused
 		scr_paste_primary(token.tk_arg[1],token.tk_arg[2]);
 		break;
 	case TK_CUU :	/* cursor up */
+		LOG("TK_CUU");
 		n = token.tk_arg[0];
 		scr_move(0, n?-n:-1, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_CUD :	/* cursor down */
+		LOG("TK_CUD");
 		n = token.tk_arg[0];
 		scr_move(0, n?n:1, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_CUF :	/* cursor forward */
+		LOG("TK_CUF");
 		n = token.tk_arg[0];
 		scr_move(n?n:1, 0, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_CUB :	/* cursor back */
+		LOG("TK_CUB");
 		n = token.tk_arg[0];
 		scr_move(n?-n:-1, 0, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_HVP :
+		LOG("TK_HVP");
 	case TK_CUP :	/* position cursor */
-		handle_cup(&token, &x, &y);
+		LOG("TK_CUP");
+		if (token.tk_nargs == 1)
+			  scr_move(0, token.tk_arg[0] - 1, 0);
+		else
+			  scr_move(token.tk_arg[1] - 1,
+				  token.tk_arg[0] - 1, 0);
 		break;
 	case TK_ED :
+		LOG("TK_ED");
 		scr_erase_screen(token.tk_arg[0]);
 		break;
 	case TK_EL :
+		LOG("TK_EL");
 		scr_erase_line(token.tk_arg[0]);
 		break;
 	case TK_IL :
 		n = token.tk_arg[0];
+		LOG("TK_IL: %d", n);
 		scr_insert_lines(n?n:1);
 		break;
 	case TK_DL :
+		LOG("TK_DL");
 		n = token.tk_arg[0];
 		scr_delete_lines(n?n:1);
 		break;
 	case TK_DCH :
+		LOG("TK_DCH");
 		n = token.tk_arg[0];
 		scr_delete_characters(n?n:1);
 		break;
 	case TK_ICH :
+		LOG("TK_ICH");
 		n = token.tk_arg[0];
 		scr_insert_characters(n?n:1);
 		break;
@@ -322,10 +317,13 @@ app_loop_head:
 		LOG("TK_TBC");
 		break;
 	case TK_SET :
+		LOG("TK_SET");
 	case TK_RESET :
+		LOG("TK_RESET");
 		handle_reset(&token);
 		break;
 	case TK_SGR :
+		LOG("TK_SGR");
 		handle_sgr(&token);
 		break;
 	case TK_DSR :		/* request for information */
@@ -339,37 +337,48 @@ app_loop_head:
 			break;
 		}
 		break;
-	case TK_DECSTBM:
-		handle_decstbm(&token);
+	case TK_DECSTBM: // set top and bottom margins.  
+		LOG("TK_DECSTBM");
+		scr_set_margins(token.tk_arg[0] - 1, token.tk_arg[1] - 1);
 		break;
 	case TK_DECSWH :		/* ESC # digit */
 		LOG("TK_DECSWH");
 		break;
 	case TK_DECSC :
+		LOG("TK_DECSC");
 		cursor(CURSOR_SAVE);
 		break;
 	case TK_DECRC :
+		LOG("TK_DECRC");
 		cursor(CURSOR_RESTORE);
 		break;
 	case TK_DECPAM :
+		LOG("TK_DECPAM");
 		set_kp_keys(JBXVT_MODE_HIGH);
 		break;
 	case TK_DECPNM :
+		LOG("TK_DECPNM");
 		set_kp_keys(JBXVT_MODE_LOW);
 		break;
 	case TK_IND :		/* Index (same as \n) */
+		LOG("TK_IND");
 		scr_index();
 		break;
 	case TK_NEL :
+		LOG("TK_NEL");
 		break;
 	case TK_HTS :
+		LOG("TK_HTS");
 		break;
 	case TK_RI :		/* Reverse index */
+		LOG("TK_RI");
 		scr_rindex();
 		break;
 	case TK_SS2 :
+		LOG("TK_SS2");
 		break;
 	case TK_SS3 :
+		LOG("TK_SS3");
 		break;
 	case TK_DECID :
 		LOG("TK_DECID");

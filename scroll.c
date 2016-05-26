@@ -193,11 +193,10 @@ void scroll(const uint8_t row1, const uint8_t row2, const int16_t count)
 	// Sanitize input:
 	if((row1 <= row2) && (count < MAX_SCROLL)) {
 		// Negative is down:
-		if(count<0) {
+		if(count < 0)
 			scroll_down(row1, row2, count);
-			return;
-		}
-		scroll_up(row1, row2, count);
+		else
+			scroll_up(row1, row2, count);
 	}
 }
 

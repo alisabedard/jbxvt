@@ -99,10 +99,9 @@ void scr_index_by(const int8_t mod)
 	jbxvt.scr.current->wrap_next = 0;
 	check_selection(jbxvt.scr.current->row,jbxvt.scr.current->row);
 	cursor(CURSOR_DRAW);
-
 }
 
-static uint8_t scroll_up_scr_bot(uint8_t count, const bool up)
+static int8_t scroll_up_scr_bot(uint8_t count, const bool up)
 {
 	while (count > MAX_SCROLL) {
 		scroll(jbxvt.scr.current->row,
@@ -132,11 +131,10 @@ static void scroll_lower_lines(const int8_t count)
 		scroll_up_scr_bot(count, false));
 }
 
-static int8_t get_insertion_count(const int8_t count)
+static inline int8_t get_insertion_count(const int8_t count)
 {
-	const int8_t i = jbxvt.scr.current->bmargin
-		- jbxvt.scr.current->row + 1;
-	return constrain(i, count);
+	return constrain(count, jbxvt.scr.current->bmargin
+		- jbxvt.scr.current->row + 1);
 }
 
 /*  Insert count blank lines at the current position and scroll the lower lines

@@ -201,7 +201,7 @@ void repaint(Dim rc1, Dim rc2)
 		uint8_t x;
 		for (x = rc1.c; x <= rc2.c; x++)
 			  str[x - rc1.c] = convert_char(s[x]);
-		const uint16_t m = x - rc1.c;
+		const uint16_t m = x - rc1.c - 1;
 		y1 = repaint_generic((Dim){.x=x1, .y=y1}, m,
 			rc1.c, rc2.c, str,
 			jbxvt.scr.current->rend[i]);

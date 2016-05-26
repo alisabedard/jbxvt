@@ -14,11 +14,8 @@
 //  Insert count spaces from the current position.
 void scr_insert_characters(int16_t count)
 {
-	if (count > jbxvt.scr.chars.width - jbxvt.scr.current->col)
-		  count = jbxvt.scr.chars.width - jbxvt.scr.current->col;
-	if (count <= 0)
-		  return;
-
+	count = constrain(count, jbxvt.scr.chars.width
+		- jbxvt.scr.current->col + 1);
 	home_screen();
 	cursor(CURSOR_DRAW);
 	check_selection(jbxvt.scr.current->row,jbxvt.scr.current->row);
