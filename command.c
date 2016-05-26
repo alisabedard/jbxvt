@@ -232,12 +232,9 @@ uint8_t * lookup_key(XEvent * restrict ev, int16_t * restrict pcount)
 		*pcount = strlen(s);
  	       	return (uint8_t *)s;
 	} else {
-		if((ev->xkey.state & Mod1Mask) && (count == 1)) {
+		if((ev->xkey.state & Mod1Mask) && (count == 1))
 			kbuf[0] |= 0200;
-			*pcount = 1;
-		} else
-			*pcount = count;
-
+		*pcount = count;
 		return (uint8_t *)kbuf;
 	}
 }
@@ -288,7 +285,8 @@ void cprintf(char *fmt,...)
 {
 	va_list args;
 	va_start(args,fmt);
-	static uint8_t buf[128];
+	// if less than 28, gcc 6.1.1 produces an executable 4k larger
+	static uint8_t buf[28];
 	// + 1 to include \0 terminator.  
 	const int l = vsnprintf((char *)buf, sizeof(buf), fmt, args) + 1;
 	va_end(args);
