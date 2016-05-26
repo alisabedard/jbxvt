@@ -73,10 +73,11 @@ static void init_screen_elements(struct screenst * restrict scr,
 
 static Dim get_dim(void)
 {
+	Window dw;
 	int d;
 	unsigned int w, h, u;
 
-	XGetGeometry(jbxvt.X.dpy, jbxvt.X.win.vt, &(Window){0}, &d, &d,
+	XGetGeometry(jbxvt.X.dpy, jbxvt.X.win.vt, &dw, &d, &d,
 		&w, &h, &u, &u);
 
 	return (Dim){.width = w, .height = h};
@@ -85,7 +86,7 @@ static Dim get_dim(void)
 __attribute__((pure))
 static Dim get_cdim(const Dim d)
 {
-	const uint8_t m = MARGIN * 2;
+	const uint8_t m = MARGIN<<1;
 	return (Dim){.width = (d.w-m)/jbxvt.X.font_width,
 		.height = (d.h-m)/jbxvt.X.font_height};
 }
@@ -171,8 +172,8 @@ void scr_reset(void)
 		if (jbxvt.scr.s1.text) {
 			fill_and_scroll(c.h);
 			// calculate working no. of lines.
-			int i = jbxvt.scr.sline.top + jbxvt.scr.s1.row + 1;
-			int j = i > c.h ? c.h - 1 : i - 1;
+			int16_t i = jbxvt.scr.sline.top + jbxvt.scr.s1.row + 1;
+			int16_t j = i > c.h ? c.h - 1 : i - 1;
 			i = jbxvt.scr.s1.row;
 			jbxvt.scr.s1.row = j;
 			bool onscreen = true;
@@ -181,8 +182,10 @@ void scr_reset(void)
 					  j, &onscreen, s1, r1, s2, r2)
 					  : handle_offscreen_data(c.w, i, j,
 						  s1, r1);
+#ifdef DEBUG
 			if (onscreen)
 				  abort();
+#endif//DEBUG
 			for (j = i; j < jbxvt.scr.sline.top; j++)
 				  jbxvt.scr.sline.data[j - i]
 					  = jbxvt.scr.sline.data[j];
@@ -192,11 +195,8 @@ void scr_reset(void)
 			jbxvt.scr.sline.top -= i;
 			free_visible_screens(c.h);
 		}
-
-		jbxvt.scr.chars.width = c.w;
-		jbxvt.scr.chars.height = c.h;
-		jbxvt.scr.pixels.width = d.w;
-		jbxvt.scr.pixels.height = d.h;
+		jbxvt.scr.chars = c;
+		jbxvt.scr.pixels = d;
 		init_screen_elements(&jbxvt.scr.s1, s1, r1);
 		init_screen_elements(&jbxvt.scr.s2, s2, r2);
 		scr_start_selection((Dim){},CHAR);
@@ -207,7 +207,7 @@ void scr_reset(void)
 	c.w--;
 	sbar_show(c.h + jbxvt.scr.sline.top, jbxvt.scr.offset,
 		jbxvt.scr.offset + c.h);
-	repaint((Dim){}, (Dim){.r=c.r, .c=c.c});
+	repaint((Dim){}, c);
 	cursor(CURSOR_DRAW);
 }
 

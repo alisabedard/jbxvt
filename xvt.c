@@ -140,17 +140,19 @@ static void handle_tk_char(const uint8_t tk_char)
 	}
 }
 
-static void handle_tk_expose(struct tokenst * restrict t __attribute__((unused)))
+//static void handle_tk_expose(struct tokenst * restrict t __attribute__((unused)))
+static void handle_tk_expose(struct tokenst * restrict t)
 {
 	LOG("handle_tk_expose()");
 	switch (t->tk_region) {
 	case SCREEN :
-		if(jbxvt_size_set)
+		if(jbxvt_size_set){
 			scr_refresh((Dim){.x = t->tk_arg[0],
 				.y = t->tk_arg[1]}, (Dim){
 				.width = t->tk_arg[2],
 				.height = t->tk_arg[3]});
-		else {
+			cursor(CURSOR_DRAW);
+		} else {
 			/*  Force a full reset if an exposure event
 			 *  arrives after a resize.  */
 			scr_reset();
