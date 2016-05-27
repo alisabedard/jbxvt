@@ -3,6 +3,7 @@
 
 #include "xvt.h"
 
+#include "change_offset.h"
 #include "cmdtok.h"
 #include "command.h"
 #include "cursor.h"
@@ -184,11 +185,19 @@ app_loop_head:
 		switch_scrollbar();
 		break;
 	case TK_SBGOTO :
-		scr_move_to(token.tk_arg[0]); break;
-	case TK_SBUP :
-		scr_move_by(token.tk_arg[0]); break;
+	/*  Move the display so that line represented by scrollbar value
+	    is at the top of the screen.  */
+		change_offset((jbxvt.scr.chars.height + jbxvt.scr.sline.top)
+			* (jbxvt.scr.pixels.height - token.tk_arg[0])
+			/ jbxvt.scr.pixels.height - jbxvt.scr.chars.height);
+		break;
 	case TK_SBDOWN :
-		scr_move_by(-token.tk_arg[0]); break;
+		token.tk_arg[0]=-token.tk_arg[0];
+		// fall through
+	case TK_SBUP :
+		change_offset(jbxvt.scr.offset
+			- token.tk_arg[0] / jbxvt.X.font_height);
+		break;
 	case TK_SELSTART :
 		scr_start_selection((Dim){.x = token.tk_arg[0],
 			.y = token.tk_arg[1]}, CHAR);
@@ -312,8 +321,9 @@ app_loop_head:
 		case 6 :
 			cursor(CURSOR_REPORT);
 			break;
-		case 7 :	/* display name */
-			scr_report_display();
+		case 7 :
+			//  Send the name of the display to the command.
+			cprintf("%s\r", DisplayString(jbxvt.X.dpy));
 			break;
 		}
 		break;

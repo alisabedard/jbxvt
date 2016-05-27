@@ -112,10 +112,6 @@ void scr_insert_lines(const int8_t count);
 
 /*  Move the display so that line represented by scrollbar value y is at the top
  *  of the screen.  */
-void scr_move_by(const int16_t y);
-
-/*  Move the display so that line represented by scrollbar value y is at the top
- *  of the screen.  */
 void scr_move_to(int16_t y);
 
 //  Send the name of the current display to the command.

@@ -28,8 +28,8 @@
 #include <sys/utsname.h>
 
 
-/*  Perform any initialisation on the screen data structures.  Called just once
- *  at startup. */
+/*  Perform any initialisation on the screen data structures.
+    Called just once at startup. */
 void scr_init(void)
 {
 	// Initialise the array of lines that have scrolled off the top.
@@ -159,40 +159,10 @@ void scr_set_margins(const uint16_t top, const uint16_t bottom)
 	scr_move(0,0,0);
 }
 
-/*  Move the display so that line represented by scrollbar value y
-    is at the top of the screen.  */
-void scr_move_to(int16_t y)
-{
-	y = jbxvt.scr.pixels.height - 1 - y;
-	const int16_t lnum = y * (jbxvt.scr.chars.height
-		+ jbxvt.scr.sline.top - 1)
-		/ (jbxvt.scr.pixels.height - 1);
-	change_offset(lnum - jbxvt.scr.chars.height + 1);
-}
-
 //  Move the display by a distance represented by the value.
 void scr_move_by(const int16_t y)
 {
 	change_offset(jbxvt.scr.offset - y/jbxvt.X.font_height);
-}
-
-//  Send the name of the current display to the command.
-void scr_report_display(void)
-{
-	char * restrict dname = DisplayString(jbxvt.X.dpy);
-	struct utsname ut;
-#ifdef SYS_uname
-	syscall(SYS_uname, &ut);
-#else//!SYS_uname
-	uname(&ut);
-#endif//SYS_uname
-
-	if (!strncmp(dname, "unix:", 5))
-		cprintf("%s%s\r",ut.nodename,dname + 4);
-	else if (dname[0] == ':')
-		cprintf("%s%s\r",ut.nodename,dname);
-	else
-		cprintf("%s\r",dname);
 }
 
 //  Reposition the scrolled text so that the scrollbar is at the bottom.
@@ -200,12 +170,12 @@ void home_screen(void)
 {
 	if (jbxvt.scr.offset) {
 		jbxvt.scr.offset = 0;
-		repaint((Dim){}, (Dim){.r = jbxvt.scr.chars.height - 1,
-			.c = jbxvt.scr.chars.width - 1});
+		Dim rc = { .r = jbxvt.scr.chars.height - 1,
+			.c = jbxvt.scr.chars.width - 1
+		};
+		repaint((Dim){}, rc);
 		cursor(CURSOR_DRAW);
-		sbar_show(jbxvt.scr.chars.height
-			+ jbxvt.scr.sline.top - 1,
-			0, jbxvt.scr.chars.height - 1);
+		sbar_show(rc.r + jbxvt.scr.sline.top, 0, rc.r);
 	}
 }
 
