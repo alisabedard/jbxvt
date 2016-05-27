@@ -17,17 +17,12 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/select.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
 #include <unistd.h>
 
-static fd_t x_fd;
-
-void init_cmdtok(void)
-{
-	  x_fd = XConnectionNumber(jbxvt.X.dpy);
-}
 
 static int16_t handle_xev(XEvent * event, int16_t * restrict count,
 	const int8_t flags)
@@ -115,6 +110,56 @@ static int16_t handle_xev(XEvent * event, int16_t * restrict count,
 	return 0;
 }
 
+static int16_t x_io_loop(int16_t count, fd_set * restrict in_fdset)
+{	
+	static fd_t x_fd;
+	if(!x_fd)
+		x_fd = XConnectionNumber(jbxvt.X.dpy);
+	while (XPending(jbxvt.X.dpy) == 0) {
+#ifdef DEBUG
+		if (FD_ISSET(x_fd, &in_fdset))
+			  quit(1, QUIT_ERROR);
+#endif//DEBUG
+		FD_SET(jbxvt.com.fd, in_fdset);
+		FD_SET(x_fd, in_fdset);
+		fd_set out_fdset;
+		FD_ZERO(&out_fdset);
+		if (jbxvt.com.send_count > 0)
+			  FD_SET(jbxvt.com.fd,&out_fdset);
+		int sv;
+		do {
+#ifdef SYS_select
+			sv = syscall(SYS_select, jbxvt.com.width,
+				in_fdset, &out_fdset, NULL, NULL);
+#else//!SYS_select
+			sv = select(jbxvt.com.width,
+				in_fdset,&out_fdset,
+				NULL, NULL);
+#endif//SYS_select
+		} while (sv < 0 && errno == EINTR);
+
+		if (FD_ISSET(jbxvt.com.fd,&out_fdset)) {
+			count = jbxvt.com.send_count < 100
+				? jbxvt.com.send_count : 100;
+#ifdef SYS_write
+			count = syscall(SYS_write, jbxvt.com.fd,
+				jbxvt.com.send_nxt, count);
+#else//!SYS_write
+			count = write(jbxvt.com.fd,
+				jbxvt.com.send_nxt,count);
+#endif//SYS_write
+			if (count < 0)
+				  quit(1, "Failed to write to command");
+			jbxvt.com.send_count -= count;
+			jbxvt.com.send_nxt += count;
+		}
+		if (FD_ISSET(jbxvt.com.fd, in_fdset))
+			  break;
+	}
+	return count;
+}
+
+
 /*  Return the next input character after first passing any keyboard input
  *  to the command.  If flags & BUF_ONLY is true then only buffered characters are
  *  returned and once the buffer is empty the special value GCC_NULL is
@@ -137,47 +182,7 @@ static int16_t get_com_char(const int8_t flags)
 	for (;;) {
 		fd_set in_fdset;
 		FD_ZERO(&in_fdset);
-		while (XPending(jbxvt.X.dpy) == 0) {
-#ifdef DEBUG
-			if (FD_ISSET(x_fd, &in_fdset))
-				quit(1, QUIT_ERROR);
-#endif//DEBUG
-			FD_SET(jbxvt.com.fd,&in_fdset);
-			FD_SET(x_fd,&in_fdset);
-			fd_set out_fdset;
-			FD_ZERO(&out_fdset);
-			if (jbxvt.com.send_count > 0)
-				FD_SET(jbxvt.com.fd,&out_fdset);
-			int sv;
-			do {
-#ifdef SYS_select
-				sv = syscall(SYS_select, jbxvt.com.width,
-					&in_fdset, &out_fdset, NULL, NULL);
-#else//!SYS_select
-				sv = select(jbxvt.com.width,
-						&in_fdset,&out_fdset,
-						NULL, NULL);
-#endif//SYS_select
-			} while (sv < 0 && errno == EINTR);
-			
-			if (FD_ISSET(jbxvt.com.fd,&out_fdset)) {
-				count = jbxvt.com.send_count < 100
-					? jbxvt.com.send_count : 100;
-#ifdef SYS_write
-				count = syscall(SYS_write, jbxvt.com.fd,
-					jbxvt.com.send_nxt, count);
-#else//!SYS_write
-				count = write(jbxvt.com.fd,
-						jbxvt.com.send_nxt,count);
-#endif//SYS_write
-				if (count < 0)
-					quit(1, "Failed to write to command");
-				jbxvt.com.send_count -= count;
-				jbxvt.com.send_nxt += count;
-			}
-			if (FD_ISSET(jbxvt.com.fd,&in_fdset))
-				break;
-		}
+		count = x_io_loop(count, &in_fdset);
 		if (FD_ISSET(jbxvt.com.fd,&in_fdset))
 			  break;
 		XEvent event;
@@ -186,9 +191,8 @@ static int16_t get_com_char(const int8_t flags)
 		if (xev_ret)
 			  return xev_ret;
 	}
-
 	count = read(jbxvt.com.fd,jbxvt.com.buf.data,COM_BUF_SIZE);
-	if (count <= 0)
+	if (count < 1) // buffer is empty
 		return errno == EWOULDBLOCK ? GCC_NULL : EOF;
 	jbxvt.com.buf.next = jbxvt.com.buf.data;
 	jbxvt.com.buf.top = jbxvt.com.buf.data + count;
@@ -198,8 +202,7 @@ static int16_t get_com_char(const int8_t flags)
 //  Return an input token
 void get_token(struct tokenst * restrict tk)
 {
-	tk->tk_private = 0;
-	tk->tk_type = TK_NULL;
+	memset(tk, 0, sizeof(struct tokenst));
 
 	if(handle_xevents(tk))
 		  return;

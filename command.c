@@ -158,7 +158,6 @@ void init_command(char ** restrict argv)
 		  quit(1, QUIT_SESSION);
 	jbxvt.com.buf.next = jbxvt.com.buf.top = jbxvt.com.buf.data;
 	jbxvt.com.stack.top = jbxvt.com.stack.data;
-	init_cmdtok();
 }
 
 // Set key mode for cursor keys if is_cursor, else for keypad keys
