@@ -83,22 +83,24 @@ static void hsc(void)
 void scr_index_by(const int8_t mod)
 {
 	hsc();
-	if (jbxvt.scr.current->row == (mod > 0 ? jbxvt.scr.current->bmargin
-		: jbxvt.scr.current->tmargin))
-		scroll(jbxvt.scr.current->tmargin,
-			jbxvt.scr.current->bmargin, mod);
+	if (jbxvt.scr.current->cursor.row == (mod > 0
+		? jbxvt.scr.current->margin.bottom
+		: jbxvt.scr.current->margin.top))
+		scroll(jbxvt.scr.current->margin.top,
+			jbxvt.scr.current->margin.bottom, mod);
 	else
-		jbxvt.scr.current->row += mod;
+		jbxvt.scr.current->cursor.row += mod;
 	jbxvt.scr.current->wrap_next = 0;
-	check_selection(jbxvt.scr.current->row,jbxvt.scr.current->row);
+	check_selection(jbxvt.scr.current->cursor.row,
+		jbxvt.scr.current->cursor.row);
 	cursor(CURSOR_DRAW);
 }
 
 static int8_t scroll_up_scr_bot(uint8_t count, const bool up)
 {
 	while (count > MAX_SCROLL) {
-		scroll(jbxvt.scr.current->row,
-			jbxvt.scr.current->bmargin,
+		scroll(jbxvt.scr.current->cursor.row,
+			jbxvt.scr.current->margin.bottom,
 			up?MAX_SCROLL:-MAX_SCROLL);
 		count -= MAX_SCROLL;
 	}
@@ -108,11 +110,12 @@ static int8_t scroll_up_scr_bot(uint8_t count, const bool up)
 //  Delete count lines and scroll up the bottom of the screen to fill the gap
 void scr_delete_lines(const uint8_t count)
 {
-	if (count > jbxvt.scr.current->bmargin
-		- jbxvt.scr.current->row + 1)
+	if (count > jbxvt.scr.current->margin.bottom
+		- jbxvt.scr.current->cursor.row + 1)
 		return;
 	hsc();
-	scroll(jbxvt.scr.current->row,jbxvt.scr.current->bmargin,
+	scroll(jbxvt.scr.current->cursor.row,
+		jbxvt.scr.current->margin.bottom,
 		scroll_up_scr_bot(count, true));
 	jbxvt.scr.current->wrap_next = 0;
 	cursor(CURSOR_DRAW);
@@ -120,21 +123,23 @@ void scr_delete_lines(const uint8_t count)
 
 static void scroll_lower_lines(const int8_t count)
 {
-	scroll(jbxvt.scr.current->row, jbxvt.scr.current->bmargin,
+	scroll(jbxvt.scr.current->cursor.row,
+		jbxvt.scr.current->margin.bottom,
 		scroll_up_scr_bot(count, false));
 }
 
 static inline int8_t get_insertion_count(const int8_t count)
 {
-	return constrain(count, jbxvt.scr.current->bmargin
-		- jbxvt.scr.current->row + 1);
+	return constrain(count, jbxvt.scr.current->margin.bottom
+		- jbxvt.scr.current->cursor.row + 1);
 }
 
-/*  Insert count blank lines at the current position and scroll the lower lines
- *  down.  */
+/*  Insert count blank lines at the current position
+    and scroll the lower lines down.  */
 void scr_insert_lines(const int8_t count)
 {
-	if (jbxvt.scr.current->row > jbxvt.scr.current->bmargin)
+	if (jbxvt.scr.current->cursor.row
+		> jbxvt.scr.current->margin.bottom)
 		return;
 	hsc();
 	scroll_lower_lines(get_insertion_count(count));
@@ -149,8 +154,8 @@ void scr_set_margins(const uint16_t top, const uint16_t bottom)
 
 	if (top > b) return;
 
-	jbxvt.scr.current->tmargin = top;
-	jbxvt.scr.current->bmargin = b;
+	jbxvt.scr.current->margin.top = top;
+	jbxvt.scr.current->margin.bottom = b;
 	scr_move(0,0,0);
 }
 

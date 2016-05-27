@@ -30,8 +30,8 @@ void scr_delete_characters(int count)
 	LOG("scr_delete_characters(%d)", count);
 	const uint8_t scw = jbxvt.scr.chars.width;
 	const Dim c = { // current cursor position
-		.col = jbxvt.scr.current->col,
-		.row = jbxvt.scr.current->row
+		.col = jbxvt.scr.current->cursor.col,
+		.row = jbxvt.scr.current->cursor.row
 	};
 	count = constrain(count, scw - c.row + 1);
 	if(!count) return;

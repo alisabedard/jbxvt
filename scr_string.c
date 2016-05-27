@@ -15,8 +15,8 @@
 
 #include <string.h>
 
-/*  Display the string at the current position.  nlcount is the number of new lines
- *  in the string.  */
+/*  Display the string at the current position.
+    nlcount is the number of new lines in the string.  */
 void scr_string(uint8_t * restrict str, int len, int nlcount)
 {
 #ifdef SCR_DEBUG
@@ -30,97 +30,105 @@ void scr_string(uint8_t * restrict str, int len, int nlcount)
 	home_screen();
 	cursor(CURSOR_DRAW);
 	if (nlcount > 0) {
-		if (jbxvt.scr.current->row > jbxvt.scr.current->bmargin)
+		if (jbxvt.scr.current->cursor.row
+			> jbxvt.scr.current->margin.bottom)
 			nlcount = 0;
 		else
-			nlcount -= jbxvt.scr.current->bmargin
-				- jbxvt.scr.current->row;
+			nlcount -= jbxvt.scr.current->margin.bottom
+				- jbxvt.scr.current->cursor.row;
 		if (nlcount < 0)
 			nlcount = 0;
-		else if (nlcount > jbxvt.scr.current->row
-			- jbxvt.scr.current->tmargin)
-			nlcount = jbxvt.scr.current->row
-				- jbxvt.scr.current->tmargin;
+		else if (nlcount > jbxvt.scr.current->cursor.row
+			- jbxvt.scr.current->margin.top)
+			nlcount = jbxvt.scr.current->cursor.row
+				- jbxvt.scr.current->margin.top;
 		if (nlcount > MAX_SCROLL)
 			nlcount = MAX_SCROLL;
-		scroll(jbxvt.scr.current->tmargin,
-			jbxvt.scr.current->bmargin,nlcount);
-		jbxvt.scr.current->row -= nlcount;
+		scroll(jbxvt.scr.current->margin.top,
+			jbxvt.scr.current->margin.bottom,nlcount);
+		jbxvt.scr.current->cursor.row -= nlcount;
 	}
 	while (len > 0) {
 		if (*str == '\n') {
-			if (jbxvt.scr.current->row
-				== jbxvt.scr.current->bmargin)
-				scroll(jbxvt.scr.current->tmargin,
-					jbxvt.scr.current->bmargin,1);
-			else if (jbxvt.scr.current->row
+			if (jbxvt.scr.current->cursor.row
+				== jbxvt.scr.current->margin.bottom)
+				scroll(jbxvt.scr.current->margin.top,
+					jbxvt.scr.current->margin.bottom,1);
+			else if (jbxvt.scr.current->cursor.row
 				< jbxvt.scr.chars.height - 1)
-				jbxvt.scr.current->row++;
-			check_selection(jbxvt.scr.current->row,
-				jbxvt.scr.current->row);
+				jbxvt.scr.current->cursor.row++;
+			check_selection(jbxvt.scr.current->cursor.row,
+				jbxvt.scr.current->cursor.row);
 			jbxvt.scr.current->wrap_next = 0;
 			len--;
 			str++;
 			continue;
 		}
 		if (*str == '\r') {
-			jbxvt.scr.current->col = 0;
+			jbxvt.scr.current->cursor.col = 0;
 			jbxvt.scr.current->wrap_next = 0;
 			len--;
 			str++;
 			continue;
 		}
 		if (*str == '\t') {
-			if (jbxvt.scr.current->col
+			if (jbxvt.scr.current->cursor.col
 				< jbxvt.scr.chars.width - 1) {
 				s = jbxvt.scr.current->text
-					[jbxvt.scr.current->row];
-				if (s[jbxvt.scr.current->col] == 0)
-					s[jbxvt.scr.current->col] = '\t';
-				jbxvt.scr.current->col++;
-				while (jbxvt.scr.current->col % 8 != 0
-					&& jbxvt.scr.current->col
+					[jbxvt.scr.current->cursor.row];
+				if (s[jbxvt.scr.current->cursor.col] == 0)
+					s[jbxvt.scr.current->cursor.col]
+						= '\t';
+				jbxvt.scr.current->cursor.col++;
+				while (jbxvt.scr.current->cursor.col % 8
+					&& jbxvt.scr.current->cursor.col
 					< jbxvt.scr.chars.width - 1)
-					jbxvt.scr.current->col++;
+					jbxvt.scr.current->cursor.col++;
 			}
 			len--;
 			str++;
 			continue;
 		}
 		if (jbxvt.scr.current->wrap_next) {
-			jbxvt.scr.current->text[jbxvt.scr.current->row]
+			jbxvt.scr.current->text
+				[jbxvt.scr.current->cursor.row]
 				[jbxvt.scr.chars.width] = 1;
-			if (jbxvt.scr.current->row
-				== jbxvt.scr.current->bmargin)
-				scroll(jbxvt.scr.current->tmargin,
-					jbxvt.scr.current->bmargin,1);
-			else if (jbxvt.scr.current->row
+			if (jbxvt.scr.current->cursor.row
+				== jbxvt.scr.current->margin.bottom)
+				scroll(jbxvt.scr.current->margin.top,
+					jbxvt.scr.current->margin.bottom,1);
+			else if (jbxvt.scr.current->cursor.row
 				< jbxvt.scr.chars.height - 1)
-				jbxvt.scr.current->row++;
-			jbxvt.scr.current->col = 0;
+				jbxvt.scr.current->cursor.row++;
+			jbxvt.scr.current->cursor.col = 0;
 			jbxvt.scr.current->wrap_next = 0;
 		}
-		check_selection(jbxvt.scr.current->row,
-			jbxvt.scr.current->row);
-		p.x = MARGIN + jbxvt.X.font_width * jbxvt.scr.current->col;
-		p.y = MARGIN + jbxvt.X.font_height * jbxvt.scr.current->row;
+		check_selection(jbxvt.scr.current->cursor.row,
+			jbxvt.scr.current->cursor.row);
+		p.x = MARGIN + jbxvt.X.font_width
+			* jbxvt.scr.current->cursor.col;
+		p.y = MARGIN + jbxvt.X.font_height
+			* jbxvt.scr.current->cursor.row;
 		for (n = 0; str[n] >= ' '; n++)
 			;
-		n = n + jbxvt.scr.current->col
+		n = n + jbxvt.scr.current->cursor.col
 			> jbxvt.scr.chars.width
 			? jbxvt.scr.chars.width
-			- jbxvt.scr.current->col : n;
+			- jbxvt.scr.current->cursor.col : n;
 		if (jbxvt.scr.current->insert) {
 			uint32_t *r;
-			s = jbxvt.scr.current->text[jbxvt.scr.current->row];
-			r = jbxvt.scr.current->rend[jbxvt.scr.current->row];
+			s = jbxvt.scr.current->text
+				[jbxvt.scr.current->cursor.row];
+			r = jbxvt.scr.current->rend
+				[jbxvt.scr.current->cursor.row];
 			for (i = jbxvt.scr.chars.width - 1;
-				i >= jbxvt.scr.current->col + n; i--) {
+				i >= jbxvt.scr.current->cursor.col + n;
+				i--) {
 				s[i] = s[i - n];
 				r[i] = r[i - n];
 			}
 			width = (jbxvt.scr.chars.width
-				- jbxvt.scr.current->col - n)
+				- jbxvt.scr.current->cursor.col - n)
 				* jbxvt.X.font_width;
 			x2 = p.x + n * jbxvt.X.font_width;
 			if (width > 0) {
@@ -132,58 +140,61 @@ void scr_string(uint8_t * restrict str, int len, int nlcount)
 			}
 		}
 		
-		memcpy(jbxvt.scr.current->text[jbxvt.scr.current->row]
-			+ jbxvt.scr.current->col,str,n);
+		memcpy(jbxvt.scr.current->text[jbxvt.scr.current->cursor.row]
+			+ jbxvt.scr.current->cursor.col,str,n);
 		/* Clear memory cells which are not part of the
 			desired output string.  */
-		memset(jbxvt.scr.current->text[jbxvt.scr.current->row]
-			+ jbxvt.scr.current->col + n, 0,
+		memset(jbxvt.scr.current->text[jbxvt.scr.current->cursor.row]
+			+ jbxvt.scr.current->cursor.col + n, 0,
 			jbxvt.scr.chars.width
-			- jbxvt.scr.current->col - n);
+			- jbxvt.scr.current->cursor.col - n);
 #ifdef SCR_DEBUG
 		LOG("n: %d, strlen: %lu", n, strlen((const char *)
-			jbxvt.scr.current->text[jbxvt.scr.current->row]));
+			jbxvt.scr.current->text[jbxvt.scr.current->cursor.row]));
 #endif//SCR_DEBUG
 			
 		paint_rval_text(str,jbxvt.scr.rstyle,n,p);
 		if (jbxvt.scr.rstyle == 0)
 			memset(jbxvt.scr.current->rend
-				[jbxvt.scr.current->row]
-				+ jbxvt.scr.current->col,
+				[jbxvt.scr.current->cursor.row]
+				+ jbxvt.scr.current->cursor.col,
 				0,n*sizeof(uint32_t));
 		else {
 			for (i = 0; i < n; i++)
-				jbxvt.scr.current->rend[jbxvt.scr.current->row]
-					[jbxvt.scr.current->col + i]
+				jbxvt.scr.current->rend
+					[jbxvt.scr.current->cursor.row]
+					[jbxvt.scr.current->cursor.col + i]
 					= jbxvt.scr.rstyle;
-			jbxvt.scr.current->rend[jbxvt.scr.current->row]
+			jbxvt.scr.current->rend[jbxvt.scr.current->cursor.row]
 				[jbxvt.scr.chars.width] = 1;
 		}
 		len -= n;
 		str += n;
-		jbxvt.scr.current->col += n;
-		if (len > 0 && jbxvt.scr.current->col
+		jbxvt.scr.current->cursor.col += n;
+		if (len > 0 && jbxvt.scr.current->cursor.col
 			== jbxvt.scr.chars.width && *str >= ' ') {
 			if (jbxvt.scr.current->wrap) {
-				jbxvt.scr.current->text[jbxvt.scr.current->row]
+				jbxvt.scr.current->text
+					[jbxvt.scr.current->cursor.row]
 					[jbxvt.scr.chars.width] = 1;
-				if (jbxvt.scr.current->row
-					== jbxvt.scr.current->bmargin)
-					scroll(jbxvt.scr.current->tmargin,
-						jbxvt.scr.current->bmargin,1);
+				if (jbxvt.scr.current->cursor.row
+					== jbxvt.scr.current->margin.bottom)
+					scroll(jbxvt.scr.current->margin.top,
+						jbxvt.scr.current
+						->margin.bottom, 1);
 				else
-					jbxvt.scr.current->row++;
-				jbxvt.scr.current->col = 0;
+					jbxvt.scr.current->cursor.row++;
+				jbxvt.scr.current->cursor.col = 0;
 			} else {
-				jbxvt.scr.current->col
+				jbxvt.scr.current->cursor.col
 					= jbxvt.scr.chars.width - 1;
 				cursor(CURSOR_DRAW);
 				return;
 			}
 		}
 	}
-	if (jbxvt.scr.current->col == jbxvt.scr.chars.width) {
-		jbxvt.scr.current->col = jbxvt.scr.chars.width - 1;
+	if (jbxvt.scr.current->cursor.col == jbxvt.scr.chars.width) {
+		jbxvt.scr.current->cursor.col = jbxvt.scr.chars.width - 1;
 		jbxvt.scr.current->wrap_next = jbxvt.scr.current->wrap;
 	}
 	cursor(CURSOR_DRAW);

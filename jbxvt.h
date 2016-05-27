@@ -3,6 +3,7 @@
 
 #include "color.h"
 #include "command.h"
+#include "Dim.h"
 #include "screenst.h"
 #include "selst.h"
 #include "slinest.h"
@@ -13,25 +14,6 @@
 
 // Use for all file descriptors:
 typedef int fd_t;
-
-// Structure for dimensional data:
-typedef struct Dim {
-	union {
-		int16_t x;
-		int16_t r; // row
-		int16_t row;
-		int16_t h; // height
-		uint16_t height;
-	};
-	union {
-		int16_t y;
-		int16_t c; // column
-		int16_t col; // column
-		int16_t column;
-		uint16_t w; // width
-		uint16_t width;
-	};
-} Dim;
 
 struct JBXVT {
 	struct {

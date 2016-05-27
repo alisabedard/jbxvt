@@ -9,10 +9,8 @@
 struct screenst {
 	uint8_t **text;		// backup copy of text
 	uint32_t **rend;	// rendition styles
-	int32_t tmargin;	// top scroll margin
-	int32_t bmargin;	// bottom scroll margin
-	int16_t row;		// cursor position
-	int16_t col;		// ditto
+	Dim margin; 		// scroll margins, top and bottom
+	Dim cursor;		// cursor position, row and column
 	bool decom:1;		// origin mode flag
 	bool wrap:1;		// auto-wrap flag
 	bool wrap_next:1;	// wrap before the next printed character

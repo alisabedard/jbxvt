@@ -43,9 +43,9 @@ static void free_visible_screens(uint8_t ch)
 
 void reset_row_col(void)
 {
-	jbxvt.scr.current->col = constrain(jbxvt.scr.current->col,
+	jbxvt.scr.current->cursor.col = constrain(jbxvt.scr.current->cursor.col,
 		jbxvt.scr.chars.width);
-	jbxvt.scr.current->row = constrain(jbxvt.scr.current->row,
+	jbxvt.scr.current->cursor.row = constrain(jbxvt.scr.current->cursor.row,
 		jbxvt.scr.chars.height);
 }
 
@@ -53,21 +53,21 @@ static void fill_and_scroll(const uint8_t ch)
 {
 	/*  Now fill up the screen from the old screen
 	    and saved lines.  */
-	if (jbxvt.scr.s1.row >= ch) {
+	if (jbxvt.scr.s1.cursor.row >= ch) {
 		// scroll up to save any lines that will be lost.
-		scroll_up(jbxvt.scr.s1.row - ch + 1);
-		jbxvt.scr.s1.row = ch - 1;
+		scroll_up(jbxvt.scr.s1.cursor.row - ch + 1);
+		jbxvt.scr.s1.cursor.row = ch - 1;
 	}
 }
 
 static void init_screen_elements(struct screenst * restrict scr,
 	uint8_t ** restrict text, uint32_t ** restrict rend)
 {
-	scr->bmargin = jbxvt.scr.chars.height - 1;
+	scr->margin.bottom = jbxvt.scr.chars.height - 1;
 	scr->decom = false;
 	scr->rend = rend;
 	scr->text = text;
-	scr->tmargin = 0;
+	scr->margin.top = 0;
 	scr->wrap_next = false;
 }
 
@@ -172,10 +172,11 @@ void scr_reset(void)
 		if (jbxvt.scr.s1.text) {
 			fill_and_scroll(c.h);
 			// calculate working no. of lines.
-			int16_t i = jbxvt.scr.sline.top + jbxvt.scr.s1.row + 1;
+			int16_t i = jbxvt.scr.sline.top
+				+ jbxvt.scr.s1.cursor.row + 1;
 			int16_t j = i > c.h ? c.h - 1 : i - 1;
-			i = jbxvt.scr.s1.row;
-			jbxvt.scr.s1.row = j;
+			i = jbxvt.scr.s1.cursor.row; // save
+			jbxvt.scr.s1.cursor.row = j;
 			bool onscreen = true;
 			for (; j >= 0; j--)
 				  i = onscreen ? save_data_on_screen(c.w, i,

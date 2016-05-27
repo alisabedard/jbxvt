@@ -13,8 +13,8 @@ static void draw_cursor(const uint8_t cursor_focus)
 	if (jbxvt.scr.offset > 0)
 		return;
 
-	const int16_t x = MARGIN + jbxvt.X.font_width * jbxvt.scr.current->col;
-	const int16_t y = MARGIN + jbxvt.X.font_height * jbxvt.scr.current->row;
+	const int16_t x = MARGIN + jbxvt.X.font_width * jbxvt.scr.current->cursor.col;
+	const int16_t y = MARGIN + jbxvt.X.font_height * jbxvt.scr.current->cursor.row;
 	XFillRectangle(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.cu,
 		x,y,jbxvt.X.font_width,jbxvt.X.font_height);
 	if (!cursor_focus)
@@ -33,9 +33,9 @@ static void adj_wh(int16_t * restrict grc,
 static void restore(struct screenst * restrict s, const uint32_t r)
 {
 	cursor(CURSOR_DRAW);
-	adj_wh(&jbxvt.scr.current->row, s->row,
+	adj_wh(&jbxvt.scr.current->cursor.row, s->cursor.row,
 		jbxvt.scr.chars.height);
-	adj_wh(&jbxvt.scr.current->col, s->col,
+	adj_wh(&jbxvt.scr.current->cursor.col, s->cursor.col,
 		jbxvt.scr.chars.width);
 	scr_change_rendition(r);
 	cursor(CURSOR_DRAW);
@@ -85,13 +85,13 @@ void cursor(const enum CursorOp op)
 		restore(&saved_screen, saved_rstyle);
 		break;
 	case CURSOR_SAVE: // Save the cursor position and rendition style.
-		saved_screen.row = jbxvt.scr.current->row;
-		saved_screen.col = jbxvt.scr.current->col;
+		saved_screen.cursor.row = jbxvt.scr.current->cursor.row;
+		saved_screen.cursor.col = jbxvt.scr.current->cursor.col;
 		saved_rstyle = jbxvt.scr.rstyle;
 		break;
 	case CURSOR_REPORT: // Report the current cursor position.
-		cprintf("\033[%d;%dR",jbxvt.scr.current->row + 1,
-			jbxvt.scr.current->col + 1);
+		cprintf("\033[%d;%dR",jbxvt.scr.current->cursor.row + 1,
+			jbxvt.scr.current->cursor.col + 1);
 		break;
 	}
 }
