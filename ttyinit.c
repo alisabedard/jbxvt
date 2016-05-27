@@ -544,9 +544,7 @@ static void set_ttymodes(void)
 	(void)ioctl(0,TIOCLSET,&lmode);
 #endif// BSD_TTY
 
-	Dim d;
-	scr_get_size(&d);
-	tty_set_size(d.w, d.h);
+	tty_set_size(jbxvt.scr.chars.width, jbxvt.scr.chars.height);
 }
 
 static void child(char ** restrict argv, fd_t ttyfd)

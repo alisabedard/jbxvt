@@ -65,13 +65,6 @@ void scr_change_rendition(const uint32_t style)
 	jbxvt.scr.rstyle = style ? jbxvt.scr.rstyle | style : 0;
 }
 
-//  Set the width and height of the screen in d.
-void scr_get_size(Dim * restrict d)
-{
-	d->w = jbxvt.scr.chars.width;
-	d->h = jbxvt.scr.chars.height;
-}
-
 //  Return true if the character is one that can be handled by scr_string()
 bool is_string_char(int16_t c)
 {

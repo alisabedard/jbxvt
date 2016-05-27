@@ -97,9 +97,6 @@ void scr_change_screen(const uint8_t direction);
 //  Delete count lines and scroll up the bottom of the screen to fill the gap
 void scr_delete_lines(const uint8_t count);
 
-//  Set the width and height of the screen in d.
-void scr_get_size(Dim * restrict d);
-
 /* Move the cursor up if mod is positive or down if mod is negative,
    by mod number of lines and scroll if necessary.  */
 void scr_index_by(const int8_t mod);
