@@ -26,10 +26,14 @@ void scr_make_selection(const Time time)
 {
 	if (!save_selection())
 		return;
-	XSetSelectionOwner(jbxvt.X.dpy, XA_PRIMARY, jbxvt.X.win.vt, time);
+	XSetSelectionOwner(jbxvt.X.dpy, XA_PRIMARY,
+		jbxvt.X.win.vt, time);
 	//  Place in CUT_BUFFER0 for backup.
-	XChangeProperty(jbxvt.X.dpy,DefaultRootWindow(jbxvt.X.dpy),XA_CUT_BUFFER0,
-		XA_STRING,8,PropModeReplace,jbxvt.sel.text,jbxvt.sel.length);
+	XChangeProperty(jbxvt.X.dpy,
+		DefaultRootWindow(jbxvt.X.dpy),
+		XA_CUT_BUFFER0,
+		XA_STRING,8,PropModeReplace,
+		jbxvt.sel.text,jbxvt.sel.length);
 }
 
 //  respond to a request for our current selection.
@@ -65,18 +69,19 @@ void scr_clear_selection(void)
 }
 
 //  start a selection using the specified unit.
-void scr_start_selection(Dim p, enum selunit unit)
+void scr_start_selection(Point p, enum selunit unit)
 {
-	const Dim sc = jbxvt.scr.chars;
-	show_selection(0, sc.h - 1, 0, sc.w - 1);
-	Dim rc = { .x = (p.x - MARGIN) / jbxvt.X.font_width,
-		.y = (p.y - MARGIN) / jbxvt.X.font_height};
+	show_selection(0, jbxvt.scr.chars.height - 1,
+		0, jbxvt.scr.chars.width - 1);
+	Point rc = { .col = (p.x - MARGIN) / jbxvt.X.font_width,
+		.row = (p.y - MARGIN) / jbxvt.X.font_height};
 	selection_unit = unit;
 	fix_rc(&rc);
 	rc_to_selend(rc.row, rc.col, &jbxvt.sel.anchor);
 	jbxvt.sel.end2 = jbxvt.sel.end1 = jbxvt.sel.anchor;
 	adjust_selection(&jbxvt.sel.end2);
-	show_selection(0, sc.h - 1, 0, sc.w - 1);
+	show_selection(0, jbxvt.scr.chars.height - 1,
+		0, jbxvt.scr.chars.width - 1);
 }
 
 
@@ -96,12 +101,12 @@ void rc_to_selend(const int16_t row, const int16_t col, struct selst * se)
 
 /*  Fix the coordinates so that they are within the screen and do not lie within
  *  empty space.  */
-void fix_rc(Dim * restrict rc)
+void fix_rc(Point * restrict rc)
 {
-	int16_t c = constrain(rc->col, jbxvt.scr.chars.width);
-	int16_t r = constrain(rc->row, jbxvt.scr.chars.height);
+	uint16_t c = constrain(rc->col, jbxvt.scr.chars.width);
+	uint16_t r = constrain(rc->row, jbxvt.scr.chars.height);
 	if (selection_unit == CHAR) {
-		int i = (r - jbxvt.scr.offset);
+		int16_t i = (r - jbxvt.scr.offset);
 		uint8_t * s;
 		if (i >= 0) {
 			s = jbxvt.scr.current->text[i];
@@ -110,7 +115,7 @@ void fix_rc(Dim * restrict rc)
 					&& s[c] < ' ')
 					c++;
 		} else {
-			i = -1 - i;
+			i = - 1 - i;
 			const uint8_t len = jbxvt.scr.sline.data[i]->sl_length;
 			s = jbxvt.scr.sline.data[i]->sl_text;
 			if (c && s[c - 1] < ' ')
@@ -236,7 +241,6 @@ void adjust_selection(struct selst * restrict include)
  */
 void check_selection(const int16_t row1, const int16_t row2)
 {
-
 	if (jbxvt.sel.end1.se_type == NOSEL || jbxvt.sel.end2.se_type == NOSEL)
 		return;
 	int16_t r1 = jbxvt.sel.end1.se_type == SCREENSEL

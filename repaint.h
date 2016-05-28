@@ -10,10 +10,10 @@
 
 /* Repaint the box delimited by rc1.r to rc2.r and rc1.c to rc2.c
    of the displayed screen from the backup screen.  */
-void repaint(Dim rc1, Dim rc2);
+void repaint(Point rc1, Point rc2);
 
 //  Paint the text using the rendition value at the screen position.
 void paint_rval_text(uint8_t * restrict str, uint32_t rval,
-	uint8_t len, Dim p);
+	uint8_t len, Point p);
 
 #endif//JBXVT_REPAINT_H

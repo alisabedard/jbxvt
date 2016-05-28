@@ -25,7 +25,7 @@ void scr_string(uint8_t * restrict str, int len, int nlcount)
 	uint8_t *s;
 	int x2, n, i;
 	unsigned int width;
-	Dim p;
+	Point p;
 
 	home_screen();
 	cursor(CURSOR_DRAW);

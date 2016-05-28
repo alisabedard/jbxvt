@@ -1,6 +1,7 @@
 CFLAGS+=-Os
 #CFLAGS+=-Werror
 #CFLAGS+=-flto # doesn't work with clang
+#CFLAGS=-O0
 #CFLAGS+=-ggdb
 #CFLAGS+=-DDEBUG
 #CFLAGS+=-DTK_DEBUG

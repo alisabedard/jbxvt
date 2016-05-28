@@ -126,8 +126,8 @@ static void handle_tk_expose(struct tokenst * restrict t)
 	switch (t->tk_region) {
 	case SCREEN :
 		if(jbxvt_size_set){
-			scr_refresh((Dim){.x = t->tk_arg[0],
-				.y = t->tk_arg[1]}, (Dim){
+			scr_refresh((Point){.x = t->tk_arg[0],
+				.y = t->tk_arg[1]}, (Size){
 				.width = t->tk_arg[2],
 				.height = t->tk_arg[3]});
 			cursor(CURSOR_DRAW);
@@ -199,23 +199,23 @@ app_loop_head:
 			- token.tk_arg[0] / jbxvt.X.font_height);
 		break;
 	case TK_SELSTART :
-		scr_start_selection((Dim){.x = token.tk_arg[0],
+		scr_start_selection((Point){.x = token.tk_arg[0],
 			.y = token.tk_arg[1]}, CHAR);
 		break;
 	case TK_SELEXTND :
-		scr_extend_selection((Dim){.x = token.tk_arg[0],
+		scr_extend_selection((Point){.x = token.tk_arg[0],
 			.y = token.tk_arg[1]}, false);
 		break;
 	case TK_SELDRAG :
-		scr_extend_selection((Dim){.x = token.tk_arg[0],
+		scr_extend_selection((Point){.x = token.tk_arg[0],
 			.y = token.tk_arg[1]}, true);
 		break;
 	case TK_SELWORD :
-		scr_start_selection((Dim){.x = token.tk_arg[0],
+		scr_start_selection((Point){.x = token.tk_arg[0],
 			.y = token.tk_arg[1]}, WORD);
 		break;
 	case TK_SELLINE :
-		scr_start_selection((Dim){.x = token.tk_arg[0],
+		scr_start_selection((Point){.x = token.tk_arg[0],
 			.y = token.tk_arg[1]}, LINE);
 		break;
 	case TK_SELECT :

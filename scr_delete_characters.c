@@ -29,7 +29,7 @@ void scr_delete_characters(int count)
 {
 	LOG("scr_delete_characters(%d)", count);
 	const uint8_t scw = jbxvt.scr.chars.width;
-	const Dim c = { // current cursor position
+	const Point c = { // current cursor position
 		.col = jbxvt.scr.current->cursor.col,
 		.row = jbxvt.scr.current->cursor.row
 	};
@@ -46,7 +46,7 @@ void scr_delete_characters(int count)
 	}
 	memset(s + scw - count, 0, count);
 	memset(r + scw - count, 0, count);
-	const Dim f = { .w = jbxvt.X.font_width,
+	const Size f = { .w = jbxvt.X.font_width,
 		.h = jbxvt.X.font_height };
 	const int16_t y = MARGIN + c.row * f.height;
 	int16_t x[2] = {[1] = MARGIN + c.col * f.width};

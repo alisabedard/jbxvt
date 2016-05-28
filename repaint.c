@@ -98,7 +98,7 @@ static void set_rval_colors(const uint32_t rval)
 
 //  Paint the text using the rendition value at the screen position.
 void paint_rval_text(uint8_t * restrict str, uint32_t rval,
-	uint8_t len, Dim p)
+	uint8_t len, Point p)
 {
 	set_rval_colors(rval);
 	XGCValues v;
@@ -127,7 +127,7 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 
 // Display the string using the rendition vector at the screen coordinates
 static void paint_rvec_text(uint8_t * str,
-	uint32_t * rvec, uint16_t len, Dim p)
+	uint32_t * rvec, uint16_t len, Point p)
 {
 	if (rvec == NULL) {
 		paint_rval_text(str, 0, len, p);
@@ -146,7 +146,7 @@ static void paint_rvec_text(uint8_t * str,
 	}
 }
 
-static int repaint_generic(const Dim p,
+static int repaint_generic(const Point p,
 	const int m, const int c1, const int c2,
 	uint8_t * restrict str, uint32_t * rend)
 {
@@ -168,7 +168,7 @@ static uint8_t convert_char(const uint8_t c)
 
 /* Repaint the box delimited by rc1.r to rc2.r and rc1.c to rc2.c
    of the displayed screen from the backup screen.  */
-void repaint(Dim rc1, Dim rc2)
+void repaint(Point rc1, Point rc2)
 {
 	LOG("repaint(%d, %d, %d, %d)", rc1.r, rc2.r, rc1.c, rc2.c);
 	uint8_t * str = malloc(jbxvt.scr.chars.width + 1);
@@ -190,7 +190,7 @@ void repaint(Dim rc1, Dim rc2)
 		m -= rc1.c;
 		for (uint16_t x = 0; x < m; x++)
 			  str[x] = convert_char(s[x + rc1.c]);
-		y1 = repaint_generic((Dim){.x=x1, .y=y1}, m, rc1.c,
+		y1 = repaint_generic((Point){.x=x1, .y=y1}, m, rc1.c,
 			rc2.c, str, sl->sl_rend);
 	}
 
@@ -199,10 +199,10 @@ void repaint(Dim rc1, Dim rc2)
 	for (; y <= rc2.r; y++, i++) {
 		uint8_t * s = jbxvt.scr.current->text[i];
 		uint8_t x;
-		for (x = rc1.c; x <= rc2.c; x++)
-			  str[x - rc1.c] = convert_char(s[x]);
+		for (x = rc1.c; s && x <= rc2.c; x++)
+			str[x - rc1.c] = convert_char(s[x]);
 		const uint16_t m = x - rc1.c - 1;
-		y1 = repaint_generic((Dim){.x=x1, .y=y1}, m,
+		y1 = repaint_generic((Point){.x=x1, .y=y1}, m,
 			rc1.c, rc2.c, str,
 			jbxvt.scr.current->rend[i]);
 	}

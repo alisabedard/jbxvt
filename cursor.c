@@ -13,8 +13,10 @@ static void draw_cursor(const uint8_t cursor_focus)
 	if (jbxvt.scr.offset > 0)
 		return;
 
-	const int16_t x = MARGIN + jbxvt.X.font_width * jbxvt.scr.current->cursor.col;
-	const int16_t y = MARGIN + jbxvt.X.font_height * jbxvt.scr.current->cursor.row;
+	const int16_t x = MARGIN + jbxvt.X.font_width
+		* jbxvt.scr.current->cursor.col;
+	const int16_t y = MARGIN + jbxvt.X.font_height
+		* jbxvt.scr.current->cursor.row;
 	XFillRectangle(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.cu,
 		x,y,jbxvt.X.font_width,jbxvt.X.font_height);
 	if (!cursor_focus)
@@ -24,7 +26,7 @@ static void draw_cursor(const uint8_t cursor_focus)
 }
 
 static void adj_wh(int16_t * restrict grc,
-	int16_t src, int16_t chw)
+	int16_t src, uint16_t chw)
 {
 	*grc = src >= chw ? chw - 1 : src;
 }

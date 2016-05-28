@@ -29,7 +29,7 @@ void scr_make_selection(const Time time);
 
 /*  Fix the coordinates so that they are within the screen and do not lie within
  *  empty space.  */
-void fix_rc(Dim * restrict rc);
+void fix_rc(Point * restrict rc);
 
 /*  Determine if the current selection overlaps row1-row2 and if it does then
  *  remove it from the screen.  */
@@ -51,7 +51,7 @@ void adjust_selection(struct selst * restrict include);
 void scr_clear_selection(void);
 
 // start selection using specified unit:
-void scr_start_selection(const Dim p, enum selunit unit);
+void scr_start_selection(const Point p, enum selunit unit);
 
 /*  Convert a section of displayed text line into a text string suitable
     for pasting. *lenp is the length of the input string, i1 is index

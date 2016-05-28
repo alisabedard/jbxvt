@@ -42,7 +42,7 @@ struct JBXVT {
 			uint16_t top; /* high water mark
 					       of saved scroll lines */
 		} sline;
-		Dim pixels, chars;
+		Size pixels, chars;
 		int16_t offset; // current vert saved line
 	} scr;
 	struct {

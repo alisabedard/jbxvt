@@ -71,7 +71,7 @@ static void init_screen_elements(struct screenst * restrict scr,
 	scr->wrap_next = false;
 }
 
-static Dim get_dim(void)
+static Size get_dim(void)
 {
 	Window dw;
 	int d;
@@ -80,14 +80,14 @@ static Dim get_dim(void)
 	XGetGeometry(jbxvt.X.dpy, jbxvt.X.win.vt, &dw, &d, &d,
 		&w, &h, &u, &u);
 
-	return (Dim){.width = w, .height = h};
+	return (Size){.width = w, .height = h};
 }
 
 __attribute__((pure))
-static Dim get_cdim(const Dim d)
+static Size get_cdim(const Size d)
 {
 	const uint8_t m = MARGIN<<1;
-	return (Dim){.width = (d.w-m)/jbxvt.X.font_width,
+	return (Size){.width = (d.w-m)/jbxvt.X.font_width,
 		.height = (d.h-m)/jbxvt.X.font_height};
 }
 
@@ -146,8 +146,8 @@ static int handle_offscreen_data(const uint8_t cw,
     needs to be repaired completely.  */
 void scr_reset(void)
 {
-	Dim d = get_dim();
-	Dim c = get_cdim(d);
+	Size d = get_dim();
+	Size c = get_cdim(d);
 	if (!jbxvt.scr.current->text || c.w != jbxvt.scr.chars.width
 		|| c.h != jbxvt.scr.chars.height) {
 		uint8_t **s1, **s2;
@@ -200,7 +200,7 @@ void scr_reset(void)
 		jbxvt.scr.pixels = d;
 		init_screen_elements(&jbxvt.scr.s1, s1, r1);
 		init_screen_elements(&jbxvt.scr.s2, s2, r2);
-		scr_start_selection((Dim){},CHAR);
+		scr_start_selection((Point){},CHAR);
 	}
 	tty_set_size(c.w, c.h);
 	reset_row_col();
@@ -208,7 +208,7 @@ void scr_reset(void)
 	c.w--;
 	sbar_show(c.h + jbxvt.scr.sline.top, jbxvt.scr.offset,
 		jbxvt.scr.offset + c.h);
-	repaint((Dim){}, c);
+	repaint((Point){}, (Point){.r = c.h, .c = c.w});
 	cursor(CURSOR_DRAW);
 }
 

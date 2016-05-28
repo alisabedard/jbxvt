@@ -27,7 +27,7 @@ void scr_insert_characters(int16_t count)
 		s[i] = s[i - count];
 		r[i] = r[i - count];
 	}
-	const Dim p = {
+	const Point p = {
 		.x = MARGIN + jbxvt.scr.current->cursor.col
 			* jbxvt.X.font_width,
 		.y = MARGIN + jbxvt.scr.current->cursor.row

@@ -27,7 +27,7 @@ void repair_damage(void)
 		if (event.type == NoExpose)
 			return;
 
-		Dim rc1, rc2;
+		Point rc1, rc2;
 		rc1.r = constrain((event.xgraphicsexpose.y - MARGIN)
 			/ jbxvt.X.font_height, jbxvt.scr.chars.height);
 		rc2.r = constrain((event.xgraphicsexpose.y

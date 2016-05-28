@@ -6,28 +6,36 @@
 
 #include <stdint.h>
 
-// Structure for dimensional data:
-typedef struct Dim {
+typedef struct Point {
 	union {
 		int16_t x;
-		int16_t r; // row
-		int16_t row;
-		int16_t h; // height
-		uint16_t height;
-		uint16_t top;
-		uint16_t t; // top
+		int16_t top;
+		int16_t column;
+		int16_t col;
+		int16_t c;
 	};
 	union {
 		int16_t y;
-		int16_t c; // column
-		int16_t col; // column
-		int16_t column;
-		uint16_t w; // width
-		uint16_t width;
-		uint16_t bottom;
-		uint16_t bot; // bottom
-		uint16_t b; // bottom
+		int16_t bottom;
+		int16_t row;
+		int16_t r;
 	};
-} Dim;
+} Point;
+
+typedef struct Size {
+	union {
+		uint16_t width;
+		uint16_t w;
+	};
+	union {
+		uint16_t height;
+		uint16_t h;
+	};
+} Size;
+
+typedef struct Rect {
+	Point pos;
+	Size sz;
+} Rect;
 
 #endif//!JBXVT_DIM_H

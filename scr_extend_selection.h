@@ -6,7 +6,7 @@
 
 #include "jbxvt.h"
 
-void scr_extend_selection(const Dim p, const bool drag);
+void scr_extend_selection(const Point p, const bool drag);
 
 #endif//!SCR_EXTEND_SELECTION_H
 
