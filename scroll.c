@@ -69,7 +69,7 @@ static void ck_sel_on_scr(const int j)
 		  scr_clear_selection();
 }
 
-static void scroll_up(uint8_t row1, uint8_t row2, int8_t count)
+static void sc_up(uint8_t row1, uint8_t row2, int8_t count)
 {
 	LOG("scroll_up(count: %d, row1: %d, row2: %d)", count, row1, row2);
 	if (row1 == 0 && jbxvt.scr.current == &jbxvt.scr.s1) {
@@ -146,41 +146,58 @@ static void scroll_up(uint8_t row1, uint8_t row2, int8_t count)
 		count * jbxvt.X.font_height,False);
 }
 
-static void scroll_down(uint8_t row1, uint8_t row2, int8_t count)
+static void lclr(const int16_t i, const uint8_t row1, const size_t sz,
+	uint32_t ** t, uint32_t ** s)
+{
+	memset(s[i], 0, sz);
+	t[row1 + i] = s[i];
+}
+
+static void clear_lines(int16_t i, uint8_t row1,
+	uint8_t ** ts, uint32_t ** tr,
+	uint8_t ** ss, uint32_t ** sr)
+{
+	const size_t s = jbxvt.scr.chars.width + 1;
+	lclr(i, row1, s, (uint32_t **)ts, (uint32_t **)ss);
+	lclr(i, row1, s * sizeof(uint32_t), tr, sr);
+}
+
+static void copy_and_repair(const uint8_t row1, const uint8_t row2, int8_t count)
+{
+	int16_t y1 = MARGIN + row1 * jbxvt.X.font_height,
+		y2 = y1 + count * jbxvt.X.font_height;
+	int height = (row2 - row1 - count)
+		* jbxvt.X.font_height;
+	XCopyArea(jbxvt.X.dpy,jbxvt.X.win.vt,
+		jbxvt.X.win.vt,jbxvt.X.gc.tx,
+		0,y1,jbxvt.scr.pixels.width,height,0,y2);
+	repair_damage();
+
+}
+
+static void sc_dn(uint8_t row1, uint8_t row2, int8_t count)
 {
 	LOG("scroll_down(%d, %d, %d)", row1, row2, count);
 	count = -count;
-	int j = row2 - 1;
 	uint32_t *rend[MAX_SCROLL];
 	uint8_t *save[MAX_SCROLL];
-	for (int i = 0; i < count; i++, j--) {
+	int16_t i, j = row2 - 1;
+	for (i = 0; i < count; i++, j--) {
 		save[i] = jbxvt.scr.current->text[j];
 		rend[i] = jbxvt.scr.current->rend[j];
 		ck_sel_on_scr(j);
 	}
 	for (; j >= row1; j--)
 		transmogrify(j, count);
-	for (int i = 0; i < count; i++) {
-		memset(save[i],0,jbxvt.scr.chars.width + 1);
-		jbxvt.scr.current->text[row1 + i] = save[i];
-		memset(rend[i],0,jbxvt.scr.chars.width + 1);
-		jbxvt.scr.current->rend[row1 + i] = rend[i];
-	}
-	int y1, y2;
-	if (count < row2 - row1) {
-		y1 = MARGIN + row1 * jbxvt.X.font_height;
-		y2 = y1 + count * jbxvt.X.font_height;
-		int height = (row2 - row1 - count)
-			* jbxvt.X.font_height;
-		XCopyArea(jbxvt.X.dpy,jbxvt.X.win.vt,
-			jbxvt.X.win.vt,jbxvt.X.gc.tx,
-			0,y1,jbxvt.scr.pixels.width,height,0,y2);
-		repair_damage();
-	}
-	int height = count * jbxvt.X.font_height;
-	y1 = MARGIN + row1 * jbxvt.X.font_height;
-	XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,0,y1,
-		jbxvt.scr.pixels.width,height,False);
+	for (i = 0; i < count; i++)
+		clear_lines(i, row1, jbxvt.scr.current->text,
+			jbxvt.scr.current->rend, save, rend);
+	if (count < row2 - row1)
+		  copy_and_repair(row1, row2, count);
+	i = count * jbxvt.X.font_height;
+	const int16_t y1 = MARGIN + row1 * jbxvt.X.font_height;
+	XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt, 0, y1,
+		jbxvt.scr.pixels.width, i, false);
 }
 
 /*  Scroll count lines from row1 to row2 inclusive.  row1 should be <= row2.
@@ -194,9 +211,9 @@ void scroll(const uint8_t row1, const uint8_t row2, const int16_t count)
 	if((row1 <= row2) && (count < MAX_SCROLL)) {
 		// Negative is down:
 		if(count < 0)
-			scroll_down(row1, row2, count);
+			sc_dn(row1, row2, count);
 		else
-			scroll_up(row1, row2, count);
+			sc_up(row1, row2, count);
 	}
 }
 
