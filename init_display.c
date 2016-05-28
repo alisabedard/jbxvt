@@ -103,38 +103,45 @@ static void create_vt_window(void)
 	XSelectInput(jbxvt.X.dpy,jbxvt.X.win.vt,VT_EVENTS);
 }
 
-//  Open the window.
-static void create_window(char * name)
+static void show_scrollbar(void)
 {
-	setup_sizehints();
-	create_main_window();
-	setup_properties(name);
-	create_sb_window();
-	create_vt_window();
-
 	if(jbxvt.opt.show_scrollbar) { // show scrollbar:
 		XMoveWindow(jbxvt.X.dpy,jbxvt.X.win.vt,SBAR_WIDTH,0);
 		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.vt,
 			sizehints.width - SBAR_WIDTH,
 			sizehints.height);
 	}
-
 }
 
-static void setup_gcs(Display * d, Window w)
+//  Open the window.
+static void create_window(char * restrict name)
+{
+	setup_sizehints();
+	create_main_window();
+	setup_properties(name);
+	create_sb_window();
+	create_vt_window();
+	show_scrollbar();
+}
+
+static void setup_gcs(void)
 {
 	XGCValues gcv = { .foreground = jbxvt.X.color.fg,
 		.background = jbxvt.X.color.bg,
 		.function = GXinvert, .font = jbxvt.X.font->fid,
 		.graphics_exposures = False };
-	jbxvt.X.gc.tx = XCreateGC(d, w, GCForeground|GCBackground|GCFont, &gcv);
-	jbxvt.X.gc.ne = XCreateGC(d, w,
+	jbxvt.X.gc.tx = XCreateGC(jbxvt.X.dpy, jbxvt.X.win.main,
+		GCForeground|GCBackground|GCFont, &gcv);
+	jbxvt.X.gc.ne = XCreateGC(jbxvt.X.dpy, jbxvt.X.win.main,
 		GCForeground|GCBackground|GCGraphicsExposures, &gcv);
-	jbxvt.X.gc.sb = XCreateGC(d, w, GCForeground|GCBackground|GCFont, &gcv);
+	jbxvt.X.gc.sb = XCreateGC(jbxvt.X.dpy, jbxvt.X.win.main,
+		GCForeground|GCBackground|GCFont, &gcv);
 	gcv.plane_mask = jbxvt.X.color.fg ^ jbxvt.X.color.bg;
-	jbxvt.X.gc.hl = XCreateGC(d, w, GCFunction|GCPlaneMask, &gcv);
+	jbxvt.X.gc.hl = XCreateGC(jbxvt.X.dpy, jbxvt.X.win.main,
+	       GCFunction|GCPlaneMask, &gcv);
 	gcv.plane_mask = jbxvt.X.color.cursor ^ jbxvt.X.color.bg;
-	jbxvt.X.gc.cu = XCreateGC(d, w, GCFunction|GCPlaneMask, &gcv);
+	jbxvt.X.gc.cu = XCreateGC(jbxvt.X.dpy, jbxvt.X.win.main,
+		GCFunction|GCPlaneMask, &gcv);
 }
 
 static void init_jbxvt_colors(void)
@@ -157,7 +164,7 @@ void init_display(char * name)
 	init_jbxvt_colors();
 	setup_font();
 	create_window(name);
-	setup_gcs(jbxvt.X.dpy, jbxvt.X.win.main);
+	setup_gcs();
 
 	scr_init();
 	sbar_reset();
