@@ -13,15 +13,16 @@ static void draw_cursor(const uint8_t cursor_focus)
 	if (jbxvt.scr.offset > 0)
 		return;
 
-	const int16_t x = MARGIN + jbxvt.X.font_width
-		* jbxvt.scr.current->cursor.col;
-	const int16_t y = MARGIN + jbxvt.X.font_height
-		* jbxvt.scr.current->cursor.row;
-	XFillRectangle(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.cu,
-		x,y,jbxvt.X.font_width,jbxvt.X.font_height);
+	Point p = jbxvt.scr.current->cursor;
+	p.x *= jbxvt.X.font_width;
+	p.y *= jbxvt.X.font_height;
+	p.x += MARGIN;
+	p.y += MARGIN;
+	XFillRectangle(jbxvt.X.dpy, jbxvt.X.win.vt, jbxvt.X.gc.cu,
+		p.x, p.y, jbxvt.X.font_width, jbxvt.X.font_height);
 	if (!cursor_focus)
 		XFillRectangle(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.cu,
-			x + 1,y + 1, jbxvt.X.font_width - 2,
+			p.x + 1, p.y + 1, jbxvt.X.font_width - 2,
 			jbxvt.X.font_height - 2);
 }
 
