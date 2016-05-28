@@ -50,13 +50,15 @@ static void setup_font(void)
 
 static void setup_sizehints(void)
 {
-	sizehints.width_inc = XTextWidth(jbxvt.X.font, "M", 1);
-	sizehints.height_inc = jbxvt.X.font->ascent + jbxvt.X.font->descent;
+	sizehints = (XSizeHints){
+		.width_inc = XTextWidth(jbxvt.X.font, "M", 1),
+		.height_inc = jbxvt.X.font->ascent + jbxvt.X.font->descent,
+		.flags = USSize,
+	};
 	sizehints.width = 80 * sizehints.width_inc;
 	sizehints.height = 24 * sizehints.height_inc;
 	sizehints.min_width = sizehints.width_inc + sizehints.base_width;
 	sizehints.min_height = sizehints.height_inc + sizehints.base_height;
-	sizehints.flags |= USSize;
 }
 
 static void setup_properties(char * name)
