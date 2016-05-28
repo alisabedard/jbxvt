@@ -9,6 +9,6 @@
 
 /*  Compare the two selections and return -1, 0 or 1 depending on
  *  whether se2 is after, equal to or before se1.  */
-int8_t selcmp(struct selst * se1, struct selst * se2);
+int8_t selcmp(struct selst * restrict se1, struct selst * restrict se2);
 
 #endif//!JBXVT_SELCMP_H
