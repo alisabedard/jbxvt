@@ -69,40 +69,48 @@ static void ck_sel_on_scr(const int j)
 		  scr_clear_selection();
 }
 
+static int16_t sc_up_find_col(uint8_t * restrict s)
+{
+	int16_t col;
+	for (col = jbxvt.scr.chars.width - 1; col >= 0 && s[col] == 0; col--)
+		  ;
+	col++;
+	return col;
+}
+
 static void sc_up(uint8_t row1, uint8_t row2, int8_t count)
 {
 	LOG("scroll_up(count: %d, row1: %d, row2: %d)", count, row1, row2);
 	if (row1 == 0 && jbxvt.scr.current == &jbxvt.scr.s1) {
 		free_top_lines(count);
-		for (int i = jbxvt.scr.sline.max - count - 1;
-			i >= 0; i--) {
-			jbxvt.scr.sline.data[i + count]
-				= jbxvt.scr.sline.data[i];
-			set_selend_index(i, count, &jbxvt.sel.end1);
-			set_selend_index(i, count, &jbxvt.sel.end2);
+		Point iter;
+		for (iter.row = jbxvt.scr.sline.max - count - 1;
+			iter.row >= 0; iter.row--) {
+			jbxvt.scr.sline.data[iter.row + count]
+				= jbxvt.scr.sline.data[iter.row];
+			set_selend_index(iter.row, count, &jbxvt.sel.end1);
+			set_selend_index(iter.row, count, &jbxvt.sel.end2);
 		}
-		for (uint8_t i = 0; i < count; i++) {
-			uint8_t * s = jbxvt.scr.current->text[i];
-			uint32_t * r = jbxvt.scr.current->rend[i];
-			int j;
-			for (j = jbxvt.scr.chars.width - 1;
-				j >= 0 && s[j] == 0; j--)
-				  ;
-			j++;
+		for (iter.row = 0; iter.row < count; iter.row++) {
+			uint8_t * s = jbxvt.scr.current->text[iter.row];
+			uint32_t * r = jbxvt.scr.current->rend[iter.row];
+			iter.col = sc_up_find_col(s);
 			struct slinest *sl = malloc(sizeof(struct slinest));
-			sl->sl_text = malloc(j+1);
-			memcpy(sl->sl_text,s,j);
-			sl->sl_text[j] = s[jbxvt.scr.chars.width];
+			sl->sl_text = malloc(iter.col + 1);
+			memcpy(sl->sl_text, s, iter.col);
+			sl->sl_text[iter.col] = s[jbxvt.scr.chars.width];
 			if (!r[jbxvt.scr.chars.width])
 				  sl->sl_rend = NULL;
 			else {
-				sl->sl_rend = malloc((j + 1)*sizeof(uint32_t));
-				memcpy(sl->sl_rend,r,j*sizeof(uint32_t));
+				sl->sl_rend = malloc((iter.col + 1)
+					* sizeof(uint32_t));
+				memcpy(sl->sl_rend, r, iter.col
+					* sizeof(uint32_t));
 			}
-			sl->sl_length = j;
-			jbxvt.scr.sline.data[count - i - 1] = sl;
-			sel_scr_to_sav(&jbxvt.sel.end1, i, count);
-			sel_scr_to_sav(&jbxvt.sel.end2, i, count);
+			sl->sl_length = iter.col;
+			jbxvt.scr.sline.data[count - iter.row - 1] = sl;
+			sel_scr_to_sav(&jbxvt.sel.end1, iter.row, count);
+			sel_scr_to_sav(&jbxvt.sel.end2, iter.row, count);
 		}
 		jbxvt.scr.sline.top += count;
 		if (jbxvt.scr.sline.top > jbxvt.scr.sline.max)
@@ -170,9 +178,8 @@ static void copy_and_repair(const uint8_t row1, const uint8_t row2, int8_t count
 		* jbxvt.X.font_height;
 	XCopyArea(jbxvt.X.dpy,jbxvt.X.win.vt,
 		jbxvt.X.win.vt,jbxvt.X.gc.tx,
-		0,y1,jbxvt.scr.pixels.width,height,0,y2);
+		0 , y1, jbxvt.scr.pixels.width, height, 0, y2);
 	repair_damage();
-
 }
 
 static void sc_dn(uint8_t row1, uint8_t row2, int8_t count)
