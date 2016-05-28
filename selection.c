@@ -37,7 +37,7 @@ void scr_make_selection(const Time time)
 }
 
 //  respond to a request for our current selection.
-void scr_send_selection(const int time __attribute__((unused)),
+void scr_send_selection(const int time,
 	const int requestor, const int target, const int property)
 {
 	XEvent event = { .xselection.type = SelectionNotify,
@@ -99,34 +99,45 @@ void rc_to_selend(const int16_t row, const int16_t col, struct selst * se)
 	se->se_col = col;
 }
 
+#if defined(__i386__) || defined(__amd64__)
+__attribute__((regparm(2)))
+#endif//__i386__||__amd64__
+static uint8_t advance_c(uint8_t c, const uint8_t len,
+	uint8_t * restrict s)
+{
+	if (c && s[c - 1] < ' ')
+		  while (c < len && s[c] < ' ')
+			    c++;
+	if (c > len)
+		  c = jbxvt.scr.chars.width;
+	return c;
+}
+
+#if defined(__i386__) || defined(__amd64__)
+__attribute__((regparm(2)))
+#endif//__i386__||__amd64__
+static uint8_t find_c(uint8_t c, int16_t i)
+{
+	if (selection_unit == CHAR) {
+		if (i > -1) {
+			c = advance_c(c, jbxvt.scr.chars.width,
+				jbxvt.scr.current->text[i]);
+		} else {
+			i = - 1 - i;
+			c = advance_c(c, jbxvt.scr.sline.data[i]->sl_length,
+				jbxvt.scr.sline.data[i]->sl_text);
+		}
+	}
+	return c;
+}
+
 /*  Fix the coordinates so that they are within the screen and do not lie within
  *  empty space.  */
 void fix_rc(Point * restrict rc)
 {
-	uint16_t c = constrain(rc->col, jbxvt.scr.chars.width);
-	uint16_t r = constrain(rc->row, jbxvt.scr.chars.height);
-	if (selection_unit == CHAR) {
-		int16_t i = (r - jbxvt.scr.offset);
-		uint8_t * s;
-		if (i >= 0) {
-			s = jbxvt.scr.current->text[i];
-			if (c && s[c - 1] < ' ')
-				while (c < jbxvt.scr.chars.width
-					&& s[c] < ' ')
-					c++;
-		} else {
-			i = - 1 - i;
-			const uint8_t len = jbxvt.scr.sline.data[i]->sl_length;
-			s = jbxvt.scr.sline.data[i]->sl_text;
-			if (c && s[c - 1] < ' ')
-				while (c <= len && s[c] < ' ')
-					c++;
-			if (c > len)
-				c = jbxvt.scr.chars.width;
-		}
-	}
-	rc->c = c;
-	rc->r = r;
+	rc->r = constrain(rc->row, jbxvt.scr.chars.height);
+	rc->c = find_c(constrain(rc->col, jbxvt.scr.chars.width),
+		rc->r - jbxvt.scr.offset);
 }
 
 //  Convert the selection into a row and column.
@@ -141,9 +152,13 @@ void selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
 		: jbxvt.scr.offset - se->se_index - 1;
 }
 
-__attribute__((pure))
-static uint8_t compute_i2(uint8_t * restrict str, const uint16_t len,
-	const uint8_t i1, uint8_t i2)
+#if defined(__i386__) || defined(__amd64__)
+	__attribute__((pure,regparm(3)))
+#else
+	__attribute__((pure))
+#endif
+static inline uint8_t compute_i2(const uint16_t len, const uint8_t i1,
+	uint8_t i2, uint8_t * restrict str)
 {
 	if (i2 >= len)
 		i2 = len - 1;
@@ -164,7 +179,7 @@ uint8_t * convert_line(uint8_t * restrict str,
 	// set this before i2 is modified
 	const bool newline = (i2 + 1 == jbxvt.scr.chars.width)
 		&& (str[*lenp] == 0);
-	i2 = compute_i2(str, *lenp, i1, i2);
+	i2 = compute_i2(*lenp, i1, i2, str);
 	static uint8_t buf[MAX_WIDTH + 3];
 	uint8_t *s = buf;
 	for (; i1 <= i2; i1++) {

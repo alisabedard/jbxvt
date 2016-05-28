@@ -33,8 +33,6 @@ struct JBXVT {
 	} X;
 	struct {
 		struct screenst * current;
-		uint32_t rstyle; // render style
-		uint32_t saved_rstyle; // saved render style
 		struct screenst s1, s2;
 		struct {
 			struct slinest **data; // saved lines
@@ -43,6 +41,8 @@ struct JBXVT {
 					       of saved scroll lines */
 		} sline;
 		Size pixels, chars;
+		uint32_t rstyle; // render style
+		uint32_t saved_rstyle; // saved render style
 		int16_t offset; // current vert saved line
 	} scr;
 	struct {
@@ -76,6 +76,10 @@ extern struct JBXVT jbxvt; // in jbxvt.c
 // constrain rc between 0 and lim, return new value
 // use more generic int type as this is used in various places.
 unsigned int constrain(const int rc, const int lim)
+#if defined(__i386__) || defined(__amd64__)
+	__attribute__((const,regparm(2)));
+#else
 	__attribute__((const));
+#endif//__i386__||__amd64__
 
 #endif//!JBXVT_H
