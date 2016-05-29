@@ -7,10 +7,11 @@ jbxvt is based on xvt 2.1.  jbxvt upgrades the code base
 to the C99 standard and introduces many code cleanups.
 
 ## Features
-* scroll wheel support
 * uses less memory than rxvt and rxvt-unicode
 * adds color support to xvt
-* massive code cleanups under way
+* scroll wheel support
+* utempter support
+* massive code cleanups
 * removes X resource support
 * uses smallest appropriate stdint types
 * build system rewrite vs xvt
