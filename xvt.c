@@ -241,29 +241,30 @@ app_loop_head:
 		// arg 0 is time, unused
 		scr_paste_primary(token.tk_arg[1],token.tk_arg[2]);
 		break;
-	case TK_CUU :	/* cursor up */
+	case TK_CUU: // cursor up
 		LOG("TK_CUU");
 		n = token.tk_arg[0];
 		scr_move(0, n?-n:-1, ROW_RELATIVE | COL_RELATIVE);
 		break;
-	case TK_CUD :	/* cursor down */
+	case TK_CUD: // cursor down
 		LOG("TK_CUD");
 		n = token.tk_arg[0];
 		scr_move(0, n?n:1, ROW_RELATIVE | COL_RELATIVE);
 		break;
-	case TK_CUF :	/* cursor forward */
+	case TK_CUF: // cursor forward
 		LOG("TK_CUF");
 		n = token.tk_arg[0];
 		scr_move(n?n:1, 0, ROW_RELATIVE | COL_RELATIVE);
 		break;
-	case TK_CUB :	/* cursor back */
+	case TK_CUB: // cursor back
 		LOG("TK_CUB");
 		n = token.tk_arg[0];
 		scr_move(n?-n:-1, 0, ROW_RELATIVE | COL_RELATIVE);
 		break;
-	case TK_HVP :
+	case TK_HVP:
 		LOG("TK_HVP");
-	case TK_CUP :	/* position cursor */
+		// fall through
+	case TK_CUP: // position cursor
 		LOG("TK_CUP");
 		if (token.tk_nargs == 1)
 			  scr_move(0, token.tk_arg[0] - 1, 0);
@@ -299,14 +300,9 @@ app_loop_head:
 		n = token.tk_arg[0];
 		scr_insert_characters(n?n:1);
 		break;
-	case TK_DA :
-		LOG("TK_DA");
-		break;
-	case TK_TBC :
-		LOG("TK_TBC");
-		break;
 	case TK_SET :
 		LOG("TK_SET");
+		// fall through
 	case TK_RESET :
 		LOG("TK_RESET");
 		handle_reset(&token);
@@ -331,9 +327,6 @@ app_loop_head:
 		LOG("TK_DECSTBM");
 		scr_set_margins(token.tk_arg[0] - 1, token.tk_arg[1] - 1);
 		break;
-	case TK_DECSWH :		/* ESC # digit */
-		LOG("TK_DECSWH");
-		break;
 	case TK_DECSC :
 		LOG("TK_DECSC");
 		cursor(CURSOR_SAVE);
@@ -354,15 +347,26 @@ app_loop_head:
 		LOG("TK_IND");
 		scr_index();
 		break;
-	case TK_NEL :
-		LOG("TK_NEL");
+	case TK_RI :		/* Reverse index */
+		LOG("TK_RI");
+		scr_rindex();
+		break;
+	case TK_DECID :
+		LOG("TK_DECID");
+		cprintf("\033[?6c");	/* I am a VT102 */
+		break;
+#ifdef DEBUG
+	case TK_DA :
+		LOG("TK_DA");
+		break;
+	case TK_DECSWH :		/* ESC # digit */
+		LOG("TK_DECSWH");
 		break;
 	case TK_HTS :
 		LOG("TK_HTS");
 		break;
-	case TK_RI :		/* Reverse index */
-		LOG("TK_RI");
-		scr_rindex();
+	case TK_NEL :
+		LOG("TK_NEL");
 		break;
 	case TK_SS2 :
 		LOG("TK_SS2");
@@ -370,10 +374,10 @@ app_loop_head:
 	case TK_SS3 :
 		LOG("TK_SS3");
 		break;
-	case TK_DECID :
-		LOG("TK_DECID");
-		cprintf("\033[?6c");	/* I am a VT102 */
+	case TK_TBC :
+		LOG("TK_TBC");
 		break;
+#endif//DEBUG
 	}
 #ifdef TK_DEBUG
 	show_token(&token);
