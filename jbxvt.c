@@ -55,11 +55,11 @@ static char ** parse_command_line(const int argc, char ** argv)
 // constrain rc between 0 and lim, return new value
 unsigned int constrain(const int rc, const int lim)
 {
-	if (rc < 0)
+	if (rc < 0) // guarantee unsigned
 		  return 0;
-	else if (rc >= lim)
+	else if (rc >= lim) // cap
 		  return lim - 1;
-	return rc;
+	return rc; // falls within range
 }
 
 /*  Run the command in a subprocess and return a file descriptor for the

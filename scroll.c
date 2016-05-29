@@ -116,10 +116,13 @@ static void sc_up_cp_rows(const int8_t count)
 		uint32_t * r = jbxvt.scr.current->rend[iter.row];
 		iter.col = sc_up_find_col(s);
 		struct slinest *sl = malloc(sizeof(struct slinest));
+		// +1 to have last byte as wrap flag:
 		sl->sl_text = malloc(iter.col + 1);
 		memcpy(sl->sl_text, s, iter.col);
 		sl->sl_text[iter.col] = s[jbxvt.scr.chars.width];
-		sl->sl_rend = malloc((iter.col + 1) * sizeof(uint32_t));
+		/* iter.col, not iter.col + 1, since the last byte
+		   of the sl_text, only, is used for the wrap flag.  */
+		sl->sl_rend = malloc(iter.col * sizeof(uint32_t));
 		memcpy(sl->sl_rend, r, iter.col * sizeof(uint32_t));
 		sl->sl_length = iter.col;
 		jbxvt.scr.sline.data[count - iter.row - 1] = sl;
