@@ -45,9 +45,7 @@ void push_xevent(struct xeventst *);
 void send_string(uint8_t * restrict buf, const uint8_t count);
 
 // Set key mode for cursor keys if is_cursor, else for keypad keys
-void set_keys(const enum ModeValue mode, const bool is_cursor);
-#define set_cur_keys(mode) set_keys(mode, true)
-#define set_kp_keys(mode) set_keys(mode, false)
+void set_keys(const bool mode_high, const bool is_cursor);
 
 #ifdef TK_DEBUG
 void show_token(struct tokenst *);

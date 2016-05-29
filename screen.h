@@ -92,7 +92,8 @@ bool is_string_char(int16_t c);
 void scr_change_rendition(const uint32_t style);
 
 //  Change between the alternate and the main screens
-void scr_change_screen(const uint8_t direction);
+//  mode_high is true for screen 2
+void scr_change_screen(const bool mode_high);
 
 //  Delete count lines and scroll up the bottom of the screen to fill the gap
 void scr_delete_lines(const uint8_t count);

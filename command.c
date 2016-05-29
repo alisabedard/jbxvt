@@ -161,13 +161,12 @@ void init_command(char ** restrict argv)
 }
 
 // Set key mode for cursor keys if is_cursor, else for keypad keys
-void set_keys(const enum ModeValue mode, const bool is_cursor)
+void set_keys(const bool mode_high, const bool is_cursor)
 {
-	const bool v = (mode == JBXVT_MODE_HIGH);
 	if(is_cursor)
-		  command.keys.app_cur = v;
+		  command.keys.app_cur = mode_high;
 	else
-		  command.keys.app_kp = v;
+		  command.keys.app_kp = mode_high;
 }
 
 //  Look up function key keycode

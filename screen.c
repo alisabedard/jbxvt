@@ -47,10 +47,10 @@ void scr_init(void)
 }
 
 //  Change between the alternate and the main screens
-void scr_change_screen(const uint8_t direction)
+void scr_change_screen(const bool mode_high)
 {
 	home_screen();
-	jbxvt.scr.current = (direction == JBXVT_MODE_HIGH)
+	jbxvt.scr.current = mode_high
 		? &jbxvt.scr.s2 : &jbxvt.scr.s1;
 	jbxvt.sel.end2.se_type = NOSEL;
 	repaint((Point){}, (Point){.r = jbxvt.scr.chars.height - 1,

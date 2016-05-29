@@ -33,41 +33,43 @@
 
 static bool jbxvt_size_set;
 
-static enum ModeValue handle_reset(struct tokenst * restrict token)
+static void handle_reset(struct tokenst * restrict token)
 {
 	LOG("handle_reset()");
-	enum ModeValue mode = (token->tk_type == TK_SET)
-		? JBXVT_MODE_HIGH : JBXVT_MODE_LOW;
+	const bool mode_high = token->tk_type == TK_SET;
 	if (token->tk_private == '?') {
 		switch (token->tk_arg[0]) {
 		case 1 :
-			set_cur_keys(mode);
+			set_keys(mode_high, true);
 			break;
 		case 6 :
-			jbxvt.scr.current->decom = (mode == JBXVT_MODE_HIGH);
+			jbxvt.scr.current->decom = mode_high;
 			break;
 		case 7 :
-			jbxvt.scr.current->wrap = (mode == JBXVT_MODE_HIGH);
+			jbxvt.scr.current->wrap = mode_high;
 			break;
 		case 47: // switch to main screen
-			scr_change_screen(mode);
+			scr_change_screen(mode_high);
 			break;
 		case 1049: // Fix stale chars in vi
-			scr_change_screen(mode);
+			scr_change_screen(mode_high);
 			break;
+#ifdef DEBUG
 		default:
 			LOG("Unhandled: %d\n", token->tk_arg[0]);
+#endif//DEBUG
 		}
 	} else if (token->tk_private == 0) {
 		switch (token->tk_arg[0]) {
 		case 4 :
-			jbxvt.scr.current->insert = mode == JBXVT_MODE_HIGH;
+			jbxvt.scr.current->insert = mode_high;
 			break;
+#ifdef DEBUG
 		default:
 			LOG("Unhandled: %d\n", token->tk_arg[0]);
+#endif//DEBUG
 		}
 	}
-	return mode;
 }
 
 static void handle_txtpar(struct tokenst * restrict token)
@@ -337,11 +339,11 @@ app_loop_head:
 		break;
 	case TK_DECPAM :
 		LOG("TK_DECPAM");
-		set_kp_keys(JBXVT_MODE_HIGH);
+		set_keys(true, false);
 		break;
 	case TK_DECPNM :
 		LOG("TK_DECPNM");
-		set_kp_keys(JBXVT_MODE_LOW);
+		set_keys(false, false);
 		break;
 	case TK_IND :		/* Index (same as \n) */
 		LOG("TK_IND");
