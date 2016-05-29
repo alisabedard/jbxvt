@@ -248,7 +248,7 @@ static int get_tslot(char * restrict ttynam)
 
 //  Attempt to create and write an entry to the utmp file
 #ifndef UTEMPTER_H
-static void write_utmp(const fd_t fd __attribute__((unused)))
+static void write_utmp(void)
 {
 #if defined(SVR4_UTMP) || defined(BSD_UTMP)
 	struct passwd *pw;
@@ -730,7 +730,7 @@ int run_command(char ** argv)
 #ifdef UTEMPTER_H
 	utempter_add_record(ptyfd, XDisplayString(jbxvt.X.dpy));
 #else//!UTEMPTER_H
-	write_utmp(ptyfd);
+	write_utmp();
 #endif//UTEMPTER_H
 
 	return(ptyfd);
