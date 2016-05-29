@@ -160,7 +160,7 @@ static void catch_child(const int sig __attribute__((unused)))
 	if (wait(&status) == comm_pid)
 		quit(status, NULL);
 
-	signal(SIGCHLD,catch_child);
+	signal(SIGCHLD, catch_child);
 }
 
 // Tidy up the utmp entry etc prior to exiting.
@@ -222,12 +222,6 @@ static void tidy_utmp(void)
 #ifdef BSD_PTY
 	chmod(tty_name,0666);
 #endif /* BSD_PTY */
-}
-
-//  Catch a fatal signal and tidy up before quitting
-static void catch_sig(const int sig __attribute__((unused)))
-{
-	quit(1, QUIT_SIGNAL);
 }
 
 #ifdef BSD_UTMP
@@ -687,9 +681,6 @@ int run_command(char ** argv)
 #endif//SYS_fcntl
 
 	jbxvt.com.width = sysconf(_SC_OPEN_MAX);
-	for (uint8_t i = 1; i <= 15; i++)
-		signal(i, catch_sig);
-
 #ifdef SYS_fork
 	comm_pid = syscall(SYS_fork);
 #else//!SYS_fork
@@ -703,7 +694,11 @@ int run_command(char ** argv)
 #endif//DEBUG
 	if (comm_pid == 0)
 		  child(argv, ttyfd);
+#ifdef SYS_signal
+	syscall(SYS_signal, SIGCHLD, catch_child);
+#else//!SYS_signal
 	signal(SIGCHLD,catch_child);
+#endif//SYS_signal
 	write_utmp();
 	return(ptyfd);
 }

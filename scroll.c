@@ -105,6 +105,11 @@ static void clr_lines(int8_t count, const uint8_t rc,
 
 static void sc_up_cp_rows(const int8_t count)
 {
+	static bool called_before;
+	if(!called_before) {
+		  called_before=true;
+		  return;
+	}
 	Point iter;
 	for (iter.row = 0; iter.row < count; ++iter.row) {
 		uint8_t * s = jbxvt.scr.current->text[iter.row];
@@ -114,14 +119,8 @@ static void sc_up_cp_rows(const int8_t count)
 		sl->sl_text = malloc(iter.col + 1);
 		memcpy(sl->sl_text, s, iter.col);
 		sl->sl_text[iter.col] = s[jbxvt.scr.chars.width];
-		if (!r[jbxvt.scr.chars.width])
-			  sl->sl_rend = NULL;
-		else {
-			sl->sl_rend = malloc((iter.col + 1)
-				* sizeof(uint32_t));
-			memcpy(sl->sl_rend, r, iter.col
-				* sizeof(uint32_t));
-		}
+		sl->sl_rend = malloc((iter.col + 1) * sizeof(uint32_t));
+		memcpy(sl->sl_rend, r, iter.col * sizeof(uint32_t));
 		sl->sl_length = iter.col;
 		jbxvt.scr.sline.data[count - iter.row - 1] = sl;
 		sel_scr_to_sav(&jbxvt.sel.end1, iter.row, count);
@@ -230,6 +229,6 @@ void scroll(const uint8_t row1, const uint8_t row2, const int16_t count)
 	if(count < 0)
 		sc_dn(row1, row2, count);
 	else
-			sc_up(row1, row2, count);
+		sc_up(row1, row2, count);
 }
 

@@ -49,16 +49,19 @@ void reset_row_col(void)
 		jbxvt.scr.chars.height);
 }
 
+#if 0
 static void fill_and_scroll(const uint8_t ch)
 {
 	/*  Now fill up the screen from the old screen
 	    and saved lines.  */
 	if (jbxvt.scr.s1.cursor.row >= ch) {
 		// scroll up to save any lines that will be lost.
-		scroll_up(jbxvt.scr.s1.cursor.row - ch + 1);
+		// this is the cause of the memory leak:
+		//scroll_up(jbxvt.scr.s1.cursor.row - ch + 1);
 		jbxvt.scr.s1.cursor.row = ch - 1;
 	}
 }
+#endif
 
 static void init_screen_elements(struct screenst * restrict scr,
 	uint8_t ** restrict text, uint32_t ** restrict rend)
@@ -154,23 +157,25 @@ void scr_reset(void)
 		uint32_t **r1, **r2;
 		jbxvt.scr.offset = 0;
 		/*  Recreate the screen backup arrays.
-		 *  The screen arrays are one byte wider than the screen and
-		 *  the last byte is used as a flag which is non-zero of the
+		 *  The screen arrays are one word wider than the screen and
+		 *  the last word is used as a flag which is non-zero if the
 		 *  line wrapped automatically.
 		 */
+		++c.h; // for one larger than ^
 		s1 = malloc(c.h * sizeof(void*));
 		s2 = malloc(c.h * sizeof(void*));
+		--c.h;
 		r1 = malloc(c.h * sizeof(uint32_t*));
 		r2 = malloc(c.h * sizeof(uint32_t*));
 		for (uint16_t y = 0; y < c.h; y++) {
 			const uint8_t w = c.w + 1;
-			s1[y] = calloc(w, 1);
-			s2[y] = calloc(w, 1);
+			s1[y] = calloc(w, sizeof(uint8_t));
+			s2[y] = calloc(w, sizeof(uint8_t));
 			r1[y] = calloc(w, sizeof(uint32_t));
 			r2[y] = calloc(w, sizeof(uint32_t));
 		}
 		if (jbxvt.scr.s1.text) {
-			fill_and_scroll(c.h);
+			//fill_and_scroll(c.h);
 			// calculate working no. of lines.
 			int16_t i = jbxvt.scr.sline.top
 				+ jbxvt.scr.s1.cursor.row + 1;
@@ -194,7 +199,8 @@ void scr_reset(void)
 				j < jbxvt.scr.sline.top; j++)
 				  jbxvt.scr.sline.data[j] = NULL;
 			jbxvt.scr.sline.top -= i;
-			free_visible_screens(c.h);
+			//free_visible_screens(c.h);
+			free_visible_screens(jbxvt.scr.chars.height);
 		}
 		jbxvt.scr.chars = c;
 		jbxvt.scr.pixels = d;
