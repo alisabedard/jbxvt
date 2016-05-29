@@ -74,8 +74,8 @@ struct JBXVT {
 extern struct JBXVT jbxvt; // in jbxvt.c
 
 // constrain rc between 0 and lim, return new value
-// use more generic int type as this is used in various places.
-unsigned int constrain(const int rc, const int lim)
+// use fast wide int type as this is used in various places.
+uint_fast32_t constrain(const int_fast32_t rc, const int_fast32_t lim)
 #if defined(__i386__) || defined(__amd64__)
 	__attribute__((const,regparm(2),leaf,warn_unused_result));
 #else

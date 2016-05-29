@@ -28,6 +28,7 @@ PREFIX=/usr
 CFLAGS+=-DLINUX -D_GNU_SOURCE
 
 LIBS+=-lX11
+LIBS+=-lutempter
 
 OBJS=jbxvt.o
 OBJS+=change_offset.o change_selection.o cmdtok.o color.o command.o

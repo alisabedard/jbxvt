@@ -27,6 +27,7 @@
 
 #include "jbxvt.h"
 #include "init_display.h"
+#include "log.h"
 #include "screen.h"
 #include "xsetup.h"
 
@@ -136,9 +137,10 @@
 #ifdef LINUX
 #include <pty.h>
 #include <stropts.h>
+#include <utempter.h>
 #include <utmp.h>
 #define POSIX_PTY
-#define SVR4_UTMP
+//#define SVR4_UTMP
 #endif
 
 static pid_t comm_pid = -1;	// process id of child
@@ -151,19 +153,8 @@ static struct utmp utent;	// our current utmp entry
 static int tslot = -1;		// index to our slot in the utmp file
 #endif /* BSD_UTMP */
 
-
-//  Catch a SIGCHLD signal and exit if the direct child has died.
-static void catch_child(const int sig __attribute__((unused)))
-{
-	int status;
-
-	if (wait(&status) == comm_pid)
-		quit(status, NULL);
-
-	signal(SIGCHLD, catch_child);
-}
-
 // Tidy up the utmp entry etc prior to exiting.
+#ifndef UTEMPTER_H
 static void tidy_utmp(void)
 {
 #if defined(SVR4_UTMP) || defined(SVR4_UTMPX)
@@ -223,6 +214,7 @@ static void tidy_utmp(void)
 	chmod(tty_name,0666);
 #endif /* BSD_PTY */
 }
+#endif//!UTEMPTER_H
 
 #ifdef BSD_UTMP
 /*  Look up the tty name in the etc/ttytab file and return a slot number
@@ -254,9 +246,9 @@ static int get_tslot(char * restrict ttynam)
 }
 #endif /* BSD_UTMP */
 
-
 //  Attempt to create and write an entry to the utmp file
-static void write_utmp(void)
+#ifndef UTEMPTER_H
+static void write_utmp(const fd_t fd __attribute__((unused)))
 {
 #if defined(SVR4_UTMP) || defined(BSD_UTMP)
 	struct passwd *pw;
@@ -345,13 +337,18 @@ static void write_utmp(void)
 			close(ut_fd);
 		}
 	}
-#endif /* BSD_UTMP */
+#endif// BSD_UTMP
 }
+#endif//!UTEMPTER_H
 
 //  Quit with the status after first removing our entry from the utmp file.
 void quit(const int8_t status, const char * restrict msg)
 {
+#ifdef UTEMPTER_H
+	utempter_remove_added_record();
+#else//!UTEMPTER_H
 	tidy_utmp();
+#endif//UTEMPTER_H
 	if(msg) {
 #ifdef SYS_write
 		  syscall(SYS_write, STDERR_FILENO, msg, strlen(msg));
@@ -665,6 +662,23 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	quit(1, QUIT_SESSION);
 }
 
+//  Catch a SIGCHLD signal and exit if the direct child has died.
+static void catch_signal(int sig)
+{
+	LOG("SIGNAL %d received\n", sig);
+	switch(sig) {
+	case SIGCHLD: // child exited
+		if (wait(&sig) == comm_pid)
+			  quit(sig, NULL);
+		break;
+	case SIGINT:
+	case SIGKILL: // normal exit
+		quit(0, NULL);
+	default: // something went wrong
+		quit(1, QUIT_SIGNAL);
+	}
+}
+
 /*  Run the command in a subprocess and return a file descriptor for the
  *  master end of the pseudo-teletype pair with the command talking to
  *  the slave.  */
@@ -681,6 +695,17 @@ int run_command(char ** argv)
 #endif//SYS_fcntl
 
 	jbxvt.com.width = sysconf(_SC_OPEN_MAX);
+	// Attach relevant signals:
+#ifdef SYS_signal
+	syscall(SYS_signal, SIGINT, catch_signal);
+	syscall(SYS_signal, SIGQUIT, catch_signal);
+	syscall(SYS_signal, SIGKILL, catch_signal);
+#else//!SYS_signal
+	signal(SIGINT, catch_signal);
+	signal(SIGQUIT, catch_signal);
+	signal(SIGKILL, catch_signal);
+#endif//SYS_signal
+
 #ifdef SYS_fork
 	comm_pid = syscall(SYS_fork);
 #else//!SYS_fork
@@ -694,12 +719,20 @@ int run_command(char ** argv)
 #endif//DEBUG
 	if (comm_pid == 0)
 		  child(argv, ttyfd);
+	for (uint8_t i = 1; i <= 15; i++)
+		signal(i, catch_signal);
 #ifdef SYS_signal
-	syscall(SYS_signal, SIGCHLD, catch_child);
+	syscall(SYS_signal, SIGCHLD, catch_signal);
 #else//!SYS_signal
-	signal(SIGCHLD,catch_child);
+	signal(SIGCHLD,catch_signal);
 #endif//SYS_signal
-	write_utmp();
+
+#ifdef UTEMPTER_H
+	utempter_add_record(ptyfd, XDisplayString(jbxvt.X.dpy));
+#else//!UTEMPTER_H
+	write_utmp(ptyfd);
+#endif//UTEMPTER_H
+
 	return(ptyfd);
 }
 
