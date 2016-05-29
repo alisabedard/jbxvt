@@ -77,9 +77,9 @@ extern struct JBXVT jbxvt; // in jbxvt.c
 // use more generic int type as this is used in various places.
 unsigned int constrain(const int rc, const int lim)
 #if defined(__i386__) || defined(__amd64__)
-	__attribute__((const,regparm(2)));
+	__attribute__((const,regparm(2),leaf,warn_unused_result));
 #else
-	__attribute__((const));
+	__attribute__((const,leaf,warn_unused_result));
 #endif//__i386__||__amd64__
 
 #endif//!JBXVT_H
