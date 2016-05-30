@@ -104,7 +104,10 @@
 
 #ifdef NETBSD
 #define POSIX_PTY
+#define BSD_UTMP
 #include <sys/ttycom.h>
+#include <utmp.h>
+#define UTMP_FILE "/var/run/utmp"
 #endif//NETBSD
 
 #ifdef FREEBSD
@@ -179,9 +182,6 @@ static void tidy_utmp(void)
 
 #ifdef BSD_UTMP
 	int ut_fd;
-
-	if (tslot < 0)
-		return;
 
 #ifdef SYS_open
 	if ((ut_fd = syscall(SYS_open, UTMP_FILE, O_WRONLY)) < 0)
