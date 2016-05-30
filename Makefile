@@ -26,9 +26,12 @@ PREFIX=/usr
 
 # Uncomment for GNU/Linux:
 CFLAGS+=-DLINUX -D_GNU_SOURCE
+LIBS+=-lutempter
+
+
+#-------------------------------------------------------------
 
 LIBS+=-lX11
-LIBS+=-lutempter
 
 OBJS=jbxvt.o
 OBJS+=change_offset.o change_selection.o cmdtok.o color.o command.o
