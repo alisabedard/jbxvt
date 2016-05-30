@@ -56,8 +56,6 @@ int resize_window(void)
 	LOG("resize_window()");
 	int x, y;
 	unsigned int width, height;
-	fprintf(stderr, "h: %d, w: %d\n", jbxvt.scr.chars.height,
-		jbxvt.scr.chars.width);
 	if (!jbxvt.scr.chars.width || !jbxvt.scr.chars.height)
 		quit(1, QUIT_ERROR);
 	Window r;

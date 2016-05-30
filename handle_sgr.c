@@ -5,6 +5,7 @@
 
 #ifdef DEBUG_SGR
 #include <stdio.h>
+#include <unistd.h>
 #endif//DEBUG_SGR
 
 void handle_sgr(struct tokenst * restrict token)
@@ -15,14 +16,14 @@ void handle_sgr(struct tokenst * restrict token)
 	}
 	for (uint8_t i = 0; i < token->tk_nargs; i++) {
 #ifdef DEBUG_SGR
-			fprintf(stderr, "tk_arg[%d]: %d\n", i,
+			dprintf(STDERR_FILENO, "tk_arg[%d]: %d\n", i,
 				token->tk_arg[i]);
 #endif//DEBUG_SGR
 		switch (token->tk_arg[i]) {
 		case 0 :
 			scr_change_rendition(RS_NONE);
 #ifdef DEBUG_SGR
-			fprintf(stderr, "--RS_NONE--\n");
+			jbputs("--RS_NONE--\n");
 #endif//DEBUG_SGR
 			reset_color();
 			break;

@@ -9,11 +9,24 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/syscall.h>
 #include <unistd.h>
 
 struct JBXVT jbxvt;
 
-// returns new command value if specified
+// Print string to stderr
+void jbputs(const char * string)
+{
+        size_t s = 0;
+        while(string[++s]);
+#ifdef SYS_write
+	syscall(SYS_write, STDERR_FILENO, string, s);
+#else//!SYS_write
+	write(STDERR_FILENO, string, s);
+#endif//SYS_write
+}
+
+
 static char ** parse_command_line(const int argc, char ** argv)
 {
 	static const char * optstr = "b:c:eF:f:ehvS:s";
@@ -41,11 +54,14 @@ static char ** parse_command_line(const int argc, char ** argv)
 			jbxvt.opt.show_scrollbar=true;
 			break;
 		case 'v': // version
-			fprintf(stdout, "%s %s\n", argv[0], VERSION);
+			jbputs(VERSION "\n");
 			quit(0, NULL);
 		case 'h': // help
 		default:
-			fprintf(stdout, "%s -[%s]\n", argv[0], optstr);
+			jbputs(argv[0]);
+			jbputs(" -[");
+			jbputs(optstr);
+			jbputs("]\n");
 			quit(0, NULL);
 		}
 	}

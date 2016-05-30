@@ -181,19 +181,24 @@ static char * get_keycode_value(struct KeyMaps * restrict keymaptable,
 			    case KS_TYPE_NONE:
 				return NULL;
 			    case KS_TYPE_CHAR:
-				sprintf((char *)buf,"%c",ks->ks_value);
+				snprintf((char *)buf, KBUFSIZE,
+					"%c",ks->ks_value);
 				return buf;
 			    case KS_TYPE_XTERM:
-				sprintf((char *)buf,"\033[%d~",ks->ks_value);
+				snprintf((char *)buf, KBUFSIZE,
+					"\033[%d~",ks->ks_value);
 				return buf;
 			    case KS_TYPE_SUN:
-				sprintf((char *)buf,"\033[%dz",ks->ks_value);
+				snprintf((char *)buf, KBUFSIZE,
+					"\033[%dz",ks->ks_value);
 				return buf;
 			    case KS_TYPE_APPKEY:
-				sprintf((char *)buf,"\033O%c",ks->ks_value);
+				snprintf((char *)buf, KBUFSIZE,
+					"\033O%c",ks->ks_value);
 				return buf;
 			    case KS_TYPE_NONAPP:
-				sprintf((char *)buf,"\033[%c",ks->ks_value);
+				snprintf((char *)buf, KBUFSIZE,
+					"\033[%c",ks->ks_value);
 				return buf;
 			}
 		}
@@ -225,7 +230,7 @@ uint8_t * lookup_key(XEvent * restrict ev, int16_t * restrict pcount)
 	char *s = get_s(keysym, kbuf);
 	if (s) {
 		*pcount = strlen(s);
- 	       	return (uint8_t *)s;
+		return (uint8_t *)s;
 	} else {
 		if((ev->xkey.state & Mod1Mask) && (count == 1))
 			kbuf[0] |= 0200;
@@ -335,232 +340,233 @@ void show_token(struct tokenst * tk)
 
 	switch (tk->tk_type) {
 		case TK_STRING :
-			printf("token(TK_STRING)");
-			printf(" \"%s\"",tk->tk_string);
+			jbputs("token(TK_STRING): ");
+			jbputs(tk->tk_string);
 			break;
 		case TK_TXTPAR :
-			printf("token(TK_TXTPAR)");
-			printf(" (%d) \"%s\"",tk->tk_arg[0],tk->tk_string);
+			dprintf(STDERR_FILENO, "token(TK_TXTPAR):"
+				" %s(%d)", tk->tk_string, tk->tk_arg[0]);
 			break;
 		case TK_CHAR :
-			printf("token(TK_CHAR)");
-			printf(" <%o>",tk->tk_char);
+			dprintf(STDERR_FILENO, "token(TK_CHAR): %o",
+				tk->tk_char);
 			break;
 		case TK_EOF :
-			printf("token(TK_EOF)");
+			jbputs("token(TK_EOF)");
 			show_token_args(tk);
 			break;
 		case TK_FOCUS :
-			printf("token(TK_FOCUS)");
-			printf(" <%d>",tk->tk_region);
+			dprintf(STDERR_FILENO, "token(TK_FOCUS)"
+				" <%d>", tk->tk_region);
 			show_token_args(tk);
 			break;
 		case TK_ENTRY :
-			printf("token(TK_ENTRY)");
-			printf(" <%d>",tk->tk_region);
+			dprintf(STDERR_FILENO, "token(TK_ENTRY)"
+				" <%d>", tk->tk_region);
 			show_token_args(tk);
 			break;
 		case TK_SBSWITCH :
-			printf("token(TK_SBSWITCH)");
+			jbputs("token(TK_SBSWITCH)");
 			show_token_args(tk);
 			break;
 		case TK_SBGOTO :
-			printf("token(TK_SBGOTO)");
+			jbputs("token(TK_SBGOTO)");
 			show_token_args(tk);
 			break;
 		case TK_SBUP :
-			printf("token(TK_SBUP)");
+			jbputs("token(TK_SBUP)");
 			show_token_args(tk);
 			break;
 		case TK_SBDOWN :
-			printf("token(TK_SBDOWN)");
+			jbputs("token(TK_SBDOWN)");
 			show_token_args(tk);
 			break;
 		case TK_EXPOSE :
-			printf("token(TK_EXPOSE)");
-			printf("(%d)",tk->tk_region);
+			dprintf(STDERR_FILENO, "token(TK_EXPOSE)"
+				"(%d)",tk->tk_region);
 			show_token_args(tk);
 			break;
 		case TK_RESIZE :
-			printf("token(TK_RESIZE)");
+			jbputs("token(TK_RESIZE)");
 			show_token_args(tk);
 			break;
 		case TK_SELSTART :
-			printf("token(TK_SELSTART)");
+			jbputs("token(TK_SELSTART)");
 			show_token_args(tk);
 			break;
 		case TK_SELEXTND :
-			printf("token(TK_SELEXTND)");
+			jbputs("token(TK_SELEXTND)");
 			show_token_args(tk);
 			break;
 		case TK_SELDRAG :
-			printf("token(TK_SELDRAG)");
+			jbputs("token(TK_SELDRAG)");
 			show_token_args(tk);
 			break;
 		case TK_SELINSRT :
-			printf("token(TK_SELINSRT)");
+			jbputs("token(TK_SELINSRT)");
 			show_token_args(tk);
 			break;
 		case TK_SELECT :
-			printf("token(TK_SELECT)");
+			jbputs("token(TK_SELECT)");
 			show_token_args(tk);
 			break;
 		case TK_SELWORD :
-			printf("token(TK_SELWORD)");
+			jbputs("token(TK_SELWORD)");
 			show_token_args(tk);
 			break;
 		case TK_SELLINE :
-			printf("token(TK_SELLINE)");
+			jbputs("token(TK_SELLINE)");
 			show_token_args(tk);
 			break;
 		case TK_SELCLEAR :
-			printf("token(TK_SELCLEAR)");
+			jbputs("token(TK_SELCLEAR)");
 			show_token_args(tk);
 			break;
 		case TK_SELNOTIFY :
-			printf("token(TK_SELNOTIFY)");
+			jbputs("token(TK_SELNOTIFY)");
 			show_hex_token_args(tk);
 			break;
 		case TK_SELREQUEST :
-			printf("token(TK_SELREQUEST)");
+			jbputs("token(TK_SELREQUEST)");
 			show_hex_token_args(tk);
 			break;
 		case TK_CUU :
-			printf("token(TK_CUU)");
+			jbputs("token(TK_CUU)");
 			show_token_args(tk);
 			break;
 		case TK_CUD :
-			printf("token(TK_CUD)");
+			jbputs("token(TK_CUD)");
 			show_token_args(tk);
 			break;
 		case TK_CUF :
-			printf("token(TK_CUF)");
+			jbputs("token(TK_CUF)");
 			show_token_args(tk);
 			break;
 		case TK_CUB :
-			printf("token(TK_CUB)");
+			jbputs("token(TK_CUB)");
 			show_token_args(tk);
 			break;
 		case TK_CUP :
-			printf("token(TK_CUP)");
+			jbputs("token(TK_CUP)");
 			show_token_args(tk);
 			break;
 		case TK_ED :
-			printf("token(TK_ED)");
+			jbputs("token(TK_ED)");
 			show_token_args(tk);
 			break;
 		case TK_EL :
-			printf("token(TK_EL)");
+			jbputs("token(TK_EL)");
 			show_token_args(tk);
 			break;
 		case TK_IL :
-			printf("token(TK_IL)");
+			jbputs("token(TK_IL)");
 			show_token_args(tk);
 			break;
 		case TK_DL :
-			printf("token(TK_DL)");
+			jbputs("token(TK_DL)");
 			show_token_args(tk);
 			break;
 		case TK_DCH :
-			printf("token(TK_DCH)");
+			jbputs("token(TK_DCH)");
 			show_token_args(tk);
 			break;
 		case TK_ICH :
-			printf("token(TK_ICH)");
+			jbputs("token(TK_ICH)");
 			show_token_args(tk);
 			break;
 		case TK_DA :
-			printf("token(TK_DA)");
+			jbputs("token(TK_DA)");
 			show_token_args(tk);
 			break;
 		case TK_HVP :
-			printf("token(TK_HVP)");
+			jbputs("token(TK_HVP)");
 			show_token_args(tk);
 			break;
 		case TK_TBC :
-			printf("token(TK_TBC)");
+			jbputs("token(TK_TBC)");
 			show_token_args(tk);
 			break;
 		case TK_SET :
-			printf("token(TK_SET)");
+			jbputs("token(TK_SET)");
 			show_token_args(tk);
 			break;
 		case TK_RESET :
-			printf("token(TK_RESET)");
+			jbputs("token(TK_RESET)");
 			show_token_args(tk);
 			break;
 		case TK_SGR :
-			printf("token(TK_SGR)");
+			jbputs("token(TK_SGR)");
 			show_token_args(tk);
 			break;
 		case TK_DSR :
-			printf("token(TK_DSR)");
+			jbputs("token(TK_DSR)");
 			show_token_args(tk);
 			break;
 		case TK_DECSTBM :
-			printf("token(TK_DECSTBM)");
+			jbputs("token(TK_DECSTBM)");
 			show_token_args(tk);
 			break;
 		case TK_DECSWH :
-			printf("token(TK_DECSWH)");
+			jbputs("token(TK_DECSWH)");
 			show_token_args(tk);
 			break;
 		case TK_SCS0 :
-			printf("token(TK_SCS0)");
+			jbputs("token(TK_SCS0)");
 			show_token_args(tk);
 			break;
 		case TK_SCS1 :
-			printf("token(TK_SCS1)");
+			jbputs("token(TK_SCS1)");
 			show_token_args(tk);
 			break;
 		case TK_DECSC :
-			printf("token(TK_DECSC)");
+			jbputs("token(TK_DECSC)");
 			show_token_args(tk);
 			break;
 		case TK_DECRC :
-			printf("token(TK_DECRC)");
+			jbputs("token(TK_DECRC)");
 			show_token_args(tk);
 			break;
 		case TK_DECPAM :
-			printf("token(TK_DECPAM)");
+			jbputs("token(TK_DECPAM)");
 			show_token_args(tk);
 			break;
 		case TK_DECPNM :
-			printf("token(TK_DECPNM)");
+			jbputs("token(TK_DECPNM)");
 			show_token_args(tk);
 			break;
 		case TK_IND :
-			printf("token(TK_IND)");
+			jbputs("token(TK_IND)");
 			show_token_args(tk);
 			break;
 		case TK_NEL :
-			printf("token(TK_NEL)");
+			jbputs("token(TK_NEL)");
 			show_token_args(tk);
 			break;
 		case TK_HTS :
-			printf("token(TK_HTS)");
+			jbputs("token(TK_HTS)");
 			show_token_args(tk);
 			break;
 		case TK_RI :
-			printf("token(TK_RI)");
+			jbputs("token(TK_RI)");
 			show_token_args(tk);
 			break;
 		case TK_SS2 :
-			printf("token(TK_SS2)");
+			jbputs("token(TK_SS2)");
 			show_token_args(tk);
 			break;
 		case TK_SS3 :
-			printf("token(TK_SS3)");
+			jbputs("token(TK_SS3)");
 			show_token_args(tk);
 			break;
 		case TK_DECID :
-			printf("token(TK_DECID)");
+			jbputs("token(TK_DECID)");
 			show_token_args(tk);
 			break;
 		case TK_NULL :
 			return;
 		default :
-			printf("unknown token <%o>",tk->tk_type);
+			dprintf(STDERR_FILENO, "unknown token <%o>",
+				tk->tk_type);
 			show_token_args(tk);
 			break;
 	}

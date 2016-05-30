@@ -73,6 +73,10 @@ struct JBXVT {
 
 extern struct JBXVT jbxvt; // in jbxvt.c
 
+
+// Print string to stderr
+void jbputs(const char * string);
+
 // constrain rc between 0 and lim, return new value
 // use fast wide int type as this is used in various places.
 uint_fast32_t constrain(const int_fast32_t rc, const int_fast32_t lim)

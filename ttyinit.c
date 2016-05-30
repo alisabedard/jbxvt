@@ -281,16 +281,17 @@ static void write_utmp(void)
 	pututline(&utent);
 	endutent();
 #endif /* SVR4_UTMP */
-
 #ifdef SVR4_UTMPX
 	struct utmpx utentx;
-	int n;
-
 	memset(&utentx,0,sizeof(utentx));
 	utentx.ut_type = USER_PROCESS;
 	utentx.ut_pid = comm_pid;
+	int n;
 	if (sscanf(tty_name,"/dev/pts/%d",&n) != 1) {
-		fprintf(stderr, "Can's parse tty name %s\n",tty_name);
+		jbputs(QUIT_TTY);
+		jbputs(" ");
+		jbputs(tty_name);
+		jbputs("\n");
 		return;
 	}
 	sprintf(utentx.ut_id,"vt%02x",n);
@@ -316,9 +317,13 @@ static void write_utmp(void)
 
 	fd_t ut_fd;
 
-	if ((tslot = get_tslot(tty_name + 5)) < 0)
-		fprintf(stderr, "can't locate tty %s in %s",
-			tty_name,TTYTAB);
+	if ((tslot = get_tslot(tty_name + 5)) < 0) {
+		jbputs("Can't locate tty ");
+		jbputs(tty_name);
+		jbputs(" in ");
+		jbputs(TTYTAB);
+		jbputs("\n");
+	}
 
 	/*  Attempt to write an entry into the utmp file.
 	 */
@@ -354,13 +359,8 @@ void quit(const int8_t status, const char * restrict msg)
 	tidy_utmp();
 #endif//UTEMPTER_H
 	if(msg) {
-#ifdef SYS_write
-		  syscall(SYS_write, STDERR_FILENO, msg, strlen(msg));
-		  syscall(SYS_write, STDERR_FILENO, "\n", 1);
-#else//!SYS_write
-		  fputs(msg, stderr);
-		  fputc('\n', stderr);
-#endif//SYS_write
+		jbputs(msg);
+		jbputs("\n");
 	}
 	exit(status);
 }
@@ -399,7 +399,7 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 
 #ifdef SYS_access
 					|| syscall(SYS_access, ttynam,
-				       		R_OK|W_OK) == 0)
+						R_OK|W_OK) == 0)
 #else//!SYS_access
 					|| access(ttynam,R_OK|W_OK) == 0)
 #endif//SYS_access
@@ -422,7 +422,7 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 #ifdef POSIX_PTY
 	const fd_t mfd = posix_openpt(O_RDWR);
 #endif//POSIX_PTY
-	if (mfd < 0) 
+	if (mfd < 0)
 		  quit(1, QUIT_TTY);
 
 #ifdef POSIX_PTY
@@ -719,7 +719,7 @@ int run_command(char ** argv)
 	if (comm_pid < 0)
 		  quit(1, QUIT_SESSION);
 #ifdef DEBUG
-	fprintf(stderr, "command: %s, pid: %d\n", argv[0], comm_pid);
+	dprintf(STDERR_FILENO, "command: %s, pid: %d\n", argv[0], comm_pid);
 #endif//DEBUG
 	if (comm_pid == 0)
 		  child(argv, ttyfd);
