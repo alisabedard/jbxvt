@@ -150,9 +150,13 @@ void jbxvt_app_loop(void)
 {
 	LOG("app_loop");
 	struct tokenst token;
-	int32_t n;
+	int32_t n; // sanitized first token
+	int32_t * t; // shortcut to token.tk_arg
 app_loop_head:
 	get_token(&token);
+	t = token.tk_arg;
+	n = t[0];
+	n = n ? n : 1; // n is sanitized for ops with optional nonzero args
 	switch (token.tk_type) {
 	case TK_STRING :
 		LOG("TK_STRING");
@@ -168,10 +172,10 @@ app_loop_head:
 		quit(0, NULL);
 		break;
 	case TK_ENTRY :	// keyboard focus changed
-		cursor(token.tk_arg[0] ? CURSOR_ENTRY_IN : CURSOR_ENTRY_OUT);
+		cursor(t[0] ? CURSOR_ENTRY_IN : CURSOR_ENTRY_OUT);
 		break;
 	case TK_FOCUS :
-		cursor(token.tk_arg[0] ? CURSOR_FOCUS_IN : CURSOR_FOCUS_OUT);
+		cursor(t[0] ? CURSOR_FOCUS_IN : CURSOR_FOCUS_OUT);
 		break;
 	case TK_EXPOSE: // window exposed
 		handle_tk_expose(&token);
@@ -190,39 +194,33 @@ app_loop_head:
 	/*  Move the display so that line represented by scrollbar value
 	    is at the top of the screen.  */
 		change_offset((jbxvt.scr.chars.height + jbxvt.scr.sline.top)
-			* (jbxvt.scr.pixels.height - token.tk_arg[0])
+			* (jbxvt.scr.pixels.height - t[0])
 			/ jbxvt.scr.pixels.height - jbxvt.scr.chars.height);
 		break;
 	case TK_SBDOWN :
-		token.tk_arg[0]=-token.tk_arg[0];
+		t[0] = - t[0];
 		// fall through
 	case TK_SBUP :
-		change_offset(jbxvt.scr.offset
-			- token.tk_arg[0] / jbxvt.X.font_height);
+		change_offset(jbxvt.scr.offset - t[0] / jbxvt.X.font_height);
 		break;
 	case TK_SELSTART :
-		scr_start_selection((Point){.x = token.tk_arg[0],
-			.y = token.tk_arg[1]}, CHAR);
+		scr_start_selection((Point){.x = t[0], .y = t[1]}, CHAR);
 		break;
 	case TK_SELEXTND :
-		scr_extend_selection((Point){.x = token.tk_arg[0],
-			.y = token.tk_arg[1]}, false);
+		scr_extend_selection((Point){.x = t[0], .y = t[1]}, false);
 		break;
 	case TK_SELDRAG :
-		scr_extend_selection((Point){.x = token.tk_arg[0],
-			.y = token.tk_arg[1]}, true);
+		scr_extend_selection((Point){.x = t[0], .y = t[1]}, true);
 		break;
 	case TK_SELWORD :
-		scr_start_selection((Point){.x = token.tk_arg[0],
-			.y = token.tk_arg[1]}, WORD);
+		scr_start_selection((Point){.x = t[0], .y = t[1]}, WORD);
 		break;
 	case TK_SELLINE :
-		scr_start_selection((Point){.x = token.tk_arg[0],
-			.y = token.tk_arg[1]}, LINE);
+		scr_start_selection((Point){.x = t[0], .y = t[1]}, LINE);
 		break;
 	case TK_SELECT :
 		LOG("TK_SELECT");
-		scr_make_selection(token.tk_arg[0]);
+		scr_make_selection(n);
 		break;
 	case TK_SELCLEAR :
 		LOG("TK_SELCLEAR");
@@ -230,38 +228,34 @@ app_loop_head:
 		break;
 	case TK_SELREQUEST :
 		LOG("TK_SELREQUEST");
-		scr_send_selection(token.tk_arg[0], token.tk_arg[1],
-			token.tk_arg[2], token.tk_arg[3]);
+		scr_send_selection(t[0], t[1], t[2], t[3]);
 		break;
 	case TK_SELINSRT :
 		LOG("TK_SELINSRT");
-		scr_request_selection(token.tk_arg[0],
-			token.tk_arg[1], token.tk_arg[2]);
+		scr_request_selection(t[0], t[1], t[2]);
 		break;
 	case TK_SELNOTIFY :
 		LOG("TK_SELNOTIFY");
 		// arg 0 is time, unused
-		scr_paste_primary(token.tk_arg[1],token.tk_arg[2]);
+		scr_paste_primary(t[1], t[2]);
 		break;
 	case TK_CUU: // cursor up
 		LOG("TK_CUU");
-		n = token.tk_arg[0];
-		scr_move(0, n?-n:-1, ROW_RELATIVE | COL_RELATIVE);
+		scr_move(0, -n, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_CUD: // cursor down
 		LOG("TK_CUD");
-		n = token.tk_arg[0];
-		scr_move(0, n?n:1, ROW_RELATIVE | COL_RELATIVE);
+		scr_move(0, n, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_CUF: // cursor forward
 		LOG("TK_CUF");
 		n = token.tk_arg[0];
-		scr_move(n?n:1, 0, ROW_RELATIVE | COL_RELATIVE);
+		scr_move(n, 0, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_CUB: // cursor back
 		LOG("TK_CUB");
 		n = token.tk_arg[0];
-		scr_move(n?-n:-1, 0, ROW_RELATIVE | COL_RELATIVE);
+		scr_move(-n, 0, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_HVP:
 		LOG("TK_HVP");
@@ -269,38 +263,33 @@ app_loop_head:
 	case TK_CUP: // position cursor
 		LOG("TK_CUP");
 		if (token.tk_nargs == 1)
-			  scr_move(0, token.tk_arg[0] - 1, 0);
+			  scr_move(0, t[0] - 1, 0);
 		else
-			  scr_move(token.tk_arg[1] - 1,
-				  token.tk_arg[0] - 1, 0);
+			  scr_move(t[1] - 1, t[0] - 1, 0);
 		break;
 	case TK_ED :
-		LOG("TK_ED");
-		scr_erase_screen(token.tk_arg[0]);
+		LOG("TK_ED"); // don't use n
+		scr_erase_screen(t[0]);
 		break;
 	case TK_EL :
-		LOG("TK_EL");
-		scr_erase_line(token.tk_arg[0]);
+		LOG("TK_EL"); // don't use n
+		scr_erase_line(t[0]);
 		break;
 	case TK_IL :
-		n = token.tk_arg[0];
 		LOG("TK_IL: %d", n);
-		scr_insert_lines(n?n:1);
+		scr_insert_lines(n);
 		break;
 	case TK_DL :
 		LOG("TK_DL");
-		n = token.tk_arg[0];
-		scr_delete_lines(n?n:1);
+		scr_delete_lines(n);
 		break;
 	case TK_DCH :
 		LOG("TK_DCH");
-		n = token.tk_arg[0];
-		scr_delete_characters(n?n:1);
+		scr_delete_characters(n);
 		break;
 	case TK_ICH :
 		LOG("TK_ICH");
-		n = token.tk_arg[0];
-		scr_insert_characters(n?n:1);
+		scr_insert_characters(n);
 		break;
 	case TK_SET :
 		LOG("TK_SET");
@@ -327,7 +316,7 @@ app_loop_head:
 		break;
 	case TK_DECSTBM: // set top and bottom margins.  
 		LOG("TK_DECSTBM");
-		scr_set_margins(token.tk_arg[0] - 1, token.tk_arg[1] - 1);
+		scr_set_margins(t[0] - 1, t[1] - 1);
 		break;
 	case TK_DECSC :
 		LOG("TK_DECSC");

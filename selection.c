@@ -135,6 +135,8 @@ static uint8_t find_c(uint8_t c, int16_t i)
  *  empty space.  */
 void fix_rc(Point * restrict rc)
 {
+	if(!jbxvt.scr.chars.height || !jbxvt.scr.chars.width)
+		  return; // prevent segfault on bad window size.
 	rc->r = constrain(rc->row, jbxvt.scr.chars.height);
 	rc->c = find_c(constrain(rc->col, jbxvt.scr.chars.width),
 		rc->r - jbxvt.scr.offset);

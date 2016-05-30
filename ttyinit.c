@@ -143,6 +143,10 @@
 //#define SVR4_UTMP
 #endif
 
+#ifdef _UTEMPTER_H_
+#define UTEMPTER_H
+#endif// use freebsd ulog
+
 static pid_t comm_pid = -1;	// process id of child
 static char *tty_name = NULL;	// name of the slave teletype
 #if defined(BSD_UTMP) || defined(SVR4_UTMP)
