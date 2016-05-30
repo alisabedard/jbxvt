@@ -110,7 +110,6 @@
 #ifdef FREEBSD
 #define POSIX_PTY
 #include <termios.h>
-#define TTYTAB _PATH_TTYS
 #endif//FREEBSD
 
 #ifdef _BSD_SOURCE
@@ -140,7 +139,6 @@
 #include <utempter.h>
 #include <utmp.h>
 #define POSIX_PTY
-//#define SVR4_UTMP
 #endif
 
 #ifdef _UTEMPTER_H_
@@ -220,36 +218,6 @@ static void tidy_utmp(void)
 }
 #endif//!UTEMPTER_H
 
-#ifdef BSD_UTMP
-/*  Look up the tty name in the etc/ttytab file and return a slot number
- *  that can be used to access the utmp file.  We cannot use ttyslot()
- *  because the tty name is not that of fd 0.
- */
-static int get_tslot(char * restrict ttynam)
-{
-	FILE *fs;
-	char buf[200], name[200];
-	int i;
-
-	if ((fs = fopen(TTYTAB,"r")) == NULL)
-		return(-1);
-	i = 1;
-	while (fgets(buf,200,fs) != NULL) {
-		if (*buf == '#')
-			continue;
-		if (sscanf(buf,"%s",name) != 1)
-			continue;
-		if (strcmp(ttynam,name) == 0) {
-			fclose(fs);
-			return(i);
-		}
-		i++;
-	}
-	fclose(fs);
-	return(-1);
-}
-#endif /* BSD_UTMP */
-
 //  Attempt to create and write an entry to the utmp file
 #ifndef UTEMPTER_H
 static void write_utmp(void)
@@ -265,9 +233,9 @@ static void write_utmp(void)
 #ifdef SYS_getuid
 	if((pw = getpwuid(syscall(SYS_getuid))))
 #else//!SYS_getuid
-	if((pw = getpwuid(getuid())))
+		  if((pw = getpwuid(getuid())))
 #endif//SYS_getuid
-		strncpy(utent.ut_name,pw->pw_name,sizeof(utent.ut_name));
+			    strncpy(utent.ut_name,pw->pw_name,sizeof(utent.ut_name));
 
 	strncpy(utent.ut_host,XDisplayString(jbxvt.X.dpy),
 		sizeof(utent.ut_host));
@@ -288,8 +256,7 @@ static void write_utmp(void)
 	utentx.ut_pid = comm_pid;
 	int n;
 	if (sscanf(tty_name,"/dev/pts/%d",&n) != 1) {
-		jbputs(QUIT_TTY);
-		jbputs(" ");
+		jbputs(QUIT_TTY " ");
 		jbputs(tty_name);
 		jbputs("\n");
 		return;
@@ -298,7 +265,7 @@ static void write_utmp(void)
 	sprintf(utentx.ut_line,"pts/%d",n);
 	pw = getpwuid(getuid());
 	if (pw != NULL)
-		strncpy(utentx.ut_name,pw->pw_name,sizeof(utent.ut_name));
+		  strncpy(utentx.ut_name,pw->pw_name,sizeof(utent.ut_name));
 	strncpy(utentx.ut_host,XDisplayString(jbxvt.X.dpy),
 		sizeof(utentx.ut_host));
 	utentx.ut_syslen = strlen(utentx.ut_host) + 1;
@@ -311,41 +278,25 @@ static void write_utmp(void)
 #endif /* SVR4_UTMPX */
 
 #ifdef BSD_UTMP
-#ifndef UTMP_FILE
-#define UTMP_FILE	"/etc/utmp"
-#endif /* !UTMP_FILE */
-
-	fd_t ut_fd;
-
-	if ((tslot = get_tslot(tty_name + 5)) < 0) {
-		jbputs("Can't locate tty ");
-		jbputs(tty_name);
-		jbputs(" in ");
-		jbputs(TTYTAB);
-		jbputs("\n");
+	fd_t ut_fd = open(UTMP_FILE, O_WRONLY);
+	if (ut_fd < 0) {
+		jbputs(WARN_UTMP);
+		return;
 	}
-
-	/*  Attempt to write an entry into the utmp file.
-	 */
-	if (tslot > 0) {
-
-		if ((ut_fd = open(UTMP_FILE, O_WRONLY)) >= 0) {
-			memset(&utent,0,sizeof(utent));
-			strncpy(utent.ut_line,tty_name + 5,
-				sizeof(utent.ut_line));
-			pw = getpwuid(getuid());
-			if (pw != NULL)
-				strncpy(utent.ut_name,pw->pw_name,
-					sizeof(utent.ut_name));
-			strncpy(utent.ut_host,
-				XDisplayString(jbxvt.X.dpy),
-				sizeof(utent.ut_host));
-			time(&utent.ut_time);
-			lseek(ut_fd,(long)(tslot * sizeof(struct utmp)),0);
-			write(ut_fd,(char *)&utent,sizeof(struct utmp));
-			close(ut_fd);
-		}
-	}
+	memset(&utent,0,sizeof(utent));
+	strncpy(utent.ut_line,tty_name + 5,
+		sizeof(utent.ut_line));
+	pw = getpwuid(getuid());
+	if (pw != NULL)
+		  strncpy(utent.ut_name,pw->pw_name,
+			  sizeof(utent.ut_name));
+	strncpy(utent.ut_host,
+		XDisplayString(jbxvt.X.dpy),
+		sizeof(utent.ut_host));
+	time(&utent.ut_time);
+	lseek(ut_fd,(long)(tslot * sizeof(struct utmp)),0);
+	write(ut_fd,(char *)&utent,sizeof(struct utmp));
+	close(ut_fd);
 #endif// BSD_UTMP
 }
 #endif//!UTEMPTER_H

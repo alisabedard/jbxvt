@@ -11,6 +11,7 @@
 #define QUIT_SESSION	"Cannot start session"
 #define QUIT_SIGNAL	"Got signal"
 #define QUIT_TTY	"Cannot open tty"
+#define WARN_UTMP	"UTMP error\n"
 
 #ifdef LINUX
 #include <asm-generic/ioctls.h>
