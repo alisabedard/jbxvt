@@ -82,6 +82,8 @@ static int16_t sc_up_find_col(uint8_t * restrict s)
 static void lclr(const uint8_t i, const uint8_t j, const size_t sz,
 	void ** t, void ** s)
 {
+	if(!s[i]) // prevent segfault;
+		return;
 	memset(s[i], 0, sz);
 	t[j] = s[i];
 }

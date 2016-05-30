@@ -10,6 +10,7 @@
 #include "scr_reset.h"
 #include "screen.h"
 #include "sbar.h"
+#include "ttyinit.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,15 +56,19 @@ int resize_window(void)
 	LOG("resize_window()");
 	int x, y;
 	unsigned int width, height;
-	{
-		Window r;
-		unsigned int u;
-		XGetGeometry(jbxvt.X.dpy,jbxvt.X.win.main,&r,
-			&x,&y,&width,&height,&u,&u);
-	}
+	fprintf(stderr, "h: %d, w: %d\n", jbxvt.scr.chars.height,
+		jbxvt.scr.chars.width);
+	if (!jbxvt.scr.chars.width || !jbxvt.scr.chars.height)
+		quit(1, QUIT_ERROR);
+	Window r;
+	unsigned int u;
+	XGetGeometry(jbxvt.X.dpy,jbxvt.X.win.main,&r,
+		&x,&y,&width,&height,&u,&u);
 	if (jbxvt.opt.show_scrollbar) {
-		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.sb,SBAR_WIDTH - 1,height);
-		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.vt,width - SBAR_WIDTH,height);
+		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.sb,
+			SBAR_WIDTH - 1,height);
+		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.vt,
+			width - SBAR_WIDTH,height);
 	} else
 		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.vt,width,height);
 	scr_reset();
