@@ -154,10 +154,6 @@ static char *tty_name = NULL;	// name of the slave teletype
 static struct utmp utent;	// our current utmp entry
 #endif//BSD_UTMP||SVR4_UTMP
 
-#ifdef BSD_UTMP
-static int tslot = -1;		// index to our slot in the utmp file
-#endif /* BSD_UTMP */
-
 // Tidy up the utmp entry etc prior to exiting.
 #ifndef UTEMPTER_H
 static void tidy_utmp(void)
@@ -193,9 +189,9 @@ static void tidy_utmp(void)
 	memset(&utent,0,sizeof(utent));
 
 #ifdef SYS_lseek
-	syscall(SYS_lseek, ut_fd, tslot * sizeof(struct utmp), 0);
+	syscall(SYS_lseek, ut_fd, sizeof(struct utmp), SEEK_END);
 #else//!SYS_lseek
-	lseek(ut_fd,(long)(tslot * sizeof(struct utmp)),0);
+	lseek(ut_fd, sizeof(struct utmp), SEEK_END);
 #endif//SYS_lseek
 
 #ifdef SYS_write
@@ -261,12 +257,12 @@ static void write_utmp(void)
 		jbputs("\n");
 		return;
 	}
-	sprintf(utentx.ut_id,"vt%02x",n);
-	sprintf(utentx.ut_line,"pts/%d",n);
+	snprintf(utentx.ut_id, sizeof(utentx.ut_id), "vt%02x",n);
+	snprintf(utentx.ut_line, sizeof(utentx.ut_line), "pts/%d",n);
 	pw = getpwuid(getuid());
 	if (pw != NULL)
 		  strncpy(utentx.ut_name,pw->pw_name,sizeof(utent.ut_name));
-	strncpy(utentx.ut_host,XDisplayString(jbxvt.X.dpy),
+	strncpy(utentx.ut_host, XDisplayString(jbxvt.X.dpy),
 		sizeof(utentx.ut_host));
 	utentx.ut_syslen = strlen(utentx.ut_host) + 1;
 	time(&utentx.ut_xtime);
@@ -278,7 +274,11 @@ static void write_utmp(void)
 #endif /* SVR4_UTMPX */
 
 #ifdef BSD_UTMP
+#ifdef SYS_open
+	fd_t ut_fd = syscall(SYS_open, UTMP_FILE, O_WRONLY);
+#else//!SYS_open
 	fd_t ut_fd = open(UTMP_FILE, O_WRONLY);
+#endif//SYS_open
 	if (ut_fd < 0) {
 		jbputs(WARN_UTMP);
 		return;
@@ -294,9 +294,21 @@ static void write_utmp(void)
 		XDisplayString(jbxvt.X.dpy),
 		sizeof(utent.ut_host));
 	time(&utent.ut_time);
-	lseek(ut_fd,(long)(tslot * sizeof(struct utmp)),0);
+#ifdef SYS_lseek
+	syscall(SYS_lseek, ut_fd, sizeof(struct utmp), SEEK_END);
+#else//!SYS_lseek
+	lseek(ut_fd, sizeof(struct utmp), SEEK_END);
+#endif//SYS_lseek
+#ifdef SYS_write
+	syscall(SYS_write, ut_fd, &utent, sizeof(struct utmp));
+#else//!SYS_write
 	write(ut_fd,(char *)&utent,sizeof(struct utmp));
+#endif//SYS_write
+#ifdef SYS_close
+	syscall(SYS_close, ut_fd);
+#else//!SYS_close
 	close(ut_fd);
+#endif//SYS_close
 #endif// BSD_UTMP
 }
 #endif//!UTEMPTER_H
