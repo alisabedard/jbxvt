@@ -111,15 +111,17 @@ static int16_t handle_xev(XEvent * event, int16_t * restrict count,
 }
 
 static int16_t x_io_loop(int16_t count, fd_set * restrict in_fdset)
-{	
+{
 	static fd_t x_fd;
 	if(!x_fd)
 		x_fd = XConnectionNumber(jbxvt.X.dpy);
 	while (XPending(jbxvt.X.dpy) == 0) {
 #ifdef DEBUG
-		if (FD_ISSET(x_fd, &in_fdset))
+		if (FD_ISSET(x_fd, in_fdset))
 			  quit(1, QUIT_ERROR);
 #endif//DEBUG
+		if (FD_ISSET(x_fd, in_fdset))
+			  quit(1, QUIT_ERROR);
 		FD_SET(jbxvt.com.fd, in_fdset);
 		FD_SET(x_fd, in_fdset);
 		fd_set out_fdset;

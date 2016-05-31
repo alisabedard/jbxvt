@@ -36,13 +36,12 @@ inline bool is_logshell(void)
 //  Map the window
 void map_window(void)
 {
-	XMapWindow(jbxvt.X.dpy,jbxvt.X.win.vt);
-	XMapWindow(jbxvt.X.dpy,jbxvt.X.win.sb); // show scrollbar
-	XMapWindow(jbxvt.X.dpy,jbxvt.X.win.main);
+	XMapWindow(jbxvt.X.dpy, jbxvt.X.win.main);
+	XMapWindow(jbxvt.X.dpy, jbxvt.X.win.sb);
+	XMapWindow(jbxvt.X.dpy, jbxvt.X.win.vt);
 
 	/*  Setup the window now so that we can add LINES and COLUMNS to
-	 *  the environment.
-	 */
+	 *  the environment.  */
 	XMaskEvent(jbxvt.X.dpy,ExposureMask,&(XEvent){});
 	resize_window();
 }

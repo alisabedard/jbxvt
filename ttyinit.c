@@ -189,9 +189,9 @@ static void tidy_utmp(void)
 	memset(&utent,0,sizeof(utent));
 
 #ifdef SYS_lseek
-	syscall(SYS_lseek, ut_fd, sizeof(struct utmp), SEEK_END);
+	syscall(SYS_lseek, ut_fd, sizeof(struct utmp), 0);
 #else//!SYS_lseek
-	lseek(ut_fd, sizeof(struct utmp), SEEK_END);
+	lseek(ut_fd, sizeof(struct utmp), 0);
 #endif//SYS_lseek
 
 #ifdef SYS_write
@@ -295,9 +295,9 @@ static void write_utmp(void)
 		sizeof(utent.ut_host));
 	time(&utent.ut_time);
 #ifdef SYS_lseek
-	syscall(SYS_lseek, ut_fd, sizeof(struct utmp), SEEK_END);
+	syscall(SYS_lseek, ut_fd, sizeof(struct utmp), 0);
 #else//!SYS_lseek
-	lseek(ut_fd, sizeof(struct utmp), SEEK_END);
+	lseek(ut_fd, sizeof(struct utmp), 0);
 #endif//SYS_lseek
 #ifdef SYS_write
 	syscall(SYS_write, ut_fd, &utent, sizeof(struct utmp));
