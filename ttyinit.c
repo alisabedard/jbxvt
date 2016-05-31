@@ -113,6 +113,7 @@
 #ifdef FREEBSD
 #define POSIX_PTY
 #include <termios.h>
+#include <utempter.h>
 #endif//FREEBSD
 
 #ifdef _BSD_SOURCE
