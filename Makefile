@@ -22,12 +22,11 @@ PREFIX=/usr
 #CFLAGS+=-I/usr/local/include
 #LIBS+=-L/usr/local/lib
 #PREFIX=/usr/local
-
+#LIBS+=-lutempter
 
 # Uncomment for GNU/Linux:
 CFLAGS+=-DLINUX -D_GNU_SOURCE
 LIBS+=-lutempter
-
 
 #-------------------------------------------------------------
 
