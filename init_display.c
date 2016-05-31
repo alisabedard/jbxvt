@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <X11/cursorfont.h>
 #include <X11/Xutil.h>
 
@@ -46,22 +47,32 @@ static void setup_font(void)
 		jbxvt.opt.font?jbxvt.opt.font:DEF_FONT); // if specified
 	if(!jbxvt.X.font) // fallback
 		  jbxvt.X.font = XLoadQueryFont(jbxvt.X.dpy, FIXED_FONT);
+	if(!jbxvt.X.font) // fail
+		  quit(1, QUIT_FONT);
 }
 
-static void setup_sizehints(void)
+// free the returned value
+static XSizeHints * get_sizehints(void)
 {
-	sizehints = (XSizeHints){
+	XSizeHints * s = malloc(sizeof(XSizeHints));
+	*s = (XSizeHints) {
+		.flags = USSize | PMinSize | PResizeInc | PBaseSize,
+		.width = 80, .height = 24,
+		.base_width = MARGIN<<1,
+		.base_height = MARGIN<<1,
 		.width_inc = XTextWidth(jbxvt.X.font, "M", 1),
-		.height_inc = jbxvt.X.font->ascent + jbxvt.X.font->descent,
-		.flags = USSize,
+		.height_inc = jbxvt.X.font->ascent
+			+ jbxvt.X.font->descent
 	};
-	sizehints.width = 80 * sizehints.width_inc;
-	sizehints.height = 24 * sizehints.height_inc;
-	sizehints.min_width = sizehints.width_inc + sizehints.base_width;
-	sizehints.min_height = sizehints.height_inc + sizehints.base_height;
+	s->width *= s->width_inc;
+	s->height *= s->height_inc;
+	s->min_width = s->width_inc + s->base_width;
+	s->min_height = s->height_inc + s->base_height;
+
+	return s;
 }
 
-static void setup_properties(char * name)
+static void setup_properties(char * name, XSizeHints * restrict sh)
 {
 	XClassHint class = { .res_name = name, .res_class = XVT_CLASS };
 	XWMHints wmhints = { .input = true, .initial_state = NormalState,
@@ -69,59 +80,51 @@ static void setup_properties(char * name)
 	XTextProperty winame;
 	XStringListToTextProperty(&name, 1, &winame);
 	XSetWMProperties(jbxvt.X.dpy, jbxvt.X.win.main, &winame,
-		&winame, &name, 1, &sizehints, &wmhints, &class);
+		&winame, &name, 1, sh, &wmhints, &class);
 	XFree(winame.value);
 }
 
-static void create_main_window(void)
+static void create_main_window(XSizeHints * restrict sh)
 {
 	jbxvt.X.win.main = XCreateSimpleWindow(jbxvt.X.dpy,
 		DefaultRootWindow(jbxvt.X.dpy),
-		sizehints.x,sizehints.y,sizehints.width,sizehints.height,
+		sh->x, sh->y, sh->width, sh->height,
 		0, jbxvt.X.color.fg,jbxvt.X.color.bg);
 	XSelectInput(jbxvt.X.dpy,jbxvt.X.win.main,MW_EVENTS);
 }
 
-static void create_sb_window(void)
+static void create_sb_window(const uint16_t height)
 {
 	jbxvt.X.win.sb = XCreateSimpleWindow(jbxvt.X.dpy,
 		jbxvt.X.win.main, -1, -1,
-		SBAR_WIDTH - 1, sizehints.height, 1,
+		SBAR_WIDTH - 1, height, 1,
 		jbxvt.X.color.fg, jbxvt.X.color.bg);
 	XSelectInput(jbxvt.X.dpy,jbxvt.X.win.sb,SB_EVENTS);
 	XDefineCursor(jbxvt.X.dpy,jbxvt.X.win.sb,
 		XCreateFontCursor(jbxvt.X.dpy, XC_sb_v_double_arrow));
 }
 
-static void create_vt_window(void)
+static void create_vt_window(XSizeHints * restrict sh)
 {
-	jbxvt.X.win.vt = XCreateSimpleWindow(jbxvt.X.dpy, jbxvt.X.win.main,
-		0, 0, sizehints.width, sizehints.height, 0,
+	jbxvt.X.win.vt = XCreateSimpleWindow(jbxvt.X.dpy,
+		jbxvt.X.win.main, 0, 0, sh->width, sh->height, 0,
 		jbxvt.X.color.fg, jbxvt.X.color.bg);
 	XDefineCursor(jbxvt.X.dpy,jbxvt.X.win.vt,
 		XCreateFontCursor(jbxvt.X.dpy, XC_xterm));
 	XSelectInput(jbxvt.X.dpy,jbxvt.X.win.vt,VT_EVENTS);
 }
 
-static void show_scrollbar(void)
-{
-	if(jbxvt.opt.show_scrollbar) { // show scrollbar:
-		XMoveWindow(jbxvt.X.dpy,jbxvt.X.win.vt,SBAR_WIDTH,0);
-		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.vt,
-			sizehints.width - SBAR_WIDTH,
-			sizehints.height);
-	}
-}
-
 //  Open the window.
 static void create_window(char * restrict name)
 {
-	setup_sizehints();
-	create_main_window();
-	setup_properties(name);
-	create_sb_window();
-	create_vt_window();
-	show_scrollbar();
+	XSizeHints * sh = get_sizehints();
+	create_main_window(sh);
+	setup_properties(name, sh);
+	create_sb_window(sh->height);
+	create_vt_window(sh);
+	free(sh);
+	jbxvt.opt.show_scrollbar ^= true;
+	switch_scrollbar();
 }
 
 static void setup_gcs(void)

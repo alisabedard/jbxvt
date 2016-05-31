@@ -18,28 +18,11 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
-static bool logshell;		/* flag nonzero if using a login shell */
-
-XSizeHints sizehints = {
-	.flags = PMinSize | PResizeInc | PBaseSize,
-	.width = 80, .height = 24, .min_width = 1, .min_height = 1,
-	.width_inc = 1, .height_inc = 1, .base_width = MARGIN<<1,
-	.base_height = MARGIN<<1
-};
-
-//  Return true if we should be running a login shell.
-inline bool is_logshell(void)
-{
-	return(logshell);
-}
-
 //  Map the window
 void map_window(void)
 {
 	XMapWindow(jbxvt.X.dpy, jbxvt.X.win.main);
-	XMapWindow(jbxvt.X.dpy, jbxvt.X.win.sb);
-	XMapWindow(jbxvt.X.dpy, jbxvt.X.win.vt);
-
+	XMapSubwindows(jbxvt.X.dpy, jbxvt.X.win.main);
 	/*  Setup the window now so that we can add LINES and COLUMNS to
 	 *  the environment.  */
 	XMaskEvent(jbxvt.X.dpy,ExposureMask,&(XEvent){});
@@ -47,20 +30,18 @@ void map_window(void)
 }
 
 /*  Called after a possible window size change.  If the window size has changed
- *  initiate a redraw by resizing the subwindows and return 1.  If the window
- *  size has not changed then return 0;
- */
-int resize_window(void)
+ *  initiate a redraw by resizing the subwindows. */
+void resize_window(void)
 {
 	LOG("resize_window()");
 	int x, y;
 	unsigned int width, height;
+	// Quit before being messed up with a bad size:
 	if (!jbxvt.scr.chars.width || !jbxvt.scr.chars.height)
 		quit(1, QUIT_ERROR);
-	Window r;
-	unsigned int u;
-	XGetGeometry(jbxvt.X.dpy,jbxvt.X.win.main,&r,
-		&x,&y,&width,&height,&u,&u);
+	XGetGeometry(jbxvt.X.dpy, jbxvt.X.win.main, &(Window){0},
+		&x, &y, &width, &height, &(unsigned int){0},
+		&(unsigned int){0});
 	if (jbxvt.opt.show_scrollbar) {
 		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.sb,
 			SBAR_WIDTH - 1,height);
@@ -69,40 +50,24 @@ int resize_window(void)
 	} else
 		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.vt,width,height);
 	scr_reset();
-	return(1);
 }
 
 //  Toggle scrollbar.
 void switch_scrollbar(void)
 {
 	LOG("switch_scrollbar()");
-	Window root;
-	int x, y;
-	unsigned int width, height, bdr_width, depth;
-
-	XGetGeometry(jbxvt.X.dpy,jbxvt.X.win.main,&root,
-		&x,&y,&width,&height,&bdr_width,&depth);
+	unsigned int width, height;
+	XGetGeometry(jbxvt.X.dpy, jbxvt.X.win.main, &(Window){0},
+		&(int){0}, &(int){0}, &width, &height,
+		&(unsigned int){0}, &(unsigned int){0});
 	if (jbxvt.opt.show_scrollbar) {
-		XUnmapWindow(jbxvt.X.dpy,jbxvt.X.win.sb);
-		XMoveWindow(jbxvt.X.dpy,jbxvt.X.win.vt,0,0);
+		XMoveWindow(jbxvt.X.dpy, jbxvt.X.win.vt, 0, 0);
 		width -= SBAR_WIDTH;
-		sizehints.base_width -= SBAR_WIDTH;
-		sizehints.width = width;
-		sizehints.height = height;
-		sizehints.flags = USSize | PMinSize | PResizeInc | PBaseSize;
-		XSetWMNormalHints(jbxvt.X.dpy,jbxvt.X.win.main,&sizehints);
-		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.main,width,height);
 	} else {
-		XMapWindow(jbxvt.X.dpy,jbxvt.X.win.sb);
-		XMoveWindow(jbxvt.X.dpy,jbxvt.X.win.vt,SBAR_WIDTH,0);
+		XMoveWindow(jbxvt.X.dpy, jbxvt.X.win.vt, SBAR_WIDTH, 0);
 		width += SBAR_WIDTH;
-		sizehints.base_width += SBAR_WIDTH;
-		sizehints.width = width;
-		sizehints.height = height;
-		sizehints.flags = USSize | PMinSize | PResizeInc | PBaseSize;
-		XSetWMNormalHints(jbxvt.X.dpy,jbxvt.X.win.main,&sizehints);
-		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.main,width,height);
 	}
+	XResizeWindow(jbxvt.X.dpy, jbxvt.X.win.main, width, height);
 	jbxvt.opt.show_scrollbar ^= true;
 }
 

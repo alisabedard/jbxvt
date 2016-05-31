@@ -35,14 +35,25 @@ static int16_t handle_xev(XEvent * event, int16_t * restrict count,
 		s = lookup_key(event, count);
 		if (count) send_string(s, *count);
 		break;
-	case ClientMessage:
-		if (event->xclient.format == 32
-			&& event->xclient.data.l[0]
-			== (long)wm_del_win())
-			  quit(0, NULL);
-		break;
-	case MappingNotify:
-		XRefreshKeyboardMapping(&event->xmapping);
+	case FocusIn:
+	case FocusOut:
+		if (event->xfocus.mode != NotifyNormal)
+			  return 0;
+		switch (event->xfocus.detail) {
+		case NotifyAncestor :
+		case NotifyInferior :
+		case NotifyNonlinear :
+			break;
+		default :
+			return 0;
+		}
+		xe = calloc(1, sizeof(struct xeventst));
+		xe->xe_type = event->type;
+		xe->xe_time = event->xselection.time;
+		xe->xe_detail = event->xfocus.detail;
+		push_xevent(xe);
+		if (flags & GET_XEVENTS)
+			  return(GCC_NULL);
 		break;
 	case SelectionRequest:
 		xe = (struct xeventst *)malloc(sizeof(struct xeventst));
@@ -66,25 +77,15 @@ static int16_t handle_xev(XEvent * event, int16_t * restrict count,
 		if (flags & GET_XEVENTS)
 			  return(GCC_NULL);
 		break;
-	case FocusIn:
-	case FocusOut:
-		if (event->xfocus.mode != NotifyNormal)
-			  return 0;
-		switch (event->xfocus.detail) {
-		case NotifyAncestor :
-		case NotifyInferior :
-		case NotifyNonlinear :
-			break;
-		default :
-			return 0;
-		}
-		xe = calloc(1, sizeof(struct xeventst));
-		xe->xe_type = event->type;
-		xe->xe_time = event->xselection.time;
-		xe->xe_detail = event->xfocus.detail;
-		push_xevent(xe);
-		if (flags & GET_XEVENTS)
-			  return(GCC_NULL);
+
+	case ClientMessage:
+		if (event->xclient.format == 32
+			&& event->xclient.data.l[0]
+			== (long)wm_del_win())
+			  quit(0, NULL);
+		break;
+	case MappingNotify:
+		XRefreshKeyboardMapping(&event->xmapping);
 		break;
 	default:
 		xe = (struct xeventst *)malloc(sizeof(struct xeventst));

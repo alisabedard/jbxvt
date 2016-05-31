@@ -8,6 +8,7 @@
 
 #define QUIT_DISPLAY	"Bad DISPLAY"
 #define QUIT_ERROR	"Fatal error"
+#define QUIT_FONT	"Bad font"
 #define QUIT_SESSION	"Cannot start session"
 #define QUIT_SIGNAL	"Got signal"
 #define QUIT_TTY	"Cannot open tty"

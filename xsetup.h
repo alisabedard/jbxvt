@@ -6,20 +6,16 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include <X11/Xutil.h>
 
-extern XSizeHints sizehints;
-
-void switch_scrollbar(void);
 
 // Change window and/or icon name:
 void change_name(uint8_t * restrict str, const bool window,
 	const bool icon);
 
-int resize_window(void);
-void send_auth(void);
 void map_window(void);
-bool is_logshell(void);
+void resize_window(void);
+void send_auth(void);
+void switch_scrollbar(void);
 void usage(int);
 
 #endif//XSETUP_H
