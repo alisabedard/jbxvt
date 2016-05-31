@@ -19,8 +19,8 @@ struct tokenst {
 	uint16_t tk_type;		/* the token type */
 	uint16_t tk_length;		/* length of string */
 	uint8_t tk_char;		/* single (unprintable) character */
-	uint8_t tk_nargs:4;		/* number of numerical arguments */
-	uint8_t tk_region:4;		/* terminal or scrollbar */
+	uint8_t tk_nargs;
+	int8_t tk_region; // terminal or scrollbar
 };
 
 #endif//!TOKENST_H
