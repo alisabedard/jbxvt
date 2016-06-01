@@ -387,7 +387,7 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 	const fd_t mfd = posix_openpt(O_RDWR);
 #endif//POSIX_PTY
 	if (mfd < 0)
-		  quit(1, QUIT_TTY);
+		  quit(1, WARN_RES RES_TTY);
 
 #ifdef POSIX_PTY
 	grantpt(mfd);
@@ -402,7 +402,7 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 #endif//SYS_open
 
 	if (sfd < 0)
-		quit(1, QUIT_TTY);
+		quit(1, WARN_RES RES_TTY);
 
 #ifdef HPUX // The following seems to only affect HPUX:
 #if defined(POSIX_PTY) && defined(I_PUSH)
@@ -525,7 +525,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
 #endif//!NETBSD
 
 	if(pgid < 0)
-		  quit(1, QUIT_SESSION);
+		  quit(1, WARN_RES RES_SSN);
 
 	/*  Having started a new session, we need to establish
 	 *  a controlling teletype for it.  On some systems
@@ -550,7 +550,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
 #endif//SYS_open
 
 	if (ttyfd < 0)
-		  quit(1, QUIT_TTY);
+		  quit(1, WARN_RES RES_SSN);
 
 #ifdef SYS_close
 	syscall(SYS_close, i);
@@ -627,7 +627,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
 #endif//SYS_setuid
 
 	execvp(argv[0],argv);
-	quit(1, QUIT_SESSION);
+	quit(1, WARN_RES RES_SSN);
 }
 
 //  Catch a SIGCHLD signal and exit if the direct child has died.
@@ -643,7 +643,7 @@ static void catch_signal(int sig)
 	case SIGKILL: // normal exit
 		quit(0, NULL);
 	default: // something went wrong
-		quit(1, QUIT_SIGNAL);
+		quit(1, WARN_SIG);
 	}
 }
 
@@ -681,7 +681,7 @@ int run_command(char ** argv)
 #endif//SYS_fork
 
 	if (comm_pid < 0)
-		  quit(1, QUIT_SESSION);
+		  quit(1, WARN_RES RES_SSN);
 #ifdef DEBUG
 	dprintf(STDERR_FILENO, "command: %s, pid: %d\n", argv[0], comm_pid);
 #endif//DEBUG

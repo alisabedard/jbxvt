@@ -48,7 +48,7 @@ static void setup_font(void)
 	if(!jbxvt.X.font) // fallback
 		  jbxvt.X.font = XLoadQueryFont(jbxvt.X.dpy, FIXED_FONT);
 	if(!jbxvt.X.font) // fail
-		  quit(1, QUIT_FONT);
+		  quit(1, WARN_RES RES_FNT);
 }
 
 // free the returned value
@@ -72,25 +72,13 @@ static XSizeHints * get_sizehints(void)
 	return s;
 }
 
-static void setup_properties(char * name, XSizeHints * restrict sh)
-{
-	XClassHint class = { .res_name = name, .res_class = XVT_CLASS };
-	XWMHints wmhints = { .input = true, .initial_state = NormalState,
-		.flags = InputHint | StateHint};
-	XTextProperty winame;
-	XStringListToTextProperty(&name, 1, &winame);
-	XSetWMProperties(jbxvt.X.dpy, jbxvt.X.win.main, &winame,
-		&winame, &name, 1, sh, &wmhints, &class);
-	XFree(winame.value);
-}
-
 static void create_main_window(XSizeHints * restrict sh)
 {
 	jbxvt.X.win.main = XCreateSimpleWindow(jbxvt.X.dpy,
 		DefaultRootWindow(jbxvt.X.dpy),
 		sh->x, sh->y, sh->width, sh->height,
 		0, jbxvt.X.color.fg,jbxvt.X.color.bg);
-	XSelectInput(jbxvt.X.dpy,jbxvt.X.win.main,MW_EVENTS);
+	XSelectInput(jbxvt.X.dpy,jbxvt.X.win.main, MW_EVENTS);
 }
 
 static void create_sb_window(const uint16_t height)
@@ -99,7 +87,7 @@ static void create_sb_window(const uint16_t height)
 		jbxvt.X.win.main, -1, -1,
 		SBAR_WIDTH - 1, height, 1,
 		jbxvt.X.color.fg, jbxvt.X.color.bg);
-	XSelectInput(jbxvt.X.dpy,jbxvt.X.win.sb,SB_EVENTS);
+	XSelectInput(jbxvt.X.dpy, jbxvt.X.win.sb, SB_EVENTS);
 	XDefineCursor(jbxvt.X.dpy,jbxvt.X.win.sb,
 		XCreateFontCursor(jbxvt.X.dpy, XC_sb_v_double_arrow));
 }
@@ -111,15 +99,15 @@ static void create_vt_window(XSizeHints * restrict sh)
 		jbxvt.X.color.fg, jbxvt.X.color.bg);
 	XDefineCursor(jbxvt.X.dpy,jbxvt.X.win.vt,
 		XCreateFontCursor(jbxvt.X.dpy, XC_xterm));
-	XSelectInput(jbxvt.X.dpy,jbxvt.X.win.vt,VT_EVENTS);
+	XSelectInput(jbxvt.X.dpy,jbxvt.X.win.vt, VT_EVENTS);
 }
 
 //  Open the window.
-static void create_window(char * restrict name)
+static void create_window(uint8_t * restrict name)
 {
 	XSizeHints * sh = get_sizehints();
 	create_main_window(sh);
-	setup_properties(name, sh);
+	change_name(name, true, true);
 	create_sb_window(sh->height);
 	create_vt_window(sh);
 	free(sh);
@@ -149,24 +137,27 @@ static void setup_gcs(void)
 
 static void init_jbxvt_colors(void)
 {
-	jbxvt.X.color.map = DefaultColormap(jbxvt.X.dpy, jbxvt.X.screen);
-	const pixel_t wp = WhitePixel(jbxvt.X.dpy, jbxvt.X.screen);
-	jbxvt.X.color.fg = jbxvt.opt.fg?get_pixel(jbxvt.opt.fg):wp;
-	jbxvt.X.color.cursor = jbxvt.opt.cu?get_pixel(jbxvt.opt.cu):wp;
-	const pixel_t bp = BlackPixel(jbxvt.X.dpy, jbxvt.X.screen);
-	jbxvt.X.color.bg = jbxvt.opt.bg?get_pixel(jbxvt.opt.bg):bp;
+	jbxvt.X.color.map = DefaultColormap(jbxvt.X.dpy,
+		jbxvt.X.screen);
+	const pixel_t p[] = {
+		BlackPixel(jbxvt.X.dpy, jbxvt.X.screen),
+		WhitePixel(jbxvt.X.dpy, jbxvt.X.screen)
+	};
+	jbxvt.X.color.fg = jbxvt.opt.fg?get_pixel(jbxvt.opt.fg):p[1];
+	jbxvt.X.color.cursor = jbxvt.opt.cu?get_pixel(jbxvt.opt.cu):p[1];
+	jbxvt.X.color.bg = jbxvt.opt.bg?get_pixel(jbxvt.opt.bg):p[0];
 }
 
 void init_display(char * name)
 {
 	jbxvt.X.dpy = XOpenDisplay(NULL);
 	if(!jbxvt.X.dpy)
-		  quit(1, QUIT_DISPLAY);
+		  quit(1, WARN_RES RES_DPY);
 
 	jbxvt.X.screen = DefaultScreen(jbxvt.X.dpy);
 	init_jbxvt_colors();
 	setup_font();
-	create_window(name);
+	create_window((uint8_t *)name);
 	setup_gcs();
 
 	scr_init();

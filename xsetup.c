@@ -34,13 +34,12 @@ void map_window(void)
 void resize_window(void)
 {
 	LOG("resize_window()");
-	int x, y;
-	unsigned int width, height;
 	// Quit before being messed up with a bad size:
 	if (!jbxvt.scr.chars.width || !jbxvt.scr.chars.height)
-		quit(1, QUIT_ERROR);
+		quit(1, WARN_ERR);
+	unsigned int width, height;
 	XGetGeometry(jbxvt.X.dpy, jbxvt.X.win.main, &(Window){0},
-		&x, &y, &width, &height, &(unsigned int){0},
+		&(int){0}, &(int){0}, &width, &height, &(unsigned int){0},
 		&(unsigned int){0});
 	if (jbxvt.opt.show_scrollbar) {
 		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.sb,

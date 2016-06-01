@@ -155,7 +155,7 @@ void init_command(char ** restrict argv)
 	wm_del_win();
 
 	if ((jbxvt.com.fd = run_command(argv)) < 0)
-		  quit(1, QUIT_SESSION);
+		  quit(1, WARN_RES RES_SSN);
 	jbxvt.com.buf.next = jbxvt.com.buf.top = jbxvt.com.buf.data;
 	jbxvt.com.stack.top = jbxvt.com.stack.data;
 }
