@@ -173,7 +173,7 @@ void set_keys(const bool mode_high, const bool is_cursor)
 static char * get_keycode_value(struct KeyMaps * restrict keymaptable,
 	KeySym keysym, char * buf, const int use_alternate)
 {
-	for (struct KeyMaps * km = keymaptable; km->km_keysym != 0; km++) {
+	for (struct KeyMaps * km = keymaptable; km->km_keysym; ++km) {
 		if (km->km_keysym != keysym)
 			  continue;
 		struct KeyStrings * ks = use_alternate
@@ -285,8 +285,7 @@ void cprintf(char *fmt,...)
 {
 	va_list args;
 	va_start(args,fmt);
-	// if less than 28, gcc 6.1.1 produces an executable 4k larger
-	static uint8_t buf[28];
+	static uint8_t buf[7];
 	// + 1 to include \0 terminator.
 	const int l = vsnprintf((char *)buf, sizeof(buf), fmt, args) + 1;
 	va_end(args);
