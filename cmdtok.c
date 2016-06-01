@@ -106,23 +106,15 @@ static int16_t handle_xev(XEvent * event, int16_t * restrict count,
 		}
 		push_xevent(xe);
 		if (flags & GET_XEVENTS)
-			  return(GCC_NULL);
+			  return GCC_NULL;
 	}
 	return 0;
 }
 
 static int16_t x_io_loop(int16_t count, fd_set * restrict in_fdset)
 {
-	static fd_t x_fd;
-	if(!x_fd)
-		x_fd = XConnectionNumber(jbxvt.X.dpy);
+	const fd_t x_fd = XConnectionNumber(jbxvt.X.dpy);
 	while (XPending(jbxvt.X.dpy) == 0) {
-#ifdef DEBUG
-		if (FD_ISSET(x_fd, in_fdset))
-			  quit(1, QUIT_ERROR);
-#endif//DEBUG
-		if (FD_ISSET(x_fd, in_fdset))
-			  quit(1, QUIT_ERROR);
 		FD_SET(jbxvt.com.fd, in_fdset);
 		FD_SET(x_fd, in_fdset);
 		fd_set out_fdset;
@@ -152,7 +144,7 @@ static int16_t x_io_loop(int16_t count, fd_set * restrict in_fdset)
 				jbxvt.com.send_nxt,count);
 #endif//SYS_write
 			if (count < 0)
-				  quit(1, "Failed to write to command");
+				  quit(1, WARN_RES RES_CMD);
 			jbxvt.com.send_count -= count;
 			jbxvt.com.send_nxt += count;
 		}
@@ -181,7 +173,6 @@ static int16_t get_com_char(const int8_t flags)
 		return(GCC_NULL);
 
 	int16_t count;
-
 	for (;;) {
 		fd_set in_fdset;
 		FD_ZERO(&in_fdset);
@@ -202,6 +193,138 @@ static int16_t get_com_char(const int8_t flags)
 	return *jbxvt.com.buf.next++;
 }
 
+static void handle_string_char(struct tokenst * restrict tk, int16_t c)
+{
+	uint16_t i = 0;
+	tk->tk_nlcount = 0;
+	do {
+		tk->tk_string[i++] = c;
+		c = get_com_char(1);
+		if (c == '\n' && ++tk->tk_nlcount >= NLMAX) {
+			tk->tk_nlcount--;
+			break;
+		}
+	} while (is_string_char(c) && i < TKS_MAX);
+	tk->tk_length = i;
+	tk->tk_string[i] = 0;
+	tk->tk_type = TK_STRING;
+	if (c != GCC_NULL)
+		  push_com_char(c);
+}
+
+#if defined(__i386__) || defined(__amd64__)
+	__attribute__((regparm(1)))
+#endif//x86
+static void start_esc(int16_t c, struct tokenst * restrict tk)
+{
+	c = get_com_char(0);
+	if (c >= '<' && c <= '?') {
+		tk->tk_private = c;
+		c = get_com_char(0);
+	}
+
+	//  read any numerical arguments
+	uint16_t i = 0;
+	do {
+		uint16_t n = 0;
+		while (c >= '0' && c <= '9') {
+			n *= 10;
+			n += c - '0';
+			c = get_com_char(0);
+		}
+		if (i < TK_MAX_ARGS)
+			  tk->tk_arg[i++] = n;
+		if (c == ESC)
+			  push_com_char(c);
+		if (c < ' ')
+			  return;
+		if (c < '@')
+			  c = get_com_char(0);
+	} while (c < '@' && c >= ' ');
+	if (c == ESC)
+		  push_com_char(c);
+	if (c < ' ')
+		  return;
+	tk->tk_nargs = i;
+	tk->tk_type = c;
+}
+
+#if defined(__i386__) || defined(__amd64__)
+	__attribute__((regparm(1)))
+#endif//x86
+static void end_esc(int16_t c, struct tokenst * restrict tk)
+{
+	c = get_com_char(0);
+	uint16_t n = 0;
+	while (c >= '0' && c <= '9') {
+		n = n * 10 + c - '0';
+		c = get_com_char(0);
+	}
+	tk->tk_arg[0] = n;
+	tk->tk_nargs = 1;
+	c = get_com_char(0);
+	register uint16_t i = 0;
+	while ((c & 0177) >= ' ' && i < TKS_MAX) {
+		if (c >= ' ')
+			  tk->tk_string[i++] = c;
+		c = get_com_char(0);
+	}
+	tk->tk_length = i;
+	tk->tk_string[i] = 0;
+	tk->tk_type = TK_TXTPAR;
+}
+
+static void handle_esc(struct tokenst * restrict tk, int16_t c)
+{
+	c = get_com_char(0);
+	switch(c) {
+	case '[':
+		start_esc(c, tk);
+		break;
+	case ']':
+		end_esc(c, tk);
+		break;
+	case '#':
+	case '(':
+	case ')':
+		tk->tk_type = c;
+		c = get_com_char(0);
+		tk->tk_arg[0] = c;
+		tk->tk_nargs = 1;
+		break;
+	case '7':
+	case '8':
+	case '=':
+	case '>':
+		tk->tk_type = c;
+		tk->tk_nargs = 0;
+		break;
+	case 'D' :
+		tk->tk_type = TK_IND;
+		break;
+	case 'E' :
+		tk->tk_type = TK_NEL;
+		break;
+	case 'H' :
+		tk->tk_type = TK_HTS;
+		break;
+	case 'M' :
+		tk->tk_type = TK_RI;
+		break;
+	case 'N' :
+		tk->tk_type = TK_SS2;
+		break;
+	case 'O' :
+		tk->tk_type = TK_SS3;
+		break;
+	case 'Z' :
+		tk->tk_type = TK_DECID;
+		break;
+	default :
+		return;
+	}
+}
+
 //  Return an input token
 void get_token(struct tokenst * restrict tk)
 {
@@ -211,128 +334,14 @@ void get_token(struct tokenst * restrict tk)
 		  return;
 
 	int16_t c = get_com_char(GET_XEVENTS);
-	switch (c) {
-	case GCC_NULL:
+	if (c == GCC_NULL) {
 		tk->tk_type = TK_NULL;
-		return;
-	case EOF:
+	} else if (c == EOF) {
 		tk->tk_type = TK_EOF;
-		return;
-	}
-
-	if (is_string_char(c)) {
-		uint16_t i = 0;
-		tk->tk_nlcount = 0;
-		do {
-			tk->tk_string[i++] = c;
-			c = get_com_char(1);
-			if (c == '\n' && ++tk->tk_nlcount >= NLMAX) {
-				tk->tk_nlcount--;
-				break;
-			}
-		} while (is_string_char(c) && i < TKS_MAX);
-		tk->tk_length = i;
-		tk->tk_string[i] = 0;
-		tk->tk_type = TK_STRING;
-		if (c != GCC_NULL)
-			push_com_char(c);
+	} else if (is_string_char(c)) {
+		handle_string_char(tk, c);
 	} else if (c == ESC) {
-		uint16_t i;
-		c = get_com_char(0);
-		switch(c) {
-		case '[':
-			c = get_com_char(0);
-			if (c >= '<' && c <= '?') {
-				tk->tk_private = c;
-				c = get_com_char(0);
-			}
-
-			//  read any numerical arguments
-			i = 0;
-			do {
-				uint16_t n = 0;
-				while (c >= '0' && c <= '9') {
-					n = n * 10 + c - '0';
-					c = get_com_char(0);
-				}
-				if (i < TK_MAX_ARGS)
-					  tk->tk_arg[i++] = n;
-				if (c == ESC)
-					  push_com_char(c);
-				if (c < ' ')
-					  return;
-				if (c < '@')
-					  c = get_com_char(0);
-			} while (c < '@' && c >= ' ');
-			if (c == ESC)
-				  push_com_char(c);
-			if (c < ' ')
-				  return;
-			tk->tk_nargs = i;
-			tk->tk_type = c;
-			break;
-		case ']':
-			c = get_com_char(0);
-			uint16_t n = 0;
-			while (c >= '0' && c <= '9') {
-				n = n * 10 + c - '0';
-				c = get_com_char(0);
-			}
-			tk->tk_arg[0] = n;
-			tk->tk_nargs = 1;
-			c = get_com_char(0);
-			i = 0;
-			while ((c & 0177) >= ' ' && i < TKS_MAX) {
-				if (c >= ' ')
-					  tk->tk_string[i++] = c;
-				c = get_com_char(0);
-			}
-			tk->tk_length = i;
-			tk->tk_string[i] = 0;
-			tk->tk_type = TK_TXTPAR;
-			break;
-		case '#':
-		case '(':
-		case ')':
-			tk->tk_type = c;
-			c = get_com_char(0);
-			tk->tk_arg[0] = c;
-			tk->tk_nargs = 1;
-			break;
-		case '7':
-		case '8':
-		case '=':
-		case '>':
-			tk->tk_type = c;
-			tk->tk_nargs = 0;
-			break;
-		default:
-			switch (c) {
-			case 'D' :
-				tk->tk_type = TK_IND;
-				break;
-			case 'E' :
-				tk->tk_type = TK_NEL;
-				break;
-			case 'H' :
-				tk->tk_type = TK_HTS;
-				break;
-			case 'M' :
-				tk->tk_type = TK_RI;
-				break;
-			case 'N' :
-				tk->tk_type = TK_SS2;
-				break;
-			case 'O' :
-				tk->tk_type = TK_SS3;
-				break;
-			case 'Z' :
-				tk->tk_type = TK_DECID;
-				break;
-			default :
-				return;
-			}
-		}
+		handle_esc(tk, c);
 	} else {
 		tk->tk_type = TK_CHAR;
 		tk->tk_char = c;
