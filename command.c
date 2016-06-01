@@ -174,33 +174,33 @@ static char * get_keycode_value(struct KeyMaps * restrict keymaptable,
 	KeySym keysym, char * buf, const int use_alternate)
 {
 	for (struct KeyMaps * km = keymaptable; km->km_keysym != 0; km++) {
-		if (km->km_keysym == keysym) {
-			struct KeyStrings * ks = use_alternate
-				? &km->km_alt : &km->km_normal;
-			switch (ks->ks_type) {
-			    case KS_TYPE_NONE:
-				return NULL;
-			    case KS_TYPE_CHAR:
-				snprintf((char *)buf, KBUFSIZE,
-					"%c",ks->ks_value);
-				return buf;
-			    case KS_TYPE_XTERM:
-				snprintf((char *)buf, KBUFSIZE,
-					"\033[%d~",ks->ks_value);
-				return buf;
-			    case KS_TYPE_SUN:
-				snprintf((char *)buf, KBUFSIZE,
-					"\033[%dz",ks->ks_value);
-				return buf;
-			    case KS_TYPE_APPKEY:
-				snprintf((char *)buf, KBUFSIZE,
-					"\033O%c",ks->ks_value);
-				return buf;
-			    case KS_TYPE_NONAPP:
-				snprintf((char *)buf, KBUFSIZE,
-					"\033[%c",ks->ks_value);
-				return buf;
-			}
+		if (km->km_keysym != keysym)
+			  continue;
+		struct KeyStrings * ks = use_alternate
+			? &km->km_alt : &km->km_normal;
+		switch (ks->ks_type) {
+		case KS_TYPE_NONE:
+			return NULL;
+		case KS_TYPE_CHAR:
+			snprintf((char *)buf, KBUFSIZE,
+				"%c",ks->ks_value);
+			return buf;
+		case KS_TYPE_XTERM:
+			snprintf((char *)buf, KBUFSIZE,
+				"\033[%d~",ks->ks_value);
+			return buf;
+		case KS_TYPE_SUN:
+			snprintf((char *)buf, KBUFSIZE,
+				"\033[%dz",ks->ks_value);
+			return buf;
+		case KS_TYPE_APPKEY:
+			snprintf((char *)buf, KBUFSIZE,
+				"\033O%c",ks->ks_value);
+			return buf;
+		case KS_TYPE_NONAPP:
+			snprintf((char *)buf, KBUFSIZE,
+				"\033[%c",ks->ks_value);
+			return buf;
 		}
 	}
 	return NULL;
@@ -287,7 +287,7 @@ void cprintf(char *fmt,...)
 	va_start(args,fmt);
 	// if less than 28, gcc 6.1.1 produces an executable 4k larger
 	static uint8_t buf[28];
-	// + 1 to include \0 terminator.  
+	// + 1 to include \0 terminator.
 	const int l = vsnprintf((char *)buf, sizeof(buf), fmt, args) + 1;
 	va_end(args);
 	send_string(buf, l);
@@ -300,12 +300,12 @@ static void show_token_args(struct tokenst * restrict tk)
 {
 	for (uint8_t i = 0; i < tk->tk_nargs; i++) {
 		if (i == 0)
-			printf(" (%d",tk->tk_arg[i]);
+			dprintf(STDERR_FILENO, " (%d",tk->tk_arg[i]);
 		else
-			printf(",%d",tk->tk_arg[i]);
+			dprintf(STDERR_FILENO, ",%d",tk->tk_arg[i]);
 	}
 	if (tk->tk_nargs > 0)
-		printf(")");
+		jbputs(")");
 	if (tk->tk_private !=0)
 		putchar(tk->tk_private);
 }
