@@ -64,7 +64,7 @@ struct JBXVT {
 			uint8_t *top;
 			uint8_t data[COM_PUSH_MAX];
 		} stack;
-		int8_t send_count; // # chars waiting to be sent
+		uint16_t send_count; // # chars waiting to be sent
 	} com;
 	struct {
 		char *bg, *fg, *cu, *font;
@@ -77,6 +77,14 @@ extern struct JBXVT jbxvt; // in jbxvt.c
 
 // Print string to stderr
 void jbputs(const char * string);
+
+#ifdef USE_LIKELY
+#define likely(x)       __builtin_expect((x), true)
+#define unlikely(x)     __builtin_expect((x), false)
+#else//!USE_LIKELY
+#define likely(x) (x)
+#define unlikely(x) (x)
+#endif//USE_LIKELY
 
 // constrain rc between 0 and lim, return new value
 // use fast wide int type as this is used in various places.

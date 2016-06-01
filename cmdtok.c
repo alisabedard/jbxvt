@@ -7,6 +7,7 @@
 #include "jbxvt.h"
 #include "log.h"
 #include "screen.h"
+#include "scr_string.h"
 #include "token.h"
 #include "ttyinit.h"
 #include "wm_del_win.h"
@@ -161,6 +162,12 @@ static int16_t x_io_loop(int16_t count, fd_set * restrict in_fdset)
  *  returned.  If flags and GET_XEVENTS is true then GCC_NULL is returned
  *  when an X event arrives.
  */
+// This is the most often called function.
+#if defined(__i386__) || defined(__amd64__)
+__attribute__((hot,regparm(1)))
+#else
+__attribute__((hot))
+#endif
 static int16_t get_com_char(const int8_t flags)
 {
 	if (jbxvt.com.stack.top > jbxvt.com.stack.data)
@@ -173,24 +180,37 @@ static int16_t get_com_char(const int8_t flags)
 		return(GCC_NULL);
 
 	int16_t count;
-	for (;;) {
-		fd_set in_fdset;
-		FD_ZERO(&in_fdset);
-		count = x_io_loop(count, &in_fdset);
-		if (FD_ISSET(jbxvt.com.fd,&in_fdset))
-			  break;
-		XEvent event;
-		XNextEvent(jbxvt.X.dpy,&event);
-		const int16_t xev_ret = handle_xev(&event, &count, flags);
-		if (xev_ret)
-			  return xev_ret;
-	}
-	count = read(jbxvt.com.fd,jbxvt.com.buf.data,COM_BUF_SIZE);
+	fd_set in_fdset;
+	XEvent event;
+	register int16_t xev_ret;
+wait_event_start:
+	FD_ZERO(&in_fdset);
+	count = x_io_loop(count, &in_fdset);
+	if (FD_ISSET(jbxvt.com.fd,&in_fdset))
+		  goto wait_event_end;
+	XNextEvent(jbxvt.X.dpy,&event);
+	if((xev_ret = handle_xev(&event, &count, flags)))
+		  return xev_ret;
+	goto wait_event_start;
+wait_event_end:
+#ifdef SYS_read
+	count = syscall(SYS_read, jbxvt.com.fd,
+		jbxvt.com.buf.data, COM_BUF_SIZE);
+#else//!SYS_read
+	count = read(jbxvt.com.fd, jbxvt.com.buf.data, COM_BUF_SIZE);
+#endif//SYS_read
 	if (count < 1) // buffer is empty
 		return errno == EWOULDBLOCK ? GCC_NULL : EOF;
 	jbxvt.com.buf.next = jbxvt.com.buf.data;
 	jbxvt.com.buf.top = jbxvt.com.buf.data + count;
 	return *jbxvt.com.buf.next++;
+}
+
+//  Return true if the character is one that can be handled by scr_string()
+static inline bool is_string_char(register int16_t c)
+{
+	c &= 0177;
+	return(c >= ' ' || c == '\n' || c == '\r' || c == '\t');
 }
 
 static void handle_string_char(struct tokenst * restrict tk, int16_t c)

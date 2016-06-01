@@ -85,9 +85,6 @@ enum RenditionStyleFlags {
 
 void home_screen(void);
 
-//  Return true if the character is one that can be handled by scr_string()
-bool is_string_char(int16_t c);
-
 //  Change the rendition style.
 void scr_change_rendition(const uint32_t style);
 

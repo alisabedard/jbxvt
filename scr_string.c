@@ -15,12 +15,32 @@
 
 #include <string.h>
 
+static uint8_t handle_new_lines(int8_t nlcount)
+{
+	if (nlcount > 0) {
+		if (jbxvt.scr.current->cursor.row
+			> jbxvt.scr.current->margin.bottom)
+			nlcount = 0;
+		else
+			nlcount -= jbxvt.scr.current->margin.bottom
+				- jbxvt.scr.current->cursor.row;
+		nlcount = constrain(nlcount, jbxvt.scr.current->cursor.row
+			- jbxvt.scr.current->margin.top + 1);
+		if (nlcount > MAX_SCROLL)
+			nlcount = MAX_SCROLL;
+		scroll(jbxvt.scr.current->margin.top,
+			jbxvt.scr.current->margin.bottom,nlcount);
+		jbxvt.scr.current->cursor.row -= nlcount;
+	}
+	return nlcount;
+}
+
 /*  Display the string at the current position.
     nlcount is the number of new lines in the string.  */
-void scr_string(uint8_t * restrict str, int len, int nlcount)
+void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 {
 #ifdef SCR_DEBUG
-	LOG("scr_string(%s, len: %d, nlcount: %d)", str, len, nlcount);
+	LOG("scr_string(s, len: %d, nlcount: %d)\n", len, nlcount);
 #endif//SCR_DEBUG
 	uint8_t *s;
 	int x2, n, i;
@@ -29,64 +49,46 @@ void scr_string(uint8_t * restrict str, int len, int nlcount)
 
 	home_screen();
 	cursor(CURSOR_DRAW);
-	if (nlcount > 0) {
-		if (jbxvt.scr.current->cursor.row
-			> jbxvt.scr.current->margin.bottom)
-			nlcount = 0;
-		else
-			nlcount -= jbxvt.scr.current->margin.bottom
-				- jbxvt.scr.current->cursor.row;
-		if (nlcount < 0)
-			nlcount = 0;
-		else if (nlcount > jbxvt.scr.current->cursor.row
-			- jbxvt.scr.current->margin.top)
-			nlcount = jbxvt.scr.current->cursor.row
-				- jbxvt.scr.current->margin.top;
-		if (nlcount > MAX_SCROLL)
-			nlcount = MAX_SCROLL;
-		scroll(jbxvt.scr.current->margin.top,
-			jbxvt.scr.current->margin.bottom,nlcount);
-		jbxvt.scr.current->cursor.row -= nlcount;
-	}
-	while (len > 0) {
-		if (*str == '\n') {
+	nlcount = handle_new_lines(nlcount);
+	while (len) {
+		switch(*str) {
+		case '\n':
 			if (jbxvt.scr.current->cursor.row
 				== jbxvt.scr.current->margin.bottom)
-				scroll(jbxvt.scr.current->margin.top,
-					jbxvt.scr.current->margin.bottom,1);
+				  scroll(jbxvt.scr.current->margin.top,
+					  jbxvt.scr.current->margin.bottom,1);
 			else if (jbxvt.scr.current->cursor.row
 				< jbxvt.scr.chars.height - 1)
-				jbxvt.scr.current->cursor.row++;
+				  jbxvt.scr.current->cursor.row++;
 			check_selection(jbxvt.scr.current->cursor.row,
 				jbxvt.scr.current->cursor.row);
 			jbxvt.scr.current->wrap_next = 0;
 			len--;
 			str++;
 			continue;
-		}
-		if (*str == '\r') {
+		case '\r':
 			jbxvt.scr.current->cursor.col = 0;
 			jbxvt.scr.current->wrap_next = 0;
 			len--;
 			str++;
 			continue;
-		}
-		if (*str == '\t') {
+		case '\t':
 			if (jbxvt.scr.current->cursor.col
 				< jbxvt.scr.chars.width - 1) {
 				s = jbxvt.scr.current->text
 					[jbxvt.scr.current->cursor.row];
 				if (s[jbxvt.scr.current->cursor.col] == 0)
-					s[jbxvt.scr.current->cursor.col]
-						= '\t';
+					  s[jbxvt.scr.current->cursor.col]
+						  = '\t';
 				jbxvt.scr.current->cursor.col++;
 				while (jbxvt.scr.current->cursor.col % 8
 					&& jbxvt.scr.current->cursor.col
 					< jbxvt.scr.chars.width - 1)
-					jbxvt.scr.current->cursor.col++;
+					  jbxvt.scr.current->cursor.col++;
 			}
 			len--;
 			str++;
+
 			continue;
 		}
 		if (jbxvt.scr.current->wrap_next) {
@@ -139,7 +141,7 @@ void scr_string(uint8_t * restrict str, int len, int nlcount)
 				repair_damage();
 			}
 		}
-		
+
 		memcpy(jbxvt.scr.current->text[jbxvt.scr.current->cursor.row]
 			+ jbxvt.scr.current->cursor.col,str,n);
 		/* Clear memory cells which are not part of the
@@ -152,7 +154,7 @@ void scr_string(uint8_t * restrict str, int len, int nlcount)
 		LOG("n: %d, strlen: %lu", n, strlen((const char *)
 			jbxvt.scr.current->text[jbxvt.scr.current->cursor.row]));
 #endif//SCR_DEBUG
-			
+
 		paint_rval_text(str,jbxvt.scr.rstyle,n,p);
 		if (jbxvt.scr.rstyle == 0)
 			memset(jbxvt.scr.current->rend

@@ -4,8 +4,11 @@
 #ifndef SCR_STRING_H
 #define SCR_STRING_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
-void scr_string(uint8_t * restrict str, int len, int nlcount);
+/*  Display the string at the current position.
+    nlcount is the number of new lines in the string.  */
+void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount);
 
 #endif//!SCR_STRING_H

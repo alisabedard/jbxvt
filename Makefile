@@ -28,7 +28,11 @@ PREFIX=/usr
 CFLAGS+=-DLINUX -D_GNU_SOURCE
 LIBS+=-lutempter
 
-#-------------------------------------------------------------
+#-------------------------------
+
+CFLAGS+=-DUSE_LIKELY
+
+#-------------------------------
 
 LIBS+=-lX11
 
@@ -43,8 +47,11 @@ OBJS+=wm_del_win.o xevents.o xsetup.o xvt.o handle_sgr.o scroll_up.o
 CFLAGS+=-D_XOPEN_SOURCE=700 --std=c99
 CFLAGS+=-Wall -Wextra
 $(exe): $(OBJS)
-	$(CC) -o $(exe) $(OBJS) $(LIBS)
-	ls -l $(exe) >> sz.log; tail sz.log
+	$(CC) -o $(exe) $(OBJS) $(CFLAGS) $(LIBS)
+	strip -o $(exe).tmp $(exe)
+	ls -l $(exe).tmp >> sz.log
+	rm -f $(exe).tmp
+	tail sz.log
 bindest=$(DESTDIR)$(PREFIX)/bin
 install:
 	install -d $(bindest)

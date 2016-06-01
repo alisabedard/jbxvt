@@ -253,7 +253,7 @@ void send_string(uint8_t * restrict buf, const uint8_t count)
 		return;
 
 	uint8_t *s1, *s2;
-	if (jbxvt.com.send_count == 0) {
+	if (likely(!jbxvt.com.send_count)) {
 		if (command.send) {
 			free(command.send);
 			command.send = NULL;
@@ -261,13 +261,13 @@ void send_string(uint8_t * restrict buf, const uint8_t count)
 		command.send = malloc(count);
 		s2 = command.send;
 		s1 = buf;
-		for (uint8_t i = 0; i < count; i++, s1++, s2++)
+		for (uint8_t i = 0; i < count; ++i, ++s1, ++s2)
 			*s2 = *s1;
 		jbxvt.com.send_nxt = command.send;
 		jbxvt.com.send_count = count;
 	} else {
 		uint8_t * s = malloc(jbxvt.com.send_count + count);
-		memcpy(s,jbxvt.com.send_nxt,jbxvt.com.send_count);
+		memcpy(s , jbxvt.com.send_nxt, jbxvt.com.send_count);
 		s2 = s + jbxvt.com.send_count;
 		s1 = buf;
 		for (uint8_t i = 0; i < count; i++, s1++, s2++)
@@ -315,21 +315,19 @@ static void show_hex_token_args(struct tokenst * restrict tk)
 	int i;
 
 	for (i = 0; i < tk->tk_nargs; i++) {
-		if (i == 0)
-			printf(" (0x%x",tk->tk_arg[i]);
-		else
-			printf(",0x%x",tk->tk_arg[i]);
+		dprintf(STDERR_FILENO, i ? ",0x%x" : " (0x%x",
+			tk->tk_arg[i]);
 	}
 	if (tk->tk_nargs > 0)
-		printf(")");
+		  jbputs(")");
+	char buf[2] = { tk->tk_private, 0};
 	if (tk->tk_private !=0)
-		putchar(tk->tk_private);
+		  jbputs(buf);
 }
 
 //  Print out the contents of an input token - used for debugging.
 void show_token(struct tokenst * tk)
 {
-
 	/*  Screen out token types that are not currently of interest.
 	 */
 	switch (tk->tk_type) {
@@ -340,7 +338,7 @@ void show_token(struct tokenst * tk)
 	switch (tk->tk_type) {
 		case TK_STRING :
 			jbputs("token(TK_STRING): ");
-			jbputs(tk->tk_string);
+			jbputs((char *)tk->tk_string);
 			break;
 		case TK_TXTPAR :
 			dprintf(STDERR_FILENO, "token(TK_TXTPAR):"

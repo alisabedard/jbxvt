@@ -65,13 +65,6 @@ void scr_change_rendition(const uint32_t style)
 	jbxvt.scr.rstyle = style ? jbxvt.scr.rstyle | style : 0;
 }
 
-//  Return true if the character is one that can be handled by scr_string()
-bool is_string_char(int16_t c)
-{
-	c &= 0177;
-	return(c >= ' ' || c == '\n' || c == '\r' || c == '\t');
-}
-
 static void hsc(void)
 {
 	home_screen();
