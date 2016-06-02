@@ -24,6 +24,8 @@ struct jb_GC {
 	xcb_gcontext_t gid;
 };
 
+#define XCBGC(gc) (((struct jb_GC *)gc)->gid)
+
 #endif//USE_XCB
 
 // Use for all file descriptors:

@@ -105,15 +105,27 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 	XGetGCValues(jbxvt.X.dpy, jbxvt.X.gc.tx,
 		GCForeground|GCBackground, &v);
 	if (rval & RS_RVID || rval & RS_BLINK) { // Reverse looked up colors.
+#ifdef USE_XCB
+		xcb_change_gc(jbxvt.X.xcb,
+			((struct jb_GC *)jbxvt.X.gc.tx)->gid,
+			XCB_GC_FOREGROUND|XCB_GC_BACKGROUND,
+			(uint32_t[]){ v.background, v.foreground });
+#else
 		XSetForeground(jbxvt.X.dpy, jbxvt.X.gc.tx, v.background);
 		XSetBackground(jbxvt.X.dpy, jbxvt.X.gc.tx, v.foreground);
+#endif
 	}
 	p.y+= jbxvt.X.font->ascent;
 
 	// Draw text with background:
+#ifdef USE_XCB
+	xcb_image_text_8(jbxvt.X.xcb, len, jbxvt.X.win.vt,
+		XCBGC(jbxvt.X.gc.tx), p.x, p.y, (const char *)str);
+#else
 	XDrawImageString(jbxvt.X.dpy,jbxvt.X.win.vt,
 		jbxvt.X.gc.tx, p.x, p.y,
 		(const char *)str,len);
+#endif
 	if (rval & RS_BOLD) // Fake bold:
 		  XDrawString(jbxvt.X.dpy,jbxvt.X.win.vt,
 			  jbxvt.X.gc.tx, p.x + 1, p.y,
