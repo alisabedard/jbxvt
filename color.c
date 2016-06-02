@@ -32,13 +32,6 @@ pixel_t get_pixel(const char * restrict color)
 #endif//USE_XCB
 }
 
-#ifdef USE_XCB
-struct jb_GC {
-	void * nothing;
-	xcb_gcontext_t gid;
-};
-#endif
-
 #if defined(__i386__) || defined(__amd64__)
 	__attribute__((regparm(3)))
 #endif//x86

@@ -12,8 +12,18 @@
 #include <stdint.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+
 #ifdef USE_XCB
+
 #include <X11/Xlib-xcb.h>
+
+// provide a struct to allow converting GCs:
+
+struct jb_GC {
+	void * nothing;
+	xcb_gcontext_t gid;
+};
+
 #endif//USE_XCB
 
 // Use for all file descriptors:

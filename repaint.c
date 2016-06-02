@@ -155,8 +155,13 @@ static int_fast32_t repaint_generic(const Point p,
 	const uint_fast16_t width = (c2 - c1 + 1 - m)
 		* jbxvt.X.font_width;
 	if (width > 0)
+#ifdef USE_XCB
+		  xcb_clear_area(jbxvt.X.xcb, false, jbxvt.X.win.vt, x,
+			  p.y, width, jbxvt.X.font_height);
+#else
 		  XClearArea(jbxvt.X.dpy, jbxvt.X.win.vt, x, p.y,
 			  width, jbxvt.X.font_height, false);
+#endif
 	return p.y + jbxvt.X.font_height;
 }
 
@@ -209,5 +214,4 @@ void repaint(Point rc1, Point rc2)
 	free(str);
 	show_selection(rc1.r,rc2.r,rc1.c,rc2.c);
 }
-
 
