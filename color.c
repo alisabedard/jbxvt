@@ -2,42 +2,74 @@
 
 #include "jbxvt.h"
 
+#ifdef USE_XCB
+#include <stdlib.h>
+#include <xcb/xproto.h>
+#endif//USE_XCB
+
 // returns pixel value for specified color
 __attribute__((nonnull))
 pixel_t get_pixel(const char * restrict color)
 {
+#ifdef USE_XCB
+	uint8_t l = 0;
+	while(color[++l]);
+	xcb_alloc_named_color_cookie_t c = xcb_alloc_named_color(
+		jbxvt.X.xcb, jbxvt.X.color.map, l, color);
+	xcb_alloc_named_color_reply_t * r
+		= xcb_alloc_named_color_reply(
+		jbxvt.X.xcb, c, NULL);
+	pixel_t p = r->pixel;
+	free(r);
+	return p;
+#else//!USE_XCB
 	XColor c;
 
 	XAllocNamedColor(jbxvt.X.dpy, jbxvt.X.color.map, color,
 		&c, &(XColor){});
 
 	return c.pixel;
+#endif//USE_XCB
 }
 
+#ifdef USE_XCB
+struct jb_GC {
+	void * nothing;
+	xcb_gcontext_t gid;
+};
+#endif
+
 #if defined(__i386__) || defined(__amd64__)
-	__attribute__((regparm(1), nonnull))
-#else//!x86
-	__attribute__((nonnull))
+	__attribute__((regparm(3)))
 #endif//x86
 static inline void set_color(const unsigned long vm,
-	const char * restrict color, GC gc)
+	const pixel_t p, GC gc)
 {
-	const pixel_t p = get_pixel(color);
-
+#ifdef USE_XCB
+	xcb_change_gc(jbxvt.X.xcb, ((struct jb_GC *)(gc))->gid,
+		vm, (uint32_t[]){ p, p});
+#else//!USE_XCB
 	XChangeGC(jbxvt.X.dpy, gc, vm, &(XGCValues){
 		.foreground=p, .background=p});
+#endif//USE_XCB
 }
 
 void reset_fg(void)
 {
-	XGCValues v = { .foreground = jbxvt.X.color.fg };
-	XChangeGC(jbxvt.X.dpy, jbxvt.X.gc.tx, GCForeground, &v);
+#ifdef USE_XCB
+	set_color(XCB_GC_FOREGROUND, jbxvt.X.color.fg, jbxvt.X.gc.tx);
+#else
+	set_color(GCForeground, jbxvt.X.color.fg, jbxvt.X.gc.tx);
+#endif
 }
 
 void reset_bg(void)
 {
-	XGCValues v = { .background = jbxvt.X.color.bg	};
-	XChangeGC(jbxvt.X.dpy, jbxvt.X.gc.tx, GCBackground, &v);
+#ifdef USE_XCB
+	set_color(XCB_GC_BACKGROUND, jbxvt.X.color.bg, jbxvt.X.gc.tx);
+#else
+	set_color(GCBackground, jbxvt.X.color.bg, jbxvt.X.gc.tx);
+#endif
 }
 
 void reset_color(void)
@@ -48,11 +80,11 @@ void reset_color(void)
 
 void set_fg(const char * color)
 {
-	set_color(GCForeground, color, jbxvt.X.gc.tx);
+	set_color(GCForeground, get_pixel(color), jbxvt.X.gc.tx);
 }
 
 void set_bg(const char * color)
 {
-	set_color(GCBackground, color, jbxvt.X.gc.tx);
+	set_color(GCBackground, get_pixel(color), jbxvt.X.gc.tx);
 }
 
