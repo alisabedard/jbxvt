@@ -49,20 +49,6 @@ void reset_row_col(void)
 		jbxvt.scr.chars.height);
 }
 
-#if 0
-static void fill_and_scroll(const uint8_t ch)
-{
-	/*  Now fill up the screen from the old screen
-	    and saved lines.  */
-	if (jbxvt.scr.s1.cursor.row >= ch) {
-		// scroll up to save any lines that will be lost.
-		// this is the cause of the memory leak:
-		//scroll_up(jbxvt.scr.s1.cursor.row - ch + 1);
-		jbxvt.scr.s1.cursor.row = ch - 1;
-	}
-}
-#endif
-
 static void init_screen_elements(struct screenst * restrict scr,
 	uint8_t ** restrict text, uint32_t ** restrict rend)
 {
