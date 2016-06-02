@@ -40,21 +40,21 @@ static void set_rval_colors(const uint32_t rval)
 	else if (rval & RS_BF) {
 		// bright foregrounds:
 		if (rval & RS_F0)
-		  	  set_fg(BCOLOR_0);
+			  set_fg(BCOLOR_0);
 		else if (rval & RS_F1)
-		  	  set_fg(BCOLOR_1);
+			  set_fg(BCOLOR_1);
 		else if (rval & RS_F2)
-		  	  set_fg(BCOLOR_2);
+			  set_fg(BCOLOR_2);
 		else if (rval & RS_F3)
-		  	  set_fg(BCOLOR_3);
+			  set_fg(BCOLOR_3);
 		else if (rval & RS_F4)
-		  	  set_fg(BCOLOR_4);
+			  set_fg(BCOLOR_4);
 		else if (rval & RS_F5)
-		  	  set_fg(BCOLOR_5);
+			  set_fg(BCOLOR_5);
 		else if (rval & RS_F6)
-		  	  set_fg(BCOLOR_6);
+			  set_fg(BCOLOR_6);
 		else if (rval & RS_F7)
-		  	  set_fg(BCOLOR_7);
+			  set_fg(BCOLOR_7);
 	}
 	// normal backgrounds:
 	if (rval & RS_B0)
@@ -78,21 +78,21 @@ static void set_rval_colors(const uint32_t rval)
 	else if (rval & RS_BB) {
 		// bright backgrounds:
 		if (rval & RS_B0)
-		  	  set_bg(BCOLOR_0);
+			  set_bg(BCOLOR_0);
 		else if (rval & RS_B1)
-		  	  set_bg(BCOLOR_1);
+			  set_bg(BCOLOR_1);
 		else if (rval & RS_B2)
-		  	  set_bg(BCOLOR_2);
+			  set_bg(BCOLOR_2);
 		else if (rval & RS_B3)
-		  	  set_bg(BCOLOR_3);
+			  set_bg(BCOLOR_3);
 		else if (rval & RS_B4)
-		  	  set_bg(BCOLOR_4);
+			  set_bg(BCOLOR_4);
 		else if (rval & RS_B5)
-		  	  set_bg(BCOLOR_5);
+			  set_bg(BCOLOR_5);
 		else if (rval & RS_B6)
-		  	  set_bg(BCOLOR_6);
+			  set_bg(BCOLOR_6);
 		else if (rval & RS_B7)
-		  	  set_bg(BCOLOR_7);
+			  set_bg(BCOLOR_7);
 	}
 }
 
