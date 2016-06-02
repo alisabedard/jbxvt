@@ -117,7 +117,11 @@ static int16_t handle_xev(XEvent * event, int16_t * restrict count,
 #endif//x86
 static int16_t x_io_loop(int16_t count, fd_set * restrict in_fdset)
 {
+#ifdef USE_XCB
+	const fd_t x_fd = xcb_get_file_descriptor(jbxvt.X.xcb);
+#else//!USE_XCB
 	const fd_t x_fd = XConnectionNumber(jbxvt.X.dpy);
+#endif//USE_XCB
 	while (XPending(jbxvt.X.dpy) == 0) {
 		FD_SET(jbxvt.com.fd, in_fdset);
 		FD_SET(x_fd, in_fdset);

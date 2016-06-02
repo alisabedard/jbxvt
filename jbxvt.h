@@ -12,6 +12,9 @@
 #include <stdint.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#ifdef USE_XCB
+#include <X11/Xlib-xcb.h>
+#endif//USE_XCB
 
 // Use for all file descriptors:
 typedef int fd_t;
@@ -19,6 +22,10 @@ typedef int fd_t;
 struct JBXVT {
 	struct {
 		Display * dpy;
+#ifdef USE_XCB
+		xcb_connection_t * xcb;
+#endif//USE_XCB
+
 		XFontStruct *font;
 		struct {
 			Window vt, sb, main;

@@ -151,6 +151,9 @@ static void init_jbxvt_colors(void)
 void init_display(char * name)
 {
 	jbxvt.X.dpy = XOpenDisplay(NULL);
+#ifdef USE_XCB
+	jbxvt.X.xcb = XGetXCBConnection(jbxvt.X.dpy);
+#endif//USE_XCB
 	if(!jbxvt.X.dpy)
 		  quit(1, WARN_RES RES_DPY);
 

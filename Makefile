@@ -31,6 +31,8 @@ LIBS+=-lutempter
 #-------------------------------
 
 CFLAGS+=-DUSE_LIKELY
+CFLAGS+=-DUSE_XCB
+LIBS+=-lX11-xcb -lxcb
 
 #-------------------------------
 

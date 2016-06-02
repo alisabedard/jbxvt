@@ -35,6 +35,46 @@ static uint8_t handle_new_lines(int8_t nlcount)
 	return nlcount;
 }
 
+#if defined(__i386__) || defined(__amd64__)
+       __attribute__((regparm(1)))
+#endif//x86
+static void handle_insert(uint8_t n, const Point p)
+{
+	uint8_t * s = jbxvt.scr.current->text
+		[jbxvt.scr.current->cursor.row];
+	uint32_t * r = jbxvt.scr.current->rend
+		[jbxvt.scr.current->cursor.row];
+	for (int_fast16_t i = jbxvt.scr.chars.width - 1;
+		i >= jbxvt.scr.current->cursor.col + n; i--) {
+		s[i] = s[i - n];
+		r[i] = r[i - n];
+	}
+	const uint16_t width = (jbxvt.scr.chars.width
+		- jbxvt.scr.current->cursor.col - n)
+		* jbxvt.X.font_width;
+	const int16_t x2 = p.x + n * jbxvt.X.font_width;
+	if (width > 0) {
+		XCopyArea(jbxvt.X.dpy, jbxvt.X.win.vt,
+			jbxvt.X.win.vt, jbxvt.X.gc.tx,
+			p.x, p.y, width,
+			jbxvt.X.font_height, x2, p.y);
+		repair_damage();
+	}
+}
+
+static void handle_wrap_next(void)
+{
+	jbxvt.scr.current->text [jbxvt.scr.current->cursor.row]
+		[jbxvt.scr.chars.width] = 1;
+	if (jbxvt.scr.current->cursor.row == jbxvt.scr.current->margin.bottom)
+		  scroll(jbxvt.scr.current->margin.top,
+			  jbxvt.scr.current->margin.bottom,1);
+	else if (jbxvt.scr.current->cursor.row < jbxvt.scr.chars.height - 1)
+		  ++jbxvt.scr.current->cursor.row;
+	jbxvt.scr.current->cursor.col = 0;
+	jbxvt.scr.current->wrap_next = 0;
+}
+
 /*  Display the string at the current position.
     nlcount is the number of new lines in the string.  */
 void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
@@ -43,8 +83,7 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 	LOG("scr_string(s, len: %d, nlcount: %d)\n", len, nlcount);
 #endif//SCR_DEBUG
 	uint8_t *s;
-	int x2, n, i;
-	unsigned int width;
+	int_fast32_t n, i;
 	Point p;
 
 	home_screen();
@@ -63,14 +102,14 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 			check_selection(jbxvt.scr.current->cursor.row,
 				jbxvt.scr.current->cursor.row);
 			jbxvt.scr.current->wrap_next = 0;
-			len--;
-			str++;
+			--len;
+			++str;
 			continue;
 		case '\r':
 			jbxvt.scr.current->cursor.col = 0;
 			jbxvt.scr.current->wrap_next = 0;
-			len--;
-			str++;
+			--len;
+			++str;
 			continue;
 		case '\t':
 			if (jbxvt.scr.current->cursor.col
@@ -86,25 +125,15 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 					< jbxvt.scr.chars.width - 1)
 					  jbxvt.scr.current->cursor.col++;
 			}
-			len--;
-			str++;
+			--len;
+			++str;
 
 			continue;
 		}
-		if (jbxvt.scr.current->wrap_next) {
-			jbxvt.scr.current->text
-				[jbxvt.scr.current->cursor.row]
-				[jbxvt.scr.chars.width] = 1;
-			if (jbxvt.scr.current->cursor.row
-				== jbxvt.scr.current->margin.bottom)
-				scroll(jbxvt.scr.current->margin.top,
-					jbxvt.scr.current->margin.bottom,1);
-			else if (jbxvt.scr.current->cursor.row
-				< jbxvt.scr.chars.height - 1)
-				jbxvt.scr.current->cursor.row++;
-			jbxvt.scr.current->cursor.col = 0;
-			jbxvt.scr.current->wrap_next = 0;
-		}
+
+		if (jbxvt.scr.current->wrap_next)
+			  handle_wrap_next();
+
 		check_selection(jbxvt.scr.current->cursor.row,
 			jbxvt.scr.current->cursor.row);
 		p.x = MARGIN + jbxvt.X.font_width
@@ -116,30 +145,9 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 		if (n + jbxvt.scr.current->cursor.col > jbxvt.scr.chars.width)
 			  n = jbxvt.scr.chars.width
 				  - jbxvt.scr.current->cursor.col;
-		if (jbxvt.scr.current->insert) {
-			uint32_t *r;
-			s = jbxvt.scr.current->text
-				[jbxvt.scr.current->cursor.row];
-			r = jbxvt.scr.current->rend
-				[jbxvt.scr.current->cursor.row];
-			for (i = jbxvt.scr.chars.width - 1;
-				i >= jbxvt.scr.current->cursor.col + n;
-				i--) {
-				s[i] = s[i - n];
-				r[i] = r[i - n];
-			}
-			width = (jbxvt.scr.chars.width
-				- jbxvt.scr.current->cursor.col - n)
-				* jbxvt.X.font_width;
-			x2 = p.x + n * jbxvt.X.font_width;
-			if (width > 0) {
-				XCopyArea(jbxvt.X.dpy, jbxvt.X.win.vt,
-					jbxvt.X.win.vt, jbxvt.X.gc.tx,
-					p.x, p.y, width,
-					jbxvt.X.font_height, x2, p.y);
-				repair_damage();
-			}
-		}
+
+		if (unlikely(jbxvt.scr.current->insert))
+			  handle_insert(n, p);
 
 		memcpy(jbxvt.scr.current->text[jbxvt.scr.current->cursor.row]
 			+ jbxvt.scr.current->cursor.col,str,n);

@@ -7,7 +7,9 @@
 typedef unsigned long pixel_t;
 
 // returns pixel value for specified color
-pixel_t get_pixel(const char * restrict color);
+
+pixel_t get_pixel(const char * restrict color)
+	__attribute__((nonnull));
 
 // Reset colors to stored background and foreground.
 void reset_color(void);

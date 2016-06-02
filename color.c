@@ -3,6 +3,7 @@
 #include "jbxvt.h"
 
 // returns pixel value for specified color
+__attribute__((nonnull))
 pixel_t get_pixel(const char * restrict color)
 {
 	XColor c;
@@ -13,8 +14,13 @@ pixel_t get_pixel(const char * restrict color)
 	return c.pixel;
 }
 
-static void set_color(const char * restrict color, GC gc,
-	const unsigned long vm)
+#if defined(__i386__) || defined(__amd64__)
+	__attribute__((regparm(1), nonnull))
+#else//!x86
+	__attribute__((nonnull))
+#endif//x86
+static inline void set_color(const unsigned long vm,
+	const char * restrict color, GC gc)
 {
 	const pixel_t p = get_pixel(color);
 
@@ -42,11 +48,11 @@ void reset_color(void)
 
 void set_fg(const char * color)
 {
-	set_color(color, jbxvt.X.gc.tx, GCForeground);
+	set_color(GCForeground, color, jbxvt.X.gc.tx);
 }
 
 void set_bg(const char * color)
 {
-	set_color(color, jbxvt.X.gc.tx, GCBackground);
+	set_color(GCBackground, color, jbxvt.X.gc.tx);
 }
 

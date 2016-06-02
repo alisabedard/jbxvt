@@ -146,13 +146,13 @@ static void paint_rvec_text(uint8_t * str,
 	}
 }
 
-static int repaint_generic(const Point p,
-	const int m, const int c1, const int c2,
+static int_fast32_t repaint_generic(const Point p,
+	const int_fast32_t m, const int_fast32_t c1, const int_fast32_t c2,
 	uint8_t * restrict str, uint32_t * rend)
 {
 	paint_rvec_text(str, rend ? rend + c1 : NULL, m, p);
-	const int x = p.x + m * jbxvt.X.font_width;
-	const unsigned int width = (c2 - c1 + 1 - m)
+	const int_fast16_t x = p.x + m * jbxvt.X.font_width;
+	const uint_fast16_t width = (c2 - c1 + 1 - m)
 		* jbxvt.X.font_width;
 	if (width > 0)
 		  XClearArea(jbxvt.X.dpy, jbxvt.X.win.vt, x, p.y,
@@ -161,7 +161,7 @@ static int repaint_generic(const Point p,
 }
 
 __attribute__((const))
-static uint8_t convert_char(const uint8_t c)
+static inline uint_fast8_t convert_char(const uint_fast8_t c)
 {
 	return c < ' ' ? ' ' : c;
 }
