@@ -112,6 +112,9 @@ static int16_t handle_xev(XEvent * event, int16_t * restrict count,
 	return 0;
 }
 
+#if defined(__i386__) || defined(__amd64__)
+	__attribute__((regparm(1)))
+#endif//x86
 static int16_t x_io_loop(int16_t count, fd_set * restrict in_fdset)
 {
 	const fd_t x_fd = XConnectionNumber(jbxvt.X.dpy);
@@ -207,21 +210,31 @@ wait_event_end:
 }
 
 //  Return true if the character is one that can be handled by scr_string()
-static inline bool is_string_char(register int16_t c)
+#if defined(__i386__) || defined(__amd64__)
+	__attribute__((hot,const,regparm(1)))
+#else
+	__attribute__((hot,const))
+#endif//x86
+static inline bool is_string_char(register int_fast16_t c)
 {
 	c &= 0177;
 	return(c >= ' ' || c == '\n' || c == '\r' || c == '\t');
 }
 
-static void handle_string_char(struct tokenst * restrict tk, int16_t c)
+#if defined(__i386__) || defined(__amd64__)
+	__attribute__((nonnull,regparm(1)))
+#else
+	__attribute__((nonnull))
+#endif//x86
+static void handle_string_char(int_fast16_t c, struct tokenst * restrict tk)
 {
-	uint16_t i = 0;
+	uint_fast16_t i = 0;
 	tk->tk_nlcount = 0;
 	do {
 		tk->tk_string[i++] = c;
 		c = get_com_char(1);
 		if (c == '\n' && ++tk->tk_nlcount >= NLMAX) {
-			tk->tk_nlcount--;
+			--tk->tk_nlcount;
 			break;
 		}
 	} while (is_string_char(c) && i < TKS_MAX);
@@ -233,9 +246,11 @@ static void handle_string_char(struct tokenst * restrict tk, int16_t c)
 }
 
 #if defined(__i386__) || defined(__amd64__)
-	__attribute__((regparm(1)))
+	__attribute__((nonnull,regparm(1)))
+#else
+	__attribute__((nonnull))
 #endif//x86
-static void start_esc(int16_t c, struct tokenst * restrict tk)
+static void start_esc(int_fast16_t c, struct tokenst * restrict tk)
 {
 	c = get_com_char(0);
 	if (c >= '<' && c <= '?') {
@@ -244,9 +259,9 @@ static void start_esc(int16_t c, struct tokenst * restrict tk)
 	}
 
 	//  read any numerical arguments
-	uint16_t i = 0;
+	uint_fast16_t i = 0;
 	do {
-		uint16_t n = 0;
+		uint_fast16_t n = 0;
 		while (c >= '0' && c <= '9') {
 			n *= 10;
 			n += c - '0';
@@ -270,7 +285,9 @@ static void start_esc(int16_t c, struct tokenst * restrict tk)
 }
 
 #if defined(__i386__) || defined(__amd64__)
-	__attribute__((regparm(1)))
+	__attribute__((nonnull,regparm(1)))
+#else
+	__attribute__((nonnull))
 #endif//x86
 static void end_esc(int16_t c, struct tokenst * restrict tk)
 {
@@ -294,7 +311,12 @@ static void end_esc(int16_t c, struct tokenst * restrict tk)
 	tk->tk_type = TK_TXTPAR;
 }
 
-static void handle_esc(struct tokenst * restrict tk, int16_t c)
+#if defined(__i386__) || defined(__amd64__)
+	__attribute__((nonnull,regparm(1)))
+#else
+	__attribute__((nonnull))
+#endif//x86
+static void handle_esc(int_fast16_t c, struct tokenst * restrict tk)
 {
 	c = get_com_char(0);
 	switch(c) {
@@ -353,15 +375,15 @@ void get_token(struct tokenst * restrict tk)
 	if(handle_xevents(tk))
 		  return;
 
-	int16_t c = get_com_char(GET_XEVENTS);
+	int_fast16_t c = get_com_char(GET_XEVENTS);
 	if (c == GCC_NULL) {
 		tk->tk_type = TK_NULL;
 	} else if (c == EOF) {
 		tk->tk_type = TK_EOF;
 	} else if (is_string_char(c)) {
-		handle_string_char(tk, c);
+		handle_string_char(c, tk);
 	} else if (c == ESC) {
-		handle_esc(tk, c);
+		handle_esc(c, tk);
 	} else {
 		tk->tk_type = TK_CHAR;
 		tk->tk_char = c;

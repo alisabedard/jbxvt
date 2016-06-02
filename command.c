@@ -229,7 +229,9 @@ uint8_t * lookup_key(XEvent * restrict ev, int16_t * restrict pcount)
 		kbuf, KBUFSIZE, &keysym, NULL);
 	char *s = get_s(keysym, kbuf);
 	if (s) {
-		*pcount = strlen(s);
+		uint8_t l = 0;
+		while (s[++l]);
+		*pcount = l;
 		return (uint8_t *)s;
 	} else {
 		if((ev->xkey.state & Mod1Mask) && (count == 1))

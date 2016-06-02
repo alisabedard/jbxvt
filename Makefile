@@ -1,4 +1,4 @@
-CFLAGS+=-Os
+#CFLAGS+=-Os
 #CFLAGS+=-Werror
 #CFLAGS+=-flto # doesn't work with clang
 #CFLAGS=-O0
