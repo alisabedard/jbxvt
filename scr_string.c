@@ -113,8 +113,8 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 			* jbxvt.scr.current->cursor.row;
 		for (n = 0; str[n] >= ' '; n++)
 			;
-		if (jbxvt.scr.current->cursor.col > jbxvt.scr.chars.width)
-			  n += jbxvt.scr.chars.width
+		if (n + jbxvt.scr.current->cursor.col > jbxvt.scr.chars.width)
+			  n = jbxvt.scr.chars.width
 				  - jbxvt.scr.current->cursor.col;
 		if (jbxvt.scr.current->insert) {
 			uint32_t *r;
