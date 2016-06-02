@@ -17,7 +17,7 @@
 static void zero_line(uint8_t * restrict s,
 	uint32_t * restrict r, uint16_t sz)
 {
-	sz++;
+	++sz;
 	memset(s, 0, sz);
 	memset(r, 0, sz * sizeof(uint32_t));
 }
