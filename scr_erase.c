@@ -100,9 +100,15 @@ void scr_erase_screen(const int8_t mode)
 				wsz * sizeof(int32_t));
 		}
 		check_selection(0,jbxvt.scr.current->cursor.row - 1);
-		if (height > 0)
-			XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,
-				x,y,width,height,False);
+		if (height > 0) {
+#ifdef USE_XCB
+			xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt,
+				x, y, width, height);
+#else//!USE_XCB
+			XClearArea(jbxvt.X.dpy, jbxvt.X.win.vt,
+				x, y, width, height, false);
+#endif//USE_XCB
+		}
 		scr_erase_line(mode);
 		break;
 	    case END :

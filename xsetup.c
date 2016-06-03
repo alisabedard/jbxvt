@@ -102,6 +102,7 @@ void switch_scrollbar(void)
 	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.main,
 		XCB_CONFIG_WINDOW_WIDTH, (uint32_t[]){
 		r->width+(jbxvt.opt.show_scrollbar?-SBAR_WIDTH:SBAR_WIDTH)});
+	free(r);
 #else//!USE_XCB
 	unsigned int width, height;
 	XGetGeometry(jbxvt.X.dpy, jbxvt.X.win.main, &(Window){0},
