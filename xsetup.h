@@ -8,9 +8,8 @@
 #include <stdint.h>
 
 
-// Change window and/or icon name:
-void change_name(uint8_t * restrict str, const bool window,
-	const bool icon);
+// Change window or icon name:
+void change_name(uint8_t * restrict str, const bool icon);
 
 void map_window(void);
 void resize_window(void);

@@ -107,7 +107,8 @@ static void create_window(uint8_t * restrict name)
 {
 	XSizeHints * sh = get_sizehints();
 	create_main_window(sh);
-	change_name(name, true, true);
+	change_name(name, true);
+	change_name(name, false);
 	create_sb_window(sh->height);
 	create_vt_window(sh);
 	free(sh);

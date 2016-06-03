@@ -76,13 +76,14 @@ static void handle_txtpar(struct tokenst * restrict token)
 {
 	switch (token->tk_arg[0]) {
 	case 0 :
-		change_name(token->tk_string, true, true);
+		change_name(token->tk_string, false);
+		change_name(token->tk_string, true);
 		break;
 	case 1 :
-		change_name(token->tk_string, false, true);
+		change_name(token->tk_string, true);
 		break;
 	case 2 :
-		change_name(token->tk_string, true, false);
+		change_name(token->tk_string, false);
 		break;
 #ifdef DEBUG
 	case 4: // change colors

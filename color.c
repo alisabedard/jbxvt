@@ -64,10 +64,10 @@ void reset_bg(void)
 #ifdef USE_XCB
 	jbxvt.X.color.current_bg = set_color(XCB_GC_BACKGROUND,
 		jbxvt.X.color.bg, jbxvt.X.gc.tx);
-#else
+#else//!USE_XCB
 	jbxvt.X.color.current_bg = set_color(GCBackground,
 		jbxvt.X.color.bg, jbxvt.X.gc.tx);
-#endif
+#endif//USE_XCB
 }
 
 void reset_color(void)

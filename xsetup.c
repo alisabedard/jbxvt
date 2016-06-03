@@ -15,8 +15,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef USE_XCB
+#include <xcb/xcb.h>
+#include <xcb/xcb_atom.h>
+#else//!USE_XCB
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#endif//USE_XCB
 
 //  Map the window
 void map_window(void)
@@ -113,20 +119,26 @@ void switch_scrollbar(void)
 	jbxvt.opt.show_scrollbar ^= true;
 }
 
-// Change window and/or icon name:
-void change_name(uint8_t * restrict str, const bool window,
-	const bool icon)
+// Change window or icon name:
+void change_name(uint8_t * restrict str, const bool icon)
 {
+#ifdef USE_XCB
+	size_t l = 0;
+	while(str[++l]);
+	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE,
+		jbxvt.X.win.main, icon?XCB_ATOM_WM_ICON_NAME:XCB_ATOM_WM_NAME,
+		XCB_ATOM_STRING, 8, l, str);
+#else//!USE_XCB
 	LOG("change_name(%s, %d, %d)", str, window, icon);
 	XTextProperty name;
 
 	if (XStringListToTextProperty((char **)&str,1,&name)) {
-		if(window)
-			XSetWMName(jbxvt.X.dpy,jbxvt.X.win.main,&name);
 		if(icon)
 			XSetWMIconName(jbxvt.X.dpy,jbxvt.X.win.main,&name);
+		else
+			XSetWMName(jbxvt.X.dpy,jbxvt.X.win.main,&name);
 		XFree(name.value);
 	}
-
+#endif//USE_XCB
 }
 
