@@ -48,6 +48,7 @@ struct JBXVT {
 		struct {
 			Colormap map;
 			pixel_t bg, fg, cursor;
+			pixel_t current_fg, current_bg;
 		} color;
 		uint8_t font_height, font_width, screen;
 	} X;

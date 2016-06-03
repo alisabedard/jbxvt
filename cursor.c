@@ -13,6 +13,8 @@ static void draw_cursor(const uint8_t cursor_focus)
 	if (jbxvt.scr.offset > 0)
 		return;
 
+	if (!jbxvt.scr.current)
+		  return; // prevent segfault
 	Point p = jbxvt.scr.current->cursor;
 	p.x *= jbxvt.X.font_width;
 	p.y *= jbxvt.X.font_height;

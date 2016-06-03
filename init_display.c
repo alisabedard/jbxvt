@@ -146,6 +146,8 @@ static void init_jbxvt_colors(void)
 	jbxvt.X.color.fg = jbxvt.opt.fg?get_pixel(jbxvt.opt.fg):p[1];
 	jbxvt.X.color.cursor = jbxvt.opt.cu?get_pixel(jbxvt.opt.cu):p[1];
 	jbxvt.X.color.bg = jbxvt.opt.bg?get_pixel(jbxvt.opt.bg):p[0];
+	jbxvt.X.color.current_fg = jbxvt.X.color.fg;
+	jbxvt.X.color.current_bg = jbxvt.X.color.bg;
 }
 
 void init_display(char * name)

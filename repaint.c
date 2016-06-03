@@ -101,18 +101,19 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 	uint8_t len, Point p)
 {
 	set_rval_colors(rval);
-	XGCValues v;
-	XGetGCValues(jbxvt.X.dpy, jbxvt.X.gc.tx,
-		GCForeground|GCBackground, &v);
 	if (rval & RS_RVID || rval & RS_BLINK) { // Reverse looked up colors.
 #ifdef USE_XCB
 		xcb_change_gc(jbxvt.X.xcb,
-			((struct jb_GC *)jbxvt.X.gc.tx)->gid,
+			//((struct jb_GC *)jbxvt.X.gc.tx)->gid,
+			XCBGC(jbxvt.X.gc.tx),
 			XCB_GC_FOREGROUND|XCB_GC_BACKGROUND,
-			(uint32_t[]){ v.background, v.foreground });
+			(uint32_t[]){jbxvt.X.color.current_bg,
+			jbxvt.X.color.current_fg});
 #else
-		XSetForeground(jbxvt.X.dpy, jbxvt.X.gc.tx, v.background);
-		XSetBackground(jbxvt.X.dpy, jbxvt.X.gc.tx, v.foreground);
+		XSetForeground(jbxvt.X.dpy, jbxvt.X.gc.tx,
+			jbxvt.X.color.current_bg);
+		XSetBackground(jbxvt.X.dpy, jbxvt.X.gc.tx,
+			jbxvt.X.color.current_fg);
 #endif
 	}
 	p.y+= jbxvt.X.font->ascent;
@@ -126,14 +127,25 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 		jbxvt.X.gc.tx, p.x, p.y,
 		(const char *)str,len);
 #endif
-	if (rval & RS_BOLD) // Fake bold:
-		  XDrawString(jbxvt.X.dpy,jbxvt.X.win.vt,
-			  jbxvt.X.gc.tx, p.x + 1, p.y,
-			  (const char *)str,len);
+	if (rval & RS_BOLD) { // Fake bold:
+		// no proper xcb equivalent
+		XDrawString(jbxvt.X.dpy,jbxvt.X.win.vt,
+			jbxvt.X.gc.tx, p.x + 1, p.y,
+			(const char *)str,len);
+	}
+
 	p.y++; // Advance for underline, use underline for italic.
-	if (rval & RS_ULINE || rval & RS_ITALIC)
+	if (rval & RS_ULINE || rval & RS_ITALIC) {
+#ifdef USE_XCB
+		xcb_poly_line(jbxvt.X.xcb, XCB_COORD_MODE_ORIGIN,
+			jbxvt.X.win.vt, XCBGC(jbxvt.X.gc.tx),
+			2, (xcb_point_t[]){{p.x, p.y}, {p.x + len
+			* jbxvt.X.font_width, p.y}});
+#else
 		XDrawLine(jbxvt.X.dpy, jbxvt.X.win.vt, jbxvt.X.gc.tx,
 			p.x, p.y, p.x + len * jbxvt.X.font_width, p.y);
+#endif
+	}
 	reset_color();
 }
 

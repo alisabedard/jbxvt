@@ -35,33 +35,38 @@ pixel_t get_pixel(const char * restrict color)
 #if defined(__i386__) || defined(__amd64__)
 	__attribute__((regparm(3)))
 #endif//x86
-static inline void set_color(const unsigned long vm,
+static inline pixel_t set_color(const unsigned long vm,
 	const pixel_t p, GC gc)
 {
 #ifdef USE_XCB
-	xcb_change_gc(jbxvt.X.xcb, ((struct jb_GC *)(gc))->gid,
-		vm, (uint32_t[]){ p, p});
+	xcb_change_gc(jbxvt.X.xcb, XCBGC(gc),
+		vm, (uint32_t[]){p});
 #else//!USE_XCB
 	XChangeGC(jbxvt.X.dpy, gc, vm, &(XGCValues){
 		.foreground=p, .background=p});
 #endif//USE_XCB
+	return p;
 }
 
 void reset_fg(void)
 {
 #ifdef USE_XCB
-	set_color(XCB_GC_FOREGROUND, jbxvt.X.color.fg, jbxvt.X.gc.tx);
+	jbxvt.X.color.current_fg = set_color(XCB_GC_FOREGROUND,
+		jbxvt.X.color.fg, jbxvt.X.gc.tx);
 #else
-	set_color(GCForeground, jbxvt.X.color.fg, jbxvt.X.gc.tx);
+	jbxvt.X.color.current_fg = set_color(GCForeground,
+		jbxvt.X.color.fg, jbxvt.X.gc.tx);
 #endif
 }
 
 void reset_bg(void)
 {
 #ifdef USE_XCB
-	set_color(XCB_GC_BACKGROUND, jbxvt.X.color.bg, jbxvt.X.gc.tx);
+	jbxvt.X.color.current_bg = set_color(XCB_GC_BACKGROUND,
+		jbxvt.X.color.bg, jbxvt.X.gc.tx);
 #else
-	set_color(GCBackground, jbxvt.X.color.bg, jbxvt.X.gc.tx);
+	jbxvt.X.color.current_bg = set_color(GCBackground,
+		jbxvt.X.color.bg, jbxvt.X.gc.tx);
 #endif
 }
 
@@ -73,11 +78,13 @@ void reset_color(void)
 
 void set_fg(const char * color)
 {
-	set_color(GCForeground, get_pixel(color), jbxvt.X.gc.tx);
+	jbxvt.X.color.current_fg = set_color(GCForeground,
+		get_pixel(color), jbxvt.X.gc.tx);
 }
 
 void set_bg(const char * color)
 {
-	set_color(GCBackground, get_pixel(color), jbxvt.X.gc.tx);
+	jbxvt.X.color.current_bg = set_color(GCBackground,
+		get_pixel(color), jbxvt.X.gc.tx);
 }
 
