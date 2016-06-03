@@ -26,6 +26,13 @@ void scr_make_selection(const Time time)
 {
 	if (!save_selection())
 		return;
+#ifdef USE_XCB
+	xcb_set_selection_owner(jbxvt.X.xcb, jbxvt.X.win.vt,
+		XCB_ATOM_PRIMARY, time);
+	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE,
+		jbxvt.X.screen->root, XCB_ATOM_CUT_BUFFER0, XCB_ATOM_STRING,
+		8, jbxvt.sel.length, jbxvt.sel.text);
+#else//!USE_XCB
 	XSetSelectionOwner(jbxvt.X.dpy, XA_PRIMARY,
 		jbxvt.X.win.vt, time);
 	//  Place in CUT_BUFFER0 for backup.
@@ -34,6 +41,7 @@ void scr_make_selection(const Time time)
 		XA_CUT_BUFFER0,
 		XA_STRING,8,PropModeReplace,
 		jbxvt.sel.text,jbxvt.sel.length);
+#endif//USE_XCB
 }
 
 //  respond to a request for our current selection.
