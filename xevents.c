@@ -13,14 +13,26 @@
 static void handle_motion_notify(struct tokenst * restrict tk,
 	struct xeventst * restrict xe)
 {
+#ifdef USE_XCB
+	xcb_query_pointer_cookie_t c = xcb_query_pointer(jbxvt.X.xcb,
+		jbxvt.X.win.sb);
+#endif//USE_XCB
 	if (xe->xe_window == jbxvt.X.win.sb && (xe->xe_state & Button2Mask)) {
+#ifdef USE_XCB
+		xcb_query_pointer_reply_t * r = xcb_query_pointer_reply(
+			jbxvt.X.xcb, c, NULL);
+		const uint32_t mask = r->mask;
+		const int16_t y = r->win_y;
+		free(r);
+#else//!USE_XCB
 		Window w;
 		int d, y;
-		unsigned int mods;
-		// Only interested in y and mods
+		uint32_t mask;
+		// Only interested in y and mask
 		XQueryPointer(jbxvt.X.dpy, jbxvt.X.win.sb, &w, &w,
-			&d, &d, &d, &y, &mods);
-		if (mods & Button2Mask) {
+			&d, &d, &d, &y, &mask);
+#endif//USE_XCB
+		if (mask & Button2Mask) {
 			tk->tk_type = TK_SBGOTO;
 			tk->tk_arg[0] = y;
 			tk->tk_nargs = 1;
@@ -35,7 +47,6 @@ static void handle_motion_notify(struct tokenst * restrict tk,
 		tk->tk_arg[1] = xe->xe_y;
 		tk->tk_nargs = 2;
 	}
-
 }
 
 static void sbop(struct tokenst * restrict tk, struct xeventst * restrict xe,
