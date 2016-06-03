@@ -109,12 +109,12 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 			XCB_GC_FOREGROUND|XCB_GC_BACKGROUND,
 			(uint32_t[]){jbxvt.X.color.current_bg,
 			jbxvt.X.color.current_fg});
-#else
+#else//!USE_XCB
 		XSetForeground(jbxvt.X.dpy, jbxvt.X.gc.tx,
 			jbxvt.X.color.current_bg);
 		XSetBackground(jbxvt.X.dpy, jbxvt.X.gc.tx,
 			jbxvt.X.color.current_fg);
-#endif
+#endif//USE_XCB
 	}
 	p.y+= jbxvt.X.font->ascent;
 
@@ -122,11 +122,11 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 #ifdef USE_XCB
 	xcb_image_text_8(jbxvt.X.xcb, len, jbxvt.X.win.vt,
 		XCBGC(jbxvt.X.gc.tx), p.x, p.y, (const char *)str);
-#else
+#else//!USE_XCB
 	XDrawImageString(jbxvt.X.dpy,jbxvt.X.win.vt,
 		jbxvt.X.gc.tx, p.x, p.y,
 		(const char *)str,len);
-#endif
+#endif//USE_XCB
 	if (rval & RS_BOLD) { // Fake bold:
 		// no proper xcb equivalent
 		XDrawString(jbxvt.X.dpy,jbxvt.X.win.vt,
@@ -141,10 +141,10 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 			jbxvt.X.win.vt, XCBGC(jbxvt.X.gc.tx),
 			2, (xcb_point_t[]){{p.x, p.y}, {p.x + len
 			* jbxvt.X.font_width, p.y}});
-#else
+#else//!USE_XCB
 		XDrawLine(jbxvt.X.dpy, jbxvt.X.win.vt, jbxvt.X.gc.tx,
 			p.x, p.y, p.x + len * jbxvt.X.font_width, p.y);
-#endif
+#endif//USE_XCB
 	}
 	reset_color();
 }
@@ -158,8 +158,8 @@ static void paint_rvec_text(uint8_t * str,
 		return;
 	}
 	while (len > 0) {
-		uint16_t i;
-		for (i = 0; i < len; i++)
+		uint_fast16_t i;
+		for (i = 0; i < len; ++i)
 			if (rvec[i] != rvec[0])
 				break;
 		paint_rval_text(str,rvec[0], i, p);
@@ -182,10 +182,10 @@ static int_fast32_t repaint_generic(const Point p,
 #ifdef USE_XCB
 		  xcb_clear_area(jbxvt.X.xcb, false, jbxvt.X.win.vt, x,
 			  p.y, width, jbxvt.X.font_height);
-#else
+#else//!USE_XCB
 		  XClearArea(jbxvt.X.dpy, jbxvt.X.win.vt, x, p.y,
 			  width, jbxvt.X.font_height, false);
-#endif
+#endif//USE_XCB
 	return p.y + jbxvt.X.font_height;
 }
 
