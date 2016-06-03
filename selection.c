@@ -45,9 +45,27 @@ void scr_make_selection(const Time time)
 }
 
 //  respond to a request for our current selection.
-void scr_send_selection(const int time,
-	const int requestor, const int target, const int property)
+void scr_send_selection(const uint32_t time,
+	const uint32_t requestor, const uint32_t target, const uint32_t property)
 {
+#ifdef USE_XCB
+	// x events must be 32 bytes long:
+	xcb_selection_notify_event_t * e = calloc(32, 1);
+	e->response_type = XCB_SELECTION_NOTIFY;
+	e->selection = XCB_ATOM_PRIMARY;
+	e->target = target;
+	e->requestor = requestor;
+	e->time = time;
+	e->property = property;
+	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE, requestor,
+		property, XCB_ATOM_STRING, 8, jbxvt.sel.length,
+		jbxvt.sel.text);
+	xcb_send_event(jbxvt.X.xcb, false, requestor, XCB_SELECTION_NOTIFY,
+		(char*)e);
+	// send it before e is freed:
+	xcb_flush(jbxvt.X.xcb);
+	free(e);
+#else//!USE_XCB
 	XEvent event = { .xselection.type = SelectionNotify,
 		.xselection.selection = XA_PRIMARY,
 		.xselection.target = XA_STRING,
@@ -61,6 +79,7 @@ void scr_send_selection(const int time,
 	} else
 		event.xselection.property = None;
 	XSendEvent(jbxvt.X.dpy,requestor,False,0,&event);
+#endif//USE_XCB
 }
 
 //  Clear the current selection.
