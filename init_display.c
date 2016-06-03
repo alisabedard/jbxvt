@@ -74,32 +74,68 @@ static XSizeHints * get_sizehints(void)
 
 static void create_main_window(XSizeHints * restrict sh)
 {
+#ifdef USE_XCB
+	jbxvt.X.win.main = xcb_generate_id(jbxvt.X.xcb);
+	xcb_create_window(jbxvt.X.xcb, XCB_COPY_FROM_PARENT,
+		jbxvt.X.win.main, DefaultRootWindow(jbxvt.X.dpy),
+		sh->x, sh->y, sh->width, sh->height, 0,
+		XCB_WINDOW_CLASS_COPY_FROM_PARENT,
+		XCB_COPY_FROM_PARENT, XCB_CW_COLORMAP | XCB_CW_EVENT_MASK,
+		(uint32_t[]){MW_EVENTS, jbxvt.X.color.map});
+#else//!USE_XCB
 	jbxvt.X.win.main = XCreateSimpleWindow(jbxvt.X.dpy,
 		DefaultRootWindow(jbxvt.X.dpy),
 		sh->x, sh->y, sh->width, sh->height,
 		0, jbxvt.X.color.fg,jbxvt.X.color.bg);
 	XSelectInput(jbxvt.X.dpy,jbxvt.X.win.main, MW_EVENTS);
+#endif//USE_XCB
 }
 
 static void create_sb_window(const uint16_t height)
 {
+#ifdef USE_XCB
+	jbxvt.X.win.sb = xcb_generate_id(jbxvt.X.xcb);
+	xcb_create_window(jbxvt.X.xcb, XCB_COPY_FROM_PARENT,
+		jbxvt.X.win.sb, jbxvt.X.win.main, -1, -1,
+		SBAR_WIDTH - 1, height, 1,
+		XCB_WINDOW_CLASS_COPY_FROM_PARENT,
+		XCB_COPY_FROM_PARENT, XCB_CW_BACK_PIXEL | XCB_CW_COLORMAP
+		| XCB_CW_BORDER_PIXEL | XCB_CW_EVENT_MASK,
+		(uint32_t[]){jbxvt.X.color.bg, jbxvt.X.color.fg,
+		SB_EVENTS, jbxvt.X.color.map});
+#else//!USE_XCB
 	jbxvt.X.win.sb = XCreateSimpleWindow(jbxvt.X.dpy,
 		jbxvt.X.win.main, -1, -1,
 		SBAR_WIDTH - 1, height, 1,
 		jbxvt.X.color.fg, jbxvt.X.color.bg);
 	XSelectInput(jbxvt.X.dpy, jbxvt.X.win.sb, SB_EVENTS);
+#endif//USE_XCB
+	// FIXME: do in xcb
 	XDefineCursor(jbxvt.X.dpy,jbxvt.X.win.sb,
 		XCreateFontCursor(jbxvt.X.dpy, XC_sb_v_double_arrow));
 }
 
 static void create_vt_window(XSizeHints * restrict sh)
 {
+#ifdef USE_XCB
+	jbxvt.X.win.vt = xcb_generate_id(jbxvt.X.xcb);
+
+	xcb_create_window(jbxvt.X.xcb, XCB_COPY_FROM_PARENT,
+		jbxvt.X.win.vt, jbxvt.X.win.main,
+		0, 0, sh->width, sh->height, 0,
+		XCB_WINDOW_CLASS_COPY_FROM_PARENT,
+		XCB_COPY_FROM_PARENT, XCB_CW_BACK_PIXEL|XCB_CW_COLORMAP
+		|XCB_CW_EVENT_MASK,
+		(uint32_t[]){jbxvt.X.color.bg, VT_EVENTS, jbxvt.X.color.map});
+#else//!USE_XCB
 	jbxvt.X.win.vt = XCreateSimpleWindow(jbxvt.X.dpy,
 		jbxvt.X.win.main, 0, 0, sh->width, sh->height, 0,
 		jbxvt.X.color.fg, jbxvt.X.color.bg);
+	XSelectInput(jbxvt.X.dpy,jbxvt.X.win.vt, VT_EVENTS);
+#endif//USE_XCB
+	// FIXME: do in xcb
 	XDefineCursor(jbxvt.X.dpy,jbxvt.X.win.vt,
 		XCreateFontCursor(jbxvt.X.dpy, XC_xterm));
-	XSelectInput(jbxvt.X.dpy,jbxvt.X.win.vt, VT_EVENTS);
 }
 
 //  Open the window.
