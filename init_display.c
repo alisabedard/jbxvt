@@ -58,8 +58,6 @@ static XSizeHints * get_sizehints(void)
 	*s = (XSizeHints) {
 		.flags = USSize | PMinSize | PResizeInc | PBaseSize,
 		.width = 80, .height = 24,
-		.base_width = MARGIN<<1,
-		.base_height = MARGIN<<1,
 		.width_inc = XTextWidth(jbxvt.X.font, "M", 1),
 		.height_inc = jbxvt.X.font->ascent
 			+ jbxvt.X.font->descent
@@ -72,7 +70,7 @@ static XSizeHints * get_sizehints(void)
 	return s;
 }
 
-static void create_main_window(XSizeHints * restrict sh, const Window root)
+static void create_main_window(XSizeHints * restrict sh, const uint32_t root)
 {
 #ifdef USE_XCB
 	jbxvt.X.win.main = xcb_generate_id(jbxvt.X.xcb);
