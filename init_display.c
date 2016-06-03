@@ -72,19 +72,17 @@ static XSizeHints * get_sizehints(void)
 	return s;
 }
 
-static void create_main_window(XSizeHints * restrict sh)
+static void create_main_window(XSizeHints * restrict sh, const Window root)
 {
 #ifdef USE_XCB
 	jbxvt.X.win.main = xcb_generate_id(jbxvt.X.xcb);
 	xcb_create_window(jbxvt.X.xcb, XCB_COPY_FROM_PARENT,
-		jbxvt.X.win.main, DefaultRootWindow(jbxvt.X.dpy),
-		sh->x, sh->y, sh->width, sh->height, 0,
-		XCB_WINDOW_CLASS_COPY_FROM_PARENT,
+		jbxvt.X.win.main, root, sh->x, sh->y,
+		sh->width, sh->height, 0, XCB_WINDOW_CLASS_COPY_FROM_PARENT,
 		XCB_COPY_FROM_PARENT, XCB_CW_COLORMAP | XCB_CW_EVENT_MASK,
 		(uint32_t[]){MW_EVENTS, jbxvt.X.color.map});
 #else//!USE_XCB
-	jbxvt.X.win.main = XCreateSimpleWindow(jbxvt.X.dpy,
-		DefaultRootWindow(jbxvt.X.dpy),
+	jbxvt.X.win.main = XCreateSimpleWindow(jbxvt.X.dpy, root,
 		sh->x, sh->y, sh->width, sh->height,
 		0, jbxvt.X.color.fg,jbxvt.X.color.bg);
 	XSelectInput(jbxvt.X.dpy,jbxvt.X.win.main, MW_EVENTS);
@@ -139,10 +137,10 @@ static void create_vt_window(XSizeHints * restrict sh)
 }
 
 //  Open the window.
-static void create_window(uint8_t * restrict name)
+static void create_window(uint8_t * restrict name, const Window root)
 {
 	XSizeHints * sh = get_sizehints();
-	create_main_window(sh);
+	create_main_window(sh, root);
 	change_name(name, true);
 	change_name(name, false);
 	create_sb_window(sh->height);
@@ -174,12 +172,20 @@ static void setup_gcs(void)
 
 static void init_jbxvt_colors(void)
 {
-	jbxvt.X.color.map = DefaultColormap(jbxvt.X.dpy,
-		jbxvt.X.screen);
+#ifdef USE_XCB
+	jbxvt.X.color.map = jbxvt.X.screen->default_colormap;
 	const pixel_t p[] = {
-		BlackPixel(jbxvt.X.dpy, jbxvt.X.screen),
-		WhitePixel(jbxvt.X.dpy, jbxvt.X.screen)
+		jbxvt.X.screen->black_pixel,
+		jbxvt.X.screen->white_pixel
 	};
+#else//!USE_XCB
+	jbxvt.X.color.map = DefaultColormap(jbxvt.X.dpy, screen);
+	const uint8_t screen = DefaultScreen(jbxvt.X.dpy);
+	const pixel_t p[] = {
+		BlackPixel(jbxvt.X.dpy, screen),
+		WhitePixel(jbxvt.X.dpy, screen)
+	};
+#endif//USE_XCB
 	jbxvt.X.color.fg = jbxvt.opt.fg?get_pixel(jbxvt.opt.fg):p[1];
 	jbxvt.X.color.cursor = jbxvt.opt.cu?get_pixel(jbxvt.opt.cu):p[1];
 	jbxvt.X.color.bg = jbxvt.opt.bg?get_pixel(jbxvt.opt.bg):p[0];
@@ -190,16 +196,19 @@ static void init_jbxvt_colors(void)
 void init_display(char * name)
 {
 	jbxvt.X.dpy = XOpenDisplay(NULL);
-#ifdef USE_XCB
-	jbxvt.X.xcb = XGetXCBConnection(jbxvt.X.dpy);
-#endif//USE_XCB
 	if(!jbxvt.X.dpy)
 		  quit(1, WARN_RES RES_DPY);
-
-	jbxvt.X.screen = DefaultScreen(jbxvt.X.dpy);
+#ifdef USE_XCB
+	jbxvt.X.xcb = XGetXCBConnection(jbxvt.X.dpy);
+	jbxvt.X.screen = xcb_setup_roots_iterator(
+		xcb_get_setup(jbxvt.X.xcb)).data;
+	const Window root = jbxvt.X.screen->root;
+#else//!USE_XCB
+	const Window root = DefaultRootWindow(jbxvt.X.dpy);
+#endif//USE_XCB
 	init_jbxvt_colors();
 	setup_font();
-	create_window((uint8_t *)name);
+	create_window((uint8_t *)name, root);
 	setup_gcs();
 
 	scr_init();

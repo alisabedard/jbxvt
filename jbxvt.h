@@ -36,6 +36,7 @@ struct JBXVT {
 		Display * dpy;
 #ifdef USE_XCB
 		xcb_connection_t * xcb;
+		xcb_screen_t * screen;
 #endif//USE_XCB
 
 		XFontStruct *font;
@@ -50,7 +51,7 @@ struct JBXVT {
 			pixel_t bg, fg, cursor;
 			pixel_t current_fg, current_bg;
 		} color;
-		uint8_t font_height, font_width, screen;
+		uint8_t font_height, font_width;
 	} X;
 	struct {
 		struct screenst * current;
