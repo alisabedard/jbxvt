@@ -84,6 +84,19 @@ void resize_window(void)
 void switch_scrollbar(void)
 {
 	LOG("switch_scrollbar()");
+#ifdef USE_XCB
+	xcb_get_geometry_cookie_t c = xcb_get_geometry(jbxvt.X.xcb,
+		jbxvt.X.win.main);
+	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt, XCB_CONFIG_WINDOW_X,
+		(uint32_t[]){jbxvt.opt.show_scrollbar?0:SBAR_WIDTH});
+	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(jbxvt.X.xcb,
+		c, NULL);
+	if (!r)
+		  return;
+	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.main,
+		XCB_CONFIG_WINDOW_WIDTH, (uint32_t[]){
+		r->width+(jbxvt.opt.show_scrollbar?-SBAR_WIDTH:SBAR_WIDTH)});
+#else//!USE_XCB
 	unsigned int width, height;
 	XGetGeometry(jbxvt.X.dpy, jbxvt.X.win.main, &(Window){0},
 		&(int){0}, &(int){0}, &width, &height,
@@ -96,6 +109,7 @@ void switch_scrollbar(void)
 		width += SBAR_WIDTH;
 	}
 	XResizeWindow(jbxvt.X.dpy, jbxvt.X.win.main, width, height);
+#endif//USE_XCB
 	jbxvt.opt.show_scrollbar ^= true;
 }
 
