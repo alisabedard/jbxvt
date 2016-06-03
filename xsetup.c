@@ -21,8 +21,15 @@
 //  Map the window
 void map_window(void)
 {
+#ifdef USE_XCB
+	XMapWindow(jbxvt.X.dpy, jbxvt.X.win.main);
+	// FIXME:  window must be created with xcb:
+	//xcb_map_window(jbxvt.X.xcb, jbxvt.X.win.main);
+	xcb_map_subwindows(jbxvt.X.xcb, jbxvt.X.win.main);
+#else//!USE_XCB
 	XMapWindow(jbxvt.X.dpy, jbxvt.X.win.main);
 	XMapSubwindows(jbxvt.X.dpy, jbxvt.X.win.main);
+#endif//USE_XCB
 	/*  Setup the window now so that we can add LINES and COLUMNS to
 	 *  the environment.  */
 	XMaskEvent(jbxvt.X.dpy,ExposureMask,&(XEvent){});
@@ -37,6 +44,27 @@ void resize_window(void)
 	// Quit before being messed up with a bad size:
 	if (!jbxvt.scr.chars.width || !jbxvt.scr.chars.height)
 		quit(1, WARN_ERR);
+#ifdef USE_XCB
+	xcb_get_geometry_cookie_t c = xcb_get_geometry(jbxvt.X.xcb,
+		jbxvt.X.win.main);
+	xcb_get_geometry_reply_t *r = xcb_get_geometry_reply(jbxvt.X.xcb,
+		c, NULL);
+	if (!r)
+		  return;
+	if (jbxvt.opt.show_scrollbar) {
+		xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.sb,
+			XCB_CONFIG_WINDOW_WIDTH|XCB_CONFIG_WINDOW_HEIGHT,
+			(uint32_t[]){SBAR_WIDTH - 1, r->height});
+		xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt,
+			XCB_CONFIG_WINDOW_WIDTH|XCB_CONFIG_WINDOW_HEIGHT,
+			(uint32_t[]){r->width - SBAR_WIDTH, r->height});
+	} else {
+		xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt,
+			XCB_CONFIG_WINDOW_WIDTH|XCB_CONFIG_WINDOW_HEIGHT,
+			(uint32_t[]){r->width, r->height});
+	}
+	free(r);
+#else//!USE_XCB
 	unsigned int width, height;
 	XGetGeometry(jbxvt.X.dpy, jbxvt.X.win.main, &(Window){0},
 		&(int){0}, &(int){0}, &width, &height, &(unsigned int){0},
@@ -48,6 +76,7 @@ void resize_window(void)
 			width - SBAR_WIDTH,height);
 	} else
 		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.vt,width,height);
+#endif//USE_XCB
 	scr_reset();
 }
 
