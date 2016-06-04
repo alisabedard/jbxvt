@@ -58,7 +58,7 @@ void scr_extend_selection(const Point p, const bool drag)
 	struct selst sesave1 = jbxvt.sel.end1;
 	struct selst sesave2 = jbxvt.sel.end2;
 
-	if (drag) 
+	if (drag)
 		  handle_drag(rc.r, rc.c);
 	else {
 		struct selst * se = get_nearest_endpoint(rc.r, rc.c);

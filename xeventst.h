@@ -10,15 +10,15 @@
 struct xeventst {
 	struct xeventst *xe_next;
 	struct xeventst *xe_prev;
-	Time xe_time;
-	Window xe_requestor; // selections
-	Window xe_window;
-	Atom xe_property; // selections
-	Atom xe_target;
-	int32_t xe_detail;
-	int32_t xe_type;
-	int32_t xe_button;
-	int32_t xe_state;
+	uint32_t xe_time;
+	uint32_t xe_requestor; // selections
+	uint32_t xe_window;
+	uint32_t xe_property; // selections
+	uint32_t xe_target;
+	uint32_t xe_detail;
+	uint32_t xe_type;
+	uint32_t xe_button;
+	uint32_t xe_state;
 	int16_t xe_x;
 	int16_t xe_y;
 	uint16_t xe_width;

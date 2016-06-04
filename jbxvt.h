@@ -41,7 +41,11 @@ struct JBXVT {
 
 		XFontStruct *font;
 		struct {
+#ifdef USE_XCB
+			xcb_window_t vt, sb, main;
+#else//!USE_XCB
 			Window vt, sb, main;
+#endif//USE_XCB
 		} win;
 		struct {
 			GC tx, ne, hl, cu, sb;
