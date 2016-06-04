@@ -19,12 +19,16 @@
 
 // provide a struct to allow converting GCs:
 
+#ifdef USE_XCB_XLIB
 struct jb_GC {
 	void * nothing;
 	xcb_gcontext_t gid;
 };
 
 #define XCBGC(gc) (((struct jb_GC *)gc)->gid)
+#else
+#define XCBGC(gc) (gc)
+#endif//USE_XCB_XLIB
 
 #endif//USE_XCB
 
@@ -48,7 +52,11 @@ struct JBXVT {
 #endif//USE_XCB
 		} win;
 		struct {
+#ifdef USE_XCB
+			xcb_gcontext_t tx, ne, hl, cu, sb;
+#else//!USE_XCB
 			GC tx, ne, hl, cu, sb;
+#endif//USE_XCB
 		} gc;
 		struct {
 			Colormap map;

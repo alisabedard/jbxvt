@@ -36,7 +36,12 @@ pixel_t get_pixel(const char * restrict color)
 	__attribute__((regparm(3)))
 #endif//x86
 static inline pixel_t set_color(const unsigned long vm,
-	const pixel_t p, GC gc)
+	const pixel_t p,
+#ifdef USE_XCB
+	xcb_gcontext_t gc)
+#else//!USE_XCB
+	GC gc)
+#endif//USE_XCB
 {
 #ifdef USE_XCB
 	xcb_change_gc(jbxvt.X.xcb, XCBGC(gc),

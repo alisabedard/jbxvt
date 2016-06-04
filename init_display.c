@@ -150,6 +150,30 @@ static void create_window(uint8_t * restrict name, const Window root)
 
 static void setup_gcs(void)
 {
+#ifdef USE_XCB
+	jbxvt.X.gc.tx = xcb_generate_id(jbxvt.X.xcb);
+	jbxvt.X.gc.ne = xcb_generate_id(jbxvt.X.xcb);
+	jbxvt.X.gc.sb = xcb_generate_id(jbxvt.X.xcb);
+	jbxvt.X.gc.hl = xcb_generate_id(jbxvt.X.xcb);
+	jbxvt.X.gc.cu = xcb_generate_id(jbxvt.X.xcb);
+	xcb_create_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, jbxvt.X.win.main,
+		XCB_GC_FOREGROUND | XCB_GC_BACKGROUND
+		| XCB_GC_FONT, (uint32_t[]){jbxvt.X.color.fg,
+		jbxvt.X.color.bg, jbxvt.X.font->fid});
+	xcb_create_gc(jbxvt.X.xcb, jbxvt.X.gc.ne, jbxvt.X.win.main,
+		XCB_GC_FOREGROUND | XCB_GC_BACKGROUND
+		| XCB_GC_GRAPHICS_EXPOSURES, (uint32_t[]){
+		jbxvt.X.color.fg, jbxvt.X.color.bg, 1});
+	xcb_create_gc(jbxvt.X.xcb, jbxvt.X.gc.sb, jbxvt.X.win.main,
+		XCB_GC_FOREGROUND | XCB_GC_BACKGROUND, (uint32_t[]){
+		jbxvt.X.color.fg, jbxvt.X.color.bg});
+	xcb_create_gc(jbxvt.X.xcb, jbxvt.X.gc.hl, jbxvt.X.win.main,
+		XCB_GC_FUNCTION | XCB_GC_PLANE_MASK, (uint32_t[]){
+		XCB_GX_INVERT, jbxvt.X.color.fg ^ jbxvt.X.color.bg});
+	xcb_create_gc(jbxvt.X.xcb, jbxvt.X.gc.cu, jbxvt.X.win.main,
+		XCB_GC_FUNCTION | XCB_GC_PLANE_MASK, (uint32_t[]){
+		XCB_GX_INVERT, jbxvt.X.color.cursor ^ jbxvt.X.color.bg});
+#else//!USE_XCB
 	XGCValues gcv = { .foreground = jbxvt.X.color.fg,
 		.background = jbxvt.X.color.bg,
 		.function = GXinvert, .font = jbxvt.X.font->fid,
@@ -166,6 +190,7 @@ static void setup_gcs(void)
 	gcv.plane_mask = jbxvt.X.color.cursor ^ jbxvt.X.color.bg;
 	jbxvt.X.gc.cu = XCreateGC(jbxvt.X.dpy, jbxvt.X.win.main,
 		GCFunction|GCPlaneMask, &gcv);
+#endif
 }
 
 static void init_jbxvt_colors(void)

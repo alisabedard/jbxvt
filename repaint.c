@@ -127,12 +127,14 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 		jbxvt.X.gc.tx, p.x, p.y,
 		(const char *)str,len);
 #endif//USE_XCB
+#ifndef USE_XCB
 	if (rval & RS_BOLD) { // Fake bold:
-		// no proper xcb equivalent
+		// FIXME: no proper xcb equivalent
 		XDrawString(jbxvt.X.dpy,jbxvt.X.win.vt,
 			jbxvt.X.gc.tx, p.x + 1, p.y,
 			(const char *)str,len);
 	}
+#endif//!USE_XCB
 
 	p.y++; // Advance for underline, use underline for italic.
 	if (rval & RS_ULINE || rval & RS_ITALIC) {

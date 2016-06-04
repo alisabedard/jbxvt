@@ -35,6 +35,15 @@ void scr_insert_characters(int16_t count)
 	};
 	const uint16_t width = (jbxvt.scr.chars.width - count
 		- jbxvt.scr.current->cursor.col) * jbxvt.X.font_width;
+#ifdef USE_XCB
+	if (width > 0)
+		  xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
+			  jbxvt.X.gc.ne, p.x, p.y, p.x + count
+			  * jbxvt.X.font_width, p.y, width,
+			  jbxvt.X.font_height);
+	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, p.x, p.y, count
+		* jbxvt.X.font_width, jbxvt.X.font_height);
+#else//!USE_XCB
 	if (width > 0)
 		  XCopyArea(jbxvt.X.dpy,jbxvt.X.win.vt,
 			  jbxvt.X.win.vt, jbxvt.X.gc.ne,
@@ -42,6 +51,7 @@ void scr_insert_characters(int16_t count)
 			  p.x+count*jbxvt.X.font_width, p.y);
 	XClearArea(jbxvt.X.dpy, jbxvt.X.win.vt, p.x, p.y,
 		count * jbxvt.X.font_width, jbxvt.X.font_height, False);
+#endif//USE_XCB
 	jbxvt.scr.current->wrap_next = 0;
 	cursor(CURSOR_DRAW);
 }
