@@ -3,14 +3,16 @@
 
 #include "selcmp.h"
 
+#include <stdbool.h>
+
 static int8_t cmp(const int8_t mod,
 	struct selst * restrict se1,
 	struct selst * restrict se2)
 {
 	if (se1->se_index > se2->se_index)
-		  return -1 * mod;
+		  return - mod;
 	if (se1->se_index < se2->se_index)
-		  return 1 * mod;
+		  return mod;
 	if (se1->se_col < se2->se_col)
 		  return -1;
 	if (se2->se_col < se1->se_col)
@@ -22,12 +24,11 @@ static int8_t cmp(const int8_t mod,
  */
 int8_t selcmp(struct selst * restrict se1, struct selst * restrict se2)
 {
-	if (se1->se_type == SAVEDSEL && se2->se_type == SAVEDSEL)
+	const bool se1sv = se1->se_type == SAVEDSEL;
+	if (se1sv && se2->se_type == SAVEDSEL)
 		  return cmp(1, se1, se2);
 	if (se1->se_type == SCREENSEL && se2->se_type == SCREENSEL)
 		  return cmp(-1, se1, se2);
-	if (se1->se_type == SAVEDSEL)
-		  return(-1);
-	return(1);
+	return se1sv ? -1 : 1;
 }
 
