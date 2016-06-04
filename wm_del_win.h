@@ -4,8 +4,6 @@
 #ifndef WM_DEL_WIN_H
 #define WM_DEL_WIN_H
 
-#include <X11/Xlib.h>
-
-Atom wm_del_win(void);
+long unsigned int wm_del_win(void);
 
 #endif//!WM_DEL_WIN_H

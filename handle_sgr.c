@@ -14,7 +14,7 @@ void handle_sgr(struct tokenst * restrict token)
 		scr_change_rendition(RS_NONE);
 		return;
 	}
-	for (uint8_t i = 0; i < token->tk_nargs; i++) {
+	for (uint8_t i = 0; i < token->tk_nargs; ++i) {
 #ifdef DEBUG_SGR
 			dprintf(STDERR_FILENO, "tk_arg[%d]: %d\n", i,
 				token->tk_arg[i]);
@@ -44,9 +44,9 @@ void handle_sgr(struct tokenst * restrict token)
 			scr_change_rendition(RS_RVID);
 			break;
 			// FG Colors:
-		case 30: 
+		case 30:
 			scr_change_rendition(RS_F0);
- 			break;
+			break;
 		case 31:
 			scr_change_rendition(RS_F1);
 			break;
@@ -96,7 +96,7 @@ void handle_sgr(struct tokenst * restrict token)
 		case 47:
 			scr_change_rendition(RS_B7);
 			break;
-		case 49: 
+		case 49:
 			scr_change_rendition(RS_BR);
 			break;
 			// Bright FG Colors:
