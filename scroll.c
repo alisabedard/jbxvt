@@ -150,7 +150,7 @@ static void cp_repair(const uint8_t row1, const uint8_t row2,
 	}
 #ifdef USE_XCB
 	xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
-		XCBGC(jbxvt.X.gc.tx), 0, y[0], 0, y[1], jbxvt.scr.pixels.width,
+		jbxvt.X.gc.tx, 0, y[0], 0, y[1], jbxvt.scr.pixels.width,
 		height);
 	// the above blocks the event queue, flush it
 	xcb_flush(jbxvt.X.xcb);

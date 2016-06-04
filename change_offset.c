@@ -19,7 +19,7 @@ static void copy_repaint_repair(const int16_t d, const int16_t y1,
 		* jbxvt.X.font_height;
 #ifdef USE_XCB
 	xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
-		XCBGC(jbxvt.X.gc.tx), 0, y1, 0, y2, jbxvt.scr.pixels.width,
+		jbxvt.X.gc.tx, 0, y1, 0, y2, jbxvt.scr.pixels.width,
 		height);
 #else//!USE_XCB
 	XCopyArea(jbxvt.X.dpy, jbxvt.X.win.vt,

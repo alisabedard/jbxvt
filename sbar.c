@@ -66,7 +66,7 @@ void sbar_show(int length, const int low,
 	if (bot >= top) {
 #ifdef USE_XCB
 		xcb_poly_fill_rectangle(jbxvt.X.xcb, jbxvt.X.win.sb,
-			XCBGC(jbxvt.X.gc.sb), 1, &(xcb_rectangle_t){0, top,
+			jbxvt.X.gc.sb, 1, &(xcb_rectangle_t){0, top,
 			sbar.sz.width, bot - top + 1});
 #else//!USE_XCB
 		XFillRectangle(jbxvt.X.dpy, jbxvt.X.win.sb,

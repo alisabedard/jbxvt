@@ -19,7 +19,7 @@ static void copy_area(const int16_t * restrict x, const int16_t y,
 	if (width > 0) {
 #ifdef USE_XCB
 		xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
-			XCBGC(jbxvt.X.gc.tx), x[0], y, x[1], y, width,
+			jbxvt.X.gc.tx, x[0], y, x[1], y, width,
 			jbxvt.X.font_height);
 #else//!USE_XCB
 		XCopyArea(jbxvt.X.dpy, jbxvt.X.win.vt, jbxvt.X.win.vt,

@@ -14,22 +14,7 @@
 #include <X11/Xutil.h>
 
 #ifdef USE_XCB
-
 #include <X11/Xlib-xcb.h>
-
-// provide a struct to allow converting GCs:
-
-#ifdef USE_XCB_XLIB
-struct jb_GC {
-	void * nothing;
-	xcb_gcontext_t gid;
-};
-
-#define XCBGC(gc) (((struct jb_GC *)gc)->gid)
-#else
-#define XCBGC(gc) (gc)
-#endif//USE_XCB_XLIB
-
 #endif//USE_XCB
 
 // Use for all file descriptors:

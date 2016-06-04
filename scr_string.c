@@ -56,8 +56,8 @@ static void handle_insert(uint8_t n, const Point p)
 	if (width > 0) {
 #ifdef USE_XCB
 		xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
-			XCBGC(jbxvt.X.gc.tx), p.x, p.y, x2, p.y,
-			width, jbxvt.X.font_height);
+			jbxvt.X.gc.tx, p.x, p.y, x2, p.y, width,
+			jbxvt.X.font_height);
 #else//!USE_XCB
 		XCopyArea(jbxvt.X.dpy, jbxvt.X.win.vt,
 			jbxvt.X.win.vt, jbxvt.X.gc.tx,

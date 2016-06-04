@@ -44,8 +44,7 @@ static inline pixel_t set_color(const unsigned long vm,
 #endif//USE_XCB
 {
 #ifdef USE_XCB
-	xcb_change_gc(jbxvt.X.xcb, XCBGC(gc),
-		vm, (uint32_t[]){p});
+	xcb_change_gc(jbxvt.X.xcb, gc, vm, (uint32_t[]){p});
 #else//!USE_XCB
 	XChangeGC(jbxvt.X.dpy, gc, vm, &(XGCValues){
 		.foreground=p, .background=p});

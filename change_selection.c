@@ -56,7 +56,7 @@ void change_selection(struct selst * restrict ose1,
 				* jbxvt.X.font_width;
 #ifdef USE_XCB
 			xcb_poly_fill_rectangle(jbxvt.X.xcb, jbxvt.X.win.vt,
-				XCBGC(jbxvt.X.gc.hl), 1, (xcb_rectangle_t[]){{
+				jbxvt.X.gc.hl, 1, (xcb_rectangle_t[]){{
 				.x = x1, .y = y, .width = x2 - x1,
 				.height = jbxvt.X.font_height}});
 #else//!USE_XCB
@@ -92,7 +92,7 @@ void change_selection(struct selst * restrict ose1,
 				* jbxvt.X.font_width;
 #ifdef USE_XCB
 			xcb_poly_fill_rectangle(jbxvt.X.xcb, jbxvt.X.win.vt,
-				XCBGC(jbxvt.X.gc.hl), 1, (xcb_rectangle_t[]){{
+				jbxvt.X.gc.hl, 1, (xcb_rectangle_t[]){{
 				.x = x1, .y = y, .width = x2 - x1,
 				.height = jbxvt.X.font_height}});
 #else//!USE_XCB
