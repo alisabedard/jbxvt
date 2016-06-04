@@ -311,11 +311,11 @@ app_loop_head:
 			break;
 		case 7 :
 			//  Send the name of the display to the command.
-			cprintf("%s\r", DisplayString(jbxvt.X.dpy));
+			cprintf("%s\r", getenv("DISPLAY"));
 			break;
 		}
 		break;
-	case TK_DECSTBM: // set top and bottom margins.  
+	case TK_DECSTBM: // set top and bottom margins.
 		LOG("TK_DECSTBM");
 		scr_set_margins(t[0] - 1, t[1] - 1);
 		break;
