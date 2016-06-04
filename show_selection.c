@@ -53,9 +53,9 @@ void show_selection(int16_t row1, int16_t row2, int16_t col1, int16_t col2)
 	if (sr > er)
 		return;
 	//  Paint in the reverse video:
-	for (int16_t row = sr; row <= er; row++) {
+	for (int16_t row = sr; row <= er; ++row) {
 		const int16_t y = MARGIN + row * jbxvt.X.font_height;
-		const int16_t x1 = MARGIN + (row == sr ? sc : col1)
+		const int16_t x1 = MARGIN + ((row == sr) ? sc : col1)
 			* jbxvt.X.font_width;
 		const int16_t x2 = MARGIN + ((row == er) ? ec : col2)
 			* jbxvt.X.font_width;
