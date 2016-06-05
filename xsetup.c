@@ -27,14 +27,14 @@
 //  Map the window
 void map_window(void)
 {
-	// window creation must be done prior to map call, so flush
-	xcb_flush(jbxvt.X.xcb);
 	xcb_map_window(jbxvt.X.xcb, jbxvt.X.win.main);
 	xcb_map_subwindows(jbxvt.X.xcb, jbxvt.X.win.main);
 	/*  Setup the window now so that we can add LINES and COLUMNS to
 	 *  the environment.  */
 	XMaskEvent(jbxvt.X.dpy,ExposureMask,&(XEvent){});
 	resize_window();
+	// Forcibly show the window now:
+	xcb_flush(jbxvt.X.xcb);
 }
 
 /*  Called after a possible window size change.  If the window size has changed
