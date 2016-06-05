@@ -20,11 +20,11 @@ enum {
 enum selunit { CHAR, WORD, LINE };
 
 //  respond to a request for our current selection.
-void scr_send_selection(const uint32_t time, const uint32_t requestor,
+void scr_send_selection(const xcb_time_t time, const uint32_t requestor,
 	const uint32_t target, const uint32_t property);
 
 //  Make the selection currently delimited by the selection end markers.
-void scr_make_selection(const Time time);
+void scr_make_selection(const xcb_time_t time);
 
 /*  Fix the coordinates so that they are within the screen and do not lie within
  *  empty space.  */

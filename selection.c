@@ -22,7 +22,7 @@
 static enum selunit selection_unit;	/* current unit of selection */
 
 //  Make the selection currently delimited by the selection end markers.
-void scr_make_selection(const Time time)
+void scr_make_selection(const xcb_time_t time)
 {
 	if (!save_selection())
 		return;
@@ -34,7 +34,7 @@ void scr_make_selection(const Time time)
 }
 
 //  respond to a request for our current selection.
-void scr_send_selection(const uint32_t time,
+void scr_send_selection(const xcb_time_t time,
 	const uint32_t requestor, const uint32_t target, const uint32_t property)
 {
 #ifdef USE_XCB
