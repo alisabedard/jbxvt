@@ -6,6 +6,7 @@
 #include "jbxvt.h"
 #include "log.h"
 #include "token.h"
+#include "xeventst.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,35 +14,23 @@
 static void handle_motion_notify(struct tokenst * restrict tk,
 	struct xeventst * restrict xe)
 {
-#ifdef USE_XCB
 	xcb_query_pointer_cookie_t c = xcb_query_pointer(jbxvt.X.xcb,
 		jbxvt.X.win.sb);
-#endif//USE_XCB
-	if (xe->xe_window == jbxvt.X.win.sb && (xe->xe_state & Button2Mask)) {
-#ifdef USE_XCB
+	if (xe->xe_window == jbxvt.X.win.sb
+		&& (xe->xe_state & XCB_KEY_BUT_MASK_BUTTON_2)) {
 		xcb_query_pointer_reply_t * r = xcb_query_pointer_reply(
 			jbxvt.X.xcb, c, NULL);
-		const uint32_t mask = r->mask;
-		const int16_t y = r->win_y;
-		free(r);
-#else//!USE_XCB
-		Window w;
-		int d, y;
-		uint32_t mask;
-		// Only interested in y and mask
-		XQueryPointer(jbxvt.X.dpy, jbxvt.X.win.sb, &w, &w,
-			&d, &d, &d, &y, &mask);
-#endif//USE_XCB
-		if (mask & Button2Mask) {
+		if (r->mask & XCB_KEY_BUT_MASK_BUTTON_2) {
 			tk->tk_type = TK_SBGOTO;
-			tk->tk_arg[0] = y;
+			tk->tk_arg[0] = r->win_y;
 			tk->tk_nargs = 1;
 		}
+		free(r);
 		return;
 	}
 	if (xe->xe_window == jbxvt.X.win.vt
-		&& (xe->xe_state & Button1Mask)
-		&& !(xe->xe_state & ControlMask)) {
+		&& (xe->xe_state & XCB_KEY_BUT_MASK_BUTTON_1)
+		&& !(xe->xe_state & XCB_KEY_BUT_MASK_CONTROL)) {
 		tk->tk_type = TK_SELDRAG;
 		tk->tk_arg[0] = xe->xe_x;
 		tk->tk_arg[1] = xe->xe_y;
@@ -62,35 +51,35 @@ static void handle_button_release(struct tokenst * restrict tk,
 {
 	if (xe->xe_window == jbxvt.X.win.sb) {
 		switch (xe->xe_button) {
-		case Button1:
-		case Button5:
+		case 1:
+		case 5:
 			sbop(tk, xe, true);
 			break;
-		case Button3:
-		case Button4:
+		case 3:
+		case 4:
 			sbop(tk, xe, false);
 			break;
 		}
 	} else if (xe->xe_window == jbxvt.X.win.vt
-		&& !(xe->xe_state & ControlMask)) {
+		&& !(xe->xe_state & XCB_KEY_BUT_MASK_CONTROL)) {
 		switch (xe->xe_button) {
-		case Button1:
-		case Button3:
+		case 1:
+		case 3:
 			tk->tk_type = TK_SELECT;
 			tk->tk_arg[0] = xe->xe_time;
 			tk->tk_nargs = 1;
 			break;
-		case Button2:
+		case 2:
 			tk->tk_type = TK_SELINSRT;
 			tk->tk_arg[0] = xe->xe_time;
 			tk->tk_arg[1] = xe->xe_x;
 			tk->tk_arg[2] = xe->xe_y;
 			tk->tk_nargs = 3;
 			break;
-		case Button4:
+		case 4:
 			sbop(tk, xe, false);
 			break;
-		case Button5:
+		case 5:
 			sbop(tk, xe, true);
 			break;
 
@@ -121,21 +110,21 @@ static void handle_button_press(struct tokenst * restrict tk,
 	struct xeventst * restrict xe)
 {
 	if (xe->xe_window == jbxvt.X.win.vt
-		&& xe->xe_state == ControlMask) {
+		&& xe->xe_state == XCB_KEY_BUT_MASK_CONTROL) {
 		tk->tk_type = TK_SBSWITCH;
 		tk->tk_nargs = 0;
 		return;
 	}
 	if (xe->xe_window == jbxvt.X.win.vt
-		&& (xe->xe_state & ControlMask) == 0) {
+		&& (xe->xe_state & XCB_KEY_BUT_MASK_CONTROL) == 0) {
 		switch (xe->xe_button) {
-		case Button1 :
+		case 1:
 			handle_button1_press(tk, xe);
 			break;
-		case Button2 :
+		case 2:
 			tk->tk_type = TK_NULL;
 			break;
-		case Button3 :
+		case 3:
 			tk->tk_type = TK_SELEXTND;
 			break;
 		}
