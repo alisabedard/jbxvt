@@ -14,31 +14,32 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <xcb/xcb_icccm.h>
 #include <X11/cursorfont.h>
 #include <X11/Xutil.h>
 
 #define XVT_CLASS	"JBXvt"
 
-#define MW_EVENTS	(	KeyPressMask |\
-				FocusChangeMask |\
-				StructureNotifyMask \
+#define MW_EVENTS	(	XCB_EVENT_MASK_KEY_PRESS |\
+				XCB_EVENT_MASK_FOCUS_CHANGE |\
+				XCB_EVENT_MASK_STRUCTURE_NOTIFY \
 			)
 
-#define VT_EVENTS	(	ExposureMask |\
-				EnterWindowMask|\
-				LeaveWindowMask |\
-				ButtonPressMask |\
-				ButtonReleaseMask |\
-				Button1MotionMask \
+#define VT_EVENTS	(	XCB_EVENT_MASK_EXPOSURE |\
+				XCB_EVENT_MASK_ENTER_WINDOW |\
+				XCB_EVENT_MASK_LEAVE_WINDOW |\
+				XCB_EVENT_MASK_BUTTON_PRESS |\
+				XCB_EVENT_MASK_BUTTON_RELEASE |\
+				XCB_EVENT_MASK_BUTTON_1_MOTION\
 			)
 
 
-#define SB_EVENTS	(	ExposureMask |\
-				EnterWindowMask|\
-				LeaveWindowMask |\
-				Button2MotionMask |\
-				ButtonReleaseMask |\
-				ButtonPressMask \
+#define SB_EVENTS	(	XCB_EVENT_MASK_EXPOSURE |\
+				XCB_EVENT_MASK_ENTER_WINDOW |\
+				XCB_EVENT_MASK_LEAVE_WINDOW |\
+				XCB_EVENT_MASK_BUTTON_1_MOTION |\
+				XCB_EVENT_MASK_BUTTON_RELEASE|\
+				XCB_EVENT_MASK_BUTTON_PRESS\
 			)
 
 static void setup_font(void)
@@ -65,10 +66,10 @@ static void setup_font(void)
 }
 
 // free the returned value
-static XSizeHints * get_sizehints(void)
+static xcb_size_hints_t * get_sizehints(void)
 {
-	XSizeHints * s = malloc(sizeof(XSizeHints));
-	*s = (XSizeHints) {
+	xcb_size_hints_t * s = malloc(sizeof(xcb_size_hints_t));
+	*s = (xcb_size_hints_t) {
 		.flags = USSize | PMinSize | PResizeInc | PBaseSize,
 		.width = 80, .height = 24,
 		.width_inc = jbxvt.X.font_width,
@@ -82,7 +83,7 @@ static XSizeHints * get_sizehints(void)
 	return s;
 }
 
-static void create_main_window(XSizeHints * restrict sh, const uint32_t root)
+static void create_main_window(xcb_size_hints_t * restrict sh, const uint32_t root)
 {
 	jbxvt.X.win.main = xcb_generate_id(jbxvt.X.xcb);
 	xcb_create_window(jbxvt.X.xcb, XCB_COPY_FROM_PARENT,
@@ -108,7 +109,7 @@ static void create_sb_window(const uint16_t height)
 		XCreateFontCursor(jbxvt.X.dpy, XC_sb_v_double_arrow));
 }
 
-static void create_vt_window(XSizeHints * restrict sh)
+static void create_vt_window(xcb_size_hints_t * restrict sh)
 {
 	jbxvt.X.win.vt = xcb_generate_id(jbxvt.X.xcb);
 
@@ -127,7 +128,7 @@ static void create_vt_window(XSizeHints * restrict sh)
 //  Open the window.
 static void create_window(uint8_t * restrict name, const Window root)
 {
-	XSizeHints * sh = get_sizehints();
+	xcb_size_hints_t * sh = get_sizehints();
 	create_main_window(sh, root);
 	change_name(name, true);
 	change_name(name, false);
