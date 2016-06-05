@@ -47,22 +47,22 @@ static struct selst * get_nearest_endpoint(const int16_t row,
 }
 
 //  Extend the selection.
-void scr_extend_selection(const Point p, const bool drag)
+void scr_extend_selection(const xcb_point_t p, const bool drag)
 {
 	if (jbxvt.sel.end1.se_type == NOSEL)
 		return;
-	Point rc = { .col = (p.x - MARGIN) / jbxvt.X.font_width,
-		.row = (p.y - MARGIN) / jbxvt.X.font_height };
+	xcb_point_t rc = { .x = (p.x - MARGIN) / jbxvt.X.font_width,
+		.y = (p.y - MARGIN) / jbxvt.X.font_height };
 	fix_rc(&rc);
 	// Save current end points:
 	struct selst sesave1 = jbxvt.sel.end1;
 	struct selst sesave2 = jbxvt.sel.end2;
 
 	if (drag)
-		  handle_drag(rc.r, rc.c);
+		  handle_drag(rc.y, rc.x);
 	else {
-		struct selst * se = get_nearest_endpoint(rc.r, rc.c);
-		rc_to_selend(rc.r, rc.c, se);
+		struct selst * se = get_nearest_endpoint(rc.y, rc.x);
+		rc_to_selend(rc.y, rc.x, se);
 		adjust_selection(se);
 	}
 

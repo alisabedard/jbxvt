@@ -43,9 +43,9 @@ static void free_visible_screens(uint8_t ch)
 
 void reset_row_col(void)
 {
-	jbxvt.scr.current->cursor.col = constrain(jbxvt.scr.current->cursor.col,
+	jbxvt.scr.current->cursor.x = constrain(jbxvt.scr.current->cursor.x,
 		jbxvt.scr.chars.width);
-	jbxvt.scr.current->cursor.row = constrain(jbxvt.scr.current->cursor.row,
+	jbxvt.scr.current->cursor.y = constrain(jbxvt.scr.current->cursor.y,
 		jbxvt.scr.chars.height);
 }
 
@@ -166,10 +166,10 @@ void scr_reset(void)
 			//fill_and_scroll(c.h);
 			// calculate working no. of lines.
 			int16_t i = jbxvt.scr.sline.top
-				+ jbxvt.scr.s1.cursor.row + 1;
+				+ jbxvt.scr.s1.cursor.y + 1;
 			int16_t j = i > c.h ? c.h - 1 : i - 1;
-			i = jbxvt.scr.s1.cursor.row; // save
-			jbxvt.scr.s1.cursor.row = j;
+			i = jbxvt.scr.s1.cursor.y; // save
+			jbxvt.scr.s1.cursor.y = j;
 			bool onscreen = true;
 			for (; j >= 0; j--)
 				  i = onscreen ? save_data_on_screen(c.w, i,
@@ -194,7 +194,7 @@ void scr_reset(void)
 		jbxvt.scr.pixels = d;
 		init_screen_elements(&jbxvt.scr.s1, s1, r1);
 		init_screen_elements(&jbxvt.scr.s2, s2, r2);
-		scr_start_selection((Point){},CHAR);
+		scr_start_selection((xcb_point_t){},CHAR);
 	}
 	tty_set_size(c.w, c.h);
 	reset_row_col();
@@ -202,7 +202,7 @@ void scr_reset(void)
 	c.w--;
 	sbar_show(c.h + jbxvt.scr.sline.top, jbxvt.scr.offset,
 		jbxvt.scr.offset + c.h);
-	repaint((Point){}, (Point){.r = c.h, .c = c.w});
+	repaint((xcb_point_t){}, (xcb_point_t){.y = c.h, .x = c.w});
 	cursor(CURSOR_DRAW);
 }
 

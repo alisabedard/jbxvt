@@ -26,22 +26,11 @@ void scr_make_selection(const Time time)
 {
 	if (!save_selection())
 		return;
-#ifdef USE_XCB
 	xcb_set_selection_owner(jbxvt.X.xcb, jbxvt.X.win.vt,
 		XCB_ATOM_PRIMARY, time);
 	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE,
 		jbxvt.X.screen->root, XCB_ATOM_CUT_BUFFER0, XCB_ATOM_STRING,
 		8, jbxvt.sel.length, jbxvt.sel.text);
-#else//!USE_XCB
-	XSetSelectionOwner(jbxvt.X.dpy, XA_PRIMARY,
-		jbxvt.X.win.vt, time);
-	//  Place in CUT_BUFFER0 for backup.
-	XChangeProperty(jbxvt.X.dpy,
-		DefaultRootWindow(jbxvt.X.dpy),
-		XA_CUT_BUFFER0,
-		XA_STRING,8,PropModeReplace,
-		jbxvt.sel.text,jbxvt.sel.length);
-#endif//USE_XCB
 }
 
 //  respond to a request for our current selection.
@@ -96,15 +85,15 @@ void scr_clear_selection(void)
 }
 
 //  start a selection using the specified unit.
-void scr_start_selection(Point p, enum selunit unit)
+void scr_start_selection(xcb_point_t p, enum selunit unit)
 {
 	show_selection(0, jbxvt.scr.chars.height - 1,
 		0, jbxvt.scr.chars.width - 1);
-	Point rc = { .col = (p.x - MARGIN) / jbxvt.X.font_width,
-		.row = (p.y - MARGIN) / jbxvt.X.font_height};
+	xcb_point_t rc = { .x = (p.x - MARGIN) / jbxvt.X.font_width,
+		.y = (p.y - MARGIN) / jbxvt.X.font_height};
 	selection_unit = unit;
 	fix_rc(&rc);
-	rc_to_selend(rc.row, rc.col, &jbxvt.sel.anchor);
+	rc_to_selend(rc.y, rc.x, &jbxvt.sel.anchor);
 	jbxvt.sel.end2 = jbxvt.sel.end1 = jbxvt.sel.anchor;
 	adjust_selection(&jbxvt.sel.end2);
 	show_selection(0, jbxvt.scr.chars.height - 1,
@@ -160,13 +149,13 @@ static uint8_t find_c(uint8_t c, int16_t i)
 
 /*  Fix the coordinates so that they are within the screen and do not lie within
  *  empty space.  */
-void fix_rc(Point * restrict rc)
+void fix_rc(xcb_point_t * restrict rc)
 {
 	if(!jbxvt.scr.chars.height || !jbxvt.scr.chars.width)
 		  return; // prevent segfault on bad window size.
-	rc->r = constrain(rc->row, jbxvt.scr.chars.height);
-	rc->c = find_c(constrain(rc->col, jbxvt.scr.chars.width),
-		rc->r - jbxvt.scr.offset);
+	rc->y = constrain(rc->y, jbxvt.scr.chars.height);
+	rc->x = find_c(constrain(rc->x, jbxvt.scr.chars.width),
+		rc->y - jbxvt.scr.offset);
 }
 
 //  Convert the selection into a row and column.

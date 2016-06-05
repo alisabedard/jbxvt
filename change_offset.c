@@ -26,7 +26,8 @@ static void copy_repaint_repair(const int16_t d, const int16_t y1,
 		jbxvt.X.win.vt, jbxvt.X.gc.tx, 0, y1,
 		jbxvt.scr.pixels.width, height, 0, y2);
 #endif//USE_XCB
-	repaint((Point){.r=row1}, (Point){.r=row2, .c=jbxvt.scr.chars.width-1});
+	repaint((xcb_point_t){.y=row1}, (xcb_point_t){.y=row2,
+		.x=jbxvt.scr.chars.width-1});
 	repair_damage();
 }
 
@@ -56,8 +57,9 @@ void change_offset(int16_t n)
 			MARGIN, jbxvt.scr.chars.height - d,
 			jbxvt.scr.chars.height - 1);
 	} else
-		  repaint((Point){}, (Point){.r=jbxvt.scr.chars.height-1,
-			  .c=jbxvt.scr.chars.width-1});
+		  repaint((xcb_point_t){}, (xcb_point_t){
+			  .y=jbxvt.scr.chars.height-1,
+			  .x=jbxvt.scr.chars.width-1});
 	cursor(CURSOR_DRAW);
 	// Update current scrollbar position due to change
 	sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1,

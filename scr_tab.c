@@ -12,21 +12,20 @@
 void scr_tab(void)
 {
 	home_screen();
-	if (jbxvt.scr.current->cursor.col == jbxvt.scr.chars.width - 1)
+	if (jbxvt.scr.current->cursor.x == jbxvt.scr.chars.width - 1)
 		return;
 	cursor(CURSOR_DRAW);
-	check_selection(jbxvt.scr.current->cursor.row,
-		jbxvt.scr.current->cursor.row);
-	if (jbxvt.scr.current->text[jbxvt.scr.current->cursor.row]
-		[jbxvt.scr.current->cursor.col] == 0)
-		jbxvt.scr.current->text[jbxvt.scr.current->cursor.row]
-				[jbxvt.scr.current->cursor.col] = '\t';
-	jbxvt.scr.current->cursor.col++;
-	while (jbxvt.scr.current->cursor.col % 8
-		&& jbxvt.scr.current->cursor.col
+	check_selection(jbxvt.scr.current->cursor.y,
+		jbxvt.scr.current->cursor.y);
+	if (jbxvt.scr.current->text[jbxvt.scr.current->cursor.y]
+		[jbxvt.scr.current->cursor.x] == 0)
+		jbxvt.scr.current->text[jbxvt.scr.current->cursor.y]
+				[jbxvt.scr.current->cursor.x] = '\t';
+	jbxvt.scr.current->cursor.x++;
+	while (jbxvt.scr.current->cursor.x % 8
+		&& jbxvt.scr.current->cursor.x
 		< jbxvt.scr.chars.width - 1)
-		jbxvt.scr.current->cursor.col++;
+		jbxvt.scr.current->cursor.x++;
 	cursor(CURSOR_DRAW);
 }
-
 

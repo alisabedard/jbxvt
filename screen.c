@@ -53,8 +53,8 @@ void scr_change_screen(const bool mode_high)
 	jbxvt.scr.current = mode_high
 		? &jbxvt.scr.s2 : &jbxvt.scr.s1;
 	jbxvt.sel.end2.se_type = NOSEL;
-	repaint((Point){}, (Point){.r = jbxvt.scr.chars.height - 1,
-		.c = jbxvt.scr.chars.width - 1});
+	repaint((xcb_point_t){}, (xcb_point_t){.y = jbxvt.scr.chars.height - 1,
+		.x = jbxvt.scr.chars.width - 1});
 	cursor(CURSOR_DRAW);
 }
 
@@ -76,23 +76,23 @@ static void hsc(void)
 void scr_index_by(const int8_t mod)
 {
 	hsc();
-	if (jbxvt.scr.current->cursor.row == (mod > 0
+	if (jbxvt.scr.current->cursor.y == (mod > 0
 		? jbxvt.scr.current->margin.bottom
 		: jbxvt.scr.current->margin.top))
 		scroll(jbxvt.scr.current->margin.top,
 			jbxvt.scr.current->margin.bottom, mod);
 	else
-		jbxvt.scr.current->cursor.row += mod;
+		jbxvt.scr.current->cursor.y += mod;
 	jbxvt.scr.current->wrap_next = 0;
-	check_selection(jbxvt.scr.current->cursor.row,
-		jbxvt.scr.current->cursor.row);
+	check_selection(jbxvt.scr.current->cursor.y,
+		jbxvt.scr.current->cursor.y);
 	cursor(CURSOR_DRAW);
 }
 
 static int8_t scroll_up_scr_bot(uint8_t count, const bool up)
 {
 	while (count > MAX_SCROLL) {
-		scroll(jbxvt.scr.current->cursor.row,
+		scroll(jbxvt.scr.current->cursor.y,
 			jbxvt.scr.current->margin.bottom,
 			up?MAX_SCROLL:-MAX_SCROLL);
 		count -= MAX_SCROLL;
@@ -104,10 +104,10 @@ static int8_t scroll_up_scr_bot(uint8_t count, const bool up)
 void scr_delete_lines(const uint8_t count)
 {
 	if (count > jbxvt.scr.current->margin.bottom
-		- jbxvt.scr.current->cursor.row + 1)
+		- jbxvt.scr.current->cursor.y + 1)
 		return;
 	hsc();
-	scroll(jbxvt.scr.current->cursor.row,
+	scroll(jbxvt.scr.current->cursor.y,
 		jbxvt.scr.current->margin.bottom,
 		scroll_up_scr_bot(count, true));
 	jbxvt.scr.current->wrap_next = 0;
@@ -116,7 +116,7 @@ void scr_delete_lines(const uint8_t count)
 
 static void scroll_lower_lines(const int8_t count)
 {
-	scroll(jbxvt.scr.current->cursor.row,
+	scroll(jbxvt.scr.current->cursor.y,
 		jbxvt.scr.current->margin.bottom,
 		scroll_up_scr_bot(count, false));
 }
@@ -124,14 +124,14 @@ static void scroll_lower_lines(const int8_t count)
 static inline int8_t get_insertion_count(const int8_t count)
 {
 	return constrain(count, jbxvt.scr.current->margin.bottom
-		- jbxvt.scr.current->cursor.row + 1);
+		- jbxvt.scr.current->cursor.y + 1);
 }
 
 /*  Insert count blank lines at the current position
     and scroll the lower lines down.  */
 void scr_insert_lines(const int8_t count)
 {
-	if (jbxvt.scr.current->cursor.row
+	if (jbxvt.scr.current->cursor.y
 		> jbxvt.scr.current->margin.bottom)
 		return;
 	hsc();
@@ -163,12 +163,12 @@ void home_screen(void)
 {
 	if (jbxvt.scr.offset) {
 		jbxvt.scr.offset = 0;
-		Point rc = { .r = jbxvt.scr.chars.height - 1,
-			.c = jbxvt.scr.chars.width - 1
+		xcb_point_t rc = { .y = jbxvt.scr.chars.height - 1,
+			.x = jbxvt.scr.chars.width - 1
 		};
-		repaint((Point){}, rc);
+		repaint((xcb_point_t){}, rc);
 		cursor(CURSOR_DRAW);
-		sbar_show(rc.r + jbxvt.scr.sline.top, 0, rc.r);
+		sbar_show(rc.y + jbxvt.scr.sline.top, 0, rc.y);
 	}
 }
 

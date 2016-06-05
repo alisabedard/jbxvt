@@ -112,24 +112,24 @@ static void sc_up_cp_rows(const int8_t count)
 		  called_before=true;
 		  return;
 	}
-	Point iter;
-	for (iter.row = 0; iter.row < count; ++iter.row) {
-		uint8_t * s = jbxvt.scr.current->text[iter.row];
-		uint32_t * r = jbxvt.scr.current->rend[iter.row];
-		iter.col = sc_up_find_col(s);
+	xcb_point_t iter;
+	for (iter.y = 0; iter.y < count; ++iter.y) {
+		uint8_t * s = jbxvt.scr.current->text[iter.y];
+		uint32_t * r = jbxvt.scr.current->rend[iter.y];
+		iter.x = sc_up_find_col(s);
 		struct slinest *sl = malloc(sizeof(struct slinest));
 		// +1 to have last byte as wrap flag:
-		sl->sl_text = malloc(iter.col + 1);
-		memcpy(sl->sl_text, s, iter.col);
-		sl->sl_text[iter.col] = s[jbxvt.scr.chars.width];
-		/* iter.col, not iter.col + 1, since the last byte
+		sl->sl_text = malloc(iter.x + 1);
+		memcpy(sl->sl_text, s, iter.x);
+		sl->sl_text[iter.x] = s[jbxvt.scr.chars.width];
+		/* iter.x, not iter.x + 1, since the last byte
 		   of the sl_text, only, is used for the wrap flag.  */
-		sl->sl_rend = malloc(iter.col * sizeof(uint32_t));
-		memcpy(sl->sl_rend, r, iter.col * sizeof(uint32_t));
-		sl->sl_length = iter.col;
-		jbxvt.scr.sline.data[count - iter.row - 1] = sl;
-		sel_scr_to_sav(&jbxvt.sel.end1, iter.row, count);
-		sel_scr_to_sav(&jbxvt.sel.end2, iter.row, count);
+		sl->sl_rend = malloc(iter.x * sizeof(uint32_t));
+		memcpy(sl->sl_rend, r, iter.x * sizeof(uint32_t));
+		sl->sl_length = iter.x;
+		jbxvt.scr.sline.data[count - iter.y - 1] = sl;
+		sel_scr_to_sav(&jbxvt.sel.end1, iter.y, count);
+		sel_scr_to_sav(&jbxvt.sel.end2, iter.y, count);
 	}
 }
 
@@ -168,13 +168,13 @@ static void sc_up(const uint8_t row1, uint8_t row2,
 	LOG("scroll_up(count: %d, row1: %d, row2: %d)", count, row1, row2);
 	if (row1 == 0 && jbxvt.scr.current == &jbxvt.scr.s1) {
 		free_top_lines(count);
-		Point iter;
-		for (iter.row = jbxvt.scr.sline.max - count - 1;
-			iter.row >= 0; --iter.row) {
-			jbxvt.scr.sline.data[iter.row + count]
-				= jbxvt.scr.sline.data[iter.row];
-			set_selend_index(iter.row, count, &jbxvt.sel.end1);
-			set_selend_index(iter.row, count, &jbxvt.sel.end2);
+		xcb_point_t iter;
+		for (iter.y = jbxvt.scr.sline.max - count - 1;
+			iter.y >= 0; --iter.y) {
+			jbxvt.scr.sline.data[iter.y + count]
+				= jbxvt.scr.sline.data[iter.y];
+			set_selend_index(iter.y, count, &jbxvt.sel.end1);
+			set_selend_index(iter.y, count, &jbxvt.sel.end2);
 		}
 		sc_up_cp_rows(count);
 		jbxvt.scr.sline.top = constrain(jbxvt.scr.sline.top

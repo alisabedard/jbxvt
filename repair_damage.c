@@ -27,15 +27,15 @@ void repair_damage(void)
 		if (event.type == NoExpose)
 			return;
 
-		Point rc1, rc2;
-		rc1.r = constrain((event.xgraphicsexpose.y - MARGIN)
+		xcb_point_t rc1, rc2;
+		rc1.y = constrain((event.xgraphicsexpose.y - MARGIN)
 			/ jbxvt.X.font_height, jbxvt.scr.chars.height);
-		rc2.r = constrain((event.xgraphicsexpose.y
+		rc2.y = constrain((event.xgraphicsexpose.y
 			+ event.xgraphicsexpose.height - MARGIN)
 			/ jbxvt.X.font_height, jbxvt.scr.chars.height);
-		rc1.c = constrain((event.xgraphicsexpose.x - MARGIN)
+		rc1.x = constrain((event.xgraphicsexpose.x - MARGIN)
 			/ jbxvt.X.font_width, jbxvt.scr.chars.width);
-		rc2.c = constrain((event.xgraphicsexpose.x
+		rc2.x = constrain((event.xgraphicsexpose.x
 			+ event.xgraphicsexpose.width - MARGIN)
 			/ jbxvt.X.font_width, jbxvt.scr.chars.width);
 		repaint(rc1, rc2);

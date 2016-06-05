@@ -4,9 +4,10 @@
 #ifndef SCR_EXTEND_SELECTION_H
 #define SCR_EXTEND_SELECTION_H
 
-#include "jbxvt.h"
+#include <stdbool.h>
+#include <xcb/xproto.h>
 
-void scr_extend_selection(const Point p, const bool drag);
+void scr_extend_selection(const xcb_point_t p, const bool drag);
 
 #endif//!SCR_EXTEND_SELECTION_H
 

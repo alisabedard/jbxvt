@@ -14,7 +14,7 @@ static void draw_cursor(const uint8_t cursor_focus)
 		  return;
 	if (!jbxvt.scr.current)
 		  return; // prevent segfault
-	Point p = jbxvt.scr.current->cursor;
+	xcb_point_t p = jbxvt.scr.current->cursor;
 	p.x *= jbxvt.X.font_width;
 	p.y *= jbxvt.X.font_height;
 	p.x += MARGIN;
@@ -46,9 +46,9 @@ static void adj_wh(int16_t * restrict grc,
 static void restore(struct screenst * restrict s, const uint32_t r)
 {
 	cursor(CURSOR_DRAW);
-	adj_wh(&jbxvt.scr.current->cursor.row, s->cursor.row,
+	adj_wh(&jbxvt.scr.current->cursor.y, s->cursor.y,
 		jbxvt.scr.chars.height);
-	adj_wh(&jbxvt.scr.current->cursor.col, s->cursor.col,
+	adj_wh(&jbxvt.scr.current->cursor.x, s->cursor.x,
 		jbxvt.scr.chars.width);
 	scr_change_rendition(r);
 	cursor(CURSOR_DRAW);
@@ -98,13 +98,13 @@ void cursor(const enum CursorOp op)
 		restore(&saved_screen, saved_rstyle);
 		break;
 	case CURSOR_SAVE: // Save the cursor position and rendition style.
-		saved_screen.cursor.row = jbxvt.scr.current->cursor.row;
-		saved_screen.cursor.col = jbxvt.scr.current->cursor.col;
+		saved_screen.cursor.y = jbxvt.scr.current->cursor.y;
+		saved_screen.cursor.x = jbxvt.scr.current->cursor.x;
 		saved_rstyle = jbxvt.scr.rstyle;
 		break;
 	case CURSOR_REPORT: // Report the current cursor position.
-		cprintf("\033[%d;%dR",jbxvt.scr.current->cursor.row + 1,
-			jbxvt.scr.current->cursor.col + 1);
+		cprintf("\033[%d;%dR",jbxvt.scr.current->cursor.y + 1,
+			jbxvt.scr.current->cursor.x + 1);
 		break;
 	}
 }

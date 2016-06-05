@@ -129,7 +129,7 @@ static void handle_tk_expose(struct tokenst * restrict t)
 	switch (t->tk_region) {
 	case SCREEN :
 		if(jbxvt_size_set){
-			scr_refresh((Point){.x = t->tk_arg[0],
+			scr_refresh((xcb_point_t){.x = t->tk_arg[0],
 				.y = t->tk_arg[1]}, (Size){
 				.width = t->tk_arg[2],
 				.height = t->tk_arg[3]});
@@ -205,19 +205,19 @@ app_loop_head:
 		change_offset(jbxvt.scr.offset - t[0] / jbxvt.X.font_height);
 		break;
 	case TK_SELSTART :
-		scr_start_selection((Point){.x = t[0], .y = t[1]}, CHAR);
+		scr_start_selection((xcb_point_t){.x = t[0], .y = t[1]}, CHAR);
 		break;
 	case TK_SELEXTND :
-		scr_extend_selection((Point){.x = t[0], .y = t[1]}, false);
+		scr_extend_selection((xcb_point_t){.x = t[0], .y = t[1]}, false);
 		break;
 	case TK_SELDRAG :
-		scr_extend_selection((Point){.x = t[0], .y = t[1]}, true);
+		scr_extend_selection((xcb_point_t){.x = t[0], .y = t[1]}, true);
 		break;
 	case TK_SELWORD :
-		scr_start_selection((Point){.x = t[0], .y = t[1]}, WORD);
+		scr_start_selection((xcb_point_t){.x = t[0], .y = t[1]}, WORD);
 		break;
 	case TK_SELLINE :
-		scr_start_selection((Point){.x = t[0], .y = t[1]}, LINE);
+		scr_start_selection((xcb_point_t){.x = t[0], .y = t[1]}, LINE);
 		break;
 	case TK_SELECT :
 		LOG("TK_SELECT");

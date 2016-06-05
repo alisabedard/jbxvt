@@ -98,7 +98,7 @@ static void set_rval_colors(const uint32_t rval)
 
 //  Paint the text using the rendition value at the screen position.
 void paint_rval_text(uint8_t * restrict str, uint32_t rval,
-	uint8_t len, Point p)
+	uint8_t len, xcb_point_t p)
 {
 	set_rval_colors(rval);
 	if (rval & RS_RVID || rval & RS_BLINK) { // Reverse looked up colors.
@@ -149,7 +149,7 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 
 // Display the string using the rendition vector at the screen coordinates
 static void paint_rvec_text(uint8_t * str,
-	uint32_t * rvec, uint16_t len, Point p)
+	uint32_t * rvec, uint16_t len, xcb_point_t p)
 {
 	if (rvec == NULL) {
 		paint_rval_text(str, 0, len, p);
@@ -168,7 +168,7 @@ static void paint_rvec_text(uint8_t * str,
 	}
 }
 
-static int_fast32_t repaint_generic(const Point p,
+static int_fast32_t repaint_generic(const xcb_point_t p,
 	const int_fast32_t m, const int_fast32_t c1, const int_fast32_t c2,
 	uint8_t * restrict str, uint32_t * rend)
 {
@@ -193,47 +193,47 @@ static inline uint_fast8_t convert_char(const uint_fast8_t c)
 	return c < ' ' ? ' ' : c;
 }
 
-/* Repaint the box delimited by rc1.r to rc2.r and rc1.c to rc2.c
+/* Repaint the box delimited by rc1.y to rc2.y and rc1.x to rc2.x
    of the displayed screen from the backup screen.  */
-void repaint(Point rc1, Point rc2)
+void repaint(xcb_point_t rc1, xcb_point_t rc2)
 {
-	LOG("repaint(%d, %d, %d, %d)", rc1.r, rc2.r, rc1.c, rc2.c);
+	LOG("repaint(%d, %d, %d, %d)", rc1.y, rc2.y, rc1.x, rc2.x);
 	uint8_t * str = malloc(jbxvt.scr.chars.width + 1);
-	int y = rc1.r;
-	int x1 = MARGIN + rc1.c * jbxvt.X.font_width;
-	int y1 = MARGIN + rc1.r * jbxvt.X.font_height;
+	int y = rc1.y;
+	int x1 = MARGIN + rc1.x * jbxvt.X.font_width;
+	int y1 = MARGIN + rc1.y * jbxvt.X.font_height;
 	int i;
 	LOG("y:%d, x1:%d, y1:%d, i1: %d, i2 %d\n",
-		y, x1, y1, jbxvt.scr.offset - 1 - rc1.r,
-		rc1.r - jbxvt.scr.offset);
+		y, x1, y1, jbxvt.scr.offset - 1 - rc1.y,
+		rc1.y - jbxvt.scr.offset);
 	//  First do any 'scrolled off' lines that are visible.
-	for (i = jbxvt.scr.offset - 1 - rc1.r;
-		y <= rc2.r && i >= 0; y++, i--) {
+	for (i = jbxvt.scr.offset - 1 - rc1.y;
+		y <= rc2.y && i >= 0; y++, i--) {
 		struct slinest * sl = jbxvt.scr.sline.data[i];
 		if(!sl) continue; // prevent segfault
-		uint16_t m = (rc2.c + 1) < sl->sl_length
-			? (rc2.c + 1) : sl->sl_length;
+		uint16_t m = (rc2.x + 1) < sl->sl_length
+			? (rc2.x + 1) : sl->sl_length;
 		uint8_t * s = sl->sl_text;
-		m -= rc1.c;
+		m -= rc1.x;
 		for (uint16_t x = 0; x < m; x++)
-			  str[x] = convert_char(s[x + rc1.c]);
-		y1 = repaint_generic((Point){.x=x1, .y=y1}, m, rc1.c,
-			rc2.c, str, sl->sl_rend);
+			  str[x] = convert_char(s[x + rc1.x]);
+		y1 = repaint_generic((xcb_point_t){.x=x1, .y=y1}, m, rc1.x,
+			rc2.x, str, sl->sl_rend);
 	}
 
 	// Do the remainder from the current screen:
-	i = jbxvt.scr.offset > rc1.r ? 0 : rc1.r - jbxvt.scr.offset;
-	for (; y <= rc2.r; y++, i++) {
+	i = jbxvt.scr.offset > rc1.y ? 0 : rc1.y - jbxvt.scr.offset;
+	for (; y <= rc2.y; y++, i++) {
 		uint8_t * s = jbxvt.scr.current->text[i];
 		uint8_t x;
-		for (x = rc1.c; s && x <= rc2.c; x++)
-			str[x - rc1.c] = convert_char(s[x]);
-		const uint16_t m = x - rc1.c - 1;
-		y1 = repaint_generic((Point){.x=x1, .y=y1}, m,
-			rc1.c, rc2.c, str,
+		for (x = rc1.x; s && x <= rc2.x; x++)
+			str[x - rc1.x] = convert_char(s[x]);
+		const uint16_t m = x - rc1.x - 1;
+		y1 = repaint_generic((xcb_point_t){.x=x1, .y=y1}, m,
+			rc1.x, rc2.x, str,
 			jbxvt.scr.current->rend[i]);
 	}
 	free(str);
-	show_selection(rc1.r,rc2.r,rc1.c,rc2.c);
+	show_selection(rc1.y,rc2.y,rc1.x,rc2.x);
 }
 

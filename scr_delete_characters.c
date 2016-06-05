@@ -35,18 +35,15 @@ void scr_delete_characters(int count)
 {
 	LOG("scr_delete_characters(%d)", count);
 	const uint8_t scw = jbxvt.scr.chars.width;
-	const Point c = { // current cursor position
-		.col = jbxvt.scr.current->cursor.col,
-		.row = jbxvt.scr.current->cursor.row
-	};
-	count = constrain(count, scw - c.row + 1);
+	const xcb_point_t c = jbxvt.scr.current->cursor;
+	count = constrain(count, scw - c.y + 1);
 	if(!count) return;
 	home_screen();
 	cursor(CURSOR_DRAW);
-	check_selection(c.r, c.r);
-	uint8_t * s = jbxvt.scr.current->text[c.row];
-	uint32_t * r = jbxvt.scr.current->rend[c.row];
-	for (uint8_t i = c.col + count; i < scw; i++) {
+	check_selection(c.y, c.y);
+	uint8_t * s = jbxvt.scr.current->text[c.y];
+	uint32_t * r = jbxvt.scr.current->rend[c.y];
+	for (uint8_t i = c.x + count; i < scw; i++) {
 		s[i - count] = s[i];
 		r[i - count] = r[i];
 	}
@@ -54,10 +51,10 @@ void scr_delete_characters(int count)
 	memset(r + scw - count, 0, count);
 	const Size f = { .w = jbxvt.X.font_width,
 		.h = jbxvt.X.font_height };
-	const int16_t y = MARGIN + c.row * f.height;
-	int16_t x[2] = {[1] = MARGIN + c.col * f.width};
+	const int16_t y = MARGIN + c.y * f.height;
+	int16_t x[2] = {[1] = MARGIN + c.x * f.width};
 	x[0] = x[1] + count * f.w;
-	const uint16_t width = (scw - count - c.col) * f.w;
+	const uint16_t width = (scw - count - c.x) * f.w;
 	copy_area(x, y, width);
 #ifdef USE_XCB
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, x[1] + width, y,
