@@ -25,7 +25,7 @@ void scr_tab(void)
 	while (jbxvt.scr.current->cursor.x % 8
 		&& jbxvt.scr.current->cursor.x
 		< jbxvt.scr.chars.width - 1)
-		jbxvt.scr.current->cursor.x++;
+		++jbxvt.scr.current->cursor.x;
 	cursor(CURSOR_DRAW);
 }
 
