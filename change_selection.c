@@ -54,16 +54,10 @@ void change_selection(struct selst * restrict ose1,
 			const int16_t x2 = MARGIN + ((row == re) ? ce
 				: jbxvt.scr.chars.width)
 				* jbxvt.X.font_width;
-#ifdef USE_XCB
 			xcb_poly_fill_rectangle(jbxvt.X.xcb, jbxvt.X.win.vt,
-				jbxvt.X.gc.hl, 1, (xcb_rectangle_t[]){{
+				jbxvt.X.gc.hl, 1, &(xcb_rectangle_t){
 				.x = x1, .y = y, .width = x2 - x1,
-				.height = jbxvt.X.font_height}});
-#else//!USE_XCB
-			XFillRectangle(jbxvt.X.dpy,jbxvt.X.win.vt,
-				jbxvt.X.gc.hl,x1,y,x2 - x1,
-				jbxvt.X.font_height);
-#endif//USE_XCB
+				.height = jbxvt.X.font_height});
 		}
 	}
 	if ((n = selcmp(se2,ose2)) != 0) {
@@ -90,15 +84,10 @@ void change_selection(struct selst * restrict ose1,
 			const int16_t x2 = MARGIN + ((row == re)
 				? ce : jbxvt.scr.chars.width)
 				* jbxvt.X.font_width;
-#ifdef USE_XCB
 			xcb_poly_fill_rectangle(jbxvt.X.xcb, jbxvt.X.win.vt,
-				jbxvt.X.gc.hl, 1, (xcb_rectangle_t[]){{
+				jbxvt.X.gc.hl, 1, &(xcb_rectangle_t){
 				.x = x1, .y = y, .width = x2 - x1,
-				.height = jbxvt.X.font_height}});
-#else//!USE_XCB
-			XFillRectangle(jbxvt.X.dpy,jbxvt.X.win.vt,
-				jbxvt.X.gc.hl,x1,y,x2 - x1,jbxvt.X.font_height);
-#endif//USE_XCB
+				.height = jbxvt.X.font_height});
 
 		}
 	}

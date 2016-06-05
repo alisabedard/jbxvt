@@ -148,17 +148,11 @@ static void cp_repair(const uint8_t row1, const uint8_t row2,
 		y[0] = a;
 		y[1] = b;
 	}
-#ifdef USE_XCB
 	xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
 		jbxvt.X.gc.tx, 0, y[0], 0, y[1], jbxvt.scr.pixels.width,
 		height);
 	// the above blocks the event queue, flush it
 	xcb_flush(jbxvt.X.xcb);
-#else//!USE_XCB
-	XCopyArea(jbxvt.X.dpy, jbxvt.X.win.vt, jbxvt.X.win.vt,
-		jbxvt.X.gc.tx, 0, y[0], jbxvt.scr.pixels.width,
-		height, 0, y[1]);
-#endif//USE_XCB
 	repair_damage();
 }
 
@@ -198,14 +192,8 @@ static void sc_up(const uint8_t row1, uint8_t row2,
 	if (count < row2 - row1)
 		cp_repair(row1, row2, count, true);
 	const int16_t y = MARGIN + (row2 - count) * jbxvt.X.font_height;
-#ifdef USE_XCB
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, 0, y,
 		jbxvt.scr.pixels.width, count * jbxvt.X.font_height);
-#else//!USE_XCB
-	XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt,
-		0, y, jbxvt.scr.pixels.width,
-		count * jbxvt.X.font_height,False);
-#endif//USE_XCB
 }
 
 static void sc_dn(uint8_t row1, uint8_t row2, int8_t count)
@@ -225,16 +213,9 @@ static void sc_dn(uint8_t row1, uint8_t row2, int8_t count)
 	clr_lines(count, row1, save, rend, false);
 	if (count < row2 - row1)
 		  cp_repair(row1, row2, count, false);
-#ifdef USE_XCB
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, 0,
 		MARGIN + row1 * jbxvt.X.font_height,
 		jbxvt.scr.pixels.width, count * jbxvt.X.font_height);
-#else//!USE_XCB
-	XClearArea(jbxvt.X.dpy,jbxvt.X.win.vt, 0,
-		MARGIN + row1 * jbxvt.X.font_height,
-		jbxvt.scr.pixels.width, count * jbxvt.X.font_height,
-		false);
-#endif//USE_XCB
 }
 
 /*  Scroll count lines from row1 to row2 inclusive.  row1 should be <= row2.

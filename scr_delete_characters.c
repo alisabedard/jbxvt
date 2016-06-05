@@ -17,15 +17,9 @@ static void copy_area(const int16_t * restrict x, const int16_t y,
 	const uint16_t width)
 {
 	if (width > 0) {
-#ifdef USE_XCB
 		xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
 			jbxvt.X.gc.tx, x[0], y, x[1], y, width,
 			jbxvt.X.font_height);
-#else//!USE_XCB
-		XCopyArea(jbxvt.X.dpy, jbxvt.X.win.vt, jbxvt.X.win.vt,
-			jbxvt.X.gc.tx, x[0], y, width,
-			jbxvt.X.font_height, x[1], y);
-#endif//USE_XCB
 		repair_damage();
 	}
 }
@@ -56,13 +50,8 @@ void scr_delete_characters(int count)
 	x[0] = x[1] + count * f.w;
 	const uint16_t width = (scw - count - c.x) * f.w;
 	copy_area(x, y, width);
-#ifdef USE_XCB
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, x[1] + width, y,
 		count * jbxvt.X.font_width, f.height);
-#else//!USE_XCB
-	XClearArea(jbxvt.X.dpy, jbxvt.X.win.vt, x[1] + width, y,
-		count * jbxvt.X.font_width, f.height, false);
-#endif//USE_XCB
 	jbxvt.scr.current->wrap_next = 0;
 	cursor(CURSOR_DRAW);
 }

@@ -17,6 +17,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
+#include <xcb/xcb_keysyms.h>
 
 static struct {
 	// chars waiting to be sent to the command:
@@ -56,7 +57,7 @@ enum KSType {
 /*  Structure used to map a keysym to a string.
  */
 struct KeyMaps {
-	KeySym km_keysym;
+	xcb_keysym_t km_keysym;
 	struct KeyStrings km_normal;	/* The usual string */
 	struct KeyStrings km_alt;	/* The alternative string */
 };
@@ -171,7 +172,7 @@ void set_keys(const bool mode_high, const bool is_cursor)
 
 //  Look up function key keycode
 static char * get_keycode_value(struct KeyMaps * restrict keymaptable,
-	KeySym keysym, char * buf, const int use_alternate)
+	xcb_keysym_t keysym, char * buf, const int use_alternate)
 {
 	for (struct KeyMaps * km = keymaptable; km->km_keysym; ++km) {
 		if (km->km_keysym != keysym)
@@ -206,13 +207,13 @@ static char * get_keycode_value(struct KeyMaps * restrict keymaptable,
 	return NULL;
 }
 
-static char * get_s(const KeySym keysym, char * restrict kbuf)
+static char * get_s(const xcb_keysym_t keysym, char * restrict kbuf)
 {
-	if (IsFunctionKey(keysym) || IsMiscFunctionKey(keysym)
+	if (xcb_is_function_key(keysym) || xcb_is_misc_function_key(keysym)
 		|| keysym == XK_Next || keysym == XK_Prior)
 		return get_keycode_value(func_key_table, keysym,
 			kbuf, command.keys.sun_fn);
-	else if (IsCursorKey(keysym) || IsPFKey(keysym))
+	else if (xcb_is_cursor_key(keysym) || xcb_is_pf_key(keysym))
 		return get_keycode_value(other_key_table, keysym,
 			kbuf, command.keys.app_cur);
 	return get_keycode_value(kp_key_table, keysym,
@@ -272,7 +273,7 @@ void send_string(uint8_t * restrict buf, const uint8_t count)
 		memcpy(s , jbxvt.com.send_nxt, jbxvt.com.send_count);
 		s2 = s + jbxvt.com.send_count;
 		s1 = buf;
-		for (uint8_t i = 0; i < count; i++, s1++, s2++)
+		for (uint8_t i = 0; i < count; ++i, ++s1, ++s2)
 			*s2 = *s1;
 		free(command.send);
 		command.send = jbxvt.com.send_nxt = s;
@@ -569,6 +570,6 @@ void show_token(struct tokenst * tk)
 			show_token_args(tk);
 			break;
 	}
-	printf("\n");
+	jbputs("\n");
 }
 #endif /* DEBUG */

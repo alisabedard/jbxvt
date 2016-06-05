@@ -60,14 +60,9 @@ void show_selection(int16_t row1, int16_t row2, int16_t col1, int16_t col2)
 		const int16_t x2 = MARGIN + ((row == er) ? ec : col2)
 			* jbxvt.X.font_width;
 		if (x2 > x1) {
-#ifdef USE_XCB
 			xcb_poly_fill_rectangle(jbxvt.X.xcb, jbxvt.X.win.vt,
 				jbxvt.X.gc.hl, 1, &(xcb_rectangle_t){
 				x1, y, x2 - x1, jbxvt.X.font_height});
-#else//!USE_XCB
-			XFillRectangle(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.hl,
-				x1,y,x2 - x1,jbxvt.X.font_height);
-#endif//USE_XCB
 		}
 	}
 }

@@ -54,16 +54,9 @@ static void handle_insert(uint8_t n, const xcb_point_t p)
 		* jbxvt.X.font_width;
 	const int16_t x2 = p.x + n * jbxvt.X.font_width;
 	if (width > 0) {
-#ifdef USE_XCB
 		xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
 			jbxvt.X.gc.tx, p.x, p.y, x2, p.y, width,
 			jbxvt.X.font_height);
-#else//!USE_XCB
-		XCopyArea(jbxvt.X.dpy, jbxvt.X.win.vt,
-			jbxvt.X.win.vt, jbxvt.X.gc.tx,
-			p.x, p.y, width,
-			jbxvt.X.font_height, x2, p.y);
-#endif//USE_XCB
 		repair_damage();
 	}
 }

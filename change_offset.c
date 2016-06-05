@@ -17,15 +17,9 @@ static void copy_repaint_repair(const int16_t d, const int16_t y1,
 {
 	const uint16_t height = (jbxvt.scr.chars.height - d)
 		* jbxvt.X.font_height;
-#ifdef USE_XCB
 	xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
 		jbxvt.X.gc.tx, 0, y1, 0, y2, jbxvt.scr.pixels.width,
 		height);
-#else//!USE_XCB
-	XCopyArea(jbxvt.X.dpy, jbxvt.X.win.vt,
-		jbxvt.X.win.vt, jbxvt.X.gc.tx, 0, y1,
-		jbxvt.scr.pixels.width, height, 0, y2);
-#endif//USE_XCB
 	repaint((xcb_point_t){.y=row1}, (xcb_point_t){.y=row2,
 		.x=jbxvt.scr.chars.width-1});
 	repair_damage();

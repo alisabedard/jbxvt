@@ -19,21 +19,11 @@ static void draw_cursor(const uint8_t cursor_focus)
 	p.y *= jbxvt.X.font_height;
 	p.x += MARGIN;
 	p.y += MARGIN;
-#ifdef USE_XCB
 	xcb_poly_fill_rectangle(jbxvt.X.xcb, jbxvt.X.win.vt,
 		jbxvt.X.gc.cu, cursor_focus?1:2, (xcb_rectangle_t[]){
 		{p.x, p.y, jbxvt.X.font_width, jbxvt.X.font_height},
 		{p.x + 1, p.y + 1, jbxvt.X.font_width - 2,
 		jbxvt.X.font_height - 2}});
-#else//!USE_XCB
-	XFillRectangle(jbxvt.X.dpy, jbxvt.X.win.vt, jbxvt.X.gc.cu,
-		p.x, p.y, jbxvt.X.font_width, jbxvt.X.font_height);
-	if (cursor_focus)
-		  return;
-	XFillRectangle(jbxvt.X.dpy,jbxvt.X.win.vt,jbxvt.X.gc.cu,
-		p.x + 1, p.y + 1, jbxvt.X.font_width - 2,
-		jbxvt.X.font_height - 2);
-#endif//USE_XCB
 }
 
 static void adj_wh(int16_t * restrict grc,

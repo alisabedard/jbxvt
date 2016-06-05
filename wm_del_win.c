@@ -11,7 +11,6 @@ long unsigned int wm_del_win(void)
 {
 	static long unsigned int a;
 	if(!a) { // Init on first call:
-#ifdef USE_XCB
 		xcb_intern_atom_cookie_t c = xcb_intern_atom(
 			jbxvt.X.xcb, false, 16, "WM_DELETE_WINDOW");
 		xcb_intern_atom_cookie_t protoc = xcb_intern_atom(
@@ -25,11 +24,6 @@ long unsigned int wm_del_win(void)
 			jbxvt.X.win.main, r->atom, XCB_ATOM_ATOM,
 			32, 1, &a);
 		free(r);
-#else//!USE_XCB
-		a = XInternAtom(jbxvt.X.dpy, "WM_DELETE_WINDOW", False);
-		//  Enable the delete window protocol:
-		XSetWMProtocols(jbxvt.X.dpy, jbxvt.X.win.main, &a, 1);
-#endif//USE_XCB
 	}
 	return a;
 }
