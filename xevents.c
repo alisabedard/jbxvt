@@ -13,16 +13,26 @@
 static void handle_motion_notify(struct tokenst * restrict tk,
 	struct xeventst * restrict xe)
 {
+#ifdef USE_XCB
 	xcb_query_pointer_cookie_t c = xcb_query_pointer(jbxvt.X.xcb,
 		jbxvt.X.win.sb);
-	if (xe->xe_window == jbxvt.X.win.sb
-		&& (xe->xe_state & XCB_EVENT_MASK_BUTTON_2_MOTION)) {
+#endif//USE_XCB
+	if (xe->xe_window == jbxvt.X.win.sb && (xe->xe_state & Button2Mask)) {
+#ifdef USE_XCB
 		xcb_query_pointer_reply_t * r = xcb_query_pointer_reply(
 			jbxvt.X.xcb, c, NULL);
 		const uint32_t mask = r->mask;
 		const int16_t y = r->win_y;
 		free(r);
-		if (mask & XCB_EVENT_MASK_BUTTON_2_MOTION) {
+#else//!USE_XCB
+		Window w;
+		int d, y;
+		uint32_t mask;
+		// Only interested in y and mask
+		XQueryPointer(jbxvt.X.dpy, jbxvt.X.win.sb, &w, &w,
+			&d, &d, &d, &y, &mask);
+#endif//USE_XCB
+		if (mask & Button2Mask) {
 			tk->tk_type = TK_SBGOTO;
 			tk->tk_arg[0] = y;
 			tk->tk_nargs = 1;
@@ -30,8 +40,8 @@ static void handle_motion_notify(struct tokenst * restrict tk,
 		return;
 	}
 	if (xe->xe_window == jbxvt.X.win.vt
-		&& (xe->xe_state & XCB_KEY_BUT_MASK_BUTTON_2)
-		&& !(xe->xe_state & XCB_KEY_BUT_MASK_CONTROL)) {
+		&& (xe->xe_state & Button1Mask)
+		&& !(xe->xe_state & ControlMask)) {
 		tk->tk_type = TK_SELDRAG;
 		tk->tk_arg[0] = xe->xe_x;
 		tk->tk_arg[1] = xe->xe_y;
@@ -52,35 +62,35 @@ static void handle_button_release(struct tokenst * restrict tk,
 {
 	if (xe->xe_window == jbxvt.X.win.sb) {
 		switch (xe->xe_button) {
-		case XCB_KEY_BUT_MASK_BUTTON_1:
-		case XCB_KEY_BUT_MASK_BUTTON_5:
+		case Button1:
+		case Button5:
 			sbop(tk, xe, true);
 			break;
-		case XCB_KEY_BUT_MASK_BUTTON_3:
-		case XCB_KEY_BUT_MASK_BUTTON_4:
+		case Button3:
+		case Button4:
 			sbop(tk, xe, false);
 			break;
 		}
 	} else if (xe->xe_window == jbxvt.X.win.vt
-		&& !(xe->xe_state & XCB_KEY_BUT_MASK_CONTROL)) {
+		&& !(xe->xe_state & ControlMask)) {
 		switch (xe->xe_button) {
-		case XCB_KEY_BUT_MASK_BUTTON_1:
-		case XCB_KEY_BUT_MASK_BUTTON_3:
+		case Button1:
+		case Button3:
 			tk->tk_type = TK_SELECT;
 			tk->tk_arg[0] = xe->xe_time;
 			tk->tk_nargs = 1;
 			break;
-		case XCB_KEY_BUT_MASK_BUTTON_2:
+		case Button2:
 			tk->tk_type = TK_SELINSRT;
 			tk->tk_arg[0] = xe->xe_time;
 			tk->tk_arg[1] = xe->xe_x;
 			tk->tk_arg[2] = xe->xe_y;
 			tk->tk_nargs = 3;
 			break;
-		case XCB_KEY_BUT_MASK_BUTTON_4:
+		case Button4:
 			sbop(tk, xe, false);
 			break;
-		case XCB_KEY_BUT_MASK_BUTTON_5:
+		case Button5:
 			sbop(tk, xe, true);
 			break;
 
@@ -111,21 +121,21 @@ static void handle_button_press(struct tokenst * restrict tk,
 	struct xeventst * restrict xe)
 {
 	if (xe->xe_window == jbxvt.X.win.vt
-		&& xe->xe_state == XCB_KEY_BUT_MASK_CONTROL) {
+		&& xe->xe_state == ControlMask) {
 		tk->tk_type = TK_SBSWITCH;
 		tk->tk_nargs = 0;
 		return;
 	}
 	if (xe->xe_window == jbxvt.X.win.vt
-		&& (xe->xe_state & XCB_KEY_BUT_MASK_CONTROL) == 0) {
+		&& (xe->xe_state & ControlMask) == 0) {
 		switch (xe->xe_button) {
-		case XCB_KEY_BUT_MASK_BUTTON_1:
+		case Button1 :
 			handle_button1_press(tk, xe);
 			break;
-		case XCB_KEY_BUT_MASK_BUTTON_2:
+		case Button2 :
 			tk->tk_type = TK_NULL;
 			break;
-		case XCB_KEY_BUT_MASK_BUTTON_3:
+		case Button3 :
 			tk->tk_type = TK_SELEXTND;
 			break;
 		}
@@ -135,7 +145,7 @@ static void handle_button_press(struct tokenst * restrict tk,
 		return;
 	}
 	if (xe->xe_window == jbxvt.X.win.sb) {
-		if (xe->xe_button == XCB_KEY_BUT_MASK_BUTTON_2) {
+		if (xe->xe_button == Button2) {
 			tk->tk_type = TK_SBGOTO;
 			tk->tk_arg[0] = xe->xe_y;
 			tk->tk_nargs = 1;
@@ -156,29 +166,29 @@ bool handle_xevents(struct tokenst * restrict tk)
 	else
 		  tk->tk_region = -1;
 	switch (xe->xe_type) {
-	case XCB_ENTER_NOTIFY:
+	case EnterNotify :
 		tk->tk_type = TK_ENTRY;
 		tk->tk_arg[0] = 1;
 		tk->tk_nargs = 1;
 		break;
-	case XCB_LEAVE_NOTIFY:
+	case LeaveNotify :
 		tk->tk_type = TK_ENTRY;
 		tk->tk_arg[0] = 0;
 		tk->tk_nargs = 1;
 		break;
-	case XCB_FOCUS_IN:
+	case FocusIn :
 		tk->tk_type = TK_FOCUS;
 		tk->tk_arg[0] = 1;
 		tk->tk_arg[1] = xe->xe_detail;
 		tk->tk_nargs = 2;
 		break;
-	case XCB_FOCUS_OUT:
+	case FocusOut :
 		tk->tk_type = TK_FOCUS;
 		tk->tk_arg[0] = 0;
 		tk->tk_arg[1] = xe->xe_detail;
 		tk->tk_nargs = 2;
 		break;
-	case XCB_EXPOSE:
+	case Expose :
 		tk->tk_type = TK_EXPOSE;
 		tk->tk_arg[0] = xe->xe_x;
 		tk->tk_arg[1] = xe->xe_y;
@@ -186,24 +196,24 @@ bool handle_xevents(struct tokenst * restrict tk)
 		tk->tk_arg[3] = xe->xe_height;
 		tk->tk_nargs = 4;
 		break;
-	case XCB_CONFIGURE_NOTIFY:
+	case ConfigureNotify :
 		LOG("ConfigureNotify");
 		tk->tk_type = TK_RESIZE;
 		tk->tk_nargs = 0;
 		break;
-	case XCB_SELECTION_CLEAR:
+	case SelectionClear :
 		tk->tk_type = TK_SELCLEAR;
 		tk->tk_arg[0] = xe->xe_time;
 		tk->tk_nargs = 1;
 		break;
-	case XCB_SELECTION_NOTIFY:
+	case SelectionNotify :
 		tk->tk_type = TK_SELNOTIFY;
 		tk->tk_arg[0] = xe->xe_time;
 		tk->tk_arg[1] = xe->xe_requestor;
 		tk->tk_arg[2] = xe->xe_property;
 		tk->tk_nargs = 3;
 		break;
-	case XCB_SELECTION_REQUEST:
+	case SelectionRequest :
 		tk->tk_type = TK_SELREQUEST;
 		tk->tk_arg[0] = xe->xe_time;
 		tk->tk_arg[1] = xe->xe_requestor;
@@ -211,13 +221,13 @@ bool handle_xevents(struct tokenst * restrict tk)
 		tk->tk_arg[3] = xe->xe_property;
 		tk->tk_nargs = 4;
 		break;
-	case XCB_BUTTON_PRESS:
+	case ButtonPress :
 		handle_button_press(tk, xe);
 		break;
-	case XCB_BUTTON_RELEASE:
+	case ButtonRelease :
 		handle_button_release(tk, xe);
 		break;
-	case XCB_MOTION_NOTIFY:
+	case MotionNotify :
 		handle_motion_notify(tk, xe);
 		break;
 	}
