@@ -234,7 +234,7 @@ static void write_utmp(void)
 #endif//SYS_getuid
 			    strncpy(utent.ut_name,pw->pw_name,sizeof(utent.ut_name));
 
-	strncpy(utent.ut_host,XDisplayString(jbxvt.X.dpy),
+	strncpy(utent.ut_host,getenv("DISPLAY"),
 		sizeof(utent.ut_host));
 
 #ifdef SYS_time
@@ -263,7 +263,7 @@ static void write_utmp(void)
 	pw = getpwuid(getuid());
 	if (pw != NULL)
 		  strncpy(utentx.ut_name,pw->pw_name,sizeof(utent.ut_name));
-	strncpy(utentx.ut_host, XDisplayString(jbxvt.X.dpy),
+	strncpy(utentx.ut_host, getenv("DISPLAY"),
 		sizeof(utentx.ut_host));
 	utentx.ut_syslen = strlen(utentx.ut_host) + 1;
 	time(&utentx.ut_xtime);
@@ -291,9 +291,7 @@ static void write_utmp(void)
 	if (pw != NULL)
 		  strncpy(utent.ut_name,pw->pw_name,
 			  sizeof(utent.ut_name));
-	strncpy(utent.ut_host,
-		XDisplayString(jbxvt.X.dpy),
-		sizeof(utent.ut_host));
+	strncpy(utent.ut_host, getenv("DISPLAY"), sizeof(utent.ut_host));
 	time(&utent.ut_time);
 #ifdef SYS_lseek
 	syscall(SYS_lseek, ut_fd, sizeof(struct utmp), 0);
@@ -696,7 +694,7 @@ int run_command(char ** argv)
 #endif//SYS_signal
 
 #ifdef UTEMPTER_H
-	utempter_add_record(ptyfd, XDisplayString(jbxvt.X.dpy));
+	utempter_add_record(ptyfd, getenv("DISPLAY"));
 #else//!UTEMPTER_H
 	write_utmp();
 #endif//UTEMPTER_H

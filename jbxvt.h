@@ -22,9 +22,6 @@ struct JBXVT {
 		Display * dpy;
 		xcb_connection_t * xcb;
 		xcb_screen_t * screen;
-#if 0
-		XFontStruct *font;
-#endif
 		xcb_font_t font;
 		struct {
 			xcb_window_t vt, sb, main;
