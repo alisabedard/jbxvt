@@ -27,15 +27,10 @@
 //  Map the window
 void map_window(void)
 {
-#ifdef USE_XCB
-	XMapWindow(jbxvt.X.dpy, jbxvt.X.win.main);
-	// FIXME:  window must be created with xcb:
-	//xcb_map_window(jbxvt.X.xcb, jbxvt.X.win.main);
+	// window creation must be done prior to map call, so flush
+	xcb_flush(jbxvt.X.xcb);
+	xcb_map_window(jbxvt.X.xcb, jbxvt.X.win.main);
 	xcb_map_subwindows(jbxvt.X.xcb, jbxvt.X.win.main);
-#else//!USE_XCB
-	XMapWindow(jbxvt.X.dpy, jbxvt.X.win.main);
-	XMapSubwindows(jbxvt.X.dpy, jbxvt.X.win.main);
-#endif//USE_XCB
 	/*  Setup the window now so that we can add LINES and COLUMNS to
 	 *  the environment.  */
 	XMaskEvent(jbxvt.X.dpy,ExposureMask,&(XEvent){});
@@ -50,7 +45,6 @@ void resize_window(void)
 	// Quit before being messed up with a bad size:
 	if (!jbxvt.scr.chars.width || !jbxvt.scr.chars.height)
 		quit(1, WARN_ERR);
-#ifdef USE_XCB
 	xcb_get_geometry_cookie_t c = xcb_get_geometry(jbxvt.X.xcb,
 		jbxvt.X.win.main);
 	xcb_get_geometry_reply_t *r = xcb_get_geometry_reply(jbxvt.X.xcb,
@@ -70,19 +64,6 @@ void resize_window(void)
 			(uint32_t[]){r->width, r->height});
 	}
 	free(r);
-#else//!USE_XCB
-	unsigned int width, height;
-	XGetGeometry(jbxvt.X.dpy, jbxvt.X.win.main, &(Window){0},
-		&(int){0}, &(int){0}, &width, &height, &(unsigned int){0},
-		&(unsigned int){0});
-	if (jbxvt.opt.show_scrollbar) {
-		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.sb,
-			SBAR_WIDTH - 1,height);
-		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.vt,
-			width - SBAR_WIDTH,height);
-	} else
-		XResizeWindow(jbxvt.X.dpy,jbxvt.X.win.vt,width,height);
-#endif//USE_XCB
 	scr_reset();
 }
 
@@ -90,7 +71,6 @@ void resize_window(void)
 void switch_scrollbar(void)
 {
 	LOG("switch_scrollbar()");
-#ifdef USE_XCB
 	xcb_get_geometry_cookie_t c = xcb_get_geometry(jbxvt.X.xcb,
 		jbxvt.X.win.main);
 	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt, XCB_CONFIG_WINDOW_X,
@@ -103,43 +83,16 @@ void switch_scrollbar(void)
 		XCB_CONFIG_WINDOW_WIDTH, (uint32_t[]){
 		r->width+(jbxvt.opt.show_scrollbar?-SBAR_WIDTH:SBAR_WIDTH)});
 	free(r);
-#else//!USE_XCB
-	unsigned int width, height;
-	XGetGeometry(jbxvt.X.dpy, jbxvt.X.win.main, &(Window){0},
-		&(int){0}, &(int){0}, &width, &height,
-		&(unsigned int){0}, &(unsigned int){0});
-	if (jbxvt.opt.show_scrollbar) {
-		XMoveWindow(jbxvt.X.dpy, jbxvt.X.win.vt, 0, 0);
-		width -= SBAR_WIDTH;
-	} else {
-		XMoveWindow(jbxvt.X.dpy, jbxvt.X.win.vt, SBAR_WIDTH, 0);
-		width += SBAR_WIDTH;
-	}
-	XResizeWindow(jbxvt.X.dpy, jbxvt.X.win.main, width, height);
-#endif//USE_XCB
 	jbxvt.opt.show_scrollbar ^= true;
 }
 
 // Change window or icon name:
 void change_name(uint8_t * restrict str, const bool icon)
 {
-#ifdef USE_XCB
 	size_t l = 0;
 	while(str[++l]);
 	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE,
 		jbxvt.X.win.main, icon?XCB_ATOM_WM_ICON_NAME:XCB_ATOM_WM_NAME,
 		XCB_ATOM_STRING, 8, l, str);
-#else//!USE_XCB
-	LOG("change_name(%s, %d, %d)", str, window, icon);
-	XTextProperty name;
-
-	if (XStringListToTextProperty((char **)&str,1,&name)) {
-		if(icon)
-			XSetWMIconName(jbxvt.X.dpy,jbxvt.X.win.main,&name);
-		else
-			XSetWMName(jbxvt.X.dpy,jbxvt.X.win.main,&name);
-		XFree(name.value);
-	}
-#endif//USE_XCB
 }
 
