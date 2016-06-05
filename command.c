@@ -220,13 +220,13 @@ static char * get_s(const KeySym keysym, char * restrict kbuf)
 }
 
 //  Convert the keypress event into a string.
-uint8_t * lookup_key(XEvent * restrict ev, int16_t * restrict pcount)
+uint8_t * lookup_key(void * restrict ev, int16_t * restrict pcount)
 {
 	KeySym keysym;
 	static char kbuf[KBUFSIZE];
 
-	const int count = XLookupString(&ev->xkey,
-		kbuf, KBUFSIZE, &keysym, NULL);
+	XKeyEvent * ke = ev;
+	const int16_t count = XLookupString(ke, kbuf, KBUFSIZE, &keysym, NULL);
 	char *s = get_s(keysym, kbuf);
 	if (s) {
 		uint8_t l = 0;
@@ -234,7 +234,7 @@ uint8_t * lookup_key(XEvent * restrict ev, int16_t * restrict pcount)
 		*pcount = l;
 		return (uint8_t *)s;
 	} else {
-		if((ev->xkey.state & Mod1Mask) && (count == 1))
+		if((ke->state & Mod1Mask) && (count == 1))
 			kbuf[0] |= 0200;
 		*pcount = count;
 		return (uint8_t *)kbuf;

@@ -5,18 +5,14 @@
 #define COMMAND_H
 
 #include "tokenst.h"
-#include "xeventst.h"
-#include "xvt.h"
-
 #include <stdbool.h>
-#include <X11/Xlib.h>
 
 enum CommandLimits {
 	NLMAX =		15,	// max number of lines to scroll
 	KBUFSIZE =	5,	// size of keyboard mapping buffer
 	COM_BUF_SIZE =	512,	// size of command read buffer
 	COM_PUSH_MAX =	20,	// max # chars to push back to input queue
-	MP_INTERVAL = 	500	// multi-press interval in ms
+	MP_INTERVAL =	500	// multi-press interval in ms
 };
 
 //  Special character returned by get_com_char().
@@ -36,7 +32,7 @@ void cprintf(char *,...);
 void init_command(char ** restrict argv);
 
 // Convert the keypress event into a string
-uint8_t *lookup_key(XEvent * restrict ev, int16_t * restrict pcount);
+uint8_t *lookup_key(void * restrict ev, int16_t * restrict pcount);
 
 void push_com_char(int);
 void push_xevent(struct xeventst *);

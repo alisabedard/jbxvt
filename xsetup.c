@@ -16,13 +16,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef USE_XCB
 #include <xcb/xcb.h>
 #include <xcb/xcb_atom.h>
-#else//!USE_XCB
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#endif//USE_XCB
 
 //  Map the window
 void map_window(void)
