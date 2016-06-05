@@ -43,12 +43,25 @@
 
 static void setup_font(void)
 {
-	jbxvt.X.font = XLoadQueryFont(jbxvt.X.dpy,
-		jbxvt.opt.font?jbxvt.opt.font:DEF_FONT); // if specified
-	if(!jbxvt.X.font) // fallback
-		  jbxvt.X.font = XLoadQueryFont(jbxvt.X.dpy, FIXED_FONT);
-	if(!jbxvt.X.font) // fail
+	jbxvt.X.font = xcb_generate_id(jbxvt.X.xcb);
+	char *fn = jbxvt.opt.font?jbxvt.opt.font:DEF_FONT;
+	size_t l = 0;
+	while(fn[++l]);
+	xcb_void_cookie_t c = xcb_open_font_checked(jbxvt.X.xcb,
+		jbxvt.X.font, l, fn);
+	xcb_query_font_cookie_t qfc = xcb_query_font(jbxvt.X.xcb,
+		jbxvt.X.font);
+	xcb_generic_error_t * error = xcb_request_check(jbxvt.X.xcb, c);
+	if(error)
 		  quit(1, WARN_RES RES_FNT);
+	xcb_query_font_reply_t * r = xcb_query_font_reply(jbxvt.X.xcb,
+		qfc, NULL);
+	jbxvt.X.font_ascent = r->font_ascent;
+	jbxvt.X.font_descent = r->font_descent;
+	jbxvt.X.font_width = r->max_bounds.character_width;
+	free(r);
+	jbxvt.X.font_height = jbxvt.X.font_ascent
+		+ jbxvt.X.font_descent;
 }
 
 // free the returned value
@@ -58,9 +71,8 @@ static XSizeHints * get_sizehints(void)
 	*s = (XSizeHints) {
 		.flags = USSize | PMinSize | PResizeInc | PBaseSize,
 		.width = 80, .height = 24,
-		.width_inc = XTextWidth(jbxvt.X.font, "M", 1),
-		.height_inc = jbxvt.X.font->ascent
-			+ jbxvt.X.font->descent
+		.width_inc = jbxvt.X.font_width,
+		.height_inc = jbxvt.X.font_height
 	};
 	s->width *= s->width_inc;
 	s->height *= s->height_inc;
@@ -72,24 +84,16 @@ static XSizeHints * get_sizehints(void)
 
 static void create_main_window(XSizeHints * restrict sh, const uint32_t root)
 {
-#ifdef USE_XCB
 	jbxvt.X.win.main = xcb_generate_id(jbxvt.X.xcb);
 	xcb_create_window(jbxvt.X.xcb, XCB_COPY_FROM_PARENT,
 		jbxvt.X.win.main, root, sh->x, sh->y,
 		sh->width, sh->height, 0, XCB_WINDOW_CLASS_COPY_FROM_PARENT,
 		XCB_COPY_FROM_PARENT, XCB_CW_COLORMAP | XCB_CW_EVENT_MASK,
 		(uint32_t[]){MW_EVENTS, jbxvt.X.color.map});
-#else//!USE_XCB
-	jbxvt.X.win.main = XCreateSimpleWindow(jbxvt.X.dpy, root,
-		sh->x, sh->y, sh->width, sh->height,
-		0, jbxvt.X.color.fg,jbxvt.X.color.bg);
-	XSelectInput(jbxvt.X.dpy,jbxvt.X.win.main, MW_EVENTS);
-#endif//USE_XCB
 }
 
 static void create_sb_window(const uint16_t height)
 {
-#ifdef USE_XCB
 	jbxvt.X.win.sb = xcb_generate_id(jbxvt.X.xcb);
 	xcb_create_window(jbxvt.X.xcb, XCB_COPY_FROM_PARENT,
 		jbxvt.X.win.sb, jbxvt.X.win.main, -1, -1,
@@ -99,13 +103,6 @@ static void create_sb_window(const uint16_t height)
 		| XCB_CW_BORDER_PIXEL | XCB_CW_EVENT_MASK,
 		(uint32_t[]){jbxvt.X.color.bg, jbxvt.X.color.fg,
 		SB_EVENTS, jbxvt.X.color.map});
-#else//!USE_XCB
-	jbxvt.X.win.sb = XCreateSimpleWindow(jbxvt.X.dpy,
-		jbxvt.X.win.main, -1, -1,
-		SBAR_WIDTH - 1, height, 1,
-		jbxvt.X.color.fg, jbxvt.X.color.bg);
-	XSelectInput(jbxvt.X.dpy, jbxvt.X.win.sb, SB_EVENTS);
-#endif//USE_XCB
 	// FIXME: do in xcb
 	XDefineCursor(jbxvt.X.dpy,jbxvt.X.win.sb,
 		XCreateFontCursor(jbxvt.X.dpy, XC_sb_v_double_arrow));
@@ -113,7 +110,6 @@ static void create_sb_window(const uint16_t height)
 
 static void create_vt_window(XSizeHints * restrict sh)
 {
-#ifdef USE_XCB
 	jbxvt.X.win.vt = xcb_generate_id(jbxvt.X.xcb);
 
 	xcb_create_window(jbxvt.X.xcb, XCB_COPY_FROM_PARENT,
@@ -123,12 +119,6 @@ static void create_vt_window(XSizeHints * restrict sh)
 		XCB_COPY_FROM_PARENT, XCB_CW_BACK_PIXEL|XCB_CW_COLORMAP
 		|XCB_CW_EVENT_MASK,
 		(uint32_t[]){jbxvt.X.color.bg, VT_EVENTS, jbxvt.X.color.map});
-#else//!USE_XCB
-	jbxvt.X.win.vt = XCreateSimpleWindow(jbxvt.X.dpy,
-		jbxvt.X.win.main, 0, 0, sh->width, sh->height, 0,
-		jbxvt.X.color.fg, jbxvt.X.color.bg);
-	XSelectInput(jbxvt.X.dpy,jbxvt.X.win.vt, VT_EVENTS);
-#endif//USE_XCB
 	// FIXME: do in xcb
 	XDefineCursor(jbxvt.X.dpy,jbxvt.X.win.vt,
 		XCreateFontCursor(jbxvt.X.dpy, XC_xterm));
@@ -150,7 +140,6 @@ static void create_window(uint8_t * restrict name, const Window root)
 
 static void setup_gcs(void)
 {
-#ifdef USE_XCB
 	jbxvt.X.gc.tx = xcb_generate_id(jbxvt.X.xcb);
 	jbxvt.X.gc.ne = xcb_generate_id(jbxvt.X.xcb);
 	jbxvt.X.gc.sb = xcb_generate_id(jbxvt.X.xcb);
@@ -159,7 +148,7 @@ static void setup_gcs(void)
 	xcb_create_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, jbxvt.X.win.main,
 		XCB_GC_FOREGROUND | XCB_GC_BACKGROUND
 		| XCB_GC_FONT, (uint32_t[]){jbxvt.X.color.fg,
-		jbxvt.X.color.bg, jbxvt.X.font->fid});
+		jbxvt.X.color.bg, jbxvt.X.font});
 	xcb_create_gc(jbxvt.X.xcb, jbxvt.X.gc.ne, jbxvt.X.win.main,
 		XCB_GC_FOREGROUND | XCB_GC_BACKGROUND
 		| XCB_GC_GRAPHICS_EXPOSURES, (uint32_t[]){
@@ -173,24 +162,6 @@ static void setup_gcs(void)
 	xcb_create_gc(jbxvt.X.xcb, jbxvt.X.gc.cu, jbxvt.X.win.main,
 		XCB_GC_FUNCTION | XCB_GC_PLANE_MASK, (uint32_t[]){
 		XCB_GX_INVERT, jbxvt.X.color.cursor ^ jbxvt.X.color.bg});
-#else//!USE_XCB
-	XGCValues gcv = { .foreground = jbxvt.X.color.fg,
-		.background = jbxvt.X.color.bg,
-		.function = GXinvert, .font = jbxvt.X.font->fid,
-		.graphics_exposures = False };
-	jbxvt.X.gc.tx = XCreateGC(jbxvt.X.dpy, jbxvt.X.win.main,
-		GCForeground|GCBackground|GCFont, &gcv);
-	jbxvt.X.gc.ne = XCreateGC(jbxvt.X.dpy, jbxvt.X.win.main,
-		GCForeground|GCBackground|GCGraphicsExposures, &gcv);
-	jbxvt.X.gc.sb = XCreateGC(jbxvt.X.dpy, jbxvt.X.win.main,
-		GCForeground|GCBackground|GCFont, &gcv);
-	gcv.plane_mask = jbxvt.X.color.fg ^ jbxvt.X.color.bg;
-	jbxvt.X.gc.hl = XCreateGC(jbxvt.X.dpy, jbxvt.X.win.main,
-	       GCFunction|GCPlaneMask, &gcv);
-	gcv.plane_mask = jbxvt.X.color.cursor ^ jbxvt.X.color.bg;
-	jbxvt.X.gc.cu = XCreateGC(jbxvt.X.dpy, jbxvt.X.win.main,
-		GCFunction|GCPlaneMask, &gcv);
-#endif
 }
 
 static void init_jbxvt_colors(void)

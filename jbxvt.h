@@ -22,7 +22,10 @@ struct JBXVT {
 		Display * dpy;
 		xcb_connection_t * xcb;
 		xcb_screen_t * screen;
+#if 0
 		XFontStruct *font;
+#endif
+		xcb_font_t font;
 		struct {
 			xcb_window_t vt, sb, main;
 		} win;
@@ -34,6 +37,7 @@ struct JBXVT {
 			pixel_t bg, fg, cursor;
 			pixel_t current_fg, current_bg;
 		} color;
+		int16_t font_ascent, font_descent;
 		uint8_t font_height, font_width;
 	} X;
 	struct {

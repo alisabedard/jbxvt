@@ -31,7 +31,6 @@ void map_window(void)
 	xcb_map_subwindows(jbxvt.X.xcb, jbxvt.X.win.main);
 	/*  Setup the window now so that we can add LINES and COLUMNS to
 	 *  the environment.  */
-	XMaskEvent(jbxvt.X.dpy,ExposureMask,&(XEvent){});
 	resize_window();
 	// Forcibly show the window now:
 	xcb_flush(jbxvt.X.xcb);
@@ -77,8 +76,6 @@ void switch_scrollbar(void)
 		(uint32_t[]){jbxvt.opt.show_scrollbar?0:SBAR_WIDTH});
 	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(jbxvt.X.xcb,
 		c, NULL);
-	if (!r)
-		  return;
 	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.main,
 		XCB_CONFIG_WINDOW_WIDTH, (uint32_t[]){
 		r->width+(jbxvt.opt.show_scrollbar?-SBAR_WIDTH:SBAR_WIDTH)});
