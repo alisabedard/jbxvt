@@ -166,29 +166,29 @@ bool handle_xevents(struct tokenst * restrict tk)
 	else
 		  tk->tk_region = -1;
 	switch (xe->xe_type) {
-	case EnterNotify :
+	case XCB_ENTER_NOTIFY:
 		tk->tk_type = TK_ENTRY;
 		tk->tk_arg[0] = 1;
 		tk->tk_nargs = 1;
 		break;
-	case LeaveNotify :
+	case XCB_LEAVE_NOTIFY:
 		tk->tk_type = TK_ENTRY;
 		tk->tk_arg[0] = 0;
 		tk->tk_nargs = 1;
 		break;
-	case FocusIn :
+	case XCB_FOCUS_IN:
 		tk->tk_type = TK_FOCUS;
 		tk->tk_arg[0] = 1;
 		tk->tk_arg[1] = xe->xe_detail;
 		tk->tk_nargs = 2;
 		break;
-	case FocusOut :
+	case XCB_FOCUS_OUT:
 		tk->tk_type = TK_FOCUS;
 		tk->tk_arg[0] = 0;
 		tk->tk_arg[1] = xe->xe_detail;
 		tk->tk_nargs = 2;
 		break;
-	case Expose :
+	case XCB_EXPOSE:
 		tk->tk_type = TK_EXPOSE;
 		tk->tk_arg[0] = xe->xe_x;
 		tk->tk_arg[1] = xe->xe_y;
@@ -196,24 +196,24 @@ bool handle_xevents(struct tokenst * restrict tk)
 		tk->tk_arg[3] = xe->xe_height;
 		tk->tk_nargs = 4;
 		break;
-	case ConfigureNotify :
+	case XCB_CONFIGURE_NOTIFY:
 		LOG("ConfigureNotify");
 		tk->tk_type = TK_RESIZE;
 		tk->tk_nargs = 0;
 		break;
-	case SelectionClear :
+	case XCB_SELECTION_CLEAR:
 		tk->tk_type = TK_SELCLEAR;
 		tk->tk_arg[0] = xe->xe_time;
 		tk->tk_nargs = 1;
 		break;
-	case SelectionNotify :
+	case XCB_SELECTION_NOTIFY:
 		tk->tk_type = TK_SELNOTIFY;
 		tk->tk_arg[0] = xe->xe_time;
 		tk->tk_arg[1] = xe->xe_requestor;
 		tk->tk_arg[2] = xe->xe_property;
 		tk->tk_nargs = 3;
 		break;
-	case SelectionRequest :
+	case XCB_SELECTION_REQUEST:
 		tk->tk_type = TK_SELREQUEST;
 		tk->tk_arg[0] = xe->xe_time;
 		tk->tk_arg[1] = xe->xe_requestor;
@@ -221,13 +221,13 @@ bool handle_xevents(struct tokenst * restrict tk)
 		tk->tk_arg[3] = xe->xe_property;
 		tk->tk_nargs = 4;
 		break;
-	case ButtonPress :
+	case XCB_BUTTON_PRESS:
 		handle_button_press(tk, xe);
 		break;
-	case ButtonRelease :
+	case XCB_BUTTON_RELEASE:
 		handle_button_release(tk, xe);
 		break;
-	case MotionNotify :
+	case XCB_MOTION_NOTIFY:
 		handle_motion_notify(tk, xe);
 		break;
 	}
