@@ -184,6 +184,7 @@ void init_display(char * name)
 	jbxvt.X.dpy = XOpenDisplay(NULL);
 	if(!jbxvt.X.dpy)
 		  quit(1, WARN_RES RES_DPY);
+	XSetEventQueueOwner(jbxvt.X.dpy, XCBOwnsEventQueue);
 	jbxvt.X.xcb = XGetXCBConnection(jbxvt.X.dpy);
 	jbxvt.X.screen = xcb_setup_roots_iterator(
 		xcb_get_setup(jbxvt.X.xcb)).data;

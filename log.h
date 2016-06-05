@@ -7,13 +7,13 @@
 #include <unistd.h>
 
 #define MARK jbuts("MARK" __FILE__ ":" __LINE__ "\n");
-#define MARK_I(i) dprintf(STDERR_FILENO, "MARK: %s:%d value: %d\n",\
-	__FILE__, __LINE__, i)
+#define MARK_I(i) dprintf(STDERR_FILENO, "MARK: " __FILE__ ":%d value: %d\n",\
+	__LINE__, i)
 
 #ifdef DEBUG
 
 #define LOG(...) {\
-	jbputs(__FILE__ ":" __LINE__ "> ");\
+	dprintf(STDERR_FILENO, __FILE__ ":%d> ", __LINE__);\
 	dprintf(STDERR_FILENO, __VA_ARGS__);\
 	jbputs("\n");\
 }

@@ -3,6 +3,7 @@
 
 #include "xevents.h"
 
+#include "change_offset.h"
 #include "jbxvt.h"
 #include "log.h"
 #include "token.h"
@@ -14,21 +15,12 @@
 static void handle_motion_notify(struct tokenst * restrict tk,
 	struct xeventst * restrict xe)
 {
-	xcb_query_pointer_cookie_t c = xcb_query_pointer(jbxvt.X.xcb,
-		jbxvt.X.win.sb);
 	if (xe->xe_window == jbxvt.X.win.sb
 		&& (xe->xe_state & XCB_KEY_BUT_MASK_BUTTON_2)) {
-		xcb_query_pointer_reply_t * r = xcb_query_pointer_reply(
-			jbxvt.X.xcb, c, NULL);
-		if (r->mask & XCB_KEY_BUT_MASK_BUTTON_2) {
 			tk->tk_type = TK_SBGOTO;
-			tk->tk_arg[0] = r->win_y;
+			tk->tk_arg[0] = xe->xe_y;
 			tk->tk_nargs = 1;
-		}
-		free(r);
-		return;
-	}
-	if (xe->xe_window == jbxvt.X.win.vt
+	} else if (xe->xe_window == jbxvt.X.win.vt
 		&& (xe->xe_state & XCB_KEY_BUT_MASK_BUTTON_1)
 		&& !(xe->xe_state & XCB_KEY_BUT_MASK_CONTROL)) {
 		tk->tk_type = TK_SELDRAG;
@@ -142,6 +134,7 @@ static void handle_button_press(struct tokenst * restrict tk,
 	}
 }
 
+// convert next X event into a token
 bool handle_xevents(struct tokenst * restrict tk)
 {
 	struct xeventst *xe = pop_xevent();

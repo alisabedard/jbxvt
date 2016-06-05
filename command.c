@@ -226,8 +226,14 @@ uint8_t * lookup_key(void * restrict ev, int16_t * restrict pcount)
 	KeySym keysym;
 	static char kbuf[KBUFSIZE];
 
-	XKeyEvent * ke = ev;
-	const int16_t count = XLookupString(ke, kbuf, KBUFSIZE, &keysym, NULL);
+	xcb_key_press_event_t * ke = ev;
+	XKeyEvent xke = {.state = ke->state, .keycode = ke->detail,
+		.window = ke->event, .display = jbxvt.X.dpy,
+		.time = ke->time, .root = jbxvt.X.screen->root,
+		.send_event = true, .type = KeyPress,
+		.serial = ke->sequence};
+	const int16_t count = XLookupString(&xke, kbuf, KBUFSIZE, &keysym, NULL);
+	xcb_flush(jbxvt.X.xcb);
 	char *s = get_s(keysym, kbuf);
 	if (s) {
 		uint8_t l = 0;

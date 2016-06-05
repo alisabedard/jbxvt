@@ -24,101 +24,167 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-
-static int16_t handle_xev(XEvent * event, int16_t * restrict count,
-	const int8_t flags)
+static void handle_focus(xcb_focus_in_event_t * restrict e)
 {
-	struct xeventst * xe;
-	uint8_t * s;
-
-	switch (event->type) {
-	case KeyPress:
-		s = lookup_key(event, count);
-		if (count) send_string(s, *count);
-		break;
-	case FocusIn:
-	case FocusOut:
-		if (event->xfocus.mode != NotifyNormal)
-			  return 0;
-		switch (event->xfocus.detail) {
-		case NotifyAncestor :
-		case NotifyInferior :
-		case NotifyNonlinear :
-			break;
-		default :
-			return 0;
-		}
-		xe = calloc(1, sizeof(struct xeventst));
-		xe->xe_type = event->type;
-		xe->xe_time = event->xselection.time;
-		xe->xe_detail = event->xfocus.detail;
-		push_xevent(xe);
-		if (flags & GET_XEVENTS)
-			  return(GCC_NULL);
-		break;
-	case SelectionRequest:
-		xe = (struct xeventst *)malloc(sizeof(struct xeventst));
-		xe->xe_type = event->type;
-		xe->xe_window = event->xselectionrequest.owner;
-		xe->xe_time = event->xselectionrequest.time;
-		xe->xe_requestor = event->xselectionrequest.requestor;
-		xe->xe_target = event->xselectionrequest.target;
-		xe->xe_property = event->xselectionrequest.property;
-		push_xevent(xe);
-		if (flags & GET_XEVENTS)
-			  return(GCC_NULL);
-		break;
-	case SelectionNotify:
-		xe = (struct xeventst *)malloc(sizeof(struct xeventst));
-		xe->xe_type = event->type;
-		xe->xe_time = event->xselection.time;
-		xe->xe_requestor = event->xselection.requestor;
-		xe->xe_property = event->xselection.property;
-		push_xevent(xe);
-		if (flags & GET_XEVENTS)
-			  return(GCC_NULL);
-		break;
-
-	case ClientMessage:
-		if (event->xclient.format == 32
-			&& event->xclient.data.l[0]
-			== (long)wm_del_win())
-			  quit(0, NULL);
-		break;
-	case MappingNotify:
-		XRefreshKeyboardMapping(&event->xmapping);
+	if (e->mode)
+		  return;
+	switch (e->detail) {
+	case XCB_NOTIFY_DETAIL_ANCESTOR:
+	case XCB_NOTIFY_DETAIL_INFERIOR:
+	case XCB_NOTIFY_DETAIL_NONLINEAR:
 		break;
 	default:
-		xe = (struct xeventst *)malloc(sizeof(struct xeventst));
-		xe->xe_type = event->type;
-		xe->xe_window = event->xany.window;
-		if (event->type == Expose
-			|| event->type == GraphicsExpose) {
-			xe->xe_x = event->xexpose.x;
-			xe->xe_y = event->xexpose.y;
-			xe->xe_width = event->xexpose.width;
-			xe->xe_height = event->xexpose.height;
-		} else {
-			xe->xe_time = event->xbutton.time;
-			xe->xe_x = event->xbutton.x;
-			xe->xe_y = event->xbutton.y;
-			xe->xe_state = event->xbutton.state;
-			xe->xe_button = event->xbutton.button;
-		}
-		push_xevent(xe);
-		if (flags & GET_XEVENTS)
-			  return GCC_NULL;
+		return;
 	}
+	struct xeventst * xe = calloc(1, sizeof(struct xeventst));
+	xe->xe_type = e->response_type & ~0x80;
+	xe->xe_detail = e->detail;
+	push_xevent(xe);
+}
+
+static void handle_sel_req(xcb_selection_request_event_t * restrict e)
+{
+	struct xeventst * xe = malloc(sizeof(struct xeventst));
+	xe->xe_type = XCB_SELECTION_REQUEST;
+	xe->xe_window = e->owner;
+	xe->xe_time = e->time;
+	xe->xe_requestor = e->requestor;
+	xe->xe_target = e->target;
+	xe->xe_property = e->property;
+	push_xevent(xe);
+}
+
+static void handle_sel_not(xcb_selection_notify_event_t * restrict e)
+{
+	struct xeventst * xe = malloc(sizeof(struct xeventst));
+	xe->xe_type = XCB_SELECTION_NOTIFY;
+	xe->xe_time = e->time;
+	xe->xe_requestor = e->requestor;
+	xe->xe_target = e->target;
+	xe->xe_property = e->property;
+	push_xevent(xe);
+}
+
+static void handle_client_msg(xcb_client_message_event_t * e)
+{
+	if (e->format == 32 && e->data.data32[0]
+		== (long)wm_del_win())
+		  quit(0, NULL);
+}
+
+#if 0
+static void handle_map_not(xcb_mapping_notify_event_t * e)
+{
+	XMappingEvent me = {.type = e->response_type & ~0x80};
+	XRefreshKeyboardMapping(&me);
+}
+#endif
+
+static void handle_expose(xcb_expose_event_t * e)
+{
+	struct xeventst * xe = malloc(sizeof(struct xeventst));
+	xe->xe_type = XCB_EXPOSE;
+	xe->xe_window = e->window;
+	xe->xe_x = e->x;
+	xe->xe_y = e->y;
+	xe->xe_width = e->width;
+	xe->xe_height = e->height;
+	push_xevent(xe);
+}
+
+static void handle_other(xcb_generic_event_t * gen_e)
+{
+	xcb_motion_notify_event_t * e = (xcb_motion_notify_event_t *)gen_e;
+	struct xeventst * xe = malloc(sizeof(struct xeventst));
+	xe->xe_type = e->response_type & ~0x80;
+	xe->xe_window = e->event;
+	xe->xe_x = e->event_x;
+	xe->xe_y = e->event_y;
+	xe->xe_state = e->state;
+	xe->xe_button = e->detail;
+	xe->xe_time = e->time;
+	push_xevent(xe);
+}
+
+#if 0
+static void handle_other(xcb_generic_event_t * e)
+{
+	struct xeventst * xe = malloc(sizeof(struct xeventst));
+	xe->xe_type = e->response_type & ~0x80;
+}
+#endif
+#if 0
+static void handle_motion(xcb_motion_notify_event_t *e)
+{
+	struct xeventst * xe = malloc(sizeof(struct xeventst));
+	xe->xe_type = e->response_type & ~0x80;
+	xe->xe_window = e->event;
+	xe->xe_x = e->event_x;
+	xe->xe_y = e->event_y;
+	xe->xe_state = e->state;
+	xe->xe_button = e->detail;
+	xe->time = e->time;
+	push_xevent(xe);
+}
+#endif
+
+static int16_t handle_xev(xcb_generic_event_t * restrict event,
+	int16_t * restrict count, const int8_t flags)
+{
+	uint8_t * s;
+
+	switch (event->response_type & ~0x80) {
+	case XCB_KEY_PRESS:
+		s = lookup_key(event, count);
+		if (count)
+			  send_string(s, *count);
+		break;
+	case XCB_FOCUS_IN:
+	case XCB_FOCUS_OUT:
+		handle_focus((xcb_focus_in_event_t *)event);
+		break;
+	case XCB_SELECTION_REQUEST:
+		handle_sel_req((xcb_selection_request_event_t *)event);
+		break;
+	case XCB_SELECTION_NOTIFY:
+		handle_sel_not((xcb_selection_notify_event_t *)event);
+		break;
+	case XCB_CLIENT_MESSAGE:
+		handle_client_msg((xcb_client_message_event_t *)event);
+		break;
+#if 0
+	case XCB_MAPPING_NOTIFY:
+		handle_map_not((xcb_mapping_notify_event_t *)event);
+		break;
+#endif
+	case XCB_EXPOSE:
+	case XCB_GRAPHICS_EXPOSURE:
+		handle_expose((xcb_expose_event_t *)event);
+		break;
+#if 0
+	case XCB_BUTTON_PRESS:
+		handle_button((xcb_button_press_event_t *)event);
+	default:
+		handle_other(event);
+#endif
+	default:
+		handle_other(event);
+	}
+	if (flags & GET_XEVENTS)
+		  return GCC_NULL;
 	return 0;
 }
 
 #if defined(__i386__) || defined(__amd64__)
 	__attribute__((regparm(1)))
 #endif//x86
-static int16_t x_io_loop(int16_t count, fd_set * restrict in_fdset)
+static int16_t io_loop(int16_t count, fd_set * restrict in_fdset)
 {
 	const fd_t x_fd = xcb_get_file_descriptor(jbxvt.X.xcb);
-	while (XPending(jbxvt.X.dpy) == 0) {
+#if 0
+	xcb_generic_event_t * e;
+	while (!(e = xcb_poll_for_event(jbxvt.X.xcb))) {
+#endif
 		FD_SET(jbxvt.com.fd, in_fdset);
 		FD_SET(x_fd, in_fdset);
 		fd_set out_fdset;
@@ -127,6 +193,7 @@ static int16_t x_io_loop(int16_t count, fd_set * restrict in_fdset)
 			  FD_SET(jbxvt.com.fd,&out_fdset);
 		int sv;
 		do {
+#if 0
 #ifdef SYS_select
 			sv = syscall(SYS_select, jbxvt.com.width,
 				in_fdset, &out_fdset, NULL, NULL);
@@ -135,6 +202,10 @@ static int16_t x_io_loop(int16_t count, fd_set * restrict in_fdset)
 				in_fdset,&out_fdset,
 				NULL, NULL);
 #endif//SYS_select
+#endif
+			sv = select(jbxvt.com.width,
+				in_fdset,&out_fdset,
+				NULL, NULL);
 		} while (sv < 0 && errno == EINTR);
 
 		if (FD_ISSET(jbxvt.com.fd,&out_fdset)) {
@@ -152,10 +223,21 @@ static int16_t x_io_loop(int16_t count, fd_set * restrict in_fdset)
 			jbxvt.com.send_count -= count;
 			jbxvt.com.send_nxt += count;
 		}
+#if 0
 		if (FD_ISSET(jbxvt.com.fd, in_fdset))
-			  break;
+			  return 0;
+#endif
+#if 0
+		if (!FD_ISSET(jbxvt.com.fd, in_fdset))
+			  goto io_loop_head;
+
 	}
-	return count;
+	if(e) {
+		handle_xev(e, &count, 0);
+		free(e);
+	}
+#endif
+	return count ;
 }
 
 
@@ -184,18 +266,34 @@ static int16_t get_com_char(const int8_t flags)
 
 	int16_t count;
 	fd_set in_fdset;
-	XEvent event;
-	register int16_t xev_ret;
+//	XEvent event;
+	xcb_generic_event_t * e;
+	int16_t xev_ret = 0;
+	xcb_flush(jbxvt.X.xcb);
 wait_event_start:
+	LOG("wait_event_start");
 	FD_ZERO(&in_fdset);
-	count = x_io_loop(count, &in_fdset);
+	if ((e = xcb_poll_for_event(jbxvt.X.xcb))) {
+		LOG("event found");
+		xev_ret = handle_xev(e, &count, flags);
+		free(e);
+		if (xev_ret) {
+			LOG("returning");
+			  return xev_ret;
+		}
+	}
+
+	count = io_loop(count, &in_fdset);
 	if (FD_ISSET(jbxvt.com.fd,&in_fdset))
 		  goto wait_event_end;
-	XNextEvent(jbxvt.X.dpy,&event);
+//	XNextEvent(jbxvt.X.dpy,&event);
+#if 0
 	if((xev_ret = handle_xev(&event, &count, flags)))
 		  return xev_ret;
+#endif
 	goto wait_event_start;
 wait_event_end:
+	LOG("wait_event_end");
 #ifdef SYS_read
 	count = syscall(SYS_read, jbxvt.com.fd,
 		jbxvt.com.buf.data, COM_BUF_SIZE);
@@ -362,16 +460,15 @@ static void handle_esc(int_fast16_t c, struct tokenst * restrict tk)
 	case 'Z' :
 		tk->tk_type = TK_DECID;
 		break;
-	default :
-		return;
 	}
 }
 
 //  Return an input token
 void get_token(struct tokenst * restrict tk)
 {
+	xcb_flush(jbxvt.X.xcb);
 	memset(tk, 0, sizeof(struct tokenst));
-
+	// set token per event:
 	if(handle_xevents(tk))
 		  return;
 
