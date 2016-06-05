@@ -72,14 +72,6 @@ static void handle_client_msg(xcb_client_message_event_t * e)
 		  quit(0, NULL);
 }
 
-#if 0
-static void handle_map_not(xcb_mapping_notify_event_t * e)
-{
-	XMappingEvent me = {.type = e->response_type & ~0x80};
-	XRefreshKeyboardMapping(&me);
-}
-#endif
-
 static void handle_expose(xcb_expose_event_t * e)
 {
 	struct xeventst * xe = malloc(sizeof(struct xeventst));
@@ -106,28 +98,6 @@ static void handle_other(xcb_generic_event_t * gen_e)
 	push_xevent(xe);
 }
 
-#if 0
-static void handle_other(xcb_generic_event_t * e)
-{
-	struct xeventst * xe = malloc(sizeof(struct xeventst));
-	xe->xe_type = e->response_type & ~0x80;
-}
-#endif
-#if 0
-static void handle_motion(xcb_motion_notify_event_t *e)
-{
-	struct xeventst * xe = malloc(sizeof(struct xeventst));
-	xe->xe_type = e->response_type & ~0x80;
-	xe->xe_window = e->event;
-	xe->xe_x = e->event_x;
-	xe->xe_y = e->event_y;
-	xe->xe_state = e->state;
-	xe->xe_button = e->detail;
-	xe->time = e->time;
-	push_xevent(xe);
-}
-#endif
-
 static int16_t handle_xev(xcb_generic_event_t * restrict event,
 	int16_t * restrict count, const int8_t flags)
 {
@@ -152,21 +122,10 @@ static int16_t handle_xev(xcb_generic_event_t * restrict event,
 	case XCB_CLIENT_MESSAGE:
 		handle_client_msg((xcb_client_message_event_t *)event);
 		break;
-#if 0
-	case XCB_MAPPING_NOTIFY:
-		handle_map_not((xcb_mapping_notify_event_t *)event);
-		break;
-#endif
 	case XCB_EXPOSE:
 	case XCB_GRAPHICS_EXPOSURE:
 		handle_expose((xcb_expose_event_t *)event);
 		break;
-#if 0
-	case XCB_BUTTON_PRESS:
-		handle_button((xcb_button_press_event_t *)event);
-	default:
-		handle_other(event);
-#endif
 	default:
 		handle_other(event);
 	}
@@ -181,65 +140,41 @@ static int16_t handle_xev(xcb_generic_event_t * restrict event,
 static int16_t io_loop(int16_t count, fd_set * restrict in_fdset)
 {
 	const fd_t x_fd = xcb_get_file_descriptor(jbxvt.X.xcb);
-#if 0
-	xcb_generic_event_t * e;
-	while (!(e = xcb_poll_for_event(jbxvt.X.xcb))) {
-#endif
-		FD_SET(jbxvt.com.fd, in_fdset);
-		FD_SET(x_fd, in_fdset);
-		fd_set out_fdset;
-		FD_ZERO(&out_fdset);
-		if (jbxvt.com.send_count > 0)
-			  FD_SET(jbxvt.com.fd,&out_fdset);
-		int sv;
-		do {
-#if 0
+	FD_SET(jbxvt.com.fd, in_fdset);
+	FD_SET(x_fd, in_fdset);
+	fd_set out_fdset;
+	FD_ZERO(&out_fdset);
+	if (jbxvt.com.send_count > 0)
+		  FD_SET(jbxvt.com.fd,&out_fdset);
+	int sv;
+	do {
 #ifdef SYS_select
-			sv = syscall(SYS_select, jbxvt.com.width,
-				in_fdset, &out_fdset, NULL, NULL);
+		sv = syscall(SYS_select, jbxvt.com.width,
+			in_fdset, &out_fdset, NULL, NULL);
 #else//!SYS_select
-			sv = select(jbxvt.com.width,
-				in_fdset,&out_fdset,
-				NULL, NULL);
+		sv = select(jbxvt.com.width,
+			in_fdset,&out_fdset,
+			NULL, NULL);
 #endif//SYS_select
-#endif
-			sv = select(jbxvt.com.width,
-				in_fdset,&out_fdset,
-				NULL, NULL);
-		} while (sv < 0 && errno == EINTR);
+	} while (sv < 0 && errno == EINTR);
 
-		if (FD_ISSET(jbxvt.com.fd,&out_fdset)) {
-			count = jbxvt.com.send_count < 100
-				? jbxvt.com.send_count : 100;
+	if (FD_ISSET(jbxvt.com.fd,&out_fdset)) {
+		count = jbxvt.com.send_count < 100
+			? jbxvt.com.send_count : 100;
 #ifdef SYS_write
-			count = syscall(SYS_write, jbxvt.com.fd,
-				jbxvt.com.send_nxt, count);
+		count = syscall(SYS_write, jbxvt.com.fd,
+			jbxvt.com.send_nxt, count);
 #else//!SYS_write
-			count = write(jbxvt.com.fd,
-				jbxvt.com.send_nxt,count);
+		count = write(jbxvt.com.fd,
+			jbxvt.com.send_nxt,count);
 #endif//SYS_write
-			if (count < 0)
-				  quit(1, WARN_RES RES_CMD);
-			jbxvt.com.send_count -= count;
-			jbxvt.com.send_nxt += count;
-		}
-#if 0
-		if (FD_ISSET(jbxvt.com.fd, in_fdset))
-			  return 0;
-#endif
-#if 0
-		if (!FD_ISSET(jbxvt.com.fd, in_fdset))
-			  goto io_loop_head;
-
+		if (count < 0)
+			  quit(1, WARN_RES RES_CMD);
+		jbxvt.com.send_count -= count;
+		jbxvt.com.send_nxt += count;
 	}
-	if(e) {
-		handle_xev(e, &count, 0);
-		free(e);
-	}
-#endif
 	return count ;
 }
-
 
 /*  Return the next input character after first passing any keyboard input
  *  to the command.  If flags & BUF_ONLY is true then only buffered characters are
@@ -264,36 +199,21 @@ static int16_t get_com_char(const int8_t flags)
 	if (flags & BUF_ONLY)
 		return(GCC_NULL);
 
-	int16_t count;
 	fd_set in_fdset;
-//	XEvent event;
 	xcb_generic_event_t * e;
-	int16_t xev_ret = 0;
+	int16_t count, xev_ret = 0;
 	xcb_flush(jbxvt.X.xcb);
-wait_event_start:
-	LOG("wait_event_start");
-	FD_ZERO(&in_fdset);
-	if ((e = xcb_poll_for_event(jbxvt.X.xcb))) {
-		LOG("event found");
-		xev_ret = handle_xev(e, &count, flags);
-		free(e);
-		if (xev_ret) {
-			LOG("returning");
-			  return xev_ret;
+	do {
+		FD_ZERO(&in_fdset);
+		if ((e = xcb_poll_for_event(jbxvt.X.xcb))) {
+			LOG("event found");
+			xev_ret = handle_xev(e, &count, flags);
+			free(e);
+			if (xev_ret)
+				  return xev_ret;
 		}
-	}
-
-	count = io_loop(count, &in_fdset);
-	if (FD_ISSET(jbxvt.com.fd,&in_fdset))
-		  goto wait_event_end;
-//	XNextEvent(jbxvt.X.dpy,&event);
-#if 0
-	if((xev_ret = handle_xev(&event, &count, flags)))
-		  return xev_ret;
-#endif
-	goto wait_event_start;
-wait_event_end:
-	LOG("wait_event_end");
+		count = io_loop(count, &in_fdset);
+	} while(!FD_ISSET(jbxvt.com.fd,&in_fdset));
 #ifdef SYS_read
 	count = syscall(SYS_read, jbxvt.com.fd,
 		jbxvt.com.buf.data, COM_BUF_SIZE);
@@ -466,7 +386,6 @@ static void handle_esc(int_fast16_t c, struct tokenst * restrict tk)
 //  Return an input token
 void get_token(struct tokenst * restrict tk)
 {
-	xcb_flush(jbxvt.X.xcb);
 	memset(tk, 0, sizeof(struct tokenst));
 	// set token per event:
 	if(handle_xevents(tk))
