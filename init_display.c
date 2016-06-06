@@ -161,18 +161,18 @@ static void setup_gcs(void)
 		| XCB_GC_FONT, (uint32_t[]){jbxvt.X.color.fg,
 		jbxvt.X.color.bg, jbxvt.X.font});
 	xcb_create_gc(jbxvt.X.xcb, jbxvt.X.gc.ne, jbxvt.X.win.main,
-		XCB_GC_FOREGROUND | XCB_GC_BACKGROUND
-		| XCB_GC_GRAPHICS_EXPOSURES, (uint32_t[]){
-		jbxvt.X.color.fg, jbxvt.X.color.bg, 1});
-	xcb_create_gc(jbxvt.X.xcb, jbxvt.X.gc.sb, jbxvt.X.win.main,
-		XCB_GC_FOREGROUND | XCB_GC_BACKGROUND, (uint32_t[]){
-		jbxvt.X.color.fg, jbxvt.X.color.bg});
+		XCB_GC_GRAPHICS_EXPOSURES, &(uint32_t){1});
+	xcb_create_gc(jbxvt.X.xcb, jbxvt.X.gc.sb, jbxvt.X.win.main, 0, NULL);
 	xcb_create_gc(jbxvt.X.xcb, jbxvt.X.gc.hl, jbxvt.X.win.main,
 		XCB_GC_FUNCTION | XCB_GC_PLANE_MASK, (uint32_t[]){
 		XCB_GX_INVERT, jbxvt.X.color.fg ^ jbxvt.X.color.bg});
 	xcb_create_gc(jbxvt.X.xcb, jbxvt.X.gc.cu, jbxvt.X.win.main,
 		XCB_GC_FUNCTION | XCB_GC_PLANE_MASK, (uint32_t[]){
 		XCB_GX_INVERT, jbxvt.X.color.cursor ^ jbxvt.X.color.bg});
+	xcb_copy_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, jbxvt.X.gc.ne,
+		XCB_GC_FOREGROUND | XCB_GC_BACKGROUND);
+	xcb_copy_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, jbxvt.X.gc.sb,
+		XCB_GC_FOREGROUND | XCB_GC_BACKGROUND);
 }
 
 static void init_jbxvt_colors(void)
