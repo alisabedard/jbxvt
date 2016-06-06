@@ -93,36 +93,46 @@ static void create_main_window(xcb_size_hints_t * restrict sh, const uint32_t ro
 		(uint32_t[]){MW_EVENTS, jbxvt.X.color.map});
 }
 
+static xcb_cursor_t get_cursor(const uint16_t id, const uint16_t fg,
+	const uint16_t bg)
+{
+	xcb_font_t f = xcb_generate_id(jbxvt.X.xcb);
+	xcb_open_font(jbxvt.X.xcb, f, 6, "cursor");
+	xcb_cursor_t c = xcb_generate_id(jbxvt.X.xcb);
+	xcb_create_glyph_cursor(jbxvt.X.xcb, c, f, f, id, id + 1,
+		fg, fg, fg, bg, bg, bg);
+	xcb_close_font(jbxvt.X.xcb, f);
+	return c;
+}
+
 static void create_sb_window(const uint16_t height)
 {
 	jbxvt.X.win.sb = xcb_generate_id(jbxvt.X.xcb);
+	xcb_cursor_t c = get_cursor(XC_sb_v_double_arrow, 0, 0xffff);
 	xcb_create_window(jbxvt.X.xcb, XCB_COPY_FROM_PARENT,
 		jbxvt.X.win.sb, jbxvt.X.win.main, -1, -1,
 		SBAR_WIDTH - 1, height, 1,
 		XCB_WINDOW_CLASS_COPY_FROM_PARENT,
 		XCB_COPY_FROM_PARENT, XCB_CW_BACK_PIXEL | XCB_CW_COLORMAP
-		| XCB_CW_BORDER_PIXEL | XCB_CW_EVENT_MASK,
+		| XCB_CW_BORDER_PIXEL | XCB_CW_EVENT_MASK | XCB_CW_CURSOR,
 		(uint32_t[]){jbxvt.X.color.bg, jbxvt.X.color.fg,
-		SB_EVENTS, jbxvt.X.color.map});
-	// FIXME: do in xcb
-	XDefineCursor(jbxvt.X.dpy,jbxvt.X.win.sb,
-		XCreateFontCursor(jbxvt.X.dpy, XC_sb_v_double_arrow));
+		SB_EVENTS, jbxvt.X.color.map, c});
+	xcb_free_cursor(jbxvt.X.xcb, c);
 }
 
 static void create_vt_window(xcb_size_hints_t * restrict sh)
 {
 	jbxvt.X.win.vt = xcb_generate_id(jbxvt.X.xcb);
-
+	xcb_cursor_t c = get_cursor(XC_xterm, 0xffff, 0);
 	xcb_create_window(jbxvt.X.xcb, XCB_COPY_FROM_PARENT,
 		jbxvt.X.win.vt, jbxvt.X.win.main,
 		0, 0, sh->width, sh->height, 0,
 		XCB_WINDOW_CLASS_COPY_FROM_PARENT,
-		XCB_COPY_FROM_PARENT, XCB_CW_BACK_PIXEL|XCB_CW_COLORMAP
-		|XCB_CW_EVENT_MASK,
-		(uint32_t[]){jbxvt.X.color.bg, VT_EVENTS, jbxvt.X.color.map});
-	// FIXME: do in xcb
-	XDefineCursor(jbxvt.X.dpy,jbxvt.X.win.vt,
-		XCreateFontCursor(jbxvt.X.dpy, XC_xterm));
+		XCB_COPY_FROM_PARENT, XCB_CW_BACK_PIXEL | XCB_CW_COLORMAP
+		| XCB_CW_EVENT_MASK | XCB_CW_CURSOR,
+		(uint32_t[]){jbxvt.X.color.bg, VT_EVENTS, jbxvt.X.color.map,
+		c});
+	xcb_free_cursor(jbxvt.X.xcb, c);
 }
 
 //  Open the window.
