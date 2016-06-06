@@ -200,9 +200,10 @@ static int_fast16_t show_scroll_history(xcb_point_t rc1, xcb_point_t rc2,
 void repaint(xcb_point_t rc1, xcb_point_t rc2)
 {
 	LOG("repaint({%d, %d}, {%d, %d})", rc1.x, rc1.y, rc2.x, rc2.y);
-	uint8_t * str = malloc(jbxvt.scr.chars.width + 1);
 	xcb_point_t p = { .x = MARGIN + rc1.x * jbxvt.X.font_width,
 		.y = MARGIN + rc1.y * jbxvt.X.font_height};
+	// Allocate enough space to process each column, plus wrap byte.
+	uint8_t * str = malloc(jbxvt.scr.chars.width + 1);
 	//  First do any 'scrolled off' lines that are visible.
 	int_fast32_t line = show_scroll_history(rc1, rc2, &p, str);
 
@@ -215,7 +216,7 @@ void repaint(xcb_point_t rc1, xcb_point_t rc2)
 		memcpy(str - rc1.x, s, m);
 		register uint_fast8_t c;
 		for(c = m; c && s[c] < ' '; --c)
-			  ;
+			  ; // eliminate junk after '\0'
 		if (!c)
 			  continue;
 		p.y = repaint_generic(p, c + 1, rc1.x, rc2.x, str,
