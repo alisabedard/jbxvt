@@ -212,14 +212,15 @@ void repaint(xcb_point_t rc1, xcb_point_t rc2)
 		: rc1.y - jbxvt.scr.offset;
 	for (; line <= rc2.y; ++line, ++i) {
 		uint8_t * s = jbxvt.scr.current->text[i];
-		const uint8_t m = rc2.x - rc1.x;
+		uint8_t m = rc2.x - rc1.x;
 		memcpy(str - rc1.x, s, m);
-		register uint_fast8_t c;
-		for(c = m; c && s[c] < ' '; --c)
-			  ; // eliminate junk after '\0'
-		if (!c)
-			  continue;
-		p.y = repaint_generic(p, c + 1, rc1.x, rc2.x, str,
+		register int_fast16_t c;
+		for(c = m; c && s[c] < ' '; --c);
+			  ; // eliminate junk after '\0' and find length
+		for(m = c; c >= 0; --c) // fix interior bad chars
+			  if (s[c] < ' ')
+				    str[c - rc1.x] = ' ';
+		p.y = repaint_generic(p, m + 1, rc1.x, rc2.x, str,
 			jbxvt.scr.current->rend[i]);
 	}
 	free(str);
