@@ -151,12 +151,6 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 
 		memcpy(jbxvt.scr.current->text[jbxvt.scr.current->cursor.y]
 			+ jbxvt.scr.current->cursor.x,str,n);
-		/* Clear memory cells which are not part of the
-			desired output string.  */
-		memset(jbxvt.scr.current->text[jbxvt.scr.current->cursor.y]
-			+ jbxvt.scr.current->cursor.x + n, 0,
-			jbxvt.scr.chars.width
-			- jbxvt.scr.current->cursor.x - n);
 #ifdef SCR_DEBUG
 		LOG("n: %d, strlen: %lu", n, strlen((const char *)
 			jbxvt.scr.current->text[jbxvt.scr.current->cursor.y]));
