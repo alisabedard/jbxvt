@@ -2,7 +2,7 @@
 #CFLAGS+=-Werror
 #CFLAGS+=-flto # doesn't work with clang
 #CFLAGS=-O0
-#CFLAGS+=-ggdb
+CFLAGS+=-ggdb
 #CFLAGS+=-DDEBUG
 #CFLAGS+=-DTK_DEBUG
 #CC=clang
@@ -31,11 +31,9 @@ LIBS+=-lutempter
 #-------------------------------
 
 CFLAGS+=-DUSE_LIKELY
-LIBS+=-lX11-xcb -lxcb -lxcb-keysyms
+LIBS+=-lxcb -lxcb-keysyms -lX11
 
 #-------------------------------
-
-LIBS+=-lX11
 
 OBJS=jbxvt.o
 OBJS+=change_offset.o change_selection.o cmdtok.o color.o command.o

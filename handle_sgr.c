@@ -14,7 +14,7 @@ void handle_sgr(struct tokenst * restrict token)
 		scr_change_rendition(RS_NONE);
 		return;
 	}
-	for (uint8_t i = 0; i < token->tk_nargs; ++i) {
+	for (uint_fast8_t i = 0; i < token->tk_nargs; ++i) {
 #ifdef DEBUG_SGR
 			dprintf(STDERR_FILENO, "tk_arg[%d]: %d\n", i,
 				token->tk_arg[i]);
@@ -22,10 +22,8 @@ void handle_sgr(struct tokenst * restrict token)
 		switch (token->tk_arg[i]) {
 		case 0 :
 			scr_change_rendition(RS_NONE);
-#ifdef DEBUG_SGR
-			jbputs("--RS_NONE--\n");
-#endif//DEBUG_SGR
-			reset_color();
+			set_fg(NULL);
+			set_bg(NULL);
 			break;
 		case 1 :
 			scr_change_rendition(RS_BOLD);
@@ -149,9 +147,7 @@ void handle_sgr(struct tokenst * restrict token)
 		case 107:
 			scr_change_rendition(RS_BB|RS_B7);
 			break;
-
 		default:
-			// reset_color();
 			scr_change_rendition(RS_NONE);
 		}
 	}

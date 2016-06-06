@@ -24,11 +24,11 @@ static void sel_scr_to_sav(struct selst * restrict s,
 	}
 }
 
-// Save lines that scroll off the top of the screen.
-static void free_top_lines(const int16_t count)
+// Free lines that scroll off the top of the screen.
+static void free_top_lines(const uint16_t count)
 {
 	LOG("free_top_lines()");
-	for (uint16_t i = 1; i <= count; ++i) {
+	for (uint_fast16_t i = 1; i <= count; ++i) {
 		struct slinest ** s = &jbxvt.scr.sline.data
 			[jbxvt.scr.sline.max - i];
 		if(*s) {
@@ -179,8 +179,8 @@ static void sc_up(const uint8_t row1, uint8_t row2,
 	}
 	uint8_t *save[MAX_SCROLL];
 	uint32_t *rend[MAX_SCROLL];
-	uint8_t j = row1;
-	for (uint8_t i = 0; i < count; ++i, ++j) {
+	uint_fast8_t j = row1;
+	for (uint_fast8_t i = 0; i < count; ++i, ++j) {
 		save[i] = jbxvt.scr.current->text[j];
 		rend[i] = jbxvt.scr.current->rend[j];
 		ck_sel_on_scr(j);

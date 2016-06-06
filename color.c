@@ -9,13 +9,12 @@
 __attribute__((nonnull))
 pixel_t get_pixel(const char * restrict color)
 {
-	uint8_t l = 0;
+	register uint_fast8_t l = 0;
 	while(color[++l]);
-	xcb_alloc_named_color_cookie_t c = xcb_alloc_named_color(
-		jbxvt.X.xcb, jbxvt.X.color.map, l, color);
+	xcb_alloc_named_color_cookie_t c = xcb_alloc_named_color(jbxvt.X.xcb,
+		jbxvt.X.color.map, l, color);
 	xcb_alloc_named_color_reply_t * r
-		= xcb_alloc_named_color_reply(
-		jbxvt.X.xcb, c, NULL);
+		= xcb_alloc_named_color_reply(jbxvt.X.xcb, c, NULL);
 	pixel_t p = r->pixel;
 	free(r);
 	return p;
@@ -31,33 +30,15 @@ static inline pixel_t set_color(const unsigned long vm,
 	return p;
 }
 
-void reset_fg(void)
+void set_fg(const char * restrict color)
 {
 	jbxvt.X.color.current_fg = set_color(XCB_GC_FOREGROUND,
-		jbxvt.X.color.fg, jbxvt.X.gc.tx);
+		color?get_pixel(color):jbxvt.X.color.fg, jbxvt.X.gc.tx);
 }
 
-void reset_bg(void)
+void set_bg(const char * restrict color)
 {
 	jbxvt.X.color.current_bg = set_color(XCB_GC_BACKGROUND,
-		jbxvt.X.color.bg, jbxvt.X.gc.tx);
-}
-
-void reset_color(void)
-{
-	reset_fg();
-	reset_bg();
-}
-
-void set_fg(const char * color)
-{
-	jbxvt.X.color.current_fg = set_color(XCB_GC_FOREGROUND,
-		get_pixel(color), jbxvt.X.gc.tx);
-}
-
-void set_bg(const char * color)
-{
-	jbxvt.X.color.current_bg = set_color(XCB_GC_BACKGROUND,
-		get_pixel(color), jbxvt.X.gc.tx);
+		color?get_pixel(color):jbxvt.X.color.bg, jbxvt.X.gc.tx);
 }
 

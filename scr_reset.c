@@ -43,10 +43,12 @@ static void free_visible_screens(uint8_t ch)
 
 void reset_row_col(void)
 {
-	jbxvt.scr.current->cursor.x = constrain(jbxvt.scr.current->cursor.x,
-		jbxvt.scr.chars.width);
-	jbxvt.scr.current->cursor.y = constrain(jbxvt.scr.current->cursor.y,
-		jbxvt.scr.chars.height);
+	xcb_point_t * c = &jbxvt.scr.current->cursor;
+	xcb_point_t p = *c;
+	int16_t l = jbxvt.scr.chars.width - 1;
+	c->x = p.x < 0 ? 0 : p.x > l ? l : p.x;
+	l = jbxvt.scr.chars.height - 1;
+	c->y = p.y < 0 ? 0 : p.y > l ? l : p.y;
 }
 
 static void init_screen_elements(struct screenst * restrict scr,
@@ -97,12 +99,12 @@ static int save_data_on_screen(uint8_t cw, int i, const int j,
 	uint32_t ** restrict r2)
 {
 	// truncate to fit:
-	uint8_t n = constrain(cw, jbxvt.scr.chars.width + 1);
+	const uint8_t n = cw > jbxvt.scr.chars.width
+	      ?	jbxvt.scr.chars.width : cw;
 	// copy contents:
 	cpl(&jbxvt.scr.s1, s1, r1, i, j, n);
 	cpl(&jbxvt.scr.s1, s2, r2, i, j, n);
-	i--;
-	if (i < 0) {
+	if (--i < 0) {
 		*onscreen = false;
 		i = 0;
 	}
@@ -117,7 +119,8 @@ static int handle_offscreen_data(const uint8_t cw,
 	if (i >= jbxvt.scr.sline.top)
 		  return i;
 	struct slinest *sl = jbxvt.scr.sline.data[i];
-	const uint8_t n = constrain(cw, sl->sl_length + 1);
+	const uint8_t l = sl->sl_length;
+	const uint8_t n = cw > l ? l : cw;
 	memcpy(s1[j],sl->sl_text,n);
 	free(sl->sl_text);
 	sl->sl_text=NULL;

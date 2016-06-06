@@ -16,8 +16,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void set_rval_colors(const uint32_t rval)
+static bool set_rval_colors(const uint32_t rval)
 {
+	bool fg_mod = true, bg_mod = true;
 	// normal foregrounds:
 	if (rval & RS_F0)
 		  set_fg(COLOR_0);
@@ -36,7 +37,7 @@ static void set_rval_colors(const uint32_t rval)
 	else if (rval & RS_F7)
 		  set_fg(COLOR_7);
 	else if (rval & RS_FR)
-		  reset_fg();
+		  set_fg(NULL);
 	else if (rval & RS_BF) {
 		// bright foregrounds:
 		if (rval & RS_F0)
@@ -55,7 +56,9 @@ static void set_rval_colors(const uint32_t rval)
 			  set_fg(BCOLOR_6);
 		else if (rval & RS_F7)
 			  set_fg(BCOLOR_7);
-	}
+	} else
+		  fg_mod = false;
+
 	// normal backgrounds:
 	if (rval & RS_B0)
 		  set_bg(COLOR_0);
@@ -74,7 +77,7 @@ static void set_rval_colors(const uint32_t rval)
 	else if (rval & RS_B7)
 		  set_bg(COLOR_7);
 	else if (rval & RS_BR)
-		  reset_bg();
+		  set_bg(NULL);
 	else if (rval & RS_BB) {
 		// bright backgrounds:
 		if (rval & RS_B0)
@@ -93,18 +96,22 @@ static void set_rval_colors(const uint32_t rval)
 			  set_bg(BCOLOR_6);
 		else if (rval & RS_B7)
 			  set_bg(BCOLOR_7);
-	}
+	} else bg_mod = false;
+
+	return fg_mod || bg_mod;
 }
 
 //  Paint the text using the rendition value at the screen position.
 void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 	uint8_t len, xcb_point_t p)
 {
-	set_rval_colors(rval);
-	if (rval & RS_RVID || rval & RS_BLINK) { // Reverse looked up colors.
+	const bool rvid = rval & RS_RVID || rval & RS_BLINK;
+	bool cmod = set_rval_colors(rval);
+	if (rvid) { // Reverse looked up colors.
 		xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, XCB_GC_FOREGROUND
 			| XCB_GC_BACKGROUND, (uint32_t[]){
 			jbxvt.X.color.current_bg, jbxvt.X.color.current_fg});
+		cmod = true;
 	}
 	p.y+= jbxvt.X.font_ascent;
 
@@ -121,13 +128,16 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 	}
 #endif
 
-	p.y++; // Advance for underline, use underline for italic.
+	++p.y; // Advance for underline, use underline for italic.
 	if (rval & RS_ULINE || rval & RS_ITALIC) {
 		xcb_poly_line(jbxvt.X.xcb, XCB_COORD_MODE_ORIGIN,
 			jbxvt.X.win.vt, jbxvt.X.gc.tx, 2, (xcb_point_t[]){
 			{p.x, p.y}, {p.x + len * jbxvt.X.font_width, p.y}});
 	}
-	reset_color();
+	if (cmod) {
+		set_fg(NULL);
+		set_bg(NULL);
+	}
 }
 
 // Display the string using the rendition vector at the screen coordinates
@@ -165,10 +175,24 @@ static int_fast32_t repaint_generic(const xcb_point_t p,
 	return p.y + jbxvt.X.font_height;
 }
 
-__attribute__((const))
-static inline uint_fast8_t convert_char(const uint_fast8_t c)
+static int_fast16_t show_scroll_history(xcb_point_t rc1, xcb_point_t rc2,
+	xcb_point_t * restrict p, uint8_t * restrict str)
 {
-	return c < ' ' ? ' ' : c;
+	int_fast16_t line = rc1.y;
+	for (int_fast32_t i = jbxvt.scr.offset - 1 - rc1.y;
+		line <= rc2.y && i >= 0; ++line, --i) {
+		struct slinest * sl = jbxvt.scr.sline.data[i];
+		if(!sl) // prevent segfault
+			  continue;
+		const uint_fast8_t l = sl->sl_length;
+		const uint_fast8_t v = rc2.x + 1;
+		const uint_fast16_t m = (v < l ? v : l) - rc1.x;
+		// history chars already sanitized, so just use them:
+		memcpy(str, sl->sl_text + rc1.x, m);
+		p->y = repaint_generic(*p, m, rc1.x, rc2.x,
+			str, sl->sl_rend);
+	}
+	return line;
 }
 
 /* Repaint the box delimited by rc1.y to rc2.y and rc1.x to rc2.x
@@ -177,35 +201,21 @@ void repaint(xcb_point_t rc1, xcb_point_t rc2)
 {
 	LOG("repaint({%d, %d}, {%d, %d})", rc1.x, rc1.y, rc2.x, rc2.y);
 	uint8_t * str = malloc(jbxvt.scr.chars.width + 1);
-	int y = rc1.y;
-	int x1 = MARGIN + rc1.x * jbxvt.X.font_width;
-	int y1 = MARGIN + rc1.y * jbxvt.X.font_height;
-	int i;
+	xcb_point_t p = { .x = MARGIN + rc1.x * jbxvt.X.font_width,
+		.y = MARGIN + rc1.y * jbxvt.X.font_height};
 	//  First do any 'scrolled off' lines that are visible.
-	for (i = jbxvt.scr.offset - 1 - rc1.y;
-		y <= rc2.y && i >= 0; y++, i--) {
-		struct slinest * sl = jbxvt.scr.sline.data[i];
-		if(!sl) continue; // prevent segfault
-		uint16_t m = (rc2.x + 1) < sl->sl_length
-			? (rc2.x + 1) : sl->sl_length;
-		uint8_t * s = sl->sl_text;
-		m -= rc1.x;
-		for (uint16_t x = 0; x < m; x++)
-			  str[x] = convert_char(s[x + rc1.x]);
-		y1 = repaint_generic((xcb_point_t){.x=x1, .y=y1}, m, rc1.x,
-			rc2.x, str, sl->sl_rend);
-	}
+	int_fast32_t line = show_scroll_history(rc1, rc2, &p, str);
 
 	// Do the remainder from the current screen:
-	i = jbxvt.scr.offset > rc1.y ? 0 : rc1.y - jbxvt.scr.offset;
-	for (; y <= rc2.y; y++, i++) {
+	int_fast32_t i = jbxvt.scr.offset > rc1.y ? 0
+		: rc1.y - jbxvt.scr.offset;
+	for (; line <= rc2.y; ++line, ++i) {
 		uint8_t * s = jbxvt.scr.current->text[i];
-		uint8_t x;
-		for (x = rc1.x; s && x <= rc2.x; x++)
-			str[x - rc1.x] = convert_char(s[x]);
-		const uint16_t m = x - rc1.x - 1;
-		y1 = repaint_generic((xcb_point_t){.x=x1, .y=y1}, m,
-			rc1.x, rc2.x, str,
+		register uint_fast8_t x;
+		for (x = rc1.x; s && x <= rc2.x; ++x) {
+			str[x - rc1.x] = s[x] < ' ' ? ' ' : s[x];
+		}
+		p.y = repaint_generic(p, x - rc1.x - 1, rc1.x, rc2.x, str,
 			jbxvt.scr.current->rend[i]);
 	}
 	free(str);

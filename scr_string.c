@@ -24,8 +24,9 @@ static uint8_t handle_new_lines(int8_t nlcount)
 		else
 			nlcount -= jbxvt.scr.current->margin.bottom
 				- jbxvt.scr.current->cursor.y;
-		nlcount = constrain(nlcount, jbxvt.scr.current->cursor.y
-			- jbxvt.scr.current->margin.top + 1);
+		const uint8_t lim = jbxvt.scr.current->cursor.y
+			- jbxvt.scr.current->margin.top - 1;
+		nlcount = nlcount < 0 ? 0 : nlcount > lim ? lim : nlcount;
 		if (nlcount > MAX_SCROLL)
 			nlcount = MAX_SCROLL;
 		scroll(jbxvt.scr.current->margin.top,
