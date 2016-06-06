@@ -175,15 +175,12 @@ static inline uint_fast8_t convert_char(const uint_fast8_t c)
    of the displayed screen from the backup screen.  */
 void repaint(xcb_point_t rc1, xcb_point_t rc2)
 {
-	LOG("repaint(%d, %d, %d, %d)", rc1.y, rc2.y, rc1.x, rc2.x);
+	LOG("repaint({%d, %d}, {%d, %d})", rc1.x, rc1.y, rc2.x, rc2.y);
 	uint8_t * str = malloc(jbxvt.scr.chars.width + 1);
 	int y = rc1.y;
 	int x1 = MARGIN + rc1.x * jbxvt.X.font_width;
 	int y1 = MARGIN + rc1.y * jbxvt.X.font_height;
 	int i;
-	LOG("y:%d, x1:%d, y1:%d, i1: %d, i2 %d\n",
-		y, x1, y1, jbxvt.scr.offset - 1 - rc1.y,
-		rc1.y - jbxvt.scr.offset);
 	//  First do any 'scrolled off' lines that are visible.
 	for (i = jbxvt.scr.offset - 1 - rc1.y;
 		y <= rc2.y && i >= 0; y++, i--) {

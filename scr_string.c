@@ -40,11 +40,12 @@ static uint8_t handle_new_lines(int8_t nlcount)
 #endif//x86
 static void handle_insert(uint8_t n, const xcb_point_t p)
 {
+	LOG("handle_insert(n=%d, p={%d, %d})", n, p.x, p.y);
 	uint8_t * s = jbxvt.scr.current->text
 		[jbxvt.scr.current->cursor.y];
 	uint32_t * r = jbxvt.scr.current->rend
 		[jbxvt.scr.current->cursor.y];
-	for (int_fast16_t i = jbxvt.scr.chars.width - 1;
+	for (int_fast16_t i = jbxvt.scr.chars.width;
 		i >= jbxvt.scr.current->cursor.x + n; --i) {
 		s[i] = s[i - n];
 		r[i] = r[i - n];
@@ -55,7 +56,7 @@ static void handle_insert(uint8_t n, const xcb_point_t p)
 	const int16_t x2 = p.x + n * jbxvt.X.font_width;
 	if (width > 0) {
 		xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
-			jbxvt.X.gc.tx, p.x, p.y, x2, p.y, width,
+			jbxvt.X.gc.ne, p.x, p.y, x2, p.y, width,
 			jbxvt.X.font_height);
 		repair_damage();
 	}
@@ -139,7 +140,7 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 			* jbxvt.scr.current->cursor.x;
 		p.y = MARGIN + jbxvt.X.font_height
 			* jbxvt.scr.current->cursor.y;
-		for (n = 0; str[n] >= ' '; n++)
+		for (n = 0; str[n] >= ' '; ++n)
 			;
 		if (n + jbxvt.scr.current->cursor.x > jbxvt.scr.chars.width)
 			  n = jbxvt.scr.chars.width
@@ -191,7 +192,7 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 						jbxvt.scr.current
 						->margin.bottom, 1);
 				else
-					jbxvt.scr.current->cursor.y++;
+				++jbxvt.scr.current->cursor.y;
 				jbxvt.scr.current->cursor.x = 0;
 			} else {
 				jbxvt.scr.current->cursor.x
