@@ -8,12 +8,6 @@
 #include "selst.h"
 #include "slinest.h"
 
-#include <stdbool.h>
-#include <stdint.h>
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/Xlib-xcb.h>
-
 // Use for all file descriptors:
 typedef int fd_t;
 
@@ -31,7 +25,7 @@ struct JBXVT {
 			xcb_gcontext_t tx, ne, hl, cu, sb;
 		} gc;
 		struct {
-			Colormap map;
+			xcb_colormap_t map;
 			pixel_t bg, fg, cursor;
 			pixel_t current_fg, current_bg;
 		} color;

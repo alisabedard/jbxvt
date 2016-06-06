@@ -320,6 +320,7 @@ void quit(const int8_t status, const char * restrict msg)
 #else//!UTEMPTER_H
 	tidy_utmp();
 #endif//UTEMPTER_H
+	xcb_disconnect(jbxvt.X.xcb);
 	if(msg) {
 		jbputs(msg);
 		jbputs("\n");

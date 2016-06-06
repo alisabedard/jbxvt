@@ -126,7 +126,7 @@ static void handle_button_press(struct tokenst * restrict tk,
 		return;
 	}
 	if (xe->xe_window == jbxvt.X.win.sb) {
-		if (xe->xe_button == Button2) {
+		if (xe->xe_button == 2) {
 			tk->tk_type = TK_SBGOTO;
 			tk->tk_arg[0] = xe->xe_y;
 			tk->tk_nargs = 1;

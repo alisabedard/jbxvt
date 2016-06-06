@@ -22,7 +22,7 @@ static void zero_line(uint8_t * restrict s,
 	memset(r, 0, sz * sizeof(uint32_t));
 }
 
-static void get_horz_geo(XRectangle * restrict h,
+static void get_horz_geo(xcb_rectangle_t * restrict h,
 	const uint16_t sz, const uint16_t col)
 {
 	h->x = MARGIN + col * jbxvt.X.font_width;
@@ -33,7 +33,7 @@ static void get_horz_geo(XRectangle * restrict h,
 void scr_erase_line(const int8_t mode)
 {
 	home_screen();
-	XRectangle g = { .y = MARGIN + jbxvt.scr.current->cursor.y
+	xcb_rectangle_t g = { .y = MARGIN + jbxvt.scr.current->cursor.y
 			* jbxvt.X.font_height
 	};
 	uint8_t * s = jbxvt.scr.current->text[jbxvt.scr.current->cursor.y];

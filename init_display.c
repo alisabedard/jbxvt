@@ -191,14 +191,10 @@ static void init_jbxvt_colors(void)
 
 void init_display(char * name)
 {
-#if 0
-	jbxvt.X.dpy = XOpenDisplay(NULL);
-	if(!jbxvt.X.dpy)
-		  quit(1, WARN_RES RES_DPY);
-	XSetEventQueueOwner(jbxvt.X.dpy, XCBOwnsEventQueue);
-	jbxvt.X.xcb = XGetXCBConnection(jbxvt.X.dpy);
-#endif
 	jbxvt.X.xcb = xcb_connect(jbxvt.opt.display, &jbxvt.opt.screen);
+	if (xcb_connection_has_error(jbxvt.X.xcb)) {
+		quit(1, WARN_RES RES_DPY);
+	}
 	jbxvt.X.screen = xcb_setup_roots_iterator(
 		xcb_get_setup(jbxvt.X.xcb)).data;
 	const xcb_window_t root = jbxvt.X.screen->root;

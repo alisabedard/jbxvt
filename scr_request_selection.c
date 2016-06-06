@@ -76,7 +76,7 @@ void scr_request_selection(xcb_timestamp_t time, int16_t x, int16_t y)
 //  Respond to a notification that a primary selection has been sent
 void scr_paste_primary(const xcb_window_t window, const xcb_atom_t property)
 {
-	if (property == None)
+	if (property == XCB_NONE)
 		return;
 	unsigned long nread = 0, bytes_after;
 	do {

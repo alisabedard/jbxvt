@@ -2,7 +2,6 @@
 #define XEVENTST_H
 
 #include <stdint.h>
-#include <X11/Xlib.h>
 
 /*  Small X event structure used to queue interesting X events that need to
  *  be converted into tokens.

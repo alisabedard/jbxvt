@@ -7,9 +7,6 @@
 #include "jbxvt.h"
 #include "screenst.h"
 
-#include <stdint.h>
-#include <X11/Xlib.h>
-
 //  flags for scr_move()
 enum ScrMoveFlags {
 	COL_RELATIVE = 1, // column movement is relative
@@ -26,11 +23,11 @@ enum ScrDelArg { END, START, ENTIRE };
 enum RenditionStyleFlags {
 	RS_NONE = 0,
 	RS_BOLD = 1,
-	RS_ULINE = (1<<1),	
-	RS_BLINK = (1<<2),	
+	RS_ULINE = (1<<1),
+	RS_BLINK = (1<<2),
 	RS_RVID = (1<<3),
 	RS_ITALIC = (1<<4),
-	RS_LOW = (1<<5), 
+	RS_LOW = (1<<5),
 	// colors:
 	// foreground:
 	RS_F0 = (1<<6),

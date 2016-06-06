@@ -51,13 +51,13 @@ void reset_color(void)
 
 void set_fg(const char * color)
 {
-	jbxvt.X.color.current_fg = set_color(GCForeground,
+	jbxvt.X.color.current_fg = set_color(XCB_GC_FOREGROUND,
 		get_pixel(color), jbxvt.X.gc.tx);
 }
 
 void set_bg(const char * color)
 {
-	jbxvt.X.color.current_bg = set_color(GCBackground,
+	jbxvt.X.color.current_bg = set_color(XCB_GC_BACKGROUND,
 		get_pixel(color), jbxvt.X.gc.tx);
 }
 

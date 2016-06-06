@@ -18,6 +18,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <xcb/xcb_keysyms.h>
+#include <X11/keysym.h>
+#include <X11/Xutil.h>
 
 static struct {
 	// chars waiting to be sent to the command:
@@ -235,7 +237,8 @@ uint8_t * lookup_key(void * restrict ev, int16_t * restrict pcount)
 		.time = ke->time, .root = jbxvt.X.screen->root,
 		.send_event = true, .type = KeyPress,
 		.serial = ke->sequence};
-	const int16_t count = XLookupString(&xke, kbuf, KBUFSIZE, &keysym, NULL);
+	const int16_t count = XLookupString(&xke, kbuf, KBUFSIZE,
+		&keysym, NULL);
 	XCloseDisplay(xke.display);
 	xcb_flush(jbxvt.X.xcb);
 	char *s = get_s(keysym, kbuf);
