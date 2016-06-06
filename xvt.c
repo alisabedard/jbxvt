@@ -117,7 +117,6 @@ static void handle_tk_char(const uint8_t tk_char)
 		scr_tab();
 		break;
 	case '\007': // ring the bell
-		XBell(jbxvt.X.dpy,0);
 		break;
 	}
 }

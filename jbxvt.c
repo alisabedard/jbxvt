@@ -29,12 +29,18 @@ void jbputs(const char * string)
 
 static char ** parse_command_line(const int argc, char ** argv)
 {
-	static const char * optstr = "b:c:eF:f:ehvS:s";
+	static const char * optstr = "b:c:D:d:eF:f:ehvS:s";
 	int8_t opt;
 	while((opt=getopt(argc, argv, optstr)) != -1) {
 		switch (opt) {
 		case 'b': // background color
 			jbxvt.opt.bg = optarg;
+			break;
+		case 'D': // DISPLAY
+			jbxvt.opt.display = optarg;
+			break;
+		case 'd': // screen number
+			jbxvt.opt.screen = atoi(optarg);
 			break;
 		case 'c': // cursor color
 			jbxvt.opt.cu = optarg;

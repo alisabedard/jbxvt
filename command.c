@@ -223,16 +223,20 @@ static char * get_s(const xcb_keysym_t keysym, char * restrict kbuf)
 //  Convert the keypress event into a string.
 uint8_t * lookup_key(void * restrict ev, int16_t * restrict pcount)
 {
+	// FIXME: implement xcb version
 	KeySym keysym;
 	static char kbuf[KBUFSIZE];
 
 	xcb_key_press_event_t * ke = ev;
+	// Generate a fake xlib event.
 	XKeyEvent xke = {.state = ke->state, .keycode = ke->detail,
-		.window = ke->event, .display = jbxvt.X.dpy,
+	// Open a temporary display connection to use XLookupString.
+		.window = ke->event, .display = XOpenDisplay(jbxvt.opt.display),
 		.time = ke->time, .root = jbxvt.X.screen->root,
 		.send_event = true, .type = KeyPress,
 		.serial = ke->sequence};
 	const int16_t count = XLookupString(&xke, kbuf, KBUFSIZE, &keysym, NULL);
+	XCloseDisplay(xke.display);
 	xcb_flush(jbxvt.X.xcb);
 	char *s = get_s(keysym, kbuf);
 	if (s) {

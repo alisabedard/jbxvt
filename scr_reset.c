@@ -62,14 +62,11 @@ static void init_screen_elements(struct screenst * restrict scr,
 
 static Size get_dim(void)
 {
-	Window dw;
-	int d;
-	unsigned int w, h, u;
-
-	XGetGeometry(jbxvt.X.dpy, jbxvt.X.win.vt, &dw, &d, &d,
-		&w, &h, &u, &u);
-
-	return (Size){.width = w, .height = h};
+	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(jbxvt.X.xcb,
+		xcb_get_geometry(jbxvt.X.xcb, jbxvt.X.win.vt), NULL);
+	Size s = {.w = r->width, .h = r->height};
+	free(r);
+	return s;
 }
 
 __attribute__((pure))

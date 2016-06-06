@@ -19,9 +19,10 @@ typedef int fd_t;
 
 struct JBXVT {
 	struct {
-		Display * dpy;
+		//Display * dpy;
 		xcb_connection_t * xcb;
 		xcb_screen_t * screen;
+		int screen_number;
 		xcb_font_t font;
 		struct {
 			xcb_window_t vt, sb, main;
@@ -72,7 +73,8 @@ struct JBXVT {
 		uint16_t send_count; // # chars waiting to be sent
 	} com;
 	struct {
-		char *bg, *fg, *cu, *font;
+		char *bg, *fg, *cu, *font, *display;
+		int screen;
 		bool show_scrollbar:1;
 	} opt;
 };
