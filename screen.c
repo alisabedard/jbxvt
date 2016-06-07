@@ -4,29 +4,16 @@
 #include "screen.h"
 
 #include "change_offset.h"
-#include "command.h"
 #include "config.h"
 #include "cursor.h"
-#include "jbxvt.h"
 #include "repaint.h"
-#include "repair_damage.h"
 #include "sbar.h"
 #include "scroll.h"
-#include "selection.h"
-#include "selst.h"
 #include "scr_move.h"
 #include "scr_reset.h"
-#include "screenst.h"
-#include "slinest.h"
-#include "ttyinit.h"
-#include "xsetup.h"
-#include "xvt.h"
+#include "selection.h"
 
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <sys/utsname.h>
-
 
 /*  Perform any initialisation on the screen data structures.
     Called just once at startup. */
