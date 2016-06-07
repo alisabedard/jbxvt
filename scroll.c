@@ -6,7 +6,6 @@
 #include "config.h"
 #include "jbxvt.h"
 #include "log.h"
-#include "repair_damage.h"
 #include "sbar.h"
 #include "screen.h"
 #include "selection.h"
@@ -153,7 +152,6 @@ static void cp_repair(const uint8_t row1, const uint8_t row2,
 		height);
 	// the above blocks the event queue, flush it
 	xcb_flush(jbxvt.X.xcb);
-	repair_damage();
 }
 
 static void sc_up(const uint8_t row1, uint8_t row2,

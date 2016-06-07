@@ -205,29 +205,23 @@ void repaint(xcb_point_t rc1, xcb_point_t rc2)
 		.y = MARGIN + rc1.y * jbxvt.X.font_height};
 	// Allocate enough space to process each column, plus wrap byte.
 	uint8_t str[jbxvt.scr.chars.width + 1];
-//	uint8_t * str = malloc(jbxvt.scr.chars.width + 1);
 	//  First do any 'scrolled off' lines that are visible.
 	int_fast32_t line = show_scroll_history(rc1, rc2, &p, str);
 
 	// Do the remainder from the current screen:
 	int_fast32_t i = jbxvt.scr.offset > rc1.y ? 0
 		: rc1.y - jbxvt.scr.offset;
+
 	for (; line <= rc2.y; ++line, ++i) {
 		uint8_t * s = jbxvt.scr.current->text[i];
-		uint8_t m = rc2.x - rc1.x;
-		memcpy(str - rc1.x, s, m);
-		register int_fast16_t c;
-		for(c = m; c && s[c] < ' '; --c);
-			  ; // eliminate junk after '\0' and find length
-		// the above reduces the iterations which follow:
-		for(m = c; c >= 0; --c) // fix interior bad chars
-			  if (s[c] < ' ')
-				    str[c - rc1.x] = ' ';
-		p.y = repaint_generic(p, m + 1, rc1.x, rc2.x, str,
+		register uint_fast8_t x;
+		for (x = rc1.x; s && x <= rc2.x; x++)
+			str[x - rc1.x] = s[x] < ' ' ? ' ' : s[x];
+		const uint16_t m = x - rc1.x - 1;
+		p.y = repaint_generic(p, m, rc1.x, rc2.x, str,
 			jbxvt.scr.current->rend[i]);
 	}
 	xcb_flush(jbxvt.X.xcb);
-//	free(str);
 	show_selection(rc1.y,rc2.y,rc1.x,rc2.x);
 }
 

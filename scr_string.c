@@ -8,7 +8,6 @@
 #include "jbxvt.h"
 #include "log.h"
 #include "repaint.h"
-#include "repair_damage.h"
 #include "screen.h"
 #include "scroll.h"
 #include "selection.h"
@@ -59,7 +58,6 @@ static void handle_insert(uint8_t n, const xcb_point_t p)
 		xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
 			jbxvt.X.gc.tx, p.x, p.y, x2, p.y, width,
 			jbxvt.X.font_height);
-		repair_damage();
 	}
 }
 

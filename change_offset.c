@@ -7,12 +7,11 @@
 #include "cursor.h"
 #include "jbxvt.h"
 #include "repaint.h"
-#include "repair_damage.h"
 #include "sbar.h"
 #include "screen.h"
 
 // Text has moved down by less than a screen, render lines that remain
-static void copy_repaint_repair(const int16_t d, const int16_t y1,
+static void copy_repaint(const int16_t d, const int16_t y1,
 	const int16_t y2, const int row1, const int row2)
 {
 	const uint16_t height = (jbxvt.scr.chars.height - d)
@@ -22,7 +21,6 @@ static void copy_repaint_repair(const int16_t d, const int16_t y1,
 		height);
 	repaint((xcb_point_t){.y=row1}, (xcb_point_t){.y=row2,
 		.x=jbxvt.scr.chars.width-1});
-	repair_damage();
 }
 
 //  Change the value of the scrolled screen offset and repaint the screen
@@ -40,14 +38,14 @@ void change_offset(int16_t n)
 	if (d > 0 && d < jbxvt.scr.chars.height) {
 		/*  Text has moved down by less than a screen so raster
 		 *  the lines that did not move off.  */
-		copy_repaint_repair(d, MARGIN,
+		copy_repaint(d, MARGIN,
 			MARGIN + d * jbxvt.X.font_height,
 			0, d - 1);
 	} else if (d < 0 && -d < jbxvt.scr.chars.height) {
 		/*  Text has moved down by less than a screen so raster
 		 *  the lines that did not move off.  */
 		d = -d;
-		copy_repaint_repair(d, MARGIN + d * jbxvt.X.font_height,
+		copy_repaint(d, MARGIN + d * jbxvt.X.font_height,
 			MARGIN, jbxvt.scr.chars.height - d,
 			jbxvt.scr.chars.height - 1);
 	} else

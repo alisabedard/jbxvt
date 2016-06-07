@@ -7,7 +7,6 @@
 #include "cursor.h"
 #include "jbxvt.h"
 #include "log.h"
-#include "repair_damage.h"
 #include "screen.h"
 #include "selection.h"
 
@@ -20,7 +19,6 @@ static void copy_area(const int16_t * restrict x, const int16_t y,
 		xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
 			jbxvt.X.gc.tx, x[0], y, x[1], y, width,
 			jbxvt.X.font_height);
-		repair_damage();
 	}
 }
 
