@@ -6,7 +6,9 @@
 
 #define VERSION "0.2" // Overall release number of the current version
 
-#define DEF_FONT "lucidasanstypewriter-10"
+#define DEF_FONT "-*-terminus-medium-r-*-*-14-*-*-*-*-*-iso10646-*"
+#define BOLD_FONT "-*-terminus-bold-r-*-*-14-*-*-*-*-*-iso10646-*"
+
 #define TERM_ENV "xterm" // TERM env var to set
 #define COMMAND "/bin/sh" // default command to run
 

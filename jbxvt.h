@@ -18,11 +18,12 @@ struct JBXVT {
 		xcb_screen_t * screen;
 		int screen_number;
 		xcb_font_t font;
+		xcb_font_t bold_font;
 		struct {
 			xcb_window_t vt, sb, main;
 		} win;
 		struct {
-			xcb_gcontext_t tx, ne, hl, cu, sb;
+			xcb_gcontext_t tx, hl, cu;
 		} gc;
 		struct {
 			xcb_colormap_t map;
@@ -67,7 +68,7 @@ struct JBXVT {
 		uint16_t send_count; // # chars waiting to be sent
 	} com;
 	struct {
-		char *bg, *fg, *cu, *font, *display;
+		char *bg, *fg, *cu, *font, *bold_font, *display;
 		int screen;
 		bool show_scrollbar:1;
 	} opt;

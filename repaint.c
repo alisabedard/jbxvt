@@ -106,6 +106,7 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 	uint8_t len, xcb_point_t p)
 {
 	const bool rvid = rval & RS_RVID || rval & RS_BLINK;
+	const bool bold = rval & RS_BOLD;
 	bool cmod = set_rval_colors(rval);
 	if (rvid) { // Reverse looked up colors.
 		xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, XCB_GC_FOREGROUND
@@ -114,25 +115,23 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 		cmod = true;
 	}
 	p.y+= jbxvt.X.font_ascent;
-
-	// Draw text with background:
-	xcb_image_text_8(jbxvt.X.xcb, len, jbxvt.X.win.vt, jbxvt.X.gc.tx,
-		p.x, p.y, (const char *)str);
-
-#if 0
-	if (rval & RS_BOLD) { // Fake bold:
-		// FIXME: no proper xcb equivalent
-		XDrawString(jbxvt.X.dpy,jbxvt.X.win.vt,
-			jbxvt.X.gc.tx, p.x + 1, p.y,
-			(const char *)str,len);
+	if(bold) {
+		xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, XCB_GC_FONT,
+			&(uint32_t){jbxvt.X.bold_font});
 	}
-#endif
-
+	// Draw text with background:
+	xcb_image_text_8(jbxvt.X.xcb, len, jbxvt.X.win.vt,
+		jbxvt.X.gc.tx, p.x, p.y, (const char *)str);
 	++p.y; // Advance for underline, use underline for italic.
-	if (rval & RS_ULINE || rval & RS_ITALIC) {
+	if (rval & RS_ULINE || unlikely(rval & RS_ITALIC)) {
 		xcb_poly_line(jbxvt.X.xcb, XCB_COORD_MODE_ORIGIN,
 			jbxvt.X.win.vt, jbxvt.X.gc.tx, 2, (xcb_point_t[]){
 			{p.x, p.y}, {p.x + len * jbxvt.X.font_width, p.y}});
+		xcb_flush(jbxvt.X.xcb);
+	}
+	if(bold) { // restore font
+		xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, XCB_GC_FONT,
+			&(uint32_t){jbxvt.X.font});
 	}
 	if (cmod) {
 		set_fg(NULL);
@@ -150,10 +149,12 @@ static void paint_rvec_text(uint8_t * str,
 	}
 	while (len > 0) {
 		uint_fast16_t i;
-		for (i = 0; i < len; ++i)
-			if (rvec[i] != rvec[0])
-				break;
+		// find the length for which the current rend val applies
+		for (i = 0; i < len && rvec[i] == *rvec; ++i)
+			  ;
+		// draw
 		paint_rval_text(str,rvec[0], i, p);
+		// advance
 		str += i;
 		rvec += i;
 		len -= i;
@@ -217,6 +218,7 @@ void repaint(xcb_point_t rc1, xcb_point_t rc2)
 		register int_fast16_t c;
 		for(c = m; c && s[c] < ' '; --c);
 			  ; // eliminate junk after '\0' and find length
+		// the above reduces the iterations which follow:
 		for(m = c; c >= 0; --c) // fix interior bad chars
 			  if (s[c] < ' ')
 				    str[c - rc1.x] = ' ';

@@ -57,7 +57,7 @@ static void handle_insert(uint8_t n, const xcb_point_t p)
 	const int16_t x2 = p.x + n * jbxvt.X.font_width;
 	if (width > 0) {
 		xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
-			jbxvt.X.gc.ne, p.x, p.y, x2, p.y, width,
+			jbxvt.X.gc.tx, p.x, p.y, x2, p.y, width,
 			jbxvt.X.font_height);
 		repair_damage();
 	}

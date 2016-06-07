@@ -45,11 +45,17 @@
 static void setup_font(void)
 {
 	jbxvt.X.font = xcb_generate_id(jbxvt.X.xcb);
+	jbxvt.X.bold_font = xcb_generate_id(jbxvt.X.xcb);
 	char *fn = jbxvt.opt.font?jbxvt.opt.font:DEF_FONT;
+	char *bfn = jbxvt.opt.bold_font?jbxvt.opt.bold_font:BOLD_FONT;
 	size_t l = 0;
 	while(fn[++l]);
 	xcb_void_cookie_t c = xcb_open_font_checked(jbxvt.X.xcb,
 		jbxvt.X.font, l, fn);
+	l = 0;
+	while(bfn[++l]);
+	xcb_void_cookie_t b = xcb_open_font_checked(jbxvt.X.xcb,
+		jbxvt.X.bold_font, l, bfn);
 	xcb_query_font_cookie_t qfc = xcb_query_font(jbxvt.X.xcb,
 		jbxvt.X.font);
 	xcb_generic_error_t * error = xcb_request_check(jbxvt.X.xcb, c);
@@ -63,6 +69,9 @@ static void setup_font(void)
 	free(r);
 	jbxvt.X.font_height = jbxvt.X.font_ascent
 		+ jbxvt.X.font_descent;
+	error = xcb_request_check(jbxvt.X.xcb, b);
+	if(error) // use normal font if bold not available.
+		  jbxvt.X.bold_font = jbxvt.X.font;
 }
 
 // free the returned value
@@ -152,27 +161,18 @@ static void create_window(uint8_t * restrict name, const Window root)
 static void setup_gcs(void)
 {
 	jbxvt.X.gc.tx = xcb_generate_id(jbxvt.X.xcb);
-	jbxvt.X.gc.ne = xcb_generate_id(jbxvt.X.xcb);
-	jbxvt.X.gc.sb = xcb_generate_id(jbxvt.X.xcb);
 	jbxvt.X.gc.hl = xcb_generate_id(jbxvt.X.xcb);
 	jbxvt.X.gc.cu = xcb_generate_id(jbxvt.X.xcb);
 	xcb_create_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, jbxvt.X.win.main,
 		XCB_GC_FOREGROUND | XCB_GC_BACKGROUND
 		| XCB_GC_FONT, (uint32_t[]){jbxvt.X.color.fg,
 		jbxvt.X.color.bg, jbxvt.X.font});
-	xcb_create_gc(jbxvt.X.xcb, jbxvt.X.gc.ne, jbxvt.X.win.main,
-		XCB_GC_GRAPHICS_EXPOSURES, &(uint32_t){1});
-	xcb_create_gc(jbxvt.X.xcb, jbxvt.X.gc.sb, jbxvt.X.win.main, 0, NULL);
-	xcb_create_gc(jbxvt.X.xcb, jbxvt.X.gc.hl, jbxvt.X.win.main,
-		XCB_GC_FUNCTION | XCB_GC_PLANE_MASK, (uint32_t[]){
-		XCB_GX_INVERT, jbxvt.X.color.fg ^ jbxvt.X.color.bg});
 	xcb_create_gc(jbxvt.X.xcb, jbxvt.X.gc.cu, jbxvt.X.win.main,
 		XCB_GC_FUNCTION | XCB_GC_PLANE_MASK, (uint32_t[]){
 		XCB_GX_INVERT, jbxvt.X.color.cursor ^ jbxvt.X.color.bg});
-	xcb_copy_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, jbxvt.X.gc.ne,
-		XCB_GC_FOREGROUND | XCB_GC_BACKGROUND);
-	xcb_copy_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, jbxvt.X.gc.sb,
-		XCB_GC_FOREGROUND | XCB_GC_BACKGROUND);
+	xcb_create_gc(jbxvt.X.xcb, jbxvt.X.gc.hl, jbxvt.X.win.main,
+		XCB_GC_FUNCTION | XCB_GC_PLANE_MASK, (uint32_t[]){
+		XCB_GX_INVERT, jbxvt.X.color.fg ^ jbxvt.X.color.bg});
 }
 
 static void init_jbxvt_colors(void)
