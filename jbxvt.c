@@ -77,16 +77,6 @@ static char ** parse_command_line(const int argc, char ** argv)
 	return NULL;
 }
 
-// constrain rc between 0 and lim, return new value
-uint_fast32_t constrain(const int_fast32_t rc, const int_fast32_t lim)
-{
-	if (rc < 0) // guarantee unsigned
-		  return 0;
-	else if (rc >= lim) // cap
-		  return lim - 1;
-	return rc; // falls within range
-}
-
 /*  Run the command in a subprocess and return a file descriptor for the
  *  master end of the pseudo-teletype pair with the command talking to
  *  the slave.  */

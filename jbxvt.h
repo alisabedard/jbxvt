@@ -88,13 +88,4 @@ void jbputs(const char * string);
 #define unlikely(x) (x)
 #endif//USE_LIKELY
 
-// constrain rc between 0 and lim, return new value
-// use fast wide int type as this is used in various places.
-uint_fast32_t constrain(const int_fast32_t rc, const int_fast32_t lim)
-#if defined(__i386__) || defined(__amd64__)
-	__attribute__((const,regparm(2),warn_unused_result));
-#else
-	__attribute__((const,warn_unused_result));
-#endif//__i386__||__amd64__
-
 #endif//!JBXVT_H

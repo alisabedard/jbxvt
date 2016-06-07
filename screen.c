@@ -105,10 +105,11 @@ static void scroll_lower_lines(const int8_t count)
 		scroll_up_scr_bot(count, false));
 }
 
-static inline int8_t get_insertion_count(const int8_t count)
+static inline uint8_t get_insertion_count(const int8_t count)
 {
-	return constrain(count, jbxvt.scr.current->margin.bottom
-		- jbxvt.scr.current->cursor.y + 1);
+	const uint8_t lim = jbxvt.scr.current->margin.bottom
+		- jbxvt.scr.current->cursor.y;
+	return count < 0 ? 0 : count > lim ? lim : count;
 }
 
 /*  Insert count blank lines at the current position
@@ -122,18 +123,6 @@ void scr_insert_lines(const int8_t count)
 	scroll_lower_lines(get_insertion_count(count));
 	jbxvt.scr.current->wrap_next = 0;
 	cursor(CURSOR_DRAW);
-}
-
-//  Attempt to set the top and bottom scroll margins.
-void scr_set_margins(const uint16_t top, const uint16_t bottom)
-{
-	const uint16_t b = constrain(bottom, jbxvt.scr.chars.height);
-
-	if (top > b) return;
-
-	jbxvt.scr.current->margin.top = top;
-	jbxvt.scr.current->margin.bottom = b;
-	scr_move(0,0,0);
 }
 
 //  Move the display by a distance represented by the value.

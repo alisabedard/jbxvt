@@ -98,7 +98,7 @@ void scr_index_by(const int8_t mod);
 #define scr_index() scr_index_by(1)
 #define scr_rindex() scr_index_by(-1)
 /*  Perform any initialisation on the screen data structures.  Called just once
- *  at startup. */ 
+ *  at startup. */
 void scr_init(void);
 
 /*  Insert count blank lines at the current position and scroll the lower lines
@@ -112,6 +112,4 @@ void scr_move_to(int16_t y);
 //  Send the name of the current display to the command.
 void scr_report_display(void);
 
-//  Attempt to set the top ans bottom scroll margins.
-void scr_set_margins(const uint16_t top, const uint16_t bottom);
 #endif//!SCREEN_H

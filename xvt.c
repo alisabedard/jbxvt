@@ -8,9 +8,9 @@
 #include "command.h"
 #include "cursor.h"
 #include "handle_sgr.h"
-#include "jbxvt.h"
 #include "log.h"
 #include "sbar.h"
+#include "screen.h"
 #include "scr_delete_characters.h"
 #include "scr_erase.h"
 #include "scr_extend_selection.h"
@@ -21,7 +21,6 @@
 #include "scr_reset.h"
 #include "scr_string.h"
 #include "scr_tab.h"
-#include "screen.h"
 #include "selection.h"
 #include "token.h"
 #include "ttyinit.h"
@@ -121,7 +120,6 @@ static void handle_tk_char(const uint8_t tk_char)
 	}
 }
 
-//static void handle_tk_expose(struct tokenst * restrict t __attribute__((unused)))
 static void handle_tk_expose(struct tokenst * restrict t)
 {
 	LOG("handle_tk_expose()");
@@ -204,19 +202,19 @@ app_loop_head:
 		change_offset(jbxvt.scr.offset - t[0] / jbxvt.X.font_height);
 		break;
 	case TK_SELSTART :
-		scr_start_selection((xcb_point_t){.x = t[0], .y = t[1]}, CHAR);
+		scr_start_selection((xcb_point_t){t[0], t[1]}, CHAR);
 		break;
 	case TK_SELEXTND :
-		scr_extend_selection((xcb_point_t){.x = t[0], .y = t[1]}, false);
+		scr_extend_selection((xcb_point_t){t[0], t[1]}, false);
 		break;
 	case TK_SELDRAG :
-		scr_extend_selection((xcb_point_t){.x = t[0], .y = t[1]}, true);
+		scr_extend_selection((xcb_point_t){t[0], t[1]}, true);
 		break;
 	case TK_SELWORD :
-		scr_start_selection((xcb_point_t){.x = t[0], .y = t[1]}, WORD);
+		scr_start_selection((xcb_point_t){t[0], t[1]}, WORD);
 		break;
 	case TK_SELLINE :
-		scr_start_selection((xcb_point_t){.x = t[0], .y = t[1]}, LINE);
+		scr_start_selection((xcb_point_t){t[0], t[1]}, LINE);
 		break;
 	case TK_SELECT :
 		LOG("TK_SELECT");
@@ -316,7 +314,9 @@ app_loop_head:
 		break;
 	case TK_DECSTBM: // set top and bottom margins.
 		LOG("TK_DECSTBM");
-		scr_set_margins(t[0] - 1, t[1] - 1);
+		jbxvt.scr.current->margin = (Size){.top = t[0] - 1,
+			.bottom = t[1] - 1};
+		scr_move(0, 0, 0);
 		break;
 	case TK_DECSC :
 		LOG("TK_DECSC");

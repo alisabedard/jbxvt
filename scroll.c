@@ -169,8 +169,9 @@ static void sc_up(const uint8_t row1, uint8_t row2,
 			set_selend_index(iter.y, count, &jbxvt.sel.end2);
 		}
 		sc_up_cp_rows(count);
-		jbxvt.scr.sline.top = constrain(jbxvt.scr.sline.top
-			+ count, jbxvt.scr.sline.max + 1);
+		uint16_t t = jbxvt.scr.sline.top + count;
+		uint16_t max = jbxvt.scr.sline.max;
+		jbxvt.scr.sline.top = likely(t < max) ? t : max;
 		sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1,
 			jbxvt.scr.offset, jbxvt.scr.offset
 			+ jbxvt.scr.chars.height - 1);
