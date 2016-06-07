@@ -11,6 +11,7 @@
 #include "screen.h"
 
 // constrain rc between 0 and lim, return new value
+__attribute__((const))
 static uint_fast32_t constrain(const int_fast32_t rc, const int_fast32_t lim)
 {
 	if (rc < 0) // guarantee unsigned

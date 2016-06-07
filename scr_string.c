@@ -16,22 +16,20 @@
 
 static uint8_t handle_new_lines(int8_t nlcount)
 {
-	if (nlcount > 0) {
-		if (jbxvt.scr.current->cursor.y
-			> jbxvt.scr.current->margin.bottom)
-			nlcount = 0;
-		else
-			nlcount -= jbxvt.scr.current->margin.bottom
-				- jbxvt.scr.current->cursor.y;
-		const uint8_t lim = jbxvt.scr.current->cursor.y
-			- jbxvt.scr.current->margin.top - 1;
-		nlcount = nlcount < 0 ? 0 : nlcount > lim ? lim : nlcount;
-		if (nlcount > MAX_SCROLL)
-			nlcount = MAX_SCROLL;
-		scroll(jbxvt.scr.current->margin.top,
-			jbxvt.scr.current->margin.bottom,nlcount);
-		jbxvt.scr.current->cursor.y -= nlcount;
-	}
+	if (jbxvt.scr.current->cursor.y
+		> jbxvt.scr.current->margin.bottom)
+		  nlcount = 0;
+	else
+		  nlcount -= jbxvt.scr.current->margin.bottom
+			  - jbxvt.scr.current->cursor.y;
+	const uint8_t lim = jbxvt.scr.current->cursor.y
+		- jbxvt.scr.current->margin.top - 1;
+	nlcount = nlcount < 0 ? 0 : nlcount > lim ? lim : nlcount;
+	if (nlcount > MAX_SCROLL)
+		  nlcount = MAX_SCROLL;
+	scroll(jbxvt.scr.current->margin.top,
+		jbxvt.scr.current->margin.bottom,nlcount);
+	jbxvt.scr.current->cursor.y -= nlcount;
 	return nlcount;
 }
 
@@ -82,12 +80,13 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 	LOG("scr_string(s, len: %d, nlcount: %d)\n", len, nlcount);
 #endif//SCR_DEBUG
 	uint8_t *s;
-	int_fast32_t n, i;
+	int_fast32_t n;
 	xcb_point_t p;
 
 	home_screen();
 	cursor(CURSOR_DRAW);
-	nlcount = handle_new_lines(nlcount);
+	if (nlcount > 0)
+		  nlcount = handle_new_lines(nlcount);
 	while (len) {
 		switch(*str) {
 		case '\n':
@@ -97,7 +96,7 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 					  jbxvt.scr.current->margin.bottom,1);
 			else if (jbxvt.scr.current->cursor.y
 				< jbxvt.scr.chars.height - 1)
-				  jbxvt.scr.current->cursor.y++;
+				  ++jbxvt.scr.current->cursor.y;
 			check_selection(jbxvt.scr.current->cursor.y,
 				jbxvt.scr.current->cursor.y);
 			jbxvt.scr.current->wrap_next = 0;
@@ -122,7 +121,7 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 				while (jbxvt.scr.current->cursor.x % 8
 					&& jbxvt.scr.current->cursor.x
 					< jbxvt.scr.chars.width - 1)
-					  jbxvt.scr.current->cursor.x++;
+					  ++jbxvt.scr.current->cursor.x;
 			}
 			--len;
 			++str;
@@ -156,19 +155,16 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 #endif//SCR_DEBUG
 
 		paint_rval_text(str,jbxvt.scr.rstyle,n,p);
-		if (jbxvt.scr.rstyle == 0)
-			memset(jbxvt.scr.current->rend
-				[jbxvt.scr.current->cursor.y]
-				+ jbxvt.scr.current->cursor.x,
-				0,n*sizeof(uint32_t));
-		else {
-			for (i = 0; i < n; i++)
+		if (jbxvt.scr.rstyle) {
+			for (uint_fast8_t i = 0; i < n; ++i) {
+				// cannot use memset, since rstyle > 1 byte
 				jbxvt.scr.current->rend
 					[jbxvt.scr.current->cursor.y]
 					[jbxvt.scr.current->cursor.x + i]
-					= jbxvt.scr.rstyle;
+						= jbxvt.scr.rstyle;
+			}
 			jbxvt.scr.current->rend[jbxvt.scr.current->cursor.y]
-				[jbxvt.scr.chars.width] = 1;
+				[jbxvt.scr.chars.width] = jbxvt.scr.rstyle;
 		}
 		len -= n;
 		str += n;
