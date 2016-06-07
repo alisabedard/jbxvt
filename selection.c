@@ -133,9 +133,15 @@ void fix_rc(xcb_point_t * restrict rc)
 {
 	if(!jbxvt.scr.chars.height || !jbxvt.scr.chars.width)
 		  return; // prevent segfault on bad window size.
-	rc->y = constrain(rc->y, jbxvt.scr.chars.height);
-	rc->x = find_c(constrain(rc->x, jbxvt.scr.chars.width),
-		rc->y - jbxvt.scr.offset);
+	if (rc->x < 0)
+		  rc->x = 0;
+	else if (rc->x >= jbxvt.scr.chars.width)
+		  rc->x = jbxvt.scr.chars.width - 1;
+	if (rc->y < 0)
+		  rc->y = 0;
+	else if (rc->y >= jbxvt.scr.chars.height)
+		  rc->y = jbxvt.scr.chars.height - 1;
+	rc->x = find_c(rc->x, rc->y - jbxvt.scr.offset);
 }
 
 //  Convert the selection into a row and column.

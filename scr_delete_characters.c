@@ -30,7 +30,8 @@ void scr_delete_characters(int count)
 	LOG("scr_delete_characters(%d)", count);
 	const uint8_t scw = jbxvt.scr.chars.width;
 	const xcb_point_t c = jbxvt.scr.current->cursor;
-	count = constrain(count, scw - c.y + 1);
+	if (count > scw - c.y)
+		  count = scw - c.y;
 	if(!count) return;
 	home_screen();
 	cursor(CURSOR_DRAW);

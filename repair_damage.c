@@ -23,9 +23,12 @@ static Bool grexornoex(Display * restrict dpy __attribute__((unused)),
 //  Check for and repair any damage after copying an area of the window.
 void repair_damage(void)
 {
+	return;
+#if 0
 	repaint((xcb_point_t){}, (xcb_point_t){
 		.x = jbxvt.scr.chars.width - 1,
 		.y = jbxvt.scr.chars.height - 1});
+#endif
 #if 0
 	return;
 	uint8_t count = 0;

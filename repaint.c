@@ -204,7 +204,8 @@ void repaint(xcb_point_t rc1, xcb_point_t rc2)
 	xcb_point_t p = { .x = MARGIN + rc1.x * jbxvt.X.font_width,
 		.y = MARGIN + rc1.y * jbxvt.X.font_height};
 	// Allocate enough space to process each column, plus wrap byte.
-	uint8_t * str = malloc(jbxvt.scr.chars.width + 1);
+	uint8_t str[jbxvt.scr.chars.width + 1];
+//	uint8_t * str = malloc(jbxvt.scr.chars.width + 1);
 	//  First do any 'scrolled off' lines that are visible.
 	int_fast32_t line = show_scroll_history(rc1, rc2, &p, str);
 
@@ -225,7 +226,8 @@ void repaint(xcb_point_t rc1, xcb_point_t rc2)
 		p.y = repaint_generic(p, m + 1, rc1.x, rc2.x, str,
 			jbxvt.scr.current->rend[i]);
 	}
-	free(str);
+	xcb_flush(jbxvt.X.xcb);
+//	free(str);
 	show_selection(rc1.y,rc2.y,rc1.x,rc2.x);
 }
 
