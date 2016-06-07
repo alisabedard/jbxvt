@@ -29,10 +29,13 @@ void jbputs(const char * string)
 
 static char ** parse_command_line(const int argc, char ** argv)
 {
-	static const char * optstr = "b:c:D:d:eF:f:ehvS:s";
+	static const char * optstr = "B:b:c:D:d:eF:f:ehvS:s";
 	int8_t opt;
 	while((opt=getopt(argc, argv, optstr)) != -1) {
 		switch (opt) {
+		case 'B': // bold font
+			jbxvt.opt.bold_font = optarg;
+			break;
 		case 'b': // background color
 			jbxvt.opt.bg = optarg;
 			break;
