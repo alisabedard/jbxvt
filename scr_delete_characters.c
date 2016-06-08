@@ -33,7 +33,6 @@ void scr_delete_characters(int count)
 	if(!count) return;
 	home_screen();
 	cursor(CURSOR_DRAW);
-	check_selection(c.y, c.y);
 	uint8_t * s = jbxvt.scr.current->text[c.y];
 	uint32_t * r = jbxvt.scr.current->rend[c.y];
 	for (uint8_t i = c.x + count; i < scw; i++) {

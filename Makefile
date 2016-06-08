@@ -42,7 +42,7 @@ OBJS+=sbar.o scr_delete_characters.o scr_erase.o scr_extend_selection.o
 OBJS+=scr_insert_characters.o scr_move.o scr_refresh.o
 OBJS+=scr_request_selection.o scr_reset.o scr_string.o scr_tab.o screen.o
 OBJS+=scroll.o selcmp.o selection.o show_selection.o ttyinit.o
-OBJS+=wm_del_win.o xevents.o xsetup.o xvt.o handle_sgr.o scroll_up.o
+OBJS+=wm_del_win.o xevents.o xsetup.o xvt.o handle_sgr.o
 CFLAGS+=-D_XOPEN_SOURCE=700 --std=c99
 CFLAGS+=-Wall -Wextra
 $(exe): $(OBJS)

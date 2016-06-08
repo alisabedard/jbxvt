@@ -9,7 +9,6 @@
 #include "log.h"
 #include "repaint.h"
 #include "sbar.h"
-#include "scroll_up.h"
 #include "selection.h"
 #include "ttyinit.h"
 

@@ -186,13 +186,13 @@ uint8_t * convert_line(uint8_t * restrict str,
 	i2 = compute_i2(*lenp, i1, i2, str);
 	static uint8_t buf[MAX_WIDTH + 3];
 	uint8_t *s = buf;
-	for (; i1 <= i2; i1++) {
+	for (; i1 <= i2; ++i1) {
 		if (str[i1] >= ' ')
 			*s++ = str[i1];
 		else if (str[i1] == '\t') {
 			*s++ = '\t';
 			while (i1 < i2 && str[i1 + 1] == 0)
-				i1++;
+				++i1;
 		} else
 			*s++ = ' ';
 	}
@@ -220,14 +220,14 @@ static void adj_sel_to_word(struct selst * include,
 		: jbxvt.scr.sline.data[se1->se_index]->sl_text;
 	int16_t i = se1->se_col;
 	while (i && s[i] != ' ')
-		  i--;
+		  --i;
 	se1->se_col = i?i+1:0;
 	i = se2->se_col;
 	if (se2 == include || !selcmp(se2,&jbxvt.sel.anchor))
-		  i++;
+		  ++i;
 	const uint16_t len = sel_s(se2, &s);
 	while (i < len && s[i] && s[i] != ' ' && s[i] != '\n')
-		  i++;
+		  ++i;
 	se2->se_col = i;
 
 }

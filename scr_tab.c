@@ -15,8 +15,6 @@ void scr_tab(void)
 	if (jbxvt.scr.current->cursor.x == jbxvt.scr.chars.width - 1)
 		return;
 	cursor(CURSOR_DRAW);
-	check_selection(jbxvt.scr.current->cursor.y,
-		jbxvt.scr.current->cursor.y);
 	if (jbxvt.scr.current->text[jbxvt.scr.current->cursor.y]
 		[jbxvt.scr.current->cursor.x] == 0)
 		jbxvt.scr.current->text[jbxvt.scr.current->cursor.y]

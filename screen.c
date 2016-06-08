@@ -68,8 +68,6 @@ void scr_index_by(const int8_t mod)
 	else
 		jbxvt.scr.current->cursor.y += mod;
 	jbxvt.scr.current->wrap_next = 0;
-	check_selection(jbxvt.scr.current->cursor.y,
-		jbxvt.scr.current->cursor.y);
 	cursor(CURSOR_DRAW);
 }
 
