@@ -85,7 +85,7 @@ enum RenditionStyleFlags {
 void home_screen(void);
 
 //  Change the rendition style.
-void scr_change_rendition(const uint32_t style);
+void scr_style(const uint32_t style);
 
 //  Change between the alternate and the main screens
 //  mode_high is true for screen 2

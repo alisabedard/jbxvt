@@ -43,7 +43,7 @@ void scr_change_screen(const bool mode_high)
 }
 
 //  Change the rendition style.
-void scr_change_rendition(const uint32_t style)
+void scr_style(const uint32_t style)
 {
 	// This allows combining styles, 0 resets
 	jbxvt.scr.rstyle = style ? jbxvt.scr.rstyle | style : 0;
@@ -107,7 +107,8 @@ static inline uint8_t get_insertion_count(const int8_t count)
 {
 	const uint8_t lim = jbxvt.scr.current->margin.bottom
 		- jbxvt.scr.current->cursor.y;
-	return count < 0 ? 0 : count > lim ? lim : count;
+	return unlikely(count < 0) ? 0
+		: unlikely(count > lim) ? lim : count;
 }
 
 /*  Insert count blank lines at the current position
@@ -132,14 +133,14 @@ void scr_move_by(const int16_t y)
 //  Reposition the scrolled text so that the scrollbar is at the bottom.
 void home_screen(void)
 {
-	if (jbxvt.scr.offset) {
-		jbxvt.scr.offset = 0;
-		xcb_point_t rc = { .y = jbxvt.scr.chars.height - 1,
-			.x = jbxvt.scr.chars.width - 1
-		};
-		repaint((xcb_point_t){}, rc);
-		cursor(CURSOR_DRAW);
-		sbar_show(rc.y + jbxvt.scr.sline.top, 0, rc.y);
-	}
+	if (likely(!jbxvt.scr.offset))
+		  return;
+	jbxvt.scr.offset = 0;
+	xcb_point_t rc = { .y = jbxvt.scr.chars.height - 1,
+		.x = jbxvt.scr.chars.width - 1
+	};
+	repaint((xcb_point_t){}, rc);
+	cursor(CURSOR_DRAW);
+	sbar_show(rc.y + jbxvt.scr.sline.top, 0, rc.y);
 }
 

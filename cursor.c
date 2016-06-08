@@ -26,7 +26,7 @@ static void draw_cursor(const uint8_t cursor_focus)
 		jbxvt.X.font_height - 2}});
 }
 
-static void adj_wh(int16_t * restrict grc,
+static inline void adj_wh(int16_t * restrict grc,
 	int16_t src, uint16_t chw)
 {
 	*grc = src >= chw ? chw - 1 : src;
@@ -40,7 +40,7 @@ static void restore(struct screenst * restrict s, const uint32_t r)
 		jbxvt.scr.chars.height);
 	adj_wh(&jbxvt.scr.current->cursor.x, s->cursor.x,
 		jbxvt.scr.chars.width);
-	scr_change_rendition(r);
+	scr_style(r);
 	cursor(CURSOR_DRAW);
 }
 
