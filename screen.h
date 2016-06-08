@@ -14,7 +14,7 @@ enum ScrMoveFlags {
 };
 
 enum {
-	MAX_SCROLL = 64 // max # lines that can scroll at once
+	MAX_SCROLL = 126 // max # lines that can scroll at once
 };
 
 //  arguments to the screen delete functions
