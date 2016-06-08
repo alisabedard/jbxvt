@@ -241,7 +241,6 @@ uint8_t * lookup_key(void * restrict ev, int16_t * restrict pcount)
 		.type = KeyPress, .serial = ke->sequence};
 	const int16_t count = XLookupString(&xke, kbuf, KBUFSIZE,
 		&keysym, NULL);
-	//xcb_flush(jbxvt.X.xcb);
 	char *s = get_s(keysym, kbuf);
 	if (s) {
 		uint8_t l = 0;
@@ -267,31 +266,23 @@ void push_com_char(const int c)
 void send_string(uint8_t * restrict buf, const uint8_t count)
 {
 	if (!count)
-		return;
-
-	uint8_t *s1, *s2;
-	if (likely(!jbxvt.com.send_count)) {
+		  return;
+	if (unlikely(jbxvt.com.send_count)) {
+		uint8_t * s = malloc(jbxvt.com.send_count + count);
+		memcpy(s , jbxvt.com.send_nxt, jbxvt.com.send_count);
+		memcpy(s + jbxvt.com.send_count, buf, count);
+		free(command.send);
+		command.send = jbxvt.com.send_nxt = s;
+		jbxvt.com.send_count += count;
+	} else {
 		if (command.send) {
 			free(command.send);
 			command.send = NULL;
 		}
 		command.send = malloc(count);
-		s2 = command.send;
-		s1 = buf;
-		for (uint8_t i = 0; i < count; ++i, ++s1, ++s2)
-			*s2 = *s1;
+		memcpy(command.send, buf, count);
 		jbxvt.com.send_nxt = command.send;
 		jbxvt.com.send_count = count;
-	} else {
-		uint8_t * s = malloc(jbxvt.com.send_count + count);
-		memcpy(s , jbxvt.com.send_nxt, jbxvt.com.send_count);
-		s2 = s + jbxvt.com.send_count;
-		s1 = buf;
-		for (uint8_t i = 0; i < count; ++i, ++s1, ++s2)
-			*s2 = *s1;
-		free(command.send);
-		command.send = jbxvt.com.send_nxt = s;
-		jbxvt.com.send_count += count;
 	}
 }
 
