@@ -14,14 +14,11 @@
 
 #include <string.h>
 
+
 static uint8_t handle_new_lines(int8_t nlcount)
 {
-	if (jbxvt.scr.current->cursor.y
-		> jbxvt.scr.current->margin.bottom)
-		  nlcount = 0;
-	else
-		  nlcount -= jbxvt.scr.current->margin.bottom
-			  - jbxvt.scr.current->cursor.y;
+	nlcount -= jbxvt.scr.current->margin.bottom
+		- jbxvt.scr.current->cursor.y;
 	const uint8_t lim = jbxvt.scr.current->cursor.y
 		- jbxvt.scr.current->margin.top - 1;
 	nlcount = nlcount < 0 ? 0 : nlcount > lim ? lim : nlcount;
@@ -44,19 +41,17 @@ static void handle_insert(uint8_t n, const xcb_point_t p)
 	uint32_t * r = jbxvt.scr.current->rend
 		[jbxvt.scr.current->cursor.y];
 	for (int_fast16_t i = jbxvt.scr.chars.width;
-		i >= jbxvt.scr.current->cursor.x + n; --i) {
-		s[i] = s[i - n];
+		i >= jbxvt.scr.current->cursor.x + n; --i)
 		r[i] = r[i - n];
-	}
+	memmove(s + jbxvt.scr.current->cursor.x + n,
+		s + jbxvt.scr.current->cursor.x,
+		jbxvt.scr.chars.width - jbxvt.scr.current->cursor.x);
 	const uint16_t width = (jbxvt.scr.chars.width
 		- jbxvt.scr.current->cursor.x - n)
 		* jbxvt.X.font_width;
 	const int16_t x2 = p.x + n * jbxvt.X.font_width;
-	if (width > 0) {
-		xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
-			jbxvt.X.gc.tx, p.x, p.y, x2, p.y, width,
-			jbxvt.X.font_height);
-	}
+	xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
+		jbxvt.X.gc.tx, p.x, p.y, x2, p.y, width, jbxvt.X.font_height);
 }
 
 static void handle_wrap_next(void)
