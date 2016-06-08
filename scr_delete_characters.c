@@ -35,10 +35,8 @@ void scr_delete_characters(int count)
 	cursor(CURSOR_DRAW);
 	uint8_t * s = jbxvt.scr.current->text[c.y];
 	uint32_t * r = jbxvt.scr.current->rend[c.y];
-	for (uint8_t i = c.x + count; i < scw; i++) {
-		s[i - count] = s[i];
-		r[i - count] = r[i];
-	}
+	memmove(s + c.x, s + c.x + count, count);
+	memmove(r + c.x, r + c.x + count, count * sizeof(uint32_t));
 	memset(s + scw - count, 0, count);
 	memset(r + scw - count, 0, count);
 	const Size f = { .w = jbxvt.X.font_width,
