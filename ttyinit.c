@@ -265,7 +265,9 @@ static void write_utmp(void)
 		  strncpy(utentx.ut_name,pw->pw_name,sizeof(utent.ut_name));
 	strncpy(utentx.ut_host, getenv("DISPLAY"),
 		sizeof(utentx.ut_host));
-	utentx.ut_syslen = strlen(utentx.ut_host) + 1;
+	size_t l = 0;
+	while(utentx.ut_host[++l]);
+	utentx.ut_syslen = l + 1;
 	time(&utentx.ut_xtime);
 	getutmp(&utentx,&utent);
 	pututline(&utent);

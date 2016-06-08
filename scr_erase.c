@@ -110,7 +110,7 @@ void scr_erase_screen(const int8_t mode)
 				- jbxvt.scr.current->cursor.y - 1)
 				* jbxvt.X.font_height;
 			for (i = jbxvt.scr.current->cursor.y + 1;
-				i < jbxvt.scr.chars.height; i++) {
+				i < jbxvt.scr.chars.height; ++i) {
 				memset(jbxvt.scr.current->text[i],0, wsz);
 				memset(jbxvt.scr.current->rend[i],0,
 					wsz * sizeof(uint32_t));
@@ -131,16 +131,20 @@ void scr_erase_screen(const int8_t mode)
 	    case ENTIRE :
 		y = MARGIN;
 		height = jbxvt.scr.chars.height * jbxvt.X.font_height;
+#if 0
 		if (jbxvt.scr.current == &jbxvt.scr.s1)
 			scroll_up(jbxvt.scr.chars.height);
 		else
+#endif
+#if 0
 			for (i = 0; i < jbxvt.scr.chars.height; i++) {
 				memset(jbxvt.scr.current->text[i],0, wsz);
 				memset(jbxvt.scr.current->rend[i],0,
 					wsz * sizeof(uint32_t));
 			}
+#endif
 		cursor(CURSOR_DRAW);
-		check_selection(0,jbxvt.scr.chars.height - 1);
+		//check_selection(0,jbxvt.scr.chars.height - 1);
 		xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, x, y,
 			width, height);
 		cursor(CURSOR_DRAW);

@@ -26,7 +26,6 @@ struct JBXVT {
 			xcb_gcontext_t tx, hl, cu;
 		} gc;
 		struct {
-			xcb_colormap_t map;
 			pixel_t bg, fg, cursor;
 			pixel_t current_fg, current_bg;
 		} color;
@@ -78,7 +77,7 @@ extern struct JBXVT jbxvt; // in jbxvt.c
 
 
 // Print string to stderr
-void jbputs(const char * string);
+void jbputs(const char * restrict string);
 
 #ifdef USE_LIKELY
 #define likely(x)       __builtin_expect((x), true)

@@ -46,16 +46,14 @@ static void setup_font(void)
 {
 	jbxvt.X.font = xcb_generate_id(jbxvt.X.xcb);
 	jbxvt.X.bold_font = xcb_generate_id(jbxvt.X.xcb);
-	char *fn = jbxvt.opt.font?jbxvt.opt.font:DEF_FONT;
-	char *bfn = jbxvt.opt.bold_font?jbxvt.opt.bold_font:BOLD_FONT;
 	size_t l = 0;
-	while(fn[++l]);
+	while(jbxvt.opt.font[++l]);
 	xcb_void_cookie_t c = xcb_open_font_checked(jbxvt.X.xcb,
-		jbxvt.X.font, l, fn);
+		jbxvt.X.font, l, jbxvt.opt.font);
 	l = 0;
-	while(bfn[++l]);
+	while(jbxvt.opt.bold_font[++l]);
 	xcb_void_cookie_t b = xcb_open_font_checked(jbxvt.X.xcb,
-		jbxvt.X.bold_font, l, bfn);
+		jbxvt.X.bold_font, l, jbxvt.opt.bold_font);
 	xcb_query_font_cookie_t qfc = xcb_query_font(jbxvt.X.xcb,
 		jbxvt.X.font);
 	xcb_generic_error_t * error = xcb_request_check(jbxvt.X.xcb, c);
@@ -98,8 +96,8 @@ static void create_main_window(xcb_size_hints_t * restrict sh, const uint32_t ro
 	xcb_create_window(jbxvt.X.xcb, XCB_COPY_FROM_PARENT,
 		jbxvt.X.win.main, root, sh->x, sh->y,
 		sh->width, sh->height, 0, XCB_WINDOW_CLASS_COPY_FROM_PARENT,
-		XCB_COPY_FROM_PARENT, XCB_CW_COLORMAP | XCB_CW_EVENT_MASK,
-		(uint32_t[]){MW_EVENTS, jbxvt.X.color.map});
+		XCB_COPY_FROM_PARENT, XCB_CW_EVENT_MASK,
+		(uint32_t[]){MW_EVENTS});
 }
 
 static xcb_cursor_t get_cursor(const uint16_t id, const uint16_t fg,
@@ -122,10 +120,9 @@ static void create_sb_window(const uint16_t height)
 		jbxvt.X.win.sb, jbxvt.X.win.main, -1, -1,
 		SBAR_WIDTH - 1, height, 1,
 		XCB_WINDOW_CLASS_COPY_FROM_PARENT,
-		XCB_COPY_FROM_PARENT, XCB_CW_BACK_PIXEL | XCB_CW_COLORMAP
-		| XCB_CW_BORDER_PIXEL | XCB_CW_EVENT_MASK | XCB_CW_CURSOR,
-		(uint32_t[]){jbxvt.X.color.bg, jbxvt.X.color.fg,
-		SB_EVENTS, jbxvt.X.color.map, c});
+		XCB_COPY_FROM_PARENT, XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL
+		| XCB_CW_EVENT_MASK | XCB_CW_CURSOR, (uint32_t[]){
+		jbxvt.X.color.bg, jbxvt.X.color.fg, SB_EVENTS, c});
 	xcb_free_cursor(jbxvt.X.xcb, c);
 }
 
@@ -133,14 +130,11 @@ static void create_vt_window(xcb_size_hints_t * restrict sh)
 {
 	jbxvt.X.win.vt = xcb_generate_id(jbxvt.X.xcb);
 	xcb_cursor_t c = get_cursor(XC_xterm, 0xffff, 0);
-	xcb_create_window(jbxvt.X.xcb, XCB_COPY_FROM_PARENT,
-		jbxvt.X.win.vt, jbxvt.X.win.main,
-		0, 0, sh->width, sh->height, 0,
-		XCB_WINDOW_CLASS_COPY_FROM_PARENT,
-		XCB_COPY_FROM_PARENT, XCB_CW_BACK_PIXEL | XCB_CW_COLORMAP
-		| XCB_CW_EVENT_MASK | XCB_CW_CURSOR,
-		(uint32_t[]){jbxvt.X.color.bg, VT_EVENTS, jbxvt.X.color.map,
-		c});
+	xcb_create_window(jbxvt.X.xcb, XCB_COPY_FROM_PARENT, jbxvt.X.win.vt,
+		jbxvt.X.win.main, 0, 0, sh->width, sh->height, 0,
+		XCB_WINDOW_CLASS_COPY_FROM_PARENT, XCB_COPY_FROM_PARENT,
+		XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK | XCB_CW_CURSOR,
+		(uint32_t[]){jbxvt.X.color.bg, VT_EVENTS, c});
 	xcb_free_cursor(jbxvt.X.xcb, c);
 }
 
@@ -177,16 +171,11 @@ static void setup_gcs(void)
 
 static void init_jbxvt_colors(void)
 {
-	jbxvt.X.color.map = jbxvt.X.screen->default_colormap;
-	const pixel_t p[] = {
-		jbxvt.X.screen->black_pixel,
-		jbxvt.X.screen->white_pixel
-	};
-	jbxvt.X.color.fg = jbxvt.opt.fg?get_pixel(jbxvt.opt.fg):p[1];
-	jbxvt.X.color.cursor = jbxvt.opt.cu?get_pixel(jbxvt.opt.cu):p[1];
-	jbxvt.X.color.bg = jbxvt.opt.bg?get_pixel(jbxvt.opt.bg):p[0];
-	jbxvt.X.color.current_fg = jbxvt.X.color.fg;
-	jbxvt.X.color.current_bg = jbxvt.X.color.bg;
+	jbxvt.X.color.current_fg = jbxvt.X.color.fg
+		= get_pixel(jbxvt.opt.fg);
+	jbxvt.X.color.cursor = get_pixel(jbxvt.opt.cu);
+	jbxvt.X.color.current_bg = jbxvt.X.color.bg
+		= get_pixel(jbxvt.opt.bg);
 }
 
 void init_display(char * name)

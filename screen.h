@@ -14,7 +14,8 @@ enum ScrMoveFlags {
 };
 
 enum {
-	MAX_SCROLL = 126 // max # lines that can scroll at once
+	MAX_SCROLL = 126 /* max # lines that can scroll at once.
+			    126 is greatest value supported. */
 };
 
 //  arguments to the screen delete functions
@@ -63,22 +64,22 @@ enum RenditionStyleFlags {
 
 // Normal colors:
 #define COLOR_0 "black"
-#define COLOR_1 "red3"
-#define COLOR_2 "green3"
-#define COLOR_3 "yellow3"
-#define COLOR_4 "blue3"
-#define COLOR_5 "magenta3"
-#define COLOR_6 "cyan3"
-#define COLOR_7 "grey90"
+#define COLOR_1 "red2"
+#define COLOR_2 "green2"
+#define COLOR_3 "yellow2"
+#define COLOR_4 "blue2"
+#define COLOR_5 "magenta2"
+#define COLOR_6 "cyan2"
+#define COLOR_7 "white"
 
 // Bright colors:
 #define BCOLOR_0 "grey10"
-#define BCOLOR_1 "red3"
-#define BCOLOR_2 "green3"
-#define BCOLOR_3 "yellow3"
-#define BCOLOR_4 "blue3"
-#define BCOLOR_5 "magenta3"
-#define BCOLOR_6 "cyan3"
+#define BCOLOR_1 "pink"
+#define BCOLOR_2 "lime"
+#define BCOLOR_3 "lightyellow"
+#define BCOLOR_4 "skyblue"
+#define BCOLOR_5 "violet"
+#define BCOLOR_6 "aquamarine"
 #define BCOLOR_7 "white"
 
 void home_screen(void);

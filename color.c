@@ -12,7 +12,7 @@ pixel_t get_pixel(const char * restrict color)
 	register uint_fast8_t l = 0;
 	while(color[++l]);
 	xcb_alloc_named_color_cookie_t c = xcb_alloc_named_color(jbxvt.X.xcb,
-		jbxvt.X.color.map, l, color);
+		jbxvt.X.screen->default_colormap, l, color);
 	xcb_alloc_named_color_reply_t * r
 		= xcb_alloc_named_color_reply(jbxvt.X.xcb, c, NULL);
 	pixel_t p = r->pixel;

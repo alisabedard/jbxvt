@@ -2,6 +2,7 @@
 
 #include "config.h"
 #include "init_display.h"
+#include "screen.h"
 #include "ttyinit.h"
 #include "xsetup.h"
 #include "xvt.h"
@@ -15,7 +16,7 @@
 struct JBXVT jbxvt;
 
 // Print string to stderr
-void jbputs(const char * string)
+void jbputs(const char * restrict string)
 {
         size_t s = 0;
         while(string[++s]);
@@ -82,6 +83,12 @@ static char ** parse_command_line(const int argc, char ** argv)
  *  the slave.  */
 int main(int argc, char ** argv)
 {
+	// Set some defaults which may be overridden.
+	jbxvt.opt.fg = COLOR_7;
+	jbxvt.opt.cu = COLOR_7;
+	jbxvt.opt.bg = COLOR_0;
+	jbxvt.opt.font = DEF_FONT;
+	jbxvt.opt.bold_font = BOLD_FONT;
 	char ** com_argv = parse_command_line(argc, argv);
 	init_display(argv[0]);
 	map_window();
