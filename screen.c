@@ -6,6 +6,7 @@
 #include "change_offset.h"
 #include "config.h"
 #include "cursor.h"
+#include "log.h"
 #include "repaint.h"
 #include "sbar.h"
 #include "scroll.h"
@@ -60,13 +61,14 @@ static void hsc(void)
 void scr_index_by(const int8_t mod)
 {
 	hsc();
-	if (jbxvt.scr.current->cursor.y == (mod > 0
-		? jbxvt.scr.current->margin.bottom
-		: jbxvt.scr.current->margin.top))
-		scroll(jbxvt.scr.current->margin.top,
-			jbxvt.scr.current->margin.bottom, mod);
-	else
-		jbxvt.scr.current->cursor.y += mod;
+	Size m = jbxvt.scr.current->margin;
+	xcb_point_t * c = &jbxvt.scr.current->cursor;
+	uint16_t n = mod > 0 ? m.bottom : m.top;
+	if (likely(c->y == n)) {
+		  scroll(m.top, m.bottom, mod);
+	} else {
+		  c->y += mod;
+	}
 	jbxvt.scr.current->wrap_next = 0;
 	cursor(CURSOR_DRAW);
 }
@@ -115,9 +117,6 @@ static inline uint8_t get_insertion_count(const int8_t count)
     and scroll the lower lines down.  */
 void scr_insert_lines(const int8_t count)
 {
-	if (jbxvt.scr.current->cursor.y
-		> jbxvt.scr.current->margin.bottom)
-		return;
 	hsc();
 	scroll_lower_lines(get_insertion_count(count));
 	jbxvt.scr.current->wrap_next = 0;
