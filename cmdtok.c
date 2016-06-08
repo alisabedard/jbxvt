@@ -201,7 +201,7 @@ static int16_t get_com_char(const int8_t flags)
 
 	fd_set in_fdset;
 	xcb_generic_event_t * e;
-	int16_t count, xev_ret = 0;
+	int16_t count = 0, xev_ret = 0;
 	xcb_flush(jbxvt.X.xcb);
 	do {
 		FD_ZERO(&in_fdset);

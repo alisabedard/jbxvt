@@ -15,7 +15,7 @@
 #include <string.h>
 
 
-static uint8_t handle_new_lines(int8_t nlcount)
+static void handle_new_lines(int8_t nlcount)
 {
 	nlcount -= jbxvt.scr.current->margin.bottom
 		- jbxvt.scr.current->cursor.y;
@@ -27,7 +27,6 @@ static uint8_t handle_new_lines(int8_t nlcount)
 	scroll(jbxvt.scr.current->margin.top,
 		jbxvt.scr.current->margin.bottom,nlcount);
 	jbxvt.scr.current->cursor.y -= nlcount;
-	return nlcount;
 }
 
 #if defined(__i386__) || defined(__amd64__)
@@ -82,7 +81,7 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 	home_screen();
 	cursor(CURSOR_DRAW);
 	if (nlcount > 0)
-		  nlcount = handle_new_lines(nlcount);
+		  handle_new_lines(nlcount);
 	while (len) {
 		switch(*str) {
 		case '\n':

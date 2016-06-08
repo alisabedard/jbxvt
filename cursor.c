@@ -26,6 +26,7 @@ static void draw_cursor(const uint8_t cursor_focus)
 		jbxvt.X.font_height - 2}});
 }
 
+__attribute__((nonnull(1)))
 static inline void adj_wh(int16_t * restrict grc,
 	int16_t src, uint16_t chw)
 {
@@ -35,6 +36,8 @@ static inline void adj_wh(int16_t * restrict grc,
 //  Restore the cursor position and rendition style.
 static void restore(struct screenst * restrict s, const uint32_t r)
 {
+	if (!jbxvt.scr.current)
+		  return;
 	cursor(CURSOR_DRAW);
 	adj_wh(&jbxvt.scr.current->cursor.y, s->cursor.y,
 		jbxvt.scr.chars.height);
