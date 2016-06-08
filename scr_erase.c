@@ -130,6 +130,12 @@ void scr_erase_screen(const int8_t mode)
 	    case ENTIRE :
 		y = MARGIN;
 		height = jbxvt.scr.chars.height * jbxvt.X.font_height;
+		// Clear any artifacts:
+		for (i = 0; i < jbxvt.scr.chars.height; i++) {
+			memset(jbxvt.scr.current->text[i],0, wsz);
+			memset(jbxvt.scr.current->rend[i],0,
+				wsz * sizeof(uint32_t));
+		}
 		cursor(CURSOR_DRAW);
 		xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, x, y,
 			width, height);
