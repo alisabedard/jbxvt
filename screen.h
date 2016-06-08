@@ -22,7 +22,7 @@ enum ScrDelArg { END, START, ENTIRE };
 
 enum RenditionStyleFlags {
 	RS_NONE = 0,
-	RS_BOLD = 1,
+	RS_HLINE = 1,
 	RS_ULINE = (1<<1),
 	RS_BLINK = (1<<2),
 	RS_RVID = (1<<3),
@@ -58,6 +58,7 @@ enum RenditionStyleFlags {
 	RS_C1 = (1<<27),
 	RS_C2 = (1<<28),
 	RS_C3 = (1<<29),
+	RS_BOLD = (1<<30)
 };
 
 // Normal colors:
