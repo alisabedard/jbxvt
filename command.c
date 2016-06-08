@@ -265,25 +265,14 @@ void push_com_char(const int c)
 //  Send count characters directly to the command.
 void send_string(uint8_t * restrict buf, const uint8_t count)
 {
-	if (!count)
-		  return;
-	if (unlikely(jbxvt.com.send_count)) {
-		uint8_t * s = malloc(jbxvt.com.send_count + count);
-		memcpy(s , jbxvt.com.send_nxt, jbxvt.com.send_count);
-		memcpy(s + jbxvt.com.send_count, buf, count);
+	if (command.send) {
 		free(command.send);
-		command.send = jbxvt.com.send_nxt = s;
-		jbxvt.com.send_count += count;
-	} else {
-		if (command.send) {
-			free(command.send);
-			command.send = NULL;
-		}
-		command.send = malloc(count);
-		memcpy(command.send, buf, count);
-		jbxvt.com.send_nxt = command.send;
-		jbxvt.com.send_count = count;
+		command.send = NULL;
 	}
+	command.send = malloc(count);
+	memcpy(command.send, buf, count);
+	jbxvt.com.send_nxt = command.send;
+	jbxvt.com.send_count = count;
 }
 
 /*  Send printf formatted output to the command.  Only used for small ammounts
