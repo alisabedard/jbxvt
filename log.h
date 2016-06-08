@@ -9,6 +9,8 @@
 #define MARK jbuts("MARK" __FILE__ ":" __LINE__ "\n");
 #define MARK_I(i) dprintf(STDERR_FILENO, "MARK: " __FILE__ ":%d value: %d\n",\
 	__LINE__, i)
+// Used for simplistic profiling and code path testing:
+#define VCOUNT(v) static uint32_t v; ++v; dprintf(STDERR_FILENO, #v ": %d\n", v);
 
 #ifdef DEBUG
 

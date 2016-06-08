@@ -40,18 +40,19 @@ static void handle_insert(uint8_t n, const xcb_point_t p)
 		[jbxvt.scr.current->cursor.y];
 	uint32_t * r = jbxvt.scr.current->rend
 		[jbxvt.scr.current->cursor.y];
-	for (int_fast16_t i = jbxvt.scr.chars.width;
-		i >= jbxvt.scr.current->cursor.x + n; --i)
-		r[i] = r[i - n];
 	memmove(s + jbxvt.scr.current->cursor.x + n,
 		s + jbxvt.scr.current->cursor.x,
 		jbxvt.scr.chars.width - jbxvt.scr.current->cursor.x);
+	memmove(r + jbxvt.scr.current->cursor.x + n,
+		r + jbxvt.scr.current->cursor.x,
+		(jbxvt.scr.chars.width - jbxvt.scr.current->cursor.x)
+		* sizeof(uint32_t));
 	const uint16_t width = (jbxvt.scr.chars.width
 		- jbxvt.scr.current->cursor.x - n)
 		* jbxvt.X.font_width;
-	const int16_t x2 = p.x + n * jbxvt.X.font_width;
+	const int16_t x = p.x + n * jbxvt.X.font_width;
 	xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
-		jbxvt.X.gc.tx, p.x, p.y, x2, p.y, width, jbxvt.X.font_height);
+		jbxvt.X.gc.tx, p.x, p.y, x, p.y, width, jbxvt.X.font_height);
 }
 
 static void handle_wrap_next(void)
