@@ -68,6 +68,8 @@ void scr_erase_line(const int8_t mode)
 		}
 	}
 	cursor(CURSOR_DRAW); //clear
+	check_selection(jbxvt.scr.current->cursor.y,
+		jbxvt.scr.current->cursor.y);
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, g.x, g.y, g.width,
 		jbxvt.X.font_height);
 	jbxvt.scr.current->wrap_next = 0;
@@ -91,6 +93,7 @@ void scr_erase_screen(const int8_t mode)
 			memset(jbxvt.scr.current->rend[i],0,
 				wsz * sizeof(int32_t));
 		}
+		check_selection(0,jbxvt.scr.current->cursor.y - 1);
 		if (height > 0) {
 			xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt,
 				x, y, width, height);
@@ -111,6 +114,8 @@ void scr_erase_screen(const int8_t mode)
 				memset(jbxvt.scr.current->rend[i],0,
 					wsz * sizeof(uint32_t));
 			}
+			check_selection(jbxvt.scr.current->cursor.y + 1,
+				jbxvt.scr.chars.height - 1);
 			if (height > 0) {
 				xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt,
 					x, y, width, height);
@@ -131,6 +136,9 @@ void scr_erase_screen(const int8_t mode)
 		cursor(CURSOR_DRAW);
 		sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1,
 			0, jbxvt.scr.chars.height - 1);
+		break;
+	    default :
+		return;
 	}
 }
 
