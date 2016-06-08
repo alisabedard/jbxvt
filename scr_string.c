@@ -86,13 +86,14 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 	while (len) {
 		switch(*str) {
 		case '\n':
-			if (jbxvt.scr.current->cursor.y
-				== jbxvt.scr.current->margin.bottom)
+			if (likely(jbxvt.scr.current->cursor.y
+				< jbxvt.scr.chars.height - 1)) {
+				  ++jbxvt.scr.current->cursor.y;
+			} else if (jbxvt.scr.current->cursor.y
+				== jbxvt.scr.current->margin.bottom) {
 				  scroll(jbxvt.scr.current->margin.top,
 					  jbxvt.scr.current->margin.bottom,1);
-			else if (jbxvt.scr.current->cursor.y
-				< jbxvt.scr.chars.height - 1)
-				  ++jbxvt.scr.current->cursor.y;
+			}
 			check_selection(jbxvt.scr.current->cursor.y,
 				jbxvt.scr.current->cursor.y);
 		// fall through:
