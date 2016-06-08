@@ -6,6 +6,7 @@
 #include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"
+#include "log.h"
 #include "repaint.h"
 #include "sbar.h"
 #include "screen.h"
@@ -35,7 +36,7 @@ void change_offset(int16_t n)
 	cursor(CURSOR_DRAW);
 	int16_t d = n - jbxvt.scr.offset;
 	jbxvt.scr.offset = n;
-	if (d > 0 && d < jbxvt.scr.chars.height) {
+	if (likely(d > 0 && d < jbxvt.scr.chars.height)) {
 		/*  Text has moved down by less than a screen so raster
 		 *  the lines that did not move off.  */
 		copy_repaint(d, MARGIN,
@@ -48,10 +49,7 @@ void change_offset(int16_t n)
 		copy_repaint(d, MARGIN + d * jbxvt.X.font_height,
 			MARGIN, jbxvt.scr.chars.height - d,
 			jbxvt.scr.chars.height - 1);
-	} else
-		  repaint((xcb_point_t){}, (xcb_point_t){
-			  .y=jbxvt.scr.chars.height-1,
-			  .x=jbxvt.scr.chars.width-1});
+	}
 	cursor(CURSOR_DRAW);
 	// Update current scrollbar position due to change
 	sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1,
