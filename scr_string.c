@@ -17,16 +17,14 @@
 
 static void handle_new_lines(int8_t nlcount)
 {
-	nlcount -= jbxvt.scr.current->margin.bottom
-		- jbxvt.scr.current->cursor.y;
-	const uint8_t lim = jbxvt.scr.current->cursor.y
-		- jbxvt.scr.current->margin.top - 1;
+	struct screenst * c = jbxvt.scr.current;
+	nlcount -= c->margin.bottom - c->cursor.y;
+	const uint8_t lim = c->cursor.y - c->margin.top - 1;
 	nlcount = nlcount < 0 ? 0 : nlcount > lim ? lim : nlcount;
 	if (nlcount > MAX_SCROLL)
 		  nlcount = MAX_SCROLL;
-	scroll(jbxvt.scr.current->margin.top,
-		jbxvt.scr.current->margin.bottom,nlcount);
-	jbxvt.scr.current->cursor.y -= nlcount;
+	scroll(c->margin.top, c->margin.bottom, nlcount);
+	c->cursor.y -= nlcount;
 }
 
 #if defined(__i386__) || defined(__amd64__)
@@ -35,19 +33,14 @@ static void handle_new_lines(int8_t nlcount)
 static void handle_insert(uint8_t n, const xcb_point_t p)
 {
 	LOG("handle_insert(n=%d, p={%d, %d})", n, p.x, p.y);
-	uint8_t * s = jbxvt.scr.current->text
-		[jbxvt.scr.current->cursor.y];
-	uint32_t * r = jbxvt.scr.current->rend
-		[jbxvt.scr.current->cursor.y];
-	memmove(s + jbxvt.scr.current->cursor.x + n,
-		s + jbxvt.scr.current->cursor.x,
-		jbxvt.scr.chars.width - jbxvt.scr.current->cursor.x);
-	memmove(r + jbxvt.scr.current->cursor.x + n,
-		r + jbxvt.scr.current->cursor.x,
-		(jbxvt.scr.chars.width - jbxvt.scr.current->cursor.x)
-		* sizeof(uint32_t));
-	const uint16_t width = (jbxvt.scr.chars.width
-		- jbxvt.scr.current->cursor.x - n)
+	struct screenst * c = jbxvt.scr.current;
+	uint8_t * s = c->text [c->cursor.y];
+	uint32_t * r = c->rend [c->cursor.y];
+	memmove(s + c->cursor.x + n, s + c->cursor.x,
+		jbxvt.scr.chars.width - c->cursor.x);
+	memmove(r + c->cursor.x + n, r + c->cursor.x,
+		(jbxvt.scr.chars.width - c->cursor.x) * sizeof(uint32_t));
+	const uint16_t width = (jbxvt.scr.chars.width - c->cursor.x - n)
 		* jbxvt.X.font_width;
 	const int16_t x = p.x + n * jbxvt.X.font_width;
 	xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
@@ -56,15 +49,15 @@ static void handle_insert(uint8_t n, const xcb_point_t p)
 
 static void handle_wrap_next(void)
 {
-	jbxvt.scr.current->text [jbxvt.scr.current->cursor.y]
+	struct screenst * restrict c = jbxvt.scr.current;
+	c->text [c->cursor.y]
 		[jbxvt.scr.chars.width] = 1;
-	if (jbxvt.scr.current->cursor.y == jbxvt.scr.current->margin.bottom)
-		  scroll(jbxvt.scr.current->margin.top,
-			  jbxvt.scr.current->margin.bottom,1);
-	else if (jbxvt.scr.current->cursor.y < jbxvt.scr.chars.height - 1)
-		  ++jbxvt.scr.current->cursor.y;
-	jbxvt.scr.current->cursor.x = 0;
-	jbxvt.scr.current->wrap_next = 0;
+	if (c->cursor.y == c->margin.bottom)
+		  scroll(c->margin.top,
+			  c->margin.bottom, 1);
+	else if (c->cursor.y < jbxvt.scr.chars.height - 1)
+		  ++c->cursor.y;
+	c->cursor.x = c->wrap_next = 0;
 }
 
 /*  Display the string at the current position.
@@ -75,83 +68,71 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 	LOG("scr_string(s, len: %d, nlcount: %d)\n", len, nlcount);
 #endif//SCR_DEBUG
 	xcb_point_t p;
-
 	home_screen();
 	cursor(CURSOR_DRAW);
 	if (nlcount > 0)
 		  handle_new_lines(nlcount);
+	struct screenst * c = jbxvt.scr.current;
 	while (len) {
 		if (likely(*str == '\r')) { // carriage return
-			jbxvt.scr.current->cursor.x = 0;
-			jbxvt.scr.current->wrap_next = 0;
+			c->cursor.x = 0;
+			c->wrap_next = 0;
 			--len;
 			++str;
 			continue;
 		} else if (*str == '\n') { // line feed
-			if (likely(jbxvt.scr.current->cursor.y
+			if (likely(c->cursor.y
 				< jbxvt.scr.chars.height - 1)) {
-				++jbxvt.scr.current->cursor.y;
-			} else if (jbxvt.scr.current->cursor.y
-				== jbxvt.scr.current->margin.bottom) {
-				scroll(jbxvt.scr.current->margin.top,
-					jbxvt.scr.current->margin.bottom,1);
+				++c->cursor.y;
+			} else if (c->cursor.y
+				== c->margin.bottom) {
+				scroll(c->margin.top,
+					c->margin.bottom,1);
 			}
-			check_selection(jbxvt.scr.current->cursor.y,
-				jbxvt.scr.current->cursor.y);
-			jbxvt.scr.current->wrap_next = 0;
+			check_selection(c->cursor.y,
+				c->cursor.y);
+			c->wrap_next = 0;
 			--len;
 			++str;
 			continue;
 		}
 
-		if (jbxvt.scr.current->wrap_next)
+		if (c->wrap_next)
 			  handle_wrap_next();
 
-		check_selection(jbxvt.scr.current->cursor.y,
-			jbxvt.scr.current->cursor.y);
+		check_selection(c->cursor.y,
+			c->cursor.y);
 		p.x = MARGIN + jbxvt.X.font_width
-			* jbxvt.scr.current->cursor.x;
+			* c->cursor.x;
 		p.y = MARGIN + jbxvt.X.font_height
-			* jbxvt.scr.current->cursor.y;
-		uint_fast16_t n;
-		for (n = 0; str[n] >= ' '; ++n)
-			;
-		if (unlikely(n + jbxvt.scr.current->cursor.x
+			* c->cursor.y;
+		uint_fast16_t n = 0;
+		while (str[++n] >= ' ')
+			  ;
+		if (unlikely(n + c->cursor.x
 			> jbxvt.scr.chars.width))
 			  n = jbxvt.scr.chars.width
-				  - jbxvt.scr.current->cursor.x;
-		if (unlikely(jbxvt.scr.current->insert))
+				  - c->cursor.x;
+		if (unlikely(c->insert))
 			  handle_insert(n, p);
-		memcpy(jbxvt.scr.current->text[jbxvt.scr.current->cursor.y]
-			+ jbxvt.scr.current->cursor.x, str, n);
+		memcpy(c->text[c->cursor.y]
+			+ c->cursor.x, str, n);
 		paint_rval_text(str,jbxvt.scr.rstyle,n,p);
-		if (jbxvt.scr.rstyle) {
-			for (uint_fast8_t i = 0; i < n; ++i) {
-				// cannot use memset, since rstyle > 1 byte
-				jbxvt.scr.current->rend
-					[jbxvt.scr.current->cursor.y]
-					[jbxvt.scr.current->cursor.x + i]
-						= jbxvt.scr.rstyle;
-			}
-			jbxvt.scr.current->rend[jbxvt.scr.current->cursor.y]
-				[jbxvt.scr.chars.width] = jbxvt.scr.rstyle;
-		}
+		for (int_fast8_t i = n; jbxvt.scr.rstyle && i >= 0; --i)
+			c->rend[c->cursor.y][c->cursor.x + i]
+				= jbxvt.scr.rstyle;
 		len -= n;
 		str += n;
-		jbxvt.scr.current->cursor.x += n;
-		if (len > 0 && jbxvt.scr.current->cursor.x
-			== jbxvt.scr.chars.width && *str >= ' ') {
-			jbxvt.scr.current->text [jbxvt.scr.current->cursor.y]
-				[jbxvt.scr.chars.width] = 1;
-			if (likely(jbxvt.scr.current->cursor.y
-				== jbxvt.scr.current->margin.bottom)) {
-				scroll(jbxvt.scr.current->margin.top,
-					jbxvt.scr.current
-					->margin.bottom, 1);
+		c->cursor.x += n;
+		if (unlikely(len > 0 && c->cursor.x == jbxvt.scr.chars.width
+			&& *str >= ' ')) {
+			c->text [c->cursor.y] [jbxvt.scr.chars.width] = 1;
+			if (likely(c->cursor.y == c->margin.bottom)) {
+				scroll(c->margin.top, c ->margin.bottom, 1);
 			} else {
-				++jbxvt.scr.current->cursor.y;
+				++c->cursor.y;
 			}
-			jbxvt.scr.current->cursor.x = 0;
+			c->cursor.x = 0;
 		}
 	}
 	cursor(CURSOR_DRAW);
