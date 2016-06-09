@@ -95,29 +95,37 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 			--len;
 			++str;
 			continue;
+		} else if (unlikely(*str == '\t')) {
+			if (c->cursor.x < jbxvt.scr.chars.width - 1) {
+				uint8_t * s = c->text[c->cursor.y];
+				if (s[c->cursor.x] == 0)
+					  s[c->cursor.x] = '\t';
+				++c->cursor.x;
+				// Advance to next tab stop:
+				while (c->cursor.x % 8 && c->cursor.x
+					< jbxvt.scr.chars.width - 1)
+					  ++c->cursor.x;
+			}
+			--len;
+			++str;
+			continue;
 		}
 
 		if (c->wrap_next)
 			  handle_wrap_next();
 
-		check_selection(c->cursor.y,
-			c->cursor.y);
-		p.x = MARGIN + jbxvt.X.font_width
-			* c->cursor.x;
-		p.y = MARGIN + jbxvt.X.font_height
-			* c->cursor.y;
+		check_selection(c->cursor.y, c->cursor.y);
+		p.x = MARGIN + jbxvt.X.font_width * c->cursor.x;
+		p.y = MARGIN + jbxvt.X.font_height * c->cursor.y;
 		uint_fast16_t n = 0;
 		while (str[++n] >= ' ')
 			  ;
-		if (unlikely(n + c->cursor.x
-			> jbxvt.scr.chars.width))
-			  n = jbxvt.scr.chars.width
-				  - c->cursor.x;
+		if (unlikely(n + c->cursor.x > jbxvt.scr.chars.width))
+			  n = jbxvt.scr.chars.width - c->cursor.x;
 		if (unlikely(c->insert))
 			  handle_insert(n, p);
-		memcpy(c->text[c->cursor.y]
-			+ c->cursor.x, str, n);
-		paint_rval_text(str,jbxvt.scr.rstyle,n,p);
+		memcpy(c->text[c->cursor.y] + c->cursor.x, str, n);
+		paint_rval_text(str,jbxvt.scr.rstyle, n, p);
 		for (int_fast8_t i = n; jbxvt.scr.rstyle && i >= 0; --i)
 			c->rend[c->cursor.y][c->cursor.x + i]
 				= jbxvt.scr.rstyle;
@@ -134,6 +142,10 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 			}
 			c->cursor.x = 0;
 		}
+	}
+	if (c->cursor.x >= jbxvt.scr.chars.width) {
+		c->cursor.x = jbxvt.scr.chars.width - 1;
+		c->wrap_next = c->wrap;
 	}
 	cursor(CURSOR_DRAW);
 }
