@@ -57,7 +57,7 @@ static void setup_font(void)
 	xcb_query_font_cookie_t qfc = xcb_query_font(jbxvt.X.xcb,
 		jbxvt.X.font);
 	xcb_generic_error_t * error = xcb_request_check(jbxvt.X.xcb, c);
-	if(error)
+	if(error) // failed to load main font
 		  quit(1, WARN_RES RES_FNT);
 	xcb_query_font_reply_t * r = xcb_query_font_reply(jbxvt.X.xcb,
 		qfc, NULL);
@@ -65,8 +65,7 @@ static void setup_font(void)
 	jbxvt.X.font_descent = r->font_descent;
 	jbxvt.X.font_width = r->max_bounds.character_width;
 	free(r);
-	jbxvt.X.font_height = jbxvt.X.font_ascent
-		+ jbxvt.X.font_descent;
+	jbxvt.X.font_height = jbxvt.X.font_ascent + jbxvt.X.font_descent;
 	error = xcb_request_check(jbxvt.X.xcb, b);
 	if(error) // use normal font if bold not available.
 		  jbxvt.X.bold_font = jbxvt.X.font;
@@ -171,17 +170,15 @@ static void setup_gcs(void)
 
 static void init_jbxvt_colors(void)
 {
-	jbxvt.X.color.current_fg = jbxvt.X.color.fg
-		= get_pixel(jbxvt.opt.fg);
+	jbxvt.X.color.current_fg = jbxvt.X.color.fg = get_pixel(jbxvt.opt.fg);
 	jbxvt.X.color.cursor = get_pixel(jbxvt.opt.cu);
-	jbxvt.X.color.current_bg = jbxvt.X.color.bg
-		= get_pixel(jbxvt.opt.bg);
+	jbxvt.X.color.current_bg = jbxvt.X.color.bg = get_pixel(jbxvt.opt.bg);
 }
 
 void init_display(char * name)
 {
 	jbxvt.X.xcb = xcb_connect(jbxvt.opt.display, &jbxvt.opt.screen);
-	if (xcb_connection_has_error(jbxvt.X.xcb)) {
+	if (unlikely(xcb_connection_has_error(jbxvt.X.xcb))) {
 		quit(1, WARN_RES RES_DPY);
 	}
 	jbxvt.X.screen = xcb_setup_roots_iterator(
@@ -191,7 +188,6 @@ void init_display(char * name)
 	setup_font();
 	create_window((uint8_t *)name, root);
 	setup_gcs();
-
 	scr_init();
 	sbar_reset();
 	xcb_flush(jbxvt.X.xcb);

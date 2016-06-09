@@ -89,7 +89,6 @@ static void cpl(struct screenst * restrict scr, uint8_t ** restrict s,
 	memcpy(r[j], scr->rend[i], sz * sizeof(uint32_t));
 	// copy end byte for wrap flag:
 	s[j][sz] = scr->text[i][jbxvt.scr.chars.width];
-	r[j][sz] = scr->rend[i][jbxvt.scr.chars.width];
 }
 
 static int save_data_on_screen(uint8_t cw, int i, const int j,
@@ -120,12 +119,11 @@ static int handle_offscreen_data(const uint8_t cw,
 	struct slinest *sl = jbxvt.scr.sline.data[i];
 	const uint8_t l = sl->sl_length;
 	const uint8_t n = cw > l ? l : cw;
-	memcpy(s1[j],sl->sl_text,n);
+	memcpy(s1[j], sl->sl_text, n);
 	free(sl->sl_text);
 	sl->sl_text=NULL;
 	if (sl->sl_rend) {
 		memcpy(r1[j],sl->sl_rend, n*sizeof(uint32_t));
-		r1[j][cw] = sl->sl_rend [sl->sl_length];
 		free(sl->sl_rend);
 	}
 	free(sl);
@@ -162,7 +160,6 @@ void scr_reset(void)
 			r2[y] = calloc(w, sizeof(uint32_t));
 		}
 		if (jbxvt.scr.s1.text) {
-			//fill_and_scroll(c.h);
 			// calculate working no. of lines.
 			int16_t i = jbxvt.scr.sline.top
 				+ jbxvt.scr.s1.cursor.y + 1;
@@ -175,18 +172,17 @@ void scr_reset(void)
 					  j, &onscreen, s1, r1, s2, r2)
 					  : handle_offscreen_data(c.w, i, j,
 						  s1, r1);
-#ifdef DEBUG
-			if (onscreen)
-				  abort();
-#endif//DEBUG
-			for (j = i; j < jbxvt.scr.sline.top; j++)
+#if 0
+			if (onscreen) // avoid segfault
+				  quit(1, WARN_ERR);
+#endif
+			for (j = i; j < jbxvt.scr.sline.top; ++j)
 				  jbxvt.scr.sline.data[j - i]
 					  = jbxvt.scr.sline.data[j];
 			for (j = jbxvt.scr.sline.top - i;
-				j < jbxvt.scr.sline.top; j++)
+				j < jbxvt.scr.sline.top; ++j)
 				  jbxvt.scr.sline.data[j] = NULL;
 			jbxvt.scr.sline.top -= i;
-			//free_visible_screens(c.h);
 			free_visible_screens(jbxvt.scr.chars.height);
 		}
 		jbxvt.scr.chars = c;
