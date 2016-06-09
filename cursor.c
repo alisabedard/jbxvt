@@ -7,18 +7,25 @@
 #include "jbxvt.h"
 #include "screen.h"
 
-//  Draw the cursor at the current position.
-static void draw_cursor(const uint8_t cursor_focus)
+static xcb_point_t get_p(void)
 {
-	if (jbxvt.scr.offset > 0)
-		  return;
-	if (!jbxvt.scr.current)
-		  return; // prevent segfault
 	xcb_point_t p = jbxvt.scr.current->cursor;
 	p.x *= jbxvt.X.font_width;
 	p.y *= jbxvt.X.font_height;
 	p.x += MARGIN;
 	p.y += MARGIN;
+	return p;
+}
+
+//  Draw the cursor at the current position.
+static void draw_cursor(const uint8_t cursor_focus)
+{
+	// Don't draw cursor when scrolled
+	if (jbxvt.scr.offset > 0)
+		  return;
+	if (!jbxvt.scr.current)
+		  return; // prevent segfault
+	xcb_point_t p = get_p();
 	xcb_poly_fill_rectangle(jbxvt.X.xcb, jbxvt.X.win.vt,
 		jbxvt.X.gc.cu, cursor_focus?1:2, (xcb_rectangle_t[]){
 		{p.x, p.y, jbxvt.X.font_width, jbxvt.X.font_height},
@@ -47,22 +54,13 @@ static void restore(struct screenst * restrict s, const uint32_t r)
 	cursor(CURSOR_DRAW);
 }
 
-enum ScreenFocusFlags {
-	SCR_FOCUS_IN = 1,
-	SCR_FOCUS_ENTRY = 2,
-	SCR_FOCUS_FOCUS = 4
-};
-
 /*  Indicate a change of keyboard focus.  Type is 1 if focusing in,
     2 for entry events, and 4 for focus events.  */
-static void focus(const uint8_t flags, uint8_t * restrict cursor_focus)
+static inline bool focus(const bool in, bool cursor_focus)
 {
-	draw_cursor(*cursor_focus); // clear via invert gc
-	if(flags & SCR_FOCUS_IN)
-		  *cursor_focus |= flags>>1;
-	else
-		  *cursor_focus &= ~(flags>>1);
-	draw_cursor(*cursor_focus); // draw
+	draw_cursor(cursor_focus); // clear via invert gc
+	draw_cursor(in);
+	return in;
 }
 
 void cursor(const enum CursorOp op)
@@ -75,17 +73,13 @@ void cursor(const enum CursorOp op)
 	case CURSOR_DRAW:
 		draw_cursor(cursor_focus);
 		break;
-	case CURSOR_ENTRY_IN:
-		focus(SCR_FOCUS_IN|SCR_FOCUS_ENTRY, &cursor_focus);
-		break;
-	case CURSOR_ENTRY_OUT:
-		focus(SCR_FOCUS_ENTRY, &cursor_focus);
-		break;
 	case CURSOR_FOCUS_IN:
-		focus(SCR_FOCUS_IN|SCR_FOCUS_FOCUS, &cursor_focus);
+	case CURSOR_ENTRY_IN:
+		cursor_focus = focus(true, cursor_focus);
 		break;
 	case CURSOR_FOCUS_OUT:
-		focus(SCR_FOCUS_FOCUS, &cursor_focus);
+	case CURSOR_ENTRY_OUT:
+		cursor_focus = focus(false, cursor_focus);
 		break;
 	case CURSOR_RESTORE:
 		restore(&saved_screen, saved_rstyle);

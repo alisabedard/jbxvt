@@ -17,7 +17,7 @@
 
 static void handle_new_lines(int8_t nlcount)
 {
-	struct screenst * c = jbxvt.scr.current;
+	struct screenst * restrict c = jbxvt.scr.current;
 	nlcount -= c->margin.bottom - c->cursor.y;
 	const uint8_t lim = c->cursor.y - c->margin.top - 1;
 	nlcount = nlcount < 0 ? 0 : nlcount > lim ? lim : nlcount;
@@ -33,7 +33,7 @@ static void handle_new_lines(int8_t nlcount)
 static void handle_insert(uint8_t n, const xcb_point_t p)
 {
 	LOG("handle_insert(n=%d, p={%d, %d})", n, p.x, p.y);
-	struct screenst * c = jbxvt.scr.current;
+	struct screenst * restrict c = jbxvt.scr.current;
 	uint8_t * s = c->text [c->cursor.y];
 	uint32_t * r = c->rend [c->cursor.y];
 	memmove(s + c->cursor.x + n, s + c->cursor.x,
@@ -72,7 +72,7 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 	cursor(CURSOR_DRAW);
 	if (nlcount > 0)
 		  handle_new_lines(nlcount);
-	struct screenst * c = jbxvt.scr.current;
+	struct screenst * restrict c = jbxvt.scr.current;
 	while (len) {
 		if (likely(*str == '\r')) { // carriage return
 			c->cursor.x = 0;

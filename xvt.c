@@ -126,11 +126,12 @@ static void handle_tk_expose(struct tokenst * restrict t)
 	switch (t->tk_region) {
 	case SCREEN :
 		if(jbxvt_size_set){
+			cursor(CURSOR_DRAW); // clear
 			scr_refresh((xcb_point_t){.x = t->tk_arg[0],
 				.y = t->tk_arg[1]}, (Size){
 				.width = t->tk_arg[2],
 				.height = t->tk_arg[3]});
-			cursor(CURSOR_DRAW);
+			cursor(CURSOR_DRAW); // draw
 		} else {
 			/*  Force a full reset if an exposure event
 			 *  arrives after a resize.  */
