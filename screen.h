@@ -14,7 +14,7 @@ enum ScrMoveFlags {
 };
 
 enum {
-	MAX_SCROLL = 126 /* max # lines that can scroll at once.
+	MAX_SCROLL = 24 /* max # lines that can scroll at once.
 			    126 is greatest value supported. */
 };
 

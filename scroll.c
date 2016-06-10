@@ -31,7 +31,7 @@ static void free_top_lines(int16_t count)
 		const int16_t i = jbxvt.scr.sline.max - count;
 		struct slinest * s = jbxvt.scr.sline.data[i];
 		if (!s)
-			  continue;
+			  return;
 		if (s->sl_text)
 			free(s->sl_text);
 		if (s->sl_rend)
@@ -109,14 +109,15 @@ static void clr_lines(int8_t count, const uint8_t rc,
 static void sc_up_cp_rows(const int8_t count)
 {
 	xcb_point_t iter;
-	for (iter.y = 0; iter.y < count; ++iter.y) {
+	for (iter.y = count - 1; iter.y >= 0; --iter.y) {
 		uint8_t * s = jbxvt.scr.current->text[iter.y];
 		uint32_t * r = jbxvt.scr.current->rend[iter.y];
 		iter.x = sc_up_find_col(s);
-		struct slinest *sl = calloc(1, sizeof(struct slinest));
+		struct slinest *sl = malloc(sizeof(struct slinest));
 		// +1 to have last byte as wrap flag:
 		sl->sl_text = malloc(iter.x + 1);
 		memcpy(sl->sl_text, s, iter.x);
+		// copy wrap flag:
 		sl->sl_text[iter.x] = s[jbxvt.scr.chars.width];
 		/* iter.x, not iter.x + 1, since the last byte
 		   of the sl_text, only, is used for the wrap flag.  */
@@ -156,7 +157,10 @@ static void sc_up(const uint8_t row1, uint8_t row2,
 {
 	LOG("scroll_up(count: %d, row1: %d, row2: %d)", count, row1, row2);
 	if (row1 == 0 && jbxvt.scr.current == &jbxvt.scr.s1) {
-		free_top_lines(count);
+		dprintf(STDERR_FILENO, "count %d\n", count);
+		if(!count)
+			  return;
+		free_top_lines(count - 1);
 		xcb_point_t iter;
 		for (iter.y = jbxvt.scr.sline.max - count - 1;
 			iter.y >= 0; --iter.y) {
