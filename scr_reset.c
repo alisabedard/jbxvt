@@ -25,7 +25,7 @@ static void free_visible_screens(uint8_t ch)
 		jbxvt.scr.chars.height);
 	// Avoid segfault when screen size changes:
 	ch=ch>jbxvt.scr.chars.height?jbxvt.scr.chars.height:ch;
-	for(uint8_t y = 0; y < ch; y++) {
+	for(uint8_t y = 0; y < ch; ++y) {
 		LOG("y:%d of sch:%d\tch:%d", y, jbxvt.scr.chars.height, ch);
 		free(jbxvt.scr.s1.text[y]);
 		free(jbxvt.scr.s2.text[y]);
@@ -65,6 +65,8 @@ static Size get_dim(void)
 {
 	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(jbxvt.X.xcb,
 		xcb_get_geometry(jbxvt.X.xcb, jbxvt.X.win.vt), NULL);
+	if (!r)
+		  return (Size){0};
 	Size s = {.w = r->width, .h = r->height};
 	free(r);
 	return s;
@@ -104,8 +106,9 @@ static int save_data_on_screen(uint8_t cw, int i, const int j,
 	cpl(&jbxvt.scr.s1, s2, r2, i, j, n);
 	if (--i < 0) {
 		*onscreen = false;
-		i = 0;
+		return 0;
 	}
+		*onscreen = false;
 	return i;
 }
 
@@ -117,16 +120,25 @@ static int handle_offscreen_data(const uint8_t cw,
 	if (i >= jbxvt.scr.sline.top)
 		  return i;
 	struct slinest *sl = jbxvt.scr.sline.data[i];
+	if (!sl) // prevent segfault.
+		  return i;
 	const uint8_t l = sl->sl_length;
 	const uint8_t n = cw > l ? l : cw;
-	memcpy(s1[j], sl->sl_text, n);
-	free(sl->sl_text);
-	sl->sl_text=NULL;
-	if (sl->sl_rend) {
-		memcpy(r1[j],sl->sl_rend, n*sizeof(uint32_t));
-		free(sl->sl_rend);
+	if (sl->sl_text) {
+		memcpy(s1[j], sl->sl_text, n);
+#if 0
+		free(sl->sl_text);
+		sl->sl_text = NULL;
+#endif
 	}
-	free(sl);
+	if (sl->sl_rend) {
+		memcpy(r1[j], sl->sl_rend, n * sizeof(uint32_t));
+#if 0
+		free(sl->sl_rend);
+		sl->sl_rend = NULL;
+#endif
+	}
+//	free(sl);
 	return i + 1;
 }
 
@@ -149,9 +161,9 @@ void scr_reset(void)
 		++c.h; // for one larger than ^
 		s1 = malloc(c.h * sizeof(void*));
 		s2 = malloc(c.h * sizeof(void*));
+		r1 = malloc(c.h * sizeof(void*));
+		r2 = malloc(c.h * sizeof(void*));
 		--c.h;
-		r1 = malloc(c.h * sizeof(uint32_t*));
-		r2 = malloc(c.h * sizeof(uint32_t*));
 		for (uint16_t y = 0; y < c.h; y++) {
 			const uint8_t w = c.w + 1;
 			s1[y] = calloc(w, sizeof(uint8_t));
@@ -160,10 +172,12 @@ void scr_reset(void)
 			r2[y] = calloc(w, sizeof(uint32_t));
 		}
 		if (jbxvt.scr.s1.text) {
+			if (jbxvt.scr.s1.cursor.y >= c.h)
+				  jbxvt.scr.s1.cursor.y = c.h - 1;
 			// calculate working no. of lines.
 			int16_t i = jbxvt.scr.sline.top
 				+ jbxvt.scr.s1.cursor.y + 1;
-			int16_t j = i > c.h ? c.h - 1 : i - 1;
+			int32_t j = i > c.h ? c.h - 1 : i - 1;
 			i = jbxvt.scr.s1.cursor.y; // save
 			jbxvt.scr.s1.cursor.y = j;
 			bool onscreen = true;
@@ -172,16 +186,20 @@ void scr_reset(void)
 					  j, &onscreen, s1, r1, s2, r2)
 					  : handle_offscreen_data(c.w, i, j,
 						  s1, r1);
-#if 0
 			if (onscreen) // avoid segfault
-				  quit(1, WARN_ERR);
-#endif
-			for (j = i; j < jbxvt.scr.sline.top; ++j)
+				  return;
+				  //abort();
+			for (j = i; j < jbxvt.scr.sline.top; ++j) {
+				if (!jbxvt.scr.sline.data[j])
+					  break;
 				  jbxvt.scr.sline.data[j - i]
 					  = jbxvt.scr.sline.data[j];
+			}
 			for (j = jbxvt.scr.sline.top - i;
-				j < jbxvt.scr.sline.top; ++j)
-				  jbxvt.scr.sline.data[j] = NULL;
+				j < jbxvt.scr.sline.top; ++j) {
+				if(jbxvt.scr.sline.data[j])
+					jbxvt.scr.sline.data[j] = NULL;
+			}
 			jbxvt.scr.sline.top -= i;
 			free_visible_screens(jbxvt.scr.chars.height);
 		}

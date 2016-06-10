@@ -322,7 +322,6 @@ void quit(const int8_t status, const char * restrict msg)
 #else//!UTEMPTER_H
 	tidy_utmp();
 #endif//UTEMPTER_H
-	xcb_disconnect(jbxvt.X.xcb);
 	if(msg) {
 		jbputs(msg);
 		jbputs("\n");
@@ -668,11 +667,11 @@ int run_command(char ** argv)
 #ifdef SYS_signal
 	syscall(SYS_signal, SIGINT, catch_signal);
 	syscall(SYS_signal, SIGQUIT, catch_signal);
-	syscall(SYS_signal, SIGKILL, catch_signal);
+	//syscall(SYS_signal, SIGKILL, catch_signal);
 #else//!SYS_signal
 	signal(SIGINT, catch_signal);
 	signal(SIGQUIT, catch_signal);
-	signal(SIGKILL, catch_signal);
+//	signal(SIGKILL, catch_signal);
 #endif//SYS_signal
 
 #ifdef SYS_fork
@@ -688,8 +687,10 @@ int run_command(char ** argv)
 #endif//DEBUG
 	if (comm_pid == 0)
 		  child(argv, ttyfd);
+#if 0
 	for (uint8_t i = 1; i <= 15; i++)
 		signal(i, catch_signal);
+#endif
 #ifdef SYS_signal
 	syscall(SYS_signal, SIGCHLD, catch_signal);
 #else//!SYS_signal

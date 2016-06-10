@@ -126,7 +126,6 @@ static void handle_tk_expose(struct tokenst * restrict t)
 	switch (t->tk_region) {
 	case SCREEN :
 		if(jbxvt_size_set){
-			VCOUNT(a);
 			cursor(CURSOR_DRAW); // clear
 			scr_refresh((xcb_point_t){.x = t->tk_arg[0],
 				.y = t->tk_arg[1]}, (Size){

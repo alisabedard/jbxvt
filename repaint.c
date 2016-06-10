@@ -184,7 +184,7 @@ static int_fast16_t show_scroll_history(xcb_point_t rc1, xcb_point_t rc2,
 		line <= rc2.y && i >= 0; ++line, --i) {
 		struct slinest * sl = jbxvt.scr.sline.data[i];
 		if(!sl) // prevent segfault
-			  continue;
+			  break;
 		const uint_fast8_t l = sl->sl_length;
 		const uint_fast8_t v = rc2.x + 1;
 		const uint_fast16_t m = (v < l ? v : l) - rc1.x;

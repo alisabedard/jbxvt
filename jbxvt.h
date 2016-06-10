@@ -37,9 +37,8 @@ struct JBXVT {
 		struct screenst s1, s2;
 		struct {
 			struct slinest **data; // saved lines
+			int32_t top;
 			uint16_t max; // max # of saved lines
-			uint16_t top; /* high water mark
-					       of saved scroll lines */
 		} sline;
 		Size pixels, chars;
 		uint32_t rstyle; // render style
