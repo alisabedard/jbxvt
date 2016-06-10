@@ -188,7 +188,7 @@ __attribute__((hot,regparm(1)))
 #else
 __attribute__((hot))
 #endif
-static int16_t get_com_char(const int8_t flags)
+static int16_t get_com_char(const int_fast8_t flags)
 {
 	if (jbxvt.com.stack.top > jbxvt.com.stack.data)
 		return(*--jbxvt.com.stack.top);
@@ -235,7 +235,7 @@ static int16_t get_com_char(const int8_t flags)
 static inline bool is_string_char(register int_fast16_t c)
 {
 	c &= 0177;
-	return(c >= ' ' || c == '\n' || c == '\r' || c == '\t');
+	return c >= ' ' || c == '\n' || c == '\r' || c == '\t';
 }
 
 #if defined(__i386__) || defined(__amd64__)

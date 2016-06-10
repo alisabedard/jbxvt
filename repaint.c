@@ -15,7 +15,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-
+// TODO: implement this as a dictionary
 static bool set_rval_colors(const uint32_t rval)
 {
 	bool fg_mod = true, bg_mod = true;

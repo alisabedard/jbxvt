@@ -41,12 +41,14 @@ static void free_top_lines(int16_t count)
 	}
 }
 
+#if 0
 static void set_selend_index(const int i, const int count,
 	struct selst * restrict s)
 {
 	if (s->se_type == SAVEDSEL && s->se_index == i)
 		  s->se_index = i + count;
 }
+#endif
 
 static void transmogrify(const int16_t j, const int8_t count)
 {
@@ -71,13 +73,13 @@ static void ck_sel_on_scr(const int j)
 		  scr_clear_selection();
 }
 
-static int16_t sc_up_find_col(uint8_t * restrict s)
+static uint16_t sc_up_find_col(uint8_t * restrict s)
 {
-	int16_t col;
+	uint_fast16_t col;
 	for (col = jbxvt.scr.chars.width - 1;
-		col >= 0 && s[col] == 0; --col)
+		col > 0 && s[col] == 0; --col)
 		  ;
-	return col + 1;
+	return col;
 }
 
 static void lclr(const uint8_t i, const uint8_t j, const size_t sz,
@@ -156,22 +158,21 @@ static void sc_up(const uint8_t row1, uint8_t row2,
 	const int8_t count)
 {
 	LOG("scroll_up(count: %d, row1: %d, row2: %d)", count, row1, row2);
-	if (row1 == 0 && jbxvt.scr.current == &jbxvt.scr.s1) {
-		dprintf(STDERR_FILENO, "count %d\n", count);
-		if(!count)
-			  return;
-		free_top_lines(count - 1);
-		xcb_point_t iter;
-		for (iter.y = jbxvt.scr.sline.max - count - 1;
-			iter.y >= 0; --iter.y) {
-			jbxvt.scr.sline.data[iter.y + count]
-				= jbxvt.scr.sline.data[iter.y];
-			set_selend_index(iter.y, count, &jbxvt.sel.end1);
-			set_selend_index(iter.y, count, &jbxvt.sel.end2);
+	if (count && row1 == 0 && jbxvt.scr.current == &jbxvt.scr.s1) {
+		free_top_lines(count);
+		int_fast16_t y;
+		for (y = jbxvt.scr.sline.max - count - 1;
+			y >= 0; --y) {
+			jbxvt.scr.sline.data[y + count]
+				= jbxvt.scr.sline.data[y];
+	//		set_selend_index(y, count, &jbxvt.sel.end1);
+	//		set_selend_index(y, count, &jbxvt.sel.end2);
 		}
+		//set_selend_index(0, count, &jbxvt.sel.end1);
+		//set_selend_index(0, count, &jbxvt.sel.end2);
 		sc_up_cp_rows(count);
-		uint16_t t = jbxvt.scr.sline.top + count;
-		uint16_t max = jbxvt.scr.sline.max;
+		const uint16_t t = jbxvt.scr.sline.top + count;
+		const uint16_t max = jbxvt.scr.sline.max;
 		jbxvt.scr.sline.top = likely(t < max) ? t : max;
 		sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1,
 			jbxvt.scr.offset, jbxvt.scr.offset
@@ -186,7 +187,7 @@ static void sc_up(const uint8_t row1, uint8_t row2,
 		ck_sel_on_scr(j);
 	}
 
-	for(row2++; j < row2; ++j)
+	for(++row2; j < row2; ++j)
 		transmogrify(j, -count);
 	clr_lines(count, row2, save, rend, true);
 	if (count < row2 - row1)
