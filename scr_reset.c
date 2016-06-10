@@ -126,19 +126,10 @@ static int handle_offscreen_data(const uint8_t cw,
 	const uint8_t n = cw > l ? l : cw;
 	if (sl->sl_text) {
 		memcpy(s1[j], sl->sl_text, n);
-#if 0
-		free(sl->sl_text);
-		sl->sl_text = NULL;
-#endif
 	}
 	if (sl->sl_rend) {
 		memcpy(r1[j], sl->sl_rend, n * sizeof(uint32_t));
-#if 0
-		free(sl->sl_rend);
-		sl->sl_rend = NULL;
-#endif
 	}
-//	free(sl);
 	return i + 1;
 }
 

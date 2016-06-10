@@ -687,10 +687,6 @@ int run_command(char ** argv)
 #endif//DEBUG
 	if (comm_pid == 0)
 		  child(argv, ttyfd);
-#if 0
-	for (uint8_t i = 1; i <= 15; i++)
-		signal(i, catch_signal);
-#endif
 #ifdef SYS_signal
 	syscall(SYS_signal, SIGCHLD, catch_signal);
 #else//!SYS_signal
