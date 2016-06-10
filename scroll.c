@@ -24,18 +24,20 @@ static void sel_scr_to_sav(struct selst * restrict s,
 }
 
 // Free lines that scroll off the top of the screen.
-static void free_top_lines(const uint16_t count)
+static void free_top_lines(int16_t count)
 {
 	LOG("free_top_lines()");
-	for (uint_fast16_t i = 1; i <= count; ++i) {
-		struct slinest ** s = &jbxvt.scr.sline.data
-			[jbxvt.scr.sline.max - i];
-		if(*s) {
-			free((*s)->sl_text);
-			free((*s)->sl_rend);
-			(*s)->sl_length = 0;
-			free(*s);
-		}
+	while(--count > 0) {
+		const int16_t i = jbxvt.scr.sline.max - count;
+		struct slinest * s = jbxvt.scr.sline.data[i];
+		if (!s)
+			  continue;
+		if (s->sl_text)
+			free(s->sl_text);
+		if (s->sl_rend)
+			free(s->sl_rend);
+		free(s);
+		jbxvt.scr.sline.data[i] = NULL;
 	}
 }
 
@@ -106,17 +108,12 @@ static void clr_lines(int8_t count, const uint8_t rc,
 
 static void sc_up_cp_rows(const int8_t count)
 {
-	static bool called_before;
-	if(!called_before) {
-		  called_before=true;
-		  return;
-	}
 	xcb_point_t iter;
 	for (iter.y = 0; iter.y < count; ++iter.y) {
 		uint8_t * s = jbxvt.scr.current->text[iter.y];
 		uint32_t * r = jbxvt.scr.current->rend[iter.y];
 		iter.x = sc_up_find_col(s);
-		struct slinest *sl = malloc(sizeof(struct slinest));
+		struct slinest *sl = calloc(1, sizeof(struct slinest));
 		// +1 to have last byte as wrap flag:
 		sl->sl_text = malloc(iter.x + 1);
 		memcpy(sl->sl_text, s, iter.x);
