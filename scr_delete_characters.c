@@ -28,19 +28,22 @@ void scr_delete_characters(int count)
 	LOG("scr_delete_characters(%d)", count);
 	const uint8_t scw = jbxvt.scr.chars.width;
 	const xcb_point_t c = jbxvt.scr.current->cursor;
-	if (count > scw - c.y)
+	if (count > scw - c.y) // keep within the screen
 		  count = scw - c.y;
 	if(!count) return;
 	home_screen();
 	cursor(CURSOR_DRAW);
 	uint8_t * s = jbxvt.scr.current->text[c.y];
 	uint32_t * r = jbxvt.scr.current->rend[c.y];
+
 	// copy the data after count
-	memmove(s + c.x, s + c.x + count, count);
-	memmove(r + c.x, r + c.x + count, count * sizeof(uint32_t));
+	memmove(s + c.x, s + c.x + count, scw - c.x - count);
+	memmove(r + c.x, r + c.x + count, (scw - c.x - count)
+		* sizeof(uint32_t));
 	// delete the source data copied
-	memset(s + c.x + count, 0, count);
-	memset(r + c.x + count, 0, count * sizeof(uint32_t));
+	memset(s + scw - count, 0, count);
+	memset(r + scw - count, 0, count * sizeof(uint32_t));
+
 	const Size f = { .w = jbxvt.X.font_width,
 		.h = jbxvt.X.font_height };
 	const int16_t y = MARGIN + c.y * f.height;
