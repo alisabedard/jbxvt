@@ -30,23 +30,15 @@ void change_selection(struct selst * restrict ose1,
 		se2 = &jbxvt.sel.end1;
 	}
 
-	if ((n = selcmp(se1,ose1)) != 0) {
-
-		/* repaint the start.
-		 */
-		if (n < 0) {
-			selend_to_rc(&rs,&cs,se1);
-			selend_to_rc(&re,&ce,ose1);
-		} else {
-			selend_to_rc(&rs,&cs,ose1);
-			selend_to_rc(&re,&ce,se1);
-		}
+	if ((n = selcmp(se1,ose1))) {
+		// repaint the start.
+		const bool nn = n < 0;
+		selend_to_rc(&rs, &cs, nn ? se1 : ose1);
+		selend_to_rc(&re, &ce, nn ? ose1 : se1);
 		uint8_t row1 = rs < 0 ? 0 : rs;
 		uint8_t row2 = re >= jbxvt.scr.chars.height
 			? jbxvt.scr.chars.height - 1 : re;
-
-		/*  Invert the changed area
-		 */
+		//  Invert the changed area
 		for (row = row1; row <= row2; row++) {
 			const int16_t y = MARGIN + row * jbxvt.X.font_height;
 			const int16_t x1 = MARGIN + (row == rs
@@ -60,33 +52,25 @@ void change_selection(struct selst * restrict ose1,
 				.height = jbxvt.X.font_height});
 		}
 	}
-	if ((n = selcmp(se2,ose2)) != 0) {
-
-		/* repaint the end.
-		 */
-		if (n < 0) {
-			selend_to_rc(&rs,&cs,se2);
-			selend_to_rc(&re,&ce,ose2);
-		} else {
-			selend_to_rc(&rs,&cs,ose2);
-			selend_to_rc(&re,&ce,se2);
-		}
+	if ((n = selcmp(se2,ose2))) {
+		// repaint the end
+		const bool nn = n < 0;
+		selend_to_rc(&rs, &cs, nn ? se2 : ose2);
+		selend_to_rc(&re, &ce, nn ? ose2 : se2);
 		const uint8_t row1 = rs < 0 ? 0 : rs;
 		const uint8_t row2 = re >= jbxvt.scr.chars.height
 			? jbxvt.scr.chars.height - 1 : re;
-
-		/*  Invert the changed area
-		 */
+		//  Invert the changed area
 		for (row = row1; row <= row2; row++) {
 			const int16_t y = MARGIN + row * jbxvt.X.font_height;
-			const int16_t x1 = MARGIN + (row == rs
+			const int16_t x1 = (row == rs
 				? cs * jbxvt.X.font_width : 0);
-			const int16_t x2 = MARGIN + ((row == re)
+			const int16_t x2 = ((row == re)
 				? ce : jbxvt.scr.chars.width)
 				* jbxvt.X.font_width;
 			xcb_poly_fill_rectangle(jbxvt.X.xcb, jbxvt.X.win.vt,
 				jbxvt.X.gc.hl, 1, &(xcb_rectangle_t){
-				.x = x1, .y = y, .width = x2 - x1,
+				.x = x1 + MARGIN, .y = y, .width = x2 - x1,
 				.height = jbxvt.X.font_height});
 
 		}

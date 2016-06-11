@@ -14,7 +14,6 @@
 
 #include <string.h>
 
-
 static void handle_new_lines(int8_t nlcount)
 {
 	struct screenst * restrict c = jbxvt.scr.current;

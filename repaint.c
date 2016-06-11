@@ -92,7 +92,7 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 			jbxvt.X.color.current_bg, jbxvt.X.color.current_fg});
 		cmod = true;
 	}
-	p.y+= jbxvt.X.font_ascent;
+	p.y += jbxvt.X.font_ascent;
 	if(bold) {
 		xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, XCB_GC_FONT,
 			&(uint32_t){jbxvt.X.bold_font});
