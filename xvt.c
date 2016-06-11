@@ -84,18 +84,6 @@ static void handle_txtpar(struct tokenst * restrict token)
 	case 2 :
 		change_name(token->tk_string, false);
 		break;
-#ifdef DEBUG
-	case 4: // change colors
-	case 12: // cursor color
-	case 13: // pointer color
-	case 17: // highlight color
-	case 19: // underline color
-	case 46: // log file
-	case 50: // font
-	default:
-		LOG("unhandled txtpar: %d", token->tk_arg[0]);
-		break;
-#endif//DEBUG
 	}
 
 }
@@ -114,8 +102,6 @@ static void handle_tk_char(const uint8_t tk_char)
 		break;
 	case '\t': // handle tab
 		scr_tab();
-		break;
-	case '\007': // ring the bell
 		break;
 	}
 }
@@ -344,32 +330,35 @@ app_loop_head:
 		scr_rindex();
 		break;
 	case TK_DECID :
+	case TK_DA :
 		LOG("TK_DECID");
 		cprintf("\033[?6c");	/* I am a VT102 */
 		break;
-#ifdef DEBUG
-	case TK_DA :
-		LOG("TK_DA");
-		break;
 	case TK_DECSWH :		/* ESC # digit */
+		VCOUNT(DECSWH);
 		LOG("TK_DECSWH");
 		break;
 	case TK_HTS :
+		VCOUNT(HTS);
 		LOG("TK_HTS");
 		break;
 	case TK_NEL :
+		VCOUNT(NEL);
 		LOG("TK_NEL");
 		break;
 	case TK_SS2 :
+		VCOUNT(SS2);
 		LOG("TK_SS2");
 		break;
 	case TK_SS3 :
+		VCOUNT(SS3);
 		LOG("TK_SS3");
 		break;
 	case TK_TBC :
+		VCOUNT(TBC);
 		LOG("TK_TBC");
 		break;
-#endif//DEBUG
+//#endif//DEBUG
 	}
 #ifdef TK_DEBUG
 	show_token(&token);

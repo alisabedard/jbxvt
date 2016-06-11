@@ -31,6 +31,7 @@ static void get_horz_geo(xcb_rectangle_t * restrict h,
 //  erase part or the whole of a line
 void scr_erase_line(const int8_t mode)
 {
+	LOG("scr_erase_line(%d)", mode);
 	home_screen();
 	xcb_rectangle_t g = { .y = MARGIN + jbxvt.scr.current->cursor.y
 			* jbxvt.X.font_height
@@ -39,10 +40,12 @@ void scr_erase_line(const int8_t mode)
 	uint32_t * r = jbxvt.scr.current->rend[jbxvt.scr.current->cursor.y];
 	switch (mode) {
 	    case START :
+		    MARK;
 		get_horz_geo(&g, jbxvt.scr.current->cursor.x, 0);
 		zero_line(s, r, jbxvt.scr.current->cursor.x);
 		break;
 	    case END :
+		MARK;
 		get_horz_geo(&g, jbxvt.scr.chars.width
 			- jbxvt.scr.current->cursor.x,
 			jbxvt.scr.current->cursor.x);
@@ -52,10 +55,12 @@ void scr_erase_line(const int8_t mode)
 			- jbxvt.scr.current->cursor.x);
 		break;
 	    case ENTIRE :
+		MARK;
 		get_horz_geo(&g, jbxvt.scr.chars.width, 0);
 		zero_line(s, r, jbxvt.scr.chars.width);
 		break;
 	    default :
+		MARK;
 		return;
 	}
 	/*  patch in the final rendition flag if there is any non-zero
@@ -79,6 +84,7 @@ void scr_erase_line(const int8_t mode)
 //  erase part or the whole of the screen
 void scr_erase_screen(const int8_t mode)
 {
+	LOG("scr_erase_screen(%d)", mode);
 	home_screen();
 	jbxvt.scr.current->wrap_next = 0;
 	uint16_t i, width = jbxvt.X.font_width * jbxvt.scr.chars.width;
@@ -86,6 +92,7 @@ void scr_erase_screen(const int8_t mode)
 	int16_t x = MARGIN, y, height;
 	switch (mode) {
 	    case START :
+		    MARK;
 		y = MARGIN;
 		height = jbxvt.scr.current->cursor.y * jbxvt.X.font_height;
 		for (i = 0; i < jbxvt.scr.current->cursor.y; i++) {
@@ -101,6 +108,7 @@ void scr_erase_screen(const int8_t mode)
 		scr_erase_line(mode);
 		break;
 	    case END :
+		MARK;
 		if (jbxvt.scr.current->cursor.y
 			|| jbxvt.scr.current->cursor.x) {
 			y = MARGIN + (jbxvt.scr.current->cursor.y + 1)
