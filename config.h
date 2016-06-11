@@ -9,7 +9,7 @@
 #define DEF_FONT "-*-terminus-medium-r-*-*-14-*-*-*-*-*-iso10646-*"
 #define BOLD_FONT "-*-terminus-bold-r-*-*-14-*-*-*-*-*-iso10646-*"
 
-#define TERM_ENV "xterm" // TERM env var to set
+#define TERM_ENV "xterm-256color" // TERM env var to set
 #define COMMAND "/bin/sh" // default command to run
 
 enum {	SBAR_WIDTH = 10, // width of scroll bar

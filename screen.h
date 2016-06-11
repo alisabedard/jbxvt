@@ -54,11 +54,11 @@ enum RenditionStyleFlags {
 	RS_BF = (1<<24),
 	// bright background: masks above colors
 	RS_BB = (1<<25),
-	// 256 color support bits, 4 bit number to specify multiplier
-	RS_C0 = (1<<26),
-	RS_C1 = (1<<27),
-	RS_C2 = (1<<28),
-	RS_C3 = (1<<29),
+	// extended color support bits
+	RS_FG_RGB = (1<<26),
+	RS_BG_RGB = (1<<27),
+	RS_FG_INDEX = (1<<28),
+	RS_BG_INDEX = (1<<29),
 };
 
 // Normal colors:

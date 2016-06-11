@@ -24,7 +24,7 @@ pixel_t get_pixel(const char * restrict color)
 pixel_t get_pixel_rgb(int16_t r, int16_t g, int16_t b)
 {
 	xcb_alloc_color_cookie_t c = xcb_alloc_color(jbxvt.X.xcb,
-		jbxvt.X.screen->default_colormap, r, g, b);
+		jbxvt.X.screen->default_colormap, r<<16, g<<8, b);
 	xcb_alloc_color_reply_t * rpl = xcb_alloc_color_reply(jbxvt.X.xcb,
 		c, NULL);
 	pixel_t p = rpl->pixel;
