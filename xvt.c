@@ -44,7 +44,7 @@ static void handle_reset(struct tokenst * restrict token)
 		case 1049: // Fix stale chars in vi
 			scr_change_screen(mode_high);
 			break;
-		case 6 :
+		case 6 : // DECOM
 			jbxvt.scr.current->decom = mode_high;
 			break;
 		case 7 :

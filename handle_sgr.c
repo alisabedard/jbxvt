@@ -1,12 +1,8 @@
 #include "handle_sgr.h"
 
 #include "color.h"
+#include "log.h"
 #include "screen.h"
-
-#ifdef DEBUG_SGR
-#include <stdio.h>
-#include <unistd.h>
-#endif//DEBUG_SGR
 
 void handle_sgr(struct tokenst * restrict token)
 {
@@ -15,10 +11,7 @@ void handle_sgr(struct tokenst * restrict token)
 		return;
 	}
 	for (uint_fast8_t i = 0; i < token->tk_nargs; ++i) {
-#ifdef DEBUG_SGR
-			dprintf(STDERR_FILENO, "tk_arg[%d]: %d\n", i,
-				token->tk_arg[i]);
-#endif//DEBUG_SGR
+		LOG("handle_sgr: tk_arg[%d]: %x", i, token->tk_arg[i]);
 		switch (token->tk_arg[i]) {
 		case 0 :
 			scr_style(RS_NONE);
@@ -148,6 +141,7 @@ void handle_sgr(struct tokenst * restrict token)
 			scr_style(RS_BB|RS_B7);
 			break;
 		default:
+			LOG("unhandled style %d", token->tk_arg[i]); 
 			scr_style(RS_NONE);
 		}
 	}

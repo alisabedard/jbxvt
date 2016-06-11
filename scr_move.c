@@ -13,34 +13,13 @@
 void scr_move(const int16_t x, const int16_t y, const uint8_t relative)
 {
 	home_screen();
-	cursor(CURSOR_DRAW);
+	cursor(CURSOR_DRAW); // clear
 	xcb_point_t * restrict c = &jbxvt.scr.current->cursor;
-	c->x = (relative & COL_RELATIVE) ? c->x + x : x;
-	if (relative & ROW_RELATIVE) {
-		if (y > 0) {
-			if (c->y <= jbxvt.scr.current->margin.bottom
-				&& c->y + y > jbxvt.scr.current->margin.bottom)
-				c->y = jbxvt.scr.current->margin.bottom;
-			else
-				c->y += y;
-		} else if (y < 0) {
-			if (c->y >= jbxvt.scr.current->margin.top && c->y + y
-				< jbxvt.scr.current->margin.top)
-				c->y = jbxvt.scr.current->margin.top;
-			else
-				c->y += y;
-		}
-	} else {
-		if (jbxvt.scr.current->decom) {
-			c->y = y + jbxvt.scr.current->margin.top;
-			if (c->y > jbxvt.scr.current->margin.bottom)
-				c->y = jbxvt.scr.current->margin.bottom;
-		} else
-			c->y = y;
-	}
+	c->x = relative & COL_RELATIVE ? c->x + x : x;
+	c->y = relative & ROW_RELATIVE ? c->y + y : y;
 	reset_row_col();
 	jbxvt.scr.current->wrap_next = 0;
 	check_selection(c->y, c->y);
-	cursor(CURSOR_DRAW);
+	cursor(CURSOR_DRAW); // draw
 }
 

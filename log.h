@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define MARK jbputs("MARK " __FILE__ "\n");
+#define MARK dprintf(STDERR_FILENO, "MARK " __FILE__ ":%d\n", __LINE__);
 #define MARK_I(i) dprintf(STDERR_FILENO, "MARK: " __FILE__ ":%d value: %d\n",\
 	__LINE__, i)
 // Used for simplistic profiling and code path testing:

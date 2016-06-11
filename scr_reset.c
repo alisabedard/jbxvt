@@ -48,6 +48,15 @@ void reset_row_col(void)
 	c->x = p.x < 0 ? 0 : p.x > l ? l : p.x;
 	l = jbxvt.scr.chars.height - 1;
 	c->y = p.y < 0 ? 0 : p.y > l ? l : p.y;
+	// Implement DECOM, DEC Origin Mode, limits
+	if (jbxvt.scr.current->decom) {
+		const Size m = jbxvt.scr.current->margin;
+		if (c->y < m.top) {
+			c->y = m.top;
+		} else if (c->y > m.bottom) {
+			c->y = m.bottom;
+		}
+	}
 }
 
 static void init_screen_elements(struct screenst * restrict scr,

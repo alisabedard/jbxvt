@@ -3,8 +3,8 @@
 #CFLAGS+=-flto # doesn't work with clang
 #CFLAGS=-O0
 #CFLAGS+=-ggdb
-CFLAGS+=-DDEBUG
-CFLAGS+=-DTK_DEBUG
+#CFLAGS+=-DDEBUG
+#CFLAGS+=-DTK_DEBUG
 #CC=clang
 
 exe=jbxvt
