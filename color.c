@@ -20,10 +20,19 @@ pixel_t get_pixel(const char * restrict color)
 	return p;
 }
 
-#if defined(__i386__) || defined(__amd64__)
-	__attribute__((regparm(3)))
-#endif//x86
-static inline pixel_t set_color(const unsigned long vm,
+// Use rgb color
+pixel_t get_pixel_rgb(int16_t r, int16_t g, int16_t b)
+{
+	xcb_alloc_color_cookie_t c = xcb_alloc_color(jbxvt.X.xcb,
+		jbxvt.X.screen->default_colormap, r, g, b);
+	xcb_alloc_color_reply_t * rpl = xcb_alloc_color_reply(jbxvt.X.xcb,
+		c, NULL);
+	pixel_t p = rpl->pixel;
+	free(rpl);
+	return p;
+}
+
+pixel_t set_color(const unsigned long vm,
 	const pixel_t p, xcb_gcontext_t gc)
 {
 	xcb_change_gc(jbxvt.X.xcb, gc, vm, (uint32_t[]){p});

@@ -57,6 +57,21 @@ static struct ColorFlag color_flags [] = {
 	{0} // terminator
 };
 
+// Set 6-bit color
+#define COLOR_IS_FG 0x80
+__attribute__((unused))
+static bool set_rgb_colors(const uint8_t c)
+{
+	const uint8_t r = (c & ~0xcf)<<2;
+	const uint8_t g = (c & ~0xf3)<<4;
+	const uint8_t b = (c & ~0xfc)<<6;
+	const bool ret = (r | g | b) != 0;
+	const pixel_t p = get_pixel_rgb(r, g, b);
+	set_color((c & COLOR_IS_FG)?XCB_GC_FOREGROUND:XCB_GC_BACKGROUND,
+		p, jbxvt.X.gc.tx);
+	return ret;
+}
+
 static bool set_rval_colors(const uint32_t rval)
 {
 	// Mask foreground colors, 8 bits offset by 6 bits

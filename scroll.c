@@ -2,6 +2,9 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 
 #include "scroll.h"
+#ifndef DEBUG_SCROLL
+#undef DEBUG
+#endif//!DEBUG_SCROLL
 
 #include "config.h"
 #include "jbxvt.h"

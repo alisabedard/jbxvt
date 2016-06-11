@@ -252,10 +252,10 @@ app_loop_head:
 			scr_move(0, 0, 0);
 			break;
 		case 1:
-			scr_move(0, t[0] - 1, 0);
+			scr_move(0, t[0]>0?t[0] - 1:0, 0);
 			break;
 		default:
-			scr_move(t[1] - 1, t[0] - 1, 0);
+			scr_move(t[1]>0?t[1] - 1:0, t[0]>0?t[0] - 1:0, 0);
 		}
 		break;
 	case TK_ED :

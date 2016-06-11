@@ -18,6 +18,8 @@ static struct {
 //  Redraw the scrollbar after a size change
 void sbar_reset(void)
 {
+	if (!jbxvt.opt.show_scrollbar)
+		  return;
 	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(jbxvt.X.xcb,
 		xcb_get_geometry(jbxvt.X.xcb, jbxvt.X.win.sb), NULL);
 	sbar.sz.w = r->width;
@@ -32,7 +34,10 @@ void sbar_reset(void)
 void sbar_show(int length, const int low,
 	const int high)
 {
-	if (!length) return;
+	if (!jbxvt.opt.show_scrollbar)
+		  return;
+	if (!length)
+		  return;
 
 	sbar.last_length = length;
 	sbar.last_low = low;

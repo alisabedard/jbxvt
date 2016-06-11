@@ -10,8 +10,19 @@ void handle_sgr(struct tokenst * restrict token)
 		scr_style(RS_NONE);
 		return;
 	}
+	bool fg_rgb_mode = false;
+	bool fg_index_mode = false;
+	bool bg_rgb_mode = false;
+	bool bg_index_mode = false;
 	for (uint_fast8_t i = 0; i < token->tk_nargs; ++i) {
 		LOG("handle_sgr: tk_arg[%d]: %x", i, token->tk_arg[i]);
+		if (fg_index_mode || bg_index_mode) {
+			jbputs("FIXME: implement color index mode\n");
+		}
+		if (fg_rgb_mode || bg_rgb_mode) {
+			jbputs("FIXME: implement color rgb mode\n");
+			continue;
+		}
 		switch (token->tk_arg[i]) {
 		case 0 :
 			scr_style(RS_NONE);
@@ -59,6 +70,12 @@ void handle_sgr(struct tokenst * restrict token)
 		case 37:
 			scr_style(RS_F7);
 			break;
+		case 38: // rgb or index mode
+			if (token->tk_nargs == 1)
+				fg_index_mode = true;
+			else
+				fg_rgb_mode = true;
+			break;
 		case 39:
 			scr_style(RS_FR);
 			break;
@@ -86,6 +103,12 @@ void handle_sgr(struct tokenst * restrict token)
 			break;
 		case 47:
 			scr_style(RS_B7);
+			break;
+		case 48: // rgb or index mode
+			if (token->tk_nargs == 1)
+				bg_index_mode = true;
+			else
+				bg_rgb_mode = true;
 			break;
 		case 49:
 			scr_style(RS_BR);
@@ -141,7 +164,7 @@ void handle_sgr(struct tokenst * restrict token)
 			scr_style(RS_BB|RS_B7);
 			break;
 		default:
-			LOG("unhandled style %d", token->tk_arg[i]); 
+			LOG("unhandled style %x", token->tk_arg[i]);
 			scr_style(RS_NONE);
 		}
 	}
