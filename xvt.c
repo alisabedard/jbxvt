@@ -39,23 +39,18 @@ static void handle_reset(struct tokenst * restrict token)
 	if (likely(token->tk_private == '?')) {
 		switch (token->tk_arg[0]) {
 		case 1 :
-			VCOUNT(a);
 			set_keys(mode_high, true);
 			break;
 		case 1049: // Fix stale chars in vi
-			VCOUNT(e);
 			scr_change_screen(mode_high);
 			break;
 		case 6 :
-			VCOUNT(b);
 			jbxvt.scr.current->decom = mode_high;
 			break;
 		case 7 :
-			VCOUNT(c);
 			jbxvt.scr.current->wrap = mode_high;
 			break;
 		case 47: // switch to main screen
-			VCOUNT(d);
 			scr_change_screen(mode_high);
 			break;
 #ifdef DEBUG
