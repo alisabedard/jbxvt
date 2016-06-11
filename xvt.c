@@ -247,10 +247,16 @@ app_loop_head:
 		// fall through
 	case TK_CUP: // position cursor
 		LOG("TK_CUP");
-		if (token.tk_nargs == 1)
-			  scr_move(0, t[0] - 1, 0);
-		else
-			  scr_move(t[1] - 1, t[0] - 1, 0);
+		switch(token.tk_nargs) {
+		case 0:
+			scr_move(0, 0, 0);
+			break;
+		case 1:
+			scr_move(0, t[0] - 1, 0);
+			break;
+		default:
+			scr_move(t[1] - 1, t[0] - 1, 0);
+		}
 		break;
 	case TK_ED :
 		LOG("TK_ED"); // don't use n
@@ -334,31 +340,26 @@ app_loop_head:
 		LOG("TK_DECID");
 		cprintf("\033[?6c");	/* I am a VT102 */
 		break;
+#ifdef DEBUG
 	case TK_DECSWH :		/* ESC # digit */
-		VCOUNT(DECSWH);
 		LOG("TK_DECSWH");
 		break;
 	case TK_HTS :
-		VCOUNT(HTS);
 		LOG("TK_HTS");
 		break;
 	case TK_NEL :
-		VCOUNT(NEL);
 		LOG("TK_NEL");
 		break;
 	case TK_SS2 :
-		VCOUNT(SS2);
 		LOG("TK_SS2");
 		break;
 	case TK_SS3 :
-		VCOUNT(SS3);
 		LOG("TK_SS3");
 		break;
 	case TK_TBC :
-		VCOUNT(TBC);
 		LOG("TK_TBC");
 		break;
-//#endif//DEBUG
+#endif//DEBUG
 	}
 #ifdef TK_DEBUG
 	show_token(&token);
