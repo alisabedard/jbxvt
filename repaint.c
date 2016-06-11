@@ -15,90 +15,68 @@
 
 #include <stdlib.h>
 #include <string.h>
-// TODO: implement this as a dictionary
+
+struct ColorFlag {
+	uint32_t flag;
+	char * color;
+};
+
+struct ColorFlag color_flags [] = {
+	{RS_F0, COLOR_0},
+	{RS_F1, COLOR_1},
+	{RS_F2, COLOR_2},
+	{RS_F3, COLOR_3},
+	{RS_F4, COLOR_4},
+	{RS_F5, COLOR_5},
+	{RS_F6, COLOR_6},
+	{RS_F7, COLOR_7},
+	{RS_BF|RS_F0, BCOLOR_0},
+	{RS_BF|RS_F1, BCOLOR_1},
+	{RS_BF|RS_F2, BCOLOR_2},
+	{RS_BF|RS_F3, BCOLOR_3},
+	{RS_BF|RS_F4, BCOLOR_4},
+	{RS_BF|RS_F5, BCOLOR_5},
+	{RS_BF|RS_F6, BCOLOR_6},
+	{RS_BF|RS_F7, BCOLOR_7},
+	{RS_B0, COLOR_0},
+	{RS_B1, COLOR_1},
+	{RS_B2, COLOR_2},
+	{RS_B3, COLOR_3},
+	{RS_B4, COLOR_4},
+	{RS_B5, COLOR_5},
+	{RS_B6, COLOR_6},
+	{RS_B7, COLOR_7},
+	{RS_BB|RS_B0, BCOLOR_0},
+	{RS_BB|RS_B1, BCOLOR_1},
+	{RS_BB|RS_B2, BCOLOR_2},
+	{RS_BB|RS_B3, BCOLOR_3},
+	{RS_BB|RS_B4, BCOLOR_4},
+	{RS_BB|RS_B5, BCOLOR_5},
+	{RS_BB|RS_B6, BCOLOR_6},
+	{RS_BB|RS_B7, BCOLOR_7},
+	{0} // terminator
+};
+
 static bool set_rval_colors(const uint32_t rval)
 {
-	bool fg_mod = true, bg_mod = true;
-	// normal foregrounds:
-	if (rval & RS_F0)
-		  set_fg(COLOR_0);
-	else if (rval & RS_F1)
-		  set_fg(COLOR_1);
-	else if (rval & RS_F2)
-		  set_fg(COLOR_2);
-	else if (rval & RS_F3)
-		  set_fg(COLOR_3);
-	else if (rval & RS_F4)
-		  set_fg(COLOR_4);
-	else if (rval & RS_F5)
-		  set_fg(COLOR_5);
-	else if (rval & RS_F6)
-		  set_fg(COLOR_6);
-	else if (rval & RS_F7)
-		  set_fg(COLOR_7);
-	else if (rval & RS_FR)
-		  set_fg(NULL);
-	else if (rval & RS_BF) {
-		// bright foregrounds:
-		if (rval & RS_F0)
-			  set_fg(BCOLOR_0);
-		else if (rval & RS_F1)
-			  set_fg(BCOLOR_1);
-		else if (rval & RS_F2)
-			  set_fg(BCOLOR_2);
-		else if (rval & RS_F3)
-			  set_fg(BCOLOR_3);
-		else if (rval & RS_F4)
-			  set_fg(BCOLOR_4);
-		else if (rval & RS_F5)
-			  set_fg(BCOLOR_5);
-		else if (rval & RS_F6)
-			  set_fg(BCOLOR_6);
-		else if (rval & RS_F7)
-			  set_fg(BCOLOR_7);
-	} else
-		  fg_mod = false;
-
-	// normal backgrounds:
-	if (rval & RS_B0)
-		  set_bg(COLOR_0);
-	else if (rval & RS_B1)
-		  set_bg(COLOR_1);
-	else if (rval & RS_B2)
-		  set_bg(COLOR_2);
-	else if (rval & RS_B3)
-		  set_bg(COLOR_3);
-	else if (rval & RS_B4)
-		  set_bg(COLOR_4);
-	else if (rval & RS_B5)
-		  set_bg(COLOR_5);
-	else if (rval & RS_B6)
-		  set_bg(COLOR_6);
-	else if (rval & RS_B7)
-		  set_bg(COLOR_7);
-	else if (rval & RS_BR)
-		  set_bg(NULL);
-	else if (rval & RS_BB) {
-		// bright backgrounds:
-		if (rval & RS_B0)
-			  set_bg(BCOLOR_0);
-		else if (rval & RS_B1)
-			  set_bg(BCOLOR_1);
-		else if (rval & RS_B2)
-			  set_bg(BCOLOR_2);
-		else if (rval & RS_B3)
-			  set_bg(BCOLOR_3);
-		else if (rval & RS_B4)
-			  set_bg(BCOLOR_4);
-		else if (rval & RS_B5)
-			  set_bg(BCOLOR_5);
-		else if (rval & RS_B6)
-			  set_bg(BCOLOR_6);
-		else if (rval & RS_B7)
-			  set_bg(BCOLOR_7);
-	} else bg_mod = false;
-
-	return fg_mod || bg_mod;
+	// Mask foreground colors, 8 bits offset by 6 bits
+	uint32_t f = rval & 0x1fc0;
+	// Mask background colors, 8 bits offset by 14 bits
+	uint32_t b = rval & 0x1fc000;
+	bool fg_set = false, bg_set = false;
+	for(int_fast8_t i = 0; color_flags[i].flag; ++i) {
+		if (!fg_set && color_flags[i].flag == f) {
+			set_fg(color_flags[i].color);
+			fg_set = true;
+		}
+		if (!bg_set && color_flags[i].flag == b) {
+			set_bg(color_flags[i].color);
+			bg_set = true;
+		}
+		if (bg_set && fg_set)
+			  break;
+	}
+	return fg_set || bg_set;
 }
 
 //  Paint the text using the rendition value at the screen position.
