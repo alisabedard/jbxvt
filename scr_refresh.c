@@ -28,14 +28,15 @@ void scr_refresh(const xcb_point_t pos, const Size sz)
 	LOG("scr_refresh()");
 	const Size s = jbxvt.scr.chars;
 	const Size f = {.h = jbxvt.X.font_height, .w = jbxvt.X.font_width};
-	const int16_t x = pos.x - MARGIN;
-	const int16_t y = pos.y - MARGIN;
+	xcb_point_t p = pos;
+	p.x -= MARGIN;
+	p.y -= MARGIN;
 	const xcb_point_t rc1 = {
-		.x = constrain(x / f.w, s.w),
-		.y = constrain(y / f.h, s.h)};
+		.x = constrain(p.x / f.w, s.w),
+		.y = constrain(p.y / f.h, s.h)};
 	const xcb_point_t rc2 = {
-		.x = constrain((x + sz.width + f.w) / f.w, s.w),
-		.y = constrain((y + sz.height + f.h) / f.h, s.h)};
+		.x = constrain((p.x + sz.width + f.w) / f.w, s.w),
+		.y = constrain((p.y + sz.height + f.h) / f.h, s.h)};
 	repaint(rc1, rc2);
 }
 

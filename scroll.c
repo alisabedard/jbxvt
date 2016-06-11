@@ -41,15 +41,6 @@ static void free_top_lines(int16_t count)
 	}
 }
 
-#if 0
-static void set_selend_index(const int i, const int count,
-	struct selst * restrict s)
-{
-	if (s->se_type == SAVEDSEL && s->se_index == i)
-		  s->se_index = i + count;
-}
-#endif
-
 static void transmogrify(const int16_t j, const int8_t count)
 {
 	const int16_t k = j + count;
@@ -76,7 +67,7 @@ static void ck_sel_on_scr(const int j)
 static uint16_t sc_up_find_col(uint8_t * restrict s)
 {
 	uint_fast16_t col;
-	for (col = jbxvt.scr.chars.width - 1;
+	for (col = jbxvt.scr.chars.width;
 		col > 0 && s[col] == 0; --col)
 		  ;
 	return col;
@@ -165,11 +156,7 @@ static void sc_up(const uint8_t row1, uint8_t row2,
 			y >= 0; --y) {
 			jbxvt.scr.sline.data[y + count]
 				= jbxvt.scr.sline.data[y];
-	//		set_selend_index(y, count, &jbxvt.sel.end1);
-	//		set_selend_index(y, count, &jbxvt.sel.end2);
 		}
-		//set_selend_index(0, count, &jbxvt.sel.end1);
-		//set_selend_index(0, count, &jbxvt.sel.end2);
 		sc_up_cp_rows(count);
 		const uint16_t t = jbxvt.scr.sline.top + count;
 		const uint16_t max = jbxvt.scr.sline.max;

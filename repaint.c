@@ -21,7 +21,7 @@ struct ColorFlag {
 	char * color;
 };
 
-struct ColorFlag color_flags [] = {
+static struct ColorFlag color_flags [] = {
 	{RS_F0, COLOR_0},
 	{RS_F1, COLOR_1},
 	{RS_F2, COLOR_2},
@@ -195,7 +195,7 @@ void repaint(xcb_point_t rc1, xcb_point_t rc2)
 		register uint_fast8_t x;
 		for (x = rc1.x; s && x <= rc2.x; x++)
 			str[x - rc1.x] = s[x] < ' ' ? ' ' : s[x];
-		const uint16_t m = x - rc1.x - 1;
+		const uint16_t m = x - rc1.x;
 		p.y = repaint_generic(p, m, rc1.x, rc2.x, str,
 			jbxvt.scr.current->rend[i]);
 	}

@@ -38,7 +38,8 @@ void scr_change_screen(const bool mode_high)
 	jbxvt.scr.current = mode_high
 		? &jbxvt.scr.s2 : &jbxvt.scr.s1;
 	jbxvt.sel.end2.se_type = NOSEL;
-	repaint((xcb_point_t){}, (xcb_point_t){.y = jbxvt.scr.chars.height - 1,
+	repaint((xcb_point_t){}, (xcb_point_t){
+		.y = jbxvt.scr.chars.height - 1,
 		.x = jbxvt.scr.chars.width - 1});
 	cursor(CURSOR_DRAW);
 }
@@ -121,12 +122,6 @@ void scr_insert_lines(const int8_t count)
 	scroll_lower_lines(get_insertion_count(count));
 	jbxvt.scr.current->wrap_next = 0;
 	cursor(CURSOR_DRAW);
-}
-
-//  Move the display by a distance represented by the value.
-void scr_move_by(const int16_t y)
-{
-	change_offset(jbxvt.scr.offset - y/jbxvt.X.font_height);
 }
 
 //  Reposition the scrolled text so that the scrollbar is at the bottom.

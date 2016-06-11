@@ -10,8 +10,7 @@
 #include "selst.h"
 
 /*  Paint any part of the selection that is between rows row1 and row2 inclusive
- *  and between cols col1 and col2 inclusive.
- */
+ *  and between cols col1 and col2 inclusive.  */
 void show_selection(int16_t row1, int16_t row2, int16_t col1, int16_t col2)
 {
 	if (jbxvt.sel.end1.se_type == NOSEL
@@ -53,7 +52,7 @@ void show_selection(int16_t row1, int16_t row2, int16_t col1, int16_t col2)
 	if (sr > er)
 		return;
 	//  Paint in the reverse video:
-	for (int16_t row = sr; row <= er; ++row) {
+	for (int_fast16_t row = sr; row <= er; ++row) {
 		const int16_t y = MARGIN + row * jbxvt.X.font_height;
 		const int16_t x1 = MARGIN + ((row == sr) ? sc : col1)
 			* jbxvt.X.font_width;

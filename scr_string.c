@@ -126,9 +126,11 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 			  handle_insert(n, p);
 		memcpy(c->text[c->cursor.y] + c->cursor.x, str, n);
 		paint_rval_text(str,jbxvt.scr.rstyle, n, p);
-		for (int_fast8_t i = n - 1; jbxvt.scr.rstyle && i >= 0; --i)
-			c->rend[c->cursor.y][c->cursor.x + i]
-				= jbxvt.scr.rstyle;
+		if(jbxvt.scr.rstyle) {
+			for (int_fast16_t i = n - 1; i >= 0; --i)
+				  c->rend[c->cursor.y][c->cursor.x + i]
+					  = jbxvt.scr.rstyle;
+		}
 		len -= n;
 		str += n;
 		c->cursor.x += n;
