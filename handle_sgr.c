@@ -1,5 +1,5 @@
 #include "handle_sgr.h"
-#define DEBUG
+
 #include "color.h"
 #include "log.h"
 #include "screen.h"
@@ -42,38 +42,38 @@ void handle_sgr(struct tokenst * restrict token)
 			}
 		}
 		if (bg_rgb_or_index) {
-			fg_rgb_or_index = false;
+			bg_rgb_or_index = false;
 			switch(token->tk_arg[i]) {
 			case 2: // rgb mode
-				scr_style(RS_FG_RGB);
+				scr_style(RS_BG_RGB);
 				bg_rgb_mode = true;
 				continue;
 			case 5: // index mode
-				scr_style(RS_FG_INDEX);
+				scr_style(RS_BG_INDEX);
 				bg_index_mode = true;
 				continue;
 			}
 		}
 		if (fg_index_mode) {
-			LOG("fg index: %d\n", token->tk_arg[i]);
-			scr_style(token->tk_arg[i]<<6);
+			LOG("fg index MUSTMATCH: %d\n", token->tk_arg[i]);
+			scr_style(token->tk_arg[i]<<7);
 			// exit mode after handling index
 			fg_index_mode = false;
 			continue;
 		} else if (fg_rgb_mode) {
-			jbputs("FIXME: implement fg color rgb mode\n");
+			jbputs("FIXME: test fg color rgb mode\n");
 			switch(fg_rgb_count) {
 			case 0: // red
 				encode_rgb(token->tk_arg[i], 11);
-				jbputs("red\n");
+				LOG("red");
 				break;
 			case 1: // green
 				encode_rgb(token->tk_arg[i], 9);
-				jbputs("green\n");
+				LOG("green");
 				break;
 			case 2: // blue
 				encode_rgb(token->tk_arg[i], 7);
-				jbputs("blue\n");
+				LOG("blue");
 				break;
 			}
 			// exit mode after 3 colors
@@ -85,12 +85,12 @@ void handle_sgr(struct tokenst * restrict token)
 		if (bg_index_mode) {
 			jbputs("FIXME: implement bg color index mode\n");
 			dprintf(STDERR_FILENO, "index: %d\n", token->tk_arg[i]);
-			scr_style(token->tk_arg[i]<<15);
+			scr_style(token->tk_arg[i]<<16);
 			// exit mode after handling index
 			bg_index_mode = false;
 			continue;
 		} else if (bg_rgb_mode) {
-			jbputs("FIXME: implement bg color rgb mode\n");
+			jbputs("FIXME: test bg color rgb mode\n");
 			switch(bg_rgb_count) {
 			case 0: // red
 				encode_rgb(token->tk_arg[i], 20);
