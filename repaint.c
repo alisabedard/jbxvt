@@ -148,9 +148,11 @@ static pixel_t get_pixel_for_byte(const uint8_t c)
 	uint16_t g = (c & 0xc) >> 2;
 	uint16_t b = c & 0x3;
 	const uint8_t o = 14; // scale
+	// Convert from 2 bit to 8 bit:
 	r<<=o;
 	g<<=o;
 	b<<=o;
+	// Compensate for bit limitation by increasing intensity:
 	r|=0x3f;
 	g|=0x3f;
 	b|=0x3f;
