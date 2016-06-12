@@ -433,8 +433,13 @@ static void set_ttymodes(void)
 	term.c_oflag = OPOST | ONLCR;
 
 	// NetBSD needs CREAD
-	// Linux needs B9600
-	term.c_cflag = CREAD | CLOCAL | B9600 | CS8;
+	// Linux needs baud setting
+	term.c_cflag = CREAD | CLOCAL | CS8;
+#ifdef B38400
+	term.c_cflag |= B38400;
+#else//!B38400
+	term.c_cflag |= B9600;
+#endif//B38400
 
 	term.c_lflag = ISIG | IEXTEN | ICANON | ECHO | ECHOE | ECHOK;
 

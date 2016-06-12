@@ -41,6 +41,9 @@ static void handle_reset(struct tokenst * restrict token)
 		case 1 :
 			set_keys(mode_high, true);
 			break;
+		case 47: // switch to main screen
+		case 1047:
+		case 1048:
 		case 1049: // Fix stale chars in vi
 			scr_change_screen(mode_high);
 			break;
@@ -49,9 +52,6 @@ static void handle_reset(struct tokenst * restrict token)
 			break;
 		case 7 :
 			jbxvt.scr.current->wrap = mode_high;
-			break;
-		case 47: // switch to main screen
-			scr_change_screen(mode_high);
 			break;
 #ifdef DEBUG
 		default:

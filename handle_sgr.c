@@ -1,5 +1,5 @@
 #include "handle_sgr.h"
-
+#define DEBUG
 #include "color.h"
 #include "log.h"
 #include "screen.h"
@@ -25,32 +25,33 @@ void handle_sgr(struct tokenst * restrict token)
 	uint8_t fg_rgb_count = 0;
 	uint8_t bg_rgb_count = 0;
 	for (uint_fast8_t i = 0; i < token->tk_nargs; ++i) {
+#define DEBUG_SGR
 #ifdef DEBUG_SGR
-		LOG("handle_sgr: tk_arg[%d]: %x", i, token->tk_arg[i]);
+		LOG("handle_sgr: tk_arg[%d]: %d", i, token->tk_arg[i]);
 #endif//DEBUG_SGR
 		if (fg_rgb_or_index) {
 			fg_rgb_or_index = false;
 			switch(token->tk_arg[i]) {
-			case 2: // rgb mode
-				scr_style(RS_FG_RGB);
-				fg_rgb_mode = true;
-				continue;
 			case 5: // index mode
 				scr_style(RS_FG_INDEX);
 				fg_index_mode = true;
+				continue;
+			case 2: // rgb mode
+				scr_style(RS_FG_RGB);
+				fg_rgb_mode = true;
 				continue;
 			}
 		}
 		if (bg_rgb_or_index) {
 			bg_rgb_or_index = false;
 			switch(token->tk_arg[i]) {
-			case 2: // rgb mode
-				scr_style(RS_BG_RGB);
-				bg_rgb_mode = true;
-				continue;
 			case 5: // index mode
 				scr_style(RS_BG_INDEX);
 				bg_index_mode = true;
+				continue;
+			case 2: // rgb mode
+				scr_style(RS_BG_RGB);
+				bg_rgb_mode = true;
 				continue;
 			}
 		}

@@ -2,7 +2,7 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 
 #include "repaint.h"
-
+#define DEBUG
 #include "color.h"
 #include "config.h"
 #include "cursor.h"
@@ -199,21 +199,21 @@ static bool set_rval_colors(const uint32_t rval)
 	if (fg_rgb_mode) {
 		LOG("fg_rgb_mode");
 		set_rgb_colors(bf&COLOR_IS_FG);
-		fg_set = true;
+//		fg_set = true;
 	} else if (fg_index_mode) {
 		LOG("fg_index_mode");
 		set_index_colors(bf, true);
-		fg_set = true;
+	//	fg_set = true;
 	}
 
 	if (bg_rgb_mode) {
 		LOG("bg_rgb_mode");
 		set_rgb_colors(bb);
-		bg_set = true;
+	//	bg_set = true;
 	} else if (bg_index_mode) {
 		LOG("bg_index_mode");
 		set_index_colors(bb, false);
-		bg_set = true;
+	//	bg_set = true;
 	}
 
 
