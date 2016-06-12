@@ -73,7 +73,7 @@ static uint16_t sc_up_find_col(uint8_t * restrict s)
 	for (col = jbxvt.scr.chars.width;
 		col > 0 && s[col] == 0; --col)
 		  ;
-	return col;
+	return col + 1;
 }
 
 static void lclr(const uint8_t i, const uint8_t j, const size_t sz,
