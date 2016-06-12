@@ -30,7 +30,7 @@ enum RenditionStyleFlags {
 	RS_ITALIC = (1<<4),
 	RS_LOW = (1<<5),
 	// colors:
-	// foreground:
+	// foreground: index or 9 bit octal rgb
 	RS_F0 = (1<<6),
 	RS_F1 = (1<<7),
 	RS_F2 = (1<<8),
@@ -40,7 +40,7 @@ enum RenditionStyleFlags {
 	RS_F6 = (1<<12),
 	RS_F7 = (1<<13),
 	RS_F8 = (1<<14),
-	// background:
+	// background: index or 9 bit octal rgb
 	RS_B0 = (1<<15),
 	RS_B1 = (1<<16),
 	RS_B2 = (1<<17),
@@ -50,15 +50,11 @@ enum RenditionStyleFlags {
 	RS_B6 = (1<<21),
 	RS_B7 = (1<<22),
 	RS_B8 = (1<<23),
-	// reset foreground:
-	RS_FR = (1<<24),
-	// reset background:
-	RS_BR = (1<<25),
 	// extended color support bits
-	RS_FG_RGB = (1<<26),
-	RS_BG_RGB = (1<<27),
-	RS_FG_INDEX = (1<<28),
-	RS_BG_INDEX = (1<<29),
+	RS_FG_RGB = (1<<24),
+	RS_BG_RGB = (1<<25),
+	RS_FG_INDEX = (1<<26),
+	RS_BG_INDEX = (1<<27),
 };
 
 // Normal colors:

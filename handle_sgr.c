@@ -10,6 +10,25 @@ static void encode_rgb(uint8_t color, uint8_t offset)
 	scr_style(((color>>5)&07)<<offset);
 }
 
+static void sgrc(const uint8_t c, const bool fg)
+{
+	const uint8_t o = fg ? 7 : 16;
+	jbxvt.scr.rstyle &= ~(0777<<o);
+	jbxvt.scr.rstyle |= (fg?RS_FG_INDEX:RS_BG_INDEX);
+	uint32_t r = c;
+	jbxvt.scr.rstyle |= r << o;
+}
+
+static inline void sgrfg(uint8_t c)
+{
+	sgrc(c, true);
+}
+
+static inline void sgrbg(uint8_t c)
+{
+	sgrc(c, false);
+}
+
 void handle_sgr(struct tokenst * restrict token)
 {
 	if (token->tk_nargs == 0) {
@@ -150,121 +169,47 @@ void handle_sgr(struct tokenst * restrict token)
 			break;
 		case 26: // reserved
 			break;
-		case 39:
-			scr_style(RS_FR);
+		case 39: // foreground reset, white
+			sgrfg(017);
 			break;
 		case 48: // extended bg colors
 			bg_rgb_or_index = true;
 			break;
-		case 49:
-			scr_style(RS_BR);
+		case 49: // background reset, black
+			sgrbg(0);
 			break;
-			// Bright FG Colors:
-		case 30:
-			jbxvt.scr.rstyle |= RS_FG_INDEX;
-			// clear fg bits:
-			jbxvt.scr.rstyle &= ~(0777<<7);
-			break;
-		case 90:
-			jbxvt.scr.rstyle |= RS_FG_INDEX;
-			jbxvt.scr.rstyle &= ~(0777<<7);
-			jbxvt.scr.rstyle |= 010<<7;
-			break;
+		case 30: sgrfg(0); break; // black
+		case 90: sgrfg(010); break; // grey
 		case 31:
-		case 91:
-			jbxvt.scr.rstyle |= RS_FG_INDEX;
-			jbxvt.scr.rstyle &= ~(0777<<7);
-			jbxvt.scr.rstyle |= 011<<7;
-			break;
+		case 91: sgrfg(011); break;
 		case 32:
-		case 92:
-			jbxvt.scr.rstyle |= RS_FG_INDEX;
-			jbxvt.scr.rstyle &= ~(0777<<7);
-			jbxvt.scr.rstyle |= 012<<7;
-			break;
+		case 92: sgrfg(012); break;
 		case 33:
-		case 93:
-			jbxvt.scr.rstyle |= RS_FG_INDEX;
-			jbxvt.scr.rstyle &= ~(0777<<7);
-			jbxvt.scr.rstyle |= 013<<7;
-			break;
+		case 93: sgrfg(013); break;
 		case 34:
-		case 94:
-			jbxvt.scr.rstyle |= RS_FG_INDEX;
-			jbxvt.scr.rstyle &= ~(0777<<7);
-			jbxvt.scr.rstyle |= 014<<7;
-			break;
+		case 94: sgrfg(014); break;
 		case 35:
-		case 95:
-			jbxvt.scr.rstyle |= RS_FG_INDEX;
-			jbxvt.scr.rstyle &= ~(0777<<7);
-			jbxvt.scr.rstyle |= 015<<7;
-			break;
+		case 95: sgrfg(015); break;
 		case 36:
-		case 96:
-			jbxvt.scr.rstyle |= RS_FG_INDEX;
-			jbxvt.scr.rstyle &= ~(0777<<7);
-			jbxvt.scr.rstyle |= 016<<7;
-			break;
+		case 96: sgrfg(016); break;
 		case 37:
-		case 97:
-			jbxvt.scr.rstyle |= RS_FG_INDEX;
-			jbxvt.scr.rstyle &= ~(0777<<7);
-			jbxvt.scr.rstyle |= 017<<7;
-			break;
-			// Bright BG BColors:
-		case 40:
-			jbxvt.scr.rstyle |= RS_BG_INDEX;
-			jbxvt.scr.rstyle &= ~(0777<<16);
-			break;
-		case 100:
-			jbxvt.scr.rstyle |= RS_BG_INDEX;
-			// clear bg bits:
-			jbxvt.scr.rstyle &= ~(0777<<16);
-			jbxvt.scr.rstyle |= 010<<16;
-			break;
+		case 97: sgrfg(017); break;
+		case 40: sgrbg(0); break;
+		case 100: sgrbg(010); break;
 		case 41:
-		case 101:
-			jbxvt.scr.rstyle |= RS_BG_INDEX;
-			jbxvt.scr.rstyle &= ~(0777<<16);
-			jbxvt.scr.rstyle |= 011<<16;
-			break;
+		case 101: sgrbg(011); break;
 		case 42:
-		case 102:
-			jbxvt.scr.rstyle |= RS_BG_INDEX;
-			jbxvt.scr.rstyle &= ~(0777<<16);
-			jbxvt.scr.rstyle |= 012<<16;
-			break;
+		case 102: sgrbg(012); break;
 		case 43:
-		case 103:
-			jbxvt.scr.rstyle |= RS_BG_INDEX;
-			jbxvt.scr.rstyle &= ~(0777<<16);
-			jbxvt.scr.rstyle |= 013<<16;
-			break;
+		case 103: sgrbg(013); break;
 		case 44:
-		case 104:
-			jbxvt.scr.rstyle |= RS_BG_INDEX;
-			jbxvt.scr.rstyle &= ~(0777<<16);
-			jbxvt.scr.rstyle |= 014<<16;
-			break;
+		case 104: sgrbg(014); break;
 		case 45:
-		case 105:
-			jbxvt.scr.rstyle |= RS_BG_INDEX;
-			jbxvt.scr.rstyle &= ~(0777<<16);
-			jbxvt.scr.rstyle |= 015<<16;
-			break;
+		case 105: sgrbg(015); break;
 		case 46:
-		case 106:
-			jbxvt.scr.rstyle |= RS_BG_INDEX;
-			jbxvt.scr.rstyle &= ~(0777<<16);
-			jbxvt.scr.rstyle |= 016<<16;
-			break;
+		case 106: sgrbg(016); break;
 		case 47:
-		case 107:
-			jbxvt.scr.rstyle |= RS_BG_INDEX;
-			jbxvt.scr.rstyle &= ~(0777<<16);
-			jbxvt.scr.rstyle |= 017<<16;
-			break;
+		case 107: sgrbg(017); break;
 		default:
 			LOG("unhandled style %d", token->tk_arg[i]);
 		}
