@@ -1,13 +1,13 @@
 #include "handle_sgr.h"
-#define DEBUG
+//#define DEBUG
 #include "color.h"
 #include "log.h"
 #include "screen.h"
 
-// Convert 8 bit color to 2 bit color, store at offset
+// Convert 3 bit color to 9 bit color, store at offset
 static void encode_rgb(uint8_t color, uint8_t offset)
 {
-	scr_style(((color>>6)&0xf)<<offset);
+	scr_style(((color>>5)&07)<<offset);
 }
 
 void handle_sgr(struct tokenst * restrict token)
@@ -25,7 +25,6 @@ void handle_sgr(struct tokenst * restrict token)
 	uint8_t fg_rgb_count = 0;
 	uint8_t bg_rgb_count = 0;
 	for (uint_fast8_t i = 0; i < token->tk_nargs; ++i) {
-#define DEBUG_SGR
 #ifdef DEBUG_SGR
 		LOG("handle_sgr: tk_arg[%d]: %d", i, token->tk_arg[i]);
 #endif//DEBUG_SGR
@@ -57,7 +56,9 @@ void handle_sgr(struct tokenst * restrict token)
 		}
 		if (fg_index_mode) {
 			LOG("fg index MUSTMATCH: %d\n", token->tk_arg[i]);
-			scr_style(token->tk_arg[i]<<7);
+			const uint8_t j = token->tk_arg[i];
+			jbxvt.scr.rstyle &= ~(0777<<7);
+			jbxvt.scr.rstyle |= j<<7;
 			// exit mode after handling index
 			fg_index_mode = false;
 			continue;
@@ -65,7 +66,7 @@ void handle_sgr(struct tokenst * restrict token)
 			jbputs("FIXME: test fg color rgb mode\n");
 			switch(fg_rgb_count) {
 			case 0: // red
-				encode_rgb(token->tk_arg[i], 11);
+				encode_rgb(token->tk_arg[i], 12);
 				LOG("red");
 				break;
 			case 1: // green
@@ -73,7 +74,7 @@ void handle_sgr(struct tokenst * restrict token)
 				LOG("green");
 				break;
 			case 2: // blue
-				encode_rgb(token->tk_arg[i], 7);
+				encode_rgb(token->tk_arg[i], 6);
 				LOG("blue");
 				break;
 			}
@@ -86,7 +87,9 @@ void handle_sgr(struct tokenst * restrict token)
 		if (bg_index_mode) {
 			jbputs("FIXME: implement bg color index mode\n");
 			dprintf(STDERR_FILENO, "index: %d\n", token->tk_arg[i]);
-			scr_style(token->tk_arg[i]<<16);
+			const uint8_t j = token->tk_arg[i];
+			jbxvt.scr.rstyle &= ~(0777<<7);
+			jbxvt.scr.rstyle |= j<<7;
 			// exit mode after handling index
 			bg_index_mode = false;
 			continue;
@@ -94,7 +97,7 @@ void handle_sgr(struct tokenst * restrict token)
 			jbputs("FIXME: test bg color rgb mode\n");
 			switch(bg_rgb_count) {
 			case 0: // red
-				encode_rgb(token->tk_arg[i], 20);
+				encode_rgb(token->tk_arg[i], 21);
 				jbputs("red\n");
 				break;
 			case 1: // green
@@ -102,7 +105,7 @@ void handle_sgr(struct tokenst * restrict token)
 				jbputs("green\n");
 				break;
 			case 2: // blue
-				encode_rgb(token->tk_arg[i], 16);
+				encode_rgb(token->tk_arg[i], 15);
 				jbputs("blue\n");
 				break;
 			}
@@ -142,61 +145,13 @@ void handle_sgr(struct tokenst * restrict token)
 		case 27: // Image positive
 			scr_style(RS_NONE);
 			break;
-		case 30:
-			scr_style(RS_F0);
-			break;
-		case 31:
-			scr_style(RS_F1);
-			break;
-		case 32:
-			scr_style(RS_F2);
-			break;
-		case 33:
-			scr_style(RS_F3);
-			break;
-		case 34:
-			scr_style(RS_F4);
-			break;
-		case 35:
-			scr_style(RS_F5);
-			break;
-		case 36:
-			scr_style(RS_F6);
-			break;
-		case 37:
-			scr_style(RS_F7);
+				case 38: // extended fg colors
+			fg_rgb_or_index = true;
 			break;
 		case 26: // reserved
-		case 38: // extended fg colors
-			fg_rgb_or_index = true;
 			break;
 		case 39:
 			scr_style(RS_FR);
-			break;
-			// BG Colors:
-		case 40:
-			scr_style(RS_B0);
-			break;
-		case 41:
-			scr_style(RS_B1);
-			break;
-		case 42:
-			scr_style(RS_B2);
-			break;
-		case 43:
-			scr_style(RS_B3);
-			break;
-		case 44:
-			scr_style(RS_B4);
-			break;
-		case 45:
-			scr_style(RS_B5);
-			break;
-		case 46:
-			scr_style(RS_B6);
-			break;
-		case 47:
-			scr_style(RS_B7);
 			break;
 		case 48: // extended bg colors
 			bg_rgb_or_index = true;
@@ -205,58 +160,113 @@ void handle_sgr(struct tokenst * restrict token)
 			scr_style(RS_BR);
 			break;
 			// Bright FG Colors:
+		case 30:
+			jbxvt.scr.rstyle |= RS_FG_INDEX;
+			// clear fg bits:
+			jbxvt.scr.rstyle &= ~(0777<<7);
+			break;
 		case 90:
-			scr_style(RS_BF|RS_F0);
+			jbxvt.scr.rstyle |= RS_FG_INDEX;
+			jbxvt.scr.rstyle &= ~(0777<<7);
+			jbxvt.scr.rstyle |= 010<<7;
 			break;
+		case 31:
 		case 91:
-			scr_style(RS_BF|RS_F1);
+			jbxvt.scr.rstyle |= RS_FG_INDEX;
+			jbxvt.scr.rstyle &= ~(0777<<7);
+			jbxvt.scr.rstyle |= 011<<7;
 			break;
+		case 32:
 		case 92:
-			scr_style(RS_BF|RS_F2);
+			jbxvt.scr.rstyle |= RS_FG_INDEX;
+			jbxvt.scr.rstyle &= ~(0777<<7);
+			jbxvt.scr.rstyle |= 012<<7;
 			break;
+		case 33:
 		case 93:
-			scr_style(RS_BF|RS_F3);
+			jbxvt.scr.rstyle |= RS_FG_INDEX;
+			jbxvt.scr.rstyle &= ~(0777<<7);
+			jbxvt.scr.rstyle |= 013<<7;
 			break;
+		case 34:
 		case 94:
-			scr_style(RS_BF|RS_F4);
+			jbxvt.scr.rstyle |= RS_FG_INDEX;
+			jbxvt.scr.rstyle &= ~(0777<<7);
+			jbxvt.scr.rstyle |= 014<<7;
 			break;
+		case 35:
 		case 95:
-			scr_style(RS_BF|RS_F5);
+			jbxvt.scr.rstyle |= RS_FG_INDEX;
+			jbxvt.scr.rstyle &= ~(0777<<7);
+			jbxvt.scr.rstyle |= 015<<7;
 			break;
+		case 36:
 		case 96:
-			scr_style(RS_BF|RS_F6);
+			jbxvt.scr.rstyle |= RS_FG_INDEX;
+			jbxvt.scr.rstyle &= ~(0777<<7);
+			jbxvt.scr.rstyle |= 016<<7;
 			break;
+		case 37:
 		case 97:
-			scr_style(RS_BF|RS_F7);
+			jbxvt.scr.rstyle |= RS_FG_INDEX;
+			jbxvt.scr.rstyle &= ~(0777<<7);
+			jbxvt.scr.rstyle |= 017<<7;
 			break;
 			// Bright BG BColors:
+		case 40:
+			jbxvt.scr.rstyle |= RS_BG_INDEX;
+			jbxvt.scr.rstyle &= ~(0777<<16);
+			break;
 		case 100:
-			scr_style(RS_BB|RS_B0);
+			jbxvt.scr.rstyle |= RS_BG_INDEX;
+			// clear bg bits:
+			jbxvt.scr.rstyle &= ~(0777<<16);
+			jbxvt.scr.rstyle |= 010<<16;
 			break;
+		case 41:
 		case 101:
-			scr_style(RS_BB|RS_B1);
+			jbxvt.scr.rstyle |= RS_BG_INDEX;
+			jbxvt.scr.rstyle &= ~(0777<<16);
+			jbxvt.scr.rstyle |= 011<<16;
 			break;
+		case 42:
 		case 102:
-			scr_style(RS_BB|RS_B2);
+			jbxvt.scr.rstyle |= RS_BG_INDEX;
+			jbxvt.scr.rstyle &= ~(0777<<16);
+			jbxvt.scr.rstyle |= 012<<16;
 			break;
+		case 43:
 		case 103:
-			scr_style(RS_BB|RS_B3);
+			jbxvt.scr.rstyle |= RS_BG_INDEX;
+			jbxvt.scr.rstyle &= ~(0777<<16);
+			jbxvt.scr.rstyle |= 013<<16;
 			break;
+		case 44:
 		case 104:
-			scr_style(RS_BB|RS_B4);
+			jbxvt.scr.rstyle |= RS_BG_INDEX;
+			jbxvt.scr.rstyle &= ~(0777<<16);
+			jbxvt.scr.rstyle |= 014<<16;
 			break;
+		case 45:
 		case 105:
-			scr_style(RS_BB|RS_B5);
+			jbxvt.scr.rstyle |= RS_BG_INDEX;
+			jbxvt.scr.rstyle &= ~(0777<<16);
+			jbxvt.scr.rstyle |= 015<<16;
 			break;
+		case 46:
 		case 106:
-			scr_style(RS_BB|RS_B6);
+			jbxvt.scr.rstyle |= RS_BG_INDEX;
+			jbxvt.scr.rstyle &= ~(0777<<16);
+			jbxvt.scr.rstyle |= 016<<16;
 			break;
+		case 47:
 		case 107:
-			scr_style(RS_BB|RS_B7);
+			jbxvt.scr.rstyle |= RS_BG_INDEX;
+			jbxvt.scr.rstyle &= ~(0777<<16);
+			jbxvt.scr.rstyle |= 017<<16;
 			break;
 		default:
 			LOG("unhandled style %d", token->tk_arg[i]);
-			//scr_style(RS_NONE);
 		}
 	}
 }

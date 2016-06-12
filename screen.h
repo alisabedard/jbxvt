@@ -39,7 +39,7 @@ enum RenditionStyleFlags {
 	RS_F5 = (1<<11),
 	RS_F6 = (1<<12),
 	RS_F7 = (1<<13),
-	RS_FR = (1<<14),
+	RS_F8 = (1<<14),
 	// background:
 	RS_B0 = (1<<15),
 	RS_B1 = (1<<16),
@@ -49,11 +49,11 @@ enum RenditionStyleFlags {
 	RS_B5 = (1<<20),
 	RS_B6 = (1<<21),
 	RS_B7 = (1<<22),
-	RS_BR = (1<<23),
-	// bright foreground: masks above colors
-	RS_BF = (1<<24),
-	// bright background: masks above colors
-	RS_BB = (1<<25),
+	RS_B8 = (1<<23),
+	// reset foreground:
+	RS_FR = (1<<24),
+	// reset background:
+	RS_BR = (1<<25),
 	// extended color support bits
 	RS_FG_RGB = (1<<26),
 	RS_BG_RGB = (1<<27),

@@ -2,7 +2,7 @@
 #CFLAGS+=-Werror
 #CFLAGS+=-flto # doesn't work with clang
 #CFLAGS=-O0
-#CFLAGS+=-ggdb
+CFLAGS+=-ggdb
 #CFLAGS+=-DDEBUG
 #CFLAGS+=-DTK_DEBUG
 #CC=clang
@@ -54,7 +54,7 @@ $(exe): $(OBJS)
 bindest=$(DESTDIR)$(PREFIX)/bin
 install:
 	install -d $(bindest)
-	install -s $(exe) $(bindest)
+	install $(exe) $(bindest)
 clean:
 	rm -f $(exe) $(OBJS)
 

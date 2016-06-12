@@ -15,6 +15,7 @@ pixel_t get_pixel(const char * restrict color)
 		jbxvt.X.screen->default_colormap, l, color);
 	xcb_alloc_named_color_reply_t * r
 		= xcb_alloc_named_color_reply(jbxvt.X.xcb, c, NULL);
+	if(!r) return 0;
 	pixel_t p = r->pixel;
 	free(r);
 	return p;
@@ -36,6 +37,10 @@ pixel_t set_color(const unsigned long vm,
 	const pixel_t p, xcb_gcontext_t gc)
 {
 	xcb_change_gc(jbxvt.X.xcb, gc, vm, (uint32_t[]){p});
+	if(vm & XCB_GC_FOREGROUND)
+		  jbxvt.X.color.current_fg = p;
+	else
+		  jbxvt.X.color.current_bg = p;
 	return p;
 }
 
