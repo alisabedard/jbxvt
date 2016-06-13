@@ -34,24 +34,33 @@ static bool jbxvt_size_set;
 
 static void handle_reset(struct tokenst * restrict token)
 {
-	LOG("handle_reset()");
-	const bool mode_high = token->tk_type == TK_SET;
+	LOG("handle_reset(%d)", token->tk_arg[0]);
+	const bool set = token->tk_type == TK_SET;
 	if (likely(token->tk_private == '?')) {
 		switch (token->tk_arg[0]) {
 		case 1 :
-			set_keys(mode_high, true);
+			set_keys(set, true);
+			break;
+		case 1047:
+			scr_change_screen(!set);
+			break;
+		case 1048:
+			cursor(!set?CURSOR_SAVE:CURSOR_RESTORE);
 			break;
 		case 47: // switch to main screen
-		case 1047:
-		case 1048:
-		case 1049: // Fix stale chars in vi
-			scr_change_screen(mode_high);
+		case 1049: // cursor restore and screen change
+			cursor(!set?CURSOR_SAVE:CURSOR_RESTORE);
+			scr_change_screen(!set);
 			break;
-		case 6 : // DECOM
-			jbxvt.scr.current->decom = mode_high;
+		case 6 : // DECOM normal cursor mode
+			jbxvt.scr.current->decom = set;
 			break;
 		case 7 :
-			jbxvt.scr.current->wrap = mode_high;
+			jbxvt.scr.current->wrap = set;
+			break;
+		case 12:
+			break;
+		case 25:
 			break;
 #ifdef DEBUG
 		default:
@@ -61,7 +70,7 @@ static void handle_reset(struct tokenst * restrict token)
 	} else if (token->tk_private == 0) {
 		switch (token->tk_arg[0]) {
 		case 4 :
-			jbxvt.scr.current->insert = mode_high;
+			jbxvt.scr.current->insert = set;
 			break;
 #ifdef DEBUG
 		default:
@@ -92,6 +101,8 @@ static void handle_tk_char(const uint8_t tk_char)
 {
 	switch (tk_char) {
 	case '\n': // handle line feed
+	case 013: // vertical tab
+	case 014: // form feed
 		scr_index();
 		break;
 	case '\r': // handle carriage return
@@ -102,6 +113,9 @@ static void handle_tk_char(const uint8_t tk_char)
 		break;
 	case '\t': // handle tab
 		scr_tab();
+		break;
+	case 005: // ENQ
+		cprintf("");
 		break;
 	}
 }
@@ -145,7 +159,7 @@ app_loop_head:
 	switch (token.tk_type) {
 	case TK_STRING :
 		LOG("TK_STRING");
-		scr_string(token.tk_string,token.tk_length,
+		scr_string(token.tk_string, token.tk_length,
 			token.tk_nlcount);
 		break;
 	case TK_CHAR :
@@ -242,11 +256,12 @@ app_loop_head:
 		n = token.tk_arg[0];
 		scr_move(-n, 0, ROW_RELATIVE | COL_RELATIVE);
 		break;
-	case TK_HVP:
+	case TK_HVP: // horizontal vertical position
 		LOG("TK_HVP");
 		// fall through
 	case TK_CUP: // position cursor
-		LOG("TK_CUP");
+		LOG("TK_CUP n: %d, 0: %d, 1: %d", token.tk_nargs,
+			t[0], t[1]);
 		switch(token.tk_nargs) {
 		case 0:
 			scr_move(0, 0, 0);
@@ -262,7 +277,7 @@ app_loop_head:
 		LOG("TK_ED"); // don't use n
 		scr_erase_screen(t[0]);
 		break;
-	case TK_EL :
+	case TK_EL: // erase line
 		LOG("TK_EL"); // don't use n
 		scr_erase_line(t[0]);
 		break;
@@ -338,7 +353,8 @@ app_loop_head:
 	case TK_DECID :
 	case TK_DA :
 		LOG("TK_DECID");
-		cprintf("\033[?6c");	/* I am a VT102 */
+		// VT420, 132 col, selective erase, ansi color
+		cprintf("'\033[?64;1;6;22c'");
 		break;
 #ifdef DEBUG
 	case TK_DECSWH :		/* ESC # digit */
