@@ -29,7 +29,7 @@ static void handle_new_lines(int8_t nlcount)
 #if defined(__i386__) || defined(__amd64__)
        __attribute__((regparm(1)))
 #endif//x86
-static void handle_insert(uint8_t n, const xcb_point_t p)
+static void handle_insert(const uint8_t n, const xcb_point_t p)
 {
 	LOG("handle_insert(n=%d, p={%d, %d})", n, p.x, p.y);
 	struct screenst * restrict c = jbxvt.scr.current;
@@ -49,29 +49,35 @@ static void handle_insert(uint8_t n, const xcb_point_t p)
 static void handle_wrap_next(void)
 {
 	struct screenst * restrict c = jbxvt.scr.current;
-	c->text [c->cursor.y]
-		[jbxvt.scr.chars.width] = 1;
+	c->text[c->cursor.y][jbxvt.scr.chars.width] = 1;
 	if (c->cursor.y == c->margin.bottom)
-		  scroll(c->margin.top,
-			  c->margin.bottom, 1);
+		  scroll(c->margin.top, c->margin.bottom, 1);
 	else if (c->cursor.y < jbxvt.scr.chars.height - 1)
 		  ++c->cursor.y;
 	c->cursor.x = c->wrap_next = 0;
 }
 
+static void handle_line_feed(void)
+{
+	struct screenst * restrict c = jbxvt.scr.current;
+	if (likely(c->cursor.y < jbxvt.scr.chars.height - 1)) {
+		++c->cursor.y;
+	} else if (c->cursor.y == c->margin.bottom) {
+		scroll(c->margin.top, c->margin.bottom,1);
+	}
+	check_selection(c->cursor.y, c->cursor.y);
+	c->wrap_next = 0;
+}
+
 static void handle_tab(void)
 {
 	struct screenst * restrict c = jbxvt.scr.current;
-	if (c->cursor.x < jbxvt.scr.chars.width - 1) {
-		uint8_t * s = c->text[c->cursor.y];
-		if (s[c->cursor.x] == 0)
-			  s[c->cursor.x] = '\t';
-		++c->cursor.x;
-		// Advance to next tab stop:
-		while (c->cursor.x % 8 && c->cursor.x
-			< jbxvt.scr.chars.width - 1)
-			  ++c->cursor.x;
-	}
+	if (c->cursor.x >= jbxvt.scr.chars.width - 1)
+		  return;
+	uint8_t * s = c->text[c->cursor.y];
+	// Advance to next tab stop:
+	while (c->cursor.x % 8 && c->cursor.x < jbxvt.scr.chars.width - 1)
+		s[c->cursor.x++] = ' ';
 }
 
 static void wrap_at_end(uint8_t * restrict str, const uint8_t len)
@@ -125,17 +131,7 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 			++str;
 			continue;
 		} else if (*str == '\n') { // line feed
-			if (likely(c->cursor.y
-				< jbxvt.scr.chars.height - 1)) {
-				++c->cursor.y;
-			} else if (c->cursor.y
-				== c->margin.bottom) {
-				scroll(c->margin.top,
-					c->margin.bottom,1);
-			}
-			check_selection(c->cursor.y,
-				c->cursor.y);
-			c->wrap_next = 0;
+			handle_line_feed();
 			--len;
 			++str;
 			continue;
