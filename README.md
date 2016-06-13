@@ -7,9 +7,10 @@ jbxvt is based on xvt 2.1.  jbxvt upgrades the code base
 to the C99 standard and introduces many code cleanups.
 
 ## Features
-* began work to port to xcb
+* 256 indexed color support
+* 512 color RGB support.  
+* XCB native
 * uses less memory than rxvt and rxvt-unicode
-* adds color support to xvt
 * scroll wheel support
 * utempter support
 * massive code cleanups

@@ -59,6 +59,47 @@ static void handle_wrap_next(void)
 	c->cursor.x = c->wrap_next = 0;
 }
 
+static void handle_tab(void)
+{
+	struct screenst * restrict c = jbxvt.scr.current;
+	if (c->cursor.x < jbxvt.scr.chars.width - 1) {
+		uint8_t * s = c->text[c->cursor.y];
+		if (s[c->cursor.x] == 0)
+			  s[c->cursor.x] = '\t';
+		++c->cursor.x;
+		// Advance to next tab stop:
+		while (c->cursor.x % 8 && c->cursor.x
+			< jbxvt.scr.chars.width - 1)
+			  ++c->cursor.x;
+	}
+}
+
+static void wrap_at_end(uint8_t * restrict str, const uint8_t len)
+{
+	struct screenst * restrict c = jbxvt.scr.current;
+	if (unlikely(len > 0 && c->cursor.x == jbxvt.scr.chars.width
+		&& *str >= ' ')) {
+		c->text [c->cursor.y] [jbxvt.scr.chars.width] = 1;
+		if (likely(c->cursor.y == c->margin.bottom)) {
+			scroll(c->margin.top, c ->margin.bottom, 1);
+		} else {
+			++c->cursor.y;
+		}
+		c->cursor.x = 0;
+	}
+}
+
+static uint_fast16_t get_n(uint8_t * restrict str)
+{
+	uint_fast16_t n = 0;
+	while (str[++n] >= ' ')
+		  ;
+	struct screenst * restrict c = jbxvt.scr.current;
+	if (unlikely(n + c->cursor.x > jbxvt.scr.chars.width))
+		  n = jbxvt.scr.chars.width - c->cursor.x;
+	return n;
+}
+
 /*  Display the string at the current position.
     nlcount is the number of new lines in the string.  */
 void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
@@ -99,16 +140,7 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 			++str;
 			continue;
 		} else if (unlikely(*str == '\t')) {
-			if (c->cursor.x < jbxvt.scr.chars.width - 1) {
-				uint8_t * s = c->text[c->cursor.y];
-				if (s[c->cursor.x] == 0)
-					  s[c->cursor.x] = '\t';
-				++c->cursor.x;
-				// Advance to next tab stop:
-				while (c->cursor.x % 8 && c->cursor.x
-					< jbxvt.scr.chars.width - 1)
-					  ++c->cursor.x;
-			}
+			handle_tab();
 			--len;
 			++str;
 			continue;
@@ -120,17 +152,12 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 		check_selection(c->cursor.y, c->cursor.y);
 		p.x = MARGIN + jbxvt.X.font_width * c->cursor.x;
 		p.y = MARGIN + jbxvt.X.font_height * c->cursor.y;
-		uint_fast16_t n = 0;
-		while (str[++n] >= ' ')
-			  ;
-		if (unlikely(n + c->cursor.x > jbxvt.scr.chars.width))
-			  n = jbxvt.scr.chars.width - c->cursor.x;
+		const uint_fast16_t n = get_n(str);
 		if (unlikely(c->insert))
 			  handle_insert(n, p);
 		uint8_t * s = c->text[c->cursor.y];
 		if (!s) return;
 		s += c->cursor.x;
-		
 		memcpy(s, str, n);
 		paint_rval_text(str, jbxvt.scr.rstyle, n, p);
 		if(jbxvt.scr.rstyle) {
@@ -141,16 +168,7 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 		len -= n;
 		str += n;
 		c->cursor.x += n;
-		if (unlikely(len > 0 && c->cursor.x == jbxvt.scr.chars.width
-			&& *str >= ' ')) {
-			c->text [c->cursor.y] [jbxvt.scr.chars.width] = 1;
-			if (likely(c->cursor.y == c->margin.bottom)) {
-				scroll(c->margin.top, c ->margin.bottom, 1);
-			} else {
-				++c->cursor.y;
-			}
-			c->cursor.x = 0;
-		}
+		wrap_at_end(str, len);
 	}
 	if (c->cursor.x >= jbxvt.scr.chars.width) {
 		c->cursor.x = jbxvt.scr.chars.width - 1;
