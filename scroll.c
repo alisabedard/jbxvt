@@ -70,6 +70,7 @@ static void ck_sel_on_scr(const int j)
 static uint16_t sc_up_find_col(uint8_t * restrict s)
 {
 	uint_fast16_t col;
+	if (!s) return 0; // prevent segfault
 	for (col = jbxvt.scr.chars.width;
 		col > 0 && s[col] == 0; --col)
 		  ;
@@ -107,6 +108,8 @@ static void sc_up_cp_rows(const int8_t count)
 	xcb_point_t iter;
 	for (iter.y = count - 1; iter.y >= 0; --iter.y) {
 		uint8_t * s = jbxvt.scr.current->text[iter.y];
+		if(!s)
+			  continue;
 		uint32_t * r = jbxvt.scr.current->rend[iter.y];
 		iter.x = sc_up_find_col(s);
 		struct slinest *sl = malloc(sizeof(struct slinest));

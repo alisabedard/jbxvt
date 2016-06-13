@@ -66,12 +66,16 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 #ifdef SCR_DEBUG
 	LOG("scr_string(s, len: %d, nlcount: %d)\n", len, nlcount);
 #endif//SCR_DEBUG
-	xcb_point_t p;
 	home_screen();
 	cursor(CURSOR_DRAW);
 	if (nlcount > 0)
 		  handle_new_lines(nlcount);
+	xcb_point_t p;
 	struct screenst * restrict c = jbxvt.scr.current;
+	if (c->cursor.y < 0)
+		  c->cursor.y = 0;
+	if (c->cursor.y > jbxvt.scr.chars.height)
+		  c->cursor.y = jbxvt.scr.chars.height;
 	while (len) {
 		if (likely(*str == '\r')) { // carriage return
 			c->cursor.x = 0;
@@ -123,8 +127,12 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 			  n = jbxvt.scr.chars.width - c->cursor.x;
 		if (unlikely(c->insert))
 			  handle_insert(n, p);
-		memcpy(c->text[c->cursor.y] + c->cursor.x, str, n);
-		paint_rval_text(str,jbxvt.scr.rstyle, n, p);
+		uint8_t * s = c->text[c->cursor.y];
+		if (!s) return;
+		s += c->cursor.x;
+		
+		memcpy(s, str, n);
+		paint_rval_text(str, jbxvt.scr.rstyle, n, p);
 		if(jbxvt.scr.rstyle) {
 			for (int_fast16_t i = n - 1; i >= 0; --i)
 				  c->rend[c->cursor.y][c->cursor.x + i]
