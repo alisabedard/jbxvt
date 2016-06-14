@@ -271,6 +271,8 @@ app_loop_head:
 		n = token.tk_arg[0];
 		scr_move(-n, 0, ROW_RELATIVE | COL_RELATIVE);
 		break;
+	case TK_VPA: // vertical position absolute
+		// fall through
 	case TK_HVP: // horizontal vertical position
 		LOG("TK_HVP");
 		// fall through
@@ -281,7 +283,7 @@ app_loop_head:
 		case 0:
 			scr_move(0, 0, 0);
 			break;
-		case 1:
+		case 1: // VPA
 			scr_move(0, t[0] - 1, scr->decom ? ROW_RELATIVE : 0);
 			break;
 		case 2:

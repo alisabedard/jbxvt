@@ -556,6 +556,9 @@ void show_token(struct tokenst * tk)
 			jbputs("token(TK_DECID)");
 			show_token_args(tk);
 			break;
+		case TK_VPA:
+			jbputs("token(TK_VPA): Vertical Position Absolute");
+			break;
 		case TK_NULL :
 			return;
 		default :

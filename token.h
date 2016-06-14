@@ -78,6 +78,7 @@ enum { MAINWIN, SCREEN, SCROLLBAR };
 #define TK_DCH		'P'	/* Delete characters */
 #define TK_ICH		'@'	/* insert characters */
 #define TK_DA		'c'	/* device attributes request */
+#define TK_VPA		'd'	// vertical position absolute
 #define TK_HVP		'f'	/* horizontal and vertical position */
 #define TK_TBC		'g'	/* tab clear */
 #define TK_SET		'h'	/* set mode */
