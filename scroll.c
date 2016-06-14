@@ -2,10 +2,7 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 
 #include "scroll.h"
-#ifndef DEBUG_SCROLL
-#undef DEBUG
-#endif//!DEBUG_SCROLL
-
+//#undef DEBUG
 #include "config.h"
 #include "jbxvt.h"
 #include "log.h"
@@ -33,7 +30,7 @@ static void free_top_lines(int16_t count)
 	while(--count > 0) {
 		const int16_t i = jbxvt.scr.sline.max - count;
 		struct slinest * s = jbxvt.scr.sline.data[i];
-		if (!s)
+		if (!s || s->canary)
 			  return;
 		if (s->sl_text)
 			free(s->sl_text);
@@ -112,7 +109,7 @@ static void sc_up_cp_rows(const int8_t count)
 			  continue;
 		uint32_t * r = jbxvt.scr.current->rend[iter.y];
 		iter.x = sc_up_find_col(s);
-		struct slinest *sl = malloc(sizeof(struct slinest));
+		struct slinest *sl = calloc(1, sizeof(struct slinest));
 		// +1 to have last byte as wrap flag:
 		sl->sl_text = malloc(iter.x + 1);
 		memcpy(sl->sl_text, s, iter.x);

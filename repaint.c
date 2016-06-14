@@ -17,6 +17,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef DEBUG_COLOR
+#define CLOG(...) LOG(__VA_ARGS__)
+#else
+#define CLOG(...)
+#endif
+
 static pixel_t get_pixel_for_word(const uint16_t c)
 {
 	// Mask and scale to 8 bits.
@@ -30,7 +36,7 @@ static pixel_t get_pixel_for_word(const uint16_t c)
 	const uint16_t m = 017777;
 	r |= m; g |= m; b |= m;
 	pixel_t p = get_pixel_rgb(r, g, b);
-	LOG("byte is 0x%x, r: 0x%x, g: 0x%x, b: 0x%x, pixel is 0x%x",
+	CLOG("byte is 0x%x, r: 0x%x, g: 0x%x, b: 0x%x, pixel is 0x%x",
 		c, r, g, b, p);
 	return p;
 }
@@ -58,29 +64,26 @@ static bool set_rval_colors(const uint32_t rval)
 	bool fg_index_mode = rval & RS_FG_INDEX;
 	bool bg_index_mode = rval & RS_BG_INDEX;
 	// Mask foreground colors, 9 bits offset by 6 bits
-	//uint32_t f = rval & 077700;
-	//uint32_t f = rval & 0xff80;
 	uint8_t bf = rval >> 7;
 	// Mask background colors, 9 bits offset by 15 bits
-	//uint32_t b = rval & 077700000;
 	uint8_t bb = rval >> 16;
 	bool fg_set = false, bg_set = false;
 	if (fg_rgb_mode) {
-		LOG("fg_rgb_mode: %d", bf);
+		CLOG("fg_rgb_mode: %d", bf);
 		set_rgb_colors(bf, true);
 		fg_set = true;
 	} else if (fg_index_mode) {
-		LOG("fg_index_mode: %d", bf);
+		CLOG("fg_index_mode: %d", bf);
 		set_index_colors(bf, true);
 		fg_set = true;
 	}
 
 	if (bg_rgb_mode) {
-		LOG("bg_rgb_mode: %d", bb);
+		CLOG("bg_rgb_mode: %d", bb);
 		set_rgb_colors(bb, false);
 		bg_set = true;
 	} else if (bg_index_mode) {
-		LOG("bg_index_mode: %d", bb);
+		CLOG("bg_index_mode: %d", bb);
 		set_index_colors(bb, false);
 		bg_set = true;
 	}
@@ -167,18 +170,25 @@ static int_fast32_t repaint_generic(const xcb_point_t p,
 	return p.y + jbxvt.X.font_height;
 }
 
+__attribute__((nonnull(3)))
 static int_fast16_t show_scroll_history(xcb_point_t rc1, xcb_point_t rc2,
 	xcb_point_t * restrict p, uint8_t * restrict str)
 {
 	int_fast16_t line = rc1.y;
+	if (!str)
+		  return line;
 	for (int_fast32_t i = jbxvt.scr.offset - 1 - rc1.y;
 		line <= rc2.y && i >= 0; ++line, --i) {
 		struct slinest * sl = jbxvt.scr.sline.data[i];
-		if(!sl) // prevent segfault
+		if(!sl || sl->canary) // prevent segfault
 			  break;
 		const uint_fast8_t l = sl->sl_length;
 		const uint_fast8_t v = rc2.x + 1;
-		const uint_fast16_t m = (v < l ? v : l) - rc1.x;
+		const int32_t m = ((v < l) ? v : l) - rc1.x;
+		if (m < 0)
+			  return line;
+		if (m >= jbxvt.scr.chars.width)
+			  return line;
 		// history chars already sanitized, so just use them:
 		memcpy(str, sl->sl_text + rc1.x, m);
 		p->y = repaint_generic(*p, m, rc1.x, rc2.x,

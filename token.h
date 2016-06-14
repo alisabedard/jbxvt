@@ -93,6 +93,7 @@ enum { MAINWIN, SCREEN, SCROLLBAR };
 #define TK_DECRC	'8'	/* restore cursor position */
 #define TK_DECPAM	'='	/* keypad to applications mode */
 #define TK_DECPNM	'>'	/* keypad to numeric mode */
+
 #define TK_IND		0x100	/* index downward */
 #define TK_NEL		0x101	/* beginning of next line */
 #define TK_HTS		0x102	/* horizontal tab set */

@@ -4,11 +4,10 @@
 #ifndef SCR_REFRESH_H
 #define SCR_REFRESH_H
 
-#include "Dim.h"
 #include <xcb/xproto.h>
 
 /*  Refresh the region of the screen delimited by the aruments.  Used to
  *  repair after minor exposure events.  */
-void scr_refresh(const xcb_point_t pos, const Size sz);
+void scr_refresh(xcb_rectangle_t box);
 
 #endif//SCR_REFRESH_H

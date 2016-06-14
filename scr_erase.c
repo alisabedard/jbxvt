@@ -9,6 +9,7 @@
 #include "log.h"
 #include "sbar.h"
 #include "screen.h"
+#include "scr_reset.h"
 #include "selection.h"
 
 #include <string.h>
@@ -37,11 +38,13 @@ void scr_erase_line(const int8_t mode)
 	uint8_t * s = jbxvt.scr.current->text[jbxvt.scr.current->cursor.y];
 	uint32_t * r = jbxvt.scr.current->rend[jbxvt.scr.current->cursor.y];
 	switch (mode) {
-	    case START :
+	case 1:
+		LOG("START");
 		get_horz_geo(&g, jbxvt.scr.current->cursor.x, 0);
 		zero_line(s, r, jbxvt.scr.current->cursor.x);
 		break;
-	    case END :
+	case 0:
+		LOG("END");
 		get_horz_geo(&g, jbxvt.scr.chars.width
 			- jbxvt.scr.current->cursor.x,
 			jbxvt.scr.current->cursor.x);
@@ -50,29 +53,15 @@ void scr_erase_line(const int8_t mode)
 			jbxvt.scr.chars.width
 			- jbxvt.scr.current->cursor.x);
 		break;
-	    case ENTIRE :
+	case 2:
+		LOG("ENTIRE");
 		get_horz_geo(&g, jbxvt.scr.chars.width, 0);
 		zero_line(s, r, jbxvt.scr.chars.width);
 		break;
-	    default :
-		MARK;
-		return;
-	}
-	/*  patch in the final rendition flag if there is any non-zero
-	 *  rendition.  */
-	r[jbxvt.scr.chars.width] = 0;
-	for (uint16_t i = 0; i < jbxvt.scr.chars.width; i++) {
-		if (r[i] != 0) {
-			r[jbxvt.scr.chars.width] = 1;
-			break;
-		}
 	}
 	cursor(CURSOR_DRAW); //clear
-	check_selection(jbxvt.scr.current->cursor.y,
-		jbxvt.scr.current->cursor.y);
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, g.x, g.y, g.width,
 		jbxvt.X.font_height);
-	jbxvt.scr.current->wrap_next = 0;
 	cursor(CURSOR_DRAW);
 }
 
@@ -86,7 +75,8 @@ void scr_erase_screen(const int8_t mode)
 	const uint16_t wsz = jbxvt.scr.chars.width + 1;
 	int16_t x = MARGIN, y, height;
 	switch (mode) {
-	    case START :
+	case 1:
+		LOG("START");
 		y = MARGIN;
 		height = jbxvt.scr.current->cursor.y * jbxvt.X.font_height;
 		for (i = 0; i < jbxvt.scr.current->cursor.y; i++) {
@@ -101,7 +91,8 @@ void scr_erase_screen(const int8_t mode)
 		}
 		scr_erase_line(mode);
 		break;
-	    case END :
+	case 0:
+		LOG("END");
 		if (jbxvt.scr.current->cursor.y
 			|| jbxvt.scr.current->cursor.x) {
 			y = MARGIN + (jbxvt.scr.current->cursor.y + 1)
@@ -128,7 +119,8 @@ void scr_erase_screen(const int8_t mode)
 		 *  it is effectively a whole screen clear.
 		 *  Drop through so that we do not need to duplicate
 		 *  the scroll-up code.  */
-	    case ENTIRE :
+	case 2:
+		LOG("ENTIRE");
 		y = MARGIN;
 		height = jbxvt.scr.chars.height * jbxvt.X.font_height;
 		// Clear any artifacts:
@@ -144,7 +136,8 @@ void scr_erase_screen(const int8_t mode)
 		sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1,
 			0, jbxvt.scr.chars.height - 1);
 		break;
-	    default :
+	default :
+		LOG("UNKNOWN");
 		return;
 	}
 }

@@ -16,9 +16,10 @@ struct screenst {
 	Size margin;		// scroll margins, top and bottom
 	xcb_point_t cursor;	// cursor position, row and column
 	bool decom:1;		// origin mode flag
-	bool wrap:1;		// auto-wrap flag
+	bool decawm:1;		// DECAWM auto-wrap flag
 	bool wrap_next:1;	// wrap before the next printed character
 	bool insert:1;		// insert mode flag
+	bool decanm:1;		// DECANM -- ANSI/VT52
 };
 
 #endif//!SCREENST_H

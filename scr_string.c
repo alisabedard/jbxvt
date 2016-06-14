@@ -14,8 +14,16 @@
 
 #include <string.h>
 
+//#define STRING_DEBUG
+#ifdef STRING_DEBUG
+#define SLOG(...) LOG(__VA_ARGS__)
+#else
+#define SLOG(...)
+#endif
+
 static void handle_new_lines(int8_t nlcount)
 {
+	SLOG("handle_new_lines(%d)", nlcount);
 	struct screenst * restrict c = jbxvt.scr.current;
 	nlcount -= c->margin.bottom - c->cursor.y;
 	const uint8_t lim = c->cursor.y - c->margin.top - 1;
@@ -31,7 +39,7 @@ static void handle_new_lines(int8_t nlcount)
 #endif//x86
 static void handle_insert(const uint8_t n, const xcb_point_t p)
 {
-	LOG("handle_insert(n=%d, p={%d, %d})", n, p.x, p.y);
+	SLOG("handle_insert(n=%d, p={%d, %d})", n, p.x, p.y);
 	struct screenst * restrict c = jbxvt.scr.current;
 	uint8_t * s = c->text [c->cursor.y];
 	uint32_t * r = c->rend [c->cursor.y];
@@ -48,17 +56,22 @@ static void handle_insert(const uint8_t n, const xcb_point_t p)
 
 static void handle_wrap_next(void)
 {
+	SLOG("handle_wrap_next()");
 	struct screenst * restrict c = jbxvt.scr.current;
 	c->text[c->cursor.y][jbxvt.scr.chars.width] = 1;
-	if (c->cursor.y == c->margin.bottom)
+	if (c->cursor.y == c->margin.bottom) {
+		SLOG("cursor at bottom margin, scrolling");
 		  scroll(c->margin.top, c->margin.bottom, 1);
-	else if (c->cursor.y < jbxvt.scr.chars.height - 1)
+	} else if (c->cursor.y < jbxvt.scr.chars.height - 1) {
+		SLOG("++cursor.y");
 		  ++c->cursor.y;
+	}
 	c->cursor.x = c->wrap_next = 0;
 }
 
 static void handle_line_feed(void)
 {
+	SLOG("handle_line_feed()");
 	struct screenst * restrict c = jbxvt.scr.current;
 	if (likely(c->cursor.y < jbxvt.scr.chars.height - 1)) {
 		++c->cursor.y;
@@ -71,6 +84,7 @@ static void handle_line_feed(void)
 
 static void handle_tab(void)
 {
+	SLOG("handle_tab()");
 	struct screenst * restrict c = jbxvt.scr.current;
 	if (c->cursor.x >= jbxvt.scr.chars.width - 1)
 		  return;
@@ -85,6 +99,7 @@ static void wrap_at_end(uint8_t * restrict str, const uint8_t len)
 	struct screenst * restrict c = jbxvt.scr.current;
 	if (unlikely(len > 0 && c->cursor.x == jbxvt.scr.chars.width
 		&& *str >= ' ')) {
+		SLOG("wrap_at_end(%s, %d)", str, len);
 		c->text [c->cursor.y] [jbxvt.scr.chars.width] = 1;
 		if (likely(c->cursor.y == c->margin.bottom)) {
 			scroll(c->margin.top, c ->margin.bottom, 1);
@@ -110,10 +125,8 @@ static uint_fast16_t get_n(uint8_t * restrict str)
     nlcount is the number of new lines in the string.  */
 void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 {
-#ifdef SCR_DEBUG
-	LOG("scr_string(s, len: %d, nlcount: %d)\n", len, nlcount);
-#endif//SCR_DEBUG
-	home_screen();
+	SLOG("scr_string(%s, len: %d, nlcount: %d)", str, len, nlcount);
+//	home_screen();
 	cursor(CURSOR_DRAW);
 	if (nlcount > 0)
 		  handle_new_lines(nlcount);
@@ -168,7 +181,7 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 	}
 	if (c->cursor.x >= jbxvt.scr.chars.width) {
 		c->cursor.x = jbxvt.scr.chars.width - 1;
-		c->wrap_next = c->wrap;
+		c->wrap_next = c->decawm;
 	}
 	cursor(CURSOR_DRAW);
 }

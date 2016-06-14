@@ -11,10 +11,27 @@
 #include "sbar.h"
 #include "scroll.h"
 #include "scr_move.h"
+#include "scr_refresh.h"
 #include "scr_reset.h"
 #include "selection.h"
 
 #include <stdlib.h>
+
+// Set all chars to 'E'
+void scr_efill(void)
+{
+	// Move to cursor home in order for all characters to appear.
+	scr_move(0, 0, 0);
+	xcb_point_t p;
+	Size c = jbxvt.scr.chars;
+	for (p.y = c.height - 1; p.y >= 0; --p.y)
+		  for (p.x = c.width - 1; p.x >= 0; --p.x) {
+			jbxvt.scr.current->text[p.y][p.x] = 'E';
+			jbxvt.scr.current->rend[p.y][p.x] = 0;
+		  }
+	scr_refresh((xcb_rectangle_t){.width=jbxvt.scr.pixels.width,
+		.height=jbxvt.scr.pixels.height});
+}
 
 /*  Perform any initialisation on the screen data structures.
     Called just once at startup. */
@@ -26,7 +43,7 @@ void scr_init(void)
 		jbxvt.scr.sline.max = MAX_SCROLL;
 	jbxvt.scr.sline.data = calloc(jbxvt.scr.sline.max,
 		sizeof(void*));
-	jbxvt.scr.s1.wrap = jbxvt.scr.s2.wrap=1;
+	jbxvt.scr.s1.decawm = jbxvt.scr.s2.decawm = true;
 	jbxvt.scr.current = &jbxvt.scr.s1;
 	scr_reset();
 }
@@ -130,9 +147,10 @@ void home_screen(void)
 	if (likely(!jbxvt.scr.offset))
 		  return;
 	jbxvt.scr.offset = 0;
-	xcb_point_t rc = { .y = jbxvt.scr.chars.height - 1,
-		.x = jbxvt.scr.chars.width - 1
-	};
+	//xcb_point_t rc = { .y = jbxvt.scr.chars.height - 1,
+	//	.x = jbxvt.scr.chars.width - 1 };
+	xcb_point_t rc = { .y = jbxvt.scr.chars.height,
+		.x = jbxvt.scr.chars.width};
 	repaint((xcb_point_t){}, rc);
 	cursor(CURSOR_DRAW);
 	sbar_show(rc.y + jbxvt.scr.sline.top, 0, rc.y);

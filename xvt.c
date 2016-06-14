@@ -41,22 +41,28 @@ static void handle_reset(struct tokenst * restrict token)
 		case 1 :
 			set_keys(set, true);
 			break;
+		case 2:
+			jbxvt.scr.current->decanm = set;
+			break;
 		case 1047:
-			scr_change_screen(!set);
+			scr_change_screen(set);
 			break;
 		case 1048:
-			cursor(!set?CURSOR_SAVE:CURSOR_RESTORE);
+			cursor(set?CURSOR_SAVE:CURSOR_RESTORE);
 			break;
 		case 47: // switch to main screen
 		case 1049: // cursor restore and screen change
-			cursor(!set?CURSOR_SAVE:CURSOR_RESTORE);
-			scr_change_screen(!set);
+			cursor(set?CURSOR_SAVE:CURSOR_RESTORE);
+			scr_change_screen(set);
 			break;
 		case 6 : // DECOM normal cursor mode
+			/* According to the spec, the cursor is reset to
+			   the home position when this is changed.  */
 			jbxvt.scr.current->decom = set;
+			scr_move(0, 0, 0);
 			break;
 		case 7 :
-			jbxvt.scr.current->wrap = set;
+			jbxvt.scr.current->decawm = set;
 			break;
 		case 12:
 			break;
@@ -127,9 +133,8 @@ static void handle_tk_expose(struct tokenst * restrict t)
 	case SCREEN :
 		if(jbxvt_size_set){
 			cursor(CURSOR_DRAW); // clear
-			scr_refresh((xcb_point_t){.x = t->tk_arg[0],
-				.y = t->tk_arg[1]}, (Size){
-				.width = t->tk_arg[2],
+			scr_refresh((xcb_rectangle_t){.x = t->tk_arg[0],
+				.y = t->tk_arg[1], .width = t->tk_arg[2],
 				.height = t->tk_arg[3]});
 			cursor(CURSOR_DRAW); // draw
 		} else {
@@ -267,10 +272,16 @@ app_loop_head:
 			scr_move(0, 0, 0);
 			break;
 		case 1:
-			scr_move(0, t[0]>0?t[0] - 1:0, 0);
+			scr_move(0, t[0] > 0 ? (t[0] - 1) : 0,
+				jbxvt.scr.current->decom
+				? COL_RELATIVE | ROW_RELATIVE : 0);
 			break;
-		default:
-			scr_move(t[1]>0?t[1] - 1:0, t[0]>0?t[0] - 1:0, 0);
+		case 2:
+			scr_move(t[1] > 0 ? (t[1] - 1) : 0,
+				t[0] > 0 ? (t[0] - 1) : 0,
+				jbxvt.scr.current->decom
+				? COL_RELATIVE | ROW_RELATIVE : 0);
+			break;
 		}
 		break;
 	case TK_ED :
@@ -322,8 +333,17 @@ app_loop_head:
 		break;
 	case TK_DECSTBM: // set top and bottom margins.
 		LOG("TK_DECSTBM");
-		jbxvt.scr.current->margin = (Size){.top = t[0] - 1,
-			.bottom = t[1] - 1};
+	//	if (token.tk_nargs == 2) {
+			//jbxvt.scr.current->margin = (Size){
+			//	.top = t[0] - 1, .bottom = t[1] - 1};
+			jbxvt.scr.current->margin = (Size){
+				.top = t[0] - 1, .bottom = t[1] - 1};
+#if 0
+		} else {
+			jbxvt.scr.current->margin = (Size){.top = 0,
+				.bottom = jbxvt.scr.chars.height};
+		}
+#endif
 		scr_move(0, 0, 0);
 		break;
 	case TK_DECSC :
@@ -356,10 +376,12 @@ app_loop_head:
 		// VT420, 132 col, selective erase, ansi color
 		cprintf("'\033[?64;1;6;22c'");
 		break;
-#ifdef DEBUG
 	case TK_DECSWH :		/* ESC # digit */
 		LOG("TK_DECSWH");
+		if (token.tk_arg[0] == '8') // DECALN
+			  scr_efill();
 		break;
+#ifdef DEBUG
 	case TK_HTS :
 		LOG("TK_HTS");
 		break;

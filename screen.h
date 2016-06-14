@@ -7,19 +7,10 @@
 #include "jbxvt.h"
 #include "screenst.h"
 
-//  flags for scr_move()
-enum ScrMoveFlags {
-	COL_RELATIVE = 1, // column movement is relative
-	ROW_RELATIVE = 2  // row movement is relative
-};
-
 enum {
-	MAX_SCROLL = 24 /* max # lines that can scroll at once.
+	MAX_SCROLL = 126 /* max # lines that can scroll at once.
 			    126 is greatest value supported. */
 };
-
-//  arguments to the screen delete functions
-enum ScrDelArg { END, START, ENTIRE };
 
 enum RenditionStyleFlags {
 	RS_NONE = 0,
@@ -88,6 +79,9 @@ void scr_change_screen(const bool mode_high);
 
 //  Delete count lines and scroll up the bottom of the screen to fill the gap
 void scr_delete_lines(const uint8_t count);
+
+// Set all chars to 'E'
+void scr_efill(void);
 
 /* Move the cursor up if mod is positive or down if mod is negative,
    by mod number of lines and scroll if necessary.  */
