@@ -156,6 +156,7 @@ void jbxvt_app_loop(void)
 	struct tokenst token;
 	int32_t n; // sanitized first token
 	int32_t * t; // shortcut to token.tk_arg
+	struct screenst * scr = jbxvt.scr.current;
 app_loop_head:
 	get_token(&token);
 	t = token.tk_arg;
@@ -273,14 +274,12 @@ app_loop_head:
 			break;
 		case 1:
 			scr_move(0, t[0] > 0 ? (t[0] - 1) : 0,
-				jbxvt.scr.current->decom
-				? COL_RELATIVE | ROW_RELATIVE : 0);
+				scr->decom ? COL_RELATIVE | ROW_RELATIVE : 0);
 			break;
 		case 2:
 			scr_move(t[1] > 0 ? (t[1] - 1) : 0,
 				t[0] > 0 ? (t[0] - 1) : 0,
-				jbxvt.scr.current->decom
-				? COL_RELATIVE | ROW_RELATIVE : 0);
+				scr->decom ? COL_RELATIVE | ROW_RELATIVE : 0);
 			break;
 		}
 		break;
@@ -290,7 +289,7 @@ app_loop_head:
 		break;
 	case TK_EL: // erase line
 		LOG("TK_EL"); // don't use n
-		scr_erase_line(t[0]);
+		scr_erase_line(t[0]-1);
 		break;
 	case TK_IL :
 		LOG("TK_IL: %d", n);
@@ -333,17 +332,20 @@ app_loop_head:
 		break;
 	case TK_DECSTBM: // set top and bottom margins.
 		LOG("TK_DECSTBM");
-	//	if (token.tk_nargs == 2) {
-			//jbxvt.scr.current->margin = (Size){
-			//	.top = t[0] - 1, .bottom = t[1] - 1};
-			jbxvt.scr.current->margin = (Size){
-				.top = t[0] - 1, .bottom = t[1] - 1};
-#if 0
-		} else {
-			jbxvt.scr.current->margin = (Size){.top = 0,
-				.bottom = jbxvt.scr.chars.height};
+		switch (token.tk_nargs) {
+		case 0:
+			scr->margin.top = 0;
+			scr->margin.bottom = jbxvt.scr.chars.height - 1;
+			break;
+		case 1:
+			scr->margin.top = 0;
+			scr->margin.bottom = t[0] - 1;
+			break;
+		case 2:
+			scr->margin.top = t[0] - 1;
+			scr->margin.bottom = t[1] - 1;
+			break;
 		}
-#endif
 		scr_move(0, 0, 0);
 		break;
 	case TK_DECSC :

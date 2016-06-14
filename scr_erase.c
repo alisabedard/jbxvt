@@ -60,8 +60,11 @@ void scr_erase_line(const int8_t mode)
 		break;
 	}
 	cursor(CURSOR_DRAW); //clear
+	check_selection(jbxvt.scr.current->cursor.y,
+		jbxvt.scr.current->cursor.y);
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, g.x, g.y, g.width,
 		jbxvt.X.font_height);
+	jbxvt.scr.current->wrap_next = false;
 	cursor(CURSOR_DRAW);
 }
 

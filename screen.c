@@ -147,10 +147,8 @@ void home_screen(void)
 	if (likely(!jbxvt.scr.offset))
 		  return;
 	jbxvt.scr.offset = 0;
-	//xcb_point_t rc = { .y = jbxvt.scr.chars.height - 1,
-	//	.x = jbxvt.scr.chars.width - 1 };
-	xcb_point_t rc = { .y = jbxvt.scr.chars.height,
-		.x = jbxvt.scr.chars.width};
+	xcb_point_t rc = { .y = jbxvt.scr.chars.height - 1,
+		.x = jbxvt.scr.chars.width - 1 };
 	repaint((xcb_point_t){}, rc);
 	cursor(CURSOR_DRAW);
 	sbar_show(rc.y + jbxvt.scr.sline.top, 0, rc.y);
