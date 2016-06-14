@@ -126,7 +126,7 @@ static uint_fast16_t get_n(uint8_t * restrict str)
 void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 {
 	SLOG("scr_string(%s, len: %d, nlcount: %d)", str, len, nlcount);
-//	home_screen();
+	home_screen();
 	cursor(CURSOR_DRAW);
 	if (nlcount > 0)
 		  handle_new_lines(nlcount);
@@ -167,6 +167,28 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 		uint8_t * s = c->text[c->cursor.y];
 		if (!s) return;
 		s += c->cursor.x;
+		if (c->charset[c->charsel] == CHARSET_SG0) {
+			SLOG("CHARSET_SG0");
+			for (int_fast16_t i = len ; i >= 0; --i) {
+				uint8_t * ch = &str[i];
+				switch (*ch) {
+				case 'j':
+				case 'k':
+				case 'l':
+				case 'm':
+				case 't':
+				case 'u':
+					*ch = '+';
+					break;
+				case 'q':
+					*ch = '-';
+					break;
+				case 'x':
+					*ch = '|';
+					break;
+				}
+			}
+		}
 		memcpy(s, str, n);
 		paint_rval_text(str, jbxvt.scr.rstyle, n, p);
 		if(jbxvt.scr.rstyle) {

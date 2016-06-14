@@ -460,6 +460,10 @@ void show_token(struct tokenst * tk)
 			jbputs("token(TK_DL)");
 			show_token_args(tk);
 			break;
+		case TK_ECH :
+			jbputs("token(TK_DCH)");
+			show_token_args(tk);
+			break;
 		case TK_DCH :
 			jbputs("token(TK_DCH)");
 			show_token_args(tk);

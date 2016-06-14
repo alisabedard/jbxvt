@@ -156,6 +156,9 @@ void handle_sgr(struct tokenst * restrict token)
 		case 7: // Image negative
 			scr_style(RS_RVID);
 			break;
+		case 8: // Invisible text
+			scr_style(RS_INVISIBLE);
+			break;
 		case 17: // Alt font
 			scr_style(RS_BOLD);
 			break;

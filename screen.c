@@ -45,6 +45,10 @@ void scr_init(void)
 		sizeof(void*));
 	jbxvt.scr.s1.decawm = jbxvt.scr.s2.decawm = true;
 	jbxvt.scr.current = &jbxvt.scr.s1;
+	jbxvt.scr.s1.charset[0] = jbxvt.scr.s2.charset[0]
+		= CHARSET_ASCII;
+	jbxvt.scr.s1.charset[1] = jbxvt.scr.s2.charset[1]
+		= CHARSET_SG0;
 	scr_reset();
 }
 

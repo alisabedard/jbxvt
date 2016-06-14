@@ -132,6 +132,16 @@ static void handle_tk_char(const uint8_t tk_char)
 	case 005: // ENQ
 		cprintf("");
 		break;
+	case '\016': // change to char set G1
+		LOG("charset G1");
+		jbxvt.scr.s1.charsel = 1;
+		jbxvt.scr.s2.charsel = 1;
+		break;
+	case '\017': // change to char set G0
+		LOG("charset G0");
+		jbxvt.scr.s1.charsel = 0;
+		jbxvt.scr.s2.charsel = 0;
+		break;
 	}
 }
 
@@ -159,6 +169,12 @@ static void handle_tk_expose(struct tokenst * restrict t)
 	}
 }
 
+static void set_cset(const enum CharacterSet cs, const uint8_t i)
+{
+	jbxvt.scr.s1.charset[i] = cs;
+	jbxvt.scr.s2.charset[i] = cs;
+}
+
 void jbxvt_app_loop(void)
 {
 	LOG("app_loop");
@@ -169,16 +185,16 @@ void jbxvt_app_loop(void)
 app_loop_head:
 	get_token(&token);
 	t = token.tk_arg;
-	n = t[0];
-	n = n ? n : 1; // n is sanitized for ops with optional nonzero args
+	// n is sanitized for ops with optional args
+	n = t[0] ? t[0] : 1;
 	switch (token.tk_type) {
 	case TK_STRING :
-		LOG("TK_STRING");
+		//LOG("TK_STRING");
 		scr_string(token.tk_string, token.tk_length,
 			token.tk_nlcount);
 		break;
 	case TK_CHAR :
-		LOG("TK_CHAR");
+		//LOG("TK_CHAR");
 		handle_tk_char(token.tk_char);
 		break;
 	case TK_EOF :
@@ -254,25 +270,25 @@ app_loop_head:
 		scr_paste_primary(t[1], t[2]);
 		break;
 	case TK_CUU: // cursor up
-		LOG("TK_CUU");
+		LOG("TK_CUU: args: %d, t[0]: %d, n: %d",
+			token.tk_nargs, t[0], n);
 		scr_move(0, -n, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_CUD: // cursor down
-		LOG("TK_CUD");
+		LOG("TK_CUD: args: %d, t[0]: %d, n: %d",
+			token.tk_nargs, t[0], n);
 		scr_move(0, n, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_CUF: // cursor forward
-		LOG("TK_CUF");
-		n = token.tk_arg[0];
+		LOG("TK_CUF: args: %d, t[0]: %d, n: %d",
+			token.tk_nargs, t[0], n);
 		scr_move(n, 0, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_CUB: // cursor back
-		LOG("TK_CUB");
-		n = token.tk_arg[0];
+		LOG("TK_CUB: args: %d, t[0]: %d, n: %d",
+			token.tk_nargs, t[0], n);
 		scr_move(-n, 0, ROW_RELATIVE | COL_RELATIVE);
 		break;
-	case TK_VPA: // vertical position absolute
-		// fall through
 	case TK_HVP: // horizontal vertical position
 		LOG("TK_HVP");
 		// fall through
@@ -292,6 +308,18 @@ app_loop_head:
 			break;
 		}
 		break;
+	case TK_VPA: // vertical position absolute
+		LOG("TK_VPA");
+		scr_move(scr->cursor.x, t[0] - 1, 0);
+		break;
+	case TK_VPR: // vertical position relative
+		LOG("TK_VPR");
+		scr_move(scr->cursor.x, t[0] - 1, ROW_RELATIVE);
+		break;
+	case TK_CHA: // cursor CHaracter Absolute column
+		LOG("TK_CHA");
+		scr_move(t[0] - 1, scr->cursor.y, 0);
+		break;
 	case TK_ED :
 		LOG("TK_ED"); // don't use n
 		scr_erase_screen(t[0]);
@@ -309,6 +337,7 @@ app_loop_head:
 		scr_delete_lines(n);
 		break;
 	case TK_DCH :
+	case TK_ECH:
 		LOG("TK_DCH");
 		scr_delete_characters(n);
 		break;
@@ -324,12 +353,15 @@ app_loop_head:
 		handle_reset(&token);
 		break;
 	case TK_SGR :
-		LOG("TK_SGR");
+		//LOG("TK_SGR");
 		handle_sgr(&token);
 		break;
 	case TK_DSR :		/* request for information */
 		LOG("TK_DSR");
 		switch (token.tk_arg[0]) {
+		case 5: // command from host requesting status
+			// 0 is response for 'Ready, no malfunctions'
+			cprintf("0");
 		case 6 :
 			cursor(CURSOR_REPORT);
 			break;
@@ -340,20 +372,16 @@ app_loop_head:
 		}
 		break;
 	case TK_DECSTBM: // set top and bottom margins.
-		LOG("TK_DECSTBM");
-		switch (token.tk_nargs) {
-		case 0:
+		LOG("TK_DECSTBM args: %d", token.tk_nargs);
+		if (token.tk_private == '?')
+			  break; // xterm param reset
+		if (token.tk_nargs < 2 || t[0] >= t[1]) {
+			// reset
 			scr->margin.top = 0;
 			scr->margin.bottom = jbxvt.scr.chars.height - 1;
-			break;
-		case 1:
-			scr->margin.top = 0;
-			scr->margin.bottom = t[0] - 1;
-			break;
-		case 2:
+		} else { // set
 			scr->margin.top = t[0] - 1;
 			scr->margin.bottom = t[1] - 1;
-			break;
 		}
 		scr_move(0, 0, 0);
 		break;
@@ -391,12 +419,74 @@ app_loop_head:
 		if (token.tk_arg[0] == '8') // DECALN
 			  scr_efill();
 		break;
+	case TK_NEL : // move to first position on next line down.
+		scr_move(0, scr->cursor.y + 1, 0);
+		LOG("TK_NEL: NExt Line");
+		break;
+	case TK_RIS: // Reset Initial State
+		scr_reset();
+		break;
+	case TK_SCS0: // DEC SCS G0
+		LOG("TK_SCS0");
+		switch(t[0]) {
+		case 'A':
+			LOG("United Kingdom");
+			set_cset(CHARSET_GB, 0);
+			break;
+		case 'B': // default
+			LOG("ASCII");
+			set_cset(CHARSET_ASCII, 0);
+			break;
+		case '0':
+			LOG("Special graphics");
+			set_cset(CHARSET_SG0, 0);
+			break;
+		case '1':
+			LOG("Alt char ROM standard graphics");
+			set_cset(CHARSET_SG1, 0);
+			break;
+		case '2':
+			LOG("Alt char ROM special graphics");
+			set_cset(CHARSET_SG2, 0);
+			break;
+		default: // reset
+			LOG("Unknown character set");
+			set_cset(CHARSET_ASCII, 0);
+		}
+		break;
+	case TK_SCS1: // DEC SCS G1
+		LOG("TK_SCS1");
+		switch(t[0]) {
+		case 'A':
+			scr->charset[1] = CHARSET_GB;
+			LOG("United Kingdom");
+			set_cset(CHARSET_GB, 0);
+			break;
+		case 'B': // default
+			LOG("ASCII");
+			set_cset(CHARSET_ASCII, 0);
+			break;
+		case '0':
+			LOG("Special graphics");
+			set_cset(CHARSET_SG0, 0);
+			break;
+		case '1':
+			LOG("Alt char ROM standard graphics");
+			set_cset(CHARSET_SG1, 0);
+			break;
+		case '2':
+			LOG("Alt char ROM special graphics");
+			set_cset(CHARSET_SG2, 0);
+			break;
+		default: // reset
+			LOG("Unknown character set");
+			set_cset(CHARSET_ASCII, 0);
+		}
+		break;
+
 #ifdef DEBUG
 	case TK_HTS :
 		LOG("TK_HTS");
-		break;
-	case TK_NEL :
-		LOG("TK_NEL");
 		break;
 	case TK_SS2 :
 		LOG("TK_SS2");
@@ -406,6 +496,10 @@ app_loop_head:
 		break;
 	case TK_TBC :
 		LOG("TK_TBC");
+		break;
+	default:
+		if(token.tk_type) // Ignore TK_NULL
+			LOG("Unhandled token: %d", token.tk_type);
 		break;
 #endif//DEBUG
 	}

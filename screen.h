@@ -19,7 +19,7 @@ enum RenditionStyleFlags {
 	RS_BLINK = (1<<2),
 	RS_RVID = (1<<3),
 	RS_ITALIC = (1<<4),
-	RS_LOW = (1<<5),
+	RS_INVISIBLE = (1<<5),
 	// colors:
 	// foreground: index or 9 bit octal rgb
 	RS_F0 = (1<<6),

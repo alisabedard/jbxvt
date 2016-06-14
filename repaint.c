@@ -97,6 +97,8 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 {
 	if (!str || !len) // prevent segfault
 		  return;
+	if (rval & RS_INVISIBLE)
+		  return; // nothing to do
 	const bool rvid = (rval & RS_RVID) || (rval & RS_BLINK);
 	const bool bold = rval & RS_BOLD;
 	bool cmod = set_rval_colors(rval);

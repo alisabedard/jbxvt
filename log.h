@@ -16,11 +16,8 @@
 
 #ifdef DEBUG
 
-#define LOG(...) {\
-	dprintf(STDERR_FILENO, __FILE__ ":%d> ", __LINE__);\
-	dprintf(STDERR_FILENO, __VA_ARGS__);\
-	jbputs("\n");\
-}
+#define LOG(...) { dprintf(STDERR_FILENO, __FILE__ ":%d> ", __LINE__);\
+	dprintf(STDERR_FILENO, __VA_ARGS__); jbputs("\n"); }
 
 #else//!DEBUG
 

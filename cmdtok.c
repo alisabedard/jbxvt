@@ -379,6 +379,15 @@ static void handle_esc(int_fast16_t c, struct tokenst * restrict tk)
 	case 'Z' :
 		tk->tk_type = TK_DECID;
 		break;
+	case 'c': // Reset to Initial State
+		tk->tk_type = TK_RIS;
+		break;
+	case 'F': // Enter VT52 graphics mode
+		tk->tk_type = TK_ENTGM52;
+		break;
+	case 'G': // Exit VT52 graphics mode
+		tk->tk_type = TK_EXTGM52;
+		break;
 	}
 }
 

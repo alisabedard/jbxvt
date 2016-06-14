@@ -63,12 +63,17 @@ enum { MAINWIN, SCREEN, SCROLLBAR };
 
 #define TK_FOCUS	22	/* keyboard focus event */
 
-/*  DEC VT100 control sequence token types
- */
+/*  DEC VT100 control sequence token types */
+// Tokens >= 1000 are artificial.
+#define TK_RIS		1000 // reset to initial state
+#define TK_ENTGM52	1001 // enter vt52 graphics mode (ESC F)
+#define TK_EXTGM52	1002 // exit vt52 graphics mode (ESC G);
+
 #define TK_CUU		'A'	/* Cursor up */
 #define TK_CUD		'B'	/* cursor down */
 #define TK_CUF		'C'	/* cursor back */
 #define TK_CUB		'D'	/* cursor back */
+#define TK_CHA		'G'	// cursor CHaracter Absolute [column]
 #define TK_CUP		'H'	/* position cursor */
 
 #define TK_ED		'J'	/* erase to start or end of screen */
@@ -76,9 +81,11 @@ enum { MAINWIN, SCREEN, SCROLLBAR };
 #define TK_IL		'L'	/* insert lines */
 #define TK_DL		'M'	/* delete lines */
 #define TK_DCH		'P'	/* Delete characters */
+#define TK_ECH		'X'	// Erase CHaracters
 #define TK_ICH		'@'	/* insert characters */
 #define TK_DA		'c'	/* device attributes request */
 #define TK_VPA		'd'	// vertical position absolute
+#define TK_VPR		'e'	// vertical position relative
 #define TK_HVP		'f'	/* horizontal and vertical position */
 #define TK_TBC		'g'	/* tab clear */
 #define TK_SET		'h'	/* set mode */
