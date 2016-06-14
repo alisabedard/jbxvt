@@ -382,8 +382,7 @@ app_loop_head:
 	case TK_DECID :
 	case TK_DA :
 		LOG("TK_DECID");
-		// VT420, 132 col, selective erase, ansi color
-		cprintf("'\033[?64;1;6;22c'");
+		cprintf("\033[?6c"); // VT102
 		break;
 	case TK_DECSWH :		/* ESC # digit */
 		LOG("TK_DECSWH");
