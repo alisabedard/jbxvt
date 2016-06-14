@@ -61,12 +61,21 @@ static void handle_reset(struct tokenst * restrict token)
 			jbxvt.scr.current->decom = set;
 			scr_move(0, 0, 0);
 			break;
-		case 7 :
+		case 7: // DECAWM
+		case 45: // reverse wrap-around mode?
 			jbxvt.scr.current->decawm = set;
 			break;
-		case 12:
+		case 12: // att610 -- stop blinking cursor
+			// N/A
 			break;
-		case 25:
+		case 25: // DECTCEM -- hide cursor
+			home_screen();
+#if 0
+			cursor(CURSOR_DRAW); // clear
+			if (!set) {
+				cursor(CURSOR_DRAW); // draw
+			}
+#endif
 			break;
 #ifdef DEBUG
 		default:
@@ -273,13 +282,11 @@ app_loop_head:
 			scr_move(0, 0, 0);
 			break;
 		case 1:
-			scr_move(0, t[0] > 0 ? (t[0] - 1) : 0,
-				scr->decom ? COL_RELATIVE | ROW_RELATIVE : 0);
+			scr_move(0, t[0] - 1, scr->decom ? ROW_RELATIVE : 0);
 			break;
 		case 2:
-			scr_move(t[1] > 0 ? (t[1] - 1) : 0,
-				t[0] > 0 ? (t[0] - 1) : 0,
-				scr->decom ? COL_RELATIVE | ROW_RELATIVE : 0);
+			scr_move(t[1] - 1, t[0] - 1, scr->decom
+				? COL_RELATIVE | ROW_RELATIVE : 0);
 			break;
 		}
 		break;
@@ -289,7 +296,7 @@ app_loop_head:
 		break;
 	case TK_EL: // erase line
 		LOG("TK_EL"); // don't use n
-		scr_erase_line(t[0]-1);
+		scr_erase_line(t[0]);
 		break;
 	case TK_IL :
 		LOG("TK_IL: %d", n);
