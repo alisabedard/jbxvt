@@ -83,15 +83,8 @@ static void hsc(void)
 void scr_index_by(const int8_t mod)
 {
 	hsc();
-	Size m = jbxvt.scr.current->margin;
-	xcb_point_t * c = &jbxvt.scr.current->cursor;
-	uint16_t n = mod > 0 ? m.bottom : m.top;
-	if (likely(c->y == n)) {
-		  scroll(m.top, m.bottom, mod);
-	} else {
-		  c->y += mod;
-	}
-	jbxvt.scr.current->wrap_next = 0;
+	const Size m = jbxvt.scr.current->margin;
+	scroll(m.top, m.bottom, mod);
 	cursor(CURSOR_DRAW);
 }
 

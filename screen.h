@@ -83,8 +83,7 @@ void scr_delete_lines(const uint8_t count);
 // Set all chars to 'E'
 void scr_efill(void);
 
-/* Move the cursor up if mod is positive or down if mod is negative,
-   by mod number of lines and scroll if necessary.  */
+// scroll by mod
 void scr_index_by(const int8_t mod);
 #define scr_index() scr_index_by(1)
 #define scr_rindex() scr_index_by(-1)
