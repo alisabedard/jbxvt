@@ -218,6 +218,8 @@ void scroll(const uint8_t row1, const uint8_t row2, const int16_t count)
 		  return;
 	if(abs(count) > MAX_SCROLL)
 		  return;
+	if (!count)
+		return;
 	if(count < 0)
 		sc_dn(row1, row2, count);
 	else
