@@ -129,7 +129,7 @@ static int save_data_on_screen(uint8_t cw, int i, const int j,
 	return i;
 }
 
-static int handle_offscreen_data(const uint8_t cw,
+static int handle_offscreen_data(const uint16_t cw,
 	const int i, const int j,
 	uint8_t ** restrict s1,
 	uint32_t ** restrict r1)
@@ -142,10 +142,9 @@ static int handle_offscreen_data(const uint8_t cw,
 	const uint8_t l = sl->sl_length;
 	if (!l || !sl->sl_text)
 		  return i + 1;
-	const uint8_t n = cw < l ? cw : l;
-	memcpy(s1[j], sl->sl_text, n);
+	memcpy(s1[j], sl->sl_text, cw);
 	if (sl->sl_rend) {
-		memcpy(r1[j], sl->sl_rend, n<<2);
+		memcpy(r1[j], sl->sl_rend, cw * sizeof(uint32_t));
 	}
 	return i + 1;
 }
