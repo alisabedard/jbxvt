@@ -9,6 +9,7 @@
 #include "log.h"
 #include "repaint.h"
 #include "screen.h"
+#include "scr_reset.h"
 
 // constrain rc between 0 and lim, return new value
 __attribute__((const))

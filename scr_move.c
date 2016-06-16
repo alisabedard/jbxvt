@@ -10,7 +10,6 @@
 /*  Move the cursor to a new position.  The relative argument is a pair of
  *  flags that specify relative rather than absolute motion.
  */
-
 void scr_move(const int16_t x, const int16_t y, const uint8_t relative)
 {
 	LOG("scr_move(x:%d, y:%d, relative:%d)", x, y, relative);

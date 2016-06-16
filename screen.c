@@ -78,8 +78,7 @@ static void hsc(void)
 	cursor(CURSOR_DRAW);
 }
 
-/* Move the cursor up if mod is positive or down if mod is negative,
-   by mod number of lines and scroll if necessary.  */
+// scroll by mod
 void scr_index_by(const int8_t mod)
 {
 	hsc();
