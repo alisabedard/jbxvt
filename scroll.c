@@ -4,6 +4,7 @@
 #include "scroll.h"
 //#undef DEBUG
 #include "config.h"
+#include "cursor.h"
 #include "jbxvt.h"
 #include "log.h"
 #include "sbar.h"
@@ -26,7 +27,7 @@ static void sel_scr_to_sav(struct selst * restrict s,
 // Free lines that scroll off the top of the screen.
 static void free_top_lines(int16_t count)
 {
-	LOG("free_top_lines()");
+	LOG("free_top_lines(%d)", count);
 	while(--count > 0) {
 		const int16_t i = jbxvt.scr.sline.max - count;
 		struct slinest * s = jbxvt.scr.sline.data[i];
@@ -43,6 +44,7 @@ static void free_top_lines(int16_t count)
 
 static void transmogrify(const int16_t j, const int8_t count)
 {
+	//LOG("transmogrify(j: %d, count: %d)", j, count);
 	const int16_t k = j + count;
 	jbxvt.scr.current->text[k]
 		= jbxvt.scr.current->text[j];
@@ -64,14 +66,9 @@ static void ck_sel_on_scr(const int j)
 		  scr_clear_selection();
 }
 
-static uint16_t sc_up_find_col(uint8_t * restrict s)
+static uint16_t find_col(uint8_t * restrict s, uint_fast16_t c)
 {
-	uint_fast16_t col;
-	if (!s) return 0; // prevent segfault
-	for (col = jbxvt.scr.chars.width;
-		col > 0 && s[col] == 0; --col)
-		  ;
-	return col + 1;
+	return s[c] ? find_col(s, c + 1) : c;
 }
 
 static void lclr(const uint8_t i, const uint8_t j, const size_t sz,
@@ -108,7 +105,7 @@ static void sc_up_cp_rows(const int8_t count)
 		if(!s)
 			  continue;
 		uint32_t * r = jbxvt.scr.current->rend[iter.y];
-		iter.x = sc_up_find_col(s);
+		iter.x = find_col(s, 0);
 		struct slinest *sl = calloc(1, sizeof(struct slinest));
 		// +1 to have last byte as wrap flag:
 		sl->sl_text = malloc(iter.x + 1);
@@ -225,5 +222,8 @@ void scroll(const uint8_t row1, const uint8_t row2, const int16_t count)
 		sc_dn(row1, row2, count);
 	else
 		sc_up(row1, row2, count);
+	home_screen();
+	cursor(CURSOR_DRAW);
+	cursor(CURSOR_DRAW);
 }
 
