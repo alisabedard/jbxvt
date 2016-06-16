@@ -12,12 +12,15 @@ typedef struct Size {
 		uint16_t w;
 		// for scroll margin:
 		int16_t top;
+		int16_t t;
 	};
 	union {
 		uint16_t height;
 		uint16_t h;
 		// for scroll margin:
 		int16_t bottom;
+		int16_t bot;
+		int16_t b;
 	};
 } Size;
 

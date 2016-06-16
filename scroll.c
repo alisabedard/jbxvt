@@ -71,7 +71,7 @@ static uint16_t find_col(uint8_t * restrict s, uint_fast16_t c)
 	return s[c] ? find_col(s, c + 1) : c;
 }
 
-static void lclr(const uint8_t i, const uint8_t j, const size_t sz,
+static void lclr(const uint8_t i, const uint8_t j, const uint16_t sz,
 	void ** t, void ** s)
 {
 	if(!s[i]) // prevent segfault;
@@ -83,10 +83,9 @@ static void lclr(const uint8_t i, const uint8_t j, const size_t sz,
 static void clr_ln_s_r(uint8_t i, uint8_t j, uint8_t ** save,
 	uint32_t ** rend)
 {
-	const size_t sz = jbxvt.scr.chars.width + 1;
+	const uint16_t sz = jbxvt.scr.chars.width + 1;
 	lclr(i, j, sz, (void**)jbxvt.scr.current->text, (void**)save);
-	lclr(i, j, sz * sizeof(uint32_t),
-		(void**)jbxvt.scr.current->rend, (void**)rend);
+	lclr(i, j, sz<<2, (void**)jbxvt.scr.current->rend, (void**)rend);
 }
 
 static void clr_lines(int8_t count, const uint8_t rc,
@@ -114,8 +113,9 @@ static void sc_up_cp_rows(const int8_t count)
 		sl->sl_text[iter.x] = s[jbxvt.scr.chars.width];
 		/* iter.x, not iter.x + 1, since the last byte
 		   of the sl_text, only, is used for the wrap flag.  */
-		sl->sl_rend = malloc(iter.x * sizeof(uint32_t));
-		memcpy(sl->sl_rend, r, iter.x * sizeof(uint32_t));
+		const uint16_t rendsz = iter.x * sizeof(uint32_t);
+		sl->sl_rend = malloc(rendsz);
+		memcpy(sl->sl_rend, r, rendsz);
 		sl->sl_length = iter.x;
 		jbxvt.scr.sline.data[count - iter.y - 1] = sl;
 		sel_scr_to_sav(&jbxvt.sel.end1, iter.y, count);

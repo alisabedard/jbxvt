@@ -38,11 +38,11 @@ void scr_delete_characters(int count)
 
 	// copy the data after count
 	memmove(s + c.x, s + c.x + count, scw - c.x - count);
-	memmove(r + c.x, r + c.x + count, (scw - c.x - count)
-		* sizeof(uint32_t));
+	memmove(r + c.x, r + c.x + count,
+		((unsigned int)(scw - c.x - count))<<2);
 	// delete the source data copied
 	memset(s + scw - count, 0, count);
-	memset(r + scw - count, 0, count * sizeof(uint32_t));
+	memset(r + scw - count, 0, ((unsigned int)count)<<2);
 
 	const Size f = { .w = jbxvt.X.font_width,
 		.h = jbxvt.X.font_height };

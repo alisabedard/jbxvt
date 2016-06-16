@@ -498,8 +498,10 @@ app_loop_head:
 		LOG("TK_TBC");
 		break;
 	default:
-		if(token.tk_type) // Ignore TK_NULL
+		if(token.tk_type) { // Ignore TK_NULL
 			LOG("Unhandled token: %d", token.tk_type);
+			exit(1);
+		}
 		break;
 #endif//DEBUG
 	}

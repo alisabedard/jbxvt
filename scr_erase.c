@@ -108,8 +108,7 @@ void scr_erase_screen(const int8_t mode)
 			for (i = jbxvt.scr.current->cursor.y + 1;
 				i < jbxvt.scr.chars.height; ++i) {
 				memset(jbxvt.scr.current->text[i],0, wsz);
-				memset(jbxvt.scr.current->rend[i],0,
-					wsz * sizeof(uint32_t));
+				memset(jbxvt.scr.current->rend[i],0, wsz<<2);
 			}
 			check_selection(jbxvt.scr.current->cursor.y + 1,
 				jbxvt.scr.chars.height - 1);
