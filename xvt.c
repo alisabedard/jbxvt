@@ -372,7 +372,7 @@ app_loop_head:
 		}
 		break;
 	case TK_DECSTBM: // set top and bottom margins.
-		LOG("TK_DECSTBM 0: %d, 1: %d", t[0], t[1]);
+		LOG("TK_DECSTBM args: %d", token.tk_nargs);
 		if (token.tk_private == '?')
 			  break; // xterm param reset
 		if (token.tk_nargs < 2 || t[0] >= t[1]) {

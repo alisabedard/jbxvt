@@ -30,10 +30,8 @@ static void handle_new_lines(int8_t nlcount)
 	nlcount = nlcount < 0 ? 0 : nlcount > lim ? lim : nlcount;
 	if (nlcount > MAX_SCROLL)
 		  nlcount = MAX_SCROLL;
-	if (nlcount) {
-		scroll(c->margin.top, c->margin.bottom, nlcount);
-		c->cursor.y -= nlcount;
-	}
+	scroll(c->margin.top, c->margin.bottom, nlcount);
+	c->cursor.y -= nlcount;
 }
 
 #if defined(__i386__) || defined(__amd64__)
@@ -91,7 +89,6 @@ static void handle_tab(void)
 	if (c->cursor.x >= jbxvt.scr.chars.width - 1)
 		  return;
 	uint8_t * s = c->text[c->cursor.y];
-	// FIXME: Implement programmable tab stops.
 	// Advance to next tab stop:
 	while (c->cursor.x % 8 && c->cursor.x < jbxvt.scr.chars.width - 1)
 		s[c->cursor.x++] = ' ';
@@ -142,7 +139,7 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 	while (len) {
 		if (likely(*str == '\r')) { // carriage return
 			c->cursor.x = 0;
-			c->wrap_next = false;
+			c->wrap_next = 0;
 			--len;
 			++str;
 			continue;
@@ -169,6 +166,7 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 			  handle_insert(n, p);
 		uint8_t * s = c->text[c->cursor.y];
 		if (!s) return;
+		s += c->cursor.x;
 		if (c->charset[c->charsel] == CHARSET_SG0) {
 			SLOG("CHARSET_SG0");
 			for (int_fast16_t i = len ; i >= 0; --i) {
@@ -191,7 +189,6 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 				}
 			}
 		}
-		s += c->cursor.x;
 		memcpy(s, str, n);
 		paint_rval_text(str, jbxvt.scr.rstyle, n, p);
 		if(jbxvt.scr.rstyle) {
@@ -204,7 +201,7 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 		c->cursor.x += n;
 		wrap_at_end(str, len);
 	}
-	if (c->cursor.x == jbxvt.scr.chars.width) {
+	if (c->cursor.x >= jbxvt.scr.chars.width) {
 		c->cursor.x = jbxvt.scr.chars.width - 1;
 		c->wrap_next = c->decawm;
 	}
