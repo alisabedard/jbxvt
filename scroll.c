@@ -2,7 +2,7 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 
 #include "scroll.h"
-//#undef DEBUG
+
 #include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"
@@ -40,6 +40,9 @@ static void free_top_lines(int16_t count)
 		free(s);
 		jbxvt.scr.sline.data[i] = NULL;
 	}
+	for (int_fast16_t i = jbxvt.scr.sline.max - count - 1; i >= 0; --i)
+		jbxvt.scr.sline.data[i + count]
+			= jbxvt.scr.sline.data[i];
 }
 
 static void transmogrify(const int16_t j, const int8_t count)
@@ -57,7 +60,6 @@ static void transmogrify(const int16_t j, const int8_t count)
 		&& jbxvt.sel.end2.se_index == j)
 		  jbxvt.sel.end2.se_index = k;
 }
-
 static void ck_sel_on_scr(const int j)
 {
 	// clear selection if it scrolls off screen:
@@ -136,25 +138,87 @@ static void cp_repair(const uint8_t row1, const uint8_t row2,
 	xcb_flush(jbxvt.X.xcb);
 }
 
-static void sc_up(const uint8_t row1, uint8_t row2,
-	const int8_t count)
+static void sc_up_main_scr(const int8_t count)
 {
+	free_top_lines(count);
+	int_fast16_t y;
+	for (y = jbxvt.scr.sline.max - count - 1;
+		y >= 0; --y) {
+		jbxvt.scr.sline.data[y + count]
+			= jbxvt.scr.sline.data[y];
+	}
+	sc_up_cp_rows(count);
+	const uint16_t t = jbxvt.scr.sline.top + count;
+	const uint16_t max = jbxvt.scr.sline.max;
+	jbxvt.scr.sline.top = likely(t < max) ? t : max;
+	sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1,
+		jbxvt.scr.offset, jbxvt.scr.offset
+		+ jbxvt.scr.chars.height - 1);
+
+}
+
+void scroll1(int16_t count)
+{
+	uint8_t * save[MAX_SCROLL];
+	uint32_t * rend[MAX_SCROLL];
+	struct slinest * sl;
+	uint8_t * s;
+	uint32_t * r;
+
+	while (count > 0) {
+		// If count > MAX_SCROLL, scroll in installments
+		int_fast16_t n = count > MAX_SCROLL ? MAX_SCROLL : count;
+		count -= n;
+		// free lines that scroll off the top
+		free_top_lines(count);
+		for(int_fast16_t i = 0; i < n; ++i) {
+			s = jbxvt.scr.s1.text[i];
+			r = jbxvt.scr.s1.rend[i];
+			uint16_t j = find_col(s, 0) + 1;
+			sl = malloc(sizeof(struct slinest));
+			// + 1 for wrap flag:
+			sl->sl_text = malloc(j + 1);
+			// copy text.
+			memcpy(sl->sl_text, s, j);
+			// copy wrap flag.
+			sl->sl_text[j] = s[jbxvt.scr.chars.width];
+			sl->sl_rend = malloc(j<<2);
+			memcpy(sl->sl_rend, r, j<<2);
+			sl->sl_length = j;
+			jbxvt.scr.sline.data[n - i - 1] = sl;
+		}
+		jbxvt.scr.sline.top += n;
+		if (jbxvt.scr.sline.top > jbxvt.scr.sline.max)
+			  jbxvt.scr.sline.top = jbxvt.scr.sline.max;
+		int_fast16_t j = 0;
+		for (int_fast16_t i = 0; i < n; ++i, ++j) {
+			save[i] = jbxvt.scr.s1.text[j];
+			rend[i] = jbxvt.scr.s1.rend[j];
+		}
+		for (; j < jbxvt.scr.chars.height; ++j) {
+			jbxvt.scr.s1.text[j - n] = jbxvt.scr.s1.text[j];
+			jbxvt.scr.s1.rend[j - n] = jbxvt.scr.s1.rend[j];
+		}
+		for (int_fast16_t i = 0; i < n; ++i) {
+			memset(save[i], 0, jbxvt.scr.chars.width + 1);
+			jbxvt.scr.s1.text[jbxvt.scr.chars.height - i - 1]
+				= save[i];
+			memset(rend[i], 0, jbxvt.scr.chars.width<<2);
+			jbxvt.scr.s1.text[jbxvt.scr.chars.height - i - 1]
+				= save[i];
+		}
+	}
+}
+
+
+static void sc_up(const uint8_t row1, uint8_t row2,
+	int8_t count)
+{
+	if (!count)
+		return;
 	LOG("scroll_up(count: %d, row1: %d, row2: %d)", count, row1, row2);
 	if (count && row1 == 0 && jbxvt.scr.current == &jbxvt.scr.s1) {
-		free_top_lines(count);
-		int_fast16_t y;
-		for (y = jbxvt.scr.sline.max - count - 1;
-			y >= 0; --y) {
-			jbxvt.scr.sline.data[y + count]
-				= jbxvt.scr.sline.data[y];
-		}
-		sc_up_cp_rows(count);
-		const uint16_t t = jbxvt.scr.sline.top + count;
-		const uint16_t max = jbxvt.scr.sline.max;
-		jbxvt.scr.sline.top = likely(t < max) ? t : max;
-		sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1,
-			jbxvt.scr.offset, jbxvt.scr.offset
-			+ jbxvt.scr.chars.height - 1);
+		sc_up_main_scr(count);
 	}
 	uint8_t *save[MAX_SCROLL];
 	uint32_t *rend[MAX_SCROLL];
@@ -174,7 +238,6 @@ static void sc_up(const uint8_t row1, uint8_t row2,
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, 0, y,
 		jbxvt.scr.pixels.width, count * jbxvt.X.font_height);
 }
-
 static void sc_dn(uint8_t row1, uint8_t row2, int8_t count)
 {
 	LOG("scroll_down(%d, %d, %d)", row1, row2, count);

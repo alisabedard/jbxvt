@@ -75,9 +75,9 @@ void scr_erase_screen(const int8_t mode)
 	LOG("scr_erase_screen(%d)", mode);
 	home_screen();
 	jbxvt.scr.current->wrap_next = 0;
-	uint16_t i, width = jbxvt.scr.pixels.width;
+	uint16_t width = jbxvt.scr.pixels.width;
 	const uint16_t wsz = jbxvt.scr.chars.width + 1;
-	int16_t x = MARGIN, y, height;
+	int_fast16_t height, i, x = MARGIN, y;
 	switch (mode) {
 	case 1:
 		LOG("START");
@@ -126,16 +126,22 @@ void scr_erase_screen(const int8_t mode)
 		LOG("ENTIRE");
 		y = MARGIN;
 		height = jbxvt.scr.chars.height - 1;
-		scroll(0, height, height);
+		for (i = jbxvt.scr.chars.height - 1; i >= 0; --i) {
+			memset(jbxvt.scr.current->text[i],0, wsz + 1);
+			memset(jbxvt.scr.current->rend[i],0, wsz<<2);
+		}
+
+		if (jbxvt.scr.current == &jbxvt.scr.s1)
+			scroll1(jbxvt.scr.chars.height);
+		else
+			scroll(0, height, height);
+
 		cursor(CURSOR_DRAW);
 		xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, x, y,
 			width, jbxvt.scr.pixels.height);
 		cursor(CURSOR_DRAW);
 		sbar_show(height + jbxvt.scr.sline.top, 0, height);
 		break;
-	default :
-		LOG("UNKNOWN");
-		return;
 	}
 }
 

@@ -327,7 +327,7 @@ app_loop_head:
 		break;
 	case TK_ED :
 		LOG("TK_ED"); // don't use n
-		scr_erase_screen(t[0] - 1);
+		scr_erase_screen(t[0]);
 		break;
 	case TK_EL: // erase line
 		LOG("TK_EL"); // don't use n

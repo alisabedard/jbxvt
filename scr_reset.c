@@ -8,6 +8,7 @@
 #include "jbxvt.h"
 #include "log.h"
 #include "repaint.h"
+#include "scroll.h"
 #include "sbar.h"
 #include "selection.h"
 #include "ttyinit.h"
@@ -15,30 +16,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-/* FIXME:  There is a memory leak when screen size changes.
-   Attempts to fix by freeing previous larger size causes
-   segmentation fault.  */
-static void free_visible_screens(uint8_t ch)
-{
-	LOG("free_visible_screens(%d), sch: %d", ch,
-		jbxvt.scr.chars.height);
-	// Avoid segfault when screen size changes:
-	ch=ch>jbxvt.scr.chars.height?jbxvt.scr.chars.height:ch;
-	for(uint8_t y = 0; y < ch; ++y) {
-		LOG("y:%d of sch:%d\tch:%d", y, jbxvt.scr.chars.height, ch);
-		free(jbxvt.scr.s1.text[y]);
-		free(jbxvt.scr.s2.text[y]);
-		if(jbxvt.scr.s1.rend[y])
-			free(jbxvt.scr.s1.rend[y]);
-		if(jbxvt.scr.s2.rend[y])
-			free(jbxvt.scr.s2.rend[y]);
-	}
-	free(jbxvt.scr.s1.text);
-	free(jbxvt.scr.s2.text);
-	free(jbxvt.scr.s1.rend);
-	free(jbxvt.scr.s2.rend);
-}
 
 void reset_row_col(void)
 {
@@ -142,6 +119,26 @@ static int handle_offscreen_data(const uint8_t cw,
 	return i + 1;
 }
 
+/* FIXME:  There is a memory leak when screen size changes.
+   Attempts to fix by freeing previous larger size causes
+   segmentation fault.  */
+static void free_visible_screens(int16_t ch)
+{
+	// Avoid segfault when screen size changes:
+	ch=ch>jbxvt.scr.chars.height?jbxvt.scr.chars.height:ch;
+	while(ch--) {
+		free(jbxvt.scr.s1.text[ch]);
+		free(jbxvt.scr.s1.rend[ch]);
+		free(jbxvt.scr.s2.text[ch]);
+		free(jbxvt.scr.s2.rend[ch]);
+	}
+	free(jbxvt.scr.s1.text);
+	free(jbxvt.scr.s2.text);
+	free(jbxvt.scr.s1.rend);
+	free(jbxvt.scr.s2.rend);
+}
+
+
 /*  Reset the screen - called whenever the screen
     needs to be repaired completely.  */
 void scr_reset(void)
@@ -172,8 +169,11 @@ void scr_reset(void)
 			r2[y] = calloc(w, sizeof(uint32_t));
 		}
 		if (jbxvt.scr.s1.text) {
-			if (jbxvt.scr.s1.cursor.y >= c.h)
-				  jbxvt.scr.s1.cursor.y = c.h - 1;
+			// Fill up scr from old scr and saved lines
+			if (jbxvt.scr.s1.cursor.y >= c.h) {
+				scroll1(jbxvt.scr.s1.cursor.y - c.h + 1);
+				jbxvt.scr.s1.cursor.y = c.h - 1;
+			}
 			// calculate working no. of lines.
 			int16_t i = jbxvt.scr.sline.top
 				+ jbxvt.scr.s1.cursor.y + 1;
@@ -197,7 +197,7 @@ void scr_reset(void)
 					  = jbxvt.scr.sline.data[j];
 			}
 			jbxvt.scr.sline.top -= i;
-			free_visible_screens(jbxvt.scr.chars.height);
+			free_visible_screens(c.h - 1);
 		}
 		jbxvt.scr.chars = c;
 		jbxvt.scr.pixels = d;
