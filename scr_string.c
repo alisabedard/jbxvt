@@ -23,15 +23,19 @@
 
 static void handle_new_lines(int8_t nlcount)
 {
-	SLOG("handle_new_lines(%d)", nlcount);
-	struct screenst * restrict c = jbxvt.scr.current;
-	nlcount -= c->margin.bottom - c->cursor.y;
-	const uint8_t lim = c->cursor.y - c->margin.top - 1;
-	nlcount = nlcount < 0 ? 0 : nlcount > lim ? lim : nlcount;
+	struct screenst * restrict s = jbxvt.scr.current;
+	if (s->cursor.y > s->margin.b)
+		  nlcount = 0;
+	else
+		  nlcount -= s->margin.b - s->cursor.y;
+	if (nlcount < 0)
+		  nlcount = 0;
+	else if (nlcount > s->cursor.y - s->margin.t)
+		  nlcount = s->cursor.y - s->margin.t;
 	if (nlcount > MAX_SCROLL)
 		  nlcount = MAX_SCROLL;
-	scroll(c->margin.top, c->margin.bottom, nlcount);
-	c->cursor.y -= nlcount;
+	scroll(s->margin.t,s->margin.b,nlcount);
+	s->cursor.y -= nlcount;
 }
 
 #if defined(__i386__) || defined(__amd64__)
@@ -59,7 +63,7 @@ static void handle_wrap_next(void)
 	SLOG("handle_wrap_next()");
 	struct screenst * restrict c = jbxvt.scr.current;
 	c->text[c->cursor.y][jbxvt.scr.chars.width] = 1;
-	if (c->cursor.y == c->margin.bottom) {
+	if (c->cursor.y >= c->margin.bottom) {
 		SLOG("cursor at bottom margin, scrolling");
 		  scroll(c->margin.top, c->margin.bottom, 1);
 	} else if (c->cursor.y < jbxvt.scr.chars.height - 1) {
@@ -75,7 +79,7 @@ static void handle_line_feed(void)
 	struct screenst * restrict c = jbxvt.scr.current;
 	if (likely(c->cursor.y < jbxvt.scr.chars.height - 1)) {
 		++c->cursor.y;
-	} else if (c->cursor.y == c->margin.bottom) {
+	} else if (c->cursor.y <= c->margin.bottom) {
 		scroll(c->margin.top, c->margin.bottom,1);
 	}
 	check_selection(c->cursor.y, c->cursor.y);
@@ -101,7 +105,7 @@ static void wrap_at_end(uint8_t * restrict str, const uint8_t len)
 		&& *str >= ' ')) {
 		SLOG("wrap_at_end(%s, %d)", str, len);
 		c->text [c->cursor.y] [jbxvt.scr.chars.width] = 1;
-		if (likely(c->cursor.y == c->margin.bottom)) {
+		if (likely(c->cursor.y >= c->margin.bottom)) {
 			scroll(c->margin.top, c ->margin.bottom, 1);
 		} else {
 			++c->cursor.y;

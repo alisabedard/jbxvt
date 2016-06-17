@@ -9,6 +9,7 @@
 #include "log.h"
 #include "sbar.h"
 #include "screen.h"
+#include "scroll.h"
 #include "scr_reset.h"
 #include "selection.h"
 
@@ -18,7 +19,7 @@ static void zero_line(uint8_t * restrict s,
 	uint32_t * restrict r, uint16_t sz)
 {
 	memset(s, 0, sz + 1); // +1 for wrap flag
-	memset(r, 0, sz * sizeof(uint32_t));
+	memset(r, 0, sz<<2);
 }
 
 static void get_horz_geo(xcb_rectangle_t * restrict h,
@@ -74,7 +75,7 @@ void scr_erase_screen(const int8_t mode)
 	LOG("scr_erase_screen(%d)", mode);
 	home_screen();
 	jbxvt.scr.current->wrap_next = 0;
-	uint16_t i, width = jbxvt.X.font_width * jbxvt.scr.chars.width;
+	uint16_t i, width = jbxvt.scr.pixels.width;
 	const uint16_t wsz = jbxvt.scr.chars.width + 1;
 	int16_t x = MARGIN, y, height;
 	switch (mode) {
@@ -124,19 +125,13 @@ void scr_erase_screen(const int8_t mode)
 	case 2:
 		LOG("ENTIRE");
 		y = MARGIN;
-		height = jbxvt.scr.chars.height * jbxvt.X.font_height;
-		// Clear any artifacts:
-		for (i = 0; i < jbxvt.scr.chars.height; i++) {
-			memset(jbxvt.scr.current->text[i],0, wsz);
-			memset(jbxvt.scr.current->rend[i],0,
-				wsz * sizeof(uint32_t));
-		}
+		height = jbxvt.scr.chars.height - 1;
+		scroll(0, height, height);
 		cursor(CURSOR_DRAW);
 		xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, x, y,
-			width, height);
+			width, jbxvt.scr.pixels.height);
 		cursor(CURSOR_DRAW);
-		sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1,
-			0, jbxvt.scr.chars.height - 1);
+		sbar_show(height + jbxvt.scr.sline.top, 0, height);
 		break;
 	default :
 		LOG("UNKNOWN");

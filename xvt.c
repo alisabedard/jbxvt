@@ -11,6 +11,7 @@
 #include "log.h"
 #include "sbar.h"
 #include "screen.h"
+#include "scroll.h"
 #include "scr_delete_characters.h"
 #include "scr_erase.h"
 #include "scr_extend_selection.h"
@@ -227,6 +228,10 @@ app_loop_head:
 			* (jbxvt.scr.pixels.height - t[0])
 			/ jbxvt.scr.pixels.height - jbxvt.scr.chars.height);
 		break;
+	case TK_SD: // scroll down n lines
+		LOG("TK_SD: %d", n);
+		scroll(scr->margin.top, scr->margin.bot, - t[0]);
+		break;
 	case TK_SBDOWN :
 		t[0] = - t[0];
 		// fall through
@@ -322,7 +327,7 @@ app_loop_head:
 		break;
 	case TK_ED :
 		LOG("TK_ED"); // don't use n
-		scr_erase_screen(t[0]);
+		scr_erase_screen(t[0] - 1);
 		break;
 	case TK_EL: // erase line
 		LOG("TK_EL"); // don't use n
@@ -372,7 +377,8 @@ app_loop_head:
 		}
 		break;
 	case TK_DECSTBM: // set top and bottom margins.
-		LOG("TK_DECSTBM args: %d", token.tk_nargs);
+		LOG("TK_DECSTBM args: %d, 0: %d, 1: %d",
+			token.tk_nargs, t[0], t[1]);
 		if (token.tk_private == '?')
 			  break; // xterm param reset
 		if (token.tk_nargs < 2 || t[0] >= t[1]) {

@@ -88,6 +88,7 @@ enum { MAINWIN, SCREEN, SCROLLBAR };
 #define TK_VPR		'e'	// vertical position relative
 #define TK_HVP		'f'	/* horizontal and vertical position */
 #define TK_TBC		'g'	/* tab clear */
+#define TK_SD		'T'	// Scroll Down # lines
 #define TK_SET		'h'	/* set mode */
 #define TK_RESET	'l'	/* reset mode */
 #define TK_SGR		'm'	/* set graphics rendition */

@@ -28,7 +28,7 @@ static void sel_scr_to_sav(struct selst * restrict s,
 static void free_top_lines(int16_t count)
 {
 	LOG("free_top_lines(%d)", count);
-	while(--count > 0) {
+	while(--count >= 0) {
 		const int16_t i = jbxvt.scr.sline.max - count;
 		struct slinest * s = jbxvt.scr.sline.data[i];
 		if (!s || s->canary)
@@ -71,29 +71,20 @@ static uint16_t find_col(uint8_t * restrict s, uint_fast16_t c)
 	return s[c] ? find_col(s, c + 1) : c;
 }
 
-static void lclr(const uint8_t i, const uint8_t j, const uint16_t sz,
-	void ** t, void ** s)
+static void clear(int8_t count, const uint8_t rc,
+	uint8_t ** text, uint32_t ** rend, const bool up)
 {
-	if(!s[i]) // prevent segfault;
-		return;
-	memset(s[i], 0, sz);
-	t[j] = s[i];
-}
-
-static void clr_ln_s_r(uint8_t i, uint8_t j, uint8_t ** save,
-	uint32_t ** rend)
-{
-	const uint16_t sz = jbxvt.scr.chars.width + 1;
-	lclr(i, j, sz, (void**)jbxvt.scr.current->text, (void**)save);
-	lclr(i, j, sz<<2, (void**)jbxvt.scr.current->rend, (void**)rend);
-}
-
-static void clr_lines(int8_t count, const uint8_t rc,
-	uint8_t ** save, uint32_t ** rend, const bool up)
-{
-	while(count--)
-		clr_ln_s_r(count, up ? rc - count - 1 : rc + count,
-			save, rend);
+	LOG("clear()");
+	if(--count < 0)
+		  return;
+	const uint16_t sz = jbxvt.scr.chars.width;
+	memset(text[count], 0, sz + 1);
+	memset(rend[count], 0, sz<<2);
+	struct screenst * cur = jbxvt.scr.current;
+	uint8_t j = up ? rc - count - 1: rc + count;
+	cur->text[j] = text[count];
+	cur->rend[j] = rend[count];
+	clear(count, rc, text, rend, up);
 }
 
 static void sc_up_cp_rows(const int8_t count)
@@ -176,7 +167,7 @@ static void sc_up(const uint8_t row1, uint8_t row2,
 
 	for(++row2; j < row2; ++j)
 		transmogrify(j, -count);
-	clr_lines(count, row2, save, rend, true);
+	clear(count, row2, save, rend, true);
 	if (count < row2 - row1)
 		cp_repair(row1, row2, count, true);
 	const int16_t y = MARGIN + (row2 - count) * jbxvt.X.font_height;
@@ -198,7 +189,7 @@ static void sc_dn(uint8_t row1, uint8_t row2, int8_t count)
 	}
 	while(j >= row1)
 		  transmogrify(j--, count);
-	clr_lines(count, row1, save, rend, false);
+	clear(count, row1, save, rend, false);
 	if (count < row2 - row1)
 		  cp_repair(row1, row2, count, false);
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, 0,
@@ -218,12 +209,10 @@ void scroll(const uint8_t row1, const uint8_t row2, const int16_t count)
 		  return;
 	if(abs(count) > MAX_SCROLL)
 		  return;
-	if (!count)
-		return;
-	if(count < 0)
-		sc_dn(row1, row2, count);
-	else
+	if (count >= 0)
 		sc_up(row1, row2, count);
+	else
+		sc_dn(row1, row2, count);
 	home_screen();
 	cursor(CURSOR_DRAW);
 	cursor(CURSOR_DRAW);

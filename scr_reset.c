@@ -136,14 +136,9 @@ static int handle_offscreen_data(const uint8_t cw,
 		  return i + 1;
 	const uint8_t n = cw > l ? l : cw;
 	memcpy(s1[j], sl->sl_text, n);
-//	free(sl->sl_text);
 	if (sl->sl_rend) {
 		memcpy(r1[j], sl->sl_rend, n * sizeof(uint32_t));
-//		free(sl->sl_rend);
 	}
-//	free(sl);
-	// flag to prevent double free:
-//	jbxvt.scr.sline.data[i] = NULL;
 	return i + 1;
 }
 
@@ -182,7 +177,8 @@ void scr_reset(void)
 			// calculate working no. of lines.
 			int16_t i = jbxvt.scr.sline.top
 				+ jbxvt.scr.s1.cursor.y + 1;
-			int32_t j = i > c.h ? c.h - 1 : i - 1;
+			int32_t j = i > c.h ? c.h : i;
+			--j;
 			i = jbxvt.scr.s1.cursor.y; // save
 			jbxvt.scr.s1.cursor.y = j;
 			bool onscreen = true;
@@ -200,13 +196,6 @@ void scr_reset(void)
 				  jbxvt.scr.sline.data[j - i]
 					  = jbxvt.scr.sline.data[j];
 			}
-#if 0
-			for (j = jbxvt.scr.sline.top - i;
-				j < jbxvt.scr.sline.top; ++j) {
-				if(jbxvt.scr.sline.data[j])
-					jbxvt.scr.sline.data[j] = NULL;
-			}
-#endif
 			jbxvt.scr.sline.top -= i;
 			free_visible_screens(jbxvt.scr.chars.height);
 		}
