@@ -34,25 +34,21 @@ void scr_erase_line(const int8_t mode)
 {
 	LOG("scr_erase_line(%d)", mode);
 	home_screen();
-	xcb_rectangle_t g = { .y = MARGIN + jbxvt.scr.current->cursor.y
-			* jbxvt.X.font_height };
-	uint8_t * s = jbxvt.scr.current->text[jbxvt.scr.current->cursor.y];
-	uint32_t * r = jbxvt.scr.current->rend[jbxvt.scr.current->cursor.y];
+	struct screenst * scr = jbxvt.scr.current;
+	xcb_point_t c = scr->cursor;
+	xcb_rectangle_t g = { .y = MARGIN + c.y * jbxvt.X.font_height };
+	uint8_t * s = scr->text[c.y];
+	uint32_t * r = scr->rend[c.y];
 	switch (mode) {
 	case 1:
 		LOG("START");
-		get_horz_geo(&g, jbxvt.scr.current->cursor.x, 0);
-		zero_line(s, r, jbxvt.scr.current->cursor.x);
+		get_horz_geo(&g, c.x, 0);
+		zero_line(s, r, c.x);
 		break;
 	case 0:
 		LOG("END");
-		get_horz_geo(&g, jbxvt.scr.chars.width
-			- jbxvt.scr.current->cursor.x,
-			jbxvt.scr.current->cursor.x);
-		zero_line(s + jbxvt.scr.current->cursor.x,
-			r + jbxvt.scr.current->cursor.x,
-			jbxvt.scr.chars.width
-			- jbxvt.scr.current->cursor.x);
+		get_horz_geo(&g, jbxvt.scr.chars.width - c.x, c.x);
+		zero_line(s + c.x, r + c.x, jbxvt.scr.chars.width - c.x);
 		break;
 	case 2:
 		LOG("ENTIRE");
@@ -61,11 +57,10 @@ void scr_erase_line(const int8_t mode)
 		break;
 	}
 	cursor(CURSOR_DRAW); //clear
-	check_selection(jbxvt.scr.current->cursor.y,
-		jbxvt.scr.current->cursor.y);
-	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, g.x, g.y, g.width,
-		jbxvt.X.font_height);
-	jbxvt.scr.current->wrap_next = false;
+	check_selection(c.y, c.y);
+	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, g.x, g.y,
+		g.width, jbxvt.X.font_height);
+	scr->wrap_next = false;
 	cursor(CURSOR_DRAW);
 }
 
