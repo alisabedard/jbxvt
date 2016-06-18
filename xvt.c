@@ -71,12 +71,12 @@ static void handle_reset(struct tokenst * restrict token)
 			break;
 		case 25: // DECTCEM -- hide cursor
 			home_screen();
-#if 0
 			cursor(CURSOR_DRAW); // clear
-			if (!set) {
-				cursor(CURSOR_DRAW); // draw
-			}
-#endif
+			jbxvt.scr.current->dectcem = set;
+			cursor(CURSOR_DRAW); // draw
+			break;
+		case 30: // toggle scrollbar -- per rxvt
+			switch_scrollbar();
 			break;
 #ifdef DEBUG
 		default:

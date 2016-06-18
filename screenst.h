@@ -25,6 +25,7 @@ struct screenst {
 	bool wrap_next:1;	// wrap before the next printed character
 	bool insert:1;		// insert mode flag
 	bool decanm:1;		// DECANM -- ANSI/VT52
+	bool dectcem:1;		// DECTCEM -- hide cursor
 	uint8_t charsel:1;	// charset index
 };
 
