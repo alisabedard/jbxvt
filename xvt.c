@@ -301,12 +301,8 @@ app_loop_head:
 		LOG("TK_CUP n: %d, 0: %d, 1: %d", token.tk_nargs,
 			t[0], t[1]);
 		switch(token.tk_nargs) {
-		case 0:
-			scr_move(0, 0, 0);
-			break;
-		case 1: // Like VPR
-			scr_move(scr->cursor.x, t[0] - 1,
-				scr->decom ? ROW_RELATIVE : 0);
+		case 1:
+			scr_move(0, t[0] - 1, scr->decom ? ROW_RELATIVE : 0);
 			break;
 		case 2:
 			scr_move(t[1] - 1, t[0] - 1, scr->decom
