@@ -29,13 +29,15 @@ static void free_top(int16_t count)
 {
 	if (count < 0)
 		  return;
-	const int16_t i = jbxvt.scr.sline.max - count;
+	int16_t i = jbxvt.scr.sline.max - count;
 	struct slinest * s = jbxvt.scr.sline.data[i];
 	if (s) {
 		free(s->sl_text);
 		free(s->sl_rend);
 		free(s);
 	}
+	--i;
+	jbxvt.scr.sline.data[i + count] = jbxvt.scr.sline.data[i];
 	free_top(count - 1);
 }
 
@@ -153,6 +155,7 @@ static void sc_up_main_scr(const int8_t count)
 
 void scroll1(int16_t count)
 {
+	LOG("scroll1(%d)", count);
 	while (count > 0) {
 		// If count > MAX_SCROLL, scroll in installments
 		int_fast16_t n = count > MAX_SCROLL ? MAX_SCROLL : count;
