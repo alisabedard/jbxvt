@@ -161,32 +161,13 @@ void scroll1(int16_t count)
 {
 	uint8_t * save[MAX_SCROLL];
 	uint32_t * rend[MAX_SCROLL];
-	struct slinest * sl;
-	uint8_t * s;
-	uint32_t * r;
-
 	while (count > 0) {
 		// If count > MAX_SCROLL, scroll in installments
 		int_fast16_t n = count > MAX_SCROLL ? MAX_SCROLL : count;
 		count -= n;
 		// free lines that scroll off the top
-		free_top_lines(count);
-		for(int_fast16_t i = 0; i < n; ++i) {
-			s = jbxvt.scr.s1.text[i];
-			r = jbxvt.scr.s1.rend[i];
-			uint16_t j = find_col(s, 0) + 1;
-			sl = malloc(sizeof(struct slinest));
-			// + 1 for wrap flag:
-			sl->sl_text = malloc(j + 1);
-			// copy text.
-			memcpy(sl->sl_text, s, j);
-			// copy wrap flag.
-			sl->sl_text[j] = s[jbxvt.scr.chars.width];
-			sl->sl_rend = malloc(j<<2);
-			memcpy(sl->sl_rend, r, j<<2);
-			sl->sl_length = j;
-			jbxvt.scr.sline.data[n - i - 1] = sl;
-		}
+		free_top_lines(n);
+		sc_up_cp_rows(n);
 		jbxvt.scr.sline.top += n;
 		if (jbxvt.scr.sline.top > jbxvt.scr.sline.max)
 			  jbxvt.scr.sline.top = jbxvt.scr.sline.max;
@@ -211,11 +192,8 @@ void scroll1(int16_t count)
 }
 
 
-static void sc_up(const uint8_t row1, uint8_t row2,
-	int8_t count)
+static void sc_up(const uint8_t row1, uint8_t row2, int8_t count)
 {
-	if (!count)
-		return;
 	LOG("scroll_up(count: %d, row1: %d, row2: %d)", count, row1, row2);
 	if (count && row1 == 0 && jbxvt.scr.current == &jbxvt.scr.s1) {
 		sc_up_main_scr(count);
@@ -270,9 +248,11 @@ void scroll(const uint8_t row1, const uint8_t row2, const int16_t count)
 	// Sanitize input:
 	if(row1 > row2)
 		  return;
+	if (!count)
+		  return;
 	if(abs(count) > MAX_SCROLL)
 		  return;
-	if (count >= 0)
+	if (count > 0)
 		sc_up(row1, row2, count);
 	else
 		sc_dn(row1, row2, count);

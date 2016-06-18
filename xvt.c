@@ -304,8 +304,9 @@ app_loop_head:
 		case 0:
 			scr_move(0, 0, 0);
 			break;
-		case 1: // VPA
-			scr_move(0, t[0] - 1, scr->decom ? ROW_RELATIVE : 0);
+		case 1: // Like VPR
+			scr_move(scr->cursor.x, t[0] - 1,
+				scr->decom ? ROW_RELATIVE : 0);
 			break;
 		case 2:
 			scr_move(t[1] - 1, t[0] - 1, scr->decom
@@ -379,13 +380,17 @@ app_loop_head:
 	case TK_DECSTBM: // set top and bottom margins.
 		LOG("TK_DECSTBM args: %d, 0: %d, 1: %d",
 			token.tk_nargs, t[0], t[1]);
-		if (token.tk_private == '?')
-			  break; // xterm param reset
+		if (token.tk_private == '?') {
+			LOG("Breaking for '?' private token");
+			break; // xterm param reset
+		}
 		if (token.tk_nargs < 2 || t[0] >= t[1]) {
+			LOG("DECSTBM reset");
 			// reset
 			scr->margin.top = 0;
 			scr->margin.bottom = jbxvt.scr.chars.height - 1;
 		} else { // set
+			LOG("DECSTBM set");
 			scr->margin.top = t[0] - 1;
 			scr->margin.bottom = t[1] - 1;
 		}

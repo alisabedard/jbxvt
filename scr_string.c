@@ -35,6 +35,11 @@ static void handle_new_lines(int8_t nlcount)
 	if (nlcount > MAX_SCROLL)
 		  nlcount = MAX_SCROLL;
 	scroll(s->margin.t,s->margin.b,nlcount);
+	LOG("c.y: %d, m.b: %d", s->cursor.y, s->margin.b);
+	// This fixes ncdu scrolling:
+	if (s->cursor.y == s->margin.b - 2) {
+		  scroll(s->margin.t + 2, s->margin.b - 2, 1);
+	}
 	s->cursor.y -= nlcount;
 }
 
