@@ -25,24 +25,18 @@ static void sel_scr_to_sav(struct selst * restrict s,
 }
 
 // Free lines that scroll off the top of the screen.
-static void free_top_lines(int16_t count)
+static void free_top(int16_t count)
 {
-	LOG("free_top_lines(%d)", count);
-	while(--count >= 0) {
-		const int16_t i = jbxvt.scr.sline.max - count;
-		struct slinest * s = jbxvt.scr.sline.data[i];
-		if (!s || s->canary)
-			  return;
-		if (s->sl_text)
-			free(s->sl_text);
-		if (s->sl_rend)
-			free(s->sl_rend);
+	if (count < 0)
+		  return;
+	const int16_t i = jbxvt.scr.sline.max - count;
+	struct slinest * s = jbxvt.scr.sline.data[i];
+	if (s) {
+		free(s->sl_text);
+		free(s->sl_rend);
 		free(s);
-		jbxvt.scr.sline.data[i] = NULL;
 	}
-	for (int_fast16_t i = jbxvt.scr.sline.max - count - 1; i >= 0; --i)
-		jbxvt.scr.sline.data[i + count]
-			= jbxvt.scr.sline.data[i];
+	free_top(count - 1);
 }
 
 static void transmogrify(const int16_t j, const int8_t count)
@@ -140,7 +134,7 @@ static void cp_repair(const uint8_t row1, const uint8_t row2,
 
 static void sc_up_main_scr(const int8_t count)
 {
-	free_top_lines(count);
+	free_top(count);
 	int_fast16_t y;
 	for (y = jbxvt.scr.sline.max - count - 1;
 		y >= 0; --y) {
@@ -164,7 +158,7 @@ void scroll1(int16_t count)
 		int_fast16_t n = count > MAX_SCROLL ? MAX_SCROLL : count;
 		count -= n;
 		// free lines that scroll off the top
-		free_top_lines(n);
+		free_top(n);
 		sc_up_cp_rows(n);
 		jbxvt.scr.sline.top += n;
 		if (jbxvt.scr.sline.top > jbxvt.scr.sline.max)
