@@ -32,8 +32,11 @@ static void free_top(int16_t count)
 	int16_t i = jbxvt.scr.sline.max - count;
 	struct slinest * s = jbxvt.scr.sline.data[i];
 	if (s) {
-		free(s->sl_text);
-		free(s->sl_rend);
+		if(s->sl_text) {
+			free(s->sl_text);
+			if(s->sl_rend)
+				  free(s->sl_rend);
+		}
 		free(s);
 	}
 	--i;
