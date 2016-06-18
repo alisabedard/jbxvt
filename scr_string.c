@@ -38,6 +38,7 @@ static void handle_new_lines(int8_t nlcount)
 	LOG("nlcount: %d, c.y: %d, m.b: %d", nlcount,
 		s->cursor.y, s->margin.b);
 	// This fixes ncdu scrolling:
+	// FIXME: it also causes minor corrupt display.
 #if 0
 	if (s->cursor.y == s->margin.b - 2) {
 		  scroll(s->margin.t + 2, s->margin.b - 2, 1);
