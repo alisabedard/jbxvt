@@ -159,8 +159,6 @@ static void sc_up_main_scr(const int8_t count)
 
 void scroll1(int16_t count)
 {
-	uint8_t * save[MAX_SCROLL];
-	uint32_t * rend[MAX_SCROLL];
 	while (count > 0) {
 		// If count > MAX_SCROLL, scroll in installments
 		int_fast16_t n = count > MAX_SCROLL ? MAX_SCROLL : count;
@@ -171,22 +169,9 @@ void scroll1(int16_t count)
 		jbxvt.scr.sline.top += n;
 		if (jbxvt.scr.sline.top > jbxvt.scr.sline.max)
 			  jbxvt.scr.sline.top = jbxvt.scr.sline.max;
-		int_fast16_t j = 0;
-		for (int_fast16_t i = 0; i < n; ++i, ++j) {
-			save[i] = jbxvt.scr.s1.text[j];
-			rend[i] = jbxvt.scr.s1.rend[j];
-		}
-		for (; j < jbxvt.scr.chars.height; ++j) {
+		for (int_fast16_t j = n; j < jbxvt.scr.chars.height; ++j) {
 			jbxvt.scr.s1.text[j - n] = jbxvt.scr.s1.text[j];
 			jbxvt.scr.s1.rend[j - n] = jbxvt.scr.s1.rend[j];
-		}
-		for (int_fast16_t i = 0; i < n; ++i) {
-			memset(save[i], 0, jbxvt.scr.chars.width + 1);
-			jbxvt.scr.s1.text[jbxvt.scr.chars.height - i - 1]
-				= save[i];
-			memset(rend[i], 0, jbxvt.scr.chars.width<<2);
-			jbxvt.scr.s1.text[jbxvt.scr.chars.height - i - 1]
-				= save[i];
 		}
 	}
 }
