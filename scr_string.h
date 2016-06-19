@@ -11,4 +11,7 @@
     nlcount is the number of new lines in the string.  */
 void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount);
 
+//  Tab to the next tab_stop.
+void scr_tab(void);
+
 #endif//!SCR_STRING_H

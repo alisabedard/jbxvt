@@ -10,6 +10,7 @@
 #include "repaint.h"
 #include "screen.h"
 #include "scroll.h"
+#include "scr_tab.h"
 #include "selection.h"
 
 #include <string.h>
@@ -21,6 +22,18 @@
 #define SLOG(...)
 #endif
 
+//  Tab to the next tab_stop.
+void scr_tab(void)
+{
+	home_screen();
+	if (jbxvt.scr.current->cursor.x >= jbxvt.scr.chars.width - 1)
+		return;
+	while (++jbxvt.scr.current->cursor.x % 8 && jbxvt.scr.current->cursor.x
+		< jbxvt.scr.chars.width - 1)
+		  ;
+}
+
+
 static void handle_new_lines(int8_t nlcount)
 {
 	struct screenst * restrict s = jbxvt.scr.current;
@@ -30,11 +43,11 @@ static void handle_new_lines(int8_t nlcount)
 		  nlcount -= s->margin.b - s->cursor.y;
 	if (nlcount < 0)
 		  nlcount = 0;
-	else if (nlcount > s->cursor.y - s->margin.t)
+	else if (nlcount > (s->cursor.y - s->margin.t))
 		  nlcount = s->cursor.y - s->margin.t;
 	if (nlcount > MAX_SCROLL)
 		  nlcount = MAX_SCROLL;
-	scroll(s->margin.t,s->margin.b,nlcount);
+	scroll(s->margin.t, s->margin.b, nlcount);
 	LOG("nlcount: %d, c.y: %d, m.b: %d", nlcount,
 		s->cursor.y, s->margin.b);
 	// This fixes ncdu scrolling:
@@ -95,18 +108,6 @@ static void handle_line_feed(void)
 	c->wrap_next = 0;
 }
 
-static void handle_tab(void)
-{
-	SLOG("handle_tab()");
-	struct screenst * restrict c = jbxvt.scr.current;
-	if (c->cursor.x >= jbxvt.scr.chars.width - 1)
-		  return;
-	uint8_t * s = c->text[c->cursor.y];
-	// Advance to next tab stop:
-	while (c->cursor.x % 8 && c->cursor.x < jbxvt.scr.chars.width - 1)
-		s[c->cursor.x++] = ' ';
-}
-
 static void wrap_at_end(uint8_t * restrict str, const uint8_t len)
 {
 	struct screenst * restrict c = jbxvt.scr.current;
@@ -157,7 +158,7 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 			++str;
 			continue;
 		} else if (unlikely(*str == '\t')) {
-			handle_tab();
+			scr_tab();
 			--len;
 			++str;
 			continue;

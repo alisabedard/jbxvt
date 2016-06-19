@@ -258,7 +258,11 @@ app_loop_head:
 		break;
 	case TK_SD: // scroll down n lines
 		LOG("TK_SD: %d", n);
-		scroll(scr->margin.top, scr->margin.bot, - t[0]);
+		t[0] = - t[0];
+		// fall through
+	case TK_SU: // scroll up n lines;
+		LOG("TK_SU");
+		scroll(scr->margin.top, scr->margin.bot, t[0]);
 		break;
 	case TK_SBDOWN :
 		t[0] = - t[0];
@@ -423,9 +427,11 @@ app_loop_head:
 			scr->margin.bottom = jbxvt.scr.chars.height - 1;
 		} else { // set
 			LOG("DECSTBM set");
-			scr->margin.top = t[0] - 1;
-			scr->margin.bottom = t[1] - 1;
+			scr->margin.top = t[0] > 0 ? t[0] - 1 : 0;
+			scr->margin.bottom = t[1] <= jbxvt.scr.chars.height
+				? t[1] - 1 : jbxvt.scr.chars.height - 1;
 		}
+		scr_move(0,0,0);
 		break;
 	case TK_DECSC :
 		LOG("TK_DECSC");

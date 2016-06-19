@@ -208,6 +208,8 @@ bool handle_xevents(struct tokenst * restrict tk)
 	else
 		  tk->tk_region = -1;
 	switch (xe->xe_type) {
+	case XCB_KEY_RELEASE: // Unimplemented
+		break;
 	case XCB_ENTER_NOTIFY:
 		tk->tk_type = TK_ENTRY;
 		tk->tk_arg[0] = 1;
