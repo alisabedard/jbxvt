@@ -26,10 +26,11 @@ void scr_tab(void)
 {
 	home_screen();
 	if (jbxvt.scr.current->cursor.x >= jbxvt.scr.chars.width - 1)
-		return;
+		  return;
+	jbxvt.scr.current->text[jbxvt.scr.current->cursor.y]
+		[jbxvt.scr.current->cursor.x] = ' ';
 	while (++jbxvt.scr.current->cursor.x % 8 && jbxvt.scr.current->cursor.x
-		< jbxvt.scr.chars.width - 1)
-		  ;
+		< jbxvt.scr.chars.width - 1);
 }
 
 
