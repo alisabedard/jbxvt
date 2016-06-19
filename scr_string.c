@@ -10,7 +10,6 @@
 #include "repaint.h"
 #include "screen.h"
 #include "scroll.h"
-#include "scr_tab.h"
 #include "selection.h"
 
 #include <string.h>

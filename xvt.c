@@ -21,7 +21,6 @@
 #include "scr_request_selection.h"
 #include "scr_reset.h"
 #include "scr_string.h"
-#include "scr_tab.h"
 #include "selection.h"
 #include "token.h"
 #include "ttyinit.h"
