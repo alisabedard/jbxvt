@@ -45,17 +45,6 @@ static void handle_reset(struct tokenst * restrict token)
 		case 2:
 			jbxvt.scr.current->decanm = set;
 			break;
-		case 1047:
-			scr_change_screen(set);
-			break;
-		case 1048:
-			cursor(set?CURSOR_SAVE:CURSOR_RESTORE);
-			break;
-		case 47: // switch to main screen
-		case 1049: // cursor restore and screen change
-			cursor(set?CURSOR_SAVE:CURSOR_RESTORE);
-			scr_change_screen(set);
-			break;
 		case 6 : // DECOM normal cursor mode
 			/* According to the spec, the cursor is reset to
 			   the home position when this is changed.  */
@@ -65,6 +54,9 @@ static void handle_reset(struct tokenst * restrict token)
 		case 7: // DECAWM
 		case 45: // reverse wrap-around mode?
 			jbxvt.scr.current->decawm = set;
+			break;
+		case 9:
+			LOG("9: Client wants mouse X and Y");
 			break;
 		case 12: // att610 -- stop blinking cursor
 			// N/A
@@ -77,6 +69,34 @@ static void handle_reset(struct tokenst * restrict token)
 			break;
 		case 30: // toggle scrollbar -- per rxvt
 			switch_scrollbar();
+			break;
+		case 1000:
+			LOG("Send mouse X and Y on button press and"
+				" release");
+		case 1002:
+			LOG("Use cell motion mouse tracking");
+			break;
+		case 1003:
+			LOG("Use all motion mouse tracking");
+		case 1005:
+			LOG("Enable UTF-8 mouse mode");
+			break;
+		case 1006:
+			LOG("Enable SGR mouse mode");
+			break;
+		case 1015:
+			LOG("Enable urxvt mouse mode");
+			break;
+		case 1047:
+			scr_change_screen(set);
+			break;
+		case 1048:
+			cursor(set?CURSOR_SAVE:CURSOR_RESTORE);
+			break;
+		case 47: // switch to main screen
+		case 1049: // cursor restore and screen change
+			cursor(set?CURSOR_SAVE:CURSOR_RESTORE);
+			scr_change_screen(set);
 			break;
 #ifdef DEBUG
 		default:
@@ -377,7 +397,9 @@ app_loop_head:
 		LOG("TK_DECSTBM args: %d, 0: %d, 1: %d",
 			token.tk_nargs, t[0], t[1]);
 		if (token.tk_private == '?') {
-			LOG("Breaking for '?' private token");
+			// Restore private modes
+			// FIXME:  Unimplemented
+			LOG("FIXME:  DECRESTOREPM");
 			break; // xterm param reset
 		}
 		if (token.tk_nargs < 2 || t[0] >= t[1]) {
@@ -432,6 +454,10 @@ app_loop_head:
 		break;
 	case TK_RIS: // Reset Initial State
 		scr_reset();
+		break;
+	case TK_DECSAVEPM: // Save private modes
+		LOG("TK_DECSAVEPM");
+		// FIXME: Unimplemented
 		break;
 	case TK_SCS0: // DEC SCS G0
 		LOG("TK_SCS0");
