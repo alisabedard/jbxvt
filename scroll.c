@@ -75,7 +75,6 @@ static uint16_t find_col(uint8_t * restrict s, uint_fast16_t c)
 static void clear(int8_t count, const uint8_t rc,
 	uint8_t ** text, uint32_t ** rend, const bool up)
 {
-	LOG("clear()");
 	if(--count < 0)
 		  return;
 	const uint16_t sz = jbxvt.scr.chars.width;
@@ -90,6 +89,7 @@ static void clear(int8_t count, const uint8_t rc,
 
 static void sc_up_cp_rows(const int8_t count)
 {
+	LOG("sc_up_cp_rows(count = %d)", count);
 	xcb_point_t iter;
 	for (iter.y = count - 1; iter.y >= 0; --iter.y) {
 		uint8_t * s = jbxvt.scr.current->text[iter.y];
@@ -137,7 +137,7 @@ static void cp_repair(const uint8_t row1, const uint8_t row2,
 	xcb_flush(jbxvt.X.xcb);
 }
 
-static void sc_up_main_scr(const int8_t count)
+static void add_scroll_history(const int8_t count)
 {
 	free_top(count);
 	int_fast16_t y;
@@ -180,27 +180,27 @@ void scroll1(int16_t count)
 static void sc_up(const uint8_t row1, uint8_t row2, int8_t count)
 {
 	LOG("scroll_up(count: %d, row1: %d, row2: %d)", count, row1, row2);
-	if (count && row1 == 0 && jbxvt.scr.current == &jbxvt.scr.s1) {
-		sc_up_main_scr(count);
-	}
+	struct screenst * scr = jbxvt.scr.current;
+	if (scr == &jbxvt.scr.s1 && row1 == 0)
+		add_scroll_history(count);
 	uint8_t *save[MAX_SCROLL];
 	uint32_t *rend[MAX_SCROLL];
 	uint_fast8_t j = row1;
 	for (uint_fast8_t i = 0; i < count; ++i, ++j) {
-		save[i] = jbxvt.scr.current->text[j];
-		rend[i] = jbxvt.scr.current->rend[j];
+		save[i] = scr->text[j];
+		rend[i] = scr->rend[j];
 		ck_sel_on_scr(j);
 	}
 
 	for(++row2; j < row2; ++j)
 		transmogrify(j, -count);
 	clear(count, row2, save, rend, true);
-	if (count < row2 - row1)
-		cp_repair(row1, row2, count, true);
+	cp_repair(row1, row2, count, true);
 	const int16_t y = MARGIN + (row2 - count) * jbxvt.X.font_height;
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, 0, y,
 		jbxvt.scr.pixels.width, count * jbxvt.X.font_height);
 }
+
 static void sc_dn(uint8_t row1, uint8_t row2, int8_t count)
 {
 	LOG("scroll_down(%d, %d, %d)", row1, row2, count);
@@ -216,8 +216,7 @@ static void sc_dn(uint8_t row1, uint8_t row2, int8_t count)
 	while(j >= row1)
 		  transmogrify(j--, count);
 	clear(count, row1, save, rend, false);
-	if (count < row2 - row1)
-		  cp_repair(row1, row2, count, false);
+	cp_repair(row1, row2, count, false);
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, 0,
 		MARGIN + row1 * jbxvt.X.font_height,
 		jbxvt.scr.pixels.width, count * jbxvt.X.font_height);
@@ -233,11 +232,9 @@ void scroll(const uint8_t row1, const uint8_t row2, const int16_t count)
 	// Sanitize input:
 	if(row1 > row2)
 		  return;
-	if (!count)
-		  return;
 	if(abs(count) > MAX_SCROLL)
 		  return;
-	if (count > 0)
+	if (count >= 0)
 		sc_up(row1, row2, count);
 	else
 		sc_dn(row1, row2, count);
