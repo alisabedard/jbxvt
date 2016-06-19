@@ -94,6 +94,8 @@ enum { MAINWIN, SCREEN, SCROLLBAR };
 #define TK_SGR		'm'	/* set graphics rendition */
 #define TK_DSR		'n'	/* report status or position */
 #define TK_DECSTBM	'r'	/* set top and bottom margins */
+				// ^-- also restore DEC mode values
+#define TK_DECSAVEPM	's'	// Save DEC (re)set mode values
 
 #define TK_DECSWH	'#'	/* set character width or height */
 #define TK_SCS0		'('	/* set character set G0 */
