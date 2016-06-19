@@ -26,6 +26,8 @@ struct screenst {
 	bool insert:1;		// insert mode flag
 	bool decanm:1;		// DECANM -- ANSI/VT52
 	bool dectcem:1;		// DECTCEM -- hide cursor
+	bool ptr_xy:1;		// send x y on button press/release
+	bool ptr_cell:1;	// cell motion mouse tracking
 	uint8_t charsel:1;	// charset index
 };
 

@@ -12,6 +12,54 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// Implementation of mouse tracking follows:
+// b == 0xff for release
+static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
+{
+	LOG("track_mouse(b=%d, p={%d, %d})", b, p.x, p.y);
+	// get character position:
+	p.x /= jbxvt.X.font_width;
+	p.y /= jbxvt.X.font_height;
+	// modify for a 1-based row/column system
+	p.x += 1;
+	p.y += 1;
+
+	// DECLRP
+	//cprintf("\033[%d;%d;%d;%d;0&w", b * 2, 7, p.y, p.x);
+	//LOG("CSI %d;%d;%d;%d;0&w", b * 2, 0, p.y, p.x);
+
+	// Release handling:
+	if (b == 0xff) {
+		b = 4;
+	} else if (b == 4 || b == 5) {
+		// Wheel mouse handling:
+		b += 64;
+	}
+
+	switch (state) {
+		// 4=Shift, 8=Meta, 16=Control
+	case XCB_KEY_BUT_MASK_CONTROL:
+		b |= 16;
+		break;
+	case XCB_KEY_BUT_MASK_SHIFT:
+		b |= 4;
+		break;
+	case XCB_KEY_BUT_MASK_MOD_1:
+	case XCB_KEY_BUT_MASK_MOD_2:
+	case XCB_KEY_BUT_MASK_MOD_3:
+	case XCB_KEY_BUT_MASK_MOD_4:
+		b |= 8;
+	}
+
+	// encode in X10 format
+	b += 31; // - 1 since 0 is mb 1
+	p.x += 32;
+	p.y += 32;
+
+	cprintf("\033[M%c%c%c]", b, p.x, p.y);
+	LOG("track_mouse: CSI M%cC%cC%c", b, p.x, p.y);
+}
+
 static void handle_motion_notify(struct tokenst * restrict tk,
 	struct xeventst * restrict xe)
 {
@@ -41,6 +89,7 @@ static void sbop(struct tokenst * restrict tk, struct xeventst * restrict xe,
 static void handle_button_release(struct tokenst * restrict tk,
 	struct xeventst * restrict xe)
 {
+	LOG("handle_button_release()");
 	if (xe->xe_window == jbxvt.X.win.sb) {
 		switch (xe->xe_button) {
 		case 1:
@@ -52,6 +101,10 @@ static void handle_button_release(struct tokenst * restrict tk,
 			sbop(tk, xe, false);
 			break;
 		}
+	} else if (xe->xe_window == jbxvt.X.win.vt && jbxvt.scr.current->ptr_xy) {
+		if (xe->xe_button > 3)
+			  return; // xterm doesn't report mouse wheel release
+		track_mouse(0xff, xe->xe_state, (xcb_point_t){xe->xe_x, xe->xe_y});
 	} else if (xe->xe_window == jbxvt.X.win.vt
 		&& !(xe->xe_state & XCB_KEY_BUT_MASK_CONTROL)) {
 		switch (xe->xe_button) {
@@ -82,6 +135,7 @@ static void handle_button_release(struct tokenst * restrict tk,
 static void handle_button1_press(struct tokenst * restrict tk,
 	struct xeventst * restrict xe)
 {
+	LOG("handle_button1_press");
 	static unsigned int time1, time2;
 	if (xe->xe_time - time2
 		< MP_INTERVAL) {
@@ -101,13 +155,17 @@ static void handle_button1_press(struct tokenst * restrict tk,
 static void handle_button_press(struct tokenst * restrict tk,
 	struct xeventst * restrict xe)
 {
+	LOG("handle_button_press()");
 	if (xe->xe_window == jbxvt.X.win.vt
 		&& xe->xe_state == XCB_KEY_BUT_MASK_CONTROL) {
 		tk->tk_type = TK_SBSWITCH;
 		tk->tk_nargs = 0;
 		return;
 	}
-	if (xe->xe_window == jbxvt.X.win.vt
+	if (xe->xe_window == jbxvt.X.win.vt && jbxvt.scr.current->ptr_xy)
+		track_mouse(xe->xe_button, xe->xe_state,
+			(xcb_point_t){xe->xe_x, xe->xe_y});
+	else if (xe->xe_window == jbxvt.X.win.vt
 		&& (xe->xe_state & XCB_KEY_BUT_MASK_CONTROL) == 0) {
 		switch (xe->xe_button) {
 		case 1:
@@ -171,12 +229,15 @@ bool handle_xevents(struct tokenst * restrict tk)
 		tk->tk_nargs = 2;
 		break;
 	case XCB_EXPOSE:
+	case XCB_GRAPHICS_EXPOSURE:
 		tk->tk_type = TK_EXPOSE;
 		tk->tk_arg[0] = xe->xe_x;
 		tk->tk_arg[1] = xe->xe_y;
 		tk->tk_arg[2] = xe->xe_width;
 		tk->tk_arg[3] = xe->xe_height;
 		tk->tk_nargs = 4;
+		break;
+	case XCB_NO_EXPOSURE: // Unimplemented
 		break;
 	case XCB_CONFIGURE_NOTIFY:
 		LOG("ConfigureNotify");
@@ -212,6 +273,8 @@ bool handle_xevents(struct tokenst * restrict tk)
 	case XCB_MOTION_NOTIFY:
 		handle_motion_notify(tk, xe);
 		break;
+	default:
+		LOG("Unhandled event %d", xe->xe_type);
 	}
 	free(xe);
 	return true;

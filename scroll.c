@@ -27,11 +27,16 @@ static void sel_scr_to_sav(struct selst * restrict s,
 // Free lines that scroll off the top of the screen.
 static void free_top(int16_t count)
 {
-	if (count < 0)
+	if (--count < 0)
 		  return;
 	int16_t i = jbxvt.scr.sline.max - count;
 	struct slinest * s = jbxvt.scr.sline.data[i];
 	if (s) {
+		// Guard against double-free:
+		if(s->canary != 0)
+			  return;
+		else
+			  s->canary=0xff;
 		if(s->sl_text) {
 			free(s->sl_text);
 			if(s->sl_rend)
@@ -41,7 +46,8 @@ static void free_top(int16_t count)
 	}
 	--i;
 	jbxvt.scr.sline.data[i + count] = jbxvt.scr.sline.data[i];
-	free_top(count - 1);
+	//free_top(count - 1);
+	free_top(count);
 }
 
 static void transmogrify(const int16_t j, const int8_t count)
@@ -78,7 +84,8 @@ static void clear(int8_t count, const uint8_t rc,
 	if(--count < 0)
 		  return;
 	const uint16_t sz = jbxvt.scr.chars.width;
-	memset(text[count], 0, sz + 1);
+	//memset(text[count], 0, sz + 1);
+	memset(text[count], 0, sz);
 	memset(rend[count], 0, sz<<2);
 	struct screenst * cur = jbxvt.scr.current;
 	uint8_t j = up ? rc - count - 1: rc + count;
@@ -191,7 +198,6 @@ static void sc_up(const uint8_t row1, uint8_t row2, int8_t count)
 		rend[i] = scr->rend[j];
 		ck_sel_on_scr(j);
 	}
-
 	for(++row2; j < row2; ++j)
 		transmogrify(j, -count);
 	clear(count, row2, save, rend, true);

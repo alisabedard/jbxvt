@@ -36,24 +36,27 @@ static bool jbxvt_size_set;
 static void handle_reset(struct tokenst * restrict token)
 {
 	LOG("handle_reset(%d)", token->tk_arg[0]);
+
 	const bool set = token->tk_type == TK_SET;
+	struct screenst * scr = jbxvt.scr.current;
+
 	if (likely(token->tk_private == '?')) {
 		switch (token->tk_arg[0]) {
 		case 1 :
 			set_keys(set, true);
 			break;
 		case 2:
-			jbxvt.scr.current->decanm = set;
+			scr->decanm = set;
 			break;
 		case 6 : // DECOM normal cursor mode
 			/* According to the spec, the cursor is reset to
 			   the home position when this is changed.  */
-			jbxvt.scr.current->decom = set;
+			scr->decom = set;
 			scr_move(0, 0, 0);
 			break;
 		case 7: // DECAWM
 		case 45: // reverse wrap-around mode?
-			jbxvt.scr.current->decawm = set;
+			scr->decawm = set;
 			break;
 		case 9:
 			LOG("9: Client wants mouse X and Y");
@@ -64,7 +67,7 @@ static void handle_reset(struct tokenst * restrict token)
 		case 25: // DECTCEM -- hide cursor
 			home_screen();
 			cursor(CURSOR_DRAW); // clear
-			jbxvt.scr.current->dectcem = set;
+			scr->dectcem = set;
 			cursor(CURSOR_DRAW); // draw
 			break;
 		case 30: // toggle scrollbar -- per rxvt
@@ -73,8 +76,13 @@ static void handle_reset(struct tokenst * restrict token)
 		case 1000:
 			LOG("Send mouse X and Y on button press and"
 				" release");
+			jbxvt.scr.s1.ptr_xy = set;
+			jbxvt.scr.s2.ptr_xy = set;
+			break;
 		case 1002:
 			LOG("Use cell motion mouse tracking");
+			jbxvt.scr.s1.ptr_cell = set;
+			jbxvt.scr.s2.ptr_cell = set;
 			break;
 		case 1003:
 			LOG("Use all motion mouse tracking");
@@ -106,7 +114,7 @@ static void handle_reset(struct tokenst * restrict token)
 	} else if (token->tk_private == 0) {
 		switch (token->tk_arg[0]) {
 		case 4 :
-			jbxvt.scr.current->insert = set;
+			scr->insert = set;
 			break;
 #ifdef DEBUG
 		default:
@@ -402,6 +410,10 @@ app_loop_head:
 			// Restore private modes
 			// FIXME:  Unimplemented
 			LOG("FIXME:  DECRESTOREPM");
+			// At least set char set back to ASCII
+			set_cset(CHARSET_ASCII, 0);
+			jbxvt.scr.s1.charsel = 0;
+			jbxvt.scr.s2.charsel = 0;
 			break; // xterm param reset
 		}
 		if (token.tk_nargs < 2 || t[0] >= t[1]) {
@@ -459,6 +471,11 @@ app_loop_head:
 	case TK_DECSAVEPM: // Save private modes
 		LOG("TK_DECSAVEPM");
 		// FIXME: Unimplemented
+		// At least set char set back to ASCII
+		// This fixes the links browser
+		set_cset(CHARSET_ASCII, 0);
+		jbxvt.scr.s1.charsel = 0;
+		jbxvt.scr.s2.charsel = 0;
 		break;
 	case TK_SCS0: // DEC SCS G0
 		LOG("TK_SCS0");
