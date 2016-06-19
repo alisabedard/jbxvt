@@ -412,7 +412,6 @@ app_loop_head:
 			scr->margin.top = t[0] - 1;
 			scr->margin.bottom = t[1] - 1;
 		}
-		scr_move(0, 0, 0);
 		break;
 	case TK_DECSC :
 		LOG("TK_DECSC");
