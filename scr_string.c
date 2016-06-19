@@ -123,15 +123,10 @@ static void wrap_at_end(uint8_t * restrict str, const uint8_t len)
 	}
 }
 
-static uint_fast16_t get_n(uint8_t * restrict str)
+// str and iter alias each other
+static int_fast16_t find_n(uint8_t * str, uint8_t * iter)
 {
-	uint_fast16_t n = 0;
-	while (str[++n] >= ' ')
-		  ;
-	struct screenst * restrict c = jbxvt.scr.current;
-	if (unlikely(n + c->cursor.x > jbxvt.scr.chars.width))
-		  n = jbxvt.scr.chars.width - c->cursor.x;
-	return n;
+	return *iter < ' ' ? iter - str : find_n(str, iter + 1);
 }
 
 /*  Display the string at the current position.
@@ -174,7 +169,7 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 		check_selection(c->cursor.y, c->cursor.y);
 		p.x = MARGIN + jbxvt.X.font_width * c->cursor.x;
 		p.y = MARGIN + jbxvt.X.font_height * c->cursor.y;
-		const uint_fast16_t n = get_n(str);
+		const int_fast16_t n = find_n(str, str);
 		if (unlikely(c->insert))
 			  handle_insert(n, p);
 		uint8_t * s = c->text[c->cursor.y];
@@ -202,8 +197,11 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 				}
 			}
 		}
+		// Save scroll history:
 		memcpy(s, str, n);
+		// Render the string:
 		paint_rval_text(str, jbxvt.scr.rstyle, n, p);
+		// Save render style:
 		if(jbxvt.scr.rstyle) {
 			for (int_fast16_t i = n - 1; i >= 0; --i)
 				  c->rend[c->cursor.y][c->cursor.x + i]
