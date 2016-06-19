@@ -13,7 +13,10 @@
 #include <stdlib.h>
 
 // Implementation of mouse tracking follows:
-// b == 0xff for release
+enum TrackFlags {
+	TRACK_RELEASE = 1 << 5,
+	TRACK_MOTION = 1 << 4
+};
 static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
 {
 	LOG("track_mouse(b=%d, p={%d, %d})", b, p.x, p.y);
@@ -29,27 +32,21 @@ static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
 	//LOG("CSI %d;%d;%d;%d;0&w", b * 2, 0, p.y, p.x);
 
 	// Release handling:
-	if (b == 0xff) {
+	if (b & TRACK_RELEASE) {
 		b = 4;
 	} else if (b == 4 || b == 5) {
 		// Wheel mouse handling:
 		b += 64;
 	}
 
-	switch (state) {
-		// 4=Shift, 8=Meta, 16=Control
-	case XCB_KEY_BUT_MASK_CONTROL:
-		b |= 16;
-		break;
-	case XCB_KEY_BUT_MASK_SHIFT:
-		b |= 4;
-		break;
-	case XCB_KEY_BUT_MASK_MOD_1:
-	case XCB_KEY_BUT_MASK_MOD_2:
-	case XCB_KEY_BUT_MASK_MOD_3:
-	case XCB_KEY_BUT_MASK_MOD_4:
-		b |= 8;
-	}
+	// 4=Shift, 8=Meta, 16=Control
+	if (state & XCB_KEY_BUT_MASK_SHIFT)
+		  b |= 4;
+	if (state & (XCB_KEY_BUT_MASK_MOD_1 | XCB_KEY_BUT_MASK_MOD_2
+		| XCB_KEY_BUT_MASK_MOD_3 | XCB_KEY_BUT_MASK_MOD_4))
+		  b |= 8;
+	if (state & XCB_KEY_BUT_MASK_CONTROL)
+		  b |= 16;
 
 	// encode in X10 format
 	b += 31; // - 1 since 0 is mb 1
@@ -68,6 +65,10 @@ static void handle_motion_notify(struct tokenst * restrict tk,
 			tk->tk_type = TK_SBGOTO;
 			tk->tk_arg[0] = xe->xe_y;
 			tk->tk_nargs = 1;
+	} else if (xe->xe_window == jbxvt.X.win.vt
+		&& jbxvt.scr.current->ptr_cell) {
+		track_mouse(xe->xe_button | TRACK_MOTION, xe->xe_state,
+			(xcb_point_t){ xe->xe_x, xe->xe_y});
 	} else if (xe->xe_window == jbxvt.X.win.vt
 		&& (xe->xe_state & XCB_KEY_BUT_MASK_BUTTON_1)
 		&& !(xe->xe_state & XCB_KEY_BUT_MASK_CONTROL)) {
