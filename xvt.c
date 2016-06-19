@@ -322,10 +322,12 @@ app_loop_head:
 			t[0], t[1]);
 		switch(token.tk_nargs) {
 		case 1:
-			scr_move(0, t[0] - 1, scr->decom ? ROW_RELATIVE : 0);
+			scr_move(0, t[0] > 0 ? t[0] - 1 : t[0],
+				scr->decom ? ROW_RELATIVE : 0);
 			break;
 		case 2:
-			scr_move(t[1] - 1, t[0] - 1, scr->decom
+			scr_move(t[1] > 0 ? t[1] - 1 : t[1],
+                                t[0] > 0 ? t[0] - 1 : t[0], scr->decom
 				? COL_RELATIVE | ROW_RELATIVE : 0);
 			break;
 		}
