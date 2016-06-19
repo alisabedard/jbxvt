@@ -105,7 +105,8 @@ static void handle_button_release(struct tokenst * restrict tk,
 	} else if (xe->xe_window == jbxvt.X.win.vt && jbxvt.scr.current->ptr_xy) {
 		if (xe->xe_button > 3)
 			  return; // xterm doesn't report mouse wheel release
-		track_mouse(0xff, xe->xe_state, (xcb_point_t){xe->xe_x, xe->xe_y});
+		track_mouse(xe->xe_button | TRACK_RELEASE,
+			xe->xe_state, (xcb_point_t){xe->xe_x, xe->xe_y});
 	} else if (xe->xe_window == jbxvt.X.win.vt
 		&& !(xe->xe_state & XCB_KEY_BUT_MASK_CONTROL)) {
 		switch (xe->xe_button) {
