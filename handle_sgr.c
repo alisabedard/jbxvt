@@ -74,10 +74,7 @@ void handle_sgr(struct tokenst * restrict token)
 			}
 		}
 		if (fg_index_mode) {
-			LOG("fg index MUSTMATCH: %d\n", token->tk_arg[i]);
-			const uint8_t j = token->tk_arg[i];
-			jbxvt.scr.rstyle &= ~(0777<<7);
-			jbxvt.scr.rstyle |= j<<7;
+			sgrfg(token->tk_arg[i]);
 			// exit mode after handling index
 			fg_index_mode = false;
 			continue;
@@ -104,11 +101,7 @@ void handle_sgr(struct tokenst * restrict token)
 			continue;
 		}
 		if (bg_index_mode) {
-			jbputs("FIXME: implement bg color index mode\n");
-			dprintf(STDERR_FILENO, "index: %d\n", token->tk_arg[i]);
-			const uint8_t j = token->tk_arg[i];
-			jbxvt.scr.rstyle &= ~(0777<<7);
-			jbxvt.scr.rstyle |= j<<7;
+			sgrbg(token->tk_arg[i]);
 			// exit mode after handling index
 			bg_index_mode = false;
 			continue;
