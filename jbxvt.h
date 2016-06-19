@@ -11,6 +11,9 @@
 // Use for all file descriptors:
 typedef int fd_t;
 
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+
 struct JBXVT {
 	struct {
 		//Display * dpy;
