@@ -15,6 +15,7 @@
 #include "scr_reset.h"
 #include "selection.h"
 
+#include <gc.h>
 #include <stdlib.h>
 
 // Set all chars to 'E'
@@ -41,8 +42,7 @@ void scr_init(void)
 	jbxvt.scr.sline.max = DEF_SAVED_LINES;
 	if (jbxvt.scr.sline.max < MAX_SCROLL)
 		jbxvt.scr.sline.max = MAX_SCROLL;
-	jbxvt.scr.sline.data = calloc(jbxvt.scr.sline.max,
-		sizeof(void*));
+	jbxvt.scr.sline.data = GC_MALLOC(jbxvt.scr.sline.max * sizeof(void*));
 	jbxvt.scr.s1.decawm = jbxvt.scr.s2.decawm = true;
 	jbxvt.scr.s1.dectcem = jbxvt.scr.s2.dectcem = true;
 	jbxvt.scr.current = &jbxvt.scr.s1;

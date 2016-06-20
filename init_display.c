@@ -10,6 +10,7 @@
 #include "ttyinit.h"
 #include "xsetup.h"
 
+#include <gc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -74,7 +75,7 @@ static void setup_font(void)
 // free the returned value
 static xcb_size_hints_t * get_sizehints(void)
 {
-	xcb_size_hints_t * s = malloc(sizeof(xcb_size_hints_t));
+	xcb_size_hints_t * s = GC_MALLOC(sizeof(xcb_size_hints_t));
 	*s = (xcb_size_hints_t) {
 		.flags = USSize | PMinSize | PResizeInc | PBaseSize,
 		.width = 80, .height = 24,
@@ -146,7 +147,7 @@ static void create_window(uint8_t * restrict name, const Window root)
 	change_name(name, false);
 	create_sb_window(sh->height);
 	create_vt_window(sh);
-	free(sh);
+	GC_FREE(sh);
 	jbxvt.opt.show_scrollbar ^= true;
 	switch_scrollbar();
 }

@@ -37,7 +37,7 @@ static void handle_focus(xcb_focus_in_event_t * restrict e)
 	default:
 		return;
 	}
-	struct xeventst * xe = calloc(1, sizeof(struct xeventst));
+	struct xeventst * xe = GC_MALLOC(sizeof(struct xeventst));
 	xe->xe_type = e->response_type & ~0x80;
 	xe->xe_detail = e->detail;
 	push_xevent(xe);

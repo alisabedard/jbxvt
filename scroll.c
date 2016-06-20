@@ -106,7 +106,6 @@ static void sc_up_cp_rows(const int8_t count)
 			  continue;
 		uint32_t * r = jbxvt.scr.current->rend[iter.y];
 		iter.x = find_col(s, 0);
-		//struct slinest *sl = calloc(1, sizeof(struct slinest));
 		struct slinest *sl = GC_MALLOC(sizeof(struct slinest));
 		// +1 to have last byte as wrap flag:
 		sl->sl_text = GC_MALLOC(iter.x + 1);
