@@ -84,8 +84,7 @@ static void clear(int8_t count, const uint8_t rc,
 	if(--count < 0)
 		  return;
 	const uint16_t sz = jbxvt.scr.chars.width;
-	//memset(text[count], 0, sz + 1);
-	memset(text[count], 0, sz);
+	memset(text[count], 0, sz + 1);
 	memset(rend[count], 0, sz<<2);
 	struct screenst * cur = jbxvt.scr.current;
 	uint8_t j = up ? rc - count - 1: rc + count;

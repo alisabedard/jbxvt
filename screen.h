@@ -8,8 +8,10 @@
 #include "screenst.h"
 
 enum {
-	MAX_SCROLL = 126 /* max # lines that can scroll at once.
+	MAX_SCROLL = 126, /* max # lines that can scroll at once.
 			    126 is greatest value supported. */
+	JBXVT_MAX_COLS = 132, // per DEC vt100 spec
+	JBXVT_MAX_ROWS = 132
 };
 
 enum RenditionStyleFlags {

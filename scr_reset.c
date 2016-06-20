@@ -8,6 +8,7 @@
 #include "jbxvt.h"
 #include "log.h"
 #include "repaint.h"
+#include "screen.h"
 #include "scroll.h"
 #include "sbar.h"
 #include "selection.h"
@@ -119,58 +120,52 @@ static int handle_offscreen_data(const uint8_t cw,
 	return i + 1;
 }
 
-/* FIXME:  There is a memory leak when screen size changes.
-   Attempts to fix by freeing previous larger size causes
-   segmentation fault.  */
-static void free_visible_screens(int16_t ch)
-{
-	// Avoid segfault when screen size changes:
-	ch=ch>jbxvt.scr.chars.height?jbxvt.scr.chars.height:ch;
-	while(ch--) {
-		free(jbxvt.scr.s1.text[ch]);
-		free(jbxvt.scr.s1.rend[ch]);
-		free(jbxvt.scr.s2.text[ch]);
-		free(jbxvt.scr.s2.rend[ch]);
-	}
-	free(jbxvt.scr.s1.text);
-	free(jbxvt.scr.s2.text);
-	free(jbxvt.scr.s1.rend);
-	free(jbxvt.scr.s2.rend);
-}
-
-
 /*  Reset the screen - called whenever the screen
     needs to be repaired completely.  */
 void scr_reset(void)
 {
 	Size d = get_dim();
 	Size c = get_cdim(d);
+	static bool created;
+	uint8_t **s1 = jbxvt.scr.s1.text, **s2 = jbxvt.scr.s2.text;
+	uint32_t **r1 = jbxvt.scr.s1.rend, **r2 = jbxvt.scr.s2.rend;
+	if (!created) {
+		const uint16_t rsz = JBXVT_MAX_ROWS * sizeof(void *);
+		s1 = malloc(rsz);
+		s2 = malloc(rsz);
+		r1 = malloc(rsz);
+		r2 = malloc(rsz);
+		for (int_fast16_t y = JBXVT_MAX_ROWS; y >= 0; --y) {
+			s1[y] = malloc(JBXVT_MAX_COLS);
+			s2[y] = malloc(JBXVT_MAX_COLS);
+			r1[y] = malloc(JBXVT_MAX_COLS<<2);
+			r2[y] = malloc(JBXVT_MAX_COLS<<2);
+		}
+		jbxvt.scr.s1.text = s1;
+		jbxvt.scr.s2.text = s2;
+		jbxvt.scr.s1.rend = r1;
+		jbxvt.scr.s2.rend = r2;
+		created = true;
+	}
 	if (!jbxvt.scr.current->text || c.w != jbxvt.scr.chars.width
 		|| c.h != jbxvt.scr.chars.height) {
-		uint8_t **s1, **s2;
-		uint32_t **r1, **r2;
 		jbxvt.scr.offset = 0;
 		/*  Recreate the screen backup arrays.
 		 *  The screen arrays are one word wider than the screen and
 		 *  the last word is used as a flag which is non-zero if the
 		 *  line wrapped automatically.
 		 */
-		++c.h; // for one larger than ^
-		s1 = malloc(c.h * sizeof(void*));
-		s2 = malloc(c.h * sizeof(void*));
-		r1 = malloc(c.h * sizeof(void*));
-		r2 = malloc(c.h * sizeof(void*));
-		--c.h;
 		for (uint16_t y = 0; y < c.h; y++) {
-			const uint8_t w = c.w + 1;
-			s1[y] = calloc(w, sizeof(uint8_t));
-			s2[y] = calloc(w, sizeof(uint8_t));
-			r1[y] = calloc(w, sizeof(uint32_t));
-			r2[y] = calloc(w, sizeof(uint32_t));
+			uint8_t w = c.w + 1;
+			memset(s1[y], 0, w);
+			memset(s2[y], 0, w);
+			w = c.w * sizeof(uint32_t);
+			memset(s1[y], 0, w);
+			memset(s2[y], 0, w);
 		}
 		if (jbxvt.scr.s1.text) {
 			// Fill up scr from old scr and saved lines
-			if (jbxvt.scr.s1.cursor.y >= c.h) {
+			if (jbxvt.scr.s1.cursor.y >= c.h - 1) {
 				scroll1(jbxvt.scr.s1.cursor.y - c.h + 1);
 				jbxvt.scr.s1.cursor.y = c.h - 1;
 			}
@@ -189,7 +184,6 @@ void scr_reset(void)
 						  s1, r1);
 			if (onscreen) // avoid segfault
 				  return;
-				  //abort();
 			for (j = i; j < jbxvt.scr.sline.top; ++j) {
 				if (!jbxvt.scr.sline.data[j])
 					  break;
@@ -197,15 +191,23 @@ void scr_reset(void)
 					  = jbxvt.scr.sline.data[j];
 			}
 			jbxvt.scr.sline.top -= i;
-			free_visible_screens(c.h - 1);
 		}
-		jbxvt.scr.chars = c;
-		jbxvt.scr.pixels = d;
 		init_screen_elements(&jbxvt.scr.s1, s1, r1);
 		init_screen_elements(&jbxvt.scr.s2, s2, r2);
 		scr_start_selection((xcb_point_t){},CHAR);
 	}
+	// Constrain dimensions:
+	if (c.width > JBXVT_MAX_COLS) {
+		  c.width = JBXVT_MAX_COLS;
+		  d.w = c.w * jbxvt.X.font_width;
+	}
+	if (c.height > JBXVT_MAX_ROWS) {
+		  c.height = JBXVT_MAX_ROWS;
+		  d.h = c.h * jbxvt.X.font_width;
+	}
 	tty_set_size(c.w, c.h);
+	jbxvt.scr.chars = c;
+	jbxvt.scr.pixels = d;
 	reset_row_col();
 	c.h--;
 	c.w--;
