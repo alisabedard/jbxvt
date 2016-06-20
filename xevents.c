@@ -9,6 +9,7 @@
 #include "token.h"
 #include "xeventst.h"
 
+#include <gc.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -280,7 +281,6 @@ bool handle_xevents(struct tokenst * restrict tk)
 	default:
 		LOG("Unhandled event %d", xe->xe_type);
 	}
-	free(xe);
 	return true;
 }
 

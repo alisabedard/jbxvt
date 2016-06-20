@@ -16,6 +16,7 @@
 #include "xsetup.h"
 
 #include <errno.h>
+#include <gc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,7 +45,7 @@ static void handle_focus(xcb_focus_in_event_t * restrict e)
 
 static void handle_sel_req(xcb_selection_request_event_t * restrict e)
 {
-	struct xeventst * xe = malloc(sizeof(struct xeventst));
+	struct xeventst * xe = GC_MALLOC(sizeof(struct xeventst));
 	xe->xe_type = XCB_SELECTION_REQUEST;
 	xe->xe_window = e->owner;
 	xe->xe_time = e->time;
@@ -56,7 +57,7 @@ static void handle_sel_req(xcb_selection_request_event_t * restrict e)
 
 static void handle_sel_not(xcb_selection_notify_event_t * restrict e)
 {
-	struct xeventst * xe = malloc(sizeof(struct xeventst));
+	struct xeventst * xe = GC_MALLOC(sizeof(struct xeventst));
 	xe->xe_type = XCB_SELECTION_NOTIFY;
 	xe->xe_time = e->time;
 	xe->xe_requestor = e->requestor;
@@ -74,7 +75,7 @@ static void handle_client_msg(xcb_client_message_event_t * e)
 
 static void handle_expose(xcb_expose_event_t * e)
 {
-	struct xeventst * xe = malloc(sizeof(struct xeventst));
+	struct xeventst * xe = GC_MALLOC(sizeof(struct xeventst));
 	xe->xe_type = XCB_EXPOSE;
 	xe->xe_window = e->window;
 	xe->xe_x = e->x;
@@ -87,7 +88,7 @@ static void handle_expose(xcb_expose_event_t * e)
 static void handle_other(xcb_generic_event_t * gen_e)
 {
 	xcb_motion_notify_event_t * e = (xcb_motion_notify_event_t *)gen_e;
-	struct xeventst * xe = malloc(sizeof(struct xeventst));
+	struct xeventst * xe = GC_MALLOC(sizeof(struct xeventst));
 	xe->xe_type = e->response_type & ~0x80;
 	xe->xe_window = e->event;
 	xe->xe_x = e->event_x;

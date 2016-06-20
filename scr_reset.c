@@ -14,6 +14,7 @@
 #include "selection.h"
 #include "ttyinit.h"
 
+#include <gc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -130,16 +131,18 @@ void scr_reset(void)
 	uint8_t **s1 = jbxvt.scr.s1.text, **s2 = jbxvt.scr.s2.text;
 	uint32_t **r1 = jbxvt.scr.s1.rend, **r2 = jbxvt.scr.s2.rend;
 	if (!created) {
-		const uint16_t rsz = JBXVT_MAX_ROWS * sizeof(void *);
-		s1 = malloc(rsz);
-		s2 = malloc(rsz);
-		r1 = malloc(rsz);
-		r2 = malloc(rsz);
+		uint16_t sz = JBXVT_MAX_ROWS * sizeof(void *);
+		s1 = GC_MALLOC(sz);
+		s2 = GC_MALLOC(sz);
+		r1 = GC_MALLOC(sz);
+		r2 = GC_MALLOC(sz);
 		for (int_fast16_t y = JBXVT_MAX_ROWS; y >= 0; --y) {
-			s1[y] = malloc(JBXVT_MAX_COLS);
-			s2[y] = malloc(JBXVT_MAX_COLS);
-			r1[y] = malloc(JBXVT_MAX_COLS<<2);
-			r2[y] = malloc(JBXVT_MAX_COLS<<2);
+			sz = JBXVT_MAX_COLS;
+			s1[y] = GC_MALLOC(sz);
+			s2[y] = GC_MALLOC(sz);
+			sz *= sizeof(uint32_t);
+			r1[y] = GC_MALLOC(sz);
+			r2[y] = GC_MALLOC(sz);
 		}
 		jbxvt.scr.s1.text = s1;
 		jbxvt.scr.s2.text = s2;

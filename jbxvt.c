@@ -7,6 +7,7 @@
 #include "xsetup.h"
 #include "xvt.h"
 
+#include <gc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -83,6 +84,7 @@ static char ** parse_command_line(const int argc, char ** argv)
  *  the slave.  */
 int main(int argc, char ** argv)
 {
+	GC_INIT();
 	// Set some defaults which may be overridden.
 	jbxvt.opt.fg = COLOR_7;
 	jbxvt.opt.cu = COLOR_7;

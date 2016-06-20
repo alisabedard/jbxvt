@@ -9,6 +9,7 @@
 #include "selection.h"
 #include "slinest.h"
 
+#include <gc.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -32,7 +33,7 @@ bool save_selection(void)
 		return -1;
 
 	if (jbxvt.sel.text)
-		free(jbxvt.sel.text);
+		GC_FREE(jbxvt.sel.text);
 
 	/*  Set se1 and se2 to point to the first
 	    and second selection endpoints.  */
@@ -43,7 +44,8 @@ bool save_selection(void)
 		se2 = &jbxvt.sel.end1;
 		se1 = &jbxvt.sel.end2;
 	}
-	str = malloc(total = 1);
+	total = 1;
+	str = GC_MALLOC(1);
 	if (se1->se_type == SAVEDSEL) {
 		col1 = se1->se_col;
 		for (i = se1->se_index; i >= 0; i--) {
@@ -55,7 +57,7 @@ bool save_selection(void)
 				col2 = jbxvt.scr.chars.width - 1;
 			len = sl->sl_length;
 			s = convert_line(sl->sl_text,&len,col1,col2);
-			str = (uint8_t *)realloc(str,total + len);
+			str = GC_REALLOC(str,total + len);
 			if (str == NULL)
 				abort();
 			strncpy((char *)str + total - 1,(char *)s,len);
@@ -78,7 +80,7 @@ bool save_selection(void)
 				break;
 			len = jbxvt.scr.chars.width;
 			s = convert_line(jbxvt.scr.current->text[i],&len,col1,col2);
-			str = (uint8_t *)realloc(str,total + len);
+			str = GC_REALLOC(str,total + len);
 			if(!str)
 				  abort();
 			strncpy((char *)str + total - 1,(char *)s,len);

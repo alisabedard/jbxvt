@@ -12,6 +12,7 @@
 #include "show_selection.h"
 #include "xsetup.h"
 
+#include <gc.h>
 #include <stdlib.h>
 
 // Static globals:
@@ -34,7 +35,7 @@ void scr_send_selection(const xcb_time_t time,
 	const uint32_t requestor, const uint32_t target, const uint32_t property)
 {
 	// x events must be 32 bytes long:
-	xcb_selection_notify_event_t * e = calloc(32, 1);
+	xcb_selection_notify_event_t * e = GC_MALLOC(32);
 	e->response_type = XCB_SELECTION_NOTIFY;
 	e->selection = XCB_ATOM_PRIMARY;
 	e->target = target;
@@ -48,14 +49,14 @@ void scr_send_selection(const xcb_time_t time,
 		(char*)e);
 	// send it before e is freed:
 	xcb_flush(jbxvt.X.xcb);
-	free(e);
+	GC_FREE(e);
 }
 
 //  Clear the current selection.
 void scr_clear_selection(void)
 {
 	if (jbxvt.sel.text) {
-		free(jbxvt.sel.text);
+		GC_FREE(jbxvt.sel.text);
 		jbxvt.sel.text = NULL;
 		jbxvt.sel.length = 0;
 	}

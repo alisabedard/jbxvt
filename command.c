@@ -14,6 +14,7 @@
 #include "xsetup.h"
 #include "xvt.h"
 
+#include <gc.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
@@ -266,10 +267,10 @@ void push_com_char(const int c)
 void send_string(uint8_t * restrict buf, const uint8_t count)
 {
 	if (command.send) {
-		free(command.send);
+		GC_FREE(command.send);
 		command.send = NULL;
 	}
-	command.send = malloc(count);
+	command.send = GC_MALLOC(count);
 	memcpy(command.send, buf, count);
 	jbxvt.com.send_nxt = command.send;
 	jbxvt.com.send_count = count;

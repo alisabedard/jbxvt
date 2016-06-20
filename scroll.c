@@ -12,6 +12,7 @@
 #include "selection.h"
 #include "show_selection.h"
 
+#include <gc.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -37,12 +38,14 @@ static void free_top(int16_t count)
 			  return;
 		else
 			  s->canary=0xff;
+#if 0
 		if(s->sl_text) {
 			free(s->sl_text);
 			if(s->sl_rend)
 				  free(s->sl_rend);
 		}
 		free(s);
+#endif
 	}
 	--i;
 	jbxvt.scr.sline.data[i + count] = jbxvt.scr.sline.data[i];
@@ -103,16 +106,17 @@ static void sc_up_cp_rows(const int8_t count)
 			  continue;
 		uint32_t * r = jbxvt.scr.current->rend[iter.y];
 		iter.x = find_col(s, 0);
-		struct slinest *sl = calloc(1, sizeof(struct slinest));
+		//struct slinest *sl = calloc(1, sizeof(struct slinest));
+		struct slinest *sl = GC_MALLOC(sizeof(struct slinest));
 		// +1 to have last byte as wrap flag:
-		sl->sl_text = malloc(iter.x + 1);
+		sl->sl_text = GC_MALLOC(iter.x + 1);
 		memcpy(sl->sl_text, s, iter.x);
 		// copy wrap flag:
 		sl->sl_text[iter.x] = s[jbxvt.scr.chars.width];
 		/* iter.x, not iter.x + 1, since the last byte
 		   of the sl_text, only, is used for the wrap flag.  */
 		const uint16_t rendsz = iter.x * sizeof(uint32_t);
-		sl->sl_rend = malloc(rendsz);
+		sl->sl_rend = GC_MALLOC(rendsz);
 		memcpy(sl->sl_rend, r, rendsz);
 		sl->sl_length = iter.x;
 		jbxvt.scr.sline.data[count - iter.y - 1] = sl;
