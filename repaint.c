@@ -182,7 +182,7 @@ static int_fast16_t show_scroll_history(xcb_point_t rc1, xcb_point_t rc2,
 	for (int_fast32_t i = jbxvt.scr.offset - 1 - rc1.y;
 		line <= rc2.y && i >= 0; ++line, --i) {
 		struct slinest * sl = jbxvt.scr.sline.data[i];
-		if(!sl || sl->canary) // prevent segfault
+		if(!sl) // prevent segfault
 			  break;
 		const uint_fast8_t l = sl->sl_length;
 		const uint_fast8_t v = rc2.x + 1;

@@ -103,7 +103,7 @@ static void handle_reset(struct tokenst * restrict token)
 		case 47: // switch to main screen
 		case 1049: // cursor restore and screen change
 			cursor(set?CURSOR_SAVE:CURSOR_RESTORE);
-			scr_change_screen(set);
+			scr_change_screen(!set);
 			break;
 #ifdef DEBUG
 		default:
@@ -426,11 +426,9 @@ app_loop_head:
 			scr->margin.bottom = jbxvt.scr.chars.height - 1;
 		} else { // set
 			LOG("DECSTBM set");
-			scr->margin.top = t[0] > 0 ? t[0] - 1 : 0;
-			scr->margin.bottom = t[1] <= jbxvt.scr.chars.height
-				? t[1] - 1 : jbxvt.scr.chars.height - 1;
+			scr->margin.top = t[0] - 1;
+			scr->margin.bottom = t[1] - 1;
 		}
-		scr_move(0,0,0);
 		break;
 	case TK_DECSC :
 		LOG("TK_DECSC");

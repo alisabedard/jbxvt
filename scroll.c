@@ -30,26 +30,8 @@ static void free_top(int16_t count)
 {
 	if (--count < 0)
 		  return;
-	int16_t i = jbxvt.scr.sline.max - count;
-	struct slinest * s = jbxvt.scr.sline.data[i];
-	if (s) {
-		// Guard against double-free:
-		if(s->canary != 0)
-			  return;
-		else
-			  s->canary=0xff;
-#if 0
-		if(s->sl_text) {
-			free(s->sl_text);
-			if(s->sl_rend)
-				  free(s->sl_rend);
-		}
-		free(s);
-#endif
-	}
-	--i;
+	const int16_t i = jbxvt.scr.sline.max - count - 1;
 	jbxvt.scr.sline.data[i + count] = jbxvt.scr.sline.data[i];
-	//free_top(count - 1);
 	free_top(count);
 }
 
@@ -216,6 +198,7 @@ static void sc_dn(uint8_t row1, uint8_t row2, int8_t count)
 	uint32_t *rend[MAX_SCROLL];
 	uint8_t *save[MAX_SCROLL];
 	int16_t j = row2 - 1;
+	++row2;
 	for (int16_t i = 0; i < count; ++i, --j) {
 		save[i] = jbxvt.scr.current->text[j];
 		rend[i] = jbxvt.scr.current->rend[j];
