@@ -175,8 +175,7 @@ void scr_reset(void)
 			// calculate working no. of lines.
 			int16_t i = jbxvt.scr.sline.top
 				+ jbxvt.scr.s1.cursor.y + 1;
-			int32_t j = MIN(i, c.h);
-			--j;
+			int32_t j = MIN(i, c.h) - 1;
 			i = jbxvt.scr.s1.cursor.y; // save
 			jbxvt.scr.s1.cursor.y = j;
 			bool onscreen = true;
