@@ -49,8 +49,10 @@ static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
 	if (state & XCB_KEY_BUT_MASK_CONTROL)
 		  b |= 16;
 
+	--b; // - 1 since 0 is mb 1, and 3 is release
+
 	// encode in X10 format
-	b += 31; // - 1 since 0 is mb 1
+	b += 32;
 	p.x += 32;
 	p.y += 32;
 
