@@ -30,11 +30,8 @@ void reset_row_col(void)
 	// Implement DECOM, DEC Origin Mode, limits
 	if (jbxvt.scr.current->decom) {
 		const Size m = jbxvt.scr.current->margin;
-		if (c->y < m.top) {
-			c->y = m.top;
-		} else if (c->y > m.bottom) {
-			c->y = m.bottom;
-		}
+		c->y = MAX(c->y, m.top);
+		c->y = MIN(c->y, m.bottom);
 	}
 }
 
@@ -113,7 +110,7 @@ static int handle_offscreen_data(const uint8_t cw,
 	const uint8_t l = sl->sl_length;
 	if (!l || !sl->sl_text)
 		  return i + 1;
-	const uint8_t n = cw > l ? l : cw;
+	const uint8_t n = MIN(cw, l);
 	memcpy(s1[j], sl->sl_text, n);
 	if (sl->sl_rend) {
 		memcpy(r1[j], sl->sl_rend, n * sizeof(uint32_t));
@@ -168,7 +165,8 @@ void scr_reset(void)
 		}
 		if (jbxvt.scr.s1.text) {
 			// Fill up scr from old scr and saved lines
-			if (jbxvt.scr.s1.cursor.y >= c.h - 1) {
+			scroll1(jbxvt.scr.s1.cursor.y);// - c.h + 1);
+			if (jbxvt.scr.s1.cursor.y >= c.h) {
 				scroll1(jbxvt.scr.s1.cursor.y - c.h + 1);
 				jbxvt.scr.s1.cursor.y = c.h - 1;
 			}

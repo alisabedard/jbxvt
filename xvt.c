@@ -95,7 +95,7 @@ static void handle_reset(struct tokenst * restrict token)
 			LOG("Enable urxvt mouse mode");
 			break;
 		case 1047:
-			scr_change_screen(set);
+			scr_change_screen(!set);
 			break;
 		case 1048:
 			cursor(set?CURSOR_SAVE:CURSOR_RESTORE);

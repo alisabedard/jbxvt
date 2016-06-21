@@ -140,7 +140,7 @@ static void add_scroll_history(const int8_t count)
 	sc_up_cp_rows(count);
 	const uint16_t t = jbxvt.scr.sline.top + count;
 	const uint16_t max = jbxvt.scr.sline.max;
-	jbxvt.scr.sline.top = likely(t < max) ? t : max;
+	jbxvt.scr.sline.top = MIN(t, max);
 	sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1,
 		jbxvt.scr.offset, jbxvt.scr.offset
 		+ jbxvt.scr.chars.height - 1);
@@ -158,8 +158,8 @@ void scroll1(int16_t count)
 		free_top(n);
 		sc_up_cp_rows(n);
 		jbxvt.scr.sline.top += n;
-		if (jbxvt.scr.sline.top > jbxvt.scr.sline.max)
-			  jbxvt.scr.sline.top = jbxvt.scr.sline.max;
+		jbxvt.scr.sline.top = MIN(jbxvt.scr.sline.top,
+			jbxvt.scr.sline.max);
 		for (int_fast16_t j = n; j < jbxvt.scr.chars.height; ++j) {
 			jbxvt.scr.s1.text[j - n] = jbxvt.scr.s1.text[j];
 			jbxvt.scr.s1.rend[j - n] = jbxvt.scr.s1.rend[j];

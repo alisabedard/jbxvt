@@ -34,7 +34,7 @@ static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
 
 	// Release handling:
 	if (b & TRACK_RELEASE) {
-		b = 4;
+		b = 4; // -1 later on
 	} else if (b == 4 || b == 5) {
 		// Wheel mouse handling:
 		b += 64;

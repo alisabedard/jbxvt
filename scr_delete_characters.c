@@ -28,8 +28,7 @@ void scr_delete_characters(int count)
 	LOG("scr_delete_characters(%d)", count);
 	const uint8_t scw = jbxvt.scr.chars.width;
 	const xcb_point_t c = jbxvt.scr.current->cursor;
-	if (count > scw - c.y) // keep within the screen
-		  count = scw - c.y;
+	count = MIN(count, scw - c.x); // keep within the screen
 	if(!count) return;
 	home_screen();
 	cursor(CURSOR_DRAW);
