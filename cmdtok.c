@@ -135,6 +135,24 @@ static int16_t handle_xev(xcb_generic_event_t * restrict event,
 	return 0;
 }
 
+static int16_t output_to_command(int16_t count)
+{
+	count = MIN(jbxvt.com.send_count, 100);
+#ifdef SYS_write
+	count = syscall(SYS_write, jbxvt.com.fd,
+		jbxvt.com.send_nxt, count);
+#else//!SYS_write
+	count = write(jbxvt.com.fd,
+		jbxvt.com.send_nxt,count);
+#endif//SYS_write
+	if (count < 0)
+		  quit(1, WARN_RES RES_CMD);
+	jbxvt.com.send_count -= count;
+	jbxvt.com.send_nxt += count;
+
+	return count;
+}
+
 #if defined(__i386__) || defined(__amd64__)
 	__attribute__((regparm(1)))
 #endif//x86
@@ -160,19 +178,7 @@ static int16_t io_loop(int16_t count, fd_set * restrict in_fdset)
 	} while (sv < 0 && errno == EINTR);
 
 	if (FD_ISSET(jbxvt.com.fd,&out_fdset)) {
-		count = jbxvt.com.send_count < 100
-			? jbxvt.com.send_count : 100;
-#ifdef SYS_write
-		count = syscall(SYS_write, jbxvt.com.fd,
-			jbxvt.com.send_nxt, count);
-#else//!SYS_write
-		count = write(jbxvt.com.fd,
-			jbxvt.com.send_nxt,count);
-#endif//SYS_write
-		if (count < 0)
-			  quit(1, WARN_RES RES_CMD);
-		jbxvt.com.send_count -= count;
-		jbxvt.com.send_nxt += count;
+		count = output_to_command(count);
 	}
 	return count ;
 }

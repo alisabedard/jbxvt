@@ -31,6 +31,24 @@ void map_window(void)
 	xcb_flush(jbxvt.X.xcb);
 }
 
+#define RSZ_VM (XCB_CONFIG_WINDOW_WIDTH|XCB_CONFIG_WINDOW_HEIGHT)
+
+static inline void resize_with_scrollbar(xcb_get_geometry_reply_t * r)
+{
+	jbxvt.scr.pixels.width = r->width - SBAR_WIDTH;
+	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.sb, RSZ_VM,
+		(uint32_t[]){SBAR_WIDTH - 1, r->height});
+	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt, RSZ_VM,
+		(uint32_t[]){r->width - SBAR_WIDTH, r->height});
+}
+
+static inline void resize_without_scrollbar(xcb_get_geometry_reply_t * r)
+{
+	jbxvt.scr.pixels.width = r->width;
+	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt, RSZ_VM,
+		(uint32_t[]){r->width, r->height});
+}
+
 /*  Called after a possible window size change.  If the window size has changed
  *  initiate a redraw by resizing the subwindows. */
 void resize_window(void)
@@ -42,21 +60,11 @@ void resize_window(void)
 		c, NULL);
 	if (!r)
 		  return;
-	const uint16_t vm = XCB_CONFIG_WINDOW_WIDTH
-		| XCB_CONFIG_WINDOW_HEIGHT;
-	if (jbxvt.opt.show_scrollbar) {
-		jbxvt.scr.pixels.width = r->width - SBAR_WIDTH;
-		jbxvt.scr.pixels.height = r->height;
-		xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.sb, vm,
-			(uint32_t[]){SBAR_WIDTH - 1, r->height});
-		xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt, vm,
-			(uint32_t[]){r->width - SBAR_WIDTH, r->height});
-	} else {
-		jbxvt.scr.pixels.width = r->width;
-		jbxvt.scr.pixels.height = r->height;
-		xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt, vm,
-			(uint32_t[]){r->width, r->height});
-	}
+	if (jbxvt.opt.show_scrollbar)
+		  resize_with_scrollbar(r);
+	else
+		  resize_without_scrollbar(r);
+	jbxvt.scr.pixels.height = r->height;
 	free(r);
 	scr_reset();
 }

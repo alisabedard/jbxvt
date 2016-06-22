@@ -92,7 +92,8 @@ static xcb_size_hints_t * get_sizehints(void)
 	return s;
 }
 
-static void create_main_window(xcb_size_hints_t * restrict sh, const uint32_t root)
+static void create_main_window(xcb_size_hints_t * restrict sh,
+	const xcb_window_t root)
 {
 	jbxvt.X.win.main = xcb_generate_id(jbxvt.X.xcb);
 	xcb_create_window(jbxvt.X.xcb, XCB_COPY_FROM_PARENT,
@@ -145,7 +146,7 @@ static void create_vt_window(xcb_size_hints_t * restrict sh)
 }
 
 //  Open the window.
-static void create_window(uint8_t * restrict name, const Window root)
+static void create_window(uint8_t * restrict name, const xcb_window_t root)
 {
 	xcb_size_hints_t * sh = get_sizehints();
 	create_main_window(sh, root);
