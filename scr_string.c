@@ -25,14 +25,14 @@
 void scr_tab(void)
 {
 	home_screen();
-	if (jbxvt.scr.current->cursor.x >= jbxvt.scr.chars.width - 1)
+	struct screenst * s = jbxvt.scr.current;
+	const xcb_point_t c = s->cursor;
+	if (c.x >= jbxvt.scr.chars.width - 1)
 		  return;
-	jbxvt.scr.current->text[jbxvt.scr.current->cursor.y]
-		[jbxvt.scr.current->cursor.x] = ' ';
-	while (++jbxvt.scr.current->cursor.x % 8 && jbxvt.scr.current->cursor.x
-		< jbxvt.scr.chars.width - 1);
+	s->text[c.y][c.x] = ' ';
+	while (++c.x % 8 && c.x < jbxvt.scr.chars.width - 1)
+		  ;
 }
-
 
 static void handle_new_lines(int8_t nlcount)
 {
