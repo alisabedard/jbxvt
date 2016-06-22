@@ -26,7 +26,7 @@ void scr_tab(void)
 {
 	home_screen();
 	struct screenst * s = jbxvt.scr.current;
-	const xcb_point_t c = s->cursor;
+	xcb_point_t c = s->cursor;
 	if (c.x >= jbxvt.scr.chars.width - 1)
 		  return;
 	s->text[c.y][c.x] = ' ';
