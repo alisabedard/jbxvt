@@ -36,25 +36,25 @@ void map_window(void)
 void resize_window(void)
 {
 	LOG("resize_window()");
-	// Quit before being messed up with a bad size:
-	if (!jbxvt.scr.chars.width || !jbxvt.scr.chars.height)
-		quit(1, WARN_ERR);
 	xcb_get_geometry_cookie_t c = xcb_get_geometry(jbxvt.X.xcb,
 		jbxvt.X.win.main);
 	xcb_get_geometry_reply_t *r = xcb_get_geometry_reply(jbxvt.X.xcb,
 		c, NULL);
 	if (!r)
 		  return;
+	const uint16_t vm = XCB_CONFIG_WINDOW_WIDTH
+		| XCB_CONFIG_WINDOW_HEIGHT;
 	if (jbxvt.opt.show_scrollbar) {
-		xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.sb,
-			XCB_CONFIG_WINDOW_WIDTH|XCB_CONFIG_WINDOW_HEIGHT,
+		jbxvt.scr.pixels.width = r->width - SBAR_WIDTH;
+		jbxvt.scr.pixels.height = r->height;
+		xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.sb, vm,
 			(uint32_t[]){SBAR_WIDTH - 1, r->height});
-		xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt,
-			XCB_CONFIG_WINDOW_WIDTH|XCB_CONFIG_WINDOW_HEIGHT,
+		xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt, vm,
 			(uint32_t[]){r->width - SBAR_WIDTH, r->height});
 	} else {
-		xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt,
-			XCB_CONFIG_WINDOW_WIDTH|XCB_CONFIG_WINDOW_HEIGHT,
+		jbxvt.scr.pixels.width = r->width;
+		jbxvt.scr.pixels.height = r->height;
+		xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt, vm,
 			(uint32_t[]){r->width, r->height});
 	}
 	free(r);

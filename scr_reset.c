@@ -46,6 +46,7 @@ static void init_screen_elements(struct screenst * restrict scr,
 	scr->wrap_next = false;
 }
 
+#if 0
 static Size get_dim(void)
 {
 	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(jbxvt.X.xcb,
@@ -56,6 +57,7 @@ static Size get_dim(void)
 	free(r);
 	return s;
 }
+#endif
 
 __attribute__((pure))
 static Size get_cdim(const Size d)
@@ -122,8 +124,7 @@ static int handle_offscreen_data(const uint8_t cw,
     needs to be repaired completely.  */
 void scr_reset(void)
 {
-	Size d = get_dim();
-	Size c = get_cdim(d);
+	Size c = get_cdim(jbxvt.scr.pixels);
 	static bool created;
 	uint8_t **s1 = jbxvt.scr.s1.text, **s2 = jbxvt.scr.s2.text;
 	uint32_t **r1 = jbxvt.scr.s1.rend, **r2 = jbxvt.scr.s2.rend;
@@ -197,17 +198,10 @@ void scr_reset(void)
 		scr_start_selection((xcb_point_t){},CHAR);
 	}
 	// Constrain dimensions:
-	if (c.width > JBXVT_MAX_COLS) {
-		  c.width = JBXVT_MAX_COLS;
-		  d.w = c.w * jbxvt.X.font_width;
-	}
-	if (c.height > JBXVT_MAX_ROWS) {
-		  c.height = JBXVT_MAX_ROWS;
-		  d.h = c.h * jbxvt.X.font_width;
-	}
+	c.w = MIN(c.w, JBXVT_MAX_COLS);
+	c.h = MIN(c.h, JBXVT_MAX_ROWS);
 	tty_set_size(c.w, c.h);
 	jbxvt.scr.chars = c;
-	jbxvt.scr.pixels = d;
 	reset_row_col();
 	c.h--;
 	c.w--;

@@ -100,6 +100,10 @@ static void create_main_window(xcb_size_hints_t * restrict sh, const uint32_t ro
 		sh->width, sh->height, 0, XCB_WINDOW_CLASS_COPY_FROM_PARENT,
 		XCB_COPY_FROM_PARENT, XCB_CW_EVENT_MASK,
 		(uint32_t[]){MW_EVENTS});
+	jbxvt.scr.pixels.width = sh->width;
+	jbxvt.scr.pixels.height = sh->height;
+	jbxvt.scr.chars.width = sh->width / jbxvt.X.font_width;
+	jbxvt.scr.chars.height = sh->height / jbxvt.X.font_height;
 }
 
 static xcb_cursor_t get_cursor(const uint16_t id, const uint16_t fg,
