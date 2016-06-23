@@ -10,6 +10,7 @@
 #include "repaint.h"
 #include "sbar.h"
 #include "scroll.h"
+#include "scr_erase.h"
 #include "scr_move.h"
 #include "scr_refresh.h"
 #include "scr_reset.h"
@@ -56,6 +57,7 @@ void scr_init(void)
 //  Change between the alternate and the main screens
 void scr_change_screen(const bool mode_high)
 {
+	jbxvt.scr.changing_screens = true;
 	home_screen();
 	jbxvt.scr.current = mode_high
 		? &jbxvt.scr.s2 : &jbxvt.scr.s1;
@@ -64,6 +66,7 @@ void scr_change_screen(const bool mode_high)
 		.y = jbxvt.scr.chars.height - 1,
 		.x = jbxvt.scr.chars.width - 1});
 	cursor(CURSOR_DRAW);
+	scr_erase_screen(2); // ENTIRE
 }
 
 //  Change the rendition style.

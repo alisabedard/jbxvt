@@ -47,6 +47,7 @@ struct JBXVT {
 		uint32_t rstyle; // render style
 		uint32_t saved_rstyle; // saved render style
 		int16_t offset; // current vert saved line
+		bool changing_screens;
 	} scr;
 	struct {
 		uint8_t * text;

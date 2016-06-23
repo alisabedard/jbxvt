@@ -46,19 +46,6 @@ static void init_screen_elements(struct screenst * restrict scr,
 	scr->wrap_next = false;
 }
 
-#if 0
-static Size get_dim(void)
-{
-	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(jbxvt.X.xcb,
-		xcb_get_geometry(jbxvt.X.xcb, jbxvt.X.win.vt), NULL);
-	if (!r)
-		  return (Size){0};
-	Size s = {.w = r->width, .h = r->height};
-	free(r);
-	return s;
-}
-#endif
-
 __attribute__((pure))
 static Size get_cdim(const Size d)
 {
@@ -95,7 +82,6 @@ static int save_data_on_screen(uint8_t cw, int i, const int j,
 		*onscreen = false;
 		return 0;
 	}
-		*onscreen = false;
 	return i;
 }
 
@@ -120,53 +106,62 @@ static int handle_offscreen_data(const uint8_t cw,
 	return i + 1;
 }
 
+static void init()
+{
+	uint8_t **s1, **s2;
+	uint32_t **r1, **r2;
+	uint16_t sz = JBXVT_MAX_ROWS * sizeof(void *);
+	s1 = GC_MALLOC(sz);
+	s2 = GC_MALLOC(sz);
+	r1 = GC_MALLOC(sz);
+	r2 = GC_MALLOC(sz);
+	for (int_fast16_t y = JBXVT_MAX_ROWS; y >= 0; --y) {
+		sz = JBXVT_MAX_COLS;
+		s1[y] = GC_MALLOC(sz);
+		s2[y] = GC_MALLOC(sz);
+		sz *= sizeof(uint32_t);
+		r1[y] = GC_MALLOC(sz);
+		r2[y] = GC_MALLOC(sz);
+	}
+	jbxvt.scr.s1.text = s1;
+	jbxvt.scr.s2.text = s2;
+	jbxvt.scr.s1.rend = r1;
+	jbxvt.scr.s2.rend = r2;
+}
+
+
 /*  Reset the screen - called whenever the screen
     needs to be repaired completely.  */
 void scr_reset(void)
 {
 	Size c = get_cdim(jbxvt.scr.pixels);
 	static bool created;
-	uint8_t **s1 = jbxvt.scr.s1.text, **s2 = jbxvt.scr.s2.text;
-	uint32_t **r1 = jbxvt.scr.s1.rend, **r2 = jbxvt.scr.s2.rend;
 	if (!created) {
-		uint16_t sz = JBXVT_MAX_ROWS * sizeof(void *);
-		s1 = GC_MALLOC(sz);
-		s2 = GC_MALLOC(sz);
-		r1 = GC_MALLOC(sz);
-		r2 = GC_MALLOC(sz);
-		for (int_fast16_t y = JBXVT_MAX_ROWS; y >= 0; --y) {
-			sz = JBXVT_MAX_COLS;
-			s1[y] = GC_MALLOC(sz);
-			s2[y] = GC_MALLOC(sz);
-			sz *= sizeof(uint32_t);
-			r1[y] = GC_MALLOC(sz);
-			r2[y] = GC_MALLOC(sz);
-		}
-		jbxvt.scr.s1.text = s1;
-		jbxvt.scr.s2.text = s2;
-		jbxvt.scr.s1.rend = r1;
-		jbxvt.scr.s2.rend = r2;
+		init();
 		created = true;
 	}
-	if (!jbxvt.scr.current->text || c.w != jbxvt.scr.chars.width
+	uint8_t **s1 = jbxvt.scr.s1.text, **s2 = jbxvt.scr.s2.text;
+	uint32_t **r1 = jbxvt.scr.s1.rend, **r2 = jbxvt.scr.s2.rend;
+	struct screenst * scr = jbxvt.scr.current;
+	if (!scr->text || c.w != jbxvt.scr.chars.width
 		|| c.h != jbxvt.scr.chars.height) {
-		jbxvt.scr.offset = 0;
 		/*  Recreate the screen backup arrays.
 		 *  The screen arrays are one word wider than the screen and
 		 *  the last word is used as a flag which is non-zero if the
-		 *  line wrapped automatically.
-		 */
-		for (uint16_t y = 0; y < c.h; y++) {
-			uint8_t w = c.w + 1;
-			memset(s1[y], 0, w);
-			memset(s2[y], 0, w);
-			w = c.w * sizeof(uint32_t);
-			memset(s1[y], 0, w);
-			memset(s2[y], 0, w);
+		 *  line wrapped automatically.  */
+		if (jbxvt.scr.changing_screens) {
+			for (int_fast16_t y = c.h - 1; y >= 0; --y) {
+				uint8_t w = c.w + 1;
+				memset(s1[y], 0, w);
+				memset(s2[y], 0, w);
+				w = c.w * sizeof(uint32_t);
+				memset(r1[y], 0, w);
+				memset(r2[y], 0, w);
+			}
+			jbxvt.scr.changing_screens = false;
 		}
-		if (jbxvt.scr.s1.text) {
+		if (scr == &jbxvt.scr.s1 && jbxvt.scr.s1.text) {
 			// Fill up scr from old scr and saved lines
-			scroll1(jbxvt.scr.s1.cursor.y);// - c.h + 1);
 			if (jbxvt.scr.s1.cursor.y >= c.h) {
 				scroll1(jbxvt.scr.s1.cursor.y - c.h + 1);
 				jbxvt.scr.s1.cursor.y = c.h - 1;
@@ -188,8 +183,8 @@ void scr_reset(void)
 			for (j = i; j < jbxvt.scr.sline.top; ++j) {
 				if (!jbxvt.scr.sline.data[j])
 					  break;
-				  jbxvt.scr.sline.data[j - i]
-					  = jbxvt.scr.sline.data[j];
+				jbxvt.scr.sline.data[j - i]
+					= jbxvt.scr.sline.data[j];
 			}
 			jbxvt.scr.sline.top -= i;
 		}
