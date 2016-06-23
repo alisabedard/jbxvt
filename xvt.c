@@ -232,6 +232,33 @@ static void select_charset(const char c, const uint8_t i)
 
 }
 
+static void decstbm(Token * restrict token)
+{
+	int32_t * restrict t = token->tk_arg;
+	LOG("TK_DECSTBM args: %d, 0: %d, 1: %d",
+		(int)token->tk_nargs, t[0], t[1]);
+	VTScreen * restrict scr = jbxvt.scr.current;
+	if (token->tk_private == '?') {
+		// Restore private modes
+		// FIXME:  Unimplemented
+		LOG("FIXME:  DECRESTOREPM");
+		// At least set char set back to ASCII
+		set_cset(CHARSET_ASCII, 0);
+		jbxvt.scr.s1.charsel = 0;
+		jbxvt.scr.s2.charsel = 0;
+	} else if (token->tk_nargs < 2 || t[0] >= t[1]) {
+		LOG("DECSTBM reset");
+		// reset
+		scr->margin.top = 0;
+		scr->margin.bottom = jbxvt.scr.chars.height - 1;
+	} else { // set
+		LOG("DECSTBM set");
+		scr->margin.top = t[0] - 1;
+		scr->margin.bottom = t[1] - 1;
+	}
+
+}
+
 void jbxvt_app_loop(void)
 {
 	LOG("app_loop");
@@ -359,19 +386,9 @@ app_loop_head:
 		LOG("TK_HVP");
 		// fall through
 	case TK_CUP: // position cursor
-		LOG("TK_CUP n: %d, 0: %d, 1: %d", token.tk_nargs,
-			t[0], t[1]);
-		switch(token.tk_nargs) {
-		case 1:
-			scr_move(0, t[0] > 0 ? t[0] - 1 : t[0],
-				scr->decom ? ROW_RELATIVE : 0);
-			break;
-		case 2:
-			scr_move(t[1] > 0 ? t[1] - 1 : t[1],
-                                t[0] > 0 ? t[0] - 1 : t[0], scr->decom
-				? COL_RELATIVE | ROW_RELATIVE : 0);
-			break;
-		}
+		LOG("TK_CUP");
+		scr_move(t[1] - 1, t[0] - 1, scr->decom
+			? ROW_RELATIVE | COL_RELATIVE : 0);
 		break;
 	case TK_VPA: // vertical position absolute
 		LOG("TK_VPA");
@@ -437,28 +454,7 @@ app_loop_head:
 		}
 		break;
 	case TK_DECSTBM: // set top and bottom margins.
-		LOG("TK_DECSTBM args: %d, 0: %d, 1: %d",
-			token.tk_nargs, t[0], t[1]);
-		if (token.tk_private == '?') {
-			// Restore private modes
-			// FIXME:  Unimplemented
-			LOG("FIXME:  DECRESTOREPM");
-			// At least set char set back to ASCII
-			set_cset(CHARSET_ASCII, 0);
-			jbxvt.scr.s1.charsel = 0;
-			jbxvt.scr.s2.charsel = 0;
-			break; // xterm param reset
-		}
-		if (token.tk_nargs < 2 || t[0] >= t[1]) {
-			LOG("DECSTBM reset");
-			// reset
-			scr->margin.top = 0;
-			scr->margin.bottom = jbxvt.scr.chars.height - 1;
-		} else { // set
-			LOG("DECSTBM set");
-			scr->margin.top = t[0] - 1;
-			scr->margin.bottom = t[1] - 1;
-		}
+		decstbm(&token);
 		break;
 	case TK_DECSC :
 		LOG("TK_DECSC");
