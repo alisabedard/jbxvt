@@ -20,7 +20,7 @@ static void handle_drag(const int16_t row, const int16_t col)
 	adjust_selection(&jbxvt.sel.end2);
 }
 
-static struct selst * get_nearest_endpoint(const int16_t row,
+static SelEnd * get_nearest_endpoint(const int16_t row,
 	const int16_t col)
 {
 	int16_t r1, r2, c1, c2;
@@ -55,17 +55,17 @@ void scr_extend_selection(const xcb_point_t p, const bool drag)
 		.y = (p.y - MARGIN) / jbxvt.X.font_height };
 	fix_rc(&rc);
 	// Save current end points:
-	struct selst sesave1 = jbxvt.sel.end1;
-	struct selst sesave2 = jbxvt.sel.end2;
+	SelEnd sesave1 = jbxvt.sel.end1;
+	SelEnd sesave2 = jbxvt.sel.end2;
 
 	if (drag)
 		  handle_drag(rc.y, rc.x);
 	else {
-		struct selst * se = get_nearest_endpoint(rc.y, rc.x);
+		SelEnd * se = get_nearest_endpoint(rc.y, rc.x);
 		rc_to_selend(rc.y, rc.x, se);
 		adjust_selection(se);
 	}
 
-	change_selection(&sesave1,&sesave2);
+	change_selection(&sesave1, &sesave2);
 }
 

@@ -44,7 +44,7 @@ void send_string(uint8_t * restrict buf, const uint8_t count);
 void set_keys(const bool mode_high, const bool is_cursor);
 
 #ifdef TK_DEBUG
-void show_token(struct tokenst *);
+void show_token(Token * restrict tk);
 #endif//TK_DEBUG
 
 #endif//!COMMAND_H

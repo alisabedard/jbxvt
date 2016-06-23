@@ -17,13 +17,8 @@
 
 #include <errno.h>
 #include <gc.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/select.h>
-#include <sys/syscall.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 static void handle_focus(xcb_focus_in_event_t * restrict e)
 {
@@ -250,7 +245,7 @@ static inline bool is_string_char(register int_fast16_t c)
 #else
 	__attribute__((nonnull))
 #endif//x86
-static void handle_string_char(int_fast16_t c, struct tokenst * restrict tk)
+static void handle_string_char(int_fast16_t c, Token * restrict tk)
 {
 	uint_fast16_t i = 0;
 	tk->tk_nlcount = 0;
@@ -274,7 +269,7 @@ static void handle_string_char(int_fast16_t c, struct tokenst * restrict tk)
 #else
 	__attribute__((nonnull))
 #endif//x86
-static void start_esc(int_fast16_t c, struct tokenst * restrict tk)
+static void start_esc(int_fast16_t c, Token * restrict tk)
 {
 	c = get_com_char(0);
 	if (c >= '<' && c <= '?') {
@@ -313,7 +308,7 @@ static void start_esc(int_fast16_t c, struct tokenst * restrict tk)
 #else
 	__attribute__((nonnull))
 #endif//x86
-static void end_esc(int16_t c, struct tokenst * restrict tk)
+static void end_esc(int16_t c, Token * restrict tk)
 {
 	c = get_com_char(0);
 	uint16_t n = 0;
@@ -340,7 +335,7 @@ static void end_esc(int16_t c, struct tokenst * restrict tk)
 #else
 	__attribute__((nonnull))
 #endif//x86
-static void handle_esc(int_fast16_t c, struct tokenst * restrict tk)
+static void handle_esc(int_fast16_t c, Token * restrict tk)
 {
 	c = get_com_char(0);
 	switch(c) {
@@ -399,9 +394,9 @@ static void handle_esc(int_fast16_t c, struct tokenst * restrict tk)
 }
 
 //  Return an input token
-void get_token(struct tokenst * restrict tk)
+void get_token(Token * restrict tk)
 {
-	memset(tk, 0, sizeof(struct tokenst));
+	memset(tk, 0, sizeof(Token));
 	// set token per event:
 	if(handle_xevents(tk))
 		  return;

@@ -11,10 +11,10 @@ enum seltype {
 };
 
 //  structure describing a selection endpoint.
-struct selst {
+typedef struct selst {
 	enum seltype se_type;
 	int16_t se_index;	// index into the sline or screen array
 	uint8_t se_col;		// column of the character
-};
+} SelEnd;
 
 #endif//!SELST_H

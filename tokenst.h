@@ -11,7 +11,7 @@ enum TokenLimits {
 /*  Structure used to represent a piece of input from the program
  *  or an interesting X event.
  */
-struct tokenst {
+typedef struct tokenst {
 	int32_t tk_arg[TK_MAX_ARGS];	/* first numerical arguments */
 	uint8_t tk_string[TKS_MAX + 1];	/* the text for string tokens */
 	uint16_t tk_private;		/* non zero for private control sequences */
@@ -21,6 +21,6 @@ struct tokenst {
 	uint8_t tk_char;		/* single (unprintable) character */
 	uint8_t tk_nargs;
 	int8_t tk_region; // terminal or scrollbar
-};
+} Token;
 
 #endif//!TOKENST_H

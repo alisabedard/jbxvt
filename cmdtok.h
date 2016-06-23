@@ -1,8 +1,8 @@
 #ifndef CMDTOK_H
 #define CMDTOK_H
 
-#include "command.h"
+#include "tokenst.h"
 
-void get_token(struct tokenst * restrict tk);
+void get_token(Token * restrict tk);
 
 #endif//!CMDTOK_H

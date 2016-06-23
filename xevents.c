@@ -60,7 +60,7 @@ static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
 	LOG("track_mouse: CSI M%cC%cC%c", b, p.x, p.y);
 }
 
-static void handle_motion_notify(struct tokenst * restrict tk,
+static void handle_motion_notify(Token * restrict tk,
 	struct xeventst * restrict xe)
 {
 	if (xe->xe_window == jbxvt.X.win.sb
@@ -82,7 +82,7 @@ static void handle_motion_notify(struct tokenst * restrict tk,
 	}
 }
 
-static void sbop(struct tokenst * restrict tk, struct xeventst * restrict xe,
+static void sbop(Token * restrict tk, struct xeventst * restrict xe,
 	const bool up)
 {
 	tk->tk_type = up ? TK_SBUP : TK_SBDOWN;
@@ -90,7 +90,7 @@ static void sbop(struct tokenst * restrict tk, struct xeventst * restrict xe,
 	tk->tk_nargs = 1;
 }
 
-static void handle_button_release(struct tokenst * restrict tk,
+static void handle_button_release(Token * restrict tk,
 	struct xeventst * restrict xe)
 {
 	LOG("handle_button_release()");
@@ -137,7 +137,7 @@ static void handle_button_release(struct tokenst * restrict tk,
 	}
 }
 
-static void handle_button1_press(struct tokenst * restrict tk,
+static void handle_button1_press(Token * restrict tk,
 	struct xeventst * restrict xe)
 {
 	LOG("handle_button1_press");
@@ -157,7 +157,7 @@ static void handle_button1_press(struct tokenst * restrict tk,
 	}
 }
 
-static void handle_button_press(struct tokenst * restrict tk,
+static void handle_button_press(Token * restrict tk,
 	struct xeventst * restrict xe)
 {
 	LOG("handle_button_press()");
@@ -198,7 +198,7 @@ static void handle_button_press(struct tokenst * restrict tk,
 }
 
 // convert next X event into a token
-bool handle_xevents(struct tokenst * restrict tk)
+bool handle_xevents(Token * restrict tk)
 {
 	struct xeventst *xe = pop_xevent();
 	if(!xe) return false;

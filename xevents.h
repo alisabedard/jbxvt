@@ -5,9 +5,8 @@
 #define JBXVT_XEVENTS_H
 
 #include "tokenst.h"
-#include <stdbool.h>
 
 // convert next X event into a token
-bool handle_xevents(struct tokenst * restrict tk);
+bool handle_xevents(Token * restrict tk);
 
 #endif//!JBXVT_XEVENTS_H

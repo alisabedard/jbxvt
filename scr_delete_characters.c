@@ -23,17 +23,18 @@ static void copy_area(const int16_t * restrict x, const int16_t y,
 }
 
 //  Delete count characters from the current position.
-void scr_delete_characters(int count)
+void scr_delete_characters(uint8_t count)
 {
 	LOG("scr_delete_characters(%d)", count);
 	const uint8_t scw = jbxvt.scr.chars.width;
-	const xcb_point_t c = jbxvt.scr.current->cursor;
+	VTScreen * restrict scr = jbxvt.scr.current;
+	const xcb_point_t c = scr->cursor;
 	count = MIN(count, scw - c.x); // keep within the screen
 	if(!count) return;
 	home_screen();
 	cursor(CURSOR_DRAW);
-	uint8_t * s = jbxvt.scr.current->text[c.y];
-	uint32_t * r = jbxvt.scr.current->rend[c.y];
+	uint8_t * s = scr->text[c.y];
+	uint32_t * r = scr->rend[c.y];
 
 	// copy the data after count
 	memmove(s + c.x, s + c.x + count, scw - c.x - count);
@@ -51,8 +52,8 @@ void scr_delete_characters(int count)
 	const uint16_t width = (scw - count - c.x) * f.w;
 	copy_area(x, y, width);
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, x[1] + width, y,
-		count * jbxvt.X.font_width, f.height);
-	jbxvt.scr.current->wrap_next = 0;
+		count * f.w, f.height);
+	scr->wrap_next = 0;
 	cursor(CURSOR_DRAW);
 }
 

@@ -293,7 +293,7 @@ void cprintf(char *fmt,...)
 
 #ifdef TK_DEBUG
 //  Print out a token's numerical arguments. Just used by show_token()
-static void show_token_args(struct tokenst * restrict tk)
+static void show_token_args(Token * restrict tk)
 {
 	for (uint8_t i = 0; i < tk->tk_nargs; i++) {
 		if (i == 0)
@@ -308,7 +308,7 @@ static void show_token_args(struct tokenst * restrict tk)
 }
 
 //  Print out a token's numerical arguments in hex. Just used by show_token()
-static void show_hex_token_args(struct tokenst * restrict tk)
+static void show_hex_token_args(Token * restrict tk)
 {
 	int i;
 
@@ -324,7 +324,7 @@ static void show_hex_token_args(struct tokenst * restrict tk)
 }
 
 //  Print out the contents of an input token - used for debugging.
-void show_token(struct tokenst * tk)
+void show_token(Token * tk)
 {
 	/*  Screen out token types that are not currently of interest.
 	 */
