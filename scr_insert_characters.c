@@ -16,36 +16,33 @@
 void scr_insert_characters(int16_t count)
 {
 	LOG("scr_insert_characters(%d)", count);
-	count = count < 0 ? 0 : count > jbxvt.scr.chars.width ?
-		jbxvt.scr.chars.width : count;
+	count = MAX(count, 0);
+	const uint8_t cw = jbxvt.scr.chars.width;
+	count = MIN(count, cw);
 	home_screen();
 	cursor(CURSOR_DRAW);
-	check_selection(jbxvt.scr.current->cursor.y,
-		jbxvt.scr.current->cursor.y);
-	uint8_t * s = jbxvt.scr.current->text[jbxvt.scr.current->cursor.y];
-	uint32_t * r = jbxvt.scr.current->rend[jbxvt.scr.current->cursor.y];
-	for (int16_t i = jbxvt.scr.chars.width - 1;
-		i >= jbxvt.scr.current->cursor.x + count; --i) {
+	VTScreen * restrict scr = jbxvt.scr.current;
+	const xcb_point_t c = scr->cursor;
+	check_selection(c.y, c.y);
+	uint8_t * s = scr->text[c.y];
+	uint32_t * r = scr->rend[c.y];
+	for (int16_t i = cw - 1; i >= c.x + count; --i) {
 		s[i] = s[i - count];
 		r[i] = r[i - count];
 	}
-	const xcb_point_t p = {
-		.x = MARGIN + jbxvt.scr.current->cursor.x
-			* jbxvt.X.font_width,
-		.y = MARGIN + jbxvt.scr.current->cursor.y
-			* jbxvt.X.font_height
-	};
-	const uint16_t width = (jbxvt.scr.chars.width - count
-		- jbxvt.scr.current->cursor.x) * jbxvt.X.font_width;
+	const Size f = { .w = jbxvt.X.font_width, .h = jbxvt.X.font_height};
+	const xcb_point_t p = { .x = MARGIN + c.x * f.width,
+		.y = MARGIN + c.y * f.height };
+	const uint16_t width = (cw - count - c.x) * f.width;
 	if (width > 0) {
 		  xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
 			  jbxvt.X.gc.tx, p.x, p.y, p.x + count
-			  * jbxvt.X.font_width, p.y, width,
-			  jbxvt.X.font_height);
+			  * f.width, p.y, width,
+			  f.height);
 	}
-	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, p.x, p.y, count
-		* jbxvt.X.font_width, jbxvt.X.font_height);
-	jbxvt.scr.current->wrap_next = 0;
+	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, p.x, p.y,
+		count * f.width, f.height);
+	scr->wrap_next = 0;
 	cursor(CURSOR_DRAW);
 }
 
