@@ -202,6 +202,36 @@ static void set_cset(const enum CharacterSet cs, const uint8_t i)
 	jbxvt.scr.s2.charset[i] = cs;
 }
 
+static void select_charset(const char c, const uint8_t i)
+{
+	switch(c) {
+	case 'A':
+		LOG("United Kingdom");
+		set_cset(CHARSET_GB, i);
+		break;
+	case 'B': // default
+		LOG("ASCII");
+		set_cset(CHARSET_ASCII, i);
+		break;
+	case '0':
+		LOG("Special graphics");
+		set_cset(CHARSET_SG0, i);
+		break;
+	case '1':
+		LOG("Alt char ROM standard graphics");
+		set_cset(CHARSET_SG1, i);
+		break;
+	case '2':
+		LOG("Alt char ROM special graphics");
+		set_cset(CHARSET_SG2, i);
+		break;
+	default: // reset
+		LOG("Unknown character set");
+		set_cset(CHARSET_ASCII, i);
+	}
+
+}
+
 void jbxvt_app_loop(void)
 {
 	LOG("app_loop");
@@ -482,62 +512,12 @@ app_loop_head:
 		break;
 	case TK_SCS0: // DEC SCS G0
 		LOG("TK_SCS0");
-		switch(t[0]) {
-		case 'A':
-			LOG("United Kingdom");
-			set_cset(CHARSET_GB, 0);
-			break;
-		case 'B': // default
-			LOG("ASCII");
-			set_cset(CHARSET_ASCII, 0);
-			break;
-		case '0':
-			LOG("Special graphics");
-			set_cset(CHARSET_SG0, 0);
-			break;
-		case '1':
-			LOG("Alt char ROM standard graphics");
-			set_cset(CHARSET_SG1, 0);
-			break;
-		case '2':
-			LOG("Alt char ROM special graphics");
-			set_cset(CHARSET_SG2, 0);
-			break;
-		default: // reset
-			LOG("Unknown character set");
-			set_cset(CHARSET_ASCII, 0);
-		}
+		select_charset(t[0], 0);
 		break;
 	case TK_SCS1: // DEC SCS G1
 		LOG("TK_SCS1");
-		switch(t[0]) {
-		case 'A':
-			scr->charset[1] = CHARSET_GB;
-			LOG("United Kingdom");
-			set_cset(CHARSET_GB, 0);
-			break;
-		case 'B': // default
-			LOG("ASCII");
-			set_cset(CHARSET_ASCII, 0);
-			break;
-		case '0':
-			LOG("Special graphics");
-			set_cset(CHARSET_SG0, 0);
-			break;
-		case '1':
-			LOG("Alt char ROM standard graphics");
-			set_cset(CHARSET_SG1, 0);
-			break;
-		case '2':
-			LOG("Alt char ROM special graphics");
-			set_cset(CHARSET_SG2, 0);
-			break;
-		default: // reset
-			LOG("Unknown character set");
-			set_cset(CHARSET_ASCII, 0);
-		}
+		select_charset(t[0], 1);
 		break;
-
 #ifdef DEBUG
 	case TK_HTS :
 		LOG("TK_HTS");
