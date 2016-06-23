@@ -32,12 +32,12 @@
 
 static bool jbxvt_size_set;
 
-static void handle_reset(struct tokenst * restrict token)
+static void handle_reset(Token * restrict token)
 {
 	LOG("handle_reset(%d)", token->tk_arg[0]);
 
 	const bool set = token->tk_type == TK_SET;
-	struct screenst * scr = jbxvt.scr.current;
+	VTScreen * scr = jbxvt.scr.current;
 
 	if (likely(token->tk_private == '?')) {
 		switch (token->tk_arg[0]) {
@@ -123,7 +123,7 @@ static void handle_reset(struct tokenst * restrict token)
 	}
 }
 
-static void handle_txtpar(struct tokenst * restrict token)
+static void handle_txtpar(Token * restrict token)
 {
 	switch (token->tk_arg[0]) {
 	case 0 :
@@ -173,7 +173,7 @@ static void handle_tk_char(const uint8_t tk_char)
 	}
 }
 
-static void handle_tk_expose(struct tokenst * restrict t)
+static void handle_tk_expose(Token * restrict t)
 {
 	LOG("handle_tk_expose()");
 	switch (t->tk_region) {
@@ -206,10 +206,10 @@ static void set_cset(const enum CharacterSet cs, const uint8_t i)
 void jbxvt_app_loop(void)
 {
 	LOG("app_loop");
-	struct tokenst token;
+	Token token;
 	int32_t n; // sanitized first token
 	int32_t * t; // shortcut to token.tk_arg
-	struct screenst * scr = jbxvt.scr.current;
+	VTScreen * scr = jbxvt.scr.current;
 app_loop_head:
 	get_token(&token);
 	t = token.tk_arg;

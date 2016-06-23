@@ -6,6 +6,8 @@
 
 #include "tokenst.h"
 
+#include <stdbool.h>
+
 // convert next X event into a token
 bool handle_xevents(Token * restrict tk);
 
