@@ -4,21 +4,16 @@
 #include "scr_refresh.h"
 
 #include "config.h"
-#include "cursor.h"
 #include "jbxvt.h"
 #include "log.h"
 #include "repaint.h"
-#include "screen.h"
 
-// constrain rc between 0 and lim, return new value
 __attribute__((const))
-static uint_fast32_t constrain(const int_fast32_t rc, const int_fast32_t lim)
+static uint16_t constrain(uint16_t rc, const int16_t lim)
 {
-	if (rc < 0) // guarantee unsigned
-		  return 0;
-	else if (rc >= lim) // cap
-		  return lim - 1;
-	return rc; // falls within range
+	rc = MAX(rc, 0);
+	rc = MIN(rc, lim);
+	return rc;
 }
 
 /*  Refresh the region of the screen delimited by the aruments.  Used to
