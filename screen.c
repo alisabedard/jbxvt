@@ -19,20 +19,27 @@
 #include <gc.h>
 #include <stdlib.h>
 
+// Renderless 'E' at position:
+static void epos(const xcb_point_t p)
+{
+	VTScreen * restrict s = jbxvt.scr.current;
+	s->text[p.y][p.x] = 'E';
+	s->rend[p.y][p.x] = 0;
+}
+
 // Set all chars to 'E'
 void scr_efill(void)
 {
 	// Move to cursor home in order for all characters to appear.
 	scr_move(0, 0, 0);
 	xcb_point_t p;
-	Size c = jbxvt.scr.chars;
+	const Size c = jbxvt.scr.chars;
 	for (p.y = c.height - 1; p.y >= 0; --p.y)
-		  for (p.x = c.width - 1; p.x >= 0; --p.x) {
-			jbxvt.scr.current->text[p.y][p.x] = 'E';
-			jbxvt.scr.current->rend[p.y][p.x] = 0;
-		  }
-	scr_refresh((xcb_rectangle_t){.width=jbxvt.scr.pixels.width,
-		.height=jbxvt.scr.pixels.height});
+		  for (p.x = c.width - 1; p.x >= 0; --p.x)
+			    epos(p);
+	const Size px = jbxvt.scr.pixels;
+	scr_refresh((xcb_rectangle_t){.width = px.width,
+		.height = px.height});
 }
 
 /*  Perform any initialisation on the screen data structures.
@@ -106,14 +113,14 @@ static int8_t scroll_up_scr_bot(uint8_t count, const bool up)
 //  Delete count lines and scroll up the bottom of the screen to fill the gap
 void scr_delete_lines(const uint8_t count)
 {
-	if (count > jbxvt.scr.current->margin.bottom
-		- jbxvt.scr.current->cursor.y + 1)
+	VTScreen * s = jbxvt.scr.current;
+	const uint8_t mb = s->margin.bottom;
+	const int16_t cy = s->cursor.y;
+	if (count > mb - cy + 1)
 		return;
 	hsc();
-	scroll(jbxvt.scr.current->cursor.y,
-		jbxvt.scr.current->margin.bottom,
-		scroll_up_scr_bot(count, true));
-	jbxvt.scr.current->wrap_next = 0;
+	scroll(cy, mb, scroll_up_scr_bot(count, true));
+	s->wrap_next = 0;
 	cursor(CURSOR_DRAW);
 }
 
