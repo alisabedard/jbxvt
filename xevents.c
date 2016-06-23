@@ -30,7 +30,7 @@ static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
 	p.y += 1;
 
 	// DECLRP
-	//cprintf("\033[%d;%d;%d;%d;0&w", b * 2, 7, p.y, p.x);
+	cprintf("\033[%d;%d;%d;%d;0&w", b * 2, 7, p.y, p.x);
 	//LOG("CSI %d;%d;%d;%d;0&w", b * 2, 0, p.y, p.x);
 
 	// Release handling:
@@ -57,7 +57,7 @@ static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
 	p.x += 32;
 	p.y += 32;
 
-	cprintf("\033[M%c%c%c", b, p.x, p.y);
+	cprintf("\033[M%c%c%c]", b, p.x, p.y);
 	LOG("track_mouse: CSI M%cC%cC%c", b, p.x, p.y);
 }
 
