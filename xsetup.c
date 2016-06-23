@@ -35,7 +35,7 @@ void map_window(void)
 
 static inline void resize_with_scrollbar(xcb_get_geometry_reply_t * r)
 {
-	jbxvt.scr.pixels.width = r->width - SBAR_WIDTH;
+	jbxvt.scr.pixels.width = r->width - SBAR_WIDTH - MARGIN;
 	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.sb, RSZ_VM,
 		(uint32_t[]){SBAR_WIDTH - 1, r->height});
 	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt, RSZ_VM,
@@ -44,7 +44,7 @@ static inline void resize_with_scrollbar(xcb_get_geometry_reply_t * r)
 
 static inline void resize_without_scrollbar(xcb_get_geometry_reply_t * r)
 {
-	jbxvt.scr.pixels.width = r->width;
+	jbxvt.scr.pixels.width = r->width - MARGIN;
 	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt, RSZ_VM,
 		(uint32_t[]){r->width, r->height});
 }
@@ -64,7 +64,7 @@ void resize_window(void)
 		  resize_with_scrollbar(r);
 	else
 		  resize_without_scrollbar(r);
-	jbxvt.scr.pixels.height = r->height;
+	jbxvt.scr.pixels.height = r->height - MARGIN;
 	free(r);
 	scr_reset();
 }
