@@ -139,6 +139,12 @@ static void handle_txtpar(Token * restrict token)
 
 }
 
+static inline void set_charsel(const uint8_t i)
+{
+	jbxvt.scr.s1.charsel = i;
+	jbxvt.scr.s2.charsel = i;
+}
+
 static void handle_tk_char(const uint8_t tk_char)
 {
 	switch (tk_char) {
@@ -161,13 +167,11 @@ static void handle_tk_char(const uint8_t tk_char)
 		break;
 	case '\016': // change to char set G1
 		LOG("charset G1");
-		jbxvt.scr.s1.charsel = 1;
-		jbxvt.scr.s2.charsel = 1;
+		set_charsel(1);
 		break;
 	case '\017': // change to char set G0
 		LOG("charset G0");
-		jbxvt.scr.s1.charsel = 0;
-		jbxvt.scr.s2.charsel = 0;
+		set_charsel(0);
 		break;
 	}
 }
@@ -244,8 +248,7 @@ static void decstbm(Token * restrict token)
 		LOG("FIXME:  DECRESTOREPM");
 		// At least set char set back to ASCII
 		set_cset(CHARSET_ASCII, 0);
-		jbxvt.scr.s1.charsel = 0;
-		jbxvt.scr.s2.charsel = 0;
+		set_charsel(0);
 	} else if (token->tk_nargs < 2 || t[0] >= t[1]) {
 		LOG("DECSTBM reset");
 		// reset
@@ -503,8 +506,7 @@ app_loop_head:
 		// At least set char set back to ASCII
 		// This fixes the links browser
 		set_cset(CHARSET_ASCII, 0);
-		jbxvt.scr.s1.charsel = 0;
-		jbxvt.scr.s2.charsel = 0;
+		set_charsel(0);
 		break;
 	case TK_SCS0: // DEC SCS G0
 		LOG("TK_SCS0");
