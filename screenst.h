@@ -14,7 +14,7 @@ enum CharacterSet {
 
 /*  Structure describing the current state of the screen.
  */
-struct screenst {
+typedef struct screenst {
 	uint8_t **text;		// backup copy of text
 	uint32_t **rend;	// rendition styles
 	Size margin;		// scroll margins, top and bottom
@@ -29,6 +29,6 @@ struct screenst {
 	bool ptr_xy:1;		// send x y on button press/release
 	bool ptr_cell:1;	// cell motion mouse tracking
 	uint8_t charsel:1;	// charset index
-};
+} VTScreen;
 
 #endif//!SCREENST_H

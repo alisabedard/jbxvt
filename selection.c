@@ -257,8 +257,7 @@ void adjust_selection(struct selst * restrict include)
 }
 
 /*  Determine if the current selection overlaps row1-row2 and if it does then
- *  remove it from the screen.
- */
+ *  remove it from the screen.  */
 void check_selection(const int16_t row1, const int16_t row2)
 {
 	if (jbxvt.sel.end1.se_type == NOSEL || jbxvt.sel.end2.se_type == NOSEL)
@@ -268,7 +267,7 @@ void check_selection(const int16_t row1, const int16_t row2)
 	int16_t r2 = jbxvt.sel.end2.se_type == SCREENSEL
 		? jbxvt.sel.end2.se_index : -1;
 	if (r1 > r2) {
-		int16_t x = r1;
+		const int16_t x = r1;
 		r1 = r2;
 		r2 = x;
 	}

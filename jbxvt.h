@@ -36,8 +36,8 @@ struct JBXVT {
 		uint8_t font_height, font_width;
 	} X;
 	struct {
-		struct screenst * current;
-		struct screenst s1, s2;
+		VTScreen * current;
+		VTScreen s1, s2;
 		struct {
 			struct slinest **data; // saved lines
 			int32_t top;
