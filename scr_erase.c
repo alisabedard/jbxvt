@@ -36,9 +36,11 @@ void scr_erase_line(const int8_t mode)
 	home_screen();
 	struct screenst * scr = jbxvt.scr.current;
 	xcb_point_t c = scr->cursor;
-	xcb_rectangle_t g = { .y = MARGIN + c.y * jbxvt.X.font_height };
+	const uint8_t fh = jbxvt.X.font_height;
+	xcb_rectangle_t g = { .y = MARGIN + c.y * fh };
 	uint8_t * s = scr->text[c.y];
 	uint32_t * r = scr->rend[c.y];
+	const uint8_t cw = jbxvt.scr.chars.width;
 	switch (mode) {
 	case 1:
 		LOG("START");
@@ -47,19 +49,18 @@ void scr_erase_line(const int8_t mode)
 		break;
 	case 0:
 		LOG("END");
-		get_horz_geo(&g, jbxvt.scr.chars.width - c.x, c.x);
-		zero_line(s + c.x, r + c.x, jbxvt.scr.chars.width - c.x);
+		get_horz_geo(&g, cw - c.x, c.x);
+		zero_line(s + c.x, r + c.x, cw - c.x);
 		break;
 	case 2:
 		LOG("ENTIRE");
-		get_horz_geo(&g, jbxvt.scr.chars.width, 0);
-		zero_line(s, r, jbxvt.scr.chars.width);
+		get_horz_geo(&g, cw, 0);
+		zero_line(s, r, cw);
 		break;
 	}
 	cursor(CURSOR_DRAW); //clear
 	check_selection(c.y, c.y);
-	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, g.x, g.y,
-		g.width, jbxvt.X.font_height);
+	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, g.x, g.y, g.width, fh);
 	scr->wrap_next = false;
 	cursor(CURSOR_DRAW);
 }
@@ -69,21 +70,22 @@ void scr_erase_screen(const int8_t mode)
 {
 	LOG("scr_erase_screen(%d)", mode);
 	home_screen();
-	jbxvt.scr.current->wrap_next = 0;
+	struct screenst * s = jbxvt.scr.current;
+	s->wrap_next = 0;
 	uint16_t width = jbxvt.scr.pixels.width;
-	const uint16_t wsz = jbxvt.scr.chars.width + 1;
+	const Size c = jbxvt.scr.chars;
+	const uint16_t wsz = c.width + 1;
 	int_fast16_t height, i, x = MARGIN, y;
 	switch (mode) {
 	case 1:
 		LOG("START");
 		y = MARGIN;
-		height = jbxvt.scr.current->cursor.y * jbxvt.X.font_height;
-		for (i = 0; i < jbxvt.scr.current->cursor.y; i++) {
-			memset(jbxvt.scr.current->text[i],0, wsz);
-			memset(jbxvt.scr.current->rend[i],0,
-				wsz * sizeof(int32_t));
+		height = s->cursor.y * jbxvt.X.font_height;
+		for (i = 0; i < s->cursor.y; i++) {
+			memset(s->text[i],0, wsz);
+			memset(s->rend[i],0, wsz * sizeof(int32_t));
 		}
-		check_selection(0,jbxvt.scr.current->cursor.y - 1);
+		check_selection(0,s->cursor.y - 1);
 		if (height > 0) {
 			xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt,
 				x, y, width, height);
@@ -92,20 +94,18 @@ void scr_erase_screen(const int8_t mode)
 		break;
 	case 0:
 		LOG("END");
-		if (jbxvt.scr.current->cursor.y
-			|| jbxvt.scr.current->cursor.x) {
-			y = MARGIN + (jbxvt.scr.current->cursor.y + 1)
+		if (s->cursor.y || s->cursor.x) {
+			y = MARGIN + (s->cursor.y + 1)
 				* jbxvt.X.font_height;
-			height = (jbxvt.scr.chars.height
-				- jbxvt.scr.current->cursor.y - 1)
+			height = (c.height
+				- s->cursor.y - 1)
 				* jbxvt.X.font_height;
-			for (i = jbxvt.scr.current->cursor.y + 1;
-				i < jbxvt.scr.chars.height; ++i) {
-				memset(jbxvt.scr.current->text[i], 0, wsz);
-				memset(jbxvt.scr.current->rend[i], 0, wsz<<2);
+			for (i = s->cursor.y + 1;
+				i < c.height; ++i) {
+				memset(s->text[i], 0, wsz);
+				memset(s->rend[i], 0, wsz<<2);
 			}
-			check_selection(jbxvt.scr.current->cursor.y + 1,
-				jbxvt.scr.chars.height - 1);
+			check_selection(s->cursor.y + 1, c.height - 1);
 			if (height > 0) {
 				xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt,
 					x, y, width, height);
@@ -120,8 +120,8 @@ void scr_erase_screen(const int8_t mode)
 	case 2:
 		LOG("ENTIRE");
 		y = MARGIN;
-		height = jbxvt.scr.chars.height - 1;
-		if (jbxvt.scr.current == &jbxvt.scr.s1)
+		height = c.height - 1;
+		if (s == &jbxvt.scr.s1)
 			scroll1(height);
 		else
 			scroll(0, height, height);
