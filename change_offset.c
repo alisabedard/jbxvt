@@ -16,7 +16,7 @@ static void copy_repaint(const int16_t d, const int16_t y1,
 	const int16_t y2, const int row1, const int row2)
 {
 	const uint16_t height = (jbxvt.scr.chars.height - d)
-		* jbxvt.X.font_height;
+		* jbxvt.X.font_size.height;
 	xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
 		jbxvt.X.gc.tx, 0, y1, 0, y2, jbxvt.scr.pixels.width,
 		height);
@@ -40,13 +40,13 @@ void change_offset(int16_t n)
 		/*  Text has moved down by less than a screen so raster
 		 *  the lines that did not move off.  */
 		copy_repaint(d, MARGIN,
-			MARGIN + d * jbxvt.X.font_height,
+			MARGIN + d * jbxvt.X.font_size.height,
 			0, d - 1);
 	} else if (d < 0 && -d < jbxvt.scr.chars.height) {
 		/*  Text has moved down by less than a screen so raster
 		 *  the lines that did not move off.  */
 		d = -d;
-		copy_repaint(d, MARGIN + d * jbxvt.X.font_height,
+		copy_repaint(d, MARGIN + d * jbxvt.X.font_size.height,
 			MARGIN, jbxvt.scr.chars.height - d,
 			jbxvt.scr.chars.height - 1);
 	}

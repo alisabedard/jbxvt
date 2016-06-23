@@ -110,10 +110,10 @@ static void cp_repair(const uint8_t row1, const uint8_t row2,
 	const int8_t count, const bool up)
 {
 	int16_t a, b, y[2];
-	a = MARGIN + row1 * jbxvt.X.font_height;
-	b = a + count * jbxvt.X.font_height;
+	a = MARGIN + row1 * jbxvt.X.font_size.h;
+	b = a + count * jbxvt.X.font_size.h;
 	const uint16_t height = (row2 - row1 - count)
-		* jbxvt.X.font_height;
+		* jbxvt.X.font_size.h;
 	if(up) {
 		y[0] = b;
 		y[1] = a;
@@ -186,9 +186,9 @@ static void sc_up(const uint8_t row1, uint8_t row2, int8_t count)
 		transmogrify(j, -count);
 	clear(count, row2, save, rend, true);
 	cp_repair(row1, row2, count, true);
-	const int16_t y = MARGIN + (row2 - count) * jbxvt.X.font_height;
+	const int16_t y = MARGIN + (row2 - count) * jbxvt.X.font_size.h;
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, 0, y,
-		jbxvt.scr.pixels.width, count * jbxvt.X.font_height);
+		jbxvt.scr.pixels.width, count * jbxvt.X.font_size.h);
 }
 
 static void sc_dn(uint8_t row1, uint8_t row2, int8_t count)
@@ -209,8 +209,8 @@ static void sc_dn(uint8_t row1, uint8_t row2, int8_t count)
 	clear(count, row1, save, rend, false);
 	cp_repair(row1, row2, count, false);
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, 0,
-		MARGIN + row1 * jbxvt.X.font_height,
-		jbxvt.scr.pixels.width, count * jbxvt.X.font_height);
+		MARGIN + row1 * jbxvt.X.font_size.h,
+		jbxvt.scr.pixels.width, count * jbxvt.X.font_size.h);
 }
 
 /*  Scroll count lines from row1 to row2 inclusive.  row1 should be <= row2.

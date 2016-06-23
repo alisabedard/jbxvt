@@ -66,9 +66,9 @@ static void setup_font(void)
 		qfc, NULL);
 	jbxvt.X.font_ascent = r->font_ascent;
 	jbxvt.X.font_descent = r->font_descent;
-	jbxvt.X.font_width = r->max_bounds.character_width;
+	jbxvt.X.font_size.width = r->max_bounds.character_width;
 	free(r);
-	jbxvt.X.font_height = jbxvt.X.font_ascent + jbxvt.X.font_descent;
+	jbxvt.X.font_size.height = jbxvt.X.font_ascent + jbxvt.X.font_descent;
 	error = xcb_request_check(jbxvt.X.xcb, b);
 	if(error) // use normal font if bold not available.
 		  jbxvt.X.bold_font = jbxvt.X.font;
@@ -81,8 +81,8 @@ static xcb_size_hints_t * get_sizehints(void)
 	*s = (xcb_size_hints_t) {
 		.flags = USSize | PMinSize | PResizeInc | PBaseSize,
 		.width = 80, .height = 24,
-		.width_inc = jbxvt.X.font_width,
-		.height_inc = jbxvt.X.font_height
+		.width_inc = jbxvt.X.font_size.width,
+		.height_inc = jbxvt.X.font_size.height
 	};
 	s->width *= s->width_inc;
 	s->height *= s->height_inc;
@@ -103,8 +103,8 @@ static void create_main_window(xcb_size_hints_t * restrict sh,
 		(uint32_t[]){MW_EVENTS});
 	jbxvt.scr.pixels.width = sh->width;
 	jbxvt.scr.pixels.height = sh->height;
-	jbxvt.scr.chars.width = sh->width / jbxvt.X.font_width;
-	jbxvt.scr.chars.height = sh->height / jbxvt.X.font_height;
+	jbxvt.scr.chars.width = sh->width / jbxvt.X.font_size.width;
+	jbxvt.scr.chars.height = sh->height / jbxvt.X.font_size.height;
 }
 
 static xcb_cursor_t get_cursor(const uint16_t id, const uint16_t fg,

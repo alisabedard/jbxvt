@@ -10,8 +10,8 @@
 static xcb_point_t get_p(void)
 {
 	xcb_point_t p = jbxvt.scr.current->cursor;
-	p.x *= jbxvt.X.font_width;
-	p.y *= jbxvt.X.font_height;
+	p.x *= jbxvt.X.font_size.width;
+	p.y *= jbxvt.X.font_size.height;
 	p.x += MARGIN;
 	p.y += MARGIN;
 	return p;
@@ -30,9 +30,9 @@ static void draw_cursor(const uint8_t cursor_focus)
 	xcb_point_t p = get_p();
 	xcb_poly_fill_rectangle(jbxvt.X.xcb, jbxvt.X.win.vt,
 		jbxvt.X.gc.cu, cursor_focus?1:2, (xcb_rectangle_t[]){
-		{p.x, p.y, jbxvt.X.font_width, jbxvt.X.font_height},
-		{p.x + 1, p.y + 1, jbxvt.X.font_width - 2,
-		jbxvt.X.font_height - 2}});
+		{p.x, p.y, jbxvt.X.font_size.width, jbxvt.X.font_size.height},
+		{p.x + 1, p.y + 1, jbxvt.X.font_size.width - 2,
+		jbxvt.X.font_size.height - 2}});
 }
 
 __attribute__((nonnull(1)))

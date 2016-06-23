@@ -70,15 +70,17 @@ static void handle_insert(const uint8_t n, const xcb_point_t p)
 	struct screenst * restrict c = jbxvt.scr.current;
 	uint8_t * s = c->text [c->cursor.y];
 	uint32_t * r = c->rend [c->cursor.y];
-	memmove(s + c->cursor.x + n, s + c->cursor.x,
-		jbxvt.scr.chars.width - c->cursor.x);
-	memmove(r + c->cursor.x + n, r + c->cursor.x,
-		(jbxvt.scr.chars.width - c->cursor.x) * sizeof(uint32_t));
-	const uint16_t width = (jbxvt.scr.chars.width - c->cursor.x - n)
-		* jbxvt.X.font_width;
-	const int16_t x = p.x + n * jbxvt.X.font_width;
+	const Size ch = jbxvt.scr.chars;
+	const xcb_point_t cur = c->cursor;
+	memmove(s + cur.x + n, s + cur.x, ch.width - cur.x);
+	memmove(r + cur.x + n, r + cur.x,
+		(ch.width - cur.x) * sizeof(uint32_t));
+	const Size f = jbxvt.X.font_size;
+	const uint16_t width = (ch.width - cur.x - n)
+		* f.w;
+	const int16_t x = p.x + n * f.w;
 	xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
-		jbxvt.X.gc.tx, p.x, p.y, x, p.y, width, jbxvt.X.font_height);
+		jbxvt.X.gc.tx, p.x, p.y, x, p.y, width, f.h);
 }
 
 static void handle_wrap_next(void)
@@ -169,8 +171,9 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 			  handle_wrap_next();
 
 		check_selection(c->cursor.y, c->cursor.y);
-		p.x = MARGIN + jbxvt.X.font_width * c->cursor.x;
-		p.y = MARGIN + jbxvt.X.font_height * c->cursor.y;
+		const Size f = jbxvt.X.font_size;
+		p.x = MARGIN + f.w * c->cursor.x;
+		p.y = MARGIN + f.h * c->cursor.y;
 		const int_fast16_t n = find_n(str, str);
 		if (unlikely(c->insert))
 			  handle_insert(n, p);

@@ -53,15 +53,14 @@ void show_selection(int16_t row1, int16_t row2, int16_t col1, int16_t col2)
 		return;
 	//  Paint in the reverse video:
 	for (int_fast16_t row = sr; row <= er; ++row) {
-		const int16_t y = MARGIN + row * jbxvt.X.font_height;
-		const int16_t x1 = MARGIN + ((row == sr) ? sc : col1)
-			* jbxvt.X.font_width;
-		const int16_t x2 = MARGIN + ((row == er) ? ec : col2)
-			* jbxvt.X.font_width;
+		const Size f = jbxvt.X.font_size;
+		const int16_t y = MARGIN + row * f.h;
+		const int16_t x1 = MARGIN + ((row == sr) ? sc : col1) * f.w;
+		const int16_t x2 = MARGIN + ((row == er) ? ec : col2) * f.w;
 		if (x2 > x1) {
 			xcb_poly_fill_rectangle(jbxvt.X.xcb, jbxvt.X.win.vt,
 				jbxvt.X.gc.hl, 1, &(xcb_rectangle_t){
-				x1, y, x2 - x1, jbxvt.X.font_height});
+				x1, y, x2 - x1, f.h});
 		}
 	}
 }

@@ -12,6 +12,25 @@
 
 #include <string.h>
 
+static void copy_area(const int16_t * restrict x, const int16_t y,
+	const uint16_t width)
+{
+	if (width > 0) {
+		xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
+			jbxvt.X.gc.tx, x[0], y, x[1], y, width,
+			jbxvt.X.font_size.height);
+	}
+}
+
+static void finalize(const xcb_point_t p, const int8_t count)
+{
+	const Size f = jbxvt.X.font_size;
+	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt,
+		p.x, p.y, count * f.w, f.h);
+	jbxvt.scr.current->wrap_next = 0;
+	cursor(CURSOR_DRAW);
+}
+
 //  Insert count spaces from the current position.
 void scr_insert_characters(int8_t count)
 {
@@ -30,30 +49,12 @@ void scr_insert_characters(int8_t count)
 		s[i] = s[i - count];
 		r[i] = r[i - count];
 	}
-	const Size f = { .w = jbxvt.X.font_width, .h = jbxvt.X.font_height};
+	const Size f = jbxvt.X.font_size;
 	const xcb_point_t p = { .x = MARGIN + c.x * f.width,
 		.y = MARGIN + c.y * f.height };
 	const uint16_t width = (cw - count - c.x) * f.width;
-	if (width > 0) {
-		  xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
-			  jbxvt.X.gc.tx, p.x, p.y, p.x + count
-			  * f.width, p.y, width,
-			  f.height);
-	}
-	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, p.x, p.y,
-		count * f.width, f.height);
-	scr->wrap_next = 0;
-	cursor(CURSOR_DRAW);
-}
-
-static void copy_area(const int16_t * restrict x, const int16_t y,
-	const uint16_t width)
-{
-	if (width > 0) {
-		xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
-			jbxvt.X.gc.tx, x[0], y, x[1], y, width,
-			jbxvt.X.font_height);
-	}
+	copy_area((int16_t[]){p.x, p.x + count * f.width}, p.y, width);
+	finalize(p, count);
 }
 
 //  Delete count characters from the current position.
@@ -63,7 +64,8 @@ void scr_delete_characters(uint8_t count)
 	const uint8_t scw = jbxvt.scr.chars.width;
 	VTScreen * restrict scr = jbxvt.scr.current;
 	const xcb_point_t c = scr->cursor;
-	count = MIN(count, scw - c.x); // keep within the screen
+	const uint8_t end = scw - c.x;
+	count = MIN(count, end); // keep within the screen
 	if(!count) return;
 	home_screen();
 	cursor(CURSOR_DRAW);
@@ -71,23 +73,20 @@ void scr_delete_characters(uint8_t count)
 	uint32_t * r = scr->rend[c.y];
 
 	// copy the data after count
-	memmove(s + c.x, s + c.x + count, scw - c.x - count);
-	memmove(r + c.x, r + c.x + count,
-		(scw - c.x - count) * sizeof(uint32_t));
+	const uint8_t offset = c.x + count;
+	memmove(s + c.x, s + offset, end - count);
+	memmove(r + c.x, r + offset,
+		(end - count) * sizeof(uint32_t));
 	// delete the source data copied
 	memset(s + scw - count, 0, count);
-	memset(r + scw - count, 0, count * sizeof(uint32_t));
+	memset(r + scw - count, 0, count << 2);
 
-	const Size f = { .w = jbxvt.X.font_width,
-		.h = jbxvt.X.font_height };
+	const Size f = jbxvt.X.font_size;
 	const int16_t y = MARGIN + c.y * f.height;
 	int16_t x[2] = {[1] = MARGIN + c.x * f.width};
 	x[0] = x[1] + count * f.w;
-	const uint16_t width = (scw - count - c.x) * f.w;
+	const uint16_t width = (end - count) * f.w;
 	copy_area(x, y, width);
-	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, x[1] + width, y,
-		count * f.w, f.height);
-	scr->wrap_next = 0;
-	cursor(CURSOR_DRAW);
+	finalize((xcb_point_t){x[1] + width, y}, count);
 }
 

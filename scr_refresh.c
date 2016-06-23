@@ -22,7 +22,7 @@ void scr_refresh(xcb_rectangle_t box)
 {
 	LOG("scr_refresh()");
 	const Size s = jbxvt.scr.chars;
-	const Size f = {.h = jbxvt.X.font_height, .w = jbxvt.X.font_width};
+	const Size f = jbxvt.X.font_size;
 	box.x -= MARGIN;
 	box.y -= MARGIN;
 	const xcb_point_t rc1 = {

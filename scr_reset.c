@@ -50,8 +50,9 @@ __attribute__((pure))
 static Size get_cdim(const Size d)
 {
 	const uint8_t m = MARGIN<<1;
-	return (Size){.width = (d.w-m)/jbxvt.X.font_width,
-		.height = (d.h-m)/jbxvt.X.font_height};
+	const Size f = jbxvt.X.font_size;
+	return (Size){.width = (d.w-m)/f.w,
+		.height = (d.h-m)/f.h};
 }
 
 static void cpl(struct screenst * restrict scr, uint8_t ** restrict s,

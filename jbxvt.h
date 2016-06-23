@@ -33,7 +33,7 @@ struct JBXVT {
 			pixel_t current_fg, current_bg;
 		} color;
 		int16_t font_ascent, font_descent;
-		uint8_t font_height, font_width;
+		Size font_size;
 	} X;
 	struct {
 		VTScreen * current;

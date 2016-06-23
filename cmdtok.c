@@ -19,6 +19,7 @@
 #include <gc.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/syscall.h>
 
 static void handle_focus(xcb_focus_in_event_t * restrict e)
 {

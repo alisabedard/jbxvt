@@ -68,17 +68,17 @@ void scr_clear_selection(void)
 //  start a selection using the specified unit.
 void scr_start_selection(xcb_point_t p, enum selunit unit)
 {
-	show_selection(0, jbxvt.scr.chars.height - 1,
-		0, jbxvt.scr.chars.width - 1);
-	xcb_point_t rc = { .x = (p.x - MARGIN) / jbxvt.X.font_width,
-		.y = (p.y - MARGIN) / jbxvt.X.font_height};
+	const Size c = jbxvt.scr.chars;
+	const Size f = jbxvt.X.font_size;
+	show_selection(0, c.h - 1, 0, c.w - 1);
+	xcb_point_t rc = { .x = (p.x - MARGIN) / f.w,
+		.y = (p.y - MARGIN) / f.h};
 	selection_unit = unit;
 	fix_rc(&rc);
 	rc_to_selend(rc.y, rc.x, &jbxvt.sel.anchor);
 	jbxvt.sel.end2 = jbxvt.sel.end1 = jbxvt.sel.anchor;
 	adjust_selection(&jbxvt.sel.end2);
-	show_selection(0, jbxvt.scr.chars.height - 1,
-		0, jbxvt.scr.chars.width - 1);
+	show_selection(0, c.h - 1, 0, c.w - 1);
 }
 
 

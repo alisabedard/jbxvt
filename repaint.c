@@ -122,7 +122,7 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 	if (rval & RS_ULINE || unlikely(rval & RS_ITALIC)) {
 		xcb_poly_line(jbxvt.X.xcb, XCB_COORD_MODE_ORIGIN,
 			jbxvt.X.win.vt, jbxvt.X.gc.tx, 2, (xcb_point_t[]){
-			{p.x, p.y}, {p.x + len * jbxvt.X.font_width, p.y}});
+			{p.x, p.y}, {p.x + len * jbxvt.X.font_size.width, p.y}});
 		xcb_flush(jbxvt.X.xcb);
 	}
 	if(bold) { // restore font
@@ -154,7 +154,7 @@ static void paint_rvec_text(uint8_t * str,
 		str += i;
 		rvec += i;
 		len -= i;
-		p.x += i * jbxvt.X.font_width;
+		p.x += i * jbxvt.X.font_size.width;
 	}
 }
 
@@ -163,13 +163,13 @@ static int_fast32_t repaint_generic(const xcb_point_t p,
 	const int_fast32_t c2, uint8_t * restrict str, uint32_t * rend)
 {
 	paint_rvec_text(str, rend ? rend + c1 : NULL, m, p);
-	const int_fast16_t x = p.x + m * jbxvt.X.font_width;
+	const int_fast16_t x = p.x + m * jbxvt.X.font_size.width;
 	const uint_fast16_t width = (c2 - c1 + 1 - m)
-		* jbxvt.X.font_width;
+		* jbxvt.X.font_size.width;
 	if (width > 0)
 		  xcb_clear_area(jbxvt.X.xcb, false, jbxvt.X.win.vt, x,
-			  p.y, width, jbxvt.X.font_height);
-	return p.y + jbxvt.X.font_height;
+			  p.y, width, jbxvt.X.font_size.height);
+	return p.y + jbxvt.X.font_size.height;
 }
 
 __attribute__((nonnull(3)))
@@ -206,8 +206,8 @@ void repaint(xcb_point_t rc1, xcb_point_t rc2)
 #ifdef DEBUG_REPAINT
 	LOG("repaint({%d, %d}, {%d, %d})", rc1.x, rc1.y, rc2.x, rc2.y);
 #endif//DEBUG_REPAINT
-	xcb_point_t p = { .x = MARGIN + rc1.x * jbxvt.X.font_width,
-		.y = MARGIN + rc1.y * jbxvt.X.font_height};
+	xcb_point_t p = { .x = MARGIN + rc1.x * jbxvt.X.font_size.width,
+		.y = MARGIN + rc1.y * jbxvt.X.font_size.height};
 	// Allocate enough space to process each column, plus wrap byte.
 	uint8_t str[jbxvt.scr.chars.width + 1];
 	//  First do any 'scrolled off' lines that are visible.

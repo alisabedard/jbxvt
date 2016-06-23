@@ -266,7 +266,8 @@ app_loop_head:
 		t[0] = - t[0];
 		// fall through
 	case TK_SBUP :
-		change_offset(jbxvt.scr.offset - t[0] / jbxvt.X.font_height);
+		change_offset(jbxvt.scr.offset - t[0]
+			/ jbxvt.X.font_size.height);
 		break;
 	case TK_SELSTART :
 		scr_start_selection((xcb_point_t){t[0], t[1]}, CHAR);

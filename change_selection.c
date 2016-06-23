@@ -40,16 +40,16 @@ void change_selection(struct selst * restrict ose1,
 			? jbxvt.scr.chars.height - 1 : re;
 		//  Invert the changed area
 		for (row = row1; row <= row2; row++) {
-			const int16_t y = MARGIN + row * jbxvt.X.font_height;
+			const int16_t y = MARGIN + row * jbxvt.X.font_size.height;
 			const int16_t x1 = MARGIN + (row == rs
-				? cs * jbxvt.X.font_width : 0);
+				? cs * jbxvt.X.font_size.width : 0);
 			const int16_t x2 = MARGIN + ((row == re) ? ce
 				: jbxvt.scr.chars.width)
-				* jbxvt.X.font_width;
+				* jbxvt.X.font_size.width;
 			xcb_poly_fill_rectangle(jbxvt.X.xcb, jbxvt.X.win.vt,
 				jbxvt.X.gc.hl, 1, &(xcb_rectangle_t){
 				.x = x1, .y = y, .width = x2 - x1,
-				.height = jbxvt.X.font_height});
+				.height = jbxvt.X.font_size.height});
 		}
 	}
 	if ((n = selcmp(se2,ose2))) {
@@ -62,16 +62,16 @@ void change_selection(struct selst * restrict ose1,
 			? jbxvt.scr.chars.height - 1 : re;
 		//  Invert the changed area
 		for (row = row1; row <= row2; row++) {
-			const int16_t y = MARGIN + row * jbxvt.X.font_height;
+			const int16_t y = MARGIN + row * jbxvt.X.font_size.height;
 			const int16_t x1 = (row == rs
-				? cs * jbxvt.X.font_width : 0);
+				? cs * jbxvt.X.font_size.width : 0);
 			const int16_t x2 = ((row == re)
 				? ce : jbxvt.scr.chars.width)
-				* jbxvt.X.font_width;
+				* jbxvt.X.font_size.width;
 			xcb_poly_fill_rectangle(jbxvt.X.xcb, jbxvt.X.win.vt,
 				jbxvt.X.gc.hl, 1, &(xcb_rectangle_t){
 				.x = x1 + MARGIN, .y = y, .width = x2 - x1,
-				.height = jbxvt.X.font_height});
+				.height = jbxvt.X.font_size.height});
 
 		}
 	}

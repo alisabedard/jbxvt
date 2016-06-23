@@ -22,8 +22,9 @@ static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
 {
 	LOG("track_mouse(b=%d, p={%d, %d})", b, p.x, p.y);
 	// get character position:
-	p.x /= jbxvt.X.font_width;
-	p.y /= jbxvt.X.font_height;
+	const Size f = jbxvt.X.font_size;
+	p.x /= f.w;
+	p.y /= f.h;
 	// modify for a 1-based row/column system
 	p.x += 1;
 	p.y += 1;
