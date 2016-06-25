@@ -31,6 +31,20 @@ static void finalize(const xcb_point_t p, const int8_t count)
 	cursor(CURSOR_DRAW);
 }
 
+static void copy_lines(const int16_t x, const uint8_t cw,
+	const int8_t count)
+{
+	VTScreen * restrict scr = jbxvt.scr.current;
+	const xcb_point_t c = scr->cursor;
+	uint8_t * s = scr->text[c.y];
+	uint32_t * r = scr->rend[c.y];
+
+	for (int16_t i = cw - 1; i >= x + count; --i) {
+		s[i] = s[i - count];
+		r[i] = r[i - count];
+	}
+}
+
 //  Insert count spaces from the current position.
 void scr_insert_characters(int8_t count)
 {
@@ -43,12 +57,7 @@ void scr_insert_characters(int8_t count)
 	VTScreen * restrict scr = jbxvt.scr.current;
 	const xcb_point_t c = scr->cursor;
 	check_selection(c.y, c.y);
-	uint8_t * s = scr->text[c.y];
-	uint32_t * r = scr->rend[c.y];
-	for (int16_t i = cw - 1; i >= c.x + count; --i) {
-		s[i] = s[i - count];
-		r[i] = r[i - count];
-	}
+	copy_lines(c.x, cw, count);
 	const Size f = jbxvt.X.font_size;
 	const xcb_point_t p = { .x = MARGIN + c.x * f.width,
 		.y = MARGIN + c.y * f.height };
