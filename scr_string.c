@@ -51,13 +51,6 @@ static void handle_new_lines(int8_t nlcount)
 	scroll(s->margin.t, s->margin.b, nlcount);
 	LOG("nlcount: %d, c.y: %d, m.b: %d", nlcount,
 		s->cursor.y, s->margin.b);
-	// This fixes ncdu scrolling:
-	// FIXME: it also causes minor corrupt display.
-#if 0
-	if (s->cursor.y == s->margin.b - 2) {
-		  scroll(s->margin.t + 2, s->margin.b - 2, 1);
-	}
-#endif
 	s->cursor.y -= nlcount;
 }
 
@@ -144,10 +137,8 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 		  handle_new_lines(nlcount);
 	xcb_point_t p;
 	struct screenst * restrict c = jbxvt.scr.current;
-	if (c->cursor.y < 0)
-		  c->cursor.y = 0;
-	if (c->cursor.y > jbxvt.scr.chars.height)
-		  c->cursor.y = jbxvt.scr.chars.height;
+	c->cursor.y = MAX(c->cursor.y, 0);
+	c->cursor.y = MIN(c->cursor.y, jbxvt.scr.chars.height);
 	while (len) {
 		if (likely(*str == '\r')) { // carriage return
 			c->cursor.x = 0;
