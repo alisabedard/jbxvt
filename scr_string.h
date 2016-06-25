@@ -9,7 +9,7 @@
 
 /*  Display the string at the current position.
     nlcount is the number of new lines in the string.  */
-void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount);
+void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount);
 
 //  Tab to the next tab_stop.
 void scr_tab(void);

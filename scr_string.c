@@ -127,9 +127,33 @@ static int_fast16_t find_n(uint8_t * str, uint8_t * iter)
 	return *iter < ' ' ? iter - str : find_n(str, iter + 1);
 }
 
+static void parse_special_charset(uint8_t * restrict str, const uint8_t len)
+{
+	SLOG("CHARSET_SG0");
+	for (int_fast16_t i = len ; i >= 0; --i) {
+		uint8_t * ch = &str[i];
+		switch (*ch) {
+		case 'j':
+		case 'k':
+		case 'l':
+		case 'm':
+		case 't':
+		case 'u':
+			*ch = '+';
+			break;
+		case 'q':
+			*ch = '-';
+			break;
+		case 'x':
+			*ch = '|';
+			break;
+		}
+	}
+}
+
 /*  Display the string at the current position.
     nlcount is the number of new lines in the string.  */
-void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
+void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 {
 	SLOG("scr_string(%s, len: %d, nlcount: %d)", str, len, nlcount);
 	home_screen();
@@ -172,28 +196,8 @@ void scr_string(uint8_t * restrict str, int8_t len, int8_t nlcount)
 		uint8_t * s = c->text[c->cursor.y];
 		if (!s) return;
 		s += c->cursor.x;
-		if (c->charset[c->charsel] == CHARSET_SG0) {
-			SLOG("CHARSET_SG0");
-			for (int_fast16_t i = len ; i >= 0; --i) {
-				uint8_t * ch = &str[i];
-				switch (*ch) {
-				case 'j':
-				case 'k':
-				case 'l':
-				case 'm':
-				case 't':
-				case 'u':
-					*ch = '+';
-					break;
-				case 'q':
-					*ch = '-';
-					break;
-				case 'x':
-					*ch = '|';
-					break;
-				}
-			}
-		}
+		if (c->charset[c->charsel] == CHARSET_SG0)
+			  parse_special_charset(str, len);
 		// Save scroll history:
 		memcpy(s, str, n);
 		// Render the string:
