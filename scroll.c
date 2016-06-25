@@ -78,8 +78,9 @@ static void clear(int8_t count, const uint8_t rc,
 	clear(count, rc, text, rend, up);
 }
 
-static void cp_rows(int_fast16_t i, const int16_t count)
+static void cp_rows(int16_t i, const int16_t count)
 {
+	LOG("cp_rows(i: %d, count: %d)", i, count);
 	if (--i < 0)
 		  return;
 	VTScreen * s = jbxvt.scr.current;

@@ -132,6 +132,8 @@ static void init()
 
 static inline void fix_margins(const Size c)
 {
+	/* On screen resize, check if old margin was on the bottom line.
+	   If so, set the bottom margin to the new bottom line.  */
 	if (c.height != jbxvt.scr.chars.height
 		&& c.height == jbxvt.scr.current->margin.b)
 		  jbxvt.scr.current->margin.b = c.height;

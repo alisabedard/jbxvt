@@ -10,11 +10,12 @@
 #include "repaint.h"
 #include "screen.h"
 #include "scroll.h"
+#include "scr_move.h"
 #include "selection.h"
 
 #include <string.h>
 
-//#define STRING_DEBUG
+#define STRING_DEBUG
 #ifdef STRING_DEBUG
 #define SLOG(...) LOG(__VA_ARGS__)
 #else
@@ -24,14 +25,14 @@
 //  Tab to the next tab_stop.
 void scr_tab(void)
 {
+	LOG("scr_tab()");
 	home_screen();
 	struct screenst * s = jbxvt.scr.current;
+	const uint8_t w = jbxvt.scr.chars.width - 1;
 	xcb_point_t c = s->cursor;
-	if (c.x >= jbxvt.scr.chars.width - 1)
-		  return;
-	s->text[c.y][c.x] = ' ';
-	while (++c.x % 8 && c.x < jbxvt.scr.chars.width - 1)
-		  ;
+	s->text[c.y][c.x] = '0';
+	while (++c.x % 8 && c.x < w);
+	s->cursor.x = c.x;
 }
 
 static void handle_new_lines(int8_t nlcount)
