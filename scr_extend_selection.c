@@ -51,8 +51,9 @@ void scr_extend_selection(const xcb_point_t p, const bool drag)
 {
 	if (jbxvt.sel.end1.se_type == NOSEL)
 		return;
-	xcb_point_t rc = { .x = (p.x - MARGIN) / jbxvt.X.font_size.width,
-		.y = (p.y - MARGIN) / jbxvt.X.font_size.height };
+	const Size f = jbxvt.X.font_size;
+	xcb_point_t rc = { .x = (p.x - MARGIN) / f.w,
+		.y = (p.y - MARGIN) / f.h};
 	fix_rc(&rc);
 	// Save current end points:
 	SelEnd sesave1 = jbxvt.sel.end1;
