@@ -256,6 +256,7 @@ static void decstbm(Token * restrict token)
 		scr->margin.bottom = jbxvt.scr.chars.height - 1;
 	} else { // set
 		LOG("DECSTBM set");
+		LOG("m.b: %d, c.y: %d", scr->margin.bottom, scr->cursor.y);
 		scr->margin.top = t[0] - 1;
 		scr->margin.bottom = t[1] - 1;
 	}
