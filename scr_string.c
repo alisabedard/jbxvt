@@ -37,7 +37,7 @@ void scr_tab(void)
 static void handle_new_lines(int8_t nlcount)
 {
 	struct screenst * restrict s = jbxvt.scr.current;
-	s->margin.b = MIN(s->margin.b, jbxvt.scr.chars.height - 1);
+	s->margin.b = MAX(s->margin.b, jbxvt.scr.chars.height - 1);
 	if (s->cursor.y > s->margin.b)
 		  nlcount = 0;
 	else

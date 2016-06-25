@@ -48,6 +48,7 @@ static inline void resize_without_scrollbar(xcb_get_geometry_reply_t * r)
 	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt, RSZ_VM,
 		(uint32_t[]){r->width, r->height});
 }
+#undef RSZ_VM
 
 /*  Called after a possible window size change.  If the window size has changed
  *  initiate a redraw by resizing the subwindows. */
@@ -58,7 +59,7 @@ void resize_window(void)
 		jbxvt.X.win.main);
 	xcb_get_geometry_reply_t *r = xcb_get_geometry_reply(jbxvt.X.xcb,
 		c, NULL);
-	if (!r)
+	if (!r) // Make sure reply was successful
 		  return;
 	if (jbxvt.opt.show_scrollbar)
 		  resize_with_scrollbar(r);

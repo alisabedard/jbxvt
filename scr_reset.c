@@ -130,12 +130,21 @@ static void init()
 	jbxvt.scr.s2.rend = r2;
 }
 
+static inline void fix_margins(const Size c)
+{
+	if (c.height != jbxvt.scr.chars.height
+		&& c.height == jbxvt.scr.current->margin.b)
+		  jbxvt.scr.current->margin.b = c.height;
+}
 
 /*  Reset the screen - called whenever the screen
     needs to be repaired completely.  */
 void scr_reset(void)
 {
 	Size c = get_cdim(jbxvt.scr.pixels);
+
+	fix_margins(c);
+
 	static bool created;
 	if (!created) {
 		init();
