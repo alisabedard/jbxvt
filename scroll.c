@@ -78,32 +78,26 @@ static void clear(int8_t count, const uint8_t rc,
 	clear(count, rc, text, rend, up);
 }
 
-static void sc_up_cp_rows(const int8_t count)
+static void cp_rows(int_fast16_t i, const int16_t count)
 {
-	LOG("sc_up_cp_rows(count = %d)", count);
-	xcb_point_t iter;
-	for (iter.y = count - 1; iter.y >= 0; --iter.y) {
-		uint8_t * s = jbxvt.scr.current->text[iter.y];
-		if(!s)
-			  continue;
-		uint32_t * r = jbxvt.scr.current->rend[iter.y];
-		iter.x = find_col(s, 0);
-		struct slinest *sl = GC_MALLOC(sizeof(struct slinest));
-		// +1 to have last byte as wrap flag:
-		sl->sl_text = GC_MALLOC(iter.x + 1);
-		memcpy(sl->sl_text, s, iter.x);
-		// copy wrap flag:
-		sl->sl_text[iter.x] = s[jbxvt.scr.chars.width];
-		/* iter.x, not iter.x + 1, since the last byte
-		   of the sl_text, only, is used for the wrap flag.  */
-		const uint16_t rendsz = iter.x * sizeof(uint32_t);
-		sl->sl_rend = GC_MALLOC(rendsz);
-		memcpy(sl->sl_rend, r, rendsz);
-		sl->sl_length = iter.x;
-		jbxvt.scr.sline.data[count - iter.y - 1] = sl;
-		sel_scr_to_sav(&jbxvt.sel.end1, iter.y, count);
-		sel_scr_to_sav(&jbxvt.sel.end2, iter.y, count);
-	}
+	if (--i < 0)
+		  return;
+	VTScreen * s = jbxvt.scr.current;
+	uint8_t * t = s->text[i];
+	const uint16_t x = find_col(t, 0);
+	uint32_t * r = s->rend[i];
+	SLine * sl = GC_MALLOC(sizeof(SLine));
+	sl->sl_length = x;
+	sl->sl_text = GC_MALLOC(x + 1);
+	sl->sl_rend = GC_MALLOC(x << 2);
+	memcpy(sl->sl_text, t, x);
+	// copy wrap flag:
+	sl->sl_text[x] = t[jbxvt.scr.chars.width];
+	memcpy(sl->sl_rend, r, x << 2);
+	jbxvt.scr.sline.data[count - i - 1] = sl;
+	sel_scr_to_sav(&jbxvt.sel.end1, i, count);
+	sel_scr_to_sav(&jbxvt.sel.end2, i, count);
+	cp_rows(i, count);
 }
 
 static void cp_repair(const uint8_t row1, const uint8_t row2,
@@ -137,7 +131,7 @@ static void add_scroll_history(const int8_t count)
 		jbxvt.scr.sline.data[y + count]
 			= jbxvt.scr.sline.data[y];
 	}
-	sc_up_cp_rows(count);
+	cp_rows(count, count);
 	const uint16_t t = jbxvt.scr.sline.top + count;
 	const uint16_t max = jbxvt.scr.sline.max;
 	jbxvt.scr.sline.top = MIN(t, max);
@@ -156,7 +150,7 @@ void scroll1(int16_t count)
 		count -= n;
 		// free lines that scroll off the top
 		free_top(n);
-		sc_up_cp_rows(n);
+		cp_rows(n, n);
 		jbxvt.scr.sline.top += n;
 		jbxvt.scr.sline.top = MIN(jbxvt.scr.sline.top,
 			jbxvt.scr.sline.max);
