@@ -4,8 +4,10 @@
 #ifndef SBAR_H
 #define SBAR_H
 
+#include <stdint.h>
+
 void sbar_reset(void);
-void sbar_show(int length, const int low,
-	const int high);
+void sbar_show(uint16_t length, const int16_t low,
+	const int16_t high);
 
 #endif//!SBAR_H
