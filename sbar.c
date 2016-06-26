@@ -4,6 +4,7 @@
 #include "sbar.h"
 
 #include "jbxvt.h"
+#undef DEBUG
 #include "log.h"
 
 #include <stdlib.h>
