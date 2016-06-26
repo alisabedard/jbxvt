@@ -61,10 +61,8 @@ void resize_window(void)
 		c, NULL);
 	if (!r) // Make sure reply was successful
 		  return;
-	if (jbxvt.opt.show_scrollbar)
-		  resize_with_scrollbar(r);
-	else
-		  resize_without_scrollbar(r);
+	(jbxvt.opt.show_scrollbar ? &resize_with_scrollbar
+		: &resize_without_scrollbar)(r);
 	jbxvt.scr.pixels.height = r->height - MARGIN;
 	free(r);
 	scr_reset();
