@@ -188,18 +188,17 @@ static void sc_up(const uint8_t row1, uint8_t row2, int8_t count)
 		jbxvt.scr.pixels.width, count * jbxvt.X.font_size.h);
 }
 
-static void sc_dn(uint8_t row1, uint8_t row2, int8_t count)
+static void sc_dn(uint8_t row1, const uint8_t row2, int8_t count)
 {
 	LOG("scroll_down(%d, %d, %d)", row1, row2, count);
 	count = -count;
 	uint32_t *rend[MAX_SCROLL];
 	uint8_t *save[MAX_SCROLL];
-	int8_t j = copy_screen_area(0, row2 - 1, -1, count, save, rend);
-	++row2;
-	while(j >= row1)
-		  transmogrify(j--, count);
+	for(int8_t j = copy_screen_area(0, row2 - 1, -1, count, save, rend);
+		j >= row1; --j)
+		  transmogrify(j, count);
 	clear(count, row1, save, rend, false);
-	cp_repair(row1, row2, count, false);
+	cp_repair(row1, row2 + 1, count, false);
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, 0,
 		MARGIN + row1 * jbxvt.X.font_size.h,
 		jbxvt.scr.pixels.width, count * jbxvt.X.font_size.h);
