@@ -197,7 +197,6 @@ void init_display(char * name)
 	create_window((uint8_t *)name, root);
 	setup_gcs();
 	scr_init();
-	sbar_reset();
 	xcb_flush(jbxvt.X.xcb);
 }
 
