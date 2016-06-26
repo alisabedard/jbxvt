@@ -93,16 +93,12 @@ static void handle_reset(Token * restrict token)
 		case 1015:
 			LOG("Enable urxvt mouse mode");
 			break;
-		case 1047:
-			scr_change_screen(!set);
-			break;
-		case 1048:
-			cursor(set?CURSOR_SAVE:CURSOR_RESTORE);
-			break;
 		case 47: // switch to main screen
+		case 1047:
+		case 1048:
 		case 1049: // cursor restore and screen change
 			cursor(set?CURSOR_SAVE:CURSOR_RESTORE);
-			scr_change_screen(!set);
+			scr_change_screen(set);
 			break;
 #ifdef DEBUG
 		default:
