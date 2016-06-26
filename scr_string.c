@@ -135,24 +135,19 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 	c->cursor.y = MAX(c->cursor.y, 0);
 	c->cursor.y = MIN(c->cursor.y, jbxvt.scr.chars.height);
 	while (len) {
+#define NXT_CHR() --len; ++str; continue;
 		if (likely(*str == '\r')) { // carriage return
 			c->cursor.x = 0;
 			c->wrap_next = 0;
-			--len;
-			++str;
-			continue;
+			NXT_CHR();
 		} else if (*str == '\n') { // line feed
 			wrap(c);
-			--len;
-			++str;
-			continue;
+			NXT_CHR();
 		} else if (unlikely(*str == '\t')) {
 			scr_tab();
-			--len;
-			++str;
-			continue;
+			NXT_CHR();
 		}
-
+#undef NXT_CHR
 		if (c->wrap_next) {
 			wrap(c);
 			c->cursor.x = 0;
