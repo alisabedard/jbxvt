@@ -87,34 +87,8 @@ static void wrap(VTScreen * restrict c)
 		SLOG("++cursor.y");
 		  ++c->cursor.y;
 	}
-}
-
-static void handle_wrap_next(void)
-{
-	SLOG("handle_wrap_next()");
-	struct screenst * restrict c = jbxvt.scr.current;
-	wrap(c);
-	c->cursor.x = c->wrap_next = 0;
-}
-
-static void handle_line_feed(void)
-{
-	SLOG("handle_line_feed()");
-	struct screenst * restrict c = jbxvt.scr.current;
-	wrap(c);
 	check_selection(c->cursor.y, c->cursor.y);
 	c->wrap_next = 0;
-}
-
-static void wrap_at_end(uint8_t * restrict str, const uint8_t len)
-{
-	struct screenst * restrict c = jbxvt.scr.current;
-	if (unlikely(len > 0 && c->cursor.x == jbxvt.scr.chars.width
-		&& *str >= ' ')) {
-		SLOG("wrap_at_end(%s, %d)", str, len);
-		wrap(c);
-		c->cursor.x = 0;
-	}
 }
 
 // str and iter alias each other
@@ -168,7 +142,7 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 			++str;
 			continue;
 		} else if (*str == '\n') { // line feed
-			handle_line_feed();
+			wrap(c);
 			--len;
 			++str;
 			continue;
@@ -179,8 +153,10 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 			continue;
 		}
 
-		if (c->wrap_next)
-			  handle_wrap_next();
+		if (c->wrap_next) {
+			wrap(c);
+			c->cursor.x = 0;
+		}
 
 		check_selection(c->cursor.y, c->cursor.y);
 		const Size f = jbxvt.X.font_size;
@@ -207,7 +183,12 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		len -= n;
 		str += n;
 		c->cursor.x += n;
-		wrap_at_end(str, len);
+
+		if (unlikely(len > 0 && c->cursor.x == jbxvt.scr.chars.width
+			&& *str >= ' ')) {
+			wrap(c);
+			c->cursor.x = 0;
+		}
 	}
 	if (c->cursor.x >= jbxvt.scr.chars.width) {
 		c->cursor.x = jbxvt.scr.chars.width - 1;
