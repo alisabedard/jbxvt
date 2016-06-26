@@ -392,15 +392,15 @@ app_loop_head:
 		break;
 	case TK_VPA: // vertical position absolute
 		LOG("TK_VPA");
-		scr_move(scr->cursor.x, t[0] - 1, 0);
+		scr_move(0, t[0] - 1, COL_RELATIVE);
 		break;
 	case TK_VPR: // vertical position relative
 		LOG("TK_VPR");
-		scr_move(scr->cursor.x, t[0] - 1, ROW_RELATIVE);
+		scr_move(0, t[0] - 1, COL_RELATIVE|ROW_RELATIVE);
 		break;
 	case TK_CHA: // cursor CHaracter Absolute column
 		LOG("TK_CHA");
-		scr_move(t[0] - 1, scr->cursor.y, 0);
+		scr_move(t[0] - 1, 0, ROW_RELATIVE);
 		break;
 	case TK_ED :
 		LOG("TK_ED"); // don't use n
