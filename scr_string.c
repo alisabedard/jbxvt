@@ -77,10 +77,8 @@ static void handle_insert(const uint8_t n, const xcb_point_t p)
 		jbxvt.X.gc.tx, p.x, p.y, x, p.y, width, f.h);
 }
 
-static void handle_wrap_next(void)
+static void wrap(VTScreen * restrict c)
 {
-	SLOG("handle_wrap_next()");
-	struct screenst * restrict c = jbxvt.scr.current;
 	c->text[c->cursor.y][jbxvt.scr.chars.width] = 1;
 	if (c->cursor.y >= c->margin.bottom) {
 		SLOG("cursor at bottom margin, scrolling");
@@ -89,6 +87,13 @@ static void handle_wrap_next(void)
 		SLOG("++cursor.y");
 		  ++c->cursor.y;
 	}
+}
+
+static void handle_wrap_next(void)
+{
+	SLOG("handle_wrap_next()");
+	struct screenst * restrict c = jbxvt.scr.current;
+	wrap(c);
 	c->cursor.x = c->wrap_next = 0;
 }
 
@@ -96,11 +101,7 @@ static void handle_line_feed(void)
 {
 	SLOG("handle_line_feed()");
 	struct screenst * restrict c = jbxvt.scr.current;
-	if (likely(c->cursor.y < jbxvt.scr.chars.height - 1)) {
-		++c->cursor.y;
-	} else if (c->cursor.y <= c->margin.bottom) {
-		scroll(c->margin.top, c->margin.bottom,1);
-	}
+	wrap(c);
 	check_selection(c->cursor.y, c->cursor.y);
 	c->wrap_next = 0;
 }
@@ -111,12 +112,7 @@ static void wrap_at_end(uint8_t * restrict str, const uint8_t len)
 	if (unlikely(len > 0 && c->cursor.x == jbxvt.scr.chars.width
 		&& *str >= ' ')) {
 		SLOG("wrap_at_end(%s, %d)", str, len);
-		c->text [c->cursor.y] [jbxvt.scr.chars.width] = 1;
-		if (likely(c->cursor.y >= c->margin.bottom)) {
-			scroll(c->margin.top, c ->margin.bottom, 1);
-		} else {
-			++c->cursor.y;
-		}
+		wrap(c);
 		c->cursor.x = 0;
 	}
 }
