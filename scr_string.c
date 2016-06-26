@@ -35,8 +35,26 @@ void scr_tab(void)
 	s->cursor.x = c.x;
 }
 
+static void wrap(VTScreen * restrict c)
+{
+	const Size m = c->margin;
+	const Size sz = jbxvt.scr.chars;
+	int16_t * y = &c->cursor.y;
+	c->text[*y][sz.w] = 1; // wrap flag
+	if (*y >= m.bottom) {
+		LOG("cursor at bottom margin, scrolling");
+		scroll(m.top, m.bottom, 1);
+	} else if (*y < sz.height - 1) {
+		SLOG("++*y");
+		++*y;
+	}
+	check_selection(*y, *y);
+	c->wrap_next = 0;
+}
+
 static void handle_new_lines(int8_t nlcount)
 {
+	LOG("handle_new_lines(nlcount: %d)", nlcount);
 	struct screenst * restrict s = jbxvt.scr.current;
 	s->margin.b = MAX(s->margin.b, jbxvt.scr.chars.height - 1);
 	if (s->cursor.y > s->margin.b)
@@ -50,9 +68,9 @@ static void handle_new_lines(int8_t nlcount)
 	if (nlcount > MAX_SCROLL)
 		  nlcount = MAX_SCROLL;
 	scroll(s->margin.t, s->margin.b, nlcount);
+	s->cursor.y -= nlcount;
 	LOG("nlcount: %d, c.y: %d, m.b: %d", nlcount,
 		s->cursor.y, s->margin.b);
-	s->cursor.y -= nlcount;
 }
 
 #if defined(__i386__) || defined(__amd64__)
@@ -75,20 +93,6 @@ static void handle_insert(const uint8_t n, const xcb_point_t p)
 	const int16_t x = p.x + n * f.w;
 	xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
 		jbxvt.X.gc.tx, p.x, p.y, x, p.y, width, f.h);
-}
-
-static void wrap(VTScreen * restrict c)
-{
-	c->text[c->cursor.y][jbxvt.scr.chars.width] = 1;
-	if (c->cursor.y >= c->margin.bottom) {
-		SLOG("cursor at bottom margin, scrolling");
-		  scroll(c->margin.top, c->margin.bottom, 1);
-	} else if (c->cursor.y < jbxvt.scr.chars.height - 1) {
-		SLOG("++cursor.y");
-		  ++c->cursor.y;
-	}
-	check_selection(c->cursor.y, c->cursor.y);
-	c->wrap_next = 0;
 }
 
 // str and iter alias each other
@@ -121,6 +125,21 @@ static void parse_special_charset(uint8_t * restrict str, const uint8_t len)
 	}
 }
 
+static inline xcb_point_t get_p(VTScreen * restrict c)
+{
+	const Size f = jbxvt.X.font_size;
+	return (xcb_point_t){.x = MARGIN + f.w * c->cursor.x,
+		.y = MARGIN + f.h * c->cursor.y};
+}
+
+static inline void fix_cursor(VTScreen * restrict c)
+{
+	c->cursor.y = MAX(c->cursor.y, 0);
+	c->cursor.y = MIN(c->cursor.y, jbxvt.scr.chars.height - 1);
+	c->cursor.x = MAX(c->cursor.x, 0);
+	c->cursor.x = MIN(c->cursor.x, jbxvt.scr.chars.width - 1);
+}
+
 /*  Display the string at the current position.
     nlcount is the number of new lines in the string.  */
 void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
@@ -132,8 +151,7 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		  handle_new_lines(nlcount);
 	xcb_point_t p;
 	struct screenst * restrict c = jbxvt.scr.current;
-	c->cursor.y = MAX(c->cursor.y, 0);
-	c->cursor.y = MIN(c->cursor.y, jbxvt.scr.chars.height);
+	fix_cursor(c);
 	while (len) {
 #define NXT_CHR() --len; ++str; continue;
 		if (likely(*str == '\r')) { // carriage return
@@ -146,17 +164,16 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		} else if (unlikely(*str == '\t')) {
 			scr_tab();
 			NXT_CHR();
-		}
-#undef NXT_CHR
+		} else if (unlikely(*str == 0xe2)) {
+			*str = '+';
+		} // mask out tmux graphics characters
 		if (c->wrap_next) {
 			wrap(c);
 			c->cursor.x = 0;
 		}
 
 		check_selection(c->cursor.y, c->cursor.y);
-		const Size f = jbxvt.X.font_size;
-		p.x = MARGIN + f.w * c->cursor.x;
-		p.y = MARGIN + f.h * c->cursor.y;
+		p = get_p(c);
 		const int_fast16_t n = find_n(str, str);
 		if (unlikely(c->insert))
 			  handle_insert(n, p);
@@ -178,11 +195,17 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		len -= n;
 		str += n;
 		c->cursor.x += n;
-
-		if (unlikely(len > 0 && c->cursor.x == jbxvt.scr.chars.width
-			&& *str >= ' ')) {
-			wrap(c);
-			c->cursor.x = 0;
+		if (unlikely(len > 0 && c->cursor.x
+			== jbxvt.scr.chars.width && *str >= ' ')) {
+			// Handle DEC auto-wrap mode:
+			if (c->decawm) {
+				wrap(c);
+				c->cursor.x = 0;
+			} else { // No auto-wrap, keep cursor at end:
+				c->cursor.x = jbxvt.scr.chars.width - 1;
+				cursor(CURSOR_DRAW);
+				return;
+			}
 		}
 	}
 	if (c->cursor.x >= jbxvt.scr.chars.width) {
