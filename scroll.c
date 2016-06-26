@@ -178,8 +178,9 @@ static void sc_up(const uint8_t row1, uint8_t row2, int8_t count)
 		add_scroll_history(count);
 	uint8_t *save[MAX_SCROLL];
 	uint32_t *rend[MAX_SCROLL];
-	int8_t j = copy_screen_area(0, row1, 1, count, save, rend);
-	for(++row2; j < row2; ++j)
+	++row2;
+	for(int8_t j = copy_screen_area(0, row1, 1, count, save, rend);
+		j < row2; ++j)
 		transmogrify(j, -count);
 	clear(count, row2, save, rend, true);
 	cp_repair(row1, row2, count, true);
