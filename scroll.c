@@ -25,14 +25,12 @@ static void sel_scr_to_sav(struct selst * restrict s,
 	}
 }
 
-static void transmogrify(const int16_t j, const int8_t count)
+static void transmogrify(const int16_t j, const int8_t count,
+	VTScreen * restrict s)
 {
-	//LOG("transmogrify(j: %d, count: %d)", j, count);
 	const int16_t k = j + count;
-	jbxvt.scr.current->text[k]
-		= jbxvt.scr.current->text[j];
-	jbxvt.scr.current->rend[k]
-		= jbxvt.scr.current->rend[j];
+	s->text[k] = s->text[j];
+	s->rend[k] = s->rend[j];
 	if (jbxvt.sel.end1.se_type == SCREENSEL
 		&& jbxvt.sel.end1.se_index == j)
 		  jbxvt.sel.end1.se_index = k;
@@ -113,19 +111,19 @@ static void cp_repair(const uint8_t row1, const uint8_t row2,
 	xcb_flush(jbxvt.X.xcb);
 }
 
-// Free lines that scroll off the top of the screen.
-static void free_top(int_fast16_t count)
+// Handle lines that scroll off the top of the screen.
+static void scroll_off(int_fast16_t count)
 {
 	if (--count < 0)
 		  return;
 	const int16_t i = jbxvt.scr.sline.max - count - 1;
 	jbxvt.scr.sline.data[i + count] = jbxvt.scr.sline.data[i];
-	free_top(count);
+	scroll_off(count);
 }
 
 static void add_scroll_history(const int8_t count)
 {
-	free_top(count);
+	scroll_off(count);
 	for (int16_t y = jbxvt.scr.sline.max - count - 1; y >= 0; --y)
 		  jbxvt.scr.sline.data[y + count] = jbxvt.scr.sline.data[y];
 	cp_rows(count, count);
@@ -137,24 +135,6 @@ static void add_scroll_history(const int8_t count)
 		jbxvt.scr.offset, jbxvt.scr.offset
 		+ jbxvt.scr.chars.height - 1);
 
-}
-
-void scroll1(int16_t count)
-{
-	LOG("scroll1(%d)", count);
-	while (count > 0) {
-		// If count > MAX_SCROLL, scroll in installments
-		int_fast16_t n = count > MAX_SCROLL ? MAX_SCROLL : count;
-		count -= n;
-		cp_rows(n, n);
-		jbxvt.scr.sline.top += n;
-		jbxvt.scr.sline.top = MIN(jbxvt.scr.sline.top,
-			jbxvt.scr.sline.max);
-		for (int_fast16_t j = n; j < jbxvt.scr.chars.height; ++j) {
-			jbxvt.scr.s1.text[j - n] = jbxvt.scr.s1.text[j];
-			jbxvt.scr.s1.rend[j - n] = jbxvt.scr.s1.rend[j];
-		}
-	}
 }
 
 static int8_t copy_screen_area(const int8_t i,
@@ -173,20 +153,35 @@ static int8_t copy_screen_area(const int8_t i,
 static void sc_up(const uint8_t row1, uint8_t row2, int8_t count)
 {
 	LOG("scroll_up(count: %d, row1: %d, row2: %d)", count, row1, row2);
-	struct screenst * scr = jbxvt.scr.current;
-	if (scr == &jbxvt.scr.s1 && row1 == 0)
+	if (jbxvt.scr.current == &jbxvt.scr.s1 && row1 == 0)
 		add_scroll_history(count);
 	uint8_t *save[MAX_SCROLL];
 	uint32_t *rend[MAX_SCROLL];
 	++row2;
 	for(int8_t j = copy_screen_area(0, row1, 1, count, save, rend);
 		j < row2; ++j)
-		transmogrify(j, -count);
+		transmogrify(j, -count, jbxvt.scr.current);
 	clear(count, row2, save, rend, true);
 	cp_repair(row1, row2, count, true);
 	const int16_t y = MARGIN + (row2 - count) * jbxvt.X.font_size.h;
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, 0, y,
 		jbxvt.scr.pixels.width, count * jbxvt.X.font_size.h);
+}
+
+void scroll1(int16_t count)
+{
+	LOG("scroll1(%d)", count);
+	if(count <= 0)
+		  return;
+	// If count > MAX_SCROLL, scroll in installments
+	const int16_t n = MIN(count, MAX_SCROLL);
+	count -= n;
+	cp_rows(n, n);
+	jbxvt.scr.sline.top = MIN(jbxvt.scr.sline.top + n,
+		jbxvt.scr.sline.max);
+	for (int_fast16_t j = n; j < jbxvt.scr.chars.height; ++j)
+		  transmogrify(j, -n, &jbxvt.scr.s1);
+	scroll1(count);
 }
 
 static void sc_dn(uint8_t row1, const uint8_t row2, int8_t count)
@@ -197,7 +192,7 @@ static void sc_dn(uint8_t row1, const uint8_t row2, int8_t count)
 	uint8_t *save[MAX_SCROLL];
 	for(int8_t j = copy_screen_area(0, row2 - 1, -1, count, save, rend);
 		j >= row1; --j)
-		  transmogrify(j, count);
+		  transmogrify(j, count, jbxvt.scr.current);
 	clear(count, row1, save, rend, false);
 	cp_repair(row1, row2 + 1, count, false);
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, 0,
@@ -213,14 +208,9 @@ void scroll(const uint8_t row1, const uint8_t row2, const int16_t count)
 {
 	LOG("scroll(%d, %d, %d)", row1, row2, count);
 	// Sanitize input:
-	if(row1 > row2)
+	if(!count || row1 > row2 || abs(count) > MAX_SCROLL)
 		  return;
-	if(!count || abs(count) > MAX_SCROLL)
-		  return;
-	if (count > 0)
-		sc_up(row1, row2, count);
-	else
-		sc_dn(row1, row2, count);
+	(count > 0 ? &sc_up : &sc_dn)(row1, row2, count);
 	home_screen();
 	cursor(CURSOR_DRAW);
 	cursor(CURSOR_DRAW);
