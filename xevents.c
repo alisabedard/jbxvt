@@ -94,7 +94,6 @@ static void sbop(Token * restrict tk, struct xeventst * restrict xe,
 static void handle_button_release(Token * restrict tk,
 	struct xeventst * restrict xe)
 {
-	LOG("handle_button_release()");
 	if (xe->xe_window == jbxvt.X.win.sb) {
 		switch (xe->xe_button) {
 		case 1:
@@ -141,7 +140,6 @@ static void handle_button_release(Token * restrict tk,
 static void handle_button1_press(Token * restrict tk,
 	struct xeventst * restrict xe)
 {
-	LOG("handle_button1_press");
 	static unsigned int time1, time2;
 	if (xe->xe_time - time2
 		< MP_INTERVAL) {
@@ -161,7 +159,6 @@ static void handle_button1_press(Token * restrict tk,
 static void handle_button_press(Token * restrict tk,
 	struct xeventst * restrict xe)
 {
-	LOG("handle_button_press()");
 	if (xe->xe_window == jbxvt.X.win.vt
 		&& xe->xe_state == XCB_KEY_BUT_MASK_CONTROL) {
 		tk->tk_type = TK_SBSWITCH;
