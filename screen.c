@@ -68,6 +68,7 @@ void scr_change_screen(const bool mode_high)
 	jbxvt.scr.current = mode_high
 		? &jbxvt.scr.s2 : &jbxvt.scr.s1;
 	jbxvt.sel.end2.se_type = NOSEL;
+	jbxvt.scr.sline.top = 0;
 	repaint((xcb_point_t){}, (xcb_point_t){
 		.y = jbxvt.scr.chars.height - 1,
 		.x = jbxvt.scr.chars.width - 1});

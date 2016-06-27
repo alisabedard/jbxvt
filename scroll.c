@@ -114,6 +114,7 @@ static void cp_repair(const uint8_t row1, const uint8_t row2,
 // Handle lines that scroll off the top of the screen.
 static void scroll_off(int_fast16_t count)
 {
+	// Decrement first to stay in array bounds
 	if (--count < 0)
 		  return;
 	const int16_t i = jbxvt.scr.sline.max - count - 1;
@@ -125,6 +126,7 @@ static void add_scroll_history(const int8_t count)
 {
 	scroll_off(count);
 	const uint16_t max = jbxvt.scr.sline.max;
+	// -1 to avoid going over array bounds
 	int_fast16_t y = max - count - 1;
 	SLine ** i = &jbxvt.scr.sline.data[y],
 		** j = &jbxvt.scr.sline.data[y + count];
