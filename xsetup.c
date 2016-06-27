@@ -33,20 +33,24 @@ void map_window(void)
 
 #define RSZ_VM (XCB_CONFIG_WINDOW_WIDTH|XCB_CONFIG_WINDOW_HEIGHT)
 
+static inline void cfg(const xcb_window_t win, const Size sz)
+{
+	xcb_configure_window(jbxvt.X.xcb, win, RSZ_VM,
+		(uint32_t[]){sz.w, sz.h});
+}
+
 static inline void resize_with_scrollbar(xcb_get_geometry_reply_t * r)
 {
-	jbxvt.scr.pixels.width = r->width - SBAR_WIDTH - MARGIN;
-	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.sb, RSZ_VM,
-		(uint32_t[]){SBAR_WIDTH - 1, r->height});
-	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt, RSZ_VM,
-		(uint32_t[]){r->width - SBAR_WIDTH, r->height});
+	jbxvt.scr.pixels.width = r->width - SBAR_WIDTH;
+	// -1 to show the border:
+	cfg(jbxvt.X.win.sb, (Size){.w = SBAR_WIDTH - 1, .h = r->height});
+	cfg(jbxvt.X.win.vt, (Size){.w = r->width - SBAR_WIDTH, .h = r->height});
 }
 
 static inline void resize_without_scrollbar(xcb_get_geometry_reply_t * r)
 {
-	jbxvt.scr.pixels.width = r->width - MARGIN;
-	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt, RSZ_VM,
-		(uint32_t[]){r->width, r->height});
+	jbxvt.scr.pixels.width = r->width;
+	cfg(jbxvt.X.win.vt, (Size){.w = r->width, .h = r->height});
 }
 #undef RSZ_VM
 
@@ -63,7 +67,7 @@ void resize_window(void)
 		  return;
 	(jbxvt.opt.show_scrollbar ? &resize_with_scrollbar
 		: &resize_without_scrollbar)(r);
-	jbxvt.scr.pixels.height = r->height - MARGIN;
+	jbxvt.scr.pixels.height = r->height;
 	free(r);
 	scr_reset();
 }
@@ -74,15 +78,17 @@ void switch_scrollbar(void)
 	LOG("switch_scrollbar()");
 	xcb_get_geometry_cookie_t c = xcb_get_geometry(jbxvt.X.xcb,
 		jbxvt.X.win.main);
-	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt, XCB_CONFIG_WINDOW_X,
-		(uint32_t[]){jbxvt.opt.show_scrollbar?0:SBAR_WIDTH});
-	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(jbxvt.X.xcb,
-		c, NULL);
-	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.main,
-		XCB_CONFIG_WINDOW_WIDTH, (uint32_t[]){
-		r->width+(jbxvt.opt.show_scrollbar?-SBAR_WIDTH:SBAR_WIDTH)});
+	const bool sb = jbxvt.opt.show_scrollbar;
+	int16_t w = sb ? 0 : SBAR_WIDTH;
+	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt,
+		XCB_CONFIG_WINDOW_X, &w);
+	xcb_get_geometry_reply_t * r;
+	r = xcb_get_geometry_reply(jbxvt.X.xcb, c, NULL);
+	w = r->width + (sb ? -SBAR_WIDTH : w);
 	free(r);
-	jbxvt.opt.show_scrollbar ^= true;
+	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.main,
+		XCB_CONFIG_WINDOW_WIDTH, &w);
+	jbxvt.opt.show_scrollbar = !sb;
 }
 
 // Change window or icon name:
