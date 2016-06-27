@@ -15,7 +15,7 @@
 
 #include <string.h>
 
-#define STRING_DEBUG
+//#define STRING_DEBUG
 #ifdef STRING_DEBUG
 #define SLOG(...) LOG(__VA_ARGS__)
 #else
