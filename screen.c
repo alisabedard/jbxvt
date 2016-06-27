@@ -64,7 +64,6 @@ void scr_init(void)
 //  Change between the alternate and the main screens
 void scr_change_screen(const bool mode_high)
 {
-	jbxvt.scr.changing_screens = true;
 	home_screen();
 	jbxvt.scr.current = mode_high
 		? &jbxvt.scr.s2 : &jbxvt.scr.s1;

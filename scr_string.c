@@ -27,7 +27,7 @@ void scr_tab(void)
 {
 	LOG("scr_tab()");
 	home_screen();
-	struct screenst * s = jbxvt.scr.current;
+	VTScreen * s = jbxvt.scr.current;
 	const uint8_t w = jbxvt.scr.chars.width - 1;
 	xcb_point_t c = s->cursor;
 	s->text[c.y][c.x] = '0';
@@ -55,8 +55,7 @@ static void wrap(VTScreen * restrict c)
 static void handle_new_lines(int8_t nlcount)
 {
 	LOG("handle_new_lines(nlcount: %d)", nlcount);
-	struct screenst * restrict s = jbxvt.scr.current;
-	s->margin.b = MAX(s->margin.b, jbxvt.scr.chars.height - 1);
+	VTScreen * restrict s = jbxvt.scr.current;
 	if (s->cursor.y > s->margin.b)
 		  nlcount = 0;
 	else
@@ -79,7 +78,7 @@ static void handle_new_lines(int8_t nlcount)
 static void handle_insert(const uint8_t n, const xcb_point_t p)
 {
 	SLOG("handle_insert(n=%d, p={%d, %d})", n, p.x, p.y);
-	struct screenst * restrict c = jbxvt.scr.current;
+	VTScreen * restrict c = jbxvt.scr.current;
 	uint8_t * s = c->text [c->cursor.y];
 	uint32_t * r = c->rend [c->cursor.y];
 	const Size ch = jbxvt.scr.chars;
@@ -132,12 +131,19 @@ static inline xcb_point_t get_p(VTScreen * restrict c)
 		.y = MARGIN + f.h * c->cursor.y};
 }
 
+static void fix_margins(VTScreen * restrict s)
+{
+	const uint8_t h = jbxvt.scr.chars.height - 1;
+	s->margin.b = MIN(s->margin.b, h);
+}
+
 static inline void fix_cursor(VTScreen * restrict c)
 {
 	c->cursor.y = MAX(c->cursor.y, 0);
 	c->cursor.y = MIN(c->cursor.y, jbxvt.scr.chars.height - 1);
 	c->cursor.x = MAX(c->cursor.x, 0);
 	c->cursor.x = MIN(c->cursor.x, jbxvt.scr.chars.width - 1);
+	fix_margins(c);
 }
 
 /*  Display the string at the current position.
@@ -150,7 +156,7 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 	if (nlcount > 0)
 		  handle_new_lines(nlcount);
 	xcb_point_t p;
-	struct screenst * restrict c = jbxvt.scr.current;
+	VTScreen * restrict c = jbxvt.scr.current;
 	fix_cursor(c);
 	while (len) {
 #define NXT_CHR() --len; ++str; continue;

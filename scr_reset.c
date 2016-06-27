@@ -35,7 +35,7 @@ void reset_row_col(void)
 	}
 }
 
-static void init_screen_elements(struct screenst * restrict scr,
+static void init_screen_elements(VTScreen * restrict scr,
 	uint8_t ** restrict text, uint32_t ** restrict rend)
 {
 	scr->margin.bottom = jbxvt.scr.chars.height - 1;
@@ -55,7 +55,7 @@ static Size get_cdim(const Size d)
 		.height = (d.h-m)/f.h};
 }
 
-static void cpl(struct screenst * restrict scr, uint8_t ** restrict s,
+static void cpl(VTScreen * restrict scr, uint8_t ** restrict s,
 	uint32_t ** restrict r, const uint8_t i, const uint8_t j,
 	const uint8_t sz) // copy line
 {
@@ -134,9 +134,11 @@ static inline void fix_margins(const Size c)
 {
 	/* On screen resize, check if old margin was on the bottom line.
 	   If so, set the bottom margin to the new bottom line.  */
-	if (c.height != jbxvt.scr.chars.height
-		&& c.height == jbxvt.scr.current->margin.b)
-		  jbxvt.scr.current->margin.b = c.height;
+	if (c.height == jbxvt.scr.chars.height)
+		  return;
+	VTScreen * restrict s = jbxvt.scr.current;
+	if (s->margin.b >= c.h)
+		  s->margin.b = c.h - 1;
 }
 
 /*  Reset the screen - called whenever the screen
@@ -154,24 +156,13 @@ void scr_reset(void)
 	}
 	uint8_t **s1 = jbxvt.scr.s1.text, **s2 = jbxvt.scr.s2.text;
 	uint32_t **r1 = jbxvt.scr.s1.rend, **r2 = jbxvt.scr.s2.rend;
-	struct screenst * scr = jbxvt.scr.current;
+	VTScreen * scr = jbxvt.scr.current;
 	if (!scr->text || c.w != jbxvt.scr.chars.width
 		|| c.h != jbxvt.scr.chars.height) {
 		/*  Recreate the screen backup arrays.
 		 *  The screen arrays are one word wider than the screen and
 		 *  the last word is used as a flag which is non-zero if the
 		 *  line wrapped automatically.  */
-		if (jbxvt.scr.changing_screens) {
-			for (int_fast16_t y = c.h - 1; y >= 0; --y) {
-				uint8_t w = c.w + 1;
-				memset(s1[y], 0, w);
-				memset(s2[y], 0, w);
-				w = c.w * sizeof(uint32_t);
-				memset(r1[y], 0, w);
-				memset(r2[y], 0, w);
-			}
-			jbxvt.scr.changing_screens = false;
-		}
 		if (scr == &jbxvt.scr.s1 && jbxvt.scr.s1.text) {
 			// Fill up scr from old scr and saved lines
 			if (jbxvt.scr.s1.cursor.y >= c.h) {
