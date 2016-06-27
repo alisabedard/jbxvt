@@ -367,6 +367,12 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 	case 'E' :
 		tk->tk_type = TK_NEL;
 		break;
+	case 'F': // Enter VT52 graphics mode
+		tk->tk_type = TK_ENTGM52;
+		break;
+	case 'G': // Leave VT52 graphics mode
+		tk->tk_type = TK_EXTGM52;
+		break;
 	case 'H' :
 		tk->tk_type = TK_HTS;
 		break;
@@ -384,12 +390,6 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 		break;
 	case 'c': // Reset to Initial State
 		tk->tk_type = TK_RIS;
-		break;
-	case 'F': // Enter VT52 graphics mode
-		tk->tk_type = TK_ENTGM52;
-		break;
-	case 'G': // Exit VT52 graphics mode
-		tk->tk_type = TK_EXTGM52;
 		break;
 	}
 }
