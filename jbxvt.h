@@ -26,7 +26,7 @@ struct JBXVT {
 			xcb_window_t vt, sb, main;
 		} win;
 		struct {
-			xcb_gcontext_t tx, hl, cu;
+			xcb_gcontext_t tx, cu;
 		} gc;
 		struct {
 			pixel_t bg, fg, cursor;
