@@ -13,7 +13,7 @@
 #define COMMAND "/bin/sh" // default command to run
 
 enum {	SBAR_WIDTH = 10, // width of scroll bar
-	MARGIN = 2, // gap between the text and the window edges
+	MARGIN = 1, // gap between the text and the window edges
 	DEF_SAVED_LINES = 500 // # lines of scroll history
 };
 
