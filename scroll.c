@@ -155,8 +155,8 @@ static void sc_up(const uint8_t row1, uint8_t row2, int8_t count)
 	LOG("scroll_up(count: %d, row1: %d, row2: %d)", count, row1, row2);
 	if (jbxvt.scr.current == &jbxvt.scr.s1 && row1 == 0)
 		add_scroll_history(count);
-	uint8_t *save[MAX_SCROLL];
-	uint32_t *rend[MAX_SCROLL];
+	uint8_t *save[MAX_SCROLL] = {NULL};
+	uint32_t *rend[MAX_SCROLL] = {NULL};
 	++row2;
 	for(int8_t j = copy_screen_area(0, row1, 1, count, save, rend);
 		j < row2; ++j)
