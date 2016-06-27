@@ -208,7 +208,8 @@ void scroll(const uint8_t row1, const uint8_t row2, const int16_t count)
 {
 	LOG("scroll(%d, %d, %d)", row1, row2, count);
 	// Sanitize input:
-	if(!count || row1 > row2 || abs(count) > MAX_SCROLL)
+	if(!count || row1 > row2 || row2 >= jbxvt.scr.chars.height
+		|| abs(count) > MAX_SCROLL)
 		  return;
 	(count > 0 ? &sc_up : &sc_dn)(row1, row2, count);
 	home_screen();
