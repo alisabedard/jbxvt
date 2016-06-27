@@ -19,15 +19,62 @@ static void sgrc(const uint8_t c, const bool fg)
 	jbxvt.scr.rstyle |= r << o;
 }
 
-static inline void sgrfg(uint8_t c)
+static bool rgb_or_index(int32_t arg, bool * restrict either,
+	bool * restrict index, bool * restrict rgb)
 {
-	sgrc(c, true);
+	if (!*either)
+		return false;
+	*either = false;
+	if (arg == 5) {
+		scr_style(RS_FG_INDEX);
+		*index = true;
+	} else if (arg == 2) {
+		scr_style(RS_FG_RGB);
+		*rgb = true;
+	}
+	return true;
 }
 
-static inline void sgrbg(uint8_t c)
+// continue if true
+static bool handle_color_encoding(const int32_t arg, const bool is_fg,
+	bool * restrict index_mode, bool * restrict rgb_mode)
 {
-	sgrc(c, false);
+	static uint8_t rgb_count;
+
+	if (*index_mode) {
+		sgrc(arg, is_fg);
+		// exit mode after handling index
+		*index_mode = false;
+		return true;
+	} else if (unlikely(*rgb_mode)) {
+		const uint8_t o = is_fg ? 0 : 9;
+		jbputs("FIXME: test fg color rgb mode\n");
+		switch(rgb_count) {
+		case 0: // red
+			encode_rgb(arg, 12 + o);
+			LOG("red: %d", arg);
+			break;
+		case 1: // green
+			encode_rgb(arg, 9 + o);
+			LOG("green: %d", arg);
+			break;
+		case 2: // blue
+			encode_rgb(arg, 6 + o);
+			LOG("blue: %d", arg);
+			break;
+		}
+		// exit mode after 3 colors
+		if (++rgb_count > 2) {
+			*rgb_mode = false;
+			rgb_count = 0;
+		}
+		return true;
+	}
+	return false;
 }
+
+#define SGRFG(c) sgrc(c, true)
+#define SGRBG(c) sgrc(c, false)
 
 void handle_sgr(struct tokenst * restrict token)
 {
@@ -41,92 +88,22 @@ void handle_sgr(struct tokenst * restrict token)
 	bool fg_index_mode = false;
 	bool bg_rgb_mode = false;
 	bool bg_index_mode = false;
-	uint8_t fg_rgb_count = 0;
-	uint8_t bg_rgb_count = 0;
 	for (uint_fast8_t i = 0; i < token->tk_nargs; ++i) {
 #ifdef DEBUG_SGR
 		LOG("handle_sgr: tk_arg[%d]: %d", i, token->tk_arg[i]);
 #endif//DEBUG_SGR
-		if (fg_rgb_or_index) {
-			fg_rgb_or_index = false;
-			switch(token->tk_arg[i]) {
-			case 5: // index mode
-				scr_style(RS_FG_INDEX);
-				fg_index_mode = true;
-				continue;
-			case 2: // rgb mode
-				scr_style(RS_FG_RGB);
-				fg_rgb_mode = true;
-				continue;
-			}
-		}
-		if (bg_rgb_or_index) {
-			bg_rgb_or_index = false;
-			switch(token->tk_arg[i]) {
-			case 5: // index mode
-				scr_style(RS_BG_INDEX);
-				bg_index_mode = true;
-				continue;
-			case 2: // rgb mode
-				scr_style(RS_BG_RGB);
-				bg_rgb_mode = true;
-				continue;
-			}
-		}
-		if (fg_index_mode) {
-			sgrfg(token->tk_arg[i]);
-			// exit mode after handling index
-			fg_index_mode = false;
-			continue;
-		} else if (fg_rgb_mode) {
-			jbputs("FIXME: test fg color rgb mode\n");
-			switch(fg_rgb_count) {
-			case 0: // red
-				encode_rgb(token->tk_arg[i], 12);
-				LOG("red");
-				break;
-			case 1: // green
-				encode_rgb(token->tk_arg[i], 9);
-				LOG("green");
-				break;
-			case 2: // blue
-				encode_rgb(token->tk_arg[i], 6);
-				LOG("blue");
-				break;
-			}
-			// exit mode after 3 colors
-			if (++fg_rgb_count > 2) {
-				fg_rgb_mode = false;
-			}
-			continue;
-		}
-		if (bg_index_mode) {
-			sgrbg(token->tk_arg[i]);
-			// exit mode after handling index
-			bg_index_mode = false;
-			continue;
-		} else if (bg_rgb_mode) {
-			jbputs("FIXME: test bg color rgb mode\n");
-			switch(bg_rgb_count) {
-			case 0: // red
-				encode_rgb(token->tk_arg[i], 21);
-				jbputs("red\n");
-				break;
-			case 1: // green
-				encode_rgb(token->tk_arg[i], 18);
-				jbputs("green\n");
-				break;
-			case 2: // blue
-				encode_rgb(token->tk_arg[i], 15);
-				jbputs("blue\n");
-				break;
-			}
-			// exit mode after 3 colors
-			if (++bg_rgb_count > 2) {
-				bg_rgb_mode = false;
-			}
-			continue;
-		}
+		if (rgb_or_index(token->tk_arg[i], &fg_rgb_or_index,
+			&fg_index_mode, &fg_rgb_mode))
+			  continue;
+		if (rgb_or_index(token->tk_arg[i], &bg_rgb_or_index,
+			&bg_index_mode, &bg_rgb_mode))
+			  continue;
+		if (handle_color_encoding(token->tk_arg[i], true,
+			&fg_index_mode, &fg_rgb_mode))
+			  continue;
+		if (handle_color_encoding(token->tk_arg[i], false,
+			&bg_index_mode, &bg_rgb_mode))
+			  continue;
 		switch (token->tk_arg[i]) {
 		case 0 :
 			scr_style(RS_NONE);
@@ -166,46 +143,46 @@ void handle_sgr(struct tokenst * restrict token)
 		case 26: // reserved
 			break;
 		case 39: // foreground reset, white
-			sgrfg(017);
+			SGRFG(017);
 			break;
 		case 48: // extended bg colors
 			bg_rgb_or_index = true;
 			break;
 		case 49: // background reset, black
-			sgrbg(0);
+			SGRBG(0);
 			break;
-		case 30: sgrfg(0); break; // black
-		case 90: sgrfg(010); break; // grey
+		case 30: SGRFG(0); break; // black
+		case 90: SGRFG(010); break; // grey
 		case 31:
-		case 91: sgrfg(011); break;
+		case 91: SGRFG(011); break;
 		case 32:
-		case 92: sgrfg(012); break;
+		case 92: SGRFG(012); break;
 		case 33:
-		case 93: sgrfg(013); break;
+		case 93: SGRFG(013); break;
 		case 34:
-		case 94: sgrfg(014); break;
+		case 94: SGRFG(014); break;
 		case 35:
-		case 95: sgrfg(015); break;
+		case 95: SGRFG(015); break;
 		case 36:
-		case 96: sgrfg(016); break;
+		case 96: SGRFG(016); break;
 		case 37:
-		case 97: sgrfg(017); break;
-		case 40: sgrbg(0); break;
-		case 100: sgrbg(010); break;
+		case 97: SGRFG(017); break;
+		case 40: SGRBG(0); break;
+		case 100: SGRBG(010); break;
 		case 41:
-		case 101: sgrbg(011); break;
+		case 101: SGRBG(011); break;
 		case 42:
-		case 102: sgrbg(012); break;
+		case 102: SGRBG(012); break;
 		case 43:
-		case 103: sgrbg(013); break;
+		case 103: SGRBG(013); break;
 		case 44:
-		case 104: sgrbg(014); break;
+		case 104: SGRBG(014); break;
 		case 45:
-		case 105: sgrbg(015); break;
+		case 105: SGRBG(015); break;
 		case 46:
-		case 106: sgrbg(016); break;
+		case 106: SGRBG(016); break;
 		case 47:
-		case 107: sgrbg(017); break;
+		case 107: SGRBG(017); break;
 		default:
 			LOG("unhandled style %d", token->tk_arg[i]);
 		}
