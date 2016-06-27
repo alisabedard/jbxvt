@@ -134,6 +134,7 @@ static inline xcb_point_t get_p(VTScreen * restrict c)
 static void fix_margins(VTScreen * restrict s)
 {
 	const uint8_t h = jbxvt.scr.chars.height - 1;
+	s->margin.b = MAX(s->margin.b, s->cursor.y);
 	s->margin.b = MIN(s->margin.b, h);
 }
 
@@ -157,7 +158,8 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		  handle_new_lines(nlcount);
 	xcb_point_t p;
 	VTScreen * restrict c = jbxvt.scr.current;
-	fix_cursor(c);
+	fix_cursor(&jbxvt.scr.s1);
+	fix_cursor(&jbxvt.scr.s2);
 	while (len) {
 #define NXT_CHR() --len; ++str; continue;
 		if (likely(*str == '\r')) { // carriage return
