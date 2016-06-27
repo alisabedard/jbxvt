@@ -137,25 +137,20 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 
 // Display the string using the rendition vector at the screen coordinates
 static void paint_rvec_text(uint8_t * str,
-	uint32_t * rvec, uint16_t len, xcb_point_t p)
+	uint32_t * rvec, int16_t len, xcb_point_t p)
 {
-	if (rvec == NULL) {
-		paint_rval_text(str, 0, len, p);
-		return;
-	}
-	while (len > 0) {
-		uint_fast16_t i;
-		// find the length for which the current rend val applies
-		for (i = 0; i < len && rvec[i] == *rvec; ++i)
-			  ;
-		// draw
-		paint_rval_text(str,rvec[0], i, p);
-		// advance
-		str += i;
-		rvec += i;
-		len -= i;
-		p.x += i * jbxvt.X.font_size.width;
-	}
+	if (len <= 0) // exit condition
+		  return;
+	// find the length for which the current rend val applies
+	int_fast16_t i = 0;
+	for (const uint32_t r = *rvec;
+		i < len && rvec[i] == r; ++i)
+		  ;
+	// draw
+	paint_rval_text(str,rvec[0], i, p);
+	// advance
+	p.x += i * jbxvt.X.font_size.width;
+	paint_rvec_text(str + i, rvec + i, len - i, p);
 }
 
 static int_fast32_t repaint_generic(const xcb_point_t p,

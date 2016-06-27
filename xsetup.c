@@ -84,6 +84,8 @@ void switch_scrollbar(void)
 		XCB_CONFIG_WINDOW_X, &w);
 	xcb_get_geometry_reply_t * r;
 	r = xcb_get_geometry_reply(jbxvt.X.xcb, c, NULL);
+	if (!r) // failed
+		  return;
 	w = r->width + (sb ? -SBAR_WIDTH : w);
 	free(r);
 	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.main,

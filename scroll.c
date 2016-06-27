@@ -124,17 +124,18 @@ static void scroll_off(int_fast16_t count)
 static void add_scroll_history(const int8_t count)
 {
 	scroll_off(count);
-	for (int16_t y = jbxvt.scr.sline.max - count - 1; y >= 0; --y)
-		  jbxvt.scr.sline.data[y + count] = jbxvt.scr.sline.data[y];
-	cp_rows(count, count);
-
-	const uint16_t t = jbxvt.scr.sline.top + count;
 	const uint16_t max = jbxvt.scr.sline.max;
-	jbxvt.scr.sline.top = MIN(t, max);
-	sbar_show(jbxvt.scr.chars.height + jbxvt.scr.sline.top - 1,
-		jbxvt.scr.offset, jbxvt.scr.offset
-		+ jbxvt.scr.chars.height - 1);
-
+	int_fast16_t y = max - count - 1;
+	SLine ** i = &jbxvt.scr.sline.data[y],
+		** j = &jbxvt.scr.sline.data[y + count];
+	for (; y >= 0; --y, --i, --j)
+		  *j = *i;
+	cp_rows(count, count);
+	uint16_t t = jbxvt.scr.sline.top + count;
+	t = jbxvt.scr.sline.top = MIN(t, max);
+	const uint8_t h = jbxvt.scr.chars.height - 1;
+	const int16_t o = jbxvt.scr.offset;
+	sbar_show(h + t, o, o + h);
 }
 
 static int8_t copy_screen_area(const int8_t i,

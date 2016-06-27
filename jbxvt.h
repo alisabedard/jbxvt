@@ -39,7 +39,7 @@ struct JBXVT {
 		VTScreen * current;
 		VTScreen s1, s2;
 		struct {
-			struct slinest **data; // saved lines
+			SLine **data; // saved lines
 			int32_t top;
 			uint16_t max; // max # of saved lines
 		} sline;
