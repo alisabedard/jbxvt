@@ -116,7 +116,7 @@ static void init()
 	s2 = GC_MALLOC(sz);
 	r1 = GC_MALLOC(sz);
 	r2 = GC_MALLOC(sz);
-	for (int_fast16_t y = JBXVT_MAX_ROWS; y >= 0; --y) {
+	for (int_fast16_t y = JBXVT_MAX_ROWS - 1; y >= 0; --y) {
 		sz = JBXVT_MAX_COLS;
 		s1[y] = GC_MALLOC(sz);
 		s2[y] = GC_MALLOC(sz);
@@ -141,6 +141,38 @@ static inline void fix_margins(const Size c)
 		  s->margin.b = c.h - 1;
 }
 
+static void handle_screen_1(const Size c, uint8_t ** t1, uint8_t ** t2,
+	uint32_t ** r1, uint32_t ** r2)
+{
+	VTScreen * restrict s = &jbxvt.scr.s1;
+	// Fill up scr from old scr and saved lines
+	if (s->cursor.y >= c.h) {
+		scroll1(s->cursor.y - c.h + 1);
+		s->cursor.y = c.h - 1;
+	}
+	// calculate working no. of lines.
+	int16_t i = jbxvt.scr.sline.top
+		+ s->cursor.y + 1;
+	int32_t j = MIN(i, c.h) - 1;
+	i = s->cursor.y; // save
+	s->cursor.y = j;
+	bool onscreen = true;
+	for (; j >= 0; j--)
+		  i = onscreen ? save_data_on_screen(c.w, i,
+			  j, &onscreen, t1, r1, t2, r2)
+			  : handle_offscreen_data(c.w, i, j,
+				  t1, r1);
+	if (onscreen) // avoid segfault
+		  return;
+	for (j = i; j < jbxvt.scr.sline.top; ++j) {
+		if (!jbxvt.scr.sline.data[j])
+			  break;
+		jbxvt.scr.sline.data[j - i]
+			= jbxvt.scr.sline.data[j];
+	}
+	jbxvt.scr.sline.top -= i;
+}
+
 /*  Reset the screen - called whenever the screen
     needs to be repaired completely.  */
 void scr_reset(void)
@@ -157,52 +189,19 @@ void scr_reset(void)
 	uint8_t **s1 = jbxvt.scr.s1.text, **s2 = jbxvt.scr.s2.text;
 	uint32_t **r1 = jbxvt.scr.s1.rend, **r2 = jbxvt.scr.s2.rend;
 	VTScreen * scr = jbxvt.scr.current;
-	if (!scr->text || c.w != jbxvt.scr.chars.width
-		|| c.h != jbxvt.scr.chars.height) {
-		/*  Recreate the screen backup arrays.
-		 *  The screen arrays are one word wider than the screen and
-		 *  the last word is used as a flag which is non-zero if the
-		 *  line wrapped automatically.  */
-		if (scr == &jbxvt.scr.s1 && jbxvt.scr.s1.text) {
-			// Fill up scr from old scr and saved lines
-			if (jbxvt.scr.s1.cursor.y >= c.h) {
-				scroll1(jbxvt.scr.s1.cursor.y - c.h + 1);
-				jbxvt.scr.s1.cursor.y = c.h - 1;
-			}
-			// calculate working no. of lines.
-			int16_t i = jbxvt.scr.sline.top
-				+ jbxvt.scr.s1.cursor.y + 1;
-			int32_t j = MIN(i, c.h) - 1;
-			i = jbxvt.scr.s1.cursor.y; // save
-			jbxvt.scr.s1.cursor.y = j;
-			bool onscreen = true;
-			for (; j >= 0; j--)
-				  i = onscreen ? save_data_on_screen(c.w, i,
-					  j, &onscreen, s1, r1, s2, r2)
-					  : handle_offscreen_data(c.w, i, j,
-						  s1, r1);
-			if (onscreen) // avoid segfault
-				  return;
-			for (j = i; j < jbxvt.scr.sline.top; ++j) {
-				if (!jbxvt.scr.sline.data[j])
-					  break;
-				jbxvt.scr.sline.data[j - i]
-					= jbxvt.scr.sline.data[j];
-			}
-			jbxvt.scr.sline.top -= i;
-		}
-		init_screen_elements(&jbxvt.scr.s1, s1, r1);
-		init_screen_elements(&jbxvt.scr.s2, s2, r2);
-		scr_start_selection((xcb_point_t){},CHAR);
+	if (likely(scr == &jbxvt.scr.s1 && jbxvt.scr.s1.text)) {
+		handle_screen_1(c, s1, s2, r1, r2);
 	}
+	init_screen_elements(&jbxvt.scr.s1, s1, r1);
+	init_screen_elements(&jbxvt.scr.s2, s2, r2);
+	scr_start_selection((xcb_point_t){},CHAR);
 	// Constrain dimensions:
 	c.w = MIN(c.w, JBXVT_MAX_COLS);
 	c.h = MIN(c.h, JBXVT_MAX_ROWS);
 	tty_set_size(c.w, c.h);
 	jbxvt.scr.chars = c;
 	reset_row_col();
-	c.h--;
-	c.w--;
+	--c.h; --c.w;
 	sbar_show(c.h + jbxvt.scr.sline.top, jbxvt.scr.offset,
 		jbxvt.scr.offset + c.h);
 	repaint((xcb_point_t){}, (xcb_point_t){.y = c.h, .x = c.w});
