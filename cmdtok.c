@@ -171,7 +171,7 @@ static int16_t io_loop(int16_t count, fd_set * restrict in_fdset)
 			in_fdset,&out_fdset,
 			NULL, NULL);
 #endif//SYS_select
-	} while (sv < 0 && errno == EINTR);
+	} while (sv < 0 && (errno == EINTR || errno == EAGAIN));
 
 	if (FD_ISSET(jbxvt.com.fd,&out_fdset)) {
 		count = output_to_command(count);
