@@ -49,12 +49,18 @@ static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
 		b += 61; // Wheel mouse handling
 	}
 	// 4=Shift, 8=Meta, 16=Control
-	if (state & XCB_KEY_BUT_MASK_SHIFT)
+	if (state & XCB_KEY_BUT_MASK_SHIFT) {
+		LOG("SHIFT");
 		b += 4;
-	if (state & XCB_KEY_BUT_MASK_MOD_1)
+	}
+	if (state & XCB_KEY_BUT_MASK_MOD_1) {
+		LOG("MOD");
 		b += 8;
-	if (state & XCB_KEY_BUT_MASK_CONTROL)
+	}
+	if (state & XCB_KEY_BUT_MASK_CONTROL) {
+		LOG("CTRL");
 		b += 16;
+	}
 	// encode in X10 format, plus
 	// - 1 since 0 is mb 1, and 3 is release
 	b += 31;
