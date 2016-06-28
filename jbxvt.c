@@ -31,7 +31,7 @@ void jbputs(const char * restrict string)
 
 static char ** parse_command_line(const int argc, char ** argv)
 {
-	static const char * optstr = "B:b:c:D:d:eF:f:ehvS:s";
+	static const char * optstr = "B:b:C:c:D:d:eF:f:ehvR:S:s";
 	int8_t opt;
 	while((opt=getopt(argc, argv, optstr)) != -1) {
 		switch (opt) {
@@ -47,6 +47,9 @@ static char ** parse_command_line(const int argc, char ** argv)
 		case 'd': // screen number
 			jbxvt.opt.screen = atoi(optarg);
 			break;
+		case 'C': // columns
+			jbxvt.opt.size.cols = atoi(optarg);
+			break;
 		case 'c': // cursor color
 			jbxvt.opt.cu = optarg;
 			break;
@@ -57,6 +60,9 @@ static char ** parse_command_line(const int argc, char ** argv)
 			break;
 		case 'f': // foreground color
 			jbxvt.opt.fg = optarg;
+			break;
+		case 'R': // rows
+			jbxvt.opt.size.rows = atoi(optarg);
 			break;
 		case 'S': // scroll history
 			jbxvt.scr.sline.max = atoi(optarg);
@@ -91,6 +97,8 @@ int main(int argc, char ** argv)
 	jbxvt.opt.bg = COLOR_0;
 	jbxvt.opt.font = DEF_FONT;
 	jbxvt.opt.bold_font = BOLD_FONT;
+	jbxvt.opt.size.width = JBXVT_COLUMNS;
+	jbxvt.opt.size.height = JBXVT_ROWS;
 	char ** com_argv = parse_command_line(argc, argv);
 	init_display(argv[0]);
 	map_window();

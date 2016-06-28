@@ -71,7 +71,8 @@ struct JBXVT {
 	struct {
 		char *bg, *fg, *cu, *font, *bold_font, *display;
 		int screen;
-		bool show_scrollbar:1;
+		Size size;
+		bool show_scrollbar;
 	} opt;
 };
 

@@ -289,6 +289,7 @@ app_loop_head:
 		cursor(t[0] ? CURSOR_ENTRY_IN : CURSOR_ENTRY_OUT);
 		break;
 	case TK_FOCUS :
+		//cprintf("\033[%c]", t[0] ? 'I' : 'O');
 		cursor(t[0] ? CURSOR_FOCUS_IN : CURSOR_FOCUS_OUT);
 		break;
 	case TK_EXPOSE: // window exposed

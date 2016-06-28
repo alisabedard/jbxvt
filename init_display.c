@@ -80,10 +80,13 @@ static xcb_size_hints_t * get_sizehints(void)
 	xcb_size_hints_t * s = GC_MALLOC(sizeof(xcb_size_hints_t));
 	*s = (xcb_size_hints_t) {
 		.flags = USSize | PMinSize | PResizeInc | PBaseSize,
-		.width = 80, .height = 24,
+		.width = jbxvt.opt.size.width,
+		.height = jbxvt.opt.size.height,
 		.width_inc = jbxvt.X.font_size.width,
 		.height_inc = jbxvt.X.font_size.height
 	};
+	++s->height;
+	s->width += 2;
 	s->width *= s->width_inc;
 	s->height *= s->height_inc;
 	s->min_width = s->width_inc + s->base_width;
