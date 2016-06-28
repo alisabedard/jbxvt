@@ -152,7 +152,7 @@ static int16_t output_to_command(int16_t count)
 #if defined(__i386__) || defined(__amd64__)
 	__attribute__((regparm(1)))
 #endif//x86
-static int16_t io_loop(int16_t count, fd_set * restrict in_fdset)
+static int16_t poll_io(int16_t count, fd_set * restrict in_fdset)
 {
 	const fd_t x_fd = xcb_get_file_descriptor(jbxvt.X.xcb);
 	FD_SET(jbxvt.com.fd, in_fdset);
@@ -162,18 +162,13 @@ static int16_t io_loop(int16_t count, fd_set * restrict in_fdset)
 	if (jbxvt.com.send_count > 0)
 		  FD_SET(jbxvt.com.fd,&out_fdset);
 	int sv;
-	do {
 #ifdef SYS_select
-		sv = syscall(SYS_select, jbxvt.com.width,
-			in_fdset, &out_fdset, NULL, NULL);
+	sv = syscall(SYS_select, jbxvt.com.width,
+		in_fdset, &out_fdset, NULL, NULL);
 #else//!SYS_select
-		sv = select(jbxvt.com.width,
-			in_fdset,&out_fdset,
-			NULL, NULL);
+	sv = select(jbxvt.com.width, in_fdset,&out_fdset, NULL, NULL);
 #endif//SYS_select
-	} while (sv < 0 && (errno == EINTR || errno == EAGAIN));
-
-	if (FD_ISSET(jbxvt.com.fd,&out_fdset)) {
+	if (sv != -1 && FD_ISSET(jbxvt.com.fd,&out_fdset)) {
 		count = output_to_command(count);
 	}
 	return count ;
@@ -214,7 +209,7 @@ static int16_t get_com_char(const int_fast8_t flags)
 			if (xev_ret)
 				  return xev_ret;
 		}
-		count = io_loop(count, &in_fdset);
+		count = poll_io(count, &in_fdset);
 	} while(!FD_ISSET(jbxvt.com.fd,&in_fdset));
 #ifdef SYS_read
 	count = syscall(SYS_read, jbxvt.com.fd,
