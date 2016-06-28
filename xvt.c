@@ -172,16 +172,14 @@ static void handle_tk_char(const uint8_t tk_char)
 	}
 }
 
-static void handle_tk_expose(Token * restrict t)
+static void handle_tk_expose(const uint8_t region, const int16_t * arg)
 {
-	LOG("handle_tk_expose()");
-	switch (t->tk_region) {
-	case SCREEN :
+	if (region != SCROLLBAR) {
 		if(jbxvt_size_set){
 			cursor(CURSOR_DRAW); // clear
-			scr_refresh((xcb_rectangle_t){.x = t->tk_arg[0],
-				.y = t->tk_arg[1], .width = t->tk_arg[2],
-				.height = t->tk_arg[3]});
+			scr_refresh((xcb_rectangle_t){.x = arg[0],
+				.y = arg[1], .width = arg[2],
+				.height = arg[3]});
 			cursor(CURSOR_DRAW); // draw
 		} else {
 			/*  Force a full reset if an exposure event
@@ -189,10 +187,8 @@ static void handle_tk_expose(Token * restrict t)
 			scr_reset();
 			jbxvt_size_set = true;
 		}
-		break;
-	case SCROLLBAR :
+	} else { // SCROLLBAR
 		sbar_reset();
-		break;
 	}
 }
 
@@ -234,7 +230,7 @@ static void select_charset(const char c, const uint8_t i)
 
 static void decstbm(Token * restrict token)
 {
-	int32_t * restrict t = token->tk_arg;
+	int16_t * restrict t = token->tk_arg;
 	LOG("TK_DECSTBM args: %d, 0: %d, 1: %d",
 		(int)token->tk_nargs, t[0], t[1]);
 	VTScreen * restrict scr = jbxvt.scr.current;
@@ -263,8 +259,8 @@ void jbxvt_app_loop(void)
 {
 	LOG("app_loop");
 	Token token;
-	int32_t n; // sanitized first token
-	int32_t * t; // shortcut to token.tk_arg
+	int16_t n; // sanitized first token
+	int16_t * t; // shortcut to token.tk_arg
 	VTScreen * scr = jbxvt.scr.current;
 app_loop_head:
 	get_token(&token);
@@ -293,7 +289,7 @@ app_loop_head:
 		cursor(t[0] ? CURSOR_FOCUS_IN : CURSOR_FOCUS_OUT);
 		break;
 	case TK_EXPOSE: // window exposed
-		handle_tk_expose(&token);
+		handle_tk_expose(token.tk_region, token.tk_arg);
 		break;
 	case TK_RESIZE :
 		jbxvt_size_set = false;
