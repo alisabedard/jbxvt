@@ -21,29 +21,18 @@
 
 #define XVT_CLASS	"JBXvt"
 
-#define MW_EVENTS	(	XCB_EVENT_MASK_KEY_PRESS |\
-				XCB_EVENT_MASK_FOCUS_CHANGE |\
-				XCB_EVENT_MASK_STRUCTURE_NOTIFY \
-			)
-
-#define VT_EVENTS	(	XCB_EVENT_MASK_EXPOSURE |\
-				XCB_EVENT_MASK_ENTER_WINDOW |\
-				XCB_EVENT_MASK_LEAVE_WINDOW |\
-				XCB_EVENT_MASK_BUTTON_PRESS |\
-				XCB_EVENT_MASK_BUTTON_RELEASE |\
-				XCB_EVENT_MASK_BUTTON_MOTION |\
-				XCB_EVENT_MASK_POINTER_MOTION \
-			)
-
-
-#define SB_EVENTS	(	XCB_EVENT_MASK_EXPOSURE |\
-				XCB_EVENT_MASK_ENTER_WINDOW |\
-				XCB_EVENT_MASK_LEAVE_WINDOW |\
-				XCB_EVENT_MASK_BUTTON_MOTION |\
-				XCB_EVENT_MASK_POINTER_MOTION |\
-				XCB_EVENT_MASK_BUTTON_RELEASE|\
-				XCB_EVENT_MASK_BUTTON_PRESS \
-			)
+enum EventMasks {
+	MW_EVENTS = (XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_FOCUS_CHANGE
+		| XCB_EVENT_MASK_STRUCTURE_NOTIFY),
+	VT_EVENTS = (XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_ENTER_WINDOW
+		| XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_BUTTON_PRESS
+		| XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_BUTTON_MOTION
+		| XCB_EVENT_MASK_POINTER_MOTION),
+	SB_EVENTS = (XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_ENTER_WINDOW
+		| XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_BUTTON_MOTION
+		| XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_BUTTON_RELEASE
+		| XCB_EVENT_MASK_BUTTON_PRESS)
+};
 
 static void setup_font(void)
 {
@@ -104,10 +93,9 @@ static void create_main_window(xcb_size_hints_t * restrict sh,
 		sh->width, sh->height, 0, XCB_WINDOW_CLASS_COPY_FROM_PARENT,
 		XCB_COPY_FROM_PARENT, XCB_CW_EVENT_MASK,
 		(uint32_t[]){MW_EVENTS});
-	jbxvt.scr.pixels.width = sh->width;
-	jbxvt.scr.pixels.height = sh->height;
-	jbxvt.scr.chars.width = sh->width / jbxvt.X.font_size.width;
-	jbxvt.scr.chars.height = sh->height / jbxvt.X.font_size.height;
+	const Size f = jbxvt.X.font_size;
+	jbxvt.scr.chars.width = (jbxvt.scr.pixels.width = sh->width) / f.w;
+	jbxvt.scr.chars.height = (jbxvt.scr.pixels.height = sh->height) /f.h;
 }
 
 static xcb_cursor_t get_cursor(const uint16_t id, const uint16_t fg,

@@ -178,8 +178,6 @@ static char * get_keycode_value(struct KeyMaps * restrict keymaptable,
 		struct KeyStrings * ks = use_alternate
 			? &km->km_alt : &km->km_normal;
 		switch (ks->ks_type) {
-		case KS_TYPE_NONE:
-			return NULL;
 		case KS_TYPE_CHAR:
 			snprintf(buf, KBUFSIZE,
 				"%c",ks->ks_value);
