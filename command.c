@@ -140,10 +140,8 @@ struct xeventst * pop_xevent(void)
 	struct xeventst * xe = command.xev.last;
 	if(xe) {
 		command.xev.last = xe->xe_prev;
-		if (command.xev.last)
-			  command.xev.last->xe_next = NULL;
-		else
-			  command.xev.start = NULL;
+		*(command.xev.last ? &command.xev.last->xe_next
+			: &command.xev.start) = NULL;
 	}
 	return(xe);
 }
