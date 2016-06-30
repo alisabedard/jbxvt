@@ -299,11 +299,7 @@ uint8_t * lookup_key(void * restrict ev, int16_t * restrict pcount)
 		break;
 	case XCB_MOD_MASK_CONTROL:
 		LOG("XCB_MOD_MASK_CONTROL");
-		if(kbuf[0] >= 'a') {
-			kbuf[0] -= 0x60;
-		} else {
-			kbuf[0] -= 0x40;
-		}
+		kbuf[0] -= kbuf[0] >= 'a' ? 0x60 : 0x40;
 		break;
 	case XCB_MOD_MASK_1:
 		LOG("XCB_MOD_MASK_1");
