@@ -531,9 +531,6 @@ app_loop_head:
 		break;
 #endif//DEBUG
 	}
-#ifdef TK_DEBUG
-	show_token(&token);
-#endif /* TK_DEBUG */
 	goto app_loop_head;
 }
 

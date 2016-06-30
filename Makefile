@@ -5,7 +5,6 @@
 #CFLAGS+=-ggdb
 #CFLAGS+=-DDEBUG
 #CFLAGS+=-DGC_DEBUG
-#CFLAGS+=-DTK_DEBUG
 #CC=clang
 
 exe=jbxvt

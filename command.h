@@ -43,8 +43,4 @@ void send_string(uint8_t * restrict buf, const uint8_t count);
 // Set key mode for cursor keys if is_cursor, else for keypad keys
 void set_keys(const bool mode_high, const bool is_cursor);
 
-#ifdef TK_DEBUG
-void show_token(Token * restrict tk);
-#endif//TK_DEBUG
-
 #endif//!COMMAND_H
