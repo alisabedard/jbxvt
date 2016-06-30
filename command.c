@@ -216,7 +216,7 @@ static char * get_s(const xcb_keysym_t keysym, char * restrict kbuf)
 		|| keysym == XK_Next || keysym == XK_Prior)
 		return get_keycode_value(func_key_table, keysym,
 			kbuf, command.keys.sun_fn);
-	else if (xcb_is_cursor_key(keysym) || xcb_is_pf_key(keysym))
+	if (xcb_is_cursor_key(keysym) || xcb_is_pf_key(keysym))
 		return get_keycode_value(other_key_table, keysym,
 			kbuf, command.keys.app_cur);
 	return get_keycode_value(kp_key_table, keysym,
@@ -225,7 +225,7 @@ static char * get_s(const xcb_keysym_t keysym, char * restrict kbuf)
 
 /* FIXME: Make this portable to non-US keyboards, or write a version
    or table for each type.  */
-static const char shift_map[][2] = {{'1', '!'}, {'2', '@'}, {'3', '#'},
+static const uint8_t shift_map[][2] = {{'1', '!'}, {'2', '@'}, {'3', '#'},
 	{'4', '$'}, {'5', '%'}, {'6', '^'}, {'7', '&'}, {'8', '*'},
 	{'9', '('}, {'0', ')'}, {'-', '_'}, {'=', '+'}, {';', ':'},
 	{'\'', '"'}, {'[', '{'}, {']', '}'}, {'\\', '|'}, {'`', '~'},
