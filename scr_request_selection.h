@@ -7,10 +7,10 @@
 #include <xcb/xproto.h>
 
 //  Request the current primary selection
-void scr_request_selection(xcb_timestamp_t time, const xcb_point_t p);
+void request_selection(void);
 
 //  Respond to a notification that a primary selection has been sent
-void scr_paste_primary(const xcb_window_t window, const xcb_atom_t property);
+void paste_primary(const xcb_window_t window, const xcb_atom_t property);
 
 
 #endif//!SCR_REQ_SEL_H

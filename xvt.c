@@ -352,12 +352,12 @@ app_loop_head:
 		break;
 	case TK_SELINSRT :
 		LOG("TK_SELINSRT");
-		scr_request_selection(t[0], (xcb_point_t){t[1], t[2]});
+		request_selection();
 		break;
 	case TK_SELNOTIFY :
 		LOG("TK_SELNOTIFY");
 		// arg 0 is time, unused
-		scr_paste_primary(t[1], t[2]);
+		paste_primary(t[1], t[2]);
 		break;
 	case TK_CUU: // cursor up
 		LOG("TK_CUU: args: %d, t[0]: %d, n: %d",

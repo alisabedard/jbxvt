@@ -21,8 +21,7 @@ static enum selunit selection_unit;	/* current unit of selection */
 //  Make the selection currently delimited by the selection end markers.
 void scr_make_selection(const xcb_time_t time)
 {
-	if (!save_selection())
-		return;
+	save_selection();
 	xcb_set_selection_owner(jbxvt.X.xcb, jbxvt.X.win.vt,
 		XCB_ATOM_PRIMARY, time);
 	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE,
