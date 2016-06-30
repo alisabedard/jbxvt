@@ -352,7 +352,7 @@ app_loop_head:
 		break;
 	case TK_SELINSRT :
 		LOG("TK_SELINSRT");
-		scr_request_selection(t[0], t[1], t[2]);
+		scr_request_selection(t[0], (xcb_point_t){t[1], t[2]});
 		break;
 	case TK_SELNOTIFY :
 		LOG("TK_SELNOTIFY");

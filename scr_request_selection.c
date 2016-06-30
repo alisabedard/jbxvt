@@ -41,7 +41,7 @@ static void use_cut_buffer(void)
 }
 
 //  Request the current primary selection
-void scr_request_selection(xcb_timestamp_t time, int16_t x, int16_t y)
+void scr_request_selection(xcb_timestamp_t time, const xcb_point_t p)
 {
 	xcb_intern_atom_cookie_t c = xcb_intern_atom(jbxvt.X.xcb, false,
 		12, "VT_SELECTION");
@@ -49,8 +49,8 @@ void scr_request_selection(xcb_timestamp_t time, int16_t x, int16_t y)
 		jbxvt.X.xcb, XCB_ATOM_PRIMARY);
 
 	//  First check that the release is within the window.
-	if (x < 0 || x >= jbxvt.scr.pixels.width || y < 0
-		|| y >= jbxvt.scr.pixels.height)
+	if (p.x < 0 || p.x >= jbxvt.scr.pixels.width || p.y < 0
+		|| p.y >= jbxvt.scr.pixels.height)
 		  return;
 
 	if (jbxvt.sel.text) { // the selection is internal
@@ -78,7 +78,7 @@ void scr_paste_primary(const xcb_window_t window, const xcb_atom_t property)
 {
 	if (property == XCB_NONE)
 		return;
-	unsigned long nread = 0, bytes_after;
+	uint32_t nread = 0, bytes_after;
 	do {
 		uint8_t * data;
 		// divide by 4 to convert 32 bit words to bytes
