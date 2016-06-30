@@ -223,41 +223,22 @@ static char * get_s(const xcb_keysym_t keysym, char * restrict kbuf)
 		kbuf, command.keys.app_kp);
 }
 
+/* FIXME: Make this portable to non-US keyboards, or write a version
+   or table for each type.  */
+static const char shift_map[][2] = {{'1', '!'}, {'2', '@'}, {'3', '#'},
+	{'4', '$'}, {'5', '%'}, {'6', '^'}, {'7', '&'}, {'8', '*'},
+	{'9', '('}, {'0', ')'}, {'-', '_'}, {'=', '+'}, {';', ':'},
+	{'\'', '"'}, {'[', '{'}, {']', '}'}, {'\\', '|'}, {'`', '~'},
+	{',', '<'}, {'.', '>'}, {'/', '?'}, {}};
+
 __attribute__((const))
 static uint8_t shift(uint8_t c)
 {
-	/* FIXME: Make this portable to non-US keyboards,
-	   or write a version or table for each type.  */
-	if (c >= 'a' && c <= 'z') {
+	if (c >= 'a' && c <= 'z')
 		return c - 0x20;
-	}
-	switch(c) {
-	case ';': return ':';
-	case '\'': return '"';
-
-	case '1': return '!';
-	case '2': return '@';
-	case '3': return '#';
-	case '4': return '$';
-	case '5': return '%';
-	case '6': return '^';
-	case '7': return '&';
-	case '8': return '*';
-	case '9': return '(';
-	case '0': return ')';
-	case '-': return '_';
-	case '=': return '+';
-
-	case '[': return '{';
-	case ']': return '}';
-	case '\\': return '|';
-
-	case '`': return '~';
-
-	case ',': return '<';
-	case '.': return '>';
-	case '/': return '?';
-
+	for (uint8_t i = 0; shift_map[i][0]; ++i) {
+		if (shift_map[i][0] == c)
+			  return shift_map[i][1];
 	}
 	return c;
 }
@@ -284,9 +265,8 @@ uint8_t * lookup_key(void * restrict ev, int16_t * restrict pcount)
 #endif//DEBUG
 		return (uint8_t *)s;
 	}
-
 	if (k >= 0xffe0) {
-		// Don't display non-printable characters:
+		// Don't display non-printable characters/modifiers:
 		*pcount = 0;
 		return NULL;
 	}
