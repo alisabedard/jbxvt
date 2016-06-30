@@ -143,7 +143,7 @@ struct xeventst * pop_xevent(void)
 		*(command.xev.last ? &command.xev.last->xe_next
 			: &command.xev.start) = NULL;
 	}
-	return(xe);
+	return xe;
 }
 
 /*  Initialise the command connection.  This should be called after the X
