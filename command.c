@@ -19,8 +19,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <xcb/xcb_keysyms.h>
+// Not part of xcb (yet):
 #include <X11/keysym.h>
-#include <X11/Xutil.h>
 
 static struct {
 	// chars waiting to be sent to the command:
@@ -223,37 +223,96 @@ static char * get_s(const xcb_keysym_t keysym, char * restrict kbuf)
 		kbuf, command.keys.app_kp);
 }
 
+__attribute__((const))
+static uint8_t shift(uint8_t c)
+{
+	/* FIXME: Make this portable to non-US keyboards,
+	   or write a version or table for each type.  */
+	if (c >= 'a' && c <= 'z') {
+		return c - 0x20;
+	}
+	switch(c) {
+	case ';': return ':';
+	case '\'': return '"';
+
+	case '1': return '!';
+	case '2': return '@';
+	case '3': return '#';
+	case '4': return '$';
+	case '5': return '%';
+	case '6': return '^';
+	case '7': return '&';
+	case '8': return '*';
+	case '9': return '(';
+	case '0': return ')';
+	case '-': return '_';
+	case '=': return '+';
+
+	case '[': return '{';
+	case ']': return '}';
+	case '\\': return '|';
+
+	case '`': return '~';
+
+	case ',': return '<';
+	case '.': return '>';
+	case '/': return '?';
+
+	}
+	return c;
+}
+
 //  Convert the keypress event into a string.
 uint8_t * lookup_key(void * restrict ev, int16_t * restrict pcount)
 {
-	static Display * dpy;
-	// FIXME: implement xcb version
-	KeySym keysym;
-	static char kbuf[KBUFSIZE];
-	if (!dpy) {
-		dpy = XOpenDisplay(jbxvt.opt.display);
-	}
+	static uint8_t kbuf[KBUFSIZE];
 	xcb_key_press_event_t * ke = ev;
-	// Generate a fake xlib event.
-	XKeyEvent xke = {.state = ke->state, .keycode = ke->detail,
-	// Open a temporary display connection to use XLookupString.
-		.window = ke->event, .display = dpy, .time = ke->time,
-		.root = jbxvt.X.screen->root, .send_event = true,
-		.type = KeyPress, .serial = ke->sequence};
-	const int16_t count = XLookupString(&xke, kbuf, KBUFSIZE,
-		&keysym, NULL);
-	char *s = get_s(keysym, kbuf);
+	xcb_key_symbols_t *syms = xcb_key_symbols_alloc(jbxvt.X.xcb);
+	xcb_keysym_t k = xcb_key_press_lookup_keysym(syms, ke, 2);
+	LOG("keycode: 0x%x, keysym: 0x%x, state: 0x%x",
+		ke->detail, k, ke->state);
+	xcb_key_symbols_free(syms);
+	char *s = get_s(k, (char *)kbuf);
 	if (s) {
 		uint8_t l = 0;
 		while (s[++l]);
 		*pcount = l;
+#ifdef DEBUG
+		for (uint8_t i = 0; i < l; ++i) {
+			LOG("s[%d]: 0x%x", i, s[i]);
+		}
+#endif//DEBUG
 		return (uint8_t *)s;
-	} else {
-		if((ke->state & Mod1Mask) && (count == 1))
-			kbuf[0] |= 0200;
-		*pcount = count;
-		return (uint8_t *)kbuf;
 	}
+
+	if (k >= 0xffe0) {
+		// Don't display non-printable characters:
+		*pcount = 0;
+		return NULL;
+	}
+	kbuf[0] = k;
+	switch (ke->state) {
+	case XCB_MOD_MASK_SHIFT:
+	case XCB_MOD_MASK_LOCK:
+		LOG("XCB_MOD_MASK_SHIFT/LOCK");
+		kbuf[0] = shift(kbuf[0]);
+		break;
+	case XCB_MOD_MASK_CONTROL:
+		LOG("XCB_MOD_MASK_CONTROL");
+		if(kbuf[0] >= 'a') {
+			kbuf[0] -= 0x60;
+		} else {
+			kbuf[0] -= 0x40;
+		}
+		break;
+	case XCB_MOD_MASK_1:
+		LOG("XCB_MOD_MASK_1");
+		kbuf[0] += 0x80;
+		break;
+	}
+	LOG("kbuf: 0x%hhx", kbuf[0]);
+	*pcount = 1;
+	return (uint8_t *)kbuf;
 }
 
 //  Push an input character back into the input queue.

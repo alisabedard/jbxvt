@@ -32,7 +32,7 @@ LIBS+=-lutempter
 #-------------------------------
 
 CFLAGS+=-DUSE_LIKELY
-LIBS+=-lxcb -lxcb-keysyms -lX11 -lgc
+LIBS+=-lxcb -lxcb-keysyms -lgc
 
 #-------------------------------
 
