@@ -132,10 +132,7 @@ void push_xevent(struct xeventst * xe)
 {
 	xe->xe_next = command.xev.start;
 	xe->xe_prev = NULL;
-	if (xe->xe_next)
-		xe->xe_next->xe_prev = xe;
-	else
-		command.xev.last = xe;
+	*(xe->xe_next ? &xe->xe_next->xe_prev : &command.xev.last) = xe;
 }
 
 struct xeventst * pop_xevent(void)
