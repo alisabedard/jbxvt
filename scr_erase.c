@@ -77,10 +77,8 @@ static void common_scr_erase(const xcb_rectangle_t r,
 	const int16_t row1, const int16_t row2, const int8_t mode)
 {
 	check_selection(row1, row2);
-	if (r.height > 0) {
-		xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt,
-			r.x, r.y, r.width, r.height);
-	}
+	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, r.x, r.y,
+		r.width, r.height);
 	scr_erase_line(mode);
 }
 
@@ -92,7 +90,6 @@ void scr_erase_screen(const int8_t mode)
 	VTScreen * s = jbxvt.scr.current;
 	s->wrap_next = 0;
 	const Size c = jbxvt.scr.chars;
-	int_fast16_t i;
 	const uint8_t fh = jbxvt.X.font_size.height;
 	xcb_rectangle_t r = {.x = MARGIN, .y = MARGIN,
 		.width = jbxvt.scr.pixels.width};
@@ -100,7 +97,7 @@ void scr_erase_screen(const int8_t mode)
 	case 1:
 		LOG("START");
 		r.height = s->cursor.y * fh;
-		for (i = 0; i < s->cursor.y; ++i)
+		for (uint8_t i = 0; i < s->cursor.y; ++i)
 			  zero(i);
 		common_scr_erase(r, 0, s->cursor.y - 1, mode);
 		break;
@@ -109,7 +106,7 @@ void scr_erase_screen(const int8_t mode)
 		if (s->cursor.y || s->cursor.x) {
 			r.y += (s->cursor.y + 1) * fh;
 			r.height = (c.height - s->cursor.y - 1) * fh;
-			for (i = s->cursor.y + 1; i < c.height; ++i)
+			for (uint8_t i = s->cursor.y + 1; i < c.height; ++i)
 				  zero(i);
 			common_scr_erase(r, s->cursor.y + 1, c.height - 1,
 				mode);

@@ -30,8 +30,7 @@ void reset_row_col(void)
 	// Implement DECOM, DEC Origin Mode, limits
 	if (jbxvt.scr.current->decom) {
 		const Size m = jbxvt.scr.current->margin;
-		c->y = MAX(c->y, m.top);
-		c->y = MIN(c->y, m.bottom);
+		c->y = MIN(MAX(c->y, m.top), m.bottom);
 	}
 }
 

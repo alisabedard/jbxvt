@@ -294,10 +294,6 @@ void push_com_char(const int c)
 //  Send count characters directly to the command.
 void send_string(uint8_t * restrict buf, const uint8_t count)
 {
-	if (command.send) {
-		GC_FREE(command.send);
-		command.send = NULL;
-	}
 	command.send = GC_MALLOC(count);
 	memcpy(command.send, buf, count);
 	jbxvt.com.send_nxt = command.send;

@@ -55,13 +55,10 @@ void scr_send_selection(const xcb_time_t time,
 //  Clear the current selection.
 void scr_clear_selection(void)
 {
-	if (jbxvt.sel.text) {
-		GC_FREE(jbxvt.sel.text);
-		jbxvt.sel.text = NULL;
+	if (jbxvt.sel.text)
 		jbxvt.sel.length = 0;
-	}
-	show_selection(0, jbxvt.scr.chars.height - 1,
-		0, jbxvt.scr.chars.width - 1);
+	const Size c = jbxvt.scr.chars;
+	show_selection(0, c.h - 1, 0, c.w - 1);
 	jbxvt.sel.end1.se_type = jbxvt.sel.end2.se_type = NOSEL;
 }
 
@@ -85,7 +82,7 @@ void scr_start_selection(xcb_point_t p, enum selunit unit)
 //  Convert a row and column coordinates into a selection endpoint.
 void rc_to_selend(const int16_t row, const int16_t col, struct selst * se)
 {
-	int i = (row - jbxvt.scr.offset);
+	int16_t i = (row - jbxvt.scr.offset);
 	if (i >= 0)
 		se->se_type = SCREENSEL;
 	else {
@@ -132,16 +129,13 @@ static uint8_t find_c(uint8_t c, int16_t i)
  *  empty space.  */
 void fix_rc(xcb_point_t * restrict rc)
 {
-	if(!jbxvt.scr.chars.height || !jbxvt.scr.chars.width)
+	const Size c = jbxvt.scr.chars;
+	if(!c.h || !c.w)
 		  return; // prevent segfault on bad window size.
-	if (rc->x < 0)
-		  rc->x = 0;
-	else if (rc->x >= jbxvt.scr.chars.width)
-		  rc->x = jbxvt.scr.chars.width - 1;
-	if (rc->y < 0)
-		  rc->y = 0;
-	else if (rc->y >= jbxvt.scr.chars.height)
-		  rc->y = jbxvt.scr.chars.height - 1;
+	rc->x = MAX(rc->x, 0);
+	rc->x = MIN(rc->x, c.w - 1);
+	rc->y = MAX(rc->y, 0);
+	rc->y = MIN(rc->y, c.h - 1);
 	rc->x = find_c(rc->x, rc->y - jbxvt.scr.offset);
 }
 
@@ -170,7 +164,7 @@ static inline uint8_t compute_i2(const uint16_t len, const uint8_t i1,
 	if (i2 - i1 >= MAX_WIDTH)
 		i2 = i1 + MAX_WIDTH;
 	while (i2 >= i1 && str[i2] == 0)
-		i2--;
+		--i2;
 	return i2;
 }
 
@@ -241,13 +235,9 @@ void adjust_selection(struct selst * restrict include)
 	if (selection_unit == CHAR)
 		return;
 	struct selst *se1, *se2;
-	if (selcmp(&jbxvt.sel.end1,&jbxvt.sel.end2) <= 0) {
-		se1 = &jbxvt.sel.end1;
-		se2 = &jbxvt.sel.end2;
-	} else {
-		se2 = &jbxvt.sel.end1;
-		se1 = &jbxvt.sel.end2;
-	}
+	const bool oneless = selcmp(&jbxvt.sel.end1,&jbxvt.sel.end2) <= 0;
+	se1 = oneless ? &jbxvt.sel.end1 : &jbxvt.sel.end2;
+	se2 = oneless ? &jbxvt.sel.end2 : &jbxvt.sel.end1;
 	if (selection_unit == WORD)
 		  adj_sel_to_word(include, se1, se2);
 	else if (selection_unit == LINE) {
