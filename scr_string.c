@@ -61,12 +61,10 @@ static void handle_new_lines(int8_t nlcount)
 		  nlcount = 0;
 	else
 		  nlcount -= s->margin.b - s->cursor.y;
-	if (nlcount < 0)
-		  nlcount = 0;
-	else if (nlcount > (s->cursor.y - s->margin.t))
-		  nlcount = s->cursor.y - s->margin.t;
-	if (nlcount > MAX_SCROLL)
-		  nlcount = MAX_SCROLL;
+	nlcount = MAX(nlcount, 0);
+	const int8_t lim = s->cursor.y - s->margin.t;
+	nlcount = MIN(nlcount, lim);
+	nlcount = MIN(nlcount, MAX_SCROLL);
 	scroll(s->margin.t, s->margin.b, nlcount);
 	s->cursor.y -= nlcount;
 	LOG("nlcount: %d, c.y: %d, m.b: %d", nlcount,
