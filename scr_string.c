@@ -50,6 +50,7 @@ static void wrap(VTScreen * restrict c)
 	}
 	check_selection(*y, *y);
 	c->wrap_next = 0;
+	c->cursor.x = 0;
 }
 
 static void handle_new_lines(int8_t nlcount)
@@ -94,10 +95,12 @@ static void handle_insert(const uint8_t n, const xcb_point_t p)
 		jbxvt.X.gc.tx, p.x, p.y, x, p.y, width, f.h);
 }
 
-// str and iter alias each other
-static int_fast16_t find_n(uint8_t * str, uint8_t * iter)
+static uint_fast16_t find_n(uint8_t * restrict str)
 {
-	return *iter < ' ' ? iter - str : find_n(str, iter + 1);
+	uint_fast16_t i;
+	for (i = 0; i < jbxvt.scr.chars.width && str[i] >= ' '; ++i)
+		  ;
+	return i;
 }
 
 static void parse_special_charset(uint8_t * restrict str, const uint8_t len)
@@ -157,17 +160,17 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 	if (nlcount > 0)
 		  handle_new_lines(nlcount);
 	xcb_point_t p;
-	VTScreen * restrict c = jbxvt.scr.current;
+	VTScreen * restrict s = jbxvt.scr.current;
 	fix_cursor(&jbxvt.scr.s1);
 	fix_cursor(&jbxvt.scr.s2);
 	while (len) {
 #define NXT_CHR() --len; ++str; continue;
 		if (likely(*str == '\r')) { // carriage return
-			c->cursor.x = 0;
-			c->wrap_next = 0;
+			s->cursor.x = 0;
+			s->wrap_next = 0;
 			NXT_CHR();
 		} else if (*str == '\n') { // line feed
-			wrap(c);
+			wrap(s);
 			NXT_CHR();
 		} else if (unlikely(*str == '\t')) {
 			scr_tab();
@@ -175,51 +178,69 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		} else if (unlikely(*str == 0xe2)) {
 			*str = '+';
 		} // mask out tmux graphics characters
-		if (c->wrap_next) {
-			wrap(c);
-			c->cursor.x = 0;
-		}
-
-		check_selection(c->cursor.y, c->cursor.y);
-		p = get_p(c);
-		const int_fast16_t n = find_n(str, str);
-		if (unlikely(c->insert))
+		if (s->wrap_next)
+			wrap(s);
+		check_selection(s->cursor.y, s->cursor.y);
+		p = get_p(s);
+		const int_fast16_t n = find_n(str);
+		if (unlikely(s->insert))
 			  handle_insert(n, p);
-		uint8_t * s = c->text[c->cursor.y];
-		if (!s) return;
-		s += c->cursor.x;
-		if (c->charset[c->charsel] == CHARSET_SG0)
+		uint8_t * t = s->text[s->cursor.y];
+		if (!t) return;
+		t += s->cursor.x;
+		if (s->charset[s->charsel] == CHARSET_SG0)
 			  parse_special_charset(str, len);
 		// Save scroll history:
-		memcpy(s, str, n);
+		//memcpy(t, str, n);
+		strncpy((char*)t, (char*)str, n);
 		// Render the string:
 		paint_rval_text(str, jbxvt.scr.rstyle, n, p);
 		// Save render style:
 		if(jbxvt.scr.rstyle) {
 			for (int_fast16_t i = n - 1; i >= 0; --i)
-				  c->rend[c->cursor.y][c->cursor.x + i]
+				  s->rend[s->cursor.y][s->cursor.x + i]
 					  = jbxvt.scr.rstyle;
 		}
 		len -= n;
 		str += n;
-		c->cursor.x += n;
-		if (unlikely(len > 0 && c->cursor.x
+		s->cursor.x += n;
+		const uint8_t w = jbxvt.scr.chars.width;
+		if (s->cursor.x >= w) {
+			s->cursor.x = jbxvt.scr.chars.width - 1;
+			s->wrap_next = s->decawm;
+		}
+#if 0
+			if (s->decawm)
+				//wrap(s);
+				s->wrap_next = true;
+			else {
+				s->cursor.x = w - 1;
+				s->wrap_next = false;
+				cursor(CURSOR_DRAW);
+				return;
+			}
+#endif
+	//	}
+#if 0
+		if (unlikely(len > 0 && s->cursor.x
 			== jbxvt.scr.chars.width && *str >= ' ')) {
 			// Handle DEC auto-wrap mode:
-			if (c->decawm) {
-				wrap(c);
-				c->cursor.x = 0;
+			if (s->decawm) {
+				wrap(s);
 			} else { // No auto-wrap, keep cursor at end:
-				c->cursor.x = jbxvt.scr.chars.width - 1;
+				s->cursor.x = jbxvt.scr.chars.width - 1;
 				cursor(CURSOR_DRAW);
 				return;
 			}
 		}
+#endif
 	}
-	if (c->cursor.x >= jbxvt.scr.chars.width) {
-		c->cursor.x = jbxvt.scr.chars.width - 1;
-		c->wrap_next = c->decawm;
+#if 0
+	if (s->cursor.x >= jbxvt.scr.chars.width) {
+		s->cursor.x = jbxvt.scr.chars.width - 1;
+		s->wrap_next = s->decawm;
 	}
+#endif
 	cursor(CURSOR_DRAW);
 }
 

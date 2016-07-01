@@ -14,26 +14,14 @@
 #include <string.h>
 
 /*  Convert the currently marked screen selection as a text string
-    and save it as the current saved selection.  true is returned
-    for a success, false for a failure.  */
-bool save_selection(void)
+    and save it as the current saved selection. */
+void save_selection(void)
 {
 	uint8_t *str, *s;
-	uint16_t len;
-	int i, total, col1, col2;
+	uint16_t len, total;
+	int16_t i, col1, col2;
 	struct selst *se1, *se2;
 	struct slinest *sl;
-
-	if (jbxvt.sel.end1.se_type == NOSEL
-		|| jbxvt.sel.end2.se_type == NOSEL)
-		return false;
-	if (jbxvt.sel.end1.se_type == jbxvt.sel.end2.se_type
-		&& jbxvt.sel.end1.se_index == jbxvt.sel.end2.se_index
-		&& jbxvt.sel.end1.se_col == jbxvt.sel.end2.se_col)
-		return false;
-
-	if (jbxvt.sel.text)
-		GC_FREE(jbxvt.sel.text);
 
 	/*  Set se1 and se2 to point to the first
 	    and second selection endpoints.  */
@@ -44,11 +32,11 @@ bool save_selection(void)
 	str = GC_MALLOC(1);
 	if (se1->se_type == SAVEDSEL) {
 		col1 = se1->se_col;
-		for (i = se1->se_index; i >= 0; i--) {
+		for (i = se1->se_index; i >= 0; --i) {
 			sl = jbxvt.scr.sline.data[i];
 			if (se2->se_type == SAVEDSEL && se2->se_index == i) {
 				col2 = se2->se_col - 1;
-				i = 0;			/* force loop exit */
+				i = 0;	// force loop exit
 			} else
 				col2 = jbxvt.scr.chars.width - 1;
 			len = sl->sl_length;
@@ -65,7 +53,7 @@ bool save_selection(void)
 		const bool is_screensel = se1->se_type == SCREENSEL;
 		i = is_screensel ? se1->se_index : 0;
 		col1 = is_screensel ? se1->se_col : 0;
-		for (; i <= se2->se_index; i++) {
+		for (; i <= se2->se_index; ++i) {
 			col2 = i == se2->se_index ? se2->se_col
 				: jbxvt.scr.chars.width;
 			if (--col2 < 0)
@@ -80,10 +68,9 @@ bool save_selection(void)
 			col1 = 0;
 		}
 	}
-	str[total - 1] = 0;
+	str[total - 1] = 0; // null termination
 	jbxvt.sel.text = str;
 	jbxvt.sel.length = total - 1;
-	return true;
 }
 
 
