@@ -57,10 +57,8 @@ static void handle_new_lines(int8_t nlcount)
 {
 	LOG("handle_new_lines(nlcount: %d)", nlcount);
 	VTScreen * restrict s = jbxvt.scr.current;
-	if (s->cursor.y > s->margin.b)
-		  nlcount = 0;
-	else
-		  nlcount -= s->margin.b - s->cursor.y;
+	nlcount = s->cursor.y > s->margin.b ? 0
+		: nlcount - s->margin.b - s->cursor.y;
 	nlcount = MAX(nlcount, 0);
 	const int8_t lim = s->cursor.y - s->margin.t;
 	nlcount = MIN(nlcount, lim);
