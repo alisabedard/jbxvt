@@ -34,23 +34,35 @@ enum EventMasks {
 		| XCB_EVENT_MASK_BUTTON_PRESS)
 };
 
+
+static xcb_font_t get_font(const char * name)
+{
+	xcb_font_t f = xcb_generate_id(jbxvt.X.xcb);
+	size_t l = 0;
+	while(name[++l]);
+	xcb_void_cookie_t c = xcb_open_font_checked(jbxvt.X.xcb,
+		f, l, name);
+	xcb_generic_error_t * error = xcb_request_check(jbxvt.X.xcb, c);
+	if (error) {
+		l = 0;
+		const char * fallback = FALLBACK_FONT;
+		while(fallback[++l]);
+		c = xcb_open_font_checked(jbxvt.X.xcb, f, l, fallback);
+		error = xcb_request_check(jbxvt.X.xcb, c);
+		if (error)
+			  quit(1, WARN_RES RES_FNT);
+		if (jbxvt.X.font) // Fall back if bold font not available:
+			  jbxvt.X.bold_font = jbxvt.X.font;
+	}
+	return f;
+}
+
 static void setup_font(void)
 {
-	jbxvt.X.font = xcb_generate_id(jbxvt.X.xcb);
-	jbxvt.X.bold_font = xcb_generate_id(jbxvt.X.xcb);
-	size_t l = 0;
-	while(jbxvt.opt.font[++l]);
-	xcb_void_cookie_t c = xcb_open_font_checked(jbxvt.X.xcb,
-		jbxvt.X.font, l, jbxvt.opt.font);
-	l = 0;
-	while(jbxvt.opt.bold_font[++l]);
-	xcb_void_cookie_t b = xcb_open_font_checked(jbxvt.X.xcb,
-		jbxvt.X.bold_font, l, jbxvt.opt.bold_font);
+	jbxvt.X.font = get_font(jbxvt.opt.font);
 	xcb_query_font_cookie_t qfc = xcb_query_font(jbxvt.X.xcb,
 		jbxvt.X.font);
-	xcb_generic_error_t * error = xcb_request_check(jbxvt.X.xcb, c);
-	if(error) // failed to load main font
-		  quit(1, WARN_RES RES_FNT);
+	jbxvt.X.bold_font = get_font(jbxvt.opt.bold_font);
 	xcb_query_font_reply_t * r = xcb_query_font_reply(jbxvt.X.xcb,
 		qfc, NULL);
 	jbxvt.X.font_ascent = r->font_ascent;
@@ -58,9 +70,6 @@ static void setup_font(void)
 	jbxvt.X.font_size.width = r->max_bounds.character_width;
 	free(r);
 	jbxvt.X.font_size.height = jbxvt.X.font_ascent + jbxvt.X.font_descent;
-	error = xcb_request_check(jbxvt.X.xcb, b);
-	if(error) // use normal font if bold not available.
-		  jbxvt.X.bold_font = jbxvt.X.font;
 }
 
 // free the returned value
