@@ -6,16 +6,6 @@
 
 #include <stdint.h>
 
-#define WARN_ERR	"ERR"
-#define WARN_SIG	"SIG"
-#define WARN_RES	"RES:"
-#define RES_DPY		"DPY"
-#define RES_CMD		"CMD"
-#define RES_FNT		"FNT"
-#define RES_SSN		"SSN"
-#define RES_TTY		"TTY"
-#define RES_TMP		"TMP"
-
 #ifdef LINUX
 #include <asm-generic/ioctls.h>
 #endif//LINUX

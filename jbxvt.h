@@ -8,6 +8,15 @@
 #include "selst.h"
 #include "slinest.h"
 
+#define WARN_ERR	"Error: "
+#define WARN_SIG	"Signal Received"
+#define WARN_RES	"Resource unavailable: "
+#define RES_DPY		"Bad DISPLAY"
+#define RES_CMD		"Could not execute command"
+#define RES_FNT		"Could not load font"
+#define RES_SSN		"Could not open session"
+#define RES_TTY		"Could not open tty"
+
 // Use for all file descriptors:
 typedef int fd_t;
 
