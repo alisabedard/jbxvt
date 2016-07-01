@@ -123,6 +123,7 @@ void scr_erase_screen(const int8_t mode)
 			r.height = c.h - 1;
 		scroll(0, r.height, r.height);
 		cursor(CURSOR_DRAW);
+		scr_erase_line(mode);
 	}
 }
 
