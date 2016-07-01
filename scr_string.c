@@ -72,7 +72,7 @@ static void handle_new_lines(int8_t nlcount)
 }
 
 #if defined(__i386__) || defined(__amd64__)
-       __attribute__((regparm(1)))
+       __attribute__((regparm(2)))
 #endif//x86
 static void handle_insert(const uint8_t n, const xcb_point_t p)
 {
@@ -148,6 +148,29 @@ static inline void fix_cursor(VTScreen * restrict c)
 	fix_margins(c);
 }
 
+static bool test_action_char(const uint8_t c, VTScreen * restrict s)
+{
+	switch(c) {
+	case '\r':
+		s->cursor.x = 0;
+		s->wrap_next = false;
+		return true;
+	case '\n':
+		wrap(s);
+		return true;
+	case '\t':
+		scr_tab();
+		return true;
+	}
+	return false;
+}
+
+static void save_render_style(const int_fast16_t n, VTScreen * restrict s)
+{
+	for (int_fast16_t i = n - 1; i >= 0; --i)
+		  s->rend[s->cursor.y][s->cursor.x + i] = jbxvt.scr.rstyle;
+}
+
 /*  Display the string at the current position.
     nlcount is the number of new lines in the string.  */
 void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
@@ -162,22 +185,12 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 	fix_cursor(&jbxvt.scr.s1);
 	fix_cursor(&jbxvt.scr.s2);
 	while (len) {
-#define NXT_CHR() --len; ++str; continue;
-		if (likely(*str == '\r')) { // carriage return
-			s->cursor.x = 0;
-			s->wrap_next = 0;
-			NXT_CHR();
-		} else if (*str == '\n') { // line feed
-			wrap(s);
-			NXT_CHR();
-		} else if (unlikely(*str == '\t')) {
-			scr_tab();
-			NXT_CHR();
-		} else if (unlikely(*str == 0xe2)) {
-			*str = '+';
-		} // mask out tmux graphics characters
+		if (test_action_char(*str, s)) {
+			--len; ++str; continue;
+		} else if (unlikely(*str == 0xe2))
+			  *str = '+';
 		if (s->wrap_next)
-			wrap(s);
+			  wrap(s);
 		check_selection(s->cursor.y, s->cursor.y);
 		p = get_p(s);
 		const int_fast16_t n = find_n(str);
@@ -188,16 +201,13 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		t += s->cursor.x;
 		if (s->charset[s->charsel] == CHARSET_SG0)
 			  parse_special_charset(str, len);
-		// Save scroll history:
-		memcpy(t, str, n);
 		// Render the string:
 		paint_rval_text(str, jbxvt.scr.rstyle, n, p);
+		// Save scroll history:
+		memcpy(t, str, n);
 		// Save render style:
-		if(jbxvt.scr.rstyle) {
-			for (int_fast16_t i = n - 1; i >= 0; --i)
-				  s->rend[s->cursor.y][s->cursor.x + i]
-					  = jbxvt.scr.rstyle;
-		}
+		if(jbxvt.scr.rstyle)
+			  save_render_style(n, s);
 		len -= n;
 		str += n;
 		s->cursor.x += n;
