@@ -150,7 +150,7 @@ static void handle_screen_1(const Size c, uint8_t ** t1, uint8_t ** t2,
 	// calculate working no. of lines.
 	int16_t i = jbxvt.scr.sline.top
 		+ s->cursor.y + 1;
-	int32_t j = MIN(i, c.h) - 1;
+	int32_t j = s->cursor.y;
 	i = s->cursor.y; // save
 	s->cursor.y = j;
 	bool onscreen = true;
