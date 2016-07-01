@@ -191,8 +191,7 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		if (s->charset[s->charsel] == CHARSET_SG0)
 			  parse_special_charset(str, len);
 		// Save scroll history:
-		//memcpy(t, str, n);
-		strncpy((char*)t, (char*)str, n);
+		memcpy(t, str, n);
 		// Render the string:
 		paint_rval_text(str, jbxvt.scr.rstyle, n, p);
 		// Save render style:
@@ -209,38 +208,7 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 			s->cursor.x = jbxvt.scr.chars.width - 1;
 			s->wrap_next = s->decawm;
 		}
-#if 0
-			if (s->decawm)
-				//wrap(s);
-				s->wrap_next = true;
-			else {
-				s->cursor.x = w - 1;
-				s->wrap_next = false;
-				cursor(CURSOR_DRAW);
-				return;
-			}
-#endif
-	//	}
-#if 0
-		if (unlikely(len > 0 && s->cursor.x
-			== jbxvt.scr.chars.width && *str >= ' ')) {
-			// Handle DEC auto-wrap mode:
-			if (s->decawm) {
-				wrap(s);
-			} else { // No auto-wrap, keep cursor at end:
-				s->cursor.x = jbxvt.scr.chars.width - 1;
-				cursor(CURSOR_DRAW);
-				return;
-			}
-		}
-#endif
 	}
-#if 0
-	if (s->cursor.x >= jbxvt.scr.chars.width) {
-		s->cursor.x = jbxvt.scr.chars.width - 1;
-		s->wrap_next = s->decawm;
-	}
-#endif
 	cursor(CURSOR_DRAW);
 }
 
