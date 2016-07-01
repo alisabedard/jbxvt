@@ -100,13 +100,11 @@ static int handle_offscreen_data(const uint8_t cw,
 		  return i + 1;
 	const uint8_t n = MIN(cw, l);
 	memcpy(s1[j], sl->sl_text, n);
-	if (sl->sl_rend) {
-		memcpy(r1[j], sl->sl_rend, n * sizeof(uint32_t));
-	}
+	memcpy(r1[j], sl->sl_rend, n * sizeof(uint32_t));
 	return i + 1;
 }
 
-static void init()
+static void init(void)
 {
 	uint8_t **s1, **s2;
 	uint32_t **r1, **r2;
