@@ -119,11 +119,9 @@ void scr_erase_screen(const int8_t mode)
 		 *  the scroll-up code.  */
 	case 2:
 		LOG("ENTIRE");
-		if (!r.height) // test in case above case fell through
-			r.height = c.h - 1;
+		r.height = c.h - 1;
 		scroll(0, r.height, r.height);
-		cursor(CURSOR_DRAW);
-		scr_erase_line(mode);
+		common_scr_erase(r, 0, r.height, mode);
 	}
 }
 
