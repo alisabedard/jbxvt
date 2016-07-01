@@ -91,8 +91,9 @@ void scr_erase_screen(const int8_t mode)
 	s->wrap_next = 0;
 	const Size c = jbxvt.scr.chars;
 	const uint8_t fh = jbxvt.X.font_size.height;
+	const Size p = jbxvt.scr.pixels;
 	xcb_rectangle_t r = {.x = MARGIN, .y = MARGIN,
-		.width = jbxvt.scr.pixels.width};
+		.width = p.width};
 	switch (mode) {
 	case 1:
 		LOG("START");
@@ -118,14 +119,9 @@ void scr_erase_screen(const int8_t mode)
 		 *  the scroll-up code.  */
 	case 2:
 		LOG("ENTIRE");
-		r.height = c.height - 1;
-		if (s == &jbxvt.scr.s1)
-			scroll1(r.height);
-		else
-			scroll(0, r.height, r.height);
-		xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, 0, 0,
-			jbxvt.scr.pixels.width, jbxvt.scr.pixels.height);
-		sbar_show(r.height + jbxvt.scr.sline.top, 0, r.height);
+		if (!r.height) // test in case above case fell through
+			r.height = c.h - 1;
+		scroll(0, r.height, r.height);
 		cursor(CURSOR_DRAW);
 	}
 }
