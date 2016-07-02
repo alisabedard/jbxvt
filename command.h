@@ -15,17 +15,9 @@ enum CommandLimits {
 	MP_INTERVAL =	500	// multi-press interval in ms
 };
 
-//  Special character returned by get_com_char().
-enum ComCharReturn {
-	GCC_NULL = 0x100, // Input buffer is empty
-	ESC = 033
-};
-
-//  Flags used to control get_com_char();
-enum ComCharFlags {BUF_ONLY=1, GET_XEVENTS=2};
-
 struct xeventst *pop_xevent(void);
-void cprintf(char *,...);
+
+void cprintf(char *, ...);
 
 /*  Initialise the command connection.  This should be called after the X
  *  server connection is established.  */
