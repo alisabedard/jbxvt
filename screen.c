@@ -51,13 +51,13 @@ void scr_init(void)
 	if (jbxvt.scr.sline.max < MAX_SCROLL)
 		jbxvt.scr.sline.max = MAX_SCROLL;
 	jbxvt.scr.sline.data = GC_MALLOC(jbxvt.scr.sline.max * sizeof(void*));
-	jbxvt.scr.s1.decawm = jbxvt.scr.s2.decawm = true;
-	jbxvt.scr.s1.dectcem = jbxvt.scr.s2.dectcem = true;
+#define SETBOTH(f, val) jbxvt.scr.s1.f = val; jbxvt.scr.s2.f = val;
+	SETBOTH(decawm, true);
+	SETBOTH(dectcem, true);
+	SETBOTH(charset[0], CHARSET_ASCII);
+	SETBOTH(charset[1], CHARSET_ASCII);
+#undef SETBOTH
 	jbxvt.scr.current = &jbxvt.scr.s1;
-	jbxvt.scr.s1.charset[0] = jbxvt.scr.s2.charset[0]
-		= CHARSET_ASCII;
-	jbxvt.scr.s1.charset[1] = jbxvt.scr.s2.charset[1]
-		= CHARSET_SG0;
 	scr_reset();
 }
 
