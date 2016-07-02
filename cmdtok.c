@@ -198,11 +198,11 @@ static int16_t get_com_char(const int_fast8_t flags)
 		return(GCC_NULL);
 
 	fd_set in_fdset;
-	xcb_generic_event_t * e;
 	xcb_flush(jbxvt.X.xcb);
 	int16_t count = 0;
 	do {
 		FD_ZERO(&in_fdset);
+		xcb_generic_event_t * e;
 		if ((e = xcb_poll_for_event(jbxvt.X.xcb))) {
 			const int16_t xev_ret = handle_xev(e, &count, flags);
 			free(e);
@@ -278,8 +278,7 @@ static void start_esc(int_fast16_t c, Token * restrict tk)
 	do {
 		uint_fast16_t n = 0;
 		while (c >= '0' && c <= '9') {
-			n *= 10;
-			n += c - '0';
+			n = n * 10 + c - '0';
 			c = get_com_char(0);
 		}
 		if (i < TK_MAX_ARGS)
@@ -394,7 +393,6 @@ void get_token(Token * restrict tk)
 	// set token per event:
 	if(handle_xevents(tk))
 		  return;
-
 	int_fast16_t c = get_com_char(GET_XEVENTS);
 	if (c == GCC_NULL) {
 		tk->tk_type = TK_NULL;
