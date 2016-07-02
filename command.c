@@ -236,35 +236,11 @@ static uint8_t shift(uint8_t c)
 	return c;
 }
 
-//  Convert the keypress event into a string.
-uint8_t * lookup_key(void * restrict ev, int16_t * restrict pcount)
+static void apply_state(const uint16_t state, uint8_t * restrict kbuf)
 {
-	static uint8_t kbuf[KBUFSIZE];
-	xcb_key_press_event_t * ke = ev;
-	xcb_key_symbols_t *syms = xcb_key_symbols_alloc(jbxvt.X.xcb);
-	xcb_keysym_t k = xcb_key_press_lookup_keysym(syms, ke, 2);
-	LOG("keycode: 0x%x, keysym: 0x%x, state: 0x%x",
-		ke->detail, k, ke->state);
-	xcb_key_symbols_free(syms);
-	char *s = get_s(k, (char *)kbuf);
-	if (s) {
-		uint8_t l = 0;
-		while (s[++l]);
-		*pcount = l;
-#ifdef DEBUG
-		for (uint8_t i = 0; i < l; ++i) {
-			LOG("s[%d]: 0x%x", i, s[i]);
-		}
-#endif//DEBUG
-		return (uint8_t *)s;
-	}
-	if (k >= 0xffe0) {
-		// Don't display non-printable characters/modifiers:
-		*pcount = 0;
-		return NULL;
-	}
-	kbuf[0] = k;
-	switch (ke->state) {
+	if (!state)
+		  return;
+	switch (state) {
 	case XCB_MOD_MASK_SHIFT:
 	case XCB_MOD_MASK_LOCK:
 		LOG("XCB_MOD_MASK_SHIFT/LOCK");
@@ -279,7 +255,42 @@ uint8_t * lookup_key(void * restrict ev, int16_t * restrict pcount)
 		kbuf[0] += 0x80;
 		break;
 	}
+}
+
+//  Convert the keypress event into a string.
+__attribute__((nonnull))
+uint8_t * lookup_key(void * restrict ev, int16_t * restrict pcount)
+{
+	static uint8_t kbuf[KBUFSIZE];
+	xcb_key_press_event_t * ke = ev;
+	xcb_key_symbols_t *syms = xcb_key_symbols_alloc(jbxvt.X.xcb);
+	xcb_keysym_t k = xcb_key_press_lookup_keysym(syms, ke, 2);
+#ifdef KEY_DEBUG
+	LOG("keycode: 0x%x, keysym: 0x%x, state: 0x%x",
+		ke->detail, k, ke->state);
+#endif//KEY_DEBUG
+	xcb_key_symbols_free(syms);
+	char *s = get_s(k, (char *)kbuf);
+	if (s) {
+		uint8_t l = 0;
+		while (s[++l]);
+		*pcount = l;
+#ifdef KEY_DEBUG
+		for (uint8_t i = 0; i < l; ++i)
+			LOG("s[%d]: 0x%x", i, s[i]);
+#endif//KEY_DEBUG
+		return (uint8_t *)s;
+	}
+	if (k >= 0xffe0) {
+		// Don't display non-printable characters/modifiers:
+		*pcount = 0;
+		return NULL;
+	}
+	kbuf[0] = k;
+	apply_state(ke->state, kbuf);
+	#ifdef KEY_DEBUG
 	LOG("kbuf: 0x%hhx", kbuf[0]);
+#endif//KEY_DEBUG
 	*pcount = 1;
 	return (uint8_t *)kbuf;
 }
