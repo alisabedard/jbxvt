@@ -204,7 +204,7 @@ static int16_t get_com_char(const int_fast8_t flags)
 	do {
 		FD_ZERO(&in_fdset);
 		if ((e = xcb_poll_for_event(jbxvt.X.xcb))) {
-			int16_t xev_ret = handle_xev(e, &count, flags);
+			const int16_t xev_ret = handle_xev(e, &count, flags);
 			free(e);
 			if (xev_ret)
 				  return xev_ret;
