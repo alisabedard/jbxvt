@@ -83,7 +83,7 @@ void scr_style(const uint32_t style)
 	jbxvt.scr.rstyle = style ? jbxvt.scr.rstyle | style : 0;
 }
 
-static void hsc(void)
+static inline void hsc(void)
 {
 	home_screen();
 	cursor(CURSOR_DRAW);
@@ -99,17 +99,6 @@ void scr_index_by(const int8_t mod)
 	cursor(CURSOR_DRAW);
 }
 
-static int8_t scroll_up_scr_bot(uint8_t count, const bool up)
-{
-	while (count > MAX_SCROLL) {
-		scroll(jbxvt.scr.current->cursor.y,
-			jbxvt.scr.current->margin.bottom,
-			up?MAX_SCROLL:-MAX_SCROLL);
-		count -= MAX_SCROLL;
-	}
-	return up?count:-count;
-}
-
 //  Delete count lines and scroll up the bottom of the screen to fill the gap
 void scr_delete_lines(const uint8_t count)
 {
@@ -119,16 +108,9 @@ void scr_delete_lines(const uint8_t count)
 	if (count > mb - cy + 1)
 		return;
 	hsc();
-	scroll(cy, mb, scroll_up_scr_bot(count, true));
+	scroll(cy, mb, count);
 	s->wrap_next = 0;
 	cursor(CURSOR_DRAW);
-}
-
-static void scroll_lower_lines(const int8_t count)
-{
-	scroll(jbxvt.scr.current->cursor.y,
-		jbxvt.scr.current->margin.bottom,
-		scroll_up_scr_bot(count, false));
 }
 
 static inline uint8_t get_insertion_count(const int8_t count)
@@ -144,8 +126,9 @@ static inline uint8_t get_insertion_count(const int8_t count)
 void scr_insert_lines(const int8_t count)
 {
 	hsc();
-	scroll_lower_lines(get_insertion_count(count));
-	jbxvt.scr.current->wrap_next = 0;
+	VTScreen * s = jbxvt.scr.current;
+	scroll(s->cursor.y, s->margin.b, -get_insertion_count(count));
+	s->wrap_next = false;
 	cursor(CURSOR_DRAW);
 }
 
