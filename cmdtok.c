@@ -196,10 +196,10 @@ static int16_t get_com_char(const int_fast8_t flags)
 
 	if (flags & BUF_ONLY)
 		return(GCC_NULL);
-
-	fd_set in_fdset;
+	// Flush here to draw the cursor.
 	xcb_flush(jbxvt.X.xcb);
 	int16_t count = 0;
+	fd_set in_fdset;
 	do {
 		FD_ZERO(&in_fdset);
 		xcb_generic_event_t * e;
