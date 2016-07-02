@@ -5,7 +5,7 @@
 #include "screen.h"
 
 // Convert 3 bit color to 9 bit color, store at offset
-static void encode_rgb(uint8_t color, uint8_t offset)
+static inline void encode_rgb(uint8_t color, uint8_t offset)
 {
 	scr_style(((color>>5)&07)<<offset);
 }
