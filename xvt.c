@@ -168,6 +168,22 @@ static void decstbm(Token * restrict token)
 
 }
 
+static void handle_dsr(const int16_t arg)
+{
+	switch (arg) {
+	case 5: // command from host requesting status
+		// 0 is response for 'Ready, no malfunctions'
+		cprintf("0");
+	case 6 :
+		cursor(CURSOR_REPORT);
+		break;
+	case 7 :
+		//  Send the name of the display to the command.
+		cprintf("%s\r", getenv("DISPLAY"));
+		break;
+	}
+}
+
 void jbxvt_app_loop(void)
 {
 	LOG("app_loop");
@@ -348,20 +364,9 @@ app_loop_head:
 		//LOG("TK_SGR");
 		handle_sgr(&token);
 		break;
-	case TK_DSR :		/* request for information */
+	case TK_DSR: // request for information
 		LOG("TK_DSR");
-		switch (token.tk_arg[0]) {
-		case 5: // command from host requesting status
-			// 0 is response for 'Ready, no malfunctions'
-			cprintf("0");
-		case 6 :
-			cursor(CURSOR_REPORT);
-			break;
-		case 7 :
-			//  Send the name of the display to the command.
-			cprintf("%s\r", getenv("DISPLAY"));
-			break;
-		}
+		handle_dsr(t[0]);
 		break;
 	case TK_DECSTBM: // set top and bottom margins.
 		decstbm(&token);
