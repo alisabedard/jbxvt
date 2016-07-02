@@ -69,27 +69,6 @@ static void setup_font(void)
 	jbxvt.X.font_size.height = jbxvt.X.font_ascent + jbxvt.X.font_descent;
 }
 
-// free the returned value
-static xcb_size_hints_t * get_sizehints(void)
-{
-	xcb_size_hints_t * s = GC_MALLOC(sizeof(xcb_size_hints_t));
-	*s = (xcb_size_hints_t) {
-		.flags = USSize | PMinSize | PResizeInc | PBaseSize,
-		.width = jbxvt.opt.size.width,
-		.height = jbxvt.opt.size.height,
-		.width_inc = jbxvt.X.font_size.width,
-		.height_inc = jbxvt.X.font_size.height
-	};
-	++s->height;
-	s->width += 2;
-	s->width *= s->width_inc;
-	s->height *= s->height_inc;
-	s->min_width = s->width_inc + s->base_width;
-	s->min_height = s->height_inc + s->base_height;
-
-	return s;
-}
-
 static void create_main_window(xcb_size_hints_t * restrict sh,
 	const xcb_window_t root)
 {
@@ -142,15 +121,33 @@ static void create_vt_window(xcb_size_hints_t * restrict sh)
 	xcb_free_cursor(jbxvt.X.xcb, c);
 }
 
+static void get_sizehints(xcb_size_hints_t * restrict s)
+{
+	*s = (xcb_size_hints_t) {
+		.flags = USSize | PMinSize | PResizeInc | PBaseSize,
+		.width = jbxvt.opt.size.width,
+		.height = jbxvt.opt.size.height,
+		.width_inc = jbxvt.X.font_size.width,
+		.height_inc = jbxvt.X.font_size.height
+	};
+	++s->height;
+	s->width += 2;
+	s->width *= s->width_inc;
+	s->height *= s->height_inc;
+	s->min_width = s->width_inc + s->base_width;
+	s->min_height = s->height_inc + s->base_height;
+}
+
 //  Open the window.
 static void create_window(uint8_t * restrict name, const xcb_window_t root)
 {
-	xcb_size_hints_t * sh = get_sizehints();
-	create_main_window(sh, root);
+	xcb_size_hints_t sh;
+	get_sizehints(&sh);
+	create_main_window(&sh, root);
 	change_name(name, true);
 	change_name(name, false);
-	create_sb_window(sh->height);
-	create_vt_window(sh);
+	create_sb_window(sh.height);
+	create_vt_window(&sh);
 	jbxvt.opt.show_scrollbar ^= true;
 	switch_scrollbar();
 }
