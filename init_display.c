@@ -19,8 +19,6 @@
 #include <X11/cursorfont.h>
 #include <X11/Xutil.h>
 
-#define XVT_CLASS	"JBXvt"
-
 enum EventMasks {
 	MW_EVENTS = (XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_FOCUS_CHANGE
 		| XCB_EVENT_MASK_STRUCTURE_NOTIFY),
@@ -33,7 +31,6 @@ enum EventMasks {
 		| XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_BUTTON_RELEASE
 		| XCB_EVENT_MASK_BUTTON_PRESS)
 };
-
 
 static xcb_font_t get_font(const char * name)
 {
@@ -154,7 +151,6 @@ static void create_window(uint8_t * restrict name, const xcb_window_t root)
 	change_name(name, false);
 	create_sb_window(sh->height);
 	create_vt_window(sh);
-	GC_FREE(sh);
 	jbxvt.opt.show_scrollbar ^= true;
 	switch_scrollbar();
 }
