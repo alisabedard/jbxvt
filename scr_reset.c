@@ -59,8 +59,6 @@ static void cpl(VTScreen * restrict scr, uint8_t ** restrict s,
 	const uint8_t sz) // copy line
 {
 	// copy contents:
-	if(!s[j] || !r[j])
-		return;
 	memcpy(s[j], scr->text[i], sz);
 	memcpy(r[j], scr->rend[i], sz * sizeof(uint32_t));
 	// copy end byte for wrap flag:
