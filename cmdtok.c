@@ -199,12 +199,12 @@ static int16_t get_com_char(const int_fast8_t flags)
 
 	fd_set in_fdset;
 	xcb_generic_event_t * e;
-	int16_t count = 0, xev_ret = 0;
 	xcb_flush(jbxvt.X.xcb);
+	int16_t count = 0;
 	do {
 		FD_ZERO(&in_fdset);
 		if ((e = xcb_poll_for_event(jbxvt.X.xcb))) {
-			xev_ret = handle_xev(e, &count, flags);
+			int16_t xev_ret = handle_xev(e, &count, flags);
 			free(e);
 			if (xev_ret)
 				  return xev_ret;
@@ -293,8 +293,6 @@ static void start_esc(int_fast16_t c, Token * restrict tk)
 	} while (c < '@' && c >= ' ');
 	if (c == ESC)
 		  push_com_char(c);
-	if (c < ' ')
-		  return;
 	tk->tk_nargs = i;
 	tk->tk_type = c;
 }
