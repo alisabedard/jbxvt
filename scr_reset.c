@@ -175,9 +175,7 @@ static void handle_screen_1(const Size c, uint8_t ** t1, uint8_t ** t2,
 void scr_reset(void)
 {
 	Size c = get_cdim(jbxvt.scr.pixels);
-
 	fix_margins(c);
-
 	static bool created;
 	if (!created) {
 		init();
@@ -186,9 +184,8 @@ void scr_reset(void)
 	uint8_t **s1 = jbxvt.scr.s1.text, **s2 = jbxvt.scr.s2.text;
 	uint32_t **r1 = jbxvt.scr.s1.rend, **r2 = jbxvt.scr.s2.rend;
 	VTScreen * scr = jbxvt.scr.current;
-	if (likely(scr == &jbxvt.scr.s1 && jbxvt.scr.s1.text)) {
+	if (likely(scr == &jbxvt.scr.s1 && jbxvt.scr.s1.text))
 		handle_screen_1(c, s1, s2, r1, r2);
-	}
 	init_screen_elements(&jbxvt.scr.s1, s1, r1);
 	init_screen_elements(&jbxvt.scr.s2, s2, r2);
 	scr_start_selection((xcb_point_t){},CHAR);
