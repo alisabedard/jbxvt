@@ -54,13 +54,22 @@ static inline void set_charsel(const uint8_t i)
 	jbxvt.scr.s2.charsel = i;
 }
 
+static void form_feed(void)
+{
+	const Size m = jbxvt.scr.current->margin;
+	scr_move(0, m.top, 0);
+	scroll(m.top, m.bottom, m.bottom - m.top);
+}
+
 static void handle_tk_char(const uint8_t tk_char)
 {
 	switch (tk_char) {
 	case '\n': // handle line feed
 	case 013: // vertical tab
-	case 014: // form feed
 		scr_index();
+		break;
+	case '\f': // form feed
+		form_feed();
 		break;
 	case '\r': // handle carriage return
 		scr_move(0,0,ROW_RELATIVE);
