@@ -35,21 +35,17 @@ void scr_send_selection(const xcb_time_t time,
 	const uint32_t requestor, const uint32_t target, const uint32_t property)
 {
 	// x events must be 32 bytes long:
-	xcb_selection_notify_event_t * e = GC_MALLOC(32);
-	e->response_type = XCB_SELECTION_NOTIFY;
-	e->selection = XCB_ATOM_PRIMARY;
-	e->target = target;
-	e->requestor = requestor;
-	e->time = time;
-	e->property = property;
+	xcb_selection_notify_event_t e = {
+		.response_type = XCB_SELECTION_NOTIFY,
+		.selection = XCB_ATOM_PRIMARY, .target = target,
+		.requestor = requestor, .time = time, .property = property};
 	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE, requestor,
 		property, XCB_ATOM_STRING, 8, jbxvt.sel.length,
 		jbxvt.sel.text);
-	xcb_send_event(jbxvt.X.xcb, false, requestor, XCB_SELECTION_NOTIFY,
-		(char*)e);
-	// send it before e is freed:
+	xcb_send_event(jbxvt.X.xcb, false, requestor,
+		XCB_SELECTION_NOTIFY, (char *)&e);
+	// send it before e looses scope
 	xcb_flush(jbxvt.X.xcb);
-	GC_FREE(e);
 }
 
 //  Clear the current selection.
