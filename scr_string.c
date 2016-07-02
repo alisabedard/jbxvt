@@ -35,24 +35,6 @@ void scr_tab(void)
 	s->cursor.x = c.x;
 }
 
-static void wrap(VTScreen * restrict c)
-{
-	const Size m = c->margin;
-	const Size sz = jbxvt.scr.chars;
-	int16_t * y = &c->cursor.y;
-	c->text[*y][sz.w] = 1; // wrap flag
-	if (*y >= m.bottom) {
-		LOG("cursor at bottom margin, scrolling");
-		scroll(m.top, m.bottom, 1);
-	} else if (*y < sz.height - 1) {
-		SLOG("++*y");
-		++*y;
-	}
-	check_selection(*y, *y);
-	c->wrap_next = 0;
-	c->cursor.x = 0;
-}
-
 static void handle_new_lines(int8_t nlcount)
 {
 	LOG("handle_new_lines(nlcount: %d)", nlcount);
@@ -67,6 +49,24 @@ static void handle_new_lines(int8_t nlcount)
 	s->cursor.y -= nlcount;
 	LOG("nlcount: %d, c.y: %d, m.b: %d", nlcount,
 		s->cursor.y, s->margin.b);
+}
+
+static void wrap(VTScreen * restrict c)
+{
+	int16_t * y = &c->cursor.y;
+	const Size sz = jbxvt.scr.chars;
+	c->text[*y][sz.w] = 1; // wrap flag
+	const Size m = c->margin;
+	if (*y >= m.bottom) {
+		LOG("cursor at bottom margin, scrolling");
+		scroll(m.top, m.bottom, 1);
+	} else if (*y < sz.height - 1) {
+		SLOG("++*y");
+		++*y;
+	}
+	check_selection(*y, *y);
+	c->wrap_next = false;
+	c->cursor.x = 0;
 }
 
 #if defined(__i386__) || defined(__amd64__)
@@ -130,20 +130,20 @@ static inline xcb_point_t get_p(VTScreen * restrict c)
 		.y = MARGIN + f.h * c->cursor.y};
 }
 
-static void fix_margins(VTScreen * restrict s)
+static void fix_margins(Size * restrict m, const int16_t cursor_y)
 {
+	m->b = MAX(m->b, cursor_y);
 	const uint8_t h = jbxvt.scr.chars.height - 1;
-	s->margin.b = MAX(s->margin.b, s->cursor.y);
-	s->margin.b = MIN(s->margin.b, h);
+	m->b = MIN(m->b, h);
 }
 
-static inline void fix_cursor(VTScreen * restrict c)
+static void fix_cursor(VTScreen * restrict c)
 {
 	c->cursor.y = MAX(c->cursor.y, 0);
 	c->cursor.y = MIN(c->cursor.y, jbxvt.scr.chars.height - 1);
 	c->cursor.x = MAX(c->cursor.x, 0);
 	c->cursor.x = MIN(c->cursor.x, jbxvt.scr.chars.width - 1);
-	fix_margins(c);
+	fix_margins(&c->margin, c->cursor.y);
 }
 
 static bool test_action_char(const uint8_t c, VTScreen * restrict s)
@@ -212,7 +212,9 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		const uint8_t w = jbxvt.scr.chars.width;
 		if (s->cursor.x >= w) {
 			s->cursor.x = jbxvt.scr.chars.width - 1;
-			s->wrap_next = s->decawm;
+			if (!(s->wrap_next = s->decawm))
+				  break; /* Skip rendering off the edge of the
+					    screen.  */
 		}
 	}
 	cursor(CURSOR_DRAW);

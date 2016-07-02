@@ -85,7 +85,7 @@ static struct KeyMaps func_key_table[] = {
 	{XK_Page_Up,	{KS_TYPE_XTERM,5},	{KS_TYPE_SUN,5}},
 	{XK_Page_Down,	{KS_TYPE_XTERM,6},	{KS_TYPE_SUN,6}},
 	{XK_Menu,	{KS_TYPE_XTERM,29},	{KS_TYPE_SUN,197}},
-	{0,		{KS_TYPE_NONE,0},	{KS_TYPE_NONE,0}}
+	{}
 };
 
 //  PC keys and VT100 keypad function keys
@@ -100,7 +100,7 @@ static struct KeyMaps other_key_table[]={
 	{ XK_KP_F2,	{KS_TYPE_APPKEY,'Q'},	{KS_TYPE_APPKEY,'Q'}},
 	{ XK_KP_F3,	{KS_TYPE_APPKEY,'R'},	{KS_TYPE_APPKEY,'R'}},
 	{ XK_KP_F4,	{KS_TYPE_APPKEY,'S'},	{KS_TYPE_APPKEY,'S'}},
-	{0,		{KS_TYPE_NONE,0},	{KS_TYPE_NONE,0}}
+	{}
 };
 
 //  VT100 numeric keypad keys
@@ -124,7 +124,7 @@ static struct KeyMaps kp_key_table[]={
 	{ XK_KP_Enter,	{KS_TYPE_CHAR,'\r'},	{KS_TYPE_APPKEY,'M'}},
 	{ XK_KP_Space,	{KS_TYPE_CHAR,' '},	{KS_TYPE_APPKEY,' '}},
 	{ XK_KP_Tab,	{KS_TYPE_CHAR,'\t'},	{KS_TYPE_APPKEY,'I'}},
-	{0,		{KS_TYPE_NONE,0},	{KS_TYPE_NONE,0}}
+	{}
 };
 
 //  Push a mini X event onto the queue
