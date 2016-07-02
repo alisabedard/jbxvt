@@ -288,7 +288,7 @@ uint8_t * lookup_key(void * restrict ev, int16_t * restrict pcount)
 	}
 	kbuf[0] = k;
 	apply_state(ke->state, kbuf);
-	#ifdef KEY_DEBUG
+#ifdef KEY_DEBUG
 	LOG("kbuf: 0x%hhx", kbuf[0]);
 #endif//KEY_DEBUG
 	*pcount = 1;
