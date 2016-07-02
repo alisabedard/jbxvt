@@ -217,7 +217,7 @@ static char * get_s(const xcb_keysym_t keysym, char * restrict kbuf)
 }
 
 /* FIXME: Make this portable to non-US keyboards, or write a version
-   or table for each type.  */
+   or table for each type.  Perhaps use libxkbcommon-x11.  */
 static const uint8_t shift_map[][2] = {{'1', '!'}, {'2', '@'}, {'3', '#'},
 	{'4', '$'}, {'5', '%'}, {'6', '^'}, {'7', '&'}, {'8', '*'},
 	{'9', '('}, {'0', ')'}, {'-', '_'}, {'=', '+'}, {';', ':'},
