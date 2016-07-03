@@ -6,6 +6,7 @@
 #include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"
+#include "log.h"
 #include "repaint.h"
 #include "sbar.h"
 #include "screen.h"
@@ -122,6 +123,7 @@ static inline void fix_margins(const Size c)
 static void handle_screen_1(const Size c, uint8_t ** t1, uint8_t ** t2,
 	uint32_t ** r1, uint32_t ** r2)
 {
+	LOG("handle_screen_1()");
 	VTScreen * restrict s = &jbxvt.scr.s1;
 	// Fill up scr from old scr and saved lines
 	if (s->cursor.y >= c.h) {
@@ -147,6 +149,7 @@ static void handle_screen_1(const Size c, uint8_t ** t1, uint8_t ** t2,
     needs to be repaired completely.  */
 void scr_reset(void)
 {
+	LOG("scr_reset()");
 	Size c = get_cdim(jbxvt.scr.pixels);
 	fix_margins(c);
 	static bool created;
