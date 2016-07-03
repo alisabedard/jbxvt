@@ -157,7 +157,10 @@ static int_fast32_t repaint_generic(const xcb_point_t p,
 	const int_fast32_t m, const int_fast32_t c1,
 	const int_fast32_t c2, uint8_t * restrict str, uint32_t * rend)
 {
-	paint_rvec_text(str, rend ? rend + c1 : NULL, m, p);
+	if (rend)
+		paint_rvec_text(str, rend + c1, m, p);
+	else
+		paint_rval_text(str, 0, m, p);
 	const int_fast16_t x = p.x + m * jbxvt.X.font_size.width;
 	const uint_fast16_t width = (c2 - c1 + 1 - m)
 		* jbxvt.X.font_size.width;
@@ -167,49 +170,49 @@ static int_fast32_t repaint_generic(const xcb_point_t p,
 	return p.y + jbxvt.X.font_size.height;
 }
 
-static int_fast16_t show_scroll_history(xcb_point_t rc1, xcb_point_t rc2,
+static int_fast16_t show_scroll_history(const xcb_rectangle_t r,
 	xcb_point_t * restrict p, uint8_t * restrict str)
 {
-	int_fast16_t line = rc1.y;
-	for (int_fast16_t i = jbxvt.scr.offset - rc1.y - 1;
-		line <= rc2.y && i >= 0; ++line, --i) {
+	int_fast16_t line = r.y;
+	for (int_fast16_t i = jbxvt.scr.offset - r.y - 1;
+		line <= r.height && i >= 0; ++line, --i) {
 		SLine * sl = jbxvt.scr.sline.data[i];
 		if (!sl) // no scroll history yet!
 			  break;
-		memcpy(str, sl->sl_text + rc1.x, sl->sl_length);
-		p->y = repaint_generic(*p, sl->sl_length, rc1.x,
-			rc2.x, sl->sl_text, sl->sl_rend);
+		memcpy(str, sl->sl_text + r.x, sl->sl_length);
+		p->y = repaint_generic(*p, sl->sl_length, r.x,
+			r.width, sl->sl_text, sl->sl_rend);
 	}
 	return line;
 }
 
-/* Repaint the box delimited by rc1.y to rc2.y and rc1.x to rc2.x
-   of the displayed screen from the backup screen.  */
-void repaint(const xcb_point_t rc1, const xcb_point_t rc2)
+/* Repaint the box delimited by r of the displayed screen
+   from the backup screen.  */
+void repaint(const xcb_rectangle_t r)
 {
-	LOG("repaint({%d, %d}, {%d, %d})", rc1.x, rc1.y, rc2.x, rc2.y);
-	xcb_point_t p = { .x = MARGIN + rc1.x * jbxvt.X.font_size.width,
-		.y = MARGIN + rc1.y * jbxvt.X.font_size.height};
+	LOG("repaint({%d, %d}, {%d, %d})", r.x, r.y, r.width, r.height);
+	xcb_point_t p = { .x = MARGIN + r.x * jbxvt.X.font_size.width,
+		.y = MARGIN + r.y * jbxvt.X.font_size.height};
 	// Allocate enough space to process each column, plus wrap byte.
 	uint8_t str[jbxvt.scr.chars.width + 1];
 	//  First do any 'scrolled off' lines that are visible.
-	int_fast32_t line = show_scroll_history(rc1, rc2, &p, str);
+	int_fast32_t line = show_scroll_history(r, &p, str);
 
 	// Do the remainder from the current screen:
-	int_fast32_t i = jbxvt.scr.offset > rc1.y ? 0
-		: rc1.y - jbxvt.scr.offset;
+	int_fast32_t i = jbxvt.scr.offset > r.y ? 0
+		: r.y - jbxvt.scr.offset;
 
-	for (; line <= rc2.y; ++line, ++i) {
+	for (; line <= r.height; ++line, ++i) {
 		uint8_t * s = jbxvt.scr.current->text[i];
 		register int_fast16_t x;
-		for (x = rc1.x; s && x <= rc2.x
+		for (x = r.x; s && x <= r.width
 			&& x < jbxvt.scr.chars.width; x++)
-			str[x - rc1.x] = s[x] < ' ' ? ' ' : s[x];
-		const uint16_t m = x - rc1.x;
-		p.y = repaint_generic(p, m, rc1.x, rc2.x, str,
+			str[x - r.x] = s[x] < ' ' ? ' ' : s[x];
+		const uint16_t m = x - r.x;
+		p.y = repaint_generic(p, m, r.x, r.width, str,
 			jbxvt.scr.current->rend[i]);
 	}
 	xcb_flush(jbxvt.X.xcb);
-	show_selection(rc1.y,rc2.y,rc1.x,rc2.x);
+	show_selection(r.y,r.height,r.x,r.width);
 }
 

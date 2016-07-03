@@ -25,12 +25,11 @@ void scr_refresh(xcb_rectangle_t box)
 	const Size f = jbxvt.X.font_size;
 	box.x -= MARGIN;
 	box.y -= MARGIN;
-	const xcb_point_t rc1 = {
+	const xcb_rectangle_t r = {
 		.x = constrain(box.x / f.w, s.w),
-		.y = constrain(box.y / f.h, s.h)};
-	const xcb_point_t rc2 = {
-		.x = constrain((box.x + box.width + f.w) / f.w, s.w),
-		.y = constrain((box.y + box.height + f.h) / f.h, s.h)};
-	repaint(rc1, rc2);
+		.y = constrain(box.y / f.h, s.h),
+		.width = constrain((box.x + box.width + f.w) / f.w, s.w),
+		.height = constrain((box.y + box.height + f.h) / f.h, s.h)};
+	repaint(r);
 }
 

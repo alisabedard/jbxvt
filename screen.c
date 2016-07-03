@@ -69,9 +69,8 @@ void scr_change_screen(const bool mode_high)
 		? &jbxvt.scr.s2 : &jbxvt.scr.s1;
 	jbxvt.sel.end2.se_type = NOSEL;
 	jbxvt.scr.sline.top = 0;
-	repaint((xcb_point_t){}, (xcb_point_t){
-		.y = jbxvt.scr.chars.height - 1,
-		.x = jbxvt.scr.chars.width - 1});
+	const Size c = jbxvt.scr.chars;
+	repaint((xcb_rectangle_t){.width = c.w - 1, .height = c.h - 1});
 	cursor(CURSOR_DRAW);
 	scr_erase_screen(2); // ENTIRE
 }
@@ -138,10 +137,10 @@ void home_screen(void)
 	if (likely(!jbxvt.scr.offset))
 		  return;
 	jbxvt.scr.offset = 0;
-	xcb_point_t rc = { .y = jbxvt.scr.chars.height - 1,
+	xcb_rectangle_t r = { .y = jbxvt.scr.chars.height - 1,
 		.x = jbxvt.scr.chars.width - 1 };
-	repaint((xcb_point_t){}, rc);
+	repaint(r);
 	cursor(CURSOR_DRAW);
-	sbar_show(rc.y + jbxvt.scr.sline.top, 0, rc.y);
+	sbar_show(r.y + jbxvt.scr.sline.top, 0, r.y);
 }
 

@@ -9,9 +9,9 @@
 #include <stdint.h>
 #include <xcb/xproto.h>
 
-/* Repaint the box delimited by rc1.r to rc2.r and rc1.c to rc2.c
-   of the displayed screen from the backup screen.  */
-void repaint(xcb_point_t rc1, xcb_point_t rc2);
+/* Repaint the box delimited by r of the displayed screen
+   from the backup screen.  */
+void repaint(const xcb_rectangle_t r);
 
 //  Paint the text using the rendition value at the screen position.
 void paint_rval_text(uint8_t * restrict str, uint32_t rval,

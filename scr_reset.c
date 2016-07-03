@@ -174,7 +174,7 @@ void scr_reset(void)
 	--c.h; --c.w;
 	sbar_show(c.h + jbxvt.scr.sline.top, jbxvt.scr.offset,
 		jbxvt.scr.offset + c.h);
-	repaint((xcb_point_t){}, (xcb_point_t){.y = c.h, .x = c.w});
+	repaint((xcb_rectangle_t){.height = c.h, .width = c.w});
 	cursor(CURSOR_DRAW);
 }
 
