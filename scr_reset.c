@@ -6,32 +6,16 @@
 #include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"
-#include "log.h"
 #include "repaint.h"
+#include "sbar.h"
 #include "screen.h"
 #include "scroll.h"
-#include "sbar.h"
+#include "scr_move.h"
 #include "selection.h"
 #include "ttyinit.h"
 
 #include <gc.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-
-void reset_row_col(void)
-{
-	xcb_point_t * c = &jbxvt.scr.current->cursor;
-	int16_t l = jbxvt.scr.chars.width - 1;
-	c->x = MAX(MIN(c->x, l), 0);
-	l = jbxvt.scr.chars.height - 1;
-	c->y = MAX(MIN(c->y, l), 0);
-	// Implement DECOM, DEC Origin Mode, limits
-	if (jbxvt.scr.current->decom) {
-		const Size m = jbxvt.scr.current->margin;
-		c->y = MAX(MIN(c->y, m.top), m.bottom);
-	}
-}
 
 static void init_screen_elements(VTScreen * restrict scr,
 	uint8_t ** restrict text, uint32_t ** restrict rend)
@@ -177,7 +161,7 @@ void scr_reset(void)
 		handle_screen_1(c, s1, s2, r1, r2);
 	init_screen_elements(&jbxvt.scr.s1, s1, r1);
 	init_screen_elements(&jbxvt.scr.s2, s2, r2);
-	scr_start_selection((xcb_point_t){},CHAR);
+	scr_start_selection((xcb_point_t){}, SEL_CHAR);
 	// Constrain dimensions:
 	c.w = MIN(c.w, JBXVT_MAX_COLS);
 	c.h = MIN(c.h, JBXVT_MAX_ROWS);

@@ -12,4 +12,7 @@ enum ScrMoveFlags {
  *  flags that specify relative rather than absolute motion.  */
 void scr_move(const int16_t x, const int16_t y, const uint8_t relative);
 
+// Sanitize cursor position, implement DECOM
+void reset_row_col(void);
+
 #endif//!SCR_MOVE_H
