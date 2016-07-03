@@ -22,15 +22,14 @@
 void reset_row_col(void)
 {
 	xcb_point_t * c = &jbxvt.scr.current->cursor;
-	xcb_point_t p = *c;
 	int16_t l = jbxvt.scr.chars.width - 1;
-	c->x = p.x < 0 ? 0 : p.x > l ? l : p.x;
+	c->x = MAX(MIN(c->x, l), 0);
 	l = jbxvt.scr.chars.height - 1;
-	c->y = p.y < 0 ? 0 : p.y > l ? l : p.y;
+	c->y = MAX(MIN(c->y, l), 0);
 	// Implement DECOM, DEC Origin Mode, limits
 	if (jbxvt.scr.current->decom) {
 		const Size m = jbxvt.scr.current->margin;
-		c->y = MIN(MAX(c->y, m.top), m.bottom);
+		c->y = MAX(MIN(c->y, m.top), m.bottom);
 	}
 }
 
