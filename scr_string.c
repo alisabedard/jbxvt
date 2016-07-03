@@ -66,7 +66,6 @@ static void wrap(VTScreen * restrict c)
 	}
 	check_selection(*y, *y);
 	c->wrap_next = false;
-	c->cursor.x = 0;
 }
 
 #if defined(__i386__) || defined(__amd64__)
@@ -187,8 +186,10 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 			--len; ++str; continue;
 		} else if (unlikely(*str == 0xe2))
 			  *str = '+';
-		if (s->wrap_next)
-			  wrap(s);
+		if (s->wrap_next) {
+			wrap(s);
+			s->cursor.x = 0;
+		}
 		check_selection(s->cursor.y, s->cursor.y);
 		p = get_p(s);
 		const int_fast16_t n = find_n(str);
