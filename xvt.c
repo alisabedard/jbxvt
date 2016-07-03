@@ -65,8 +65,11 @@ static void handle_tk_char(const uint8_t tk_char)
 {
 	switch (tk_char) {
 	case '\n': // handle line feed
-	case 013: // vertical tab
 		scr_index();
+		break;
+	case 013: // vertical tab
+		for (uint8_t i = jbxvt.scr.current->cursor.y; i % 8; ++i)
+			  scr_index();
 		break;
 	case '\f': // form feed
 		form_feed();
