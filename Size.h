@@ -1,8 +1,8 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 
-#ifndef JBXVT_DIM_H
-#define JBXVT_DIM_H
+#ifndef JBXVT_SIZE_H
+#define JBXVT_SIZE_H
 
 #include <stdint.h>
 
@@ -29,4 +29,4 @@ typedef struct Size {
 	};
 } Size;
 
-#endif//!JBXVT_DIM_H
+#endif//!JBXVT_SIZE_H

@@ -3,7 +3,7 @@
 
 #include "color.h"
 #include "command.h"
-#include "Dim.h"
+#include "Size.h"
 #include "screenst.h"
 #include "selst.h"
 #include "slinest.h"
