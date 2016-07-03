@@ -2,7 +2,7 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 
 #include "repaint.h"
-//#define DEBUG
+
 #include "color.h"
 #include "color_index.h"
 #include "config.h"
@@ -167,40 +167,27 @@ static int_fast32_t repaint_generic(const xcb_point_t p,
 	return p.y + jbxvt.X.font_size.height;
 }
 
-__attribute__((nonnull(3)))
 static int_fast16_t show_scroll_history(xcb_point_t rc1, xcb_point_t rc2,
 	xcb_point_t * restrict p, uint8_t * restrict str)
 {
 	int_fast16_t line = rc1.y;
-	if (!str)
-		  return line;
-	for (int_fast32_t i = jbxvt.scr.offset - 1 - rc1.y;
+	for (int_fast16_t i = jbxvt.scr.offset - rc1.y - 1;
 		line <= rc2.y && i >= 0; ++line, --i) {
-		struct slinest * sl = jbxvt.scr.sline.data[i];
-		if(!sl) // prevent segfault
+		SLine * sl = jbxvt.scr.sline.data[i];
+		if (!sl) // no scroll history yet!
 			  break;
-		const uint_fast8_t l = sl->sl_length;
-		const uint_fast8_t v = rc2.x + 1;
-		const int32_t m = ((v < l) ? v : l) - rc1.x;
-		if (m < 0)
-			  return line;
-		if (m >= jbxvt.scr.chars.width)
-			  return line;
-		// history chars already sanitized, so just use them:
-		memcpy(str, sl->sl_text + rc1.x, m);
-		p->y = repaint_generic(*p, m, rc1.x, rc2.x,
-			str, sl->sl_rend);
+		memcpy(str, sl->sl_text + rc1.x, sl->sl_length);
+		p->y = repaint_generic(*p, sl->sl_length, rc1.x,
+			rc2.x, sl->sl_text, sl->sl_rend);
 	}
 	return line;
 }
 
 /* Repaint the box delimited by rc1.y to rc2.y and rc1.x to rc2.x
    of the displayed screen from the backup screen.  */
-void repaint(xcb_point_t rc1, xcb_point_t rc2)
+void repaint(const xcb_point_t rc1, const xcb_point_t rc2)
 {
-#ifdef DEBUG_REPAINT
 	LOG("repaint({%d, %d}, {%d, %d})", rc1.x, rc1.y, rc2.x, rc2.y);
-#endif//DEBUG_REPAINT
 	xcb_point_t p = { .x = MARGIN + rc1.x * jbxvt.X.font_size.width,
 		.y = MARGIN + rc1.y * jbxvt.X.font_size.height};
 	// Allocate enough space to process each column, plus wrap byte.
@@ -214,8 +201,9 @@ void repaint(xcb_point_t rc1, xcb_point_t rc2)
 
 	for (; line <= rc2.y; ++line, ++i) {
 		uint8_t * s = jbxvt.scr.current->text[i];
-		register uint_fast8_t x;
-		for (x = rc1.x; s && x <= rc2.x; x++)
+		register int_fast16_t x;
+		for (x = rc1.x; s && x <= rc2.x
+			&& x < jbxvt.scr.chars.width; x++)
 			str[x - rc1.x] = s[x] < ' ' ? ' ' : s[x];
 		const uint16_t m = x - rc1.x;
 		p.y = repaint_generic(p, m, rc1.x, rc2.x, str,
