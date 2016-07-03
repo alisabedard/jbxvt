@@ -97,7 +97,7 @@ static int handle_offscreen_data(const uint8_t cw,
 		  return i + 1;
 	const uint8_t n = MIN(cw, l);
 	memcpy(s1[j], sl->sl_text, n);
-	memcpy(r1[j], sl->sl_rend, n * sizeof(uint32_t));
+	memcpy(r1[j], sl->sl_rend, n << 2);
 	return i + 1;
 }
 
@@ -144,12 +144,8 @@ static void handle_screen_1(const Size c, uint8_t ** t1, uint8_t ** t2,
 		scroll1(s->cursor.y - c.h + 1);
 		s->cursor.y = c.h - 1;
 	}
-	// calculate working no. of lines.
-	int16_t i = jbxvt.scr.sline.top
-		+ s->cursor.y + 1;
-	int32_t j = s->cursor.y;
-	i = s->cursor.y; // save
-	s->cursor.y = j;
+	int_fast16_t j = s->cursor.y;
+	int_fast16_t i = j;
 	bool onscreen = true;
 	for (; j >= 0; j--)
 		  i = onscreen ? save_data_on_screen(c.w, i,
@@ -158,12 +154,8 @@ static void handle_screen_1(const Size c, uint8_t ** t1, uint8_t ** t2,
 				  t1, r1);
 	if (onscreen) // avoid segfault
 		  return;
-	for (j = i; j < jbxvt.scr.sline.top; ++j) {
-		if (!jbxvt.scr.sline.data[j])
-			  break;
-		jbxvt.scr.sline.data[j - i]
-			= jbxvt.scr.sline.data[j];
-	}
+	memcpy(jbxvt.scr.sline.data, jbxvt.scr.sline.data + i,
+		jbxvt.scr.sline.top - i);
 	jbxvt.scr.sline.top -= i;
 }
 
