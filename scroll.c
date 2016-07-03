@@ -97,13 +97,8 @@ static void cp_repair(const uint8_t row1, const uint8_t row2,
 	b = a + count * jbxvt.X.font_size.h;
 	const uint16_t height = (row2 - row1 - count)
 		* jbxvt.X.font_size.h;
-	if(up) {
-		y[0] = b;
-		y[1] = a;
-	} else {
-		y[0] = a;
-		y[1] = b;
-	}
+	*(up ? &y[0] : &y[1]) = b;
+	*(up ? &y[1] : &y[0]) = a;
 	xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
 		jbxvt.X.gc.tx, 0, y[0], 0, y[1], jbxvt.scr.pixels.width,
 		height);
