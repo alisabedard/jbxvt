@@ -59,7 +59,7 @@ static int save_data_on_screen(uint8_t cw, int i, const int j,
 	      ?	jbxvt.scr.chars.width : cw;
 	// copy contents:
 	cpl(&jbxvt.scr.s1, s1, r1, i, j, n);
-	cpl(&jbxvt.scr.s1, s2, r2, i, j, n);
+	cpl(&jbxvt.scr.s2, s2, r2, i, j, n);
 	if (--i < 0) {
 		*onscreen = false;
 		return 0;

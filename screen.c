@@ -47,9 +47,7 @@ void scr_efill(void)
 void scr_init(void)
 {
 	// Initialise the array of lines that have scrolled off the top.
-	jbxvt.scr.sline.max = DEF_SAVED_LINES;
-	if (jbxvt.scr.sline.max < MAX_SCROLL)
-		jbxvt.scr.sline.max = MAX_SCROLL;
+	jbxvt.scr.sline.max = MAX_SCROLL;
 	jbxvt.scr.sline.data = GC_MALLOC(jbxvt.scr.sline.max * sizeof(void*));
 #define SETBOTH(f, val) jbxvt.scr.s1.f = val; jbxvt.scr.s2.f = val;
 	SETBOTH(decawm, true);

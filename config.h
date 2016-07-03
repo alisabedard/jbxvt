@@ -15,7 +15,6 @@
 
 enum {	SBAR_WIDTH = 10, // width of scroll bar
 	MARGIN = 1, // gap between the text and the window edges
-	DEF_SAVED_LINES = 500, // # lines of scroll history
 	JBXVT_ROWS = 24, // default # rows
 	JBXVT_COLUMNS = 80 // default # columns
 };
