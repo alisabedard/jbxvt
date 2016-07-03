@@ -265,7 +265,7 @@ app_loop_head:
 			/ jbxvt.X.font_size.height);
 		break;
 	case TK_SELSTART :
-		scr_start_selection((xcb_point_t){t[0], t[1]}, CHAR);
+		scr_start_selection((xcb_point_t){t[0], t[1]}, SEL_CHAR);
 		break;
 	case TK_SELEXTND :
 		scr_extend_selection((xcb_point_t){t[0], t[1]}, false);
@@ -274,10 +274,10 @@ app_loop_head:
 		scr_extend_selection((xcb_point_t){t[0], t[1]}, true);
 		break;
 	case TK_SELWORD :
-		scr_start_selection((xcb_point_t){t[0], t[1]}, WORD);
+		scr_start_selection((xcb_point_t){t[0], t[1]}, SEL_WORD);
 		break;
 	case TK_SELLINE :
-		scr_start_selection((xcb_point_t){t[0], t[1]}, LINE);
+		scr_start_selection((xcb_point_t){t[0], t[1]}, SEL_LINE);
 		break;
 	case TK_SELECT :
 		LOG("TK_SELECT");

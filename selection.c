@@ -108,7 +108,7 @@ __attribute__((regparm(2)))
 #endif//__i386__||__amd64__
 static uint8_t find_c(uint8_t c, int16_t i)
 {
-	if (selection_unit == CHAR) {
+	if (selection_unit == SEL_CHAR) {
 		if (i > -1) {
 			c = advance_c(c, jbxvt.scr.chars.width,
 				jbxvt.scr.current->text[i]);
@@ -228,15 +228,15 @@ static void adj_sel_to_word(struct selst * include,
  */
 void adjust_selection(struct selst * restrict include)
 {
-	if (selection_unit == CHAR)
+	if (selection_unit == SEL_CHAR)
 		return;
 	struct selst *se1, *se2;
 	const bool oneless = selcmp(&jbxvt.sel.end1,&jbxvt.sel.end2) <= 0;
 	se1 = oneless ? &jbxvt.sel.end1 : &jbxvt.sel.end2;
 	se2 = oneless ? &jbxvt.sel.end2 : &jbxvt.sel.end1;
-	if (selection_unit == WORD)
+	if (selection_unit == SEL_WORD)
 		  adj_sel_to_word(include, se1, se2);
-	else if (selection_unit == LINE) {
+	else if (selection_unit == SEL_LINE) {
 		se1->se_col = 0;
 		se2->se_col = jbxvt.scr.chars.width;
 	}

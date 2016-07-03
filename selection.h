@@ -17,7 +17,7 @@ enum {
 };
 
 //  The current selection unit
-enum selunit { CHAR, WORD, LINE };
+enum selunit { SEL_CHAR, SEL_WORD, SEL_LINE };
 
 //  respond to a request for our current selection.
 void scr_send_selection(const xcb_time_t time, const uint32_t requestor,

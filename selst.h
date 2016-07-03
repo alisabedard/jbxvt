@@ -5,9 +5,9 @@
 
 //  selection endpoint types.
 enum seltype {
+	NOSEL,
 	SCREENSEL,
-	SAVEDSEL,
-	NOSEL
+	SAVEDSEL
 };
 
 //  structure describing a selection endpoint.
