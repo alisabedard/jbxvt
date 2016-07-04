@@ -13,11 +13,7 @@ static int8_t cmp(const int8_t mod,
 		  return - mod;
 	if (se1->se_index < se2->se_index)
 		  return mod;
-	if (se1->se_col < se2->se_col)
-		  return -1;
-	if (se2->se_col < se1->se_col)
-		  return 1;
-	return(0);
+	return se1->se_col - se2->se_col;
 }
 /*  Compare the two selections and return -1, 0 or 1 depending on
  *  whether se2 is after, equal to or before se1.
