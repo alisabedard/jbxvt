@@ -168,6 +168,23 @@ void set_keys(const bool mode_high, const bool is_cursor)
 		  command.keys.app_kp = mode_high;
 }
 
+static char * get_format(const uint8_t type)
+{
+	switch(type) {
+	case KS_TYPE_CHAR:
+		return "%c";
+	case KS_TYPE_XTERM:
+		return "\033[%d~";
+	case KS_TYPE_SUN:
+		return "\033[%dz";
+	case KS_TYPE_APPKEY:
+		return "\033O%c";
+	case KS_TYPE_NONAPP:
+		return "\033[%c";
+	}
+	return NULL;
+}
+
 //  Look up function key keycode
 static char * get_keycode_value(struct KeyMaps * restrict keymaptable,
 	xcb_keysym_t keysym, char * buf, const int use_alternate)
@@ -177,28 +194,11 @@ static char * get_keycode_value(struct KeyMaps * restrict keymaptable,
 			  continue;
 		struct KeyStrings * ks = use_alternate
 			? &km->km_alt : &km->km_normal;
-		switch (ks->ks_type) {
-		case KS_TYPE_CHAR:
-			snprintf(buf, KBUFSIZE,
-				"%c",ks->ks_value);
-			return buf;
-		case KS_TYPE_XTERM:
-			snprintf(buf, KBUFSIZE,
-				"\033[%d~",ks->ks_value);
-			return buf;
-		case KS_TYPE_SUN:
-			snprintf(buf, KBUFSIZE,
-				"\033[%dz",ks->ks_value);
-			return buf;
-		case KS_TYPE_APPKEY:
-			snprintf(buf, KBUFSIZE,
-				"\033O%c",ks->ks_value);
-			return buf;
-		case KS_TYPE_NONAPP:
-			snprintf(buf, KBUFSIZE,
-				"\033[%c",ks->ks_value);
-			return buf;
-		}
+		char * f = get_format(ks->ks_type);
+		if (!f)
+			  continue;
+		snprintf(buf, KBUFSIZE, f, ks->ks_value);
+		return buf;
 	}
 	return NULL;
 }
@@ -238,8 +238,6 @@ static uint8_t shift(uint8_t c)
 
 static void apply_state(const uint16_t state, uint8_t * restrict kbuf)
 {
-	if (!state)
-		  return;
 	switch (state) {
 	case XCB_MOD_MASK_SHIFT:
 	case XCB_MOD_MASK_LOCK:
