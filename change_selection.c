@@ -9,74 +9,53 @@
 #include "selcmp.h"
 #include "selection.h"
 
+static void invert(const Size c, const Size f, const int16_t rs,
+	const int16_t re, const int16_t cs, const int16_t ce,
+	const uint8_t row1, const uint8_t row2, const uint8_t m)
+{
+	for (uint8_t row = row1; row <= row2; row++) {
+		const int16_t y = m + row * f.height;
+		const int16_t x1 = m + (row == rs ? cs * f.w : 0);
+		const int16_t x2 = m + ((row == re) ? ce : c.w) * f.w;
+		xcb_poly_fill_rectangle(jbxvt.X.xcb, jbxvt.X.win.vt,
+			jbxvt.X.gc.cu, 1, &(xcb_rectangle_t){ .x = x1,
+			.y = y, .width = x2 - x1, .height = f.h});
+	}
+}
+
+static void change(const Size c, const Size f, const uint8_t m,
+	SelEnd * se, SelEnd * ose)
+{
+	int16_t rs, cs, re, ce, n;
+	n = selcmp(se, ose);
+	if (!n) return;
+	// repaint the start.
+	const bool nn = n < 0;
+	selend_to_rc(&rs, &cs, nn ? se : ose);
+	selend_to_rc(&re, &ce, nn ? ose : se);
+	uint8_t row1 = rs < 0 ? 0 : rs;
+	uint8_t row2 = re >= c.h ? c.height - 1 : re;
+	//  Invert the changed area
+	invert(c, f, rs, re, cs, ce, row1, row2, m);
+}
+
 /*  Repaint the displayed selection to reflect the new value.  ose1 and ose2
  *  are assumed to represent the currently displayed selection endpoints.  */
-void change_selection(struct selst * restrict ose1,
-	struct selst * restrict ose2)
+void change_selection(SelEnd * restrict ose1, SelEnd * restrict ose2)
 {
-	int16_t rs, cs, re, ce, n, row;
-	struct selst *se, *se1, *se2;
+	SelEnd *se, *se1, *se2;
 
-	if (selcmp(ose1,ose2) > 0) {
+	if (selcmp(ose1, ose2) > 0) {
 		se = ose1;
 		ose1 = ose2;
 		ose2 = se;
 	}
-	if (selcmp(&jbxvt.sel.end1, &jbxvt.sel.end2) <= 0) {
-		se1 = &jbxvt.sel.end1;
-		se2 = &jbxvt.sel.end2;
-	} else {
-		se1 = &jbxvt.sel.end2;
-		se2 = &jbxvt.sel.end1;
-	}
-
-	if ((n = selcmp(se1,ose1))) {
-		// repaint the start.
-		const bool nn = n < 0;
-		selend_to_rc(&rs, &cs, nn ? se1 : ose1);
-		selend_to_rc(&re, &ce, nn ? ose1 : se1);
-		uint8_t row1 = rs < 0 ? 0 : rs;
-		uint8_t row2 = re >= jbxvt.scr.chars.height
-			? jbxvt.scr.chars.height - 1 : re;
-		//  Invert the changed area
-		for (row = row1; row <= row2; row++) {
-			const int16_t y = MARGIN + row
-				* jbxvt.X.font_size.height;
-			const int16_t x1 = MARGIN + (row == rs
-				? cs * jbxvt.X.font_size.width : 0);
-			const int16_t x2 = MARGIN + ((row == re) ? ce
-				: jbxvt.scr.chars.width)
-				* jbxvt.X.font_size.width;
-			xcb_poly_fill_rectangle(jbxvt.X.xcb, jbxvt.X.win.vt,
-				jbxvt.X.gc.cu, 1, &(xcb_rectangle_t){
-				.x = x1, .y = y, .width = x2 - x1,
-				.height = jbxvt.X.font_size.height});
-		}
-	}
-	if ((n = selcmp(se2,ose2))) {
-		// repaint the end
-		const bool nn = n < 0;
-		selend_to_rc(&rs, &cs, nn ? se2 : ose2);
-		selend_to_rc(&re, &ce, nn ? ose2 : se2);
-		const uint8_t row1 = rs < 0 ? 0 : rs;
-		const uint8_t row2 = re >= jbxvt.scr.chars.height
-			? jbxvt.scr.chars.height - 1 : re;
-		//  Invert the changed area
-		for (row = row1; row <= row2; row++) {
-			const int16_t y = MARGIN + row
-				* jbxvt.X.font_size.height;
-			const int16_t x1 = (row == rs
-				? cs * jbxvt.X.font_size.width : 0);
-			const int16_t x2 = ((row == re)
-				? ce : jbxvt.scr.chars.width)
-				* jbxvt.X.font_size.width;
-			xcb_poly_fill_rectangle(jbxvt.X.xcb, jbxvt.X.win.vt,
-				jbxvt.X.gc.cu, 1, &(xcb_rectangle_t){
-				.x = x1 + MARGIN, .y = y, .width = x2 - x1,
-				.height = jbxvt.X.font_size.height});
-
-		}
-	}
+	const bool fw = selcmp(&jbxvt.sel.end1, &jbxvt.sel.end2) <= 0;
+	*(fw ? &se1 : &se2) = &jbxvt.sel.end1;
+	*(fw ? &se2 : &se1) = &jbxvt.sel.end2;
+	const Size f = jbxvt.X.font_size;
+	const Size c = jbxvt.scr.chars;
+	const uint8_t m = MARGIN;
+	change(c, f, m, se1, ose1);
+	change(c, f, m, se2, ose2);
 }
-
-
