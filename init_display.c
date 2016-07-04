@@ -63,10 +63,9 @@ static void setup_font(void)
 	xcb_query_font_reply_t * r = xcb_query_font_reply(jbxvt.X.xcb,
 		qfc, NULL);
 	jbxvt.X.font_ascent = r->font_ascent;
-	jbxvt.X.font_descent = r->font_descent;
 	jbxvt.X.font_size.width = r->max_bounds.character_width;
+	jbxvt.X.font_size.height = r->font_ascent + r->font_descent;
 	free(r);
-	jbxvt.X.font_size.height = jbxvt.X.font_ascent + jbxvt.X.font_descent;
 }
 
 static void create_main_window(xcb_size_hints_t * restrict sh,

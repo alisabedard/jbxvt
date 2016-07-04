@@ -41,8 +41,8 @@ struct JBXVT {
 			pixel_t bg, fg, cursor;
 			pixel_t current_fg, current_bg;
 		} color;
-		int16_t font_ascent, font_descent;
 		Size font_size;
+		int16_t font_ascent;
 	} X;
 	struct {
 		VTScreen * current;
