@@ -13,61 +13,78 @@
 #include <stdlib.h>
 #include <string.h>
 
-/*  Convert the currently marked screen selection as a text string
-    and save it as the current saved selection. */
-void save_selection(void)
+static void handle_savedsel(uint8_t ** str, uint16_t * restrict total,
+	SelEnd * restrict se1, SelEnd * restrict se2)
 {
-	uint8_t *str, *s;
-	uint16_t len, total;
-	int16_t i, col1, col2;
-	struct selst *se1, *se2;
-	struct slinest *sl;
-
-	/*  Set se1 and se2 to point to the first
-	    and second selection endpoints.  */
-	const bool forward = selcmp(&jbxvt.sel.end1, &jbxvt.sel.end2) <= 0;
-	se1 = forward ? &jbxvt.sel.end1 : &jbxvt.sel.end2;
-	se2 = forward ? &jbxvt.sel.end2 : &jbxvt.sel.end1;
-	total = 1;
-	str = GC_MALLOC(1);
 	if (se1->se_type == SAVEDSEL) {
-		col1 = se1->se_col;
-		for (i = se1->se_index; i >= 0; --i) {
-			sl = jbxvt.scr.sline.data[i];
+		int16_t col1 = se1->se_col;
+		for (int_fast16_t i = se1->se_index; i >= 0; --i) {
+			SLine * sl = jbxvt.scr.sline.data[i];
+			int16_t col2;
 			if (se2->se_type == SAVEDSEL && se2->se_index == i) {
 				col2 = se2->se_col - 1;
 				i = 0;	// force loop exit
 			} else
 				col2 = jbxvt.scr.chars.width - 1;
-			len = sl->sl_length;
-			s = convert_line(sl->sl_text,&len,col1,col2);
-			str = GC_REALLOC(str,total + len);
-			if (str == NULL)
+			uint16_t len = sl->sl_length;
+			uint8_t * s = convert_line(sl->sl_text,
+				&len, col1, col2);
+			*str = GC_REALLOC(*str, *total + len);
+			if (*str == NULL)
 				abort();
-			strncpy((char *)str + total - 1,(char *)s,len);
-			total += len;
+			strncpy((char *)*str + *total - 1,(char *)s,len);
+			*total += len;
 			col1 = 0;
 		}
 	}
+
+}
+
+static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
+	SelEnd * restrict se1, SelEnd * restrict se2)
+{
 	if (se2->se_type == SCREENSEL) {
 		const bool is_screensel = se1->se_type == SCREENSEL;
-		i = is_screensel ? se1->se_index : 0;
-		col1 = is_screensel ? se1->se_col : 0;
+		int_fast16_t i = is_screensel ? se1->se_index : 0;
+		int16_t col1 = is_screensel ? se1->se_col : 0;
 		for (; i <= se2->se_index; ++i) {
-			col2 = i == se2->se_index ? se2->se_col
+			int16_t col2 = i == se2->se_index ? se2->se_col
 				: jbxvt.scr.chars.width;
 			if (--col2 < 0)
 				break;
-			len = jbxvt.scr.chars.width;
-			s = convert_line(jbxvt.scr.current->text[i],&len,col1,col2);
-			str = GC_REALLOC(str,total + len);
-			if(!str)
+			uint16_t len = jbxvt.scr.chars.width;
+			uint8_t * s = convert_line(jbxvt.scr.current->text[i],
+				&len, col1, col2);
+			*str = GC_REALLOC(*str, *total + len);
+			if(!*str)
 				  abort();
-			strncpy((char *)str + total - 1,(char *)s,len);
-			total += len;
+			strncpy((char *)*str + *total - 1,(char *)s,len);
+			*total += len;
 			col1 = 0;
 		}
 	}
+}
+
+/*  Convert the currently marked screen selection as a text string
+    and save it as the current saved selection. */
+void save_selection(void)
+{
+#if 0
+	uint8_t *str, *s;
+	uint16_t len, total;
+	int16_t i, col1, col2;
+	struct selst *se1, *se2;
+	struct slinest *sl;
+#endif
+	/*  Set se1 and se2 to point to the first
+	    and second selection endpoints.  */
+	const bool forward = selcmp(&jbxvt.sel.end1, &jbxvt.sel.end2) <= 0;
+	SelEnd * se1 = forward ? &jbxvt.sel.end1 : &jbxvt.sel.end2;
+	SelEnd * se2 = forward ? &jbxvt.sel.end2 : &jbxvt.sel.end1;
+	uint16_t total = 1;
+	uint8_t * str = GC_MALLOC(1);
+	handle_savedsel(&str, &total, se1, se2);
+	handle_screensel(&str, &total, se1, se2);
 	str[total - 1] = 0; // null termination
 	jbxvt.sel.text = str;
 	jbxvt.sel.length = total - 1;
