@@ -38,54 +38,6 @@ static Size get_cdim(const Size d)
 		.height = (d.h-m)/f.h};
 }
 
-static void cpl(VTScreen * restrict scr, uint8_t ** restrict s,
-	uint32_t ** restrict r, const uint8_t i, const uint8_t j,
-	const uint8_t sz) // copy line
-{
-	// copy contents:
-	memcpy(s[j], scr->text[i], sz);
-	memcpy(r[j], scr->rend[i], sz * sizeof(uint32_t));
-	// copy end byte for wrap flag:
-	s[j][sz] = scr->text[i][jbxvt.scr.chars.width];
-}
-
-static int save_data_on_screen(uint8_t cw, int i, const int j,
-	bool * restrict onscreen, uint8_t ** restrict s1,
-	uint32_t ** restrict r1, uint8_t ** restrict s2,
-	uint32_t ** restrict r2)
-{
-	// truncate to fit:
-	const uint8_t n = cw > jbxvt.scr.chars.width
-	      ?	jbxvt.scr.chars.width : cw;
-	// copy contents:
-	cpl(&jbxvt.scr.s1, s1, r1, i, j, n);
-	cpl(&jbxvt.scr.s2, s2, r2, i, j, n);
-	if (--i < 0) {
-		*onscreen = false;
-		return 0;
-	}
-	return i;
-}
-
-static int handle_offscreen_data(const uint8_t cw,
-	const int i, const int j,
-	uint8_t ** restrict s1,
-	uint32_t ** restrict r1)
-{
-	if (i >= jbxvt.scr.sline.top)
-		  return i;
-	struct slinest *sl = jbxvt.scr.sline.data[i];
-	if (!sl) // prevent segfault.
-		  return i;
-	const uint8_t l = sl->sl_length;
-	if (!l || !sl->sl_text)
-		  return i + 1;
-	const uint8_t n = MIN(cw, l);
-	memcpy(s1[j], sl->sl_text, n);
-	memcpy(r1[j], sl->sl_rend, n << 2);
-	return i + 1;
-}
-
 static void init(void)
 {
 	uint8_t **s1, **s2;
@@ -99,7 +51,7 @@ static void init(void)
 		sz = JBXVT_MAX_COLS;
 		s1[y] = GC_MALLOC(sz);
 		s2[y] = GC_MALLOC(sz);
-		sz *= sizeof(uint32_t);
+		sz <<= 2;
 		r1[y] = GC_MALLOC(sz);
 		r2[y] = GC_MALLOC(sz);
 	}
@@ -120,31 +72,6 @@ static inline void fix_margins(const Size c)
 		  s->margin.b = c.h - 1;
 }
 
-static void handle_screen_1(const Size c, uint8_t ** t1, uint8_t ** t2,
-	uint32_t ** r1, uint32_t ** r2)
-{
-	LOG("handle_screen_1()");
-	VTScreen * restrict s = &jbxvt.scr.s1;
-	// Fill up scr from old scr and saved lines
-	if (s->cursor.y >= c.h) {
-		scroll1(s->cursor.y - c.h + 1);
-		s->cursor.y = c.h - 1;
-	}
-	int_fast16_t j = s->cursor.y;
-	int_fast16_t i = j;
-	bool onscreen = true;
-	for (; j >= 0; j--)
-		  i = onscreen ? save_data_on_screen(c.w, i,
-			  j, &onscreen, t1, r1, t2, r2)
-			  : handle_offscreen_data(c.w, i, j,
-				  t1, r1);
-	if (onscreen) // avoid segfault
-		  return;
-	memcpy(jbxvt.scr.sline.data, jbxvt.scr.sline.data + i,
-		jbxvt.scr.sline.top - i);
-	jbxvt.scr.sline.top -= i;
-}
-
 /*  Reset the screen - called whenever the screen
     needs to be repaired completely.  */
 void scr_reset(void)
@@ -160,8 +87,13 @@ void scr_reset(void)
 	uint8_t **s1 = jbxvt.scr.s1.text, **s2 = jbxvt.scr.s2.text;
 	uint32_t **r1 = jbxvt.scr.s1.rend, **r2 = jbxvt.scr.s2.rend;
 	VTScreen * scr = jbxvt.scr.current;
-	if (likely(scr == &jbxvt.scr.s1 && jbxvt.scr.s1.text))
-		handle_screen_1(c, s1, s2, r1, r2);
+	if (likely(scr == &jbxvt.scr.s1 && jbxvt.scr.s1.text)) {
+		if (scr->cursor.y >= c.h) {
+			scroll1(scr->cursor.y - c.h + 1);
+			scr->cursor.y = c.h - 1;
+		}
+	}
+	//	handle_screen_1(c, s1, s2, r1, r2);
 	init_screen_elements(&jbxvt.scr.s1, s1, r1);
 	init_screen_elements(&jbxvt.scr.s2, s2, r2);
 	scr_start_selection((xcb_point_t){}, SEL_CHAR);
