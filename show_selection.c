@@ -13,8 +13,8 @@
  *  and between cols col1 and col2 inclusive.  */
 void show_selection(int16_t row1, int16_t row2, int16_t col1, int16_t col2)
 {
-	if (jbxvt.sel.end1.se_type == NOSEL
-		|| jbxvt.sel.end2.se_type == NOSEL)
+	if (jbxvt.sel.end1.type == NOSEL
+		|| jbxvt.sel.end2.type == NOSEL)
 		return;
 	if (selcmp(&jbxvt.sel.end1,&jbxvt.sel.end2) == 0)
 		return;

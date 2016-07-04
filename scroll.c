@@ -16,12 +16,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-static void sel_scr_to_sav(struct selst * restrict s,
+static void sel_scr_to_sav(SelEnd * restrict s,
 	const int i, const int count)
 {
-	if (s->se_type == SCREENSEL && s->se_index == i) {
-		s->se_type = SAVEDSEL;
-		s->se_index = count - i - 1;
+	if (s->type == SCREENSEL && s->index == i) {
+		s->type = SAVEDSEL;
+		s->index = count - i - 1;
 	}
 }
 
@@ -31,18 +31,15 @@ static void transmogrify(const int16_t j, const int8_t count,
 	const int16_t k = j + count;
 	s->text[k] = s->text[j];
 	s->rend[k] = s->rend[j];
-	if (jbxvt.sel.end1.se_type == SCREENSEL
-		&& jbxvt.sel.end1.se_index == j)
-		  jbxvt.sel.end1.se_index = k;
-	if (jbxvt.sel.end2.se_type == SCREENSEL
-		&& jbxvt.sel.end2.se_index == j)
-		  jbxvt.sel.end2.se_index = k;
+	if (jbxvt.sel.end1.type == SCREENSEL && jbxvt.sel.end1.index == j)
+		  jbxvt.sel.end1.index = k;
+	if (jbxvt.sel.end2.type == SCREENSEL && jbxvt.sel.end2.index == j)
+		  jbxvt.sel.end2.index = k;
 }
 static void ck_sel_on_scr(const int j)
 {
 	// clear selection if it scrolls off screen:
-	if (jbxvt.sel.end1.se_index == j
-		|| jbxvt.sel.end2.se_index == j)
+	if (jbxvt.sel.end1.index == j || jbxvt.sel.end2.index == j)
 		  scr_clear_selection();
 }
 

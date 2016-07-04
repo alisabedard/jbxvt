@@ -60,7 +60,7 @@ struct JBXVT {
 	} scr;
 	struct {
 		uint8_t * text;
-		struct selst end1, end2, // selection endpoints
+		SelEnd end1, end2, // selection endpoints
 			     anchor; //selection anchor
 		uint16_t length;
 	} sel;

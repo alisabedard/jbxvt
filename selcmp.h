@@ -7,8 +7,8 @@
 #include "selst.h"
 #include <stdint.h>
 
-/*  Compare the two selections and return -1, 0 or 1 depending on
+/*  Compare the two selections and return negtive, 0 or positive depending on
  *  whether se2 is after, equal to or before se1.  */
-int8_t selcmp(struct selst * restrict se1, struct selst * restrict se2);
+int8_t selcmp(SelEnd * restrict se1, SelEnd * restrict se2);
 
 #endif//!JBXVT_SELCMP_H

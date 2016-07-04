@@ -65,7 +65,7 @@ void scr_change_screen(const bool mode_high)
 	home_screen();
 	jbxvt.scr.current = mode_high
 		? &jbxvt.scr.s2 : &jbxvt.scr.s1;
-	jbxvt.sel.end2.se_type = NOSEL;
+	jbxvt.sel.end2.type = NOSEL;
 	jbxvt.scr.sline.top = 0;
 	const Size c = jbxvt.scr.chars;
 	repaint((xcb_rectangle_t){.width = c.w - 1, .height = c.h - 1});

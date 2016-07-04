@@ -5,25 +5,23 @@
 
 #include <stdbool.h>
 
-static int8_t cmp(const int8_t mod,
-	struct selst * restrict se1,
-	struct selst * restrict se2)
+static int8_t cmp(const int8_t mod, SelEnd * restrict se1, SelEnd * restrict se2)
 {
-	if (se1->se_index > se2->se_index)
+	if (se1->index > se2->index)
 		  return - mod;
-	if (se1->se_index < se2->se_index)
+	if (se1->index < se2->index)
 		  return mod;
-	return se1->se_col - se2->se_col;
+	return se1->col - se2->col;
 }
-/*  Compare the two selections and return -1, 0 or 1 depending on
- *  whether se2 is after, equal to or before se1.
- */
-int8_t selcmp(struct selst * restrict se1, struct selst * restrict se2)
+
+/*  Compare the two selections and return negtive, 0 or positive depending on
+ *  whether se2 is after, equal to or before se1.  */
+int8_t selcmp(SelEnd * restrict se1, SelEnd * restrict se2)
 {
-	const bool se1sv = se1->se_type == SAVEDSEL;
-	if (se1sv && se2->se_type == SAVEDSEL)
+	const bool se1sv = se1->type == SAVEDSEL;
+	if (se1sv && se2->type == SAVEDSEL)
 		  return cmp(1, se1, se2);
-	if (se1->se_type == SCREENSEL && se2->se_type == SCREENSEL)
+	if (se1->type == SCREENSEL && se2->type == SCREENSEL)
 		  return cmp(-1, se1, se2);
 	return se1sv ? -1 : 1;
 }

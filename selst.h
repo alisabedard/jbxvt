@@ -4,17 +4,17 @@
 #include <stdint.h>
 
 //  selection endpoint types.
-enum seltype {
+typedef enum {
 	NOSEL,
 	SCREENSEL,
 	SAVEDSEL
-};
+} SelType;
 
 //  structure describing a selection endpoint.
-typedef struct selst {
-	enum seltype se_type;
-	int16_t se_index;	// index into the sline or screen array
-	uint8_t se_col;		// column of the character
+typedef struct {
+	SelType type;
+	int16_t index;	// index into the sline or screen array
+	uint8_t col;	// column of the character
 } SelEnd;
 
 #endif//!SELST_H

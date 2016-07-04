@@ -24,14 +24,14 @@ static void realloc_and_copy(uint8_t ** str, uint8_t * restrict src,
 static void handle_savedsel(uint8_t ** str, uint16_t * restrict total,
 	SelEnd * restrict se1, SelEnd * restrict se2)
 {
-	if (se1->se_type != SAVEDSEL)
+	if (se1->type != SAVEDSEL)
 		  return;
-	int16_t col1 = se1->se_col;
-	for (int_fast16_t i = se1->se_index; i >= 0; --i) {
+	int16_t col1 = se1->col;
+	for (int_fast16_t i = se1->index; i >= 0; --i) {
 		SLine * sl = jbxvt.scr.sline.data[i];
 		int16_t col2;
-		if (se2->se_type == SAVEDSEL && se2->se_index == i) {
-			col2 = se2->se_col - 1;
+		if (se2->type == SAVEDSEL && se2->index == i) {
+			col2 = se2->col - 1;
 			i = 0;	// force loop exit
 		} else
 			  col2 = jbxvt.scr.chars.width - 1;
@@ -46,13 +46,13 @@ static void handle_savedsel(uint8_t ** str, uint16_t * restrict total,
 static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 	SelEnd * restrict se1, SelEnd * restrict se2)
 {
-	if (se2->se_type != SCREENSEL)
+	if (se2->type != SCREENSEL)
 		  return;
-	const bool is_screensel = se1->se_type == SCREENSEL;
-	int_fast16_t i = is_screensel ? se1->se_index : 0;
-	int16_t col1 = is_screensel ? se1->se_col : 0;
-	for (; i <= se2->se_index; ++i) {
-		int16_t col2 = i == se2->se_index ? se2->se_col
+	const bool is_screensel = se1->type == SCREENSEL;
+	int_fast16_t i = is_screensel ? se1->index : 0;
+	int16_t col1 = is_screensel ? se1->col : 0;
+	for (; i <= se2->index; ++i) {
+		int16_t col2 = i == se2->index ? se2->col
 			: jbxvt.scr.chars.width - 1;
 		if (--col2 < 0)
 			  break;

@@ -49,7 +49,7 @@ static SelEnd * get_nearest_endpoint(const int16_t row,
 //  Extend the selection.
 void scr_extend_selection(const xcb_point_t p, const bool drag)
 {
-	if (jbxvt.sel.end1.se_type == NOSEL)
+	if (jbxvt.sel.end1.type == NOSEL)
 		return;
 	const Size f = jbxvt.X.font_size;
 	xcb_point_t rc = { .x = (p.x - MARGIN) / f.w,

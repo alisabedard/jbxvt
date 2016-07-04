@@ -36,15 +36,15 @@ void check_selection(const int16_t row1, const int16_t row2);
 
 //  Convert the selection into a row and column.
 void selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
-	struct selst * restrict se);
+	SelEnd * restrict se);
 
 //  Convert a row and column coordinates into a selection endpoint.
-void rc_to_selend(const int16_t row, const int16_t col, struct selst * se);
+void rc_to_selend(const int16_t row, const int16_t col, SelEnd * se);
 
 /*  Adjust the selection to a word or line boundary. If the include endpoint is
  *  non NULL then the selection is forced to be large enough to include it.
  */
-void adjust_selection(struct selst * restrict include);
+void adjust_selection(SelEnd * restrict include);
 
 // clear the current selection:
 void scr_clear_selection(void);

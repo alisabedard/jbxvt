@@ -55,7 +55,7 @@ void scr_clear_selection(void)
 		jbxvt.sel.length = 0;
 	const Size c = jbxvt.scr.chars;
 	show_selection(0, c.h - 1, 0, c.w - 1);
-	jbxvt.sel.end1.se_type = jbxvt.sel.end2.se_type = NOSEL;
+	jbxvt.sel.end1.type = jbxvt.sel.end2.type = NOSEL;
 }
 
 //  start a selection using the specified unit.
@@ -76,17 +76,17 @@ void scr_start_selection(xcb_point_t p, enum selunit unit)
 
 
 //  Convert a row and column coordinates into a selection endpoint.
-void rc_to_selend(const int16_t row, const int16_t col, struct selst * se)
+void rc_to_selend(const int16_t row, const int16_t col, SelEnd * se)
 {
 	int16_t i = (row - jbxvt.scr.offset);
 	if (i >= 0)
-		se->se_type = SCREENSEL;
+		se->type = SCREENSEL;
 	else {
-		se->se_type = SAVEDSEL;
+		se->type = SAVEDSEL;
 		i = -1 - i;
 	}
-	se->se_index = i;
-	se->se_col = col;
+	se->index = i;
+	se->col = col;
 }
 
 #if defined(__i386__) || defined(__amd64__)
@@ -137,14 +137,14 @@ void fix_rc(xcb_point_t * restrict rc)
 
 //  Convert the selection into a row and column.
 void selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
-	struct selst * restrict se)
+	SelEnd * restrict se)
 {
-	if (se->se_type == NOSEL)
+	if (se->type == NOSEL)
 		return;
 
-	*colp = se->se_col;
-	*rowp = se->se_type == SCREENSEL ? se->se_index + jbxvt.scr.offset
-		: jbxvt.scr.offset - se->se_index - 1;
+	*colp = se->col;
+	*rowp = se->type == SCREENSEL ? se->index + jbxvt.scr.offset
+		: jbxvt.scr.offset - se->index - 1;
 }
 
 #if defined(__i386__) || defined(__amd64__)
@@ -194,51 +194,51 @@ uint8_t * convert_line(uint8_t * restrict str,
 	return (buf);
 }
 
-static uint16_t sel_s(struct selst * restrict se2, uint8_t ** s)
+static uint16_t sel_s(SelEnd * restrict se2, uint8_t ** s)
 {
-	const bool ss = se2->se_type == SCREENSEL;
-	*s = ss ? jbxvt.scr.current->text[se2->se_index]
-		: jbxvt.scr.sline.data[se2->se_index]->sl_text;
+	const bool ss = se2->type == SCREENSEL;
+	*s = ss ? jbxvt.scr.current->text[se2->index]
+		: jbxvt.scr.sline.data[se2->index]->sl_text;
 	return ss ? jbxvt.scr.chars.width
-		: jbxvt.scr.sline.data[se2->se_index]->sl_length;
+		: jbxvt.scr.sline.data[se2->index]->sl_length;
 }
 
-static void adj_sel_to_word(struct selst * include,
-	struct selst * se1, struct selst * se2)
+static void adj_sel_to_word(SelEnd * include,
+	SelEnd * se1, SelEnd * se2)
 {
-	uint8_t * s = se1->se_type == SCREENSEL
-		? jbxvt.scr.current->text[se1->se_index]
-		: jbxvt.scr.sline.data[se1->se_index]->sl_text;
-	int16_t i = se1->se_col;
+	uint8_t * s = se1->type == SCREENSEL
+		? jbxvt.scr.current->text[se1->index]
+		: jbxvt.scr.sline.data[se1->index]->sl_text;
+	int16_t i = se1->col;
 	while (i && s[i] != ' ')
 		  --i;
-	se1->se_col = i?i+1:0;
-	i = se2->se_col;
+	se1->col = i?i+1:0;
+	i = se2->col;
 	if (se2 == include || !selcmp(se2,&jbxvt.sel.anchor))
 		  ++i;
 	const uint16_t len = sel_s(se2, &s);
 	while (i < len && s[i] && s[i] != ' ' && s[i] != '\n')
 		  ++i;
-	se2->se_col = i;
+	se2->col = i;
 
 }
 
 /*  Adjust the selection to a word or line boundary. If the include endpoint is
  *  non NULL then the selection is forced to be large enough to include it.
  */
-void adjust_selection(struct selst * restrict include)
+void adjust_selection(SelEnd * restrict include)
 {
 	if (selection_unit == SEL_CHAR)
 		return;
-	struct selst *se1, *se2;
+	SelEnd *se1, *se2;
 	const bool oneless = selcmp(&jbxvt.sel.end1,&jbxvt.sel.end2) <= 0;
 	se1 = oneless ? &jbxvt.sel.end1 : &jbxvt.sel.end2;
 	se2 = oneless ? &jbxvt.sel.end2 : &jbxvt.sel.end1;
 	if (selection_unit == SEL_WORD)
 		  adj_sel_to_word(include, se1, se2);
 	else if (selection_unit == SEL_LINE) {
-		se1->se_col = 0;
-		se2->se_col = jbxvt.scr.chars.width;
+		se1->col = 0;
+		se2->col = jbxvt.scr.chars.width;
 	}
 }
 
@@ -246,12 +246,12 @@ void adjust_selection(struct selst * restrict include)
  *  remove it from the screen.  */
 void check_selection(const int16_t row1, const int16_t row2)
 {
-	if (jbxvt.sel.end1.se_type == NOSEL || jbxvt.sel.end2.se_type == NOSEL)
+	if (jbxvt.sel.end1.type == NOSEL || jbxvt.sel.end2.type == NOSEL)
 		return;
-	int16_t r1 = jbxvt.sel.end1.se_type == SCREENSEL
-		? jbxvt.sel.end1.se_index : -1;
-	int16_t r2 = jbxvt.sel.end2.se_type == SCREENSEL
-		? jbxvt.sel.end2.se_index : -1;
+	int16_t r1 = jbxvt.sel.end1.type == SCREENSEL
+		? jbxvt.sel.end1.index : -1;
+	int16_t r2 = jbxvt.sel.end2.type == SCREENSEL
+		? jbxvt.sel.end2.index : -1;
 	if (r1 > r2) {
 		const int16_t x = r1;
 		r1 = r2;
@@ -261,6 +261,6 @@ void check_selection(const int16_t row1, const int16_t row2)
 		return;
 	show_selection(0, jbxvt.scr.chars.height - 1,
 		0, jbxvt.scr.chars.width - 1);
-	jbxvt.sel.end2.se_type = NOSEL;
+	jbxvt.sel.end2.type = NOSEL;
 }
 
