@@ -160,7 +160,7 @@ static int_fast16_t poll_io(int_fast16_t count, fd_set * restrict in_fdset)
 	fd_set out_fdset;
 	FD_ZERO(&out_fdset);
 	if (jbxvt.com.send_count > 0)
-		  FD_SET(jbxvt.com.fd,&out_fdset);
+		  FD_SET(jbxvt.com.fd, &out_fdset);
 	int sv;
 #ifdef SYS_select
 	sv = syscall(SYS_select, jbxvt.com.width,
@@ -168,7 +168,7 @@ static int_fast16_t poll_io(int_fast16_t count, fd_set * restrict in_fdset)
 #else//!SYS_select
 	sv = select(jbxvt.com.width, in_fdset,&out_fdset, NULL, NULL);
 #endif//SYS_select
-	if (sv != -1 && FD_ISSET(jbxvt.com.fd,&out_fdset)) {
+	if (sv != -1 && FD_ISSET(jbxvt.com.fd, &out_fdset)) {
 		count = output_to_command(count);
 	}
 	return count ;
@@ -211,16 +211,16 @@ static int_fast16_t get_com_char(const int_fast8_t flags)
 		}
 		count = poll_io(count, &in_fdset);
 	} while(!FD_ISSET(jbxvt.com.fd,&in_fdset));
+	uint8_t * d = jbxvt.com.buf.data;
 #ifdef SYS_read
-	count = syscall(SYS_read, jbxvt.com.fd,
-		jbxvt.com.buf.data, COM_BUF_SIZE);
+	count = syscall(SYS_read, jbxvt.com.fd, d, COM_BUF_SIZE);
 #else//!SYS_read
-	count = read(jbxvt.com.fd, jbxvt.com.buf.data, COM_BUF_SIZE);
+	count = read(jbxvt.com.fd, d, COM_BUF_SIZE);
 #endif//SYS_read
 	if (count < 1) // buffer is empty
 		return errno == EWOULDBLOCK ? GCC_NULL : EOF;
-	jbxvt.com.buf.next = jbxvt.com.buf.data;
-	jbxvt.com.buf.top = jbxvt.com.buf.data + count;
+	jbxvt.com.buf.next = d;
+	jbxvt.com.buf.top = d + count;
 	return *jbxvt.com.buf.next++;
 }
 
