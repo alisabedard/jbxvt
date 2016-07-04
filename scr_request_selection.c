@@ -13,7 +13,7 @@
 //  Send the selection to the command after converting LF to CR.
 static void send_selection(uint8_t * str, const uint16_t count)
 {
-	for (uint16_t i = count; i >= 0; --i)
+	for (int_fast16_t i = count; i >= 0; --i)
 		if (str[i] == '\n')
 			str[i] = '\r';
 	send_string(str, count);
