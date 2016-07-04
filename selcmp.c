@@ -7,11 +7,9 @@
 
 static int8_t cmp(const int8_t mod, SelEnd * restrict se1, SelEnd * restrict se2)
 {
-	if (se1->index > se2->index)
-		  return - mod;
-	if (se1->index < se2->index)
-		  return mod;
-	return se1->col - se2->col;
+	if (se1->index == se2->index)
+		return se1->col - se2->col;
+	return (se2->index - se1->index) * mod;
 }
 
 /*  Compare the two selections and return negtive, 0 or positive depending on
