@@ -393,7 +393,7 @@ void get_token(Token * restrict tk)
 	// set token per event:
 	if(handle_xevents(tk))
 		  return;
-	int_fast16_t c = get_com_char(GET_XEVENTS);
+	const int_fast16_t c = get_com_char(GET_XEVENTS);
 	if (c == GCC_NULL) {
 		tk->tk_type = TK_NULL;
 	} else if (c == EOF) {
