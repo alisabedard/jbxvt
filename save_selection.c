@@ -13,55 +13,54 @@
 #include <stdlib.h>
 #include <string.h>
 
+static void realloc_and_copy(uint8_t ** str, uint8_t * restrict src,
+	uint16_t * restrict total, const uint16_t len)
+{
+	*str = GC_REALLOC(*str, *total + len);
+	strncpy((char *)*str + *total - 1, (char *)src, len);
+	*total += len;
+}
+
 static void handle_savedsel(uint8_t ** str, uint16_t * restrict total,
 	SelEnd * restrict se1, SelEnd * restrict se2)
 {
-	if (se1->se_type == SAVEDSEL) {
-		int16_t col1 = se1->se_col;
-		for (int_fast16_t i = se1->se_index; i >= 0; --i) {
-			SLine * sl = jbxvt.scr.sline.data[i];
-			int16_t col2;
-			if (se2->se_type == SAVEDSEL && se2->se_index == i) {
-				col2 = se2->se_col - 1;
-				i = 0;	// force loop exit
-			} else
-				col2 = jbxvt.scr.chars.width - 1;
-			uint16_t len = sl->sl_length;
-			uint8_t * s = convert_line(sl->sl_text,
-				&len, col1, col2);
-			*str = GC_REALLOC(*str, *total + len);
-			if (*str == NULL)
-				abort();
-			strncpy((char *)*str + *total - 1,(char *)s,len);
-			*total += len;
-			col1 = 0;
-		}
+	if (se1->se_type != SAVEDSEL)
+		  return;
+	int16_t col1 = se1->se_col;
+	for (int_fast16_t i = se1->se_index; i >= 0; --i) {
+		SLine * sl = jbxvt.scr.sline.data[i];
+		int16_t col2;
+		if (se2->se_type == SAVEDSEL && se2->se_index == i) {
+			col2 = se2->se_col - 1;
+			i = 0;	// force loop exit
+		} else
+			  col2 = jbxvt.scr.chars.width - 1;
+		uint16_t len = sl->sl_length;
+		uint8_t * s = convert_line(sl->sl_text,
+			&len, col1, col2);
+		realloc_and_copy(str, s, total, len);
+		col1 = 0;
 	}
-
 }
 
 static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 	SelEnd * restrict se1, SelEnd * restrict se2)
 {
-	if (se2->se_type == SCREENSEL) {
-		const bool is_screensel = se1->se_type == SCREENSEL;
-		int_fast16_t i = is_screensel ? se1->se_index : 0;
-		int16_t col1 = is_screensel ? se1->se_col : 0;
-		for (; i <= se2->se_index; ++i) {
-			int16_t col2 = i == se2->se_index ? se2->se_col
-				: jbxvt.scr.chars.width;
-			if (--col2 < 0)
-				break;
-			uint16_t len = jbxvt.scr.chars.width;
-			uint8_t * s = convert_line(jbxvt.scr.current->text[i],
-				&len, col1, col2);
-			*str = GC_REALLOC(*str, *total + len);
-			if(!*str)
-				  abort();
-			strncpy((char *)*str + *total - 1,(char *)s,len);
-			*total += len;
-			col1 = 0;
-		}
+	if (se2->se_type != SCREENSEL)
+		  return;
+	const bool is_screensel = se1->se_type == SCREENSEL;
+	int_fast16_t i = is_screensel ? se1->se_index : 0;
+	int16_t col1 = is_screensel ? se1->se_col : 0;
+	for (; i <= se2->se_index; ++i) {
+		int16_t col2 = i == se2->se_index ? se2->se_col
+			: jbxvt.scr.chars.width - 1;
+		if (--col2 < 0)
+			  break;
+		uint16_t len = jbxvt.scr.chars.width;
+		uint8_t * s = convert_line(jbxvt.scr.current->text[i],
+			&len, col1, col2);
+		realloc_and_copy(str, s, total, len);
+		col1 = 0;
 	}
 }
 
