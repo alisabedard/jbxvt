@@ -669,11 +669,9 @@ int run_command(char ** argv)
 #ifdef SYS_signal
 	syscall(SYS_signal, SIGINT, catch_signal);
 	syscall(SYS_signal, SIGQUIT, catch_signal);
-	//syscall(SYS_signal, SIGKILL, catch_signal);
 #else//!SYS_signal
 	signal(SIGINT, catch_signal);
 	signal(SIGQUIT, catch_signal);
-//	signal(SIGKILL, catch_signal);
 #endif//SYS_signal
 
 #ifdef SYS_fork
