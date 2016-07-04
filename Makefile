@@ -13,7 +13,7 @@ PREFIX=/usr
 # Uncomment for NetBSD:
 #CFLAGS+=-DNETBSD -D_NETBSD_SOURCE -D_BSD_SOURCE
 #CFLAGS+=-Wno-missing-field-initializers
-#CFLAGS+=-I/usr/X11R7/include
+#CFLAGS+=-I/usr/X11R7/include -I/usr/pkg/include
 #LIBS+=-L/usr/X11R7/lib -Wl,-R/usr/X11R7/lib
 #PREFIX=/usr/local
 
