@@ -4,7 +4,7 @@
 #ifndef SCR_REQ_SEL_H
 #define SCR_REQ_SEL_H
 
-#include <xcb/xproto.h>
+#include <xcb/xcb.h>
 
 //  Request the current primary selection
 void request_selection(void);

@@ -4,7 +4,7 @@
 #ifndef SCR_REFRESH_H
 #define SCR_REFRESH_H
 
-#include <xcb/xproto.h>
+#include <xcb/xcb.h>
 
 /*  Refresh the region of the screen delimited by the aruments.  Used to
  *  repair after minor exposure events.  */

@@ -99,6 +99,9 @@
 #ifdef NETBSD
 #define POSIX_PTY
 #define BSD_UTMP
+#include <pwd.h>
+#include <string.h>
+#include <sys/termios.h>
 #include <sys/ttycom.h>
 #include <utmp.h>
 #define UTMP_FILE "/var/run/utmp"
@@ -277,7 +280,7 @@ static void write_utmp(void)
 	fd_t ut_fd = open(UTMP_FILE, O_WRONLY);
 #endif//SYS_open
 	if (ut_fd < 0) {
-		jbputs(WARN_UTMP);
+		jbputs(WARN_RES RES_TMP);
 		return;
 	}
 	memset(&utent,0,sizeof(utent));

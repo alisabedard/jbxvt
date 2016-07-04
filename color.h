@@ -2,6 +2,7 @@
 #define JBXVT_COLOR_H
 
 #include <stdint.h>
+#include <xcb/xcb.h>
 #include <xcb/xproto.h>
 
 // describe var as relating to a pixel:

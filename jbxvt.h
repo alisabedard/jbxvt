@@ -16,6 +16,7 @@
 #define RES_FNT		"Could not load font"
 #define RES_SSN		"Could not open session"
 #define RES_TTY		"Could not open tty"
+#define RES_TMP		"Could not open utmp database"
 
 // Use for all file descriptors:
 typedef int fd_t;

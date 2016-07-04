@@ -15,6 +15,7 @@ PREFIX=/usr
 #CFLAGS+=-Wno-missing-field-initializers
 #CFLAGS+=-I/usr/X11R7/include -I/usr/pkg/include
 #LIBS+=-L/usr/X11R7/lib -Wl,-R/usr/X11R7/lib
+#LIBS+=-L/usr/pkg/lib -Wl,-R/usr/pkg/lib
 #PREFIX=/usr/local
 
 # Uncomment for FreeBSD:

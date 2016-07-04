@@ -5,7 +5,7 @@
 #define SCR_EXTEND_SELECTION_H
 
 #include <stdbool.h>
-#include <xcb/xproto.h>
+#include <xcb/xcb.h>
 
 void scr_extend_selection(const xcb_point_t p, const bool drag);
 
