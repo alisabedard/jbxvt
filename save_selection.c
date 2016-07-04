@@ -13,6 +13,18 @@
 #include <stdlib.h>
 #include <string.h>
 
+static uint8_t * common(uint8_t * restrict str, uint8_t * restrict source,
+	uint16_t * restrict total, int16_t * restrict col1, const uint16_t len)
+{
+	str = GC_REALLOC(str, *total + len);
+	if(!str)
+		  abort();
+	strncpy((char *)str + *total - 1, (char *)source, len);
+	total += len;
+	return str;
+	*col1 = 0;
+}
+
 /*  Convert the currently marked screen selection as a text string
     and save it as the current saved selection. */
 void save_selection(void)
@@ -30,6 +42,7 @@ void save_selection(void)
 	se2 = forward ? &jbxvt.sel.end2 : &jbxvt.sel.end1;
 	total = 1;
 	str = GC_MALLOC(1);
+	const uint8_t w = jbxvt.scr.chars.width;
 	if (se1->se_type == SAVEDSEL) {
 		col1 = se1->se_col;
 		for (i = se1->se_index; i >= 0; --i) {
@@ -38,15 +51,10 @@ void save_selection(void)
 				col2 = se2->se_col - 1;
 				i = 0;	// force loop exit
 			} else
-				col2 = jbxvt.scr.chars.width - 1;
+				col2 = w - 1;
 			len = sl->sl_length;
-			s = convert_line(sl->sl_text,&len,col1,col2);
-			str = GC_REALLOC(str,total + len);
-			if (str == NULL)
-				abort();
-			strncpy((char *)str + total - 1,(char *)s,len);
-			total += len;
-			col1 = 0;
+			s = convert_line(sl->sl_text, &len, col1, col2);
+			str = common(str, s, &total, &col1, len);
 		}
 	}
 	if (se2->se_type == SCREENSEL) {
@@ -54,18 +62,13 @@ void save_selection(void)
 		i = is_screensel ? se1->se_index : 0;
 		col1 = is_screensel ? se1->se_col : 0;
 		for (; i <= se2->se_index; ++i) {
-			col2 = i == se2->se_index ? se2->se_col
-				: jbxvt.scr.chars.width;
+			col2 = i == se2->se_index ? se2->se_col : w;
 			if (--col2 < 0)
 				break;
-			len = jbxvt.scr.chars.width;
-			s = convert_line(jbxvt.scr.current->text[i],&len,col1,col2);
-			str = GC_REALLOC(str,total + len);
-			if(!str)
-				  abort();
-			strncpy((char *)str + total - 1,(char *)s,len);
-			total += len;
-			col1 = 0;
+			len = w;
+			s = convert_line(jbxvt.scr.current->text[i], &len,
+				col1, col2);
+			common(str, s, &total, &col1, len);
 		}
 	}
 	str[total - 1] = 0; // null termination
