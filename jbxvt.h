@@ -4,9 +4,9 @@
 #include "color.h"
 #include "command.h"
 #include "Size.h"
-#include "screenst.h"
+#include "VTScreen.h"
 #include "selst.h"
-#include "slinest.h"
+#include "SLine.h"
 
 #define WARN_ERR	"Error: "
 #define WARN_SIG	"Signal Received"

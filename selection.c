@@ -8,7 +8,6 @@
 #include "save_selection.h"
 #include "selcmp.h"
 #include "screen.h"
-#include "slinest.h"
 #include "show_selection.h"
 #include "xsetup.h"
 

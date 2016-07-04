@@ -5,7 +5,6 @@
 #define SCREEN_H
 
 #include "jbxvt.h"
-#include "screenst.h"
 
 enum {
 	MAX_SCROLL = 126, /* max # lines that can scroll at once.

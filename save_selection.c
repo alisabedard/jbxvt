@@ -7,7 +7,6 @@
 #include "screen.h"
 #include "selcmp.h"
 #include "selection.h"
-#include "slinest.h"
 
 #include <gc.h>
 #include <stdlib.h>

@@ -5,9 +5,6 @@
 #define JBXVT_SELECTION_H
 
 #include "jbxvt.h"
-#include "selst.h"
-
-#include <stdint.h>
 
 enum {
 	MAX_WIDTH = 250, // max width of selected lines

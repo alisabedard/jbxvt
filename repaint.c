@@ -12,7 +12,6 @@
 #include "screen.h"
 #include "selection.h"
 #include "show_selection.h"
-#include "slinest.h"
 
 #include <stdlib.h>
 #include <string.h>
