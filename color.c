@@ -33,14 +33,11 @@ pixel_t get_pixel_rgb(int16_t r, int16_t g, int16_t b)
 	return p;
 }
 
-pixel_t set_color(const unsigned long vm,
-	const pixel_t p, xcb_gcontext_t gc)
+pixel_t set_color(const uint32_t vm, const pixel_t p, const xcb_gcontext_t gc)
 {
 	xcb_change_gc(jbxvt.X.xcb, gc, vm, (uint32_t[]){p});
-	if(vm & XCB_GC_FOREGROUND)
-		  jbxvt.X.color.current_fg = p;
-	else
-		  jbxvt.X.color.current_bg = p;
+	*(vm & XCB_GC_FOREGROUND ? &jbxvt.X.color.current_fg
+		: &jbxvt.X.color.current_bg) = p;
 	return p;
 }
 
