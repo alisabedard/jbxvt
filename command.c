@@ -23,8 +23,6 @@
 #include <X11/keysym.h>
 
 static struct {
-	// chars waiting to be sent to the command:
-	uint8_t *send;
 	// start and end of queue:
 	struct {
 		struct xeventst *start, *last;
@@ -302,15 +300,12 @@ void push_com_char(const int c)
 //  Send count characters directly to the command.
 void send_string(uint8_t * restrict buf, const uint8_t count)
 {
-	command.send = GC_MALLOC(count);
-	memcpy(command.send, buf, count);
-	jbxvt.com.send_nxt = command.send;
+	jbxvt.com.send_nxt = buf;
 	jbxvt.com.send_count = count;
 }
 
 /*  Send printf formatted output to the command.  Only used for small ammounts
  *  of data.  */
-/*VARARGS1*/
 void cprintf(char *fmt,...)
 {
 	va_list args;
