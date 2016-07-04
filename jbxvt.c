@@ -16,7 +16,7 @@
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
 
-struct JBXVT jbxvt;
+JBXVT jbxvt;
 
 // Print string to stderr
 void jbputs(const char * restrict string)

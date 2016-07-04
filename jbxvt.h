@@ -24,7 +24,7 @@ typedef int fd_t;
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 
-struct JBXVT {
+typedef struct {
 	struct {
 		//Display * dpy;
 		xcb_connection_t * xcb;
@@ -84,9 +84,9 @@ struct JBXVT {
 		Size size;
 		bool show_scrollbar;
 	} opt;
-};
+} JBXVT;
 
-extern struct JBXVT jbxvt; // in jbxvt.c
+extern JBXVT jbxvt; // in jbxvt.c
 
 
 // Print string to stderr
