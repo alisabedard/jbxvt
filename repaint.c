@@ -45,7 +45,7 @@ static pixel_t get_pixel_for_word(const uint16_t c)
 static pixel_t set_rgb_colors(const uint16_t c, const bool fg)
 {
 	pixel_t p = get_pixel_for_word(c);
-	set_color(fg?XCB_GC_FOREGROUND :XCB_GC_BACKGROUND, c, jbxvt.X.gc.tx);
+	set_color(fg ? XCB_GC_FOREGROUND : XCB_GC_BACKGROUND, c, jbxvt.X.gc.tx);
 	return p;
 }
 
@@ -153,7 +153,7 @@ static void paint_rvec_text(uint8_t * str,
 	paint_rvec_text(str + i, rvec + i, len - i, p);
 }
 
-static int_fast32_t repaint_generic(const xcb_point_t p,
+static int_fast32_t repaint_generic(xcb_point_t p,
 	const int_fast32_t m, const int_fast32_t c1,
 	const int_fast32_t c2, uint8_t * restrict str, uint32_t * rend)
 {
@@ -161,13 +161,12 @@ static int_fast32_t repaint_generic(const xcb_point_t p,
 		paint_rvec_text(str, rend + c1, m, p);
 	else
 		paint_rval_text(str, 0, m, p);
-	const int_fast16_t x = p.x + m * jbxvt.X.font_size.width;
-	const uint_fast16_t width = (c2 - c1 + 1 - m)
-		* jbxvt.X.font_size.width;
-	if (width > 0)
-		  xcb_clear_area(jbxvt.X.xcb, false, jbxvt.X.win.vt, x,
-			  p.y, width, jbxvt.X.font_size.height);
-	return p.y + jbxvt.X.font_size.height;
+	const Size f = jbxvt.X.font_size;
+	p.x += m * f.width;
+	const uint16_t width = (c2 - c1 + 1 - m) * f.width;
+	xcb_clear_area(jbxvt.X.xcb, false, jbxvt.X.win.vt,
+		p.x, p.y, width, f.height);
+	return p.y + f.height;
 }
 
 static int_fast16_t show_scroll_history(const xcb_rectangle_t r,
