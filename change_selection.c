@@ -16,7 +16,7 @@ static void invert(const Size c, const Size f, const int16_t rs,
 	for (uint8_t row = row1; row <= row2; row++) {
 		const int16_t y = m + row * f.height;
 		const int16_t x1 = m + (row == rs ? cs * f.w : 0);
-		const int16_t x2 = m + ((row == re) ? ce : c.w) * f.w;
+		const int16_t x2 = m + (row == re ? ce : c.w) * f.w;
 		xcb_poly_fill_rectangle(jbxvt.X.xcb, jbxvt.X.win.vt,
 			jbxvt.X.gc.cu, 1, &(xcb_rectangle_t){ .x = x1,
 			.y = y, .width = x2 - x1, .height = f.h});
