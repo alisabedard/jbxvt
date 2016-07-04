@@ -156,9 +156,10 @@ static void paint_rvec_text(uint8_t * str,
 }
 
 static int_fast32_t repaint_generic(xcb_point_t p,
-	const int_fast32_t m, const int_fast32_t c1,
+	int_fast16_t m, const int_fast32_t c1,
 	const int_fast32_t c2, uint8_t * restrict str, uint32_t * rend)
 {
+	m = MIN(m, jbxvt.scr.chars.width - 1);
 	if (rend)
 		paint_rvec_text(str, rend + c1, m, p);
 	else
