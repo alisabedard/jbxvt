@@ -118,7 +118,7 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 	xcb_image_text_8(jbxvt.X.xcb, len, jbxvt.X.win.vt,
 		jbxvt.X.gc.tx, p.x, p.y, (const char *)str);
 	xcb_flush(jbxvt.X.xcb);
-	++p.y; // Advance for underline, use underline for italic.
+	++p.y; // Padding for underline, use underline for italic.
 	if (rval & RS_ULINE || unlikely(rval & RS_ITALIC)) {
 		xcb_poly_line(jbxvt.X.xcb, XCB_COORD_MODE_ORIGIN,
 			jbxvt.X.win.vt, jbxvt.X.gc.tx, 2, (xcb_point_t[]){
@@ -139,18 +139,20 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 static void paint_rvec_text(uint8_t * str,
 	uint32_t * rvec, int16_t len, xcb_point_t p)
 {
-	if (len <= 0) // exit condition
-		  return;
-	// find the length for which the current rend val applies
-	int_fast16_t i = 0;
-	for (const uint32_t r = *rvec;
-		i < len && rvec[i] == r; ++i)
-		  ;
-	// draw
-	paint_rval_text(str,rvec[0], i, p);
-	// advance
-	p.x += i * jbxvt.X.font_size.width;
-	paint_rvec_text(str + i, rvec + i, len - i, p);
+	int_fast16_t i;
+	uint32_t r;
+	while (len > 0) {
+		// find the length for which the current rend val applies
+		for (i = 0, r = *rvec; i < len && rvec[i] == r; ++i)
+			  ;
+		// draw
+		paint_rval_text(str,rvec[0], i, p);
+		// advance to next block
+		p.x += i * jbxvt.X.font_size.width;
+		str += i;
+		rvec += i;
+		len -= i;
+	}
 }
 
 static int_fast32_t repaint_generic(xcb_point_t p,
@@ -175,6 +177,7 @@ static int_fast16_t show_scroll_history(const xcb_rectangle_t r,
 	int_fast16_t line = r.y;
 	for (int_fast16_t i = jbxvt.scr.offset - r.y - 1;
 		line <= r.height && i >= 0; ++line, --i) {
+		LOG("i: %d, line: %d", (int)i, (int)line);
 		SLine * sl = jbxvt.scr.sline.data[i];
 		if (!sl) // no scroll history yet!
 			  break;

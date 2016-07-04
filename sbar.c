@@ -12,7 +12,7 @@
 static struct {
 	Size sz;
 	// most recent arguments to sbar_show:
-	int32_t last_low, last_high, last_length;
+	int16_t last_low, last_high, last_length;
 } sbar = { .sz.width = SBAR_WIDTH, .last_length = 100, .last_high = 100 };
 
 //  Redraw the scrollbar after a size change
