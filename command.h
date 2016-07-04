@@ -24,7 +24,7 @@ void cprintf(char *, ...);
 void init_command(char ** restrict argv);
 
 // Convert the keypress event into a string
-uint8_t *lookup_key(void * restrict ev, int16_t * restrict pcount)
+uint8_t *lookup_key(void * restrict ev, int_fast16_t * restrict pcount)
 	__attribute__((nonnull));
 
 void push_com_char(int);

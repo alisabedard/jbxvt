@@ -14,8 +14,7 @@ pixel_t get_pixel(const char * restrict color)
 // Use rgb color
 pixel_t get_pixel_rgb(int16_t r, int16_t g, int16_t b);
 
-pixel_t set_color(const unsigned long vm,
-	const pixel_t p, xcb_gcontext_t gc);
+pixel_t set_color(const uint32_t vm, const pixel_t p, const xcb_gcontext_t gc);
 
 // NULL value resets colors to stored value
 void set_fg(const char * restrict color); //foreground

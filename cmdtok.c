@@ -95,8 +95,8 @@ static void handle_other(xcb_generic_event_t * gen_e)
 	push_xevent(xe);
 }
 
-static int16_t handle_xev(xcb_generic_event_t * restrict event,
-	int16_t * restrict count, const int8_t flags)
+static int_fast16_t handle_xev(xcb_generic_event_t * restrict event,
+	int_fast16_t * restrict count, const uint8_t flags)
 {
 	uint8_t * s;
 
@@ -131,7 +131,7 @@ static int16_t handle_xev(xcb_generic_event_t * restrict event,
 	return 0;
 }
 
-static int16_t output_to_command(int16_t count)
+static int_fast16_t output_to_command(int_fast16_t count)
 {
 	count = MIN(jbxvt.com.send_count, 100);
 #ifdef SYS_write
@@ -152,7 +152,7 @@ static int16_t output_to_command(int16_t count)
 #if defined(__i386__) || defined(__amd64__)
 	__attribute__((regparm(1)))
 #endif//x86
-static int16_t poll_io(int16_t count, fd_set * restrict in_fdset)
+static int_fast16_t poll_io(int_fast16_t count, fd_set * restrict in_fdset)
 {
 	const fd_t x_fd = xcb_get_file_descriptor(jbxvt.X.xcb);
 	FD_SET(jbxvt.com.fd, in_fdset);
@@ -186,7 +186,7 @@ __attribute__((hot,regparm(1)))
 #else
 __attribute__((hot))
 #endif
-static int16_t get_com_char(const int_fast8_t flags)
+static int_fast16_t get_com_char(const int_fast8_t flags)
 {
 	if (jbxvt.com.stack.top > jbxvt.com.stack.data)
 		return(*--jbxvt.com.stack.top);
@@ -198,13 +198,13 @@ static int16_t get_com_char(const int_fast8_t flags)
 		return(GCC_NULL);
 	// Flush here to draw the cursor.
 	xcb_flush(jbxvt.X.xcb);
-	int16_t count = 0;
+	int_fast16_t count = 0;
 	fd_set in_fdset;
 	do {
 		FD_ZERO(&in_fdset);
 		xcb_generic_event_t * e;
 		if ((e = xcb_poll_for_event(jbxvt.X.xcb))) {
-			const int16_t xev_ret = handle_xev(e, &count, flags);
+			const int_fast16_t xev_ret = handle_xev(e, &count, flags);
 			free(e);
 			if (xev_ret)
 				  return xev_ret;
@@ -301,10 +301,10 @@ static void start_esc(int_fast16_t c, Token * restrict tk)
 #else
 	__attribute__((nonnull))
 #endif//x86
-static void end_esc(int16_t c, Token * restrict tk)
+static void end_esc(int_fast16_t c, Token * restrict tk)
 {
 	c = get_com_char(0);
-	uint16_t n = 0;
+	uint_fast16_t n = 0;
 	while (c >= '0' && c <= '9') {
 		n = n * 10 + c - '0';
 		c = get_com_char(0);
@@ -312,7 +312,7 @@ static void end_esc(int16_t c, Token * restrict tk)
 	tk->tk_arg[0] = n;
 	tk->tk_nargs = 1;
 	c = get_com_char(0);
-	register uint16_t i = 0;
+	register uint_fast16_t i = 0;
 	while ((c & 0177) >= ' ' && i < TKS_MAX) {
 		if (c >= ' ')
 			  tk->tk_string[i++] = c;

@@ -258,8 +258,7 @@ static void apply_state(const uint16_t state, uint8_t * restrict kbuf)
 }
 
 //  Convert the keypress event into a string.
-__attribute__((nonnull))
-uint8_t * lookup_key(void * restrict ev, int16_t * restrict pcount)
+uint8_t * lookup_key(void * restrict ev, int_fast16_t * restrict pcount)
 {
 	static uint8_t kbuf[KBUFSIZE];
 	xcb_key_press_event_t * ke = ev;
