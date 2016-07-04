@@ -69,13 +69,6 @@ static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
     and save it as the current saved selection. */
 void save_selection(void)
 {
-#if 0
-	uint8_t *str, *s;
-	uint16_t len, total;
-	int16_t i, col1, col2;
-	struct selst *se1, *se2;
-	struct slinest *sl;
-#endif
 	/*  Set se1 and se2 to point to the first
 	    and second selection endpoints.  */
 	const bool forward = selcmp(&jbxvt.sel.end1, &jbxvt.sel.end2) <= 0;
