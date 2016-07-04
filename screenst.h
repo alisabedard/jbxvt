@@ -8,18 +8,18 @@
 #include <stdint.h>
 #include <xcb/xproto.h>
 
-enum CharacterSet {
+typedef enum {
 	CHARSET_GB, CHARSET_ASCII, CHARSET_SG0, CHARSET_SG1, CHARSET_SG2
-};
+} CharacterSet;
 
 /*  Structure describing the current state of the screen.
  */
-typedef struct screenst {
+typedef struct {
 	uint8_t **text;		// backup copy of text
 	uint32_t **rend;	// rendition styles
 	Size margin;		// scroll margins, top and bottom
 	xcb_point_t cursor;	// cursor position, row and column
-	uint8_t charset[2];	// graphics mode char set
+	CharacterSet charset[2];// graphics mode char set
 	bool decom:1;		// origin mode flag
 	bool decawm:1;		// DECAWM auto-wrap flag
 	bool wrap_next:1;	// wrap before the next printed character

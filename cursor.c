@@ -43,7 +43,7 @@ static inline void adj_wh(int16_t * restrict grc,
 }
 
 //  Restore the cursor position and rendition style.
-static void restore(struct screenst * restrict s, const uint32_t r)
+static void restore(VTScreen * restrict s, const uint32_t r)
 {
 	if (!jbxvt.scr.current)
 		  return;
@@ -65,9 +65,9 @@ static inline bool focus(const bool in, bool cursor_focus)
 	return in;
 }
 
-void cursor(const enum CursorOp op)
+void cursor(const CursorOp op)
 {
-	static struct screenst saved_screen; // saved cursor position
+	static VTScreen saved_screen; // saved cursor position
 	static uint32_t saved_rstyle; // saved render style
 	static uint8_t cursor_focus; // window has focus if nonzero
 

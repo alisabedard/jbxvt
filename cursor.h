@@ -4,7 +4,7 @@
 #ifndef JBXVT_CURSOR_H
 #define JBXVT_CURSOR_H
 
-enum CursorOp {
+typedef enum {
 	CURSOR_DRAW,
 	CURSOR_SAVE,
 	CURSOR_RESTORE,
@@ -13,9 +13,9 @@ enum CursorOp {
 	CURSOR_FOCUS_OUT,
 	CURSOR_ENTRY_IN,
 	CURSOR_ENTRY_OUT
-};
+} CursorOp;
 
 //  Draw the cursor at the current position.
-void cursor(const enum CursorOp op);
+void cursor(const CursorOp op);
 
 #endif//!JBXVT_CURSOR_H

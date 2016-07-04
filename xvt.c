@@ -117,7 +117,7 @@ static void handle_tk_expose(const uint8_t region, const int16_t * arg)
 	}
 }
 
-static void set_cset(const enum CharacterSet cs, const uint8_t i)
+static void set_cset(const CharacterSet cs, const uint8_t i)
 {
 	jbxvt.scr.s1.charset[i] = cs;
 	jbxvt.scr.s2.charset[i] = cs;
