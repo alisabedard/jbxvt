@@ -183,7 +183,7 @@ static void handle_dsr(const int16_t arg)
 	switch (arg) {
 	case 5: // command from host requesting status
 		// 0 is response for 'Ready, no malfunctions'
-		cprintf("0");
+		cprintf("\033[0n");
 	case 6 :
 		cursor(CURSOR_REPORT);
 		break;
@@ -464,6 +464,14 @@ app_loop_head:
 		break;
 	case TK_TBC :
 		LOG("TK_TBC");
+		break;
+	case TK_DECPM:
+		LOG("TK_DECPM");
+		scr->decpm = true;
+		break;
+	case TK_DECST:
+		LOG("TK_DECST");
+		scr->decpm = false;
 		break;
 	default:
 #ifdef DEBUG

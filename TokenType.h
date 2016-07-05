@@ -81,6 +81,9 @@ typedef enum {
 	TK_DECPAM = '=', // keypad to applications mode
 	TK_DECPNM = '>', // keypad to numeric mode
 
+	TK_DECPM = '^', // Privacy message (ended by ESC \)
+	TK_DECST = '\\', // String Terminator
+
 	TK_IND = 0x100, // index downward
 	TK_NEL = 0x101, // beginning of next line
 	TK_HTS = 0x102, // horizontal tab set

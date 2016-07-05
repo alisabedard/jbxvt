@@ -28,6 +28,7 @@ typedef struct {
 	bool dectcem:1;		// DECTCEM -- hide cursor
 	bool ptr_xy:1;		// send x y on button press/release
 	bool ptr_cell:1;	// cell motion mouse tracking
+	bool decpm:1;		// privacy message
 	uint8_t charsel:1;	// charset index
 } VTScreen;
 

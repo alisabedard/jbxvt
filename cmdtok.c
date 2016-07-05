@@ -7,7 +7,6 @@
 #include "jbxvt.h"
 #include "log.h"
 #include "screen.h"
-#include "scr_string.h"
 #include "Token.h"
 #include "ttyinit.h"
 #include "wm_del_win.h"
@@ -345,6 +344,8 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 	case '8': // DECRC: restore cursor
 	case '=': // DECPAM: keypad to application mode
 	case '>': // DECPNM: keypad to numeric mode
+	case '^': // DECPM: Privacy message (ended by ESC \)
+	case '\\':
 		tk->type = c;
 		tk->nargs = 0;
 		break;

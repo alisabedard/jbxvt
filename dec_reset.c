@@ -20,17 +20,21 @@ void dec_reset(Token * restrict token)
 
 	if (likely(token->private == '?')) {
 		switch (token->arg[0]) {
-		case 1 :
+		case 1: // DECCKM
 			set_keys(set, true);
 			break;
 		case 2:
 			scr->decanm = set;
 			break;
+		case 3: // DECCOLM: 80/132 col mode switch
+			break;
+		case 5: // DECSCNM: set reverse-video mode
+			break;
 		case 6 : // DECOM normal cursor mode
 			/* According to the spec, the cursor is reset to
 			   the home position when this is changed.  */
 			scr->decom = set;
-			scr_move(0, 0, 0);
+			scr_move(scr->margin.top, 0, 0);
 			break;
 		case 7: // DECAWM
 		case 45: // reverse wrap-around mode?

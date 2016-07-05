@@ -108,7 +108,7 @@ void handle_sgr(Token * restrict token)
 			&bg_index_mode, &bg_rgb_mode))
 			  continue;
 		switch (token->arg[i]) {
-		case 0 :
+		case 0 : // reset
 			scr_style(RS_NONE);
 			set_fg(NULL);
 			set_bg(NULL);

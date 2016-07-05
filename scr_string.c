@@ -201,9 +201,11 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		if (s->charset[s->charsel] == CHARSET_SG0)
 			  parse_special_charset(str, len);
 		// Render the string:
-		paint_rval_text(str, jbxvt.scr.rstyle, n, p);
-		// Save scroll history:
-		memcpy(t, str, n);
+		if (!s->decpm) {
+			paint_rval_text(str, jbxvt.scr.rstyle, n, p);
+			// Save scroll history:
+			memcpy(t, str, n);
+		}
 		// Save render style:
 		if(jbxvt.scr.rstyle)
 			  save_render_style(n, s);
