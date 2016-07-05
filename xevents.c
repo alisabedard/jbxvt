@@ -6,7 +6,7 @@
 #include "change_offset.h"
 #include "jbxvt.h"
 #include "log.h"
-#include "token.h"
+#include "Token.h"
 #include "xeventst.h"
 
 #include <gc.h>
@@ -73,9 +73,9 @@ static void handle_motion_notify(Token * restrict tk,
 {
 	if (xe->xe_window == jbxvt.X.win.sb
 		&& (xe->xe_state & XCB_KEY_BUT_MASK_BUTTON_2)) {
-		tk->tk_type = TK_SBGOTO;
-		tk->tk_arg[0] = xe->xe_y;
-		tk->tk_nargs = 1;
+		tk->type = TK_SBGOTO;
+		tk->arg[0] = xe->xe_y;
+		tk->nargs = 1;
 	} else if (xe->xe_window == jbxvt.X.win.vt
 		&& jbxvt.scr.current->ptr_cell) {
 		track_mouse(xe->xe_button | TRACK_MOTION, xe->xe_state,
@@ -83,19 +83,19 @@ static void handle_motion_notify(Token * restrict tk,
 	} else if (xe->xe_window == jbxvt.X.win.vt
 		&& (xe->xe_state & XCB_KEY_BUT_MASK_BUTTON_1)
 		&& !(xe->xe_state & XCB_KEY_BUT_MASK_CONTROL)) {
-		tk->tk_type = TK_SELDRAG;
-		tk->tk_arg[0] = xe->xe_x;
-		tk->tk_arg[1] = xe->xe_y;
-		tk->tk_nargs = 2;
+		tk->type = TK_SELDRAG;
+		tk->arg[0] = xe->xe_x;
+		tk->arg[1] = xe->xe_y;
+		tk->nargs = 2;
 	}
 }
 
 static void sbop(Token * restrict tk, struct xeventst * restrict xe,
 	const bool up)
 {
-	tk->tk_type = up ? TK_SBUP : TK_SBDOWN;
-	tk->tk_arg[0] = xe->xe_y;
-	tk->tk_nargs = 1;
+	tk->type = up ? TK_SBUP : TK_SBDOWN;
+	tk->arg[0] = xe->xe_y;
+	tk->nargs = 1;
 }
 
 static void handle_button_release(Token * restrict tk,
@@ -123,16 +123,16 @@ static void handle_button_release(Token * restrict tk,
 		switch (xe->xe_button) {
 		case 1:
 		case 3:
-			tk->tk_type = TK_SELECT;
-			tk->tk_arg[0] = xe->xe_time;
-			tk->tk_nargs = 1;
+			tk->type = TK_SELECT;
+			tk->arg[0] = xe->xe_time;
+			tk->nargs = 1;
 			break;
 		case 2:
-			tk->tk_type = TK_SELINSRT;
-			tk->tk_arg[0] = xe->xe_time;
-			tk->tk_arg[1] = xe->xe_x;
-			tk->tk_arg[2] = xe->xe_y;
-			tk->tk_nargs = 3;
+			tk->type = TK_SELINSRT;
+			tk->arg[0] = xe->xe_time;
+			tk->arg[1] = xe->xe_x;
+			tk->arg[2] = xe->xe_y;
+			tk->nargs = 3;
 			break;
 		case 4:
 			sbop(tk, xe, false);
@@ -153,14 +153,14 @@ static void handle_button1_press(Token * restrict tk,
 		< MP_INTERVAL) {
 		time1 = 0;
 		time2 = 0;
-		tk->tk_type = TK_SELLINE;
+		tk->type = TK_SELLINE;
 	} else if (xe->xe_time - time1
 		< MP_INTERVAL) {
 		time2 = xe->xe_time;
-		tk->tk_type = TK_SELWORD;
+		tk->type = TK_SELWORD;
 	} else {
 		time1 = xe->xe_time;
-		tk->tk_type = TK_SELSTART;
+		tk->type = TK_SELSTART;
 	}
 }
 
@@ -169,8 +169,8 @@ static void handle_button_press(Token * restrict tk,
 {
 	if (xe->xe_window == jbxvt.X.win.vt
 		&& xe->xe_state == XCB_KEY_BUT_MASK_CONTROL) {
-		tk->tk_type = TK_SBSWITCH;
-		tk->tk_nargs = 0;
+		tk->type = TK_SBSWITCH;
+		tk->nargs = 0;
 		return;
 	}
 	if (xe->xe_window == jbxvt.X.win.vt && jbxvt.scr.current->ptr_xy)
@@ -183,22 +183,22 @@ static void handle_button_press(Token * restrict tk,
 			handle_button1_press(tk, xe);
 			break;
 		case 2:
-			tk->tk_type = TK_NULL;
+			tk->type = TK_NULL;
 			break;
 		case 3:
-			tk->tk_type = TK_SELEXTND;
+			tk->type = TK_SELEXTND;
 			break;
 		}
-		tk->tk_arg[0] = xe->xe_x;
-		tk->tk_arg[1] = xe->xe_y;
-		tk->tk_nargs = 2;
+		tk->arg[0] = xe->xe_x;
+		tk->arg[1] = xe->xe_y;
+		tk->nargs = 2;
 		return;
 	}
 	if (xe->xe_window == jbxvt.X.win.sb) {
 		if (xe->xe_button == 2) {
-			tk->tk_type = TK_SBGOTO;
-			tk->tk_arg[0] = xe->xe_y;
-			tk->tk_nargs = 1;
+			tk->type = TK_SBGOTO;
+			tk->arg[0] = xe->xe_y;
+			tk->nargs = 1;
 		}
 	}
 }
@@ -209,73 +209,73 @@ bool handle_xevents(Token * restrict tk)
 	struct xeventst *xe = pop_xevent();
 	if(!xe) return false;
 	if (xe->xe_window == jbxvt.X.win.vt)
-		  tk->tk_region = SCREEN;
+		  tk->region = SCREEN;
 	else if (xe->xe_window == jbxvt.X.win.sb)
-		  tk->tk_region = SCROLLBAR;
+		  tk->region = SCROLLBAR;
 	else if (xe->xe_window == jbxvt.X.win.main)
-		  tk->tk_region = MAINWIN;
+		  tk->region = MAINWIN;
 	else
-		  tk->tk_region = -1;
+		  tk->region = -1;
 	switch (xe->xe_type) {
 	case XCB_KEY_RELEASE: // Unimplemented
 		break;
 	case XCB_ENTER_NOTIFY:
-		tk->tk_type = TK_ENTRY;
-		tk->tk_arg[0] = 1;
-		tk->tk_nargs = 1;
+		tk->type = TK_ENTRY;
+		tk->arg[0] = 1;
+		tk->nargs = 1;
 		break;
 	case XCB_LEAVE_NOTIFY:
-		tk->tk_type = TK_ENTRY;
-		tk->tk_arg[0] = 0;
-		tk->tk_nargs = 1;
+		tk->type = TK_ENTRY;
+		tk->arg[0] = 0;
+		tk->nargs = 1;
 		break;
 	case XCB_FOCUS_IN:
-		tk->tk_type = TK_FOCUS;
-		tk->tk_arg[0] = 1;
-		tk->tk_arg[1] = xe->xe_detail;
-		tk->tk_nargs = 2;
+		tk->type = TK_FOCUS;
+		tk->arg[0] = 1;
+		tk->arg[1] = xe->xe_detail;
+		tk->nargs = 2;
 		break;
 	case XCB_FOCUS_OUT:
-		tk->tk_type = TK_FOCUS;
-		tk->tk_arg[0] = 0;
-		tk->tk_arg[1] = xe->xe_detail;
-		tk->tk_nargs = 2;
+		tk->type = TK_FOCUS;
+		tk->arg[0] = 0;
+		tk->arg[1] = xe->xe_detail;
+		tk->nargs = 2;
 		break;
 	case XCB_EXPOSE:
 	case XCB_GRAPHICS_EXPOSURE:
-		tk->tk_type = TK_EXPOSE;
-		tk->tk_arg[0] = xe->xe_x;
-		tk->tk_arg[1] = xe->xe_y;
-		tk->tk_arg[2] = xe->xe_width;
-		tk->tk_arg[3] = xe->xe_height;
-		tk->tk_nargs = 4;
+		tk->type = TK_EXPOSE;
+		tk->arg[0] = xe->xe_x;
+		tk->arg[1] = xe->xe_y;
+		tk->arg[2] = xe->xe_width;
+		tk->arg[3] = xe->xe_height;
+		tk->nargs = 4;
 		break;
 	case XCB_NO_EXPOSURE: // Unimplemented
 		break;
 	case XCB_CONFIGURE_NOTIFY:
 		LOG("ConfigureNotify");
-		tk->tk_type = TK_RESIZE;
-		tk->tk_nargs = 0;
+		tk->type = TK_RESIZE;
+		tk->nargs = 0;
 		break;
 	case XCB_SELECTION_CLEAR:
-		tk->tk_type = TK_SELCLEAR;
-		tk->tk_arg[0] = xe->xe_time;
-		tk->tk_nargs = 1;
+		tk->type = TK_SELCLEAR;
+		tk->arg[0] = xe->xe_time;
+		tk->nargs = 1;
 		break;
 	case XCB_SELECTION_NOTIFY:
-		tk->tk_type = TK_SELNOTIFY;
-		tk->tk_arg[0] = xe->xe_time;
-		tk->tk_arg[1] = xe->xe_requestor;
-		tk->tk_arg[2] = xe->xe_property;
-		tk->tk_nargs = 3;
+		tk->type = TK_SELNOTIFY;
+		tk->arg[0] = xe->xe_time;
+		tk->arg[1] = xe->xe_requestor;
+		tk->arg[2] = xe->xe_property;
+		tk->nargs = 3;
 		break;
 	case XCB_SELECTION_REQUEST:
-		tk->tk_type = TK_SELREQUEST;
-		tk->tk_arg[0] = xe->xe_time;
-		tk->tk_arg[1] = xe->xe_requestor;
-		tk->tk_arg[2] = xe->xe_target;
-		tk->tk_arg[3] = xe->xe_property;
-		tk->tk_nargs = 4;
+		tk->type = TK_SELREQUEST;
+		tk->arg[0] = xe->xe_time;
+		tk->arg[1] = xe->xe_requestor;
+		tk->arg[2] = xe->xe_target;
+		tk->arg[3] = xe->xe_property;
+		tk->nargs = 4;
 		break;
 	case XCB_BUTTON_PRESS:
 		handle_button_press(tk, xe);

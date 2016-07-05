@@ -4,7 +4,7 @@
 #ifndef JBXVT_XEVENTS_H
 #define JBXVT_XEVENTS_H
 
-#include "tokenst.h"
+#include "Token.h"
 
 #include <stdbool.h>
 

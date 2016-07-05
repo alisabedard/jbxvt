@@ -1,5 +1,8 @@
+/*  Copyright 2016, Jeffrey E. Bedard
+    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+
 #include "handle_sgr.h"
-//#define DEBUG
+
 #include "color.h"
 #include "log.h"
 #include "screen.h"
@@ -76,9 +79,9 @@ static bool handle_color_encoding(const int32_t arg, const bool is_fg,
 #define SGRFG(c) sgrc(c, true)
 #define SGRBG(c) sgrc(c, false)
 
-void handle_sgr(struct tokenst * restrict token)
+void handle_sgr(Token * restrict token)
 {
-	if (token->tk_nargs == 0) {
+	if (token->nargs == 0) {
 		scr_style(RS_NONE);
 		return;
 	}
@@ -88,23 +91,23 @@ void handle_sgr(struct tokenst * restrict token)
 	bool fg_index_mode = false;
 	bool bg_rgb_mode = false;
 	bool bg_index_mode = false;
-	for (uint_fast8_t i = 0; i < token->tk_nargs; ++i) {
+	for (uint_fast8_t i = 0; i < token->nargs; ++i) {
 #ifdef DEBUG_SGR
-		LOG("handle_sgr: tk_arg[%d]: %d", i, token->tk_arg[i]);
+		LOG("handle_sgr: arg[%d]: %d", i, token->arg[i]);
 #endif//DEBUG_SGR
-		if (rgb_or_index(token->tk_arg[i], &fg_rgb_or_index,
+		if (rgb_or_index(token->arg[i], &fg_rgb_or_index,
 			&fg_index_mode, &fg_rgb_mode))
 			  continue;
-		if (rgb_or_index(token->tk_arg[i], &bg_rgb_or_index,
+		if (rgb_or_index(token->arg[i], &bg_rgb_or_index,
 			&bg_index_mode, &bg_rgb_mode))
 			  continue;
-		if (handle_color_encoding(token->tk_arg[i], true,
+		if (handle_color_encoding(token->arg[i], true,
 			&fg_index_mode, &fg_rgb_mode))
 			  continue;
-		if (handle_color_encoding(token->tk_arg[i], false,
+		if (handle_color_encoding(token->arg[i], false,
 			&bg_index_mode, &bg_rgb_mode))
 			  continue;
-		switch (token->tk_arg[i]) {
+		switch (token->arg[i]) {
 		case 0 :
 			scr_style(RS_NONE);
 			set_fg(NULL);
@@ -184,7 +187,7 @@ void handle_sgr(struct tokenst * restrict token)
 		case 47:
 		case 107: SGRBG(017); break;
 		default:
-			LOG("unhandled style %d", token->tk_arg[i]);
+			LOG("unhandled style %d", token->arg[i]);
 		}
 	}
 }

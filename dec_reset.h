@@ -4,7 +4,7 @@
 #ifndef DEC_RESET_H
 #define DEC_RESET_H
 
-#include "tokenst.h"
+#include "Token.h"
 
 void dec_reset(Token * restrict token)
 	__attribute__((nonnull));

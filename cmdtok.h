@@ -1,7 +1,7 @@
 #ifndef CMDTOK_H
 #define CMDTOK_H
 
-#include "tokenst.h"
+#include "Token.h"
 
 //  Special character returned by get_com_char().
 enum ComCharReturn {

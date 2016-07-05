@@ -1,39 +1,15 @@
-/*  Copyright 1992 John Bovey, University of Kent at Canterbury.
- *
- *  Redistribution and use in source code and/or executable forms, with
- *  or without modification, are permitted provided that the following
- *  condition is met:
- *
- *  Any redistribution must retain the above copyright notice, this
- *  condition and the following disclaimer, either as part of the
- *  program source code included in the redistribution or in human-
- *  readable materials provided with the redistribution.
- *
- *  THIS SOFTWARE IS PROVIDED "AS IS".  Any express or implied
- *  warranties concerning this software are disclaimed by the copyright
- *  holder to the fullest extent permitted by applicable law.  In no
- *  event shall the copyright-holder be liable for any damages of any
- *  kind, however caused and on any theory of liability, arising in any
- *  way out of the use of, or inability to use, this software.
- *
- *  -------------------------------------------------------------------
- *
- *  In other words, do not misrepresent my work as your own work, and
- *  do not sue me if it causes problems.  Feel free to do anything else
- *  you wish with it.
- */
+/*  Copyright 2016, Jeffrey E. Bedard
+    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 
-/* @(#)token.h	1.2 16/11/93 (UKC) */
-#ifndef TOKEN_H
-#define TOKEN_H
+#ifndef TOKEN_TYPE_H
+#define TOKEN_TYPE_H
 
-/*  Values of tk_region for Xevent generated tokens.
- */
+//  Values of tk_region for Xevent generated tokens.
 enum { MAINWIN, SCREEN, SCROLLBAR };
 
 //  Token types
-enum {
-TK_NULL = 0, // null token to be ignored
+typedef enum {
+	TK_NULL = 0, // null token to be ignored
 	TK_STRING =  1, // string of printable characters
 	TK_CHAR =  2, // single character
 	TK_EOF = 3, // read end of file
@@ -109,6 +85,6 @@ TK_NULL = 0, // null token to be ignored
 	TK_SS2 = 0x104, // single shift 2
 	TK_SS3 = 0x105, // single shift 3
 	TK_DECID = 0x106, // request terminal ID
-};
+} TokenType;
 
 #endif//!TOKEN_H

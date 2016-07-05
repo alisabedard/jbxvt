@@ -22,7 +22,7 @@
 #include "scr_reset.h"
 #include "scr_string.h"
 #include "selection.h"
-#include "token.h"
+#include "Token.h"
 #include "ttyinit.h"
 #include "xsetup.h"
 
@@ -33,16 +33,16 @@
 static bool jbxvt_size_set;
 static void handle_txtpar(Token * restrict token)
 {
-	switch (token->tk_arg[0]) {
+	switch (token->arg[0]) {
 	case 0 :
-		change_name(token->tk_string, false);
-		change_name(token->tk_string, true);
+		change_name(token->string, false);
+		change_name(token->string, true);
 		break;
 	case 1 :
-		change_name(token->tk_string, true);
+		change_name(token->string, true);
 		break;
 	case 2 :
-		change_name(token->tk_string, false);
+		change_name(token->string, false);
 		break;
 	}
 
@@ -155,18 +155,18 @@ static void select_charset(const char c, const uint8_t i)
 
 static void decstbm(Token * restrict token)
 {
-	int16_t * restrict t = token->tk_arg;
+	int16_t * restrict t = token->arg;
 	LOG("TK_DECSTBM args: %d, 0: %d, 1: %d",
-		(int)token->tk_nargs, t[0], t[1]);
+		(int)token->nargs, t[0], t[1]);
 	VTScreen * restrict scr = jbxvt.scr.current;
-	if (token->tk_private == '?') {
+	if (token->private == '?') {
 		// Restore private modes
 		// FIXME:  Unimplemented
 		LOG("FIXME:  DECRESTOREPM");
 		// At least set char set back to ASCII
 		set_cset(CHARSET_ASCII, 0);
 		set_charsel(0);
-	} else if (token->tk_nargs < 2 || t[0] >= t[1]) {
+	} else if (token->nargs < 2 || t[0] >= t[1]) {
 		LOG("DECSTBM reset");
 		// reset
 		scr->margin.top = 0;
@@ -201,18 +201,18 @@ void jbxvt_app_loop(void)
 	LOG("app_loop");
 	Token token;
 	int16_t n; // sanitized first token
-	int16_t * t; // shortcut to token.tk_arg
+	int16_t * t; // shortcut to token.arg
 	VTScreen * scr = jbxvt.scr.current;
 app_loop_head:
 	get_token(&token);
-	t = token.tk_arg;
+	t = token.arg;
 	// n is sanitized for ops with optional args
 	n = t[0] ? t[0] : 1;
-	switch (token.tk_type) {
+	switch (token.type) {
 	case TK_STRING :
 		//LOG("TK_STRING");
-		scr_string(token.tk_string, token.tk_length,
-			token.tk_nlcount);
+		scr_string(token.string, token.length,
+			token.nlcount);
 		break;
 	case TK_CHAR :
 		//LOG("TK_CHAR");
@@ -230,7 +230,7 @@ app_loop_head:
 		cursor(t[0] ? CURSOR_FOCUS_IN : CURSOR_FOCUS_OUT);
 		break;
 	case TK_EXPOSE: // window exposed
-		handle_tk_expose(token.tk_region, token.tk_arg);
+		handle_tk_expose(token.region, token.arg);
 		break;
 	case TK_RESIZE :
 		jbxvt_size_set = false;
@@ -302,22 +302,22 @@ app_loop_head:
 		break;
 	case TK_CUU: // cursor up
 		LOG("TK_CUU: args: %d, t[0]: %d, n: %d",
-			token.tk_nargs, t[0], n);
+			token.nargs, t[0], n);
 		scr_move(0, -n, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_CUD: // cursor down
 		LOG("TK_CUD: args: %d, t[0]: %d, n: %d",
-			token.tk_nargs, t[0], n);
+			token.nargs, t[0], n);
 		scr_move(0, n, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_CUF: // cursor forward
 		LOG("TK_CUF: args: %d, t[0]: %d, n: %d",
-			token.tk_nargs, t[0], n);
+			token.nargs, t[0], n);
 		scr_move(n, 0, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_CUB: // cursor back
 		LOG("TK_CUB: args: %d, t[0]: %d, n: %d",
-			token.tk_nargs, t[0], n);
+			token.nargs, t[0], n);
 		scr_move(-n, 0, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_HVP: // horizontal vertical position
@@ -414,7 +414,7 @@ app_loop_head:
 		break;
 	case TK_DECSWH :		/* ESC # digit */
 		LOG("TK_DECSWH");
-		if (token.tk_arg[0] == '8') // DECALN
+		if (token.arg[0] == '8') // DECALN
 			  scr_efill();
 		break;
 	case TK_NEL : // move to first position on next line down.
@@ -440,7 +440,6 @@ app_loop_head:
 		LOG("TK_SCS1");
 		select_charset(t[0], 1);
 		break;
-#ifdef DEBUG
 	case TK_HTS :
 		LOG("TK_HTS");
 		break;
@@ -454,12 +453,13 @@ app_loop_head:
 		LOG("TK_TBC");
 		break;
 	default:
-		if(token.tk_type) { // Ignore TK_NULL
-			LOG("Unhandled token: %d", token.tk_type);
+#ifdef DEBUG
+		if(token.type) { // Ignore TK_NULL
+			LOG("Unhandled token: %d", token.type);
 			exit(1);
 		}
-		break;
 #endif//DEBUG
+		break;
 	}
 	goto app_loop_head;
 }

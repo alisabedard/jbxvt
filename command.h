@@ -4,8 +4,8 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
-#include "tokenst.h"
 #include <stdbool.h>
+#include <stdint.h>
 
 enum CommandLimits {
 	NLMAX =		15,	// max number of lines to scroll

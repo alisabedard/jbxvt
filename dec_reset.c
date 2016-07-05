@@ -8,18 +8,18 @@
 #include "log.h"
 #include "screen.h"
 #include "scr_move.h"
-#include "token.h"
+#include "Token.h"
 #include "xsetup.h"
 
 void dec_reset(Token * restrict token)
 {
-	LOG("handle_reset(%d)", token->tk_arg[0]);
+	LOG("handle_reset(%d)", token->arg[0]);
 
-	const bool set = token->tk_type == TK_SET;
+	const bool set = token->type == TK_SET;
 	VTScreen * scr = jbxvt.scr.current;
 
-	if (likely(token->tk_private == '?')) {
-		switch (token->tk_arg[0]) {
+	if (likely(token->private == '?')) {
+		switch (token->arg[0]) {
 		case 1 :
 			set_keys(set, true);
 			break;
@@ -82,17 +82,17 @@ void dec_reset(Token * restrict token)
 			break;
 #ifdef DEBUG
 		default:
-			LOG("Unhandled: %d\n", token->tk_arg[0]);
+			LOG("Unhandled: %d\n", token->arg[0]);
 #endif//DEBUG
 		}
-	} else if (token->tk_private == 0) {
-		switch (token->tk_arg[0]) {
+	} else if (token->private == 0) {
+		switch (token->arg[0]) {
 		case 4 :
 			scr->insert = set;
 			break;
 #ifdef DEBUG
 		default:
-			LOG("Unhandled: %d\n", token->tk_arg[0]);
+			LOG("Unhandled: %d\n", token->arg[0]);
 #endif//DEBUG
 		}
 	}

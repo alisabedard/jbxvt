@@ -7,7 +7,7 @@
 #include "jbxvt.h"
 #include "log.h"
 #include "screen.h"
-#include "token.h"
+#include "Token.h"
 #include "ttyinit.h"
 #include "wm_del_win.h"
 #include "xeventst.h"

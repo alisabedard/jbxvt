@@ -8,7 +8,7 @@
 #include "log.h"
 #include "screen.h"
 #include "scr_string.h"
-#include "token.h"
+#include "Token.h"
 #include "ttyinit.h"
 #include "wm_del_win.h"
 #include "xevents.h"
@@ -244,18 +244,18 @@ static inline bool is_string_char(register int_fast16_t c)
 static void handle_string_char(int_fast16_t c, Token * restrict tk)
 {
 	uint_fast16_t i = 0;
-	tk->tk_nlcount = 0;
+	tk->nlcount = 0;
 	do {
-		tk->tk_string[i++] = c;
+		tk->string[i++] = c;
 		c = get_com_char(1);
-		if (c == '\n' && ++tk->tk_nlcount >= NLMAX) {
-			--tk->tk_nlcount;
+		if (c == '\n' && ++tk->nlcount >= NLMAX) {
+			--tk->nlcount;
 			break;
 		}
 	} while (is_string_char(c) && i < TKS_MAX);
-	tk->tk_length = i;
-	tk->tk_string[i] = 0;
-	tk->tk_type = TK_STRING;
+	tk->length = i;
+	tk->string[i] = 0;
+	tk->type = TK_STRING;
 	if (c != GCC_NULL)
 		  push_com_char(c);
 }
@@ -269,7 +269,7 @@ static void start_esc(int_fast16_t c, Token * restrict tk)
 {
 	c = get_com_char(0);
 	if (c >= '<' && c <= '?') {
-		tk->tk_private = c;
+		tk->private = c;
 		c = get_com_char(0);
 	}
 
@@ -282,7 +282,7 @@ static void start_esc(int_fast16_t c, Token * restrict tk)
 			c = get_com_char(0);
 		}
 		if (i < TK_MAX_ARGS)
-			  tk->tk_arg[i++] = n;
+			  tk->arg[i++] = n;
 		if (c == ESC)
 			  push_com_char(c);
 		if (c < ' ')
@@ -292,8 +292,8 @@ static void start_esc(int_fast16_t c, Token * restrict tk)
 	} while (c < '@' && c >= ' ');
 	if (c == ESC)
 		  push_com_char(c);
-	tk->tk_nargs = i;
-	tk->tk_type = c;
+	tk->nargs = i;
+	tk->type = c;
 }
 
 #if defined(__i386__) || defined(__amd64__)
@@ -309,18 +309,18 @@ static void end_esc(int_fast16_t c, Token * restrict tk)
 		n = n * 10 + c - '0';
 		c = get_com_char(0);
 	}
-	tk->tk_arg[0] = n;
-	tk->tk_nargs = 1;
+	tk->arg[0] = n;
+	tk->nargs = 1;
 	c = get_com_char(0);
 	register uint_fast16_t i = 0;
 	while ((c & 0177) >= ' ' && i < TKS_MAX) {
 		if (c >= ' ')
-			  tk->tk_string[i++] = c;
+			  tk->string[i++] = c;
 		c = get_com_char(0);
 	}
-	tk->tk_length = i;
-	tk->tk_string[i] = 0;
-	tk->tk_type = TK_TXTPAR;
+	tk->length = i;
+	tk->string[i] = 0;
+	tk->type = TK_TXTPAR;
 }
 
 #if defined(__i386__) || defined(__amd64__)
@@ -341,47 +341,47 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 	case '#':
 	case '(':
 	case ')':
-		tk->tk_type = c;
+		tk->type = c;
 		c = get_com_char(0);
-		tk->tk_arg[0] = c;
-		tk->tk_nargs = 1;
+		tk->arg[0] = c;
+		tk->nargs = 1;
 		break;
 	case '7':
 	case '8':
 	case '=':
 	case '>':
-		tk->tk_type = c;
-		tk->tk_nargs = 0;
+		tk->type = c;
+		tk->nargs = 0;
 		break;
 	case 'D' :
-		tk->tk_type = TK_IND;
+		tk->type = TK_IND;
 		break;
 	case 'E' :
-		tk->tk_type = TK_NEL;
+		tk->type = TK_NEL;
 		break;
 	case 'F': // Enter VT52 graphics mode
-		tk->tk_type = TK_ENTGM52;
+		tk->type = TK_ENTGM52;
 		break;
 	case 'G': // Leave VT52 graphics mode
-		tk->tk_type = TK_EXTGM52;
+		tk->type = TK_EXTGM52;
 		break;
 	case 'H' :
-		tk->tk_type = TK_HTS;
+		tk->type = TK_HTS;
 		break;
 	case 'M' :
-		tk->tk_type = TK_RI;
+		tk->type = TK_RI;
 		break;
 	case 'N' :
-		tk->tk_type = TK_SS2;
+		tk->type = TK_SS2;
 		break;
 	case 'O' :
-		tk->tk_type = TK_SS3;
+		tk->type = TK_SS3;
 		break;
 	case 'Z' :
-		tk->tk_type = TK_DECID;
+		tk->type = TK_DECID;
 		break;
 	case 'c': // Reset to Initial State
-		tk->tk_type = TK_RIS;
+		tk->type = TK_RIS;
 		break;
 	}
 }
@@ -395,15 +395,15 @@ void get_token(Token * restrict tk)
 		  return;
 	const int_fast16_t c = get_com_char(GET_XEVENTS);
 	if (c == GCC_NULL) {
-		tk->tk_type = TK_NULL;
+		tk->type = TK_NULL;
 	} else if (c == EOF) {
-		tk->tk_type = TK_EOF;
+		tk->type = TK_EOF;
 	} else if (is_string_char(c)) {
 		handle_string_char(c, tk);
 	} else if (c == ESC) {
 		handle_esc(c, tk);
 	} else {
-		tk->tk_type = TK_CHAR;
+		tk->type = TK_CHAR;
 		tk->tk_char = c;
 	}
 }
