@@ -166,7 +166,7 @@ static int_fast16_t poll_io(int_fast16_t count, fd_set * restrict in_fdset)
 	if (sv != -1 && FD_ISSET(jbxvt.com.fd, &out_fdset)) {
 		count = output_to_command(count);
 	}
-	return count ;
+	return count;
 }
 
 /*  Return the next input character after first passing any keyboard input

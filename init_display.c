@@ -22,14 +22,10 @@
 enum EventMasks {
 	MW_EVENTS = (XCB_EVENT_MASK_KEY_PRESS | XCB_EVENT_MASK_FOCUS_CHANGE
 		| XCB_EVENT_MASK_STRUCTURE_NOTIFY),
-	VT_EVENTS = (XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_ENTER_WINDOW
+	SUB_EVENTS = (XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_ENTER_WINDOW
 		| XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_BUTTON_PRESS
 		| XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_BUTTON_MOTION
-		| XCB_EVENT_MASK_POINTER_MOTION),
-	SB_EVENTS = (XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_ENTER_WINDOW
-		| XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_BUTTON_MOTION
-		| XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_BUTTON_RELEASE
-		| XCB_EVENT_MASK_BUTTON_PRESS)
+		| XCB_EVENT_MASK_POINTER_MOTION)
 };
 
 static xcb_font_t get_font(const char * name)
@@ -104,7 +100,7 @@ static void create_sb_window(const uint16_t height)
 		XCB_WINDOW_CLASS_COPY_FROM_PARENT,
 		XCB_COPY_FROM_PARENT, XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL
 		| XCB_CW_EVENT_MASK | XCB_CW_CURSOR, (uint32_t[]){
-		jbxvt.X.color.bg, jbxvt.X.color.fg, SB_EVENTS, c});
+		jbxvt.X.color.bg, jbxvt.X.color.fg, SUB_EVENTS, c});
 	xcb_free_cursor(jbxvt.X.xcb, c);
 }
 
@@ -116,7 +112,7 @@ static void create_vt_window(xcb_size_hints_t * restrict sh)
 		jbxvt.X.win.main, 0, 0, sh->width, sh->height, 0,
 		XCB_WINDOW_CLASS_COPY_FROM_PARENT, XCB_COPY_FROM_PARENT,
 		XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK | XCB_CW_CURSOR,
-		(uint32_t[]){jbxvt.X.color.bg, VT_EVENTS, c});
+		(uint32_t[]){jbxvt.X.color.bg, SUB_EVENTS, c});
 	xcb_free_cursor(jbxvt.X.xcb, c);
 }
 
