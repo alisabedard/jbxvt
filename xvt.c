@@ -319,8 +319,10 @@ app_loop_head:
 		scr_move(-n, 0, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_CPL: // cursor previous line
+		LOG("TK_CPL");
 		n = -n; // fall through
 	case TK_CNL: // cursor next line
+		LOG("TK_CNL");
 		scr_move(0, n, 0);
 		break;
 	case TK_HVP: // horizontal vertical position
@@ -332,8 +334,12 @@ app_loop_head:
 			? ROW_RELATIVE | COL_RELATIVE : 0);
 		break;
 	case TK_HPA: // horizontal position absolute
-		LOG("TK_VPA");
+		LOG("TK_HPA");
 		scr_move(t[0] - 1, 0, ROW_RELATIVE);
+		break;
+	case TK_HPR: // horizontal position relative
+		LOG("TK_VPA");
+		scr_move(t[0] - 1, 0, COL_RELATIVE | ROW_RELATIVE);
 		break;
 	case TK_VPA: // vertical position absolute
 		LOG("TK_VPA");

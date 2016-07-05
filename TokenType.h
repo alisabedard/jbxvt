@@ -55,6 +55,7 @@ typedef enum {
 	TK_DCH = 'P', // Delete characters
 	TK_ECH = 'X', // ECH: Erase CHaracters
 	TK_ICH = '@', // ICH: insert characters
+	TK_HPR = 'a', // HPR: horizontal position relative
 	TK_DA = 'c', // device attributes request
 	TK_VPA = 'd', // vertical position absolute
 	TK_VPR = 'e', // vertical position relative
