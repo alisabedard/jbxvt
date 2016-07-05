@@ -136,14 +136,18 @@ void handle_sgr(Token * restrict token)
 			scr_style(RS_BOLD);
 			break;
 		case 23: // Not italic
-		case 24: // Underline none
-		case 27: // Image positive
-			scr_style(RS_NONE);
+			jbxvt.scr.rstyle &= ~RS_ITALIC;
 			break;
-				case 38: // extended fg colors
-			fg_rgb_or_index = true;
+		case 24: // Underline none
+			jbxvt.scr.rstyle &= ~RS_ULINE;
+			break;
+		case 27: // Image positive ( rvid off)
+			jbxvt.scr.rstyle &= ~RS_BOLD;
 			break;
 		case 26: // reserved
+			break;
+		case 38: // extended fg colors
+			fg_rgb_or_index = true;
 			break;
 		case 39: // foreground reset, white
 			SGRFG(017);
