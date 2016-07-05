@@ -25,7 +25,7 @@
 static struct {
 	// start and end of queue:
 	struct {
-		struct xeventst *start, *last;
+		JBXVTEvent *start, *last;
 	} xev;
 	struct {
 		bool app_cur:1; // cursor keys in app mode
@@ -126,16 +126,16 @@ static struct KeyMaps kp_key_table[]={
 };
 
 //  Push a mini X event onto the queue
-void push_xevent(struct xeventst * xe)
+void push_xevent(JBXVTEvent * xe)
 {
 	xe->next = command.xev.start;
 	xe->prev = NULL;
 	*(xe->next ? &xe->next->prev : &command.xev.last) = xe;
 }
 
-struct xeventst * pop_xevent(void)
+JBXVTEvent * pop_xevent(void)
 {
-	struct xeventst * xe = command.xev.last;
+	JBXVTEvent * xe = command.xev.last;
 	if(xe) {
 		command.xev.last = xe->prev;
 		*(command.xev.last ? &command.xev.last->next

@@ -326,6 +326,10 @@ app_loop_head:
 		scr_move(t[1] - 1, t[0] - 1, scr->decom
 			? ROW_RELATIVE | COL_RELATIVE : 0);
 		break;
+	case TK_HPA: // horizontal position absolute
+		LOG("TK_VPA");
+		scr_move(t[0] - 1, 0, ROW_RELATIVE);
+		break;
 	case TK_VPA: // vertical position absolute
 		LOG("TK_VPA");
 		scr_move(0, t[0] - 1, COL_RELATIVE);

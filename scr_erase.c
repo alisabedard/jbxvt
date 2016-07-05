@@ -118,6 +118,7 @@ void scr_erase_screen(const int8_t mode)
 		 *  Drop through so that we do not need to duplicate
 		 *  the scroll-up code.  */
 	case 2:
+	case 3: // for linux console compatibility
 		LOG("ENTIRE");
 		r.height = c.h - 1;
 		scroll(0, r.height, r.height);

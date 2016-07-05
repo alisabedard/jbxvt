@@ -327,26 +327,29 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 {
 	c = get_com_char(0);
 	switch(c) {
-	case '[':
+	case '[': // CSI
 		start_esc(c, tk);
 		break;
-	case ']':
+	case ']': // OSC
 		end_esc(c, tk);
 		break;
-	case '#':
-	case '(':
-	case ')':
+	case '#': // DECSWH, or prelude to DECALN
+	case '(': // G0 charset
+	case ')': // G1 charset
 		tk->type = c;
 		c = get_com_char(0);
 		tk->arg[0] = c;
 		tk->nargs = 1;
 		break;
-	case '7':
-	case '8':
-	case '=':
-	case '>':
+	case '7': // DECSC: save cursor
+	case '8': // DECRC: restore cursor
+	case '=': // DECPAM: keypad to application mode
+	case '>': // DECPNM: keypad to numeric mode
 		tk->type = c;
 		tk->nargs = 0;
+		break;
+	case 'c': // Reset to Initial State
+		tk->type = TK_RIS;
 		break;
 	case 'D' :
 		tk->type = TK_IND;
@@ -374,9 +377,6 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 		break;
 	case 'Z' :
 		tk->type = TK_DECID;
-		break;
-	case 'c': // Reset to Initial State
-		tk->type = TK_RIS;
 		break;
 	}
 }

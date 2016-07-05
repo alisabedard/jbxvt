@@ -212,7 +212,7 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		s->cursor.x += n;
 		const uint8_t w = jbxvt.scr.chars.width;
 		if (s->cursor.x >= w) {
-			s->cursor.x = jbxvt.scr.chars.width - 1;
+			s->cursor.x = w - 1;
 			if (!(s->wrap_next = s->decawm))
 				  break; /* Skip rendering off the edge of the
 					    screen.  */
