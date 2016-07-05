@@ -24,7 +24,7 @@
 static JBXVTEvent * ev_alloc(xcb_generic_event_t * restrict e)
 {
 	JBXVTEvent * xe = GC_MALLOC(sizeof(JBXVTEvent));
-	xe->xe_type = e->response_type & ~0x80;
+	xe->type = e->response_type & ~0x80;
 	return xe;
 }
 
@@ -42,7 +42,7 @@ static void handle_focus(xcb_generic_event_t * restrict e)
 		return;
 	}
 	JBXVTEvent * xe = ev_alloc(e);
-	xe->xe_detail = f->detail;
+	xe->detail = f->detail;
 	push_xevent(xe);
 }
 
@@ -51,11 +51,11 @@ static void handle_sel(xcb_generic_event_t * restrict ge)
 	JBXVTEvent * xe = ev_alloc(ge);
 	xcb_selection_request_event_t * e
 		= (xcb_selection_request_event_t *)ge;
-	xe->xe_time = e->time;
-	xe->xe_requestor = e->requestor;
-	xe->xe_target = e->target;
-	xe->xe_property = e->property;
-	xe->xe_window = e->owner;
+	xe->time = e->time;
+	xe->requestor = e->requestor;
+	xe->target = e->target;
+	xe->property = e->property;
+	xe->window = e->owner;
 	push_xevent(xe);
 }
 
@@ -71,11 +71,11 @@ static void handle_expose(xcb_generic_event_t * restrict ge)
 {
 	xcb_expose_event_t * e = (xcb_expose_event_t *)ge;
 	JBXVTEvent * xe = ev_alloc(ge);
-	xe->xe_window = e->window;
-	xe->xe_x = e->x;
-	xe->xe_y = e->y;
-	xe->xe_width = e->width;
-	xe->xe_height = e->height;
+	xe->window = e->window;
+	xe->box.x = e->x;
+	xe->box.y = e->y;
+	xe->box.width = e->width;
+	xe->box.height = e->height;
 	push_xevent(xe);
 }
 
@@ -83,12 +83,12 @@ static void handle_other(xcb_generic_event_t * restrict ge)
 {
 	xcb_key_press_event_t * e = (xcb_key_press_event_t *)ge;
 	JBXVTEvent * xe = ev_alloc(ge);
-	xe->xe_window = e->event;
-	xe->xe_x = e->event_x;
-	xe->xe_y = e->event_y;
-	xe->xe_state = e->state;
-	xe->xe_button = e->detail;
-	xe->xe_time = e->time;
+	xe->window = e->event;
+	xe->box.x = e->event_x;
+	xe->box.y = e->event_y;
+	xe->state = e->state;
+	xe->button = e->detail;
+	xe->time = e->time;
 	push_xevent(xe);
 }
 

@@ -71,21 +71,21 @@ static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
 static void handle_motion_notify(Token * restrict tk,
 	struct xeventst * restrict xe)
 {
-	if (xe->xe_window == jbxvt.X.win.sb
-		&& (xe->xe_state & XCB_KEY_BUT_MASK_BUTTON_2)) {
+	if (xe->window == jbxvt.X.win.sb
+		&& (xe->state & XCB_KEY_BUT_MASK_BUTTON_2)) {
 		tk->type = TK_SBGOTO;
-		tk->arg[0] = xe->xe_y;
+		tk->arg[0] = xe->box.y;
 		tk->nargs = 1;
-	} else if (xe->xe_window == jbxvt.X.win.vt
+	} else if (xe->window == jbxvt.X.win.vt
 		&& jbxvt.scr.current->ptr_cell) {
-		track_mouse(xe->xe_button | TRACK_MOTION, xe->xe_state,
-			(xcb_point_t){ xe->xe_x, xe->xe_y});
-	} else if (xe->xe_window == jbxvt.X.win.vt
-		&& (xe->xe_state & XCB_KEY_BUT_MASK_BUTTON_1)
-		&& !(xe->xe_state & XCB_KEY_BUT_MASK_CONTROL)) {
+		track_mouse(xe->button | TRACK_MOTION, xe->state,
+			(xcb_point_t){ xe->box.x, xe->box.y});
+	} else if (xe->window == jbxvt.X.win.vt
+		&& (xe->state & XCB_KEY_BUT_MASK_BUTTON_1)
+		&& !(xe->state & XCB_KEY_BUT_MASK_CONTROL)) {
 		tk->type = TK_SELDRAG;
-		tk->arg[0] = xe->xe_x;
-		tk->arg[1] = xe->xe_y;
+		tk->arg[0] = xe->box.x;
+		tk->arg[1] = xe->box.y;
 		tk->nargs = 2;
 	}
 }
@@ -94,15 +94,15 @@ static void sbop(Token * restrict tk, struct xeventst * restrict xe,
 	const bool up)
 {
 	tk->type = up ? TK_SBUP : TK_SBDOWN;
-	tk->arg[0] = xe->xe_y;
+	tk->arg[0] = xe->box.y;
 	tk->nargs = 1;
 }
 
 static void handle_button_release(Token * restrict tk,
 	struct xeventst * restrict xe)
 {
-	if (xe->xe_window == jbxvt.X.win.sb) {
-		switch (xe->xe_button) {
+	if (xe->window == jbxvt.X.win.sb) {
+		switch (xe->button) {
 		case 1:
 		case 5:
 			sbop(tk, xe, true);
@@ -112,26 +112,26 @@ static void handle_button_release(Token * restrict tk,
 			sbop(tk, xe, false);
 			break;
 		}
-	} else if (xe->xe_window == jbxvt.X.win.vt
-		&& jbxvt.scr.current->ptr_xy && xe->xe_button <= 3) {
+	} else if (xe->window == jbxvt.X.win.vt
+		&& jbxvt.scr.current->ptr_xy && xe->button <= 3) {
 		/* check less than or equal to 3, since xterm does not
 		   report mouse wheel release events.  */
-		track_mouse(TRACK_RELEASE, xe->xe_state,
-			(xcb_point_t){xe->xe_x, xe->xe_y});
-	} else if (xe->xe_window == jbxvt.X.win.vt
-		&& !(xe->xe_state & XCB_KEY_BUT_MASK_CONTROL)) {
-		switch (xe->xe_button) {
+		track_mouse(TRACK_RELEASE, xe->state,
+			(xcb_point_t){xe->box.x, xe->box.y});
+	} else if (xe->window == jbxvt.X.win.vt
+		&& !(xe->state & XCB_KEY_BUT_MASK_CONTROL)) {
+		switch (xe->button) {
 		case 1:
 		case 3:
 			tk->type = TK_SELECT;
-			tk->arg[0] = xe->xe_time;
+			tk->arg[0] = xe->time;
 			tk->nargs = 1;
 			break;
 		case 2:
 			tk->type = TK_SELINSRT;
-			tk->arg[0] = xe->xe_time;
-			tk->arg[1] = xe->xe_x;
-			tk->arg[2] = xe->xe_y;
+			tk->arg[0] = xe->time;
+			tk->arg[1] = xe->box.x;
+			tk->arg[2] = xe->box.y;
 			tk->nargs = 3;
 			break;
 		case 4:
@@ -149,17 +149,17 @@ static void handle_button1_press(Token * restrict tk,
 	struct xeventst * restrict xe)
 {
 	static unsigned int time1, time2;
-	if (xe->xe_time - time2
+	if (xe->time - time2
 		< MP_INTERVAL) {
 		time1 = 0;
 		time2 = 0;
 		tk->type = TK_SELLINE;
-	} else if (xe->xe_time - time1
+	} else if (xe->time - time1
 		< MP_INTERVAL) {
-		time2 = xe->xe_time;
+		time2 = xe->time;
 		tk->type = TK_SELWORD;
 	} else {
-		time1 = xe->xe_time;
+		time1 = xe->time;
 		tk->type = TK_SELSTART;
 	}
 }
@@ -167,18 +167,18 @@ static void handle_button1_press(Token * restrict tk,
 static void handle_button_press(Token * restrict tk,
 	struct xeventst * restrict xe)
 {
-	if (xe->xe_window == jbxvt.X.win.vt
-		&& xe->xe_state == XCB_KEY_BUT_MASK_CONTROL) {
+	if (xe->window == jbxvt.X.win.vt
+		&& xe->state == XCB_KEY_BUT_MASK_CONTROL) {
 		tk->type = TK_SBSWITCH;
 		tk->nargs = 0;
 		return;
 	}
-	if (xe->xe_window == jbxvt.X.win.vt && jbxvt.scr.current->ptr_xy)
-		track_mouse(xe->xe_button, xe->xe_state,
-			(xcb_point_t){xe->xe_x, xe->xe_y});
-	else if (xe->xe_window == jbxvt.X.win.vt
-		&& (xe->xe_state & XCB_KEY_BUT_MASK_CONTROL) == 0) {
-		switch (xe->xe_button) {
+	if (xe->window == jbxvt.X.win.vt && jbxvt.scr.current->ptr_xy)
+		track_mouse(xe->button, xe->state,
+			(xcb_point_t){xe->box.x, xe->box.y});
+	else if (xe->window == jbxvt.X.win.vt
+		&& (xe->state & XCB_KEY_BUT_MASK_CONTROL) == 0) {
+		switch (xe->button) {
 		case 1:
 			handle_button1_press(tk, xe);
 			break;
@@ -189,15 +189,15 @@ static void handle_button_press(Token * restrict tk,
 			tk->type = TK_SELEXTND;
 			break;
 		}
-		tk->arg[0] = xe->xe_x;
-		tk->arg[1] = xe->xe_y;
+		tk->arg[0] = xe->box.x;
+		tk->arg[1] = xe->box.y;
 		tk->nargs = 2;
 		return;
 	}
-	if (xe->xe_window == jbxvt.X.win.sb) {
-		if (xe->xe_button == 2) {
+	if (xe->window == jbxvt.X.win.sb) {
+		if (xe->button == 2) {
 			tk->type = TK_SBGOTO;
-			tk->arg[0] = xe->xe_y;
+			tk->arg[0] = xe->box.y;
 			tk->nargs = 1;
 		}
 	}
@@ -208,15 +208,15 @@ bool handle_xevents(Token * restrict tk)
 {
 	struct xeventst *xe = pop_xevent();
 	if(!xe) return false;
-	if (xe->xe_window == jbxvt.X.win.vt)
+	if (xe->window == jbxvt.X.win.vt)
 		  tk->region = REGION_SCREEN;
-	else if (xe->xe_window == jbxvt.X.win.sb)
+	else if (xe->window == jbxvt.X.win.sb)
 		  tk->region = REGION_SCROLLBAR;
-	else if (xe->xe_window == jbxvt.X.win.main)
+	else if (xe->window == jbxvt.X.win.main)
 		  tk->region = REGION_MAINWIN;
 	else
 		  tk->region = REGION_NONE;
-	switch (xe->xe_type) {
+	switch (xe->type) {
 	case XCB_KEY_RELEASE: // Unimplemented
 		break;
 	case XCB_ENTER_NOTIFY:
@@ -232,22 +232,22 @@ bool handle_xevents(Token * restrict tk)
 	case XCB_FOCUS_IN:
 		tk->type = TK_FOCUS;
 		tk->arg[0] = 1;
-		tk->arg[1] = xe->xe_detail;
+		tk->arg[1] = xe->detail;
 		tk->nargs = 2;
 		break;
 	case XCB_FOCUS_OUT:
 		tk->type = TK_FOCUS;
 		tk->arg[0] = 0;
-		tk->arg[1] = xe->xe_detail;
+		tk->arg[1] = xe->detail;
 		tk->nargs = 2;
 		break;
 	case XCB_EXPOSE:
 	case XCB_GRAPHICS_EXPOSURE:
 		tk->type = TK_EXPOSE;
-		tk->arg[0] = xe->xe_x;
-		tk->arg[1] = xe->xe_y;
-		tk->arg[2] = xe->xe_width;
-		tk->arg[3] = xe->xe_height;
+		tk->arg[0] = xe->box.x;
+		tk->arg[1] = xe->box.y;
+		tk->arg[2] = xe->box.width;
+		tk->arg[3] = xe->box.height;
 		tk->nargs = 4;
 		break;
 	case XCB_NO_EXPOSURE: // Unimplemented
@@ -259,22 +259,22 @@ bool handle_xevents(Token * restrict tk)
 		break;
 	case XCB_SELECTION_CLEAR:
 		tk->type = TK_SELCLEAR;
-		tk->arg[0] = xe->xe_time;
+		tk->arg[0] = xe->time;
 		tk->nargs = 1;
 		break;
 	case XCB_SELECTION_NOTIFY:
 		tk->type = TK_SELNOTIFY;
-		tk->arg[0] = xe->xe_time;
-		tk->arg[1] = xe->xe_requestor;
-		tk->arg[2] = xe->xe_property;
+		tk->arg[0] = xe->time;
+		tk->arg[1] = xe->requestor;
+		tk->arg[2] = xe->property;
 		tk->nargs = 3;
 		break;
 	case XCB_SELECTION_REQUEST:
 		tk->type = TK_SELREQUEST;
-		tk->arg[0] = xe->xe_time;
-		tk->arg[1] = xe->xe_requestor;
-		tk->arg[2] = xe->xe_target;
-		tk->arg[3] = xe->xe_property;
+		tk->arg[0] = xe->time;
+		tk->arg[1] = xe->requestor;
+		tk->arg[2] = xe->target;
+		tk->arg[3] = xe->property;
 		tk->nargs = 4;
 		break;
 	case XCB_BUTTON_PRESS:
@@ -287,7 +287,7 @@ bool handle_xevents(Token * restrict tk)
 		handle_motion_notify(tk, xe);
 		break;
 	default:
-		LOG("Unhandled event %d", xe->xe_type);
+		LOG("Unhandled event %d", xe->type);
 	}
 	return true;
 }

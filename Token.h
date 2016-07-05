@@ -27,9 +27,9 @@ typedef struct {
 	JBXVTRegion region;		// where token applies
 	uint16_t private;		// non zero for priv ctl sequences
 	uint16_t nlcount;		// number of newlines in the string
-	uint16_t length;		// length of string
-	uint8_t tk_char;		// single (unprintable) character
+	uint16_t length:12;		// length of string
 	uint8_t nargs:4;		// number of arguments passed
+	uint8_t tk_char;		// single (unprintable) character
 } Token;
 
 #endif//!TOKENST_H
