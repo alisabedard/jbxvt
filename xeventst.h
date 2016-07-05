@@ -4,9 +4,8 @@
 #include <stdint.h>
 
 /*  Small X event structure used to queue interesting X events that need to
- *  be converted into tokens.
- */
-struct xeventst {
+ *  be converted into tokens.  */
+typedef struct xeventst {
 	struct xeventst *xe_next;
 	struct xeventst *xe_prev;
 	uint32_t xe_time;
@@ -22,6 +21,6 @@ struct xeventst {
 	int16_t xe_y;
 	uint16_t xe_width;
 	uint16_t xe_height;
-};
+} JBXVTEvent;
 
 #endif//!XEVENTST_H

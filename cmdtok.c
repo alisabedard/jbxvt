@@ -21,11 +21,19 @@
 #include <string.h>
 #include <sys/syscall.h>
 
-static void handle_focus(xcb_focus_in_event_t * restrict e)
+static JBXVTEvent * ev_alloc(xcb_generic_event_t * restrict e)
 {
-	if (e->mode)
+	JBXVTEvent * xe = GC_MALLOC(sizeof(JBXVTEvent));
+	xe->xe_type = e->response_type & ~0x80;
+	return xe;
+}
+
+static void handle_focus(xcb_generic_event_t * restrict e)
+{
+	xcb_focus_in_event_t * f = (xcb_focus_in_event_t *)e;
+	if (f->mode)
 		  return;
-	switch (e->detail) {
+	switch (f->detail) {
 	case XCB_NOTIFY_DETAIL_ANCESTOR:
 	case XCB_NOTIFY_DETAIL_INFERIOR:
 	case XCB_NOTIFY_DETAIL_NONLINEAR:
@@ -33,46 +41,36 @@ static void handle_focus(xcb_focus_in_event_t * restrict e)
 	default:
 		return;
 	}
-	struct xeventst * xe = GC_MALLOC(sizeof(struct xeventst));
-	xe->xe_type = e->response_type & ~0x80;
-	xe->xe_detail = e->detail;
+	JBXVTEvent * xe = ev_alloc(e);
+	xe->xe_detail = f->detail;
 	push_xevent(xe);
 }
 
-static void handle_sel_req(xcb_selection_request_event_t * restrict e)
+static void handle_sel(xcb_generic_event_t * restrict ge)
 {
-	struct xeventst * xe = GC_MALLOC(sizeof(struct xeventst));
-	xe->xe_type = XCB_SELECTION_REQUEST;
+	JBXVTEvent * xe = ev_alloc(ge);
+	xcb_selection_request_event_t * e
+		= (xcb_selection_request_event_t *)ge;
+	xe->xe_time = e->time;
+	xe->xe_requestor = e->requestor;
+	xe->xe_target = e->target;
+	xe->xe_property = e->property;
 	xe->xe_window = e->owner;
-	xe->xe_time = e->time;
-	xe->xe_requestor = e->requestor;
-	xe->xe_target = e->target;
-	xe->xe_property = e->property;
 	push_xevent(xe);
 }
 
-static void handle_sel_not(xcb_selection_notify_event_t * restrict e)
+static void handle_client_msg(xcb_generic_event_t * restrict ge)
 {
-	struct xeventst * xe = GC_MALLOC(sizeof(struct xeventst));
-	xe->xe_type = XCB_SELECTION_NOTIFY;
-	xe->xe_time = e->time;
-	xe->xe_requestor = e->requestor;
-	xe->xe_target = e->target;
-	xe->xe_property = e->property;
-	push_xevent(xe);
-}
-
-static void handle_client_msg(xcb_client_message_event_t * e)
-{
+	xcb_client_message_event_t * e = (xcb_client_message_event_t *)ge;
 	if (e->format == 32 && e->data.data32[0]
 		== (long)wm_del_win())
 		  quit(0, NULL);
 }
 
-static void handle_expose(xcb_expose_event_t * e)
+static void handle_expose(xcb_generic_event_t * restrict ge)
 {
-	struct xeventst * xe = GC_MALLOC(sizeof(struct xeventst));
-	xe->xe_type = XCB_EXPOSE;
+	xcb_expose_event_t * e = (xcb_expose_event_t *)ge;
+	JBXVTEvent * xe = ev_alloc(ge);
 	xe->xe_window = e->window;
 	xe->xe_x = e->x;
 	xe->xe_y = e->y;
@@ -81,11 +79,10 @@ static void handle_expose(xcb_expose_event_t * e)
 	push_xevent(xe);
 }
 
-static void handle_other(xcb_generic_event_t * gen_e)
+static void handle_other(xcb_generic_event_t * restrict ge)
 {
-	xcb_motion_notify_event_t * e = (xcb_motion_notify_event_t *)gen_e;
-	struct xeventst * xe = GC_MALLOC(sizeof(struct xeventst));
-	xe->xe_type = e->response_type & ~0x80;
+	xcb_key_press_event_t * e = (xcb_key_press_event_t *)ge;
+	JBXVTEvent * xe = ev_alloc(ge);
 	xe->xe_window = e->event;
 	xe->xe_x = e->event_x;
 	xe->xe_y = e->event_y;
@@ -108,20 +105,18 @@ static int_fast16_t handle_xev(xcb_generic_event_t * restrict event,
 		break;
 	case XCB_FOCUS_IN:
 	case XCB_FOCUS_OUT:
-		handle_focus((xcb_focus_in_event_t *)event);
+		handle_focus(event);
 		break;
 	case XCB_SELECTION_REQUEST:
-		handle_sel_req((xcb_selection_request_event_t *)event);
-		break;
 	case XCB_SELECTION_NOTIFY:
-		handle_sel_not((xcb_selection_notify_event_t *)event);
+		handle_sel(event);
 		break;
 	case XCB_CLIENT_MESSAGE:
-		handle_client_msg((xcb_client_message_event_t *)event);
+		handle_client_msg(event);
 		break;
 	case XCB_EXPOSE:
 	case XCB_GRAPHICS_EXPOSURE:
-		handle_expose((xcb_expose_event_t *)event);
+		handle_expose(event);
 		break;
 	default:
 		handle_other(event);
