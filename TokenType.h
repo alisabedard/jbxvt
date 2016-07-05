@@ -43,6 +43,8 @@ typedef enum {
 	TK_CUD = 'B', // cursor down
 	TK_CUF = 'C', // cursor back
 	TK_CUB = 'D', // cursor back
+	TK_CNL = 'E', // CNL: cursor next line, first column
+	TK_CPL = 'F', // CNL: cursor prev line, first column
 	TK_CHA = 'G', // cursor CHaracter Absolute [column]
 	TK_CUP = 'H', // position cursor
 

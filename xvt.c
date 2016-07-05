@@ -318,6 +318,11 @@ app_loop_head:
 			token.nargs, t[0], n);
 		scr_move(-n, 0, ROW_RELATIVE | COL_RELATIVE);
 		break;
+	case TK_CPL: // cursor previous line
+		n = -n; // fall through
+	case TK_CNL: // cursor next line
+		scr_move(0, n, 0);
+		break;
 	case TK_HVP: // horizontal vertical position
 		LOG("TK_HVP");
 		// fall through
