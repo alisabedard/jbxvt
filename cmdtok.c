@@ -389,17 +389,23 @@ void get_token(Token * restrict tk)
 	if(handle_xevents(tk))
 		  return;
 	const int_fast16_t c = get_com_char(GET_XEVENTS);
-	if (c == GCC_NULL) {
+	switch (c) {
+	case GCC_NULL:
 		tk->type = TK_NULL;
-	} else if (c == EOF) {
+		break;
+	case EOF:
 		tk->type = TK_EOF;
-	} else if (is_string_char(c)) {
-		handle_string_char(c, tk);
-	} else if (c == ESC) {
+		break;
+	case ESC:
 		handle_esc(c, tk);
-	} else {
-		tk->type = TK_CHAR;
-		tk->tk_char = c;
+		break;
+	default:
+		if (is_string_char(c))
+			  handle_string_char(c, tk);
+		else {
+			tk->type = TK_CHAR;
+			tk->tk_char = c;
+		}
 	}
 }
 

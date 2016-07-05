@@ -4,9 +4,6 @@
 #ifndef TOKEN_TYPE_H
 #define TOKEN_TYPE_H
 
-//  Values of tk_region for Xevent generated tokens.
-enum { MAINWIN, SCREEN, SCROLLBAR };
-
 //  Token types
 typedef enum {
 	TK_NULL = 0, // null token to be ignored

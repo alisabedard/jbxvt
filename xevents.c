@@ -209,13 +209,13 @@ bool handle_xevents(Token * restrict tk)
 	struct xeventst *xe = pop_xevent();
 	if(!xe) return false;
 	if (xe->xe_window == jbxvt.X.win.vt)
-		  tk->region = SCREEN;
+		  tk->region = REGION_SCREEN;
 	else if (xe->xe_window == jbxvt.X.win.sb)
-		  tk->region = SCROLLBAR;
+		  tk->region = REGION_SCROLLBAR;
 	else if (xe->xe_window == jbxvt.X.win.main)
-		  tk->region = MAINWIN;
+		  tk->region = REGION_MAINWIN;
 	else
-		  tk->region = -1;
+		  tk->region = REGION_NONE;
 	switch (xe->xe_type) {
 	case XCB_KEY_RELEASE: // Unimplemented
 		break;

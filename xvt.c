@@ -99,11 +99,9 @@ static void handle_tk_char(const uint8_t tk_char)
 
 static void handle_tk_expose(const uint8_t region, const int16_t * arg)
 {
-	if (region == SCROLLBAR) {
+	if (region == REGION_SCROLLBAR)
 		sbar_reset();
-		return;
-	}
-	if(jbxvt_size_set){
+	else if (jbxvt_size_set) {
 		cursor(CURSOR_DRAW); // clear
 		scr_refresh((xcb_rectangle_t){.x = arg[0],
 			.y = arg[1], .width = arg[2],
