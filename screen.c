@@ -67,8 +67,9 @@ void scr_change_screen(const bool mode_high)
 		? &jbxvt.scr.s2 : &jbxvt.scr.s1;
 	jbxvt.sel.end2.type = NOSEL;
 	jbxvt.scr.sline.top = 0;
-	const Size c = jbxvt.scr.chars;
-	repaint((xcb_rectangle_t){.width = c.w - 1, .height = c.h - 1});
+	repaint((xcb_rectangle_t){
+		.width = jbxvt.scr.chars.height - 1,
+		.height = jbxvt.scr.chars.width - 1});
 	cursor(CURSOR_DRAW);
 	scr_erase_screen(2); // ENTIRE
 }
@@ -80,7 +81,7 @@ void scr_style(const uint32_t style)
 	jbxvt.scr.rstyle = style ? jbxvt.scr.rstyle | style : 0;
 }
 
-static inline void hsc(void)
+static void hsc(void)
 {
 	home_screen();
 	cursor(CURSOR_DRAW);
@@ -96,6 +97,17 @@ void scr_index_by(const int8_t mod)
 	cursor(CURSOR_DRAW);
 }
 
+static int8_t scroll_up_scr_bot(uint8_t count, const bool up)
+{
+	while (count > MAX_SCROLL) {
+		scroll(jbxvt.scr.current->cursor.y,
+			jbxvt.scr.current->margin.bottom,
+			up?MAX_SCROLL:-MAX_SCROLL);
+		count -= MAX_SCROLL;
+	}
+	return up?count:-count;
+}
+
 //  Delete count lines and scroll up the bottom of the screen to fill the gap
 void scr_delete_lines(const uint8_t count)
 {
@@ -105,9 +117,16 @@ void scr_delete_lines(const uint8_t count)
 	if (count > mb - cy + 1)
 		return;
 	hsc();
-	scroll(cy, mb, count);
+	scroll(cy, mb, scroll_up_scr_bot(count, true));
 	s->wrap_next = 0;
 	cursor(CURSOR_DRAW);
+}
+
+static void scroll_lower_lines(const int8_t count)
+{
+	scroll(jbxvt.scr.current->cursor.y,
+		jbxvt.scr.current->margin.bottom,
+		scroll_up_scr_bot(count, false));
 }
 
 static inline uint8_t get_insertion_count(const int8_t count)
@@ -123,9 +142,8 @@ static inline uint8_t get_insertion_count(const int8_t count)
 void scr_insert_lines(const int8_t count)
 {
 	hsc();
-	VTScreen * s = jbxvt.scr.current;
-	scroll(s->cursor.y, s->margin.b, -get_insertion_count(count));
-	s->wrap_next = false;
+	scroll_lower_lines(get_insertion_count(count));
+	jbxvt.scr.current->wrap_next = 0;
 	cursor(CURSOR_DRAW);
 }
 
@@ -135,10 +153,10 @@ void home_screen(void)
 	if (likely(!jbxvt.scr.offset))
 		  return;
 	jbxvt.scr.offset = 0;
-	xcb_rectangle_t r = { .y = jbxvt.scr.chars.height - 1,
-		.x = jbxvt.scr.chars.width - 1 };
+	xcb_rectangle_t r = { .height = jbxvt.scr.chars.height - 1,
+		.width = jbxvt.scr.chars.width - 1 };
 	repaint(r);
 	cursor(CURSOR_DRAW);
-	sbar_show(r.y + jbxvt.scr.sline.top, 0, r.y);
+	sbar_show(r.height + jbxvt.scr.sline.top, 0, r.height);
 }
 
