@@ -97,7 +97,7 @@ static void handle_tk_char(const uint8_t tk_char)
 	}
 }
 
-static void handle_tk_expose(const uint8_t region, const int16_t * arg)
+static void handle_tk_expose(const uint8_t region, const int32_t * arg)
 {
 	if (region == REGION_SCROLLBAR)
 		sbar_reset();
@@ -153,7 +153,7 @@ static void select_charset(const char c, const uint8_t i)
 
 static void decstbm(Token * restrict token)
 {
-	int16_t * restrict t = token->arg;
+	int32_t * restrict t = token->arg;
 	LOG("TK_DECSTBM args: %d, 0: %d, 1: %d",
 		(int)token->nargs, t[0], t[1]);
 	VTScreen * restrict scr = jbxvt.scr.current;
@@ -198,8 +198,8 @@ void jbxvt_app_loop(void)
 {
 	LOG("app_loop");
 	Token token;
-	int16_t n; // sanitized first token
-	int16_t * t; // shortcut to token.arg
+	int32_t n; // sanitized first token
+	int32_t * t; // shortcut to token.arg
 	VTScreen * scr = jbxvt.scr.current;
 app_loop_head:
 	get_token(&token);

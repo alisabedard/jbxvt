@@ -21,7 +21,7 @@ typedef enum {
 /*  Structure used to represent a piece of input from the program
  *  or an interesting X event.  */
 typedef struct {
-	int16_t arg[TK_MAX_ARGS];	// first numerical arguments
+	int32_t arg[TK_MAX_ARGS];	// first numerical arguments
 	uint8_t string[TKS_MAX + 1];	// the text for string tokens
 	TokenType type;			// type of token
 	JBXVTRegion region;		// where token applies

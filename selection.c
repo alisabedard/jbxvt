@@ -5,6 +5,7 @@
 
 #include "config.h"
 #include "jbxvt.h"
+#include "log.h"
 #include "save_selection.h"
 #include "selcmp.h"
 #include "screen.h"
@@ -23,9 +24,8 @@ void scr_make_selection(const xcb_time_t time)
 	save_selection();
 	xcb_set_selection_owner(jbxvt.X.xcb, jbxvt.X.win.vt,
 		XCB_ATOM_PRIMARY, time);
-	// root cut buffer
 	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE,
-		jbxvt.X.screen->root, XCB_ATOM_CUT_BUFFER0, XCB_ATOM_STRING,
+		jbxvt.X.win.vt, XCB_ATOM_PRIMARY, XCB_ATOM_STRING,
 		8, jbxvt.sel.length, jbxvt.sel.text);
 }
 
@@ -151,8 +151,8 @@ void selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
 #else
 	__attribute__((pure))
 #endif
-static inline uint8_t compute_i2(const uint16_t len, const uint8_t i1,
-	uint8_t i2, uint8_t * restrict str)
+static inline int16_t compute_i2(const uint16_t len, const int16_t i1,
+	int16_t i2, uint8_t * restrict str)
 {
 	if (i2 >= len)
 		i2 = len - 1;
@@ -168,29 +168,14 @@ static inline uint8_t compute_i2(const uint16_t len, const uint8_t i1,
     of the first character to convert and i2 is the last.  The length
     of the returned string is returned in *lenp; */
 uint8_t * convert_line(uint8_t * restrict str,
-	uint16_t * restrict lenp, uint8_t i1, uint8_t i2)
+	uint16_t * restrict lenp, uint16_t i1, uint16_t i2)
 {
-	// set this before i2 is modified
-	const bool newline = (i2 + 1 == jbxvt.scr.chars.width)
-		&& (str[*lenp] == 0);
-	i2 = compute_i2(*lenp, i1, i2, str);
-	static uint8_t buf[MAX_WIDTH + 3];
-	uint8_t *s = buf;
-	for (; i1 <= i2; ++i1) {
-		if (str[i1] >= ' ')
-			*s++ = str[i1];
-		else if (str[i1] == '\t') {
-			*s++ = '\t';
-			while (i1 < i2 && str[i1 + 1] == 0)
-				++i1;
-		} else
-			*s++ = ' ';
-	}
-	if (newline)
-		*s++ = '\n';
-	*s = 0;
-	*lenp = s - buf;
-	return (buf);
+	//LOG("lenp: %d", *lenp);
+	str += i1;
+	uint16_t sz = i2 - i1;
+	str[sz + 1] = '\0';
+	*lenp = sz + 1;
+	return str;
 }
 
 static uint16_t sel_s(SelEnd * restrict se2, uint8_t ** s)

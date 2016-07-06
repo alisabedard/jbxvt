@@ -9,28 +9,52 @@
 #include "selection.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 //  Send the selection to the command after converting LF to CR.
 static void send_selection(uint8_t * str, const uint16_t count)
 {
-	for (int_fast16_t i = count; i >= 0; --i)
-		if (str[i] == '\n')
-			str[i] = '\r';
+	LOG("send_selection(str, count: %d)", count);
+	if (!count)
+		  return;
+	for (char * i = (char *)str; (i = strchr(i, '\n')); *i = '\r')
+		  ;
 	send_string(str, count);
 }
 
 void request_selection(void)
 {
-	xcb_get_property_cookie_t c = xcb_get_property(jbxvt.X.xcb,
-		false, jbxvt.X.screen->root, XCB_ATOM_CUT_BUFFER0,
-		XCB_ATOM_STRING, 0, PROP_SIZE);
-	xcb_get_property_reply_t * r = xcb_get_property_reply(
-		jbxvt.X.xcb, c, NULL);
-	if (!r)
-		  return;
-	send_selection(xcb_get_property_value(r),
-		xcb_get_property_value_length(r));
-	free(r);
+	LOG("request_selection");
+	xcb_get_selection_owner_cookie_t o_c
+		= xcb_get_selection_owner_unchecked(jbxvt.X.xcb,
+			XCB_ATOM_PRIMARY);
+	xcb_get_selection_owner_reply_t * o_r
+		= xcb_get_selection_owner_reply(jbxvt.X.xcb, o_c, NULL);
+	if (!o_r) {
+		LOG("could not get owner");
+		return;
+	}
+	xcb_get_property_cookie_t p_c = xcb_get_property(jbxvt.X.xcb,
+		false, o_r->owner, XCB_ATOM_PRIMARY, XCB_ATOM_STRING,
+		0, PROP_SIZE);
+	free(o_r);
+	xcb_get_property_reply_t * p_r = xcb_get_property_reply(jbxvt.X.xcb,
+		p_c, NULL);
+	if (!p_r) {
+		LOG("could not get property");
+		return;
+	}
+#ifdef DEBUG
+	xcb_get_atom_name_cookie_t a_c = xcb_get_atom_name(jbxvt.X.xcb,
+		p_r->type);
+	xcb_get_atom_name_reply_t * a_r = xcb_get_atom_name_reply(jbxvt.X.xcb,
+		a_c, NULL);
+	LOG("value: %d -- %s", p_r->type, xcb_get_atom_name_name(a_r));
+	free(a_r);
+#endif//DEBUG
+	send_selection(xcb_get_property_value(p_r),
+		xcb_get_property_value_length(p_r));
+	free(p_r);
 }
 
 //  Respond to a notification that a primary selection has been sent
@@ -56,5 +80,4 @@ void paste_primary(const xcb_window_t window, const xcb_atom_t property)
 		free(r);
 	} while (bytes_after > 0);
 }
-
 
