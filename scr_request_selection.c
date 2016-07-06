@@ -44,13 +44,26 @@ void request_selection(void)
 		LOG("could not get property");
 		return;
 	}
+	if (p_r->type == XCB_ATOM_NONE) {
+		p_c = xcb_get_property(jbxvt.X.xcb, false,
+			jbxvt.X.screen->root, XCB_ATOM_CUT_BUFFER0,
+			XCB_ATOM_STRING, 0, PROP_SIZE);
+		free(p_r);
+		p_r = xcb_get_property_reply(jbxvt.X.xcb, p_c, NULL);
+	}
 #ifdef DEBUG
 	xcb_get_atom_name_cookie_t a_c = xcb_get_atom_name(jbxvt.X.xcb,
 		p_r->type);
+	xcb_generic_error_t * e;
 	xcb_get_atom_name_reply_t * a_r = xcb_get_atom_name_reply(jbxvt.X.xcb,
-		a_c, NULL);
+		a_c, &e);
+	if (e)
+		LOG("could not get atom name for %d", p_r->type);
+	if (!a_r)
+		  goto skip_debug;
 	LOG("value: %d -- %s", p_r->type, xcb_get_atom_name_name(a_r));
 	free(a_r);
+skip_debug:
 #endif//DEBUG
 	send_selection(xcb_get_property_value(p_r),
 		xcb_get_property_value_length(p_r));

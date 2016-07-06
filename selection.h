@@ -54,6 +54,6 @@ void scr_start_selection(const xcb_point_t p, enum selunit unit);
     of the first character to convert and i2 is the last.  The length
     of the returned string is returned in *lenp; */
 uint8_t * convert_line(uint8_t * restrict str,
-	uint16_t * restrict lenp, uint16_t i1, uint16_t i2);
+	uint16_t * restrict lenp, int16_t i1, int16_t i2);
 
 #endif//!JBXVT_SELECTION_H
