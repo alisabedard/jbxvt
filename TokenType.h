@@ -4,6 +4,8 @@
 #ifndef TOKEN_TYPE_H
 #define TOKEN_TYPE_H
 
+// Reference man console_codes(4) and ctlseqs(ms)
+
 //  Token types
 typedef enum {
 	TK_NULL = 0, // null token to be ignored
