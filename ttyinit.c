@@ -37,7 +37,6 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/syscall.h>
-#include <sys/types.h>
 #include <sys/wait.h>
 
 /*  NOTES ON PORTING
@@ -79,7 +78,7 @@
  * structure and the tcsetattr() system call whereas BSD systems use the
  * sgttyb structure and TIOC ioctls.  In the systems I have ported to,
  * termios is prevalent and so this is the default.  If your system does
- * not have termios then you will need to #define BSD_TTY to enable the
+ * not have termios then you will need to #define BSD_PTY to enable the
  * use of sgttyb instead.
  *
  * Adding an entry to utmp
@@ -421,7 +420,7 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 //  Initialise the terminal attributes.
 static void set_ttymodes(void)
 {
-#ifndef BSD_TTY
+#ifndef BSD_PTY
 	//  Set the terminal using the standard System V termios interface
 	static struct termios term;
 
@@ -466,7 +465,7 @@ static void set_ttymodes(void)
 
 	tcsetattr(0,TCSANOW,&term);
 
-#else /* BSD_TTY */
+#else /* BSD_PTY */
 	/* Use sgtty rather than termios interface to configure the terminal
 	 */
 	int ldisc, lmode;
@@ -503,7 +502,7 @@ static void set_ttymodes(void)
 
 	lmode = LCRTBS | LCRTERA | LCTLECH | LPASS8 | LCRTKIL;
 	(void)ioctl(0,TIOCLSET,&lmode);
-#endif// BSD_TTY
+#endif// BSD_PTY
 
 	tty_set_size(jbxvt.scr.chars.width, jbxvt.scr.chars.height);
 }
@@ -606,7 +605,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
 #endif//SYS_close
 	}
 
-#ifdef BSD_TTY
+#ifdef BSD_PTY
 
 #ifdef SYS_ioctl
 	syscall(SYS_ioctl, 0, TIOCSPGRP, &pgid);
@@ -619,7 +618,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
 #else//!SYS_setpgid
         setpgid(0, pgid);
 #endif//SYS_setpgid
-#endif /* BSD_TTY */
+#endif /* BSD_PTY */
 	set_ttymodes();
 
 #ifdef SYS_setuid
