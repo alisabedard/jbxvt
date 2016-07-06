@@ -142,7 +142,7 @@ void handle_sgr(Token * restrict token)
 			jbxvt.scr.rstyle &= ~RS_ULINE;
 			break;
 		case 27: // Image positive ( rvid off)
-			jbxvt.scr.rstyle &= ~RS_BOLD;
+			jbxvt.scr.rstyle &= ~RS_RVID;
 			break;
 		case 26: // reserved
 			break;
