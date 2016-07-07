@@ -36,7 +36,7 @@ LIBS+=-lxcb -lxcb-keysyms -lgc
 
 #-------------------------------
 
-OBJS=jbxvt.o
+OBJS=jbxvt.o lookup_key.o
 OBJS+=change_offset.o change_selection.o cmdtok.o color.o command.o
 OBJS+=cursor.o init_display.o repaint.o save_selection.o scr_move.o
 OBJS+=sbar.o scr_erase.o scr_extend_selection.o scr_refresh.o scr_edit.o

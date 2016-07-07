@@ -4,7 +4,6 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
-#include <stdbool.h>
 #include <stdint.h>
 
 enum CommandLimits {
@@ -23,17 +22,13 @@ void cprintf(char *, ...);
  *  server connection is established.  */
 void init_command(char ** restrict argv);
 
-// Convert the keypress event into a string
-uint8_t *lookup_key(void * restrict ev, int_fast16_t * restrict pcount)
-	__attribute__((nonnull));
+//  Push an input character back into the input queue.
+void push_com_char(const uint8_t c);
 
-void push_com_char(int);
+//  Push a mini X event onto the queue
 void push_xevent(struct xeventst *);
 
 //  Send count characters directly to the command.
 void send_string(uint8_t * restrict buf, const uint8_t count);
-
-// Set key mode for cursor keys if is_cursor, else for keypad keys
-void set_keys(const bool mode_high, const bool is_cursor);
 
 #endif//!COMMAND_H
