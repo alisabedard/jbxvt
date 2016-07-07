@@ -158,12 +158,15 @@ static int_fast32_t repaint_generic(xcb_point_t p,
 	int_fast16_t m, const int_fast32_t c1,
 	const int_fast32_t c2, uint8_t * restrict str, uint32_t * rend)
 {
+	const Size f = jbxvt.X.font_size;
+	// check inputs:
+	if (!str || c2 >= c1 || !m)
+		  return p.y + f.height;
 	m = MIN(m, jbxvt.scr.chars.width - 1);
 	if (rend)
 		paint_rvec_text(str, rend + c1, m, p);
 	else
 		paint_rval_text(str, 0, m, p);
-	const Size f = jbxvt.X.font_size;
 	p.x += m * f.width;
 	const uint16_t width = (c2 - c1 + 1 - m) * f.width;
 	xcb_clear_area(jbxvt.X.xcb, false, jbxvt.X.win.vt,

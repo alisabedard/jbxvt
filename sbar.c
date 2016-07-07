@@ -37,8 +37,7 @@ void sbar_show(uint16_t length, const int16_t low,
 	const int16_t bot = s.h - s.h * low / length;
 	const xcb_window_t sb = jbxvt.X.win.sb;
 	if (top > 0)
-		xcb_clear_area(jbxvt.X.xcb, false, sb, 0, 0,
-			sbar.sz.width, top - 1);
+		xcb_clear_area(jbxvt.X.xcb, false, sb, 0, 0, s.w, top - 1);
 	if (bot >= top)
 		xcb_poly_fill_rectangle(jbxvt.X.xcb, sb, jbxvt.X.gc.tx, 1,
 			&(xcb_rectangle_t){0, top, s.w, bot - top + 1});
