@@ -89,17 +89,8 @@ void dec_reset(Token * restrict token)
 			LOG("Unhandled: %d\n", token->arg[0]);
 #endif//DEBUG
 		}
-	} else if (token->private == 0) {
-		switch (token->arg[0]) {
-		case 4 :
-			scr->insert = set;
-			break;
-#ifdef DEBUG
-		default:
-			LOG("Unhandled: %d\n", token->arg[0]);
-#endif//DEBUG
-		}
-	}
+	} else if (!token->private && token->arg[0] == 4)
+		  scr->insert = set;
 }
 
 
