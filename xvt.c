@@ -10,6 +10,7 @@
 #include "dec_reset.h"
 #include "handle_sgr.h"
 #include "log.h"
+#include "lookup_key.h"
 #include "sbar.h"
 #include "screen.h"
 #include "scroll.h"

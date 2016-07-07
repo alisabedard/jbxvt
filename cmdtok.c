@@ -3,22 +3,20 @@
 
 #include "cmdtok.h"
 
-#include "command.h"
 #include "jbxvt.h"
-#include "log.h"
-#include "screen.h"
-#include "Token.h"
+#include "lookup_key.h"
 #include "ttyinit.h"
 #include "wm_del_win.h"
 #include "xevents.h"
 #include "xeventst.h"
-#include "xsetup.h"
 
 #include <errno.h>
 #include <gc.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/syscall.h>
+#include <unistd.h>
 
 static JBXVTEvent * ev_alloc(xcb_generic_event_t * restrict e)
 {

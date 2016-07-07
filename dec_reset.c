@@ -6,9 +6,9 @@
 #include "cursor.h"
 #include "jbxvt.h"
 #include "log.h"
-#include "screen.h"
+#include "lookup_key.h"
 #include "scr_move.h"
-#include "Token.h"
+#include "screen.h"
 #include "xsetup.h"
 
 void dec_reset(Token * restrict token)
