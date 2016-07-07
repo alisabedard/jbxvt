@@ -66,10 +66,10 @@ struct KeyMaps {
 /*  Table of function key mappings
  */
 static struct KeyMaps func_key_table[] = {
-	{XK_F1,		{KS_TYPE_XTERM,11},	{KS_TYPE_SUN,224}},
-	{XK_F2,		{KS_TYPE_XTERM,12},	{KS_TYPE_SUN,225}},
-	{XK_F3,		{KS_TYPE_XTERM,13},	{KS_TYPE_SUN,226}},
-	{XK_F4,		{KS_TYPE_XTERM,14},	{KS_TYPE_SUN,227}},
+	{XK_F1,		{KS_TYPE_APPKEY,'P'},	{KS_TYPE_XTERM,11}},
+	{XK_F2,		{KS_TYPE_APPKEY,'Q'},	{KS_TYPE_XTERM,12}},
+	{XK_F3,		{KS_TYPE_APPKEY,'R'},	{KS_TYPE_XTERM,13}},
+	{XK_F4,		{KS_TYPE_APPKEY,'S'},	{KS_TYPE_XTERM,14}},
 	{XK_F5,		{KS_TYPE_XTERM,15},	{KS_TYPE_SUN,228}},
 	{XK_F6,		{KS_TYPE_XTERM,17},	{KS_TYPE_SUN,229}},
 	{XK_F7,		{KS_TYPE_XTERM,18},	{KS_TYPE_SUN,230}},
@@ -166,11 +166,9 @@ void set_keys(const bool mode_high, const bool is_cursor)
 		  command.keys.app_kp = mode_high;
 }
 
-static char * get_format(const uint8_t type)
+static char * get_format(const enum KSType type)
 {
 	switch(type) {
-	case KS_TYPE_CHAR:
-		return "%c";
 	case KS_TYPE_XTERM:
 		return "\033[%d~";
 	case KS_TYPE_SUN:
@@ -179,8 +177,9 @@ static char * get_format(const uint8_t type)
 		return "\033O%c";
 	case KS_TYPE_NONAPP:
 		return "\033[%c";
+	default:
+		return "%c";
 	}
-	return NULL;
 }
 
 //  Look up function key keycode
@@ -192,10 +191,7 @@ static char * get_keycode_value(struct KeyMaps * restrict keymaptable,
 			  continue;
 		struct KeyStrings * ks = use_alternate
 			? &km->km_alt : &km->km_normal;
-		char * f = get_format(ks->ks_type);
-		if (!f)
-			  continue;
-		snprintf(buf, KBUFSIZE, f, ks->ks_value);
+		snprintf(buf, KBUFSIZE, get_format(ks->ks_type), ks->ks_value);
 		return buf;
 	}
 	return NULL;

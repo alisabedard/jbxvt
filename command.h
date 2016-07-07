@@ -9,7 +9,7 @@
 
 enum CommandLimits {
 	NLMAX =		15,	// max number of lines to scroll
-	KBUFSIZE =	5,	// size of keyboard mapping buffer
+	KBUFSIZE =	8,	// size of keyboard mapping buffer
 	COM_BUF_SIZE =	512,	// size of command read buffer
 	COM_PUSH_MAX =	20,	// max # chars to push back to input queue
 	MP_INTERVAL =	500	// multi-press interval in ms
