@@ -78,23 +78,15 @@ void scr_style(const uint32_t style);
 //  mode_high is true for screen 2
 void scr_change_screen(const bool mode_high);
 
-//  Delete count lines and scroll up the bottom of the screen to fill the gap
-void scr_delete_lines(const uint8_t count);
-
 // Set all chars to 'E'
 void scr_efill(void);
 
-// scroll by mod
-void scr_index_by(const int8_t mod);
-#define scr_index() scr_index_by(1)
-#define scr_rindex() scr_index_by(-1)
-/*  Perform any initialisation on the screen data structures.  Called just once
- *  at startup. */
-void scr_init(void);
+// Scroll from top to current bottom margin count lines, moving cursor
+void scr_index_from(const int8_t count, const int16_t top);
 
-/*  Insert count blank lines at the current position and scroll the lower lines
- *  down.  */
-void scr_insert_lines(const int8_t count);
+/*  Perform any initialization on the screen data structures.
+    Called just once at startup. */
+void scr_init(void);
 
 /*  Move the display so that line represented by scrollbar value y is at the top
  *  of the screen.  */

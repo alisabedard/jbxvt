@@ -63,13 +63,14 @@ static void form_feed(void)
 
 static void handle_tk_char(const uint8_t tk_char)
 {
+	VTScreen * s = jbxvt.scr.current;
 	switch (tk_char) {
 	case '\n': // handle line feed
-		scr_index();
+		scr_index_from(1, s->margin.t);
 		break;
 	case 013: // vertical tab
-		for (uint8_t i = jbxvt.scr.current->cursor.y; i % 8; ++i)
-			  scr_index();
+		for (uint8_t i = s->cursor.y; i % 8; ++i)
+			  scr_index_from(1, s->margin.t);
 		break;
 	case '\f': // form feed
 		form_feed();
@@ -156,7 +157,7 @@ static void decstbm(Token * restrict token)
 	int32_t * restrict t = token->arg;
 	LOG("TK_DECSTBM args: %d, 0: %d, 1: %d",
 		(int)token->nargs, t[0], t[1]);
-	VTScreen * restrict scr = jbxvt.scr.current;
+	VTScreen * restrict s = jbxvt.scr.current;
 	if (token->private == '?') {
 		// Restore private modes
 		// FIXME:  Unimplemented
@@ -167,13 +168,13 @@ static void decstbm(Token * restrict token)
 	} else if (token->nargs < 2 || t[0] >= t[1]) {
 		LOG("DECSTBM reset");
 		// reset
-		scr->margin.top = 0;
-		scr->margin.bottom = jbxvt.scr.chars.height - 1;
+		s->margin.top = 0;
+		s->margin.bottom = jbxvt.scr.chars.height - 1;
 	} else { // set
 		LOG("DECSTBM set");
-		LOG("m.b: %d, c.y: %d", scr->margin.bottom, scr->cursor.y);
-		scr->margin.top = t[0] - 1;
-		scr->margin.bottom = t[1] - 1;
+		LOG("m.b: %d, c.y: %d", s->margin.bottom, s->cursor.y);
+		s->margin.top = t[0] - 1;
+		s->margin.bottom = t[1] - 1;
 	}
 
 }
@@ -200,7 +201,6 @@ void jbxvt_app_loop(void)
 	Token token;
 	int32_t n; // sanitized first token
 	int32_t * t; // shortcut to token.arg
-	VTScreen * scr = jbxvt.scr.current;
 app_loop_head:
 	get_token(&token);
 	t = token.arg;
@@ -253,7 +253,8 @@ app_loop_head:
 		// fall through
 	case TK_SU: // scroll up n lines;
 		LOG("TK_SU");
-		scroll(scr->margin.top, scr->margin.bot, t[0]);
+		scroll(jbxvt.scr.current->margin.top,
+			jbxvt.scr.current->margin.bot, t[0]);
 		break;
 	case TK_SBDOWN :
 		t[0] = - t[0];
@@ -330,7 +331,7 @@ app_loop_head:
 		// fall through
 	case TK_CUP: // position cursor
 		LOG("TK_CUP");
-		scr_move(t[1] - 1, t[0] - 1, scr->decom
+		scr_move(t[1] - 1, t[0] - 1, jbxvt.scr.current->decom
 			? ROW_RELATIVE | COL_RELATIVE : 0);
 		break;
 	case TK_HPA: // horizontal position absolute
@@ -361,13 +362,11 @@ app_loop_head:
 		LOG("TK_EL"); // don't use n
 		scr_erase_line(t[0]);
 		break;
-	case TK_IL :
-		LOG("TK_IL: %d", n);
-		scr_insert_lines(n);
-		break;
-	case TK_DL :
-		LOG("TK_DL");
-		scr_delete_lines(n);
+	case TK_IL:
+		n = -n; // fall through
+	case TK_DL:
+		LOG("TK_IL(-)/TK_DL(+): %d", n);
+		scr_index_from(n, jbxvt.scr.current->cursor.y);
 		break;
 	case TK_DCH :
 	case TK_ECH:
@@ -386,7 +385,6 @@ app_loop_head:
 		dec_reset(&token);
 		break;
 	case TK_SGR :
-		//LOG("TK_SGR");
 		handle_sgr(&token);
 		break;
 	case TK_DSR: // request for information
@@ -412,26 +410,26 @@ app_loop_head:
 		LOG("TK_DECPNM");
 		set_keys(false, false);
 		break;
-	case TK_IND :		/* Index (same as \n) */
+	case TK_IND: // Index (same as \n)
 		LOG("TK_IND");
-		scr_index();
+		scr_index_from(1, jbxvt.scr.current->margin.t);
 		break;
-	case TK_RI :		/* Reverse index */
+	case TK_RI: // Reverse index
 		LOG("TK_RI");
-		scr_rindex();
+		scr_index_from(-1, jbxvt.scr.current->margin.t);
 		break;
-	case TK_DECID :
-	case TK_DA :
+	case TK_DECID:
+	case TK_DA:
 		LOG("TK_DECID");
 		cprintf("\033[?6c"); // VT102
 		break;
-	case TK_DECSWH :		/* ESC # digit */
+	case TK_DECSWH: // ESC # digit
 		LOG("TK_DECSWH");
 		if (token.arg[0] == '8') // DECALN
 			  scr_efill();
 		break;
 	case TK_NEL : // move to first position on next line down.
-		scr_move(0, scr->cursor.y + 1, 0);
+		scr_move(0, jbxvt.scr.current->cursor.y + 1, 0);
 		LOG("TK_NEL: NExt Line");
 		break;
 	case TK_RIS: // Reset Initial State
@@ -467,11 +465,11 @@ app_loop_head:
 		break;
 	case TK_DECPM:
 		LOG("TK_DECPM");
-		scr->decpm = true;
+		jbxvt.scr.current->decpm = true;
 		break;
 	case TK_DECST:
 		LOG("TK_DECST");
-		scr->decpm = false;
+		jbxvt.scr.current->decpm = false;
 		break;
 	default:
 #ifdef DEBUG
