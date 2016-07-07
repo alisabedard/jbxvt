@@ -160,7 +160,7 @@ static int_fast32_t repaint_generic(xcb_point_t p,
 {
 	const Size f = jbxvt.X.font_size;
 	// check inputs:
-	if (!str || c2 >= c1 || !m)
+	if (!str || !m)
 		  return p.y + f.height;
 	m = MIN(m, jbxvt.scr.chars.width - 1);
 	if (rend)
