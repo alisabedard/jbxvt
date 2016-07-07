@@ -180,16 +180,8 @@ uint8_t * convert_line(uint8_t * restrict str,
 	i2 = compute_i2(*lenp, i1, i2, str);
 	static uint8_t buf[MAX_WIDTH + 3];
 	uint8_t *s = buf;
-	for (; i1 <= i2; ++i1) {
-		if (str[i1] >= ' ')
-			*s++ = str[i1];
-		else if (str[i1] == '\t') {
-			*s++ = '\t';
-			while (i1 < i2 && str[i1 + 1] == 0)
-				++i1;
-		} else
-			*s++ = ' ';
-	}
+	for(; i1 <= i2; ++i1, ++s)
+		  *s = str[i1];
 	if (newline)
 		*s++ = '\n';
 	*s = 0;
