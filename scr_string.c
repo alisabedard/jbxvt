@@ -206,9 +206,7 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 			// Save scroll history:
 			memcpy(t, str, n);
 		}
-		// Save render style:
-		if(jbxvt.scr.rstyle)
-			  save_render_style(n, s);
+		save_render_style(n, s);
 		len -= n;
 		str += n;
 		s->cursor.x += n;
