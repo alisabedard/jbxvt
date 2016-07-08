@@ -58,13 +58,15 @@ static inline void resize_without_scrollbar(xcb_get_geometry_reply_t * r)
  *  initiate a redraw by resizing the subwindows. */
 void resize_window(void)
 {
-	LOG("resize_window()");
 	xcb_get_geometry_cookie_t c = xcb_get_geometry(jbxvt.X.xcb,
 		jbxvt.X.win.main);
 	xcb_get_geometry_reply_t *r = xcb_get_geometry_reply(jbxvt.X.xcb,
 		c, NULL);
-	if (!r) // Make sure reply was successful
-		  return;
+	const Size ws = jbxvt.X.window_size;
+	if (r->width == ws.w && r->height == ws.h)
+		  return; // Size has not changed.
+	jbxvt.X.window_size.w = r->width;
+	jbxvt.X.window_size.h = r->height;
 	(jbxvt.opt.show_scrollbar ? &resize_with_scrollbar
 		: &resize_without_scrollbar)(r);
 	jbxvt.scr.pixels.height = r->height;
