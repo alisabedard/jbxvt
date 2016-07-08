@@ -18,11 +18,11 @@
 static enum selunit selection_unit;	/* current unit of selection */
 
 //  Make the selection currently delimited by the selection end markers.
-void scr_make_selection(const xcb_time_t time)
+void scr_make_selection(void)
 {
 	save_selection();
 	xcb_set_selection_owner(jbxvt.X.xcb, jbxvt.X.win.vt,
-		XCB_ATOM_PRIMARY, time);
+		XCB_ATOM_PRIMARY, XCB_CURRENT_TIME);
 	// root cut buffer
 	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE,
 		jbxvt.X.screen->root, XCB_ATOM_CUT_BUFFER0, XCB_ATOM_STRING,
@@ -33,7 +33,7 @@ void scr_make_selection(const xcb_time_t time)
 		8, jbxvt.sel.length, jbxvt.sel.text);
 }
 
-//  respond to a request for our current selection.
+//  Respond to a request for our current selection.
 void scr_send_selection(const xcb_time_t time,
 	const uint32_t requestor, const uint32_t target, const uint32_t property)
 {
@@ -42,8 +42,10 @@ void scr_send_selection(const xcb_time_t time,
 		.response_type = XCB_SELECTION_NOTIFY,
 		.selection = XCB_ATOM_PRIMARY, .target = target,
 		.requestor = requestor, .time = time, .property = property};
+	// If property is None, use taget, per ICCCM
 	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE, requestor,
-		property, XCB_ATOM_STRING, 8, jbxvt.sel.length,
+		property == XCB_NONE ? target : property,
+		XCB_ATOM_STRING, 8, jbxvt.sel.length,
 		jbxvt.sel.text);
 	xcb_send_event(jbxvt.X.xcb, false, requestor,
 		XCB_SELECTION_NOTIFY, (char *)&e);
@@ -160,8 +162,8 @@ static inline uint8_t compute_i2(const uint16_t len, const int16_t i1,
 {
 	if (i2 >= len)
 		i2 = len - 1;
-	if (i2 - i1 >= MAX_WIDTH)
-		i2 = i1 + MAX_WIDTH;
+	if (i2 - i1 >= JBXVT_MAX_COLS)
+		i2 = i1 + JBXVT_MAX_COLS;
 	while (i2 >= i1 && str[i2] == 0)
 		--i2;
 	return i2;
@@ -178,7 +180,7 @@ uint8_t * convert_line(uint8_t * restrict str,
 	const bool newline = (i2 + 1 == jbxvt.scr.chars.width)
 		&& (str[*lenp] == 0);
 	i2 = compute_i2(*lenp, i1, i2, str);
-	static uint8_t buf[MAX_WIDTH + 3];
+	static uint8_t buf[JBXVT_MAX_COLS + 3];
 	uint8_t *s = buf;
 	for(; i1 <= i2; ++i1, ++s)
 		  *s = str[i1];
