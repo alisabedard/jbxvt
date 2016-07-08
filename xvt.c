@@ -281,7 +281,7 @@ app_loop_head:
 		break;
 	case TK_SELECT :
 		LOG("TK_SELECT");
-		scr_make_selection(n);
+		scr_make_selection();
 		break;
 	case TK_SELCLEAR :
 		LOG("TK_SELCLEAR");

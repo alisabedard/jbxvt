@@ -31,13 +31,13 @@ void request_selection(void)
 	xcb_get_selection_owner_reply_t * o_r
 		= xcb_get_selection_owner_reply(jbxvt.X.xcb, o_c, NULL);
 	if (!o_r) {
-		LOG("could not get owner");
+		LOG("could not get selection owner");
 		return;
 	}
-	xcb_get_property_cookie_t p_c = xcb_get_property(jbxvt.X.xcb,
-		false, o_r->owner, XCB_ATOM_PRIMARY, XCB_ATOM_STRING,
-		0, PROP_SIZE);
+	xcb_window_t w = o_r->owner;
 	free(o_r);
+	xcb_get_property_cookie_t p_c = xcb_get_property(jbxvt.X.xcb,
+		false, w, XCB_ATOM_PRIMARY, XCB_ATOM_STRING, 0, PROP_SIZE);
 	xcb_get_property_reply_t * p_r = xcb_get_property_reply(jbxvt.X.xcb,
 		p_c, NULL);
 	if (!p_r) {
@@ -45,6 +45,14 @@ void request_selection(void)
 		return;
 	}
 	if (p_r->type == XCB_ATOM_NONE) {
+		LOG("using CLIPBOARD");
+		p_c = xcb_get_property(jbxvt.X.xcb, false, w,
+			jbxvt.X.clipboard, XCB_ATOM_STRING, 0, PROP_SIZE);
+		free(p_r);
+		p_r = xcb_get_property_reply(jbxvt.X.xcb, p_c, NULL);
+	}
+	if (p_r->type == XCB_ATOM_NONE) {
+		LOG("using root window XCB_ATOM_CUT_BUFFER0");
 		p_c = xcb_get_property(jbxvt.X.xcb, false,
 			jbxvt.X.screen->root, XCB_ATOM_CUT_BUFFER0,
 			XCB_ATOM_STRING, 0, PROP_SIZE);
@@ -73,6 +81,7 @@ skip_debug:
 //  Respond to a notification that a primary selection has been sent
 void paste_primary(const xcb_window_t window, const xcb_atom_t property)
 {
+	LOG("paste_primary()");
 	if (property == XCB_NONE)
 		return;
 	uint32_t nread = 0, bytes_after;

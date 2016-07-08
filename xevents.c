@@ -216,7 +216,7 @@ bool handle_xevents(Token * restrict tk)
 		  tk->region = REGION_MAINWIN;
 	else
 		  tk->region = REGION_NONE;
-	switch (xe->type) {
+	switch (xe->type) { // Ordered numerically:
 	case XCB_KEY_RELEASE: // Unimplemented
 		break;
 	case XCB_ENTER_NOTIFY:
@@ -253,7 +253,6 @@ bool handle_xevents(Token * restrict tk)
 	case XCB_NO_EXPOSURE: // Unimplemented
 		break;
 	case XCB_CONFIGURE_NOTIFY:
-		LOG("ConfigureNotify");
 		tk->type = TK_RESIZE;
 		tk->nargs = 0;
 		break;

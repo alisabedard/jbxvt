@@ -7,7 +7,6 @@
 #include "jbxvt.h"
 
 enum {
-	MAX_WIDTH = 250, // max width of selected lines
 	PROP_SIZE = 1024, // chunk size for retrieving the selection property
 	SEL_KEY_DEL = 2000 /* time delay in allowing keyboard input to be accepted
 			    before a selection arrives. */
@@ -21,7 +20,7 @@ void scr_send_selection(const xcb_time_t time, const uint32_t requestor,
 	const uint32_t target, const uint32_t property);
 
 //  Make the selection currently delimited by the selection end markers.
-void scr_make_selection(const xcb_time_t time);
+void scr_make_selection(void);
 
 /*  Fix the coordinates so that they are within the screen and do not lie within
  *  empty space.  */

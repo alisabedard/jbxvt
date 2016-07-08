@@ -22,11 +22,10 @@ static void init_screen_elements(VTScreen * restrict scr,
 	uint8_t ** restrict text, uint32_t ** restrict rend)
 {
 	scr->margin.bottom = jbxvt.scr.chars.height - 1;
-	scr->decom = false;
+	scr->decom = scr->wrap_next = false;
 	scr->rend = rend;
 	scr->text = text;
 	scr->margin.top = 0;
-	scr->wrap_next = false;
 }
 
 __attribute__((pure))
@@ -87,13 +86,11 @@ void scr_reset(void)
 	uint8_t **s1 = jbxvt.scr.s1.text, **s2 = jbxvt.scr.s2.text;
 	uint32_t **r1 = jbxvt.scr.s1.rend, **r2 = jbxvt.scr.s2.rend;
 	VTScreen * scr = jbxvt.scr.current;
-	if (likely(scr == &jbxvt.scr.s1 && jbxvt.scr.s1.text)) {
-		if (scr->cursor.y >= c.h) {
-			scroll1(scr->cursor.y - c.h + 1);
-			scr->cursor.y = c.h - 1;
-		}
+	if (likely(scr == &jbxvt.scr.s1 && jbxvt.scr.s1.text)
+		&& scr->cursor.y >= c.h) {
+		scroll1(scr->cursor.y - c.h + 1);
+		scr->cursor.y = c.h - 1;
 	}
-	//	handle_screen_1(c, s1, s2, r1, r2);
 	init_screen_elements(&jbxvt.scr.s1, s1, r1);
 	init_screen_elements(&jbxvt.scr.s2, s2, r2);
 	scr_start_selection((xcb_point_t){}, SEL_CHAR);
