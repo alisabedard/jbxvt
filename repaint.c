@@ -135,17 +135,18 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 }
 
 // Display the string using the rendition vector at the screen coordinates
+__attribute__((nonnull(1,2)))
 static void paint_rvec_text(uint8_t * str,
 	uint32_t * rvec, int16_t len, xcb_point_t p)
 {
-	int_fast16_t i;
-	uint32_t r;
 	while (len > 0) {
+		uint32_t r;
+		int_fast16_t i;
 		// find the length for which the current rend val applies
 		for (i = 0, r = *rvec; i < len && rvec[i] == r; ++i)
 			  ;
 		// draw
-		paint_rval_text(str,rvec[0], i, p);
+		paint_rval_text(str, r, i, p);
 		// advance to next block
 		p.x += i * jbxvt.X.font_size.width;
 		str += i;
