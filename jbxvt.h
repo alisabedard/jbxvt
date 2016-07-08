@@ -32,6 +32,7 @@ typedef struct {
 		int screen_number;
 		xcb_font_t font;
 		xcb_font_t bold_font;
+		xcb_atom_t clipboard;
 		struct {
 			xcb_window_t vt, sb, main;
 		} win;
@@ -43,6 +44,7 @@ typedef struct {
 			pixel_t current_fg, current_bg;
 		} color;
 		Size font_size;
+		Size window_size;
 		int16_t font_ascent;
 	} X;
 	struct {
