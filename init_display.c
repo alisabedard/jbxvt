@@ -168,6 +168,8 @@ static void init_jbxvt_colors(void)
 void init_display(char * name)
 {
 	jbxvt.X.xcb = xcb_connect(jbxvt.opt.display, &jbxvt.opt.screen);
+	xcb_intern_atom_cookie_t c = xcb_intern_atom(jbxvt.X.xcb,
+		false, 9, "CLIPBOARD");
 	if (unlikely(xcb_connection_has_error(jbxvt.X.xcb))) {
 		quit(1, WARN_RES RES_DPY);
 	}
@@ -180,5 +182,9 @@ void init_display(char * name)
 	setup_gcs();
 	scr_init();
 	xcb_flush(jbxvt.X.xcb);
+	xcb_intern_atom_reply_t * r = xcb_intern_atom_reply(jbxvt.X.xcb,
+		c, NULL);
+	jbxvt.X.clipboard = r->atom;
+	free(r);
 }
 
