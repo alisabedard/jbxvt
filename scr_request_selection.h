@@ -7,7 +7,7 @@
 #include <xcb/xcb.h>
 
 //  Request the current primary selection
-void request_selection(void);
+void request_selection(const xcb_timestamp_t t);
 
 //  Respond to a notification that a primary selection has been sent
 void paste_primary(const xcb_window_t window, const xcb_atom_t property);

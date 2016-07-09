@@ -17,20 +17,22 @@
 // Static globals:
 static enum selunit selection_unit;	/* current unit of selection */
 
+static void prop(const xcb_window_t win, const xcb_atom_t a)
+{
+	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE,
+		win, a, XCB_ATOM_STRING, 8, jbxvt.sel.length, jbxvt.sel.text);
+}
+
 //  Make the selection currently delimited by the selection end markers.
 void scr_make_selection(void)
 {
 	save_selection();
+	prop(jbxvt.X.win.vt, XCB_ATOM_PRIMARY);
+	prop(jbxvt.X.win.vt, XCB_ATOM_SECONDARY);
+	prop(jbxvt.X.win.vt, jbxvt.X.clipboard);
+	prop(jbxvt.X.screen->root, XCB_ATOM_CUT_BUFFER0);
 	xcb_set_selection_owner(jbxvt.X.xcb, jbxvt.X.win.vt,
 		XCB_ATOM_PRIMARY, XCB_CURRENT_TIME);
-	// root cut buffer
-	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE,
-		jbxvt.X.screen->root, XCB_ATOM_CUT_BUFFER0, XCB_ATOM_STRING,
-		8, jbxvt.sel.length, jbxvt.sel.text);
-	// vt window PRIMARY selection
-	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE,
-		jbxvt.X.win.vt, XCB_ATOM_PRIMARY, XCB_ATOM_STRING,
-		8, jbxvt.sel.length, jbxvt.sel.text);
 }
 
 //  Respond to a request for our current selection.

@@ -293,7 +293,7 @@ app_loop_head:
 		break;
 	case TK_SELINSRT :
 		LOG("TK_SELINSRT");
-		request_selection();
+		request_selection(t[0]);
 		break;
 	case TK_SELNOTIFY :
 		LOG("TK_SELNOTIFY");
