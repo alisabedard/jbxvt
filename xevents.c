@@ -19,13 +19,6 @@ enum TrackFlags {
 	TRACK_RELEASE = 1 << 6
 };
 
-static void encode_point(xcb_point_t * p)
-{
-	// encode in X10 format
-	p->x += 32;
-	p->y += 32;
-}
-
 static uint8_t get_mod(const uint16_t state)
 {
 	// 4=Shift, 8=Meta, 16=Control
@@ -45,7 +38,7 @@ static bool track_mouse_sgr(uint8_t b, xcb_point_t p)
 	const bool rel = b & TRACK_RELEASE;
 	if (rel)
 		  b &= ~TRACK_RELEASE;
-	cprintf("\033[<%d;%d;%d%c", b, p.x, p.y, rel ? 'm' : 'M');
+	cprintf("\033[<%d;%d;%d%c]", b, p.x, p.y, rel ? 'm' : 'M');
 	return true;
 }
 
@@ -62,8 +55,7 @@ static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
 	// base button on 0
 	--b;
 	// DECLRP
-	cprintf("\033[%d;%d;%d;%d;0&w", b * 2, 7, p.y, p.x);
-	//LOG("CSI %d;%d;%d;%d;0&w", b * 2, 0, p.y, p.x);
+	cprintf("\033[%d;%d;%d;%d;0&w]", b * 2, 7, p.y, p.x);
 	VTScreen * s = jbxvt.scr.current;
 	// Release handling:
 	if (s->mouse_x10)
@@ -80,9 +72,13 @@ static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
 	if (track_mouse_sgr(b, p))
 		  return;
 mouse_x10:
-	b += 32; // X10 encoding
-	encode_point(&p);
-	cprintf("\033[M%c%c%c]", b, p.x, p.y);
+	b += 32; // X10 encoding:
+	p.x += 32;
+	p.y += 32;
+	if (s->mouse_urxvt)
+		cprintf("\033[%d;%d;%dM]", b, p.x, p.y);
+	else
+		cprintf("\033[M%c%c%c]", b, p.x, p.y);
 	LOG("track_mouse: CSI M%cC%cC%c", b, p.x, p.y);
 }
 
