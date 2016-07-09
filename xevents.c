@@ -38,6 +38,17 @@ static uint8_t get_mod(const uint16_t state)
 	return 0;
 }
 
+static bool track_mouse_sgr(uint8_t b, xcb_point_t p)
+{
+	if (!jbxvt.scr.current->mouse_sgr)
+		  return false;
+	const bool rel = b & TRACK_RELEASE;
+	if (rel)
+		  b &= ~TRACK_RELEASE;
+	cprintf("\033[<%d;%d;%d%c", b, p.x, p.y, rel ? 'm' : 'M');
+	return true;
+}
+
 static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
 {
 	LOG("track_mouse(b=%d, p={%d, %d})", b, p.x, p.y);
@@ -47,29 +58,29 @@ static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
 	p.y /= f.h;
 	// modify for a 1-based row/column system
 	++p.x; ++p.y;
-
+	const bool wheel = b == 4 || b == 5;
+	// base button on 0
+	--b;
 	// DECLRP
 	cprintf("\033[%d;%d;%d;%d;0&w", b * 2, 7, p.y, p.x);
 	//LOG("CSI %d;%d;%d;%d;0&w", b * 2, 0, p.y, p.x);
 	VTScreen * s = jbxvt.scr.current;
 	// Release handling:
 	if (s->mouse_x10)
-		  goto x10_mouse;
+		  goto mouse_x10;
 	if (b & TRACK_RELEASE) {
 		LOG("TRACK_RELEASE");
-		b = 4; // -1 later on
-		goto x10_mouse;
-	} else if (b == 4 || b == 5) {
+		b = 3;
+	} else if (wheel) {
 		// up and down are represented as button one and two,
 		// then add 64, plus one since one is lost later
 		b += 61; // Wheel mouse handling
-		goto x10_mouse;
 	}
 	b += get_mod(state);
-	// encode in X10 format
-	// - 1 since 0 is mb 1, and 3 is release
-x10_mouse:
-	b += 31;
+	if (track_mouse_sgr(b, p))
+		  return;
+mouse_x10:
+	b += 32; // X10 encoding
 	encode_point(&p);
 	cprintf("\033[M%c%c%c]", b, p.x, p.y);
 	LOG("track_mouse: CSI M%cC%cC%c", b, p.x, p.y);
@@ -145,7 +156,7 @@ static void handle_button_release(Token * restrict tk,
 		&& is_tracked() && xe->button <= 3) {
 		/* check less than or equal to 3, since xterm does not
 		   report mouse wheel release events.  */
-		track_mouse(TRACK_RELEASE, xe->state,
+		track_mouse(xe->button | TRACK_RELEASE, xe->state,
 			(xcb_point_t){xe->box.x, xe->box.y});
 	} else if (xe->window == jbxvt.X.win.vt
 		&& !(xe->state & XCB_KEY_BUT_MASK_CONTROL)) {
