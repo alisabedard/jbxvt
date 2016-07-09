@@ -65,7 +65,9 @@ static void clear(int8_t count, const uint8_t rc,
 
 static void cp_rows(int16_t i, const int16_t count)
 {
+#ifdef SCROLL_DEBUG
 	LOG("cp_rows(i: %d, count: %d)", i, count);
+#endif//SCROLL_DEBUG
 	if (--i < 0)
 		  return;
 	VTScreen * s = jbxvt.scr.current;
@@ -143,7 +145,9 @@ static int8_t copy_screen_area(const int8_t i,
 
 static void sc_up(const uint8_t row1, uint8_t row2, int8_t count)
 {
+#ifdef SCROLL_DEBUG
 	LOG("scroll_up(count: %d, row1: %d, row2: %d)", count, row1, row2);
+#endif//SCROLL_DEBUG
 	if (jbxvt.scr.current == &jbxvt.scr.s1 && row1 == 0)
 		add_scroll_history(count);
 	uint8_t *save[MAX_SCROLL] = {NULL};
@@ -177,7 +181,9 @@ void scroll1(int16_t count)
 
 static void sc_dn(uint8_t row1, const uint8_t row2, int8_t count)
 {
+#ifdef SCROLL_DEBUG
 	LOG("scroll_down(%d, %d, %d)", row1, row2, count);
+#endif//SCROLL_DEBUG
 	count = -count;
 	uint32_t *rend[MAX_SCROLL];
 	uint8_t *save[MAX_SCROLL];

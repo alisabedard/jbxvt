@@ -27,6 +27,7 @@ static void prop(const xcb_window_t win, const xcb_atom_t a)
 void scr_make_selection(void)
 {
 	save_selection();
+	/* Set all properties which may possibly be requested.  */
 	prop(jbxvt.X.win.vt, XCB_ATOM_PRIMARY);
 	prop(jbxvt.X.win.vt, XCB_ATOM_SECONDARY);
 	prop(jbxvt.X.win.vt, jbxvt.X.clipboard);

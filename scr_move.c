@@ -29,7 +29,9 @@ void reset_row_col(void)
  *  flags that specify relative rather than absolute motion.  */
 void scr_move(const int16_t x, const int16_t y, const uint8_t relative)
 {
+#ifdef MOVE_DEBUG
 	LOG("scr_move(x:%d, y:%d, relative:%d)", x, y, relative);
+#endif//MOVE_DEBUG
 	home_screen();
 	cursor(CURSOR_DRAW); // clear
 	xcb_point_t * c = &jbxvt.scr.current->cursor;
