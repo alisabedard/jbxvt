@@ -135,10 +135,11 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 }
 
 // Display the string using the rendition vector at the screen coordinates
-__attribute__((nonnull(1,2)))
 static void paint_rvec_text(uint8_t * str,
 	uint32_t * rvec, int16_t len, xcb_point_t p)
 {
+	if (!rvec || !str)
+		  return;
 	while (len > 0) {
 		uint32_t r;
 		int_fast16_t i;
@@ -164,7 +165,7 @@ static int_fast32_t repaint_generic(xcb_point_t p,
 	if (!str || !m)
 		  return p.y + f.height;
 	m = MIN(m, jbxvt.scr.chars.width - 1);
-	if (rend)
+	if (rend && c1 <= jbxvt.scr.chars.width)
 		paint_rvec_text(str, rend + c1, m, p);
 	else
 		paint_rval_text(str, 0, m, p);
@@ -183,8 +184,9 @@ static int_fast16_t show_scroll_history(const xcb_rectangle_t r,
 		line <= r.height && i >= 0; ++line, --i) {
 		LOG("i: %d, line: %d", (int)i, (int)line);
 		SLine * sl = jbxvt.scr.sline.data[i];
-		if (!sl) // no scroll history yet!
+		if (!sl) // no scroll history
 			  break;
+		sl->sl_length = MIN(sl->sl_length, jbxvt.scr.chars.width);
 		memcpy(str, sl->sl_text + r.x, sl->sl_length);
 		p->y = repaint_generic(*p, sl->sl_length, r.x,
 			r.width, sl->sl_text, sl->sl_rend);

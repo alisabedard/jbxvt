@@ -119,6 +119,8 @@ static void handle_motion_notify(Token * restrict tk,
 	} else if (xe->window == jbxvt.X.win.vt
 		&& (xe->state & XCB_KEY_BUT_MASK_BUTTON_1)
 		&& !(xe->state & XCB_KEY_BUT_MASK_CONTROL)) {
+		if (is_tracked())
+			  return;
 		tk->type = TK_SELDRAG;
 		tk->arg[0] = xe->box.x;
 		tk->arg[1] = xe->box.y;

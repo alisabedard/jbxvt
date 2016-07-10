@@ -192,9 +192,9 @@ static void sc_dn(uint8_t row1, const uint8_t row2, int8_t count)
 		  transmogrify(j, count, jbxvt.scr.current);
 	clear(count, row1, save, rend, false);
 	cp_repair(row1, row2 + 1, count, false);
-	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, 0,
-		MARGIN + row1 * jbxvt.X.font_size.h,
-		jbxvt.scr.pixels.width, count * jbxvt.X.font_size.h);
+	const uint16_t h = jbxvt.X.font_size.h;
+	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, 0, MARGIN + row1 * h,
+		jbxvt.scr.pixels.width, count * h);
 }
 
 /*  Scroll count lines from row1 to row2 inclusive.  row1 should be <= row2.
