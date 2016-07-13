@@ -28,17 +28,18 @@ void scr_make_selection(void)
 {
 	save_selection();
 	/* Set all properties which may possibly be requested.  */
-	prop(jbxvt.X.win.vt, XCB_ATOM_PRIMARY);
-	prop(jbxvt.X.win.vt, XCB_ATOM_SECONDARY);
-	prop(jbxvt.X.win.vt, jbxvt.X.clipboard);
+	const xcb_window_t v = jbxvt.X.win.vt;
+	prop(v, XCB_ATOM_PRIMARY);
+	prop(v, XCB_ATOM_SECONDARY);
+	prop(v, jbxvt.X.clipboard);
 	prop(jbxvt.X.screen->root, XCB_ATOM_CUT_BUFFER0);
-	xcb_set_selection_owner(jbxvt.X.xcb, jbxvt.X.win.vt,
-		XCB_ATOM_PRIMARY, XCB_CURRENT_TIME);
+	xcb_set_selection_owner(jbxvt.X.xcb, v, XCB_ATOM_PRIMARY,
+		XCB_CURRENT_TIME);
 }
 
 //  Respond to a request for our current selection.
-void scr_send_selection(const xcb_time_t time,
-	const uint32_t requestor, const uint32_t target, const uint32_t property)
+void scr_send_selection(const xcb_time_t time, const uint32_t requestor,
+	const uint32_t target, const uint32_t property)
 {
 	// x events must be 32 bytes long:
 	xcb_selection_notify_event_t e = {
@@ -82,17 +83,20 @@ void scr_start_selection(xcb_point_t p, enum selunit unit)
 	show_selection(0, c.h - 1, 0, c.w - 1);
 }
 
+static bool ipos(int16_t * i)
+{
+	if (*i < 0) {
+		*i = -1 - *i;
+		return false;
+	}
+	return true;
+}
 
 //  Convert a row and column coordinates into a selection endpoint.
 void rc_to_selend(const int16_t row, const int16_t col, SelEnd * se)
 {
 	int16_t i = (row - jbxvt.scr.offset);
-	if (i >= 0)
-		se->type = SCREENSEL;
-	else {
-		se->type = SAVEDSEL;
-		i = -1 - i;
-	}
+	se->type = ipos(&i) ? SCREENSEL : SAVEDSEL;
 	se->index = i;
 	se->col = col;
 }
@@ -116,17 +120,13 @@ __attribute__((regparm(2)))
 #endif//__i386__||__amd64__
 static uint8_t find_c(uint8_t c, int16_t i)
 {
-	if (selection_unit == SEL_CHAR) {
-		if (i > -1) {
-			c = advance_c(c, jbxvt.scr.chars.width,
-				jbxvt.scr.current->text[i]);
-		} else {
-			i = - 1 - i;
-			c = advance_c(c, jbxvt.scr.sline.data[i]->sl_length,
-				jbxvt.scr.sline.data[i]->sl_text);
-		}
-	}
-	return c;
+	return selection_unit == SEL_CHAR
+		? ipos(&i)
+		? advance_c(c, jbxvt.scr.chars.width,
+			jbxvt.scr.current->text[i])
+		: advance_c(c, jbxvt.scr.sline.data[i]->sl_length,
+				jbxvt.scr.sline.data[i]->sl_text)
+		: c;
 }
 
 /*  Fix the coordinates so that they are within the screen and do not lie within
@@ -163,8 +163,7 @@ void selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
 static inline uint8_t compute_i2(const uint16_t len, const int16_t i1,
 	int16_t i2, uint8_t * restrict str)
 {
-	if (i2 >= len)
-		i2 = len - 1;
+	i2 = MIN(i2, len - 1);
 	if (i2 - i1 >= JBXVT_MAX_COLS)
 		i2 = i1 + JBXVT_MAX_COLS;
 	while (i2 >= i1 && str[i2] == 0)
