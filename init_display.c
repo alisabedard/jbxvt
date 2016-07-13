@@ -4,6 +4,7 @@
 #include "init_display.h"
 
 #include "config.h"
+#include "cursor.h"
 #include "jbxvt.h"
 #include "sbar.h"
 #include "screen.h"
@@ -208,5 +209,6 @@ void init_display(char * name)
 		= xcb_intern_atom_reply(jbxvt.X.xcb, c, NULL);
 	jbxvt.X.clipboard = r->atom;
 	free(r);
+	cursor(CURSOR_FOCUS_IN);
 }
 
