@@ -199,20 +199,10 @@ static int_fast16_t show_scroll_history(const xcb_rectangle_t r,
 		SLine * sl = jbxvt.scr.sline.data[i];
 		if (!sl) // no scroll history
 			  break;
-		int_fast16_t len = sl->sl_length;
-		uint8_t * iter = sl->sl_text;
-		uint32_t * riter = sl->sl_rend;
 		const uint16_t lim = jbxvt.scr.chars.width - 1;
-		while (len > 0) { // wrap if necessary
-			int_fast16_t inc = MIN(len, lim);
-			p->y = repaint_generic(*p, inc,
-				r.x, r.width, iter, riter);
-			if (inc < lim)
-				  break;
-			iter += inc;
-			riter += inc;
-			len -= inc;
-		}
+		p->y = repaint_generic(*p,
+			MIN(sl->sl_length, lim),
+			r.x, r.width, sl->sl_text, sl->sl_rend);
 	}
 	return line;
 }
