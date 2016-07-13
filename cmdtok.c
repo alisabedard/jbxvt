@@ -21,7 +21,7 @@
 static JBXVTEvent * ev_alloc(xcb_generic_event_t * restrict e)
 {
 	JBXVTEvent * xe = GC_MALLOC(sizeof(JBXVTEvent));
-	xe->type = e->response_type & ~0x80;
+	xe->type = e->response_type;
 	return xe;
 }
 
@@ -198,7 +198,8 @@ static int_fast16_t get_com_char(const int_fast8_t flags)
 		FD_ZERO(&in_fdset);
 		xcb_generic_event_t * e;
 		if ((e = xcb_poll_for_event(jbxvt.X.xcb))) {
-			const int_fast16_t xev_ret = handle_xev(e, &count, flags);
+			const int_fast16_t xev_ret
+				= handle_xev(e, &count, flags);
 			free(e);
 			if (xev_ret)
 				  return xev_ret;
