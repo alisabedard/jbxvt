@@ -19,7 +19,8 @@ static void send_selection(uint8_t * str, const uint16_t count)
 		  return;
 	for (char * i = (char *)str; (i = strchr(i, '\n')); *i = '\r')
 		  ;
-	send_string(str, count);
+	jbxvt.com.send_nxt = str;
+	jbxvt.com.send_count = count;
 }
 
 static void paste_root(void)

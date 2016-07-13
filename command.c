@@ -57,13 +57,6 @@ void push_com_char(const uint8_t c)
 		*jbxvt.com.stack.top++ = c;
 }
 
-//  Send count characters directly to the command.
-void send_string(uint8_t * restrict buf, const uint8_t count)
-{
-	jbxvt.com.send_nxt = buf;
-	jbxvt.com.send_count = count;
-}
-
 /*  Send printf formatted output to the command.
     Only used for small ammounts of data.  */
 void cprintf(char *fmt,...)
@@ -75,6 +68,7 @@ void cprintf(char *fmt,...)
 	const int l = vsnprintf((char *)buf, sizeof(buf),
 		fmt, args) + 1;
 	va_end(args);
-	send_string(buf, l);
+	jbxvt.com.send_nxt = buf;
+	jbxvt.com.send_count = l;
 }
 

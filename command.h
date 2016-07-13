@@ -28,7 +28,4 @@ void push_com_char(const uint8_t c);
 //  Push a mini X event onto the queue
 void push_xevent(struct xeventst *);
 
-//  Send count characters directly to the command.
-void send_string(uint8_t * restrict buf, const uint8_t count);
-
 #endif//!COMMAND_H

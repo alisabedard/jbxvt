@@ -97,8 +97,10 @@ static int_fast16_t handle_xev(xcb_generic_event_t * restrict event,
 	switch (event->response_type & ~0x80) {
 	case XCB_KEY_PRESS:
 		s = lookup_key(event, count);
-		if (count)
-			  send_string(s, *count);
+		if (count) {
+			jbxvt.com.send_nxt = s;
+			jbxvt.com.send_count = *count;
+		}
 		break;
 	case XCB_FOCUS_IN:
 	case XCB_FOCUS_OUT:
