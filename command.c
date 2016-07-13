@@ -35,8 +35,8 @@ JBXVTEvent * pop_xevent(void)
 	return xe;
 }
 
-/*  Initialise the command connection.  This should be called after the X
- *  server connection is established.  */
+/*  Initialize the command connection.  This should
+    be called after the X server connection is established.  */
 void init_command(char ** restrict argv)
 {
 	//  Enable the delete window protocol:
@@ -44,14 +44,16 @@ void init_command(char ** restrict argv)
 
 	if ((jbxvt.com.fd = run_command(argv)) < 0)
 		  quit(1, WARN_RES RES_SSN);
-	jbxvt.com.buf.next = jbxvt.com.buf.top = jbxvt.com.buf.data;
+	jbxvt.com.buf.next = jbxvt.com.buf.top
+		= jbxvt.com.buf.data;
 	jbxvt.com.stack.top = jbxvt.com.stack.data;
 }
 
 //  Push an input character back into the input queue.
 void push_com_char(const uint8_t c)
 {
-	if (jbxvt.com.stack.top < jbxvt.com.stack.data + COM_PUSH_MAX)
+	if (jbxvt.com.stack.top < jbxvt.com.stack.data
+		+ COM_PUSH_MAX)
 		*jbxvt.com.stack.top++ = c;
 }
 
@@ -62,15 +64,16 @@ void send_string(uint8_t * restrict buf, const uint8_t count)
 	jbxvt.com.send_count = count;
 }
 
-/*  Send printf formatted output to the command.  Only used for small ammounts
- *  of data.  */
+/*  Send printf formatted output to the command.
+    Only used for small ammounts of data.  */
 void cprintf(char *fmt,...)
 {
 	va_list args;
 	va_start(args,fmt);
 	static uint8_t buf[7];
 	// + 1 to include \0 terminator.
-	const int l = vsnprintf((char *)buf, sizeof(buf), fmt, args) + 1;
+	const int l = vsnprintf((char *)buf, sizeof(buf),
+		fmt, args) + 1;
 	va_end(args);
 	send_string(buf, l);
 }

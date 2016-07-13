@@ -31,15 +31,18 @@ static void transmogrify(const int16_t j, const int8_t count,
 	const int16_t k = j + count;
 	s->text[k] = s->text[j];
 	s->rend[k] = s->rend[j];
-	if (jbxvt.sel.end1.type == SCREENSEL && jbxvt.sel.end1.index == j)
+	if (jbxvt.sel.end1.type == SCREENSEL
+		&& jbxvt.sel.end1.index == j)
 		  jbxvt.sel.end1.index = k;
-	if (jbxvt.sel.end2.type == SCREENSEL && jbxvt.sel.end2.index == j)
+	if (jbxvt.sel.end2.type == SCREENSEL
+		&& jbxvt.sel.end2.index == j)
 		  jbxvt.sel.end2.index = k;
 }
 static void ck_sel_on_scr(const int j)
 {
 	// clear selection if it scrolls off screen:
-	if (jbxvt.sel.end1.index == j || jbxvt.sel.end2.index == j)
+	if (jbxvt.sel.end1.index == j
+		|| jbxvt.sel.end2.index == j)
 		  scr_clear_selection();
 }
 
@@ -98,8 +101,9 @@ static void cp_repair(const uint8_t row1, const uint8_t row2,
 		* jbxvt.X.font_size.h;
 	*(up ? &y[0] : &y[1]) = b;
 	*(up ? &y[1] : &y[0]) = a;
-	xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
-		jbxvt.X.gc.tx, 0, y[0], 0, y[1], jbxvt.scr.pixels.width,
+	xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt,
+		jbxvt.X.win.vt, jbxvt.X.gc.tx, 0, y[0],
+		0, y[1], jbxvt.scr.pixels.width,
 		height);
 	// the above blocks the event queue, flush it
 	xcb_flush(jbxvt.X.xcb);
@@ -109,7 +113,8 @@ static void cp_repair(const uint8_t row1, const uint8_t row2,
 static void scroll_off(const int16_t count)
 {
 	// -1 to avoid going over array bounds
-	memcpy(jbxvt.scr.sline.data + count, jbxvt.scr.sline.data, count - 1);
+	memcpy(jbxvt.scr.sline.data + count,
+		jbxvt.scr.sline.data, count - 1);
 }
 
 static void add_scroll_history(const int8_t count)
@@ -140,13 +145,16 @@ static int8_t copy_screen_area(const int8_t i,
 	save[i] = scr->text[j];
 	rend[i] = scr->rend[j];
 	ck_sel_on_scr(j);
-	return copy_screen_area(i + 1, j + mod, mod, count, save, rend);
+	return copy_screen_area(i + 1, j + mod, mod,
+		count, save, rend);
 }
 
-static void sc_up(const uint8_t row1, uint8_t row2, int8_t count)
+static void sc_up(const uint8_t row1, uint8_t row2,
+	int8_t count)
 {
 #ifdef SCROLL_DEBUG
-	LOG("scroll_up(count: %d, row1: %d, row2: %d)", count, row1, row2);
+	LOG("scroll_up(count: %d, row1: %d, row2: %d)",
+		count, row1, row2);
 #endif//SCROLL_DEBUG
 	if (jbxvt.scr.current == &jbxvt.scr.s1 && row1 == 0)
 		add_scroll_history(count);
@@ -158,9 +166,11 @@ static void sc_up(const uint8_t row1, uint8_t row2, int8_t count)
 		transmogrify(j, -count, jbxvt.scr.current);
 	clear(count, row2, save, rend, true);
 	cp_repair(row1, row2, count, true);
-	const int16_t y = MARGIN + (row2 - count) * jbxvt.X.font_size.h;
+	const int16_t y = MARGIN + (row2 - count)
+		* jbxvt.X.font_size.h;
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, 0, y,
-		jbxvt.scr.pixels.width, count * jbxvt.X.font_size.h);
+		jbxvt.scr.pixels.width,
+		count * jbxvt.X.font_size.h);
 }
 
 void scroll1(int16_t count)
@@ -179,7 +189,8 @@ void scroll1(int16_t count)
 	scroll1(count);
 }
 
-static void sc_dn(uint8_t row1, const uint8_t row2, int8_t count)
+static void sc_dn(uint8_t row1, const uint8_t row2,
+	int8_t count)
 {
 #ifdef SCROLL_DEBUG
 	LOG("scroll_down(%d, %d, %d)", row1, row2, count);
@@ -187,25 +198,29 @@ static void sc_dn(uint8_t row1, const uint8_t row2, int8_t count)
 	count = -count;
 	uint32_t *rend[MAX_SCROLL];
 	uint8_t *save[MAX_SCROLL];
-	for(int8_t j = copy_screen_area(0, row2 - 1, -1, count, save, rend);
+	for(int8_t j = copy_screen_area(0, row2 - 1, -1,
+		count, save, rend);
 		j >= row1; --j)
 		  transmogrify(j, count, jbxvt.scr.current);
 	clear(count, row1, save, rend, false);
 	cp_repair(row1, row2 + 1, count, false);
 	const uint16_t h = jbxvt.X.font_size.h;
-	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, 0, MARGIN + row1 * h,
-		jbxvt.scr.pixels.width, count * h);
+	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt,
+		0, MARGIN + row1 * h, jbxvt.scr.pixels.width,
+		count * h);
 }
 
-/*  Scroll count lines from row1 to row2 inclusive.  row1 should be <= row2.
- *  scrolling is up for a +ve count and down for a -ve count.
- *  count is limited to a maximum of MAX_SCROLL lines.
- */
-void scroll(const uint8_t row1, const uint8_t row2, const int16_t count)
+/*  Scroll count lines from row1 to row2 inclusive.
+    row1 should be <= row2.  Scrolling is up for
+    a positive count and down for a negative count.
+    count is limited to a maximum of MAX_SCROLL lines.  */
+void scroll(const uint8_t row1, const uint8_t row2,
+	const int16_t count)
 {
 	LOG("scroll(%d, %d, %d)", row1, row2, count);
 	// Sanitize input:
-	if(!count || row1 > row2 || row2 >= jbxvt.scr.chars.height
+	if(!count || row1 > row2
+		|| row2 >= jbxvt.scr.chars.height
 		|| abs(count) > MAX_SCROLL)
 		  return;
 	(count > 0 ? &sc_up : &sc_dn)(row1, row2, count);
