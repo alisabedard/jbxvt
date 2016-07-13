@@ -1,5 +1,6 @@
 /*  Copyright 2016, Jeffrey E. Bedard
-    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+    Copyright 1992, 1997 John Bovey,
+    University of Kent at Canterbury.*/
 
 #include "repaint.h"
 
@@ -35,8 +36,8 @@ static pixel_t get_pixel_for_word(const uint16_t c)
 	const uint16_t m = 017777;
 	r |= m; g |= m; b |= m;
 	pixel_t p = get_pixel_rgb(r, g, b);
-	CLOG("byte is 0x%x, r: 0x%x, g: 0x%x, b: 0x%x, pixel is 0x%x",
-		c, r, g, b, p);
+	CLOG("byte is 0x%x, r: 0x%x, g: 0x%x, b: 0x%x,"
+		" pixel is 0x%x", c, r, g, b, p);
 	return p;
 }
 
@@ -44,11 +45,13 @@ static pixel_t get_pixel_for_word(const uint16_t c)
 static pixel_t set_rgb_colors(const uint16_t c, const bool fg)
 {
 	pixel_t p = get_pixel_for_word(c);
-	set_color(fg ? XCB_GC_FOREGROUND : XCB_GC_BACKGROUND, c, jbxvt.X.gc.tx);
+	set_color(fg ? XCB_GC_FOREGROUND : XCB_GC_BACKGROUND,
+		c, jbxvt.X.gc.tx);
 	return p;
 }
 
-static pixel_t set_index_colors(const uint8_t index, const bool fg)
+static pixel_t set_index_colors(const uint8_t index,
+	const bool fg)
 {
 	const pixel_t p = color_index[index];
 	set_color(fg ? XCB_GC_FOREGROUND : XCB_GC_BACKGROUND,
@@ -90,7 +93,8 @@ static bool set_rval_colors(const uint32_t rval)
 	return fg_set || bg_set;
 }
 
-//  Paint the text using the rendition value at the screen position.
+/*  Paint the text using the rendition value
+    at the screen position. */
 void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 	uint8_t len, xcb_point_t p)
 {
@@ -103,30 +107,35 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 	bool cmod = set_rval_colors(rval);
 	if (rvid) { // Reverse looked up colors.
 		LOG("rvid");
-		xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, XCB_GC_FOREGROUND
-			| XCB_GC_BACKGROUND, (uint32_t[]){
-			jbxvt.X.color.current_bg, jbxvt.X.color.current_fg});
+		xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx,
+			XCB_GC_FOREGROUND | XCB_GC_BACKGROUND,
+			(uint32_t[]){ jbxvt.X.color.current_bg,
+			jbxvt.X.color.current_fg});
 		cmod = true;
 	}
 	p.y += jbxvt.X.font_ascent;
 	if(bold) {
-		xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, XCB_GC_FONT,
-			&(uint32_t){jbxvt.X.bold_font});
+		xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx,
+			XCB_GC_FONT, &(uint32_t){
+			jbxvt.X.bold_font});
 	}
 	// Draw text with background:
 	xcb_image_text_8(jbxvt.X.xcb, len, jbxvt.X.win.vt,
 		jbxvt.X.gc.tx, p.x, p.y, (const char *)str);
 	xcb_flush(jbxvt.X.xcb);
-	++p.y; // Padding for underline, use underline for italic.
+	++p.y; /* Padding for underline,
+		  use underline for italic. */
 	if (rval & RS_ULINE || unlikely(rval & RS_ITALIC)) {
 		xcb_poly_line(jbxvt.X.xcb, XCB_COORD_MODE_ORIGIN,
-			jbxvt.X.win.vt, jbxvt.X.gc.tx, 2, (xcb_point_t[]){
-			{p.x, p.y}, {p.x + len * jbxvt.X.font_size.width, p.y}});
+			jbxvt.X.win.vt, jbxvt.X.gc.tx, 2,
+			(xcb_point_t[]){{p.x, p.y},
+			{p.x + len * jbxvt.X.font_size.width,
+			p.y}});
 		xcb_flush(jbxvt.X.xcb);
 	}
 	if(bold) { // restore font
-		xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, XCB_GC_FONT,
-			&(uint32_t){jbxvt.X.font});
+		xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx,
+			XCB_GC_FONT, &(uint32_t){jbxvt.X.font});
 	}
 	if (cmod) {
 		set_fg(NULL);
@@ -134,17 +143,20 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 	}
 }
 
-// Display the string using the rendition vector at the screen coordinates
-static void paint_rvec_text(uint8_t * str,
-	uint32_t * rvec, int16_t len, xcb_point_t p)
+/* Display the string using the rendition vector
+   at the screen coordinates.  */
+static void paint_rvec_text(uint8_t * str, uint32_t * rvec,
+	int16_t len, xcb_point_t p)
 {
 	if (!rvec || !str)
 		  return;
 	while (len > 0) {
 		uint32_t r;
 		int_fast16_t i;
-		// find the length for which the current rend val applies
-		for (i = 0, r = *rvec; i < len && rvec[i] == r; ++i)
+		/* Find the length for which
+		   the current rend val applies.  */
+		for (i = 0, r = *rvec;
+			i < len && rvec[i] == r; ++i)
 			  ;
 		// draw
 		paint_rval_text(str, r, i, p);
@@ -158,7 +170,8 @@ static void paint_rvec_text(uint8_t * str,
 
 static int_fast32_t repaint_generic(xcb_point_t p,
 	int_fast16_t m, const int_fast32_t c1,
-	const int_fast32_t c2, uint8_t * restrict str, uint32_t * rend)
+	const int_fast32_t c2, uint8_t * restrict str,
+	uint32_t * rend)
 {
 	const Size f = jbxvt.X.font_size;
 	// check inputs:
@@ -177,7 +190,7 @@ static int_fast32_t repaint_generic(xcb_point_t p,
 }
 
 static int_fast16_t show_scroll_history(const xcb_rectangle_t r,
-	xcb_point_t * restrict p, uint8_t * restrict str)
+	xcb_point_t * restrict p)
 {
 	int_fast16_t line = r.y;
 	for (int_fast16_t i = jbxvt.scr.offset - r.y - 1;
@@ -186,10 +199,20 @@ static int_fast16_t show_scroll_history(const xcb_rectangle_t r,
 		SLine * sl = jbxvt.scr.sline.data[i];
 		if (!sl) // no scroll history
 			  break;
-		sl->sl_length = MIN(sl->sl_length, jbxvt.scr.chars.width);
-		memcpy(str, sl->sl_text + r.x, sl->sl_length);
-		p->y = repaint_generic(*p, sl->sl_length, r.x,
-			r.width, sl->sl_text, sl->sl_rend);
+		int_fast16_t len = sl->sl_length;
+		uint8_t * iter = sl->sl_text;
+		uint32_t * riter = sl->sl_rend;
+		const uint16_t lim = jbxvt.scr.chars.width - 1;
+		while (len > 0) { // wrap if necessary
+			int_fast16_t inc = MIN(len, lim);
+			p->y = repaint_generic(*p, inc,
+				r.x, r.width, iter, riter);
+			if (inc < lim)
+				  break;
+			iter += inc;
+			riter += inc;
+			len -= inc;
+		}
 	}
 	return line;
 }
@@ -198,13 +221,16 @@ static int_fast16_t show_scroll_history(const xcb_rectangle_t r,
    from the backup screen.  */
 void repaint(const xcb_rectangle_t r)
 {
-	LOG("repaint({%d, %d}, {%d, %d})", r.x, r.y, r.width, r.height);
-	xcb_point_t p = { .x = MARGIN + r.x * jbxvt.X.font_size.width,
+	LOG("repaint({%d, %d}, {%d, %d})",
+		r.x, r.y, r.width, r.height);
+	xcb_point_t p = { .x = MARGIN + r.x
+		* jbxvt.X.font_size.width,
 		.y = MARGIN + r.y * jbxvt.X.font_size.height};
-	// Allocate enough space to process each column, plus wrap byte.
+	/* Allocate enough space to process each column, plus
+	 * wrap byte. */
 	uint8_t str[jbxvt.scr.chars.width + 1];
 	//  First do any 'scrolled off' lines that are visible.
-	int_fast32_t line = show_scroll_history(r, &p, str);
+	int_fast32_t line = show_scroll_history(r, &p);
 
 	// Do the remainder from the current screen:
 	int_fast32_t i = jbxvt.scr.offset > r.y ? 0

@@ -141,7 +141,7 @@ static void get_sizehints(xcb_size_hints_t * restrict s)
 		.height_inc = jbxvt.X.font_size.height
 	};
 	++s->height;
-	s->width += 2;
+	s->width += 2; // adjust to 80 columns by default
 	s->width *= s->width_inc;
 	s->height *= s->height_inc;
 	s->min_width = s->width_inc + s->base_width;
@@ -204,7 +204,6 @@ void init_display(char * name)
 	create_window((uint8_t *)name, root);
 	setup_gcs();
 	scr_init();
-	xcb_flush(jbxvt.X.xcb);
 	xcb_intern_atom_reply_t * r
 		= xcb_intern_atom_reply(jbxvt.X.xcb, c, NULL);
 	jbxvt.X.clipboard = r->atom;

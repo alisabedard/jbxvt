@@ -66,6 +66,15 @@ static void clear(int8_t count, const uint8_t rc,
 	clear(count, rc, text, rend, up);
 }
 
+static SLine * new_sline(const uint16_t x)
+{
+	SLine * sl = GC_MALLOC(sizeof(SLine));
+	sl->sl_length = x;
+	sl->sl_text = GC_MALLOC(x + 1);
+	sl->sl_rend = GC_MALLOC(x << 2);
+	return sl;
+}
+
 static void cp_rows(int16_t i, const int16_t count)
 {
 #ifdef SCROLL_DEBUG
@@ -77,13 +86,9 @@ static void cp_rows(int16_t i, const int16_t count)
 	uint8_t * t = s->text[i];
 	const uint16_t x = find_col(t, 0);
 	uint32_t * r = s->rend[i];
-	SLine * sl = GC_MALLOC(sizeof(SLine));
-	sl->sl_length = x;
-	sl->sl_text = GC_MALLOC(x + 1);
-	sl->sl_rend = GC_MALLOC(x << 2);
+	SLine * sl = new_sline(x);
 	memcpy(sl->sl_text, t, x);
-	// copy wrap flag:
-	sl->sl_text[x] = t[jbxvt.scr.chars.width];
+	sl->wrap = t[jbxvt.scr.chars.width];
 	memcpy(sl->sl_rend, r, x << 2);
 	jbxvt.scr.sline.data[count - i - 1] = sl;
 	sel_scr_to_sav(&jbxvt.sel.end1, i, count);
@@ -161,8 +166,8 @@ static void sc_up(const uint8_t row1, uint8_t row2,
 	uint8_t *save[MAX_SCROLL] = {NULL};
 	uint32_t *rend[MAX_SCROLL] = {NULL};
 	++row2;
-	for(int8_t j = copy_screen_area(0, row1, 1, count, save, rend);
-		j < row2; ++j)
+	for(int8_t j = copy_screen_area(0, row1,
+		1, count, save, rend); j < row2; ++j)
 		transmogrify(j, -count, jbxvt.scr.current);
 	clear(count, row2, save, rend, true);
 	cp_repair(row1, row2, count, true);
@@ -184,7 +189,8 @@ void scroll1(int16_t count)
 	cp_rows(n, n);
 	jbxvt.scr.sline.top = MIN(jbxvt.scr.sline.top + n,
 		jbxvt.scr.sline.max);
-	for (int_fast16_t j = n; j < jbxvt.scr.chars.height; ++j)
+	for (int_fast16_t j = n;
+		j < jbxvt.scr.chars.height; ++j)
 		  transmogrify(j, -n, &jbxvt.scr.s1);
 	scroll1(count);
 }
