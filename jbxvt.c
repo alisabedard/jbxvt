@@ -1,3 +1,5 @@
+// Copyright 2016, Jeffrey E. Bedard
+
 #include "jbxvt.h"
 
 #include "config.h"
@@ -8,28 +10,18 @@
 #include "xvt.h"
 
 #include <gc.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#include <sys/syscall.h>
 #include <unistd.h>
-#include <xcb/xcb.h>
-#include <xcb/xproto.h>
 
 JBXVT jbxvt;
 
 // Print string to stderr
-void jbputs(const char * restrict string)
+ssize_t jbputs(const char * restrict string)
 {
         size_t s = 0;
         while(string[++s]);
-#ifdef SYS_write
-	syscall(SYS_write, STDERR_FILENO, string, s);
-#else//!SYS_write
-	write(STDERR_FILENO, string, s);
-#endif//SYS_write
+	return write(STDERR_FILENO, string, s);
 }
-
 
 static char ** parse_command_line(const int argc, char ** argv)
 {

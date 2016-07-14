@@ -27,7 +27,6 @@ typedef int fd_t;
 
 typedef struct {
 	struct {
-		//Display * dpy;
 		xcb_connection_t * xcb;
 		xcb_screen_t * screen;
 		int screen_number;
@@ -93,7 +92,7 @@ extern JBXVT jbxvt; // in jbxvt.c
 
 
 // Print string to stderr
-void jbputs(const char * restrict string);
+ssize_t jbputs(const char * restrict string);
 
 #ifdef USE_LIKELY
 #define likely(x)       __builtin_expect((x), true)

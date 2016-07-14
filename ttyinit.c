@@ -36,7 +36,6 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <sys/stat.h>
-#include <sys/syscall.h>
 #include <sys/wait.h>
 
 /*  NOTES ON PORTING
@@ -126,13 +125,6 @@
 #define SVR4_PTY
 #endif /* SUNOS5 */
 
-#ifdef AIX3
-#include <sys/ioctl.h>
-#include <sys/stropts.h>
-#define SVR4_UTMP
-#define BSD_PTY
-#endif /* AIX3 */
-
 #ifdef LINUX
 #include <pty.h>
 #include <stropts.h>
@@ -161,48 +153,22 @@ static void tidy_utmp(void)
 		return;
 	utent.ut_type = DEAD_PROCESS;
 
-#ifdef SYS_time
-	syscall(SYS_time, &utent.ut_time);
-#else//!SYS_time
 	time((time_t *)&utent.ut_time);
-#endif//SYS_time
-
 	pututline(&utent);
 #endif /* SVR4_UTMP || SVR4_UTMPX */
+
 #ifdef SVR4_UTMPX
-	updwtmp(WTMP_FILE,&utent);
+	updwtmp(WTMP_FILE, &utent);
 #endif /* SVR4_UTMPX */
 
 #ifdef BSD_UTMP
 	int ut_fd;
-
-#ifdef SYS_open
-	if ((ut_fd = syscall(SYS_open, UTMP_FILE, O_WRONLY)) < 0)
-#else//!SYS_open
 	if ((ut_fd = open(UTMP_FILE,O_WRONLY)) < 0)
-#endif//SYS_open
 		return;
-
 	memset(&utent,0,sizeof(utent));
-
-#ifdef SYS_lseek
-	syscall(SYS_lseek, ut_fd, sizeof(struct utmp), 0);
-#else//!SYS_lseek
 	lseek(ut_fd, sizeof(struct utmp), 0);
-#endif//SYS_lseek
-
-#ifdef SYS_write
-	syscall(SYS_write, ut_fd, &utent, sizeof(struct utmp));
-#else//!SYS_write
 	write(ut_fd,(char *)&utent,sizeof(struct utmp));
-#endif//SYS_write
-
-#ifdef SYS_close
-	syscall(SYS_close, ut_fd);
-#else//!SYS_close
 	close(ut_fd);
-#endif//SYS_close
-
 #endif /* BSD_UTMP */
 
 #ifdef BSD_PTY
@@ -222,23 +188,11 @@ static void write_utmp(void)
 	utent.ut_type = USER_PROCESS;
 	strncpy(utent.ut_id,tty_name + 8,sizeof(utent.ut_id));
 	strncpy(utent.ut_line,tty_name + 5,sizeof(utent.ut_line));
-
-#ifdef SYS_getuid
-	if((pw = getpwuid(syscall(SYS_getuid))))
-#else//!SYS_getuid
-		  if((pw = getpwuid(getuid())))
-#endif//SYS_getuid
-			    strncpy(utent.ut_name,pw->pw_name,sizeof(utent.ut_name));
-
+	if((pw = getpwuid(getuid())))
+		  strncpy(utent.ut_name, pw->pw_name, sizeof(utent.ut_name));
 	strncpy(utent.ut_host,getenv("DISPLAY"),
 		sizeof(utent.ut_host));
-
-#ifdef SYS_time
-	syscall(SYS_time, &utent.ut_time);
-#else//!SYS_time
 	time((time_t *)&utent.ut_time);
-#endif//SYS_time
-
 	pututline(&utent);
 	endutent();
 #endif /* SVR4_UTMP */
@@ -273,11 +227,7 @@ static void write_utmp(void)
 #endif /* SVR4_UTMPX */
 
 #ifdef BSD_UTMP
-#ifdef SYS_open
-	fd_t ut_fd = syscall(SYS_open, UTMP_FILE, O_WRONLY);
-#else//!SYS_open
 	fd_t ut_fd = open(UTMP_FILE, O_WRONLY);
-#endif//SYS_open
 	if (ut_fd < 0) {
 		jbputs(WARN_RES RES_TMP);
 		return;
@@ -291,21 +241,9 @@ static void write_utmp(void)
 			  sizeof(utent.ut_name));
 	strncpy(utent.ut_host, getenv("DISPLAY"), sizeof(utent.ut_host));
 	time(&utent.ut_time);
-#ifdef SYS_lseek
-	syscall(SYS_lseek, ut_fd, sizeof(struct utmp), 0);
-#else//!SYS_lseek
 	lseek(ut_fd, sizeof(struct utmp), 0);
-#endif//SYS_lseek
-#ifdef SYS_write
-	syscall(SYS_write, ut_fd, &utent, sizeof(struct utmp));
-#else//!SYS_write
 	write(ut_fd,(char *)&utent,sizeof(struct utmp));
-#endif//SYS_write
-#ifdef SYS_close
-	syscall(SYS_close, ut_fd);
-#else//!SYS_close
 	close(ut_fd);
-#endif//SYS_close
 #endif// BSD_UTMP
 }
 #endif//!UTEMPTER_H
@@ -345,31 +283,11 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 		for (s4 = ptyc4; *s4 != 0; s4++) {
 			ptynam[8] = ttynam[8] = *s3;
 			ptynam[9] = ttynam[9] = *s4;
-#ifdef SYS_open
-			if ((mfd = syscall(SYS_open, ptynam,O_RDWR)) >= 0) {
-#else//!SYS_open
 			if ((mfd = open(ptynam,O_RDWR)) >= 0) {
-#endif//SYS_open
-
-#ifdef SYS_geteuid
-				if (syscall(SYS_geteuid) == 0
-#else//!SYS_geteuid
-				if (geteuid() == 0
-#endif//SYS_geteuid
-
-#ifdef SYS_access
-					|| syscall(SYS_access, ttynam,
-						R_OK|W_OK) == 0)
-#else//!SYS_access
-					|| access(ttynam,R_OK|W_OK) == 0)
-#endif//SYS_access
+				if (!geteuid() || !access(ttynam,R_OK|W_OK))
 					break;
 				else {
-#ifdef SYS_close
-					syscall(SYS_close, mfd);
-#else//!SYS_close
 					close(mfd);
-#endif//SYS_close
 					mfd = -1;
 				}
 			}
@@ -384,34 +302,20 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 #endif//POSIX_PTY
 	if (mfd < 0)
 		  quit(1, WARN_RES RES_TTY);
-
 #ifdef POSIX_PTY
 	grantpt(mfd);
 	unlockpt(mfd);
 	char *ttynam = ptsname(mfd);
 #endif//POSIX_PTY
-
-#ifdef SYS_open
-	const fd_t sfd = syscall(SYS_open, ttynam, O_RDWR);
-#else//!SYS_open
 	const fd_t sfd = open((const char *)ttynam,O_RDWR);
-#endif//SYS_open
-
 	if (sfd < 0)
 		quit(1, WARN_RES RES_TTY);
-
 #ifdef HPUX // The following seems to only affect HPUX:
 #if defined(POSIX_PTY) && defined(I_PUSH)
-#ifdef SYS_ioctl
-	syscall(SYS_ioctl, sfd, I_PUSH, "ptem");
-	syscall(SYS_ioctl, sfd, I_PUSH, "ldterm");
-#else//!SYS_ioctl
 	ioctl(sfd, I_PUSH, "ptem");
 	ioctl(sfd, I_PUSH, "ldterm");
-#endif//SYS_ioctl
 #endif//POSIX_PTY&&I_PUSH
 #endif//HPUX
-
 	*pslave = sfd;
 	*pmaster = mfd;
 	return ttynam;
@@ -510,21 +414,10 @@ static void set_ttymodes(void)
 static void child(char ** restrict argv, fd_t ttyfd)
 {
 #ifndef NETBSD
-
-#ifdef SYS_setsid
-	const pid_t pgid = syscall(SYS_setsid);
-#else//!SYS_setsid
 	const pid_t pgid = setsid();
-#endif//SYS_setsid
-
 #else//NETBSD
-#if defined(SYS_getsid) && defined(SYS_getpid)
-	const pid_t pgid = syscall(SYS_getsid, syscall(SYS_getpid));
-#else//!(SYS_getsid&&SYS_getpid)
 	const pid_t pgid = getsid(getpid());
-#endif//SYS_getsid&&SYS_getpid
 #endif//!NETBSD
-
 	if(pgid < 0)
 		  quit(1, WARN_RES RES_SSN);
 
@@ -532,102 +425,40 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	 *  a controlling teletype for it.  On some systems
 	 *  this can be done with an ioctl but on others
 	 *  we need to re-open the slave tty.  */
+
+	int r; // for return value checking
 #ifdef TIOCSCTTY
-
-#ifdef SYS_ioctl
-	syscall(SYS_ioctl, ttyfd, TIOCSCTTY, 0);
-#else//!SYS_ioctl
-	(void)ioctl(ttyfd,TIOCSCTTY,0);
-#endif//SYS_ioctl
-
+	r = ioctl(ttyfd,TIOCSCTTY,0);
+	if (r == 1) {
+		perror("ioctl TIOCSCTTY");
+		r = 0;
+	}
 #else//!TIOCSCTTY
-
 	fd_t i = ttyfd;
-
-#ifdef SYS_open
-	ttyfd = syscall(SYS_open, tty_name, O_RDWR);
-#else//!SYS_open
 	ttyfd = open(tty_name, O_RDWR);
-#endif//SYS_open
-
 	if (ttyfd < 0)
 		  quit(1, WARN_RES RES_SSN);
-
-#ifdef SYS_close
-	syscall(SYS_close, i);
-#else//!SYS_close
 	close(i);
-#endif//SYS_close
-
 #endif//TIOCSCTTY
-
-#ifdef SYS_getuid
-	const uid_t uid = syscall(SYS_getuid);
-#else//!SYS_getuid
-	const uid_t uid = getuid();
-#endif//SYS_getuid
-
-	struct group * gr = getgrnam("tty");
-	const gid_t gid = gr ? (int)gr->gr_gid : -1;
-
-#ifdef SYS_fchown
-	syscall(SYS_fchown, ttyfd, uid, gid);
-	syscall(SYS_fchmod, ttyfd, 0620);
-#else//!SYS_fchown
-	fchown(ttyfd,uid,gid);
-	fchmod(ttyfd, 0620);
-#endif//SYS_fchown
-
 	for (int i = 0; i < jbxvt.com.width; i++)
 		  if (i != ttyfd)
-#ifdef SYS_close
-			    syscall(SYS_close, i);
-#else//!SYS_close
 			    close(i);
-#endif//SYS_close
-
 	// for stdin, stderr, stdout:
-#ifdef SYS_fcntl
-	syscall(SYS_fcntl, ttyfd, F_DUPFD, 0);
-	syscall(SYS_fcntl, ttyfd, F_DUPFD, 0);
-	syscall(SYS_fcntl, ttyfd, F_DUPFD, 0);
-#else//!SYS_fcntl
 	fcntl(ttyfd, F_DUPFD, 0);
 	fcntl(ttyfd, F_DUPFD, 0);
 	fcntl(ttyfd, F_DUPFD, 0);
-#endif//SYS_fcntl
-
-	if (ttyfd > 2) {
-#ifdef SYS_close
-		  syscall(SYS_close, ttyfd);
-#else//!SYS_close
+	if (ttyfd > 2)
 		  close(ttyfd);
-#endif//SYS_close
-	}
 
 #ifdef BSD_PTY
-
-#ifdef SYS_ioctl
-	syscall(SYS_ioctl, 0, TIOCSPGRP, &pgid);
-#else//!SYS_ioctl
-	ioctl(0, TIOCSPGRP, (char *)&pgid);
-#endif//SYS_ioctl
-
-#ifdef SYS_setpgid
-	syscall(SYS_setpgid, 0, pgid);
-#else//!SYS_setpgid
-        setpgid(0, pgid);
-#endif//SYS_setpgid
+        r = setpgid(0, pgid);
+	if (r) {
+		perror("Could not set process group ID");
+		r = 0;
+	}
 #endif /* BSD_PTY */
 	set_ttymodes();
-
-#ifdef SYS_setuid
-	syscall(SYS_setuid, uid);
-#else//!SYS_setuid
-	setuid(uid);
-#endif//SYS_setuid
-
-	execvp(argv[0],argv);
+	execvp(argv[0],argv); // Only returns on failure
 	quit(1, WARN_RES RES_SSN);
 }
 
@@ -657,40 +488,17 @@ int run_command(char ** argv)
 	tty_name = get_pseudo_tty(&ptyfd, &ttyfd);
 	if (!tty_name)
 		  return -1;
-#ifdef SYS_fcntl
-	syscall(SYS_fcntl, ptyfd, F_SETFL, O_NONBLOCK);
-#else//!SYS_fcntl
 	fcntl(ptyfd,F_SETFL,O_NONBLOCK);
-#endif//SYS_fcntl
-
 	jbxvt.com.width = sysconf(_SC_OPEN_MAX);
 	// Attach relevant signals:
-#ifdef SYS_signal
-	syscall(SYS_signal, SIGINT, catch_signal);
-	syscall(SYS_signal, SIGQUIT, catch_signal);
-#else//!SYS_signal
 	signal(SIGINT, catch_signal);
 	signal(SIGQUIT, catch_signal);
-#endif//SYS_signal
-
-#ifdef SYS_fork
-	comm_pid = syscall(SYS_fork);
-#else//!SYS_fork
 	comm_pid = fork();
-#endif//SYS_fork
-
 	if (comm_pid < 0)
 		  quit(1, WARN_RES RES_SSN);
-#ifdef DEBUG
-	dprintf(STDERR_FILENO, "command: %s, pid: %d\n", argv[0], comm_pid);
-#endif//DEBUG
 	if (comm_pid == 0)
 		  child(argv, ttyfd);
-#ifdef SYS_signal
-	syscall(SYS_signal, SIGCHLD, catch_signal);
-#else//!SYS_signal
-	signal(SIGCHLD,catch_signal);
-#endif//SYS_signal
+	signal(SIGCHLD, catch_signal);
 
 #ifdef UTEMPTER_H
 	utempter_add_record(ptyfd, getenv("DISPLAY"));
@@ -708,17 +516,11 @@ int run_command(char ** argv)
 #ifdef TIOCSWINSZ
 void tty_set_size(const uint8_t width, const uint8_t height)
 {
-
 	if (comm_pid < 0)
 		return;
 	struct winsize wsize = {.ws_row = height, .ws_col = width};
 	const fd_t f = comm_pid == 0 ? 0 : jbxvt.com.fd;
-
-#ifdef SYS_ioctl
-	syscall(SYS_ioctl, f, TIOCSWINSZ, &wsize);
-#else//!SYS_ioctl
 	ioctl(f, TIOCSWINSZ, &wsize);
-#endif//SYS_ioctl
 }
 #endif//TIOCSWINSZ
 #endif//!NETBSD&&!FREEBSD

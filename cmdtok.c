@@ -15,7 +15,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/syscall.h>
 #include <unistd.h>
 
 static JBXVTEvent * ev_alloc(xcb_generic_event_t * restrict e)
@@ -128,13 +127,7 @@ static int_fast16_t handle_xev(xcb_generic_event_t * restrict event,
 static int_fast16_t output_to_command(int_fast16_t count)
 {
 	count = MIN(jbxvt.com.send_count, 100);
-#ifdef SYS_write
-	count = syscall(SYS_write, jbxvt.com.fd,
-		jbxvt.com.send_nxt, count);
-#else//!SYS_write
-	count = write(jbxvt.com.fd,
-		jbxvt.com.send_nxt,count);
-#endif//SYS_write
+	count = write(jbxvt.com.fd, jbxvt.com.send_nxt, count);
 	if (count < 0)
 		  quit(1, WARN_RES RES_CMD);
 	jbxvt.com.send_count -= count;
@@ -156,12 +149,7 @@ static int_fast16_t poll_io(int_fast16_t count, fd_set * restrict in_fdset)
 	if (jbxvt.com.send_count > 0)
 		  FD_SET(jbxvt.com.fd, &out_fdset);
 	int sv;
-#ifdef SYS_select
-	sv = syscall(SYS_select, jbxvt.com.width,
-		in_fdset, &out_fdset, NULL, NULL);
-#else//!SYS_select
 	sv = select(jbxvt.com.width, in_fdset,&out_fdset, NULL, NULL);
-#endif//SYS_select
 	if (sv != -1 && FD_ISSET(jbxvt.com.fd, &out_fdset)) {
 		count = output_to_command(count);
 	}
@@ -207,11 +195,7 @@ static int_fast16_t get_com_char(const int_fast8_t flags)
 		count = poll_io(count, &in_fdset);
 	} while(!FD_ISSET(jbxvt.com.fd,&in_fdset));
 	uint8_t * d = jbxvt.com.buf.data;
-#ifdef SYS_read
-	count = syscall(SYS_read, jbxvt.com.fd, d, COM_BUF_SIZE);
-#else//!SYS_read
 	count = read(jbxvt.com.fd, d, COM_BUF_SIZE);
-#endif//SYS_read
 	if (count < 1) // buffer is empty
 		return errno == EWOULDBLOCK ? GCC_NULL : EOF;
 	jbxvt.com.buf.next = d;
