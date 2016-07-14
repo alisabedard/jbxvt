@@ -245,21 +245,17 @@ void adjust_selection(SelEnd * restrict include)
  *  remove it from the screen.  */
 void check_selection(const int16_t row1, const int16_t row2)
 {
-	if (jbxvt.sel.end1.type == NOSEL || jbxvt.sel.end2.type == NOSEL)
+	const SelEnd *e1 = &jbxvt.sel.end1, *e2 = &jbxvt.sel.end2;
+	if (e1->type == NOSEL || e2->type == NOSEL)
 		return;
-	int16_t r1 = jbxvt.sel.end1.type == SCREENSEL
-		? jbxvt.sel.end1.index : -1;
-	int16_t r2 = jbxvt.sel.end2.type == SCREENSEL
-		? jbxvt.sel.end2.index : -1;
-	if (r1 > r2) {
-		const int16_t x = r1;
-		r1 = r2;
-		r2 = x;
-	}
+	int16_t r1 = e1->type == SCREENSEL ? e1->index : -1;
+	int16_t r2 = e2->type == SCREENSEL ? e2->index : -1;
+	if (r1 > r2)
+		SWAP(int16_t, r1, r2);
 	if (row2 < r1 || row1 > r2)
 		return;
-	show_selection(0, jbxvt.scr.chars.height - 1,
-		0, jbxvt.scr.chars.width - 1);
+	const Size c = jbxvt.scr.chars;
+	show_selection(0, c.h - 1, 0, c.w - 1);
 	jbxvt.sel.end2.type = NOSEL;
 }
 

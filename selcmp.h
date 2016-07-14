@@ -4,8 +4,7 @@
 #ifndef JBXVT_SELCMP_H
 #define JBXVT_SELCMP_H
 
-#include "selst.h"
-#include <stdint.h>
+#include "SelEnd.h"
 
 /*  Compare the two selections and return negtive, 0 or positive depending on
  *  whether se2 is after, equal to or before se1.  */

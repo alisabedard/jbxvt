@@ -5,7 +5,7 @@
 #include "command.h"
 #include "Size.h"
 #include "VTScreen.h"
-#include "selst.h"
+#include "SelEnd.h"
 #include "SLine.h"
 
 #define WARN_ERR	"Error: "
@@ -23,6 +23,7 @@ typedef int fd_t;
 
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
+#define SWAP(type, a, b) { type x; x = a; a = b; b = x; }
 
 typedef struct {
 	struct {

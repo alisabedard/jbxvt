@@ -1,5 +1,7 @@
-#ifndef SELST_H
-#define SELST_H
+// Copyright 2016, Jeffrey E. Bedard
+
+#ifndef SELEND_H
+#define SELEND_H
 
 #include <stdint.h>
 
@@ -17,4 +19,4 @@ typedef struct {
 	uint8_t col;	// column of the character
 } SelEnd;
 
-#endif//!SELST_H
+#endif//!SELEND_H

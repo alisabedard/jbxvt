@@ -7,7 +7,6 @@
 #include "jbxvt.h"
 #include "selcmp.h"
 #include "selection.h"
-#include "selst.h"
 
 /*  Paint any part of the selection that is between rows row1 and row2 inclusive
  *  and between cols col1 and col2 inclusive.  */
