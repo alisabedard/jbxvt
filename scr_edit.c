@@ -15,11 +15,11 @@
 static void copy_area(const int16_t * restrict x, const int16_t y,
 	const uint16_t width)
 {
-	if (width > 0) {
-		xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
-			jbxvt.X.gc.tx, x[0], y, x[1], y, width,
-			jbxvt.X.font_size.height);
-	}
+	if (width <= 0)
+		  return;
+	const xcb_window_t v = jbxvt.X.win.vt;
+	xcb_copy_area(jbxvt.X.xcb, v, v, jbxvt.X.gc.tx, x[0], y,
+		x[1], y, width, jbxvt.X.font_size.height);
 }
 
 static void finalize(const xcb_point_t p, const int8_t count)
@@ -75,7 +75,8 @@ void scr_delete_characters(uint8_t count)
 	const xcb_point_t c = scr->cursor;
 	const uint8_t end = scw - c.x;
 	count = MIN(count, end); // keep within the screen
-	if(!count) return;
+	if(!count)
+		  return;
 	home_screen();
 	cursor(CURSOR_DRAW);
 	uint8_t * s = scr->text[c.y];

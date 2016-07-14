@@ -39,11 +39,10 @@ static SelEnd * get_nearest_endpoint(const int16_t row,
 		else if (row > r1)
 			  return (c1 > c2) ? &jbxvt.sel.end1
 				  : &jbxvt.sel.end2;
-		else
-			  return abs(c1 - col) < abs(c2 - col)
-				  ? &jbxvt.sel.end1 : &jbxvt.sel.end2;
-	} else
-		  return &jbxvt.sel.end2;
+		return abs(c1 - col) < abs(c2 - col)
+			? &jbxvt.sel.end1 : &jbxvt.sel.end2;
+	}
+	return &jbxvt.sel.end2;
 }
 
 //  Extend the selection.

@@ -108,10 +108,10 @@ static uint8_t advance_c(uint8_t c, const uint8_t len,
 	uint8_t * restrict s)
 {
 	if (c && s[c - 1] < ' ')
-		  while (c < len && s[c] < ' ')
-			    c++;
+		while (c < len && s[c] < ' ')
+			c++;
 	if (c > len)
-		  c = jbxvt.scr.chars.width;
+		c = jbxvt.scr.chars.width;
 	return c;
 }
 
@@ -123,9 +123,9 @@ static uint8_t find_c(uint8_t c, int16_t i)
 	return selection_unit == SEL_CHAR
 		? ipos(&i)
 		? advance_c(c, jbxvt.scr.chars.width,
-			jbxvt.scr.current->text[i])
+			    jbxvt.scr.current->text[i])
 		: advance_c(c, jbxvt.scr.sline.data[i]->sl_length,
-				jbxvt.scr.sline.data[i]->sl_text)
+			    jbxvt.scr.sline.data[i]->sl_text)
 		: c;
 }
 

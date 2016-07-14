@@ -51,11 +51,10 @@ static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 	int_fast16_t i = is_screensel ? se1->index : 0;
 	int16_t col1 = is_screensel ? se1->col : 0;
 	for (; i <= se2->index; ++i) {
-		int16_t col2 = i == se2->index ? se2->col
-			: jbxvt.scr.chars.width - 1;
+		uint16_t len = jbxvt.scr.chars.width;
+		int16_t col2 = i == se2->index ? se2->col : len - 1;
 		if (--col2 < 0)
 			  break;
-		uint16_t len = jbxvt.scr.chars.width;
 		uint8_t * s = convert_line(jbxvt.scr.current->text[i],
 			&len, col1, col2);
 		realloc_and_copy(str, s, total, len);

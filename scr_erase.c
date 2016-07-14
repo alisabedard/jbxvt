@@ -19,7 +19,7 @@ static void zero_line(uint8_t * restrict s,
 	uint32_t * restrict r, uint16_t sz)
 {
 	memset(s, 0, sz + 1); // +1 for wrap flag
-	memset(r, 0, sz<<2);
+	memset(r, 0, sz << 2);
 }
 
 static void get_horz_geo(xcb_rectangle_t * restrict h,
@@ -60,7 +60,8 @@ void scr_erase_line(const int8_t mode)
 	}
 	cursor(CURSOR_DRAW); //clear
 	check_selection(c.y, c.y);
-	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, g.x, g.y, g.width, fh);
+	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt,
+		g.x, g.y, g.width, fh);
 	scr->wrap_next = false;
 	cursor(CURSOR_DRAW);
 }
@@ -94,23 +95,23 @@ void scr_erase_screen(const int8_t mode)
 	const Size p = jbxvt.scr.pixels;
 	xcb_rectangle_t r = {.x = MARGIN, .y = MARGIN,
 		.width = p.width};
+	const xcb_point_t cur = s->cursor;
 	switch (mode) {
 	case 1:
 		LOG("START");
-		r.height = s->cursor.y * fh;
-		for (uint8_t i = 0; i < s->cursor.y; ++i)
+		r.height = cur.y * fh;
+		for (uint8_t i = 0; i < cur.y; ++i)
 			  zero(i);
-		common_scr_erase(r, 0, s->cursor.y - 1, mode);
+		common_scr_erase(r, 0, cur.y - 1, mode);
 		break;
 	case 0:
 		LOG("END");
-		if (s->cursor.y || s->cursor.x) {
-			r.y += (s->cursor.y + 1) * fh;
-			r.height = (c.height - s->cursor.y - 1) * fh;
-			for (uint8_t i = s->cursor.y + 1; i < c.height; ++i)
+		if (cur.y || cur.x) {
+			r.y += (cur.y + 1) * fh;
+			r.height = (c.height - cur.y - 1) * fh;
+			for (uint8_t i = cur.y + 1; i < c.height; ++i)
 				  zero(i);
-			common_scr_erase(r, s->cursor.y + 1, c.height - 1,
-				mode);
+			common_scr_erase(r, cur.y + 1, c.height - 1, mode);
 			break;
 		}
 		/*  If we are positioned at the top left hand corner then
