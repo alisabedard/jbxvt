@@ -426,7 +426,7 @@ app_loop_head:
 		break;
 	case TK_DECSWH: // ESC # digit
 		LOG("TK_DECSWH");
-		if (token.arg[0] == '8') // DECALN
+		if (t[0] == '8') // DECALN
 			  scr_efill();
 		break;
 	case TK_NEL : // move to first position on next line down.
@@ -463,6 +463,14 @@ app_loop_head:
 		break;
 	case TK_TBC: // Tabulation clear
 		LOG("TK_TBC");
+		switch (t[0]) {
+		case 0: // clear at current position
+			scr_set_tab(jbxvt.scr.current->cursor.x, false);
+			break;
+		case 3: // clear all
+			scr_set_tab(-1, false);
+			break;
+		}
 		break;
 	case TK_DECPM:
 		LOG("TK_DECPM");
