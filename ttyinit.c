@@ -299,10 +299,6 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 
 #ifdef POSIX_PTY
 	const fd_t mfd = posix_openpt(O_RDWR);
-#endif//POSIX_PTY
-	if (mfd < 0)
-		  quit(1, WARN_RES RES_TTY);
-#ifdef POSIX_PTY
 	grantpt(mfd);
 	unlockpt(mfd);
 	char *ttynam = ptsname(mfd);
@@ -310,12 +306,6 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 	const fd_t sfd = open((const char *)ttynam,O_RDWR);
 	if (sfd < 0)
 		quit(1, WARN_RES RES_TTY);
-#ifdef HPUX // The following seems to only affect HPUX:
-#if defined(POSIX_PTY) && defined(I_PUSH)
-	ioctl(sfd, I_PUSH, "ptem");
-	ioctl(sfd, I_PUSH, "ldterm");
-#endif//POSIX_PTY&&I_PUSH
-#endif//HPUX
 	*pslave = sfd;
 	*pmaster = mfd;
 	return ttynam;
