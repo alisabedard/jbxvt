@@ -202,7 +202,9 @@ void jbxvt_app_loop(void)
 	Token token;
 	int32_t n; // sanitized first token
 	int32_t * t; // shortcut to token.arg
+	VTScreen * s;
 app_loop_head:
+	s = jbxvt.scr.current; // update in case screen changed
 	get_token(&token);
 	t = token.arg;
 	// n is sanitized for ops with optional args
@@ -254,8 +256,8 @@ app_loop_head:
 		// fall through
 	case TK_SU: // scroll up n lines;
 		LOG("TK_SU");
-		scroll(jbxvt.scr.current->margin.top,
-			jbxvt.scr.current->margin.bot, t[0]);
+		scroll(s->margin.top,
+			s->margin.bot, t[0]);
 		break;
 	case TK_SBDOWN :
 		t[0] = - t[0];
@@ -332,7 +334,7 @@ app_loop_head:
 		// fall through
 	case TK_CUP: // position cursor
 		LOG("TK_CUP");
-		scr_move(t[1] - 1, t[0] - 1, jbxvt.scr.current->decom
+		scr_move(t[1] - 1, t[0] - 1, s->decom
 			? ROW_RELATIVE | COL_RELATIVE : 0);
 		break;
 	case TK_HPA: // horizontal position absolute
@@ -367,7 +369,7 @@ app_loop_head:
 		n = -n; // fall through
 	case TK_DL:
 		LOG("TK_IL(-)/TK_DL(+): %d", n);
-		scr_index_from(n, jbxvt.scr.current->cursor.y);
+		scr_index_from(n, s->cursor.y);
 		break;
 	case TK_DCH :
 	case TK_ECH:
@@ -413,11 +415,11 @@ app_loop_head:
 		break;
 	case TK_IND: // Index (same as \n)
 		LOG("TK_IND");
-		scr_index_from(1, jbxvt.scr.current->margin.t);
+		scr_index_from(1, s->margin.t);
 		break;
 	case TK_RI: // Reverse index
 		LOG("TK_RI");
-		scr_index_from(-1, jbxvt.scr.current->margin.t);
+		scr_index_from(-1, s->margin.t);
 		break;
 	case TK_DECID:
 	case TK_DA:
@@ -430,7 +432,7 @@ app_loop_head:
 			  scr_efill();
 		break;
 	case TK_NEL : // move to first position on next line down.
-		scr_move(0, jbxvt.scr.current->cursor.y + 1, 0);
+		scr_move(0, s->cursor.y + 1, 0);
 		LOG("TK_NEL: NExt Line");
 		break;
 	case TK_RIS: // Reset Initial State
@@ -454,7 +456,7 @@ app_loop_head:
 		break;
 	case TK_HTS: // set tab stop at current position
 		LOG("TK_HTS");
-		scr_set_tab(jbxvt.scr.current->cursor.x, true);
+		scr_set_tab(s->cursor.x, true);
 		break;
 	case TK_SS2 :
 		LOG("TK_SS2");
@@ -466,7 +468,7 @@ app_loop_head:
 		LOG("TK_TBC");
 		switch (t[0]) {
 		case 0: // clear at current position
-			scr_set_tab(jbxvt.scr.current->cursor.x, false);
+			scr_set_tab(s->cursor.x, false);
 			break;
 		case 3: // clear all
 			scr_set_tab(-1, false);
@@ -475,11 +477,11 @@ app_loop_head:
 		break;
 	case TK_DECPM:
 		LOG("TK_DECPM");
-		jbxvt.scr.current->decpm = true;
+		s->decpm = true;
 		break;
 	case TK_DECST:
 		LOG("TK_DECST");
-		jbxvt.scr.current->decpm = false;
+		s->decpm = false;
 		break;
 	default:
 #ifdef DEBUG
