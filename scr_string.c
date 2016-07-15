@@ -8,7 +8,7 @@
 #include "cursor.h"
 #include "jbxvt.h"
 #include "log.h"
-#include "repaint.h"
+#include "paint.h"
 #include "screen.h"
 #include "scroll.h"
 #include "scr_move.h"

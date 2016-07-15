@@ -11,6 +11,7 @@
 #include "handle_sgr.h"
 #include "log.h"
 #include "lookup_key.h"
+#include "repaint.h"
 #include "sbar.h"
 #include "screen.h"
 #include "scroll.h"
@@ -18,7 +19,6 @@
 #include "scr_erase.h"
 #include "scr_extend_selection.h"
 #include "scr_move.h"
-#include "scr_refresh.h"
 #include "scr_request_selection.h"
 #include "scr_reset.h"
 #include "scr_string.h"
@@ -32,6 +32,7 @@
 #include <string.h>
 
 static bool jbxvt_size_set;
+
 static void handle_txtpar(Token * restrict token)
 {
 	switch (token->arg[0]) {
@@ -99,15 +100,13 @@ static void handle_tk_char(const uint8_t tk_char)
 	}
 }
 
-static void handle_tk_expose(const uint8_t region, const int32_t * arg)
+static void expose(const uint8_t region)
 {
 	if (region == REGION_SCROLLBAR)
 		sbar_reset();
 	else if (jbxvt_size_set) {
 		cursor(CURSOR_DRAW); // clear
-		scr_refresh((xcb_rectangle_t){.x = arg[0],
-			.y = arg[1], .width = arg[2],
-			.height = arg[3]});
+		repaint();
 		cursor(CURSOR_DRAW); // draw
 	} else {
 		/*  Force a full reset if an exposure event
@@ -227,11 +226,12 @@ app_loop_head:
 		cursor(t[0] ? CURSOR_ENTRY_IN : CURSOR_ENTRY_OUT);
 		break;
 	case TK_FOCUS :
-		//cprintf("\033[%c]", t[0] ? 'I' : 'O');
+		if (s->mouse_focus_evt)
+			cprintf("\033[%c]", t[0] ? 'I' : 'O');
 		cursor(t[0] ? CURSOR_FOCUS_IN : CURSOR_FOCUS_OUT);
 		break;
 	case TK_EXPOSE: // window exposed
-		handle_tk_expose(token.region, token.arg);
+		expose(token.region);
 		break;
 	case TK_RESIZE :
 		jbxvt_size_set = false;

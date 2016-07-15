@@ -13,7 +13,6 @@
 #include "scroll.h"
 #include "scr_erase.h"
 #include "scr_move.h"
-#include "scr_refresh.h"
 #include "scr_reset.h"
 #include "scr_string.h"
 #include "selection.h"
@@ -39,12 +38,10 @@ void scr_efill(void)
 	for (p.y = c.height - 1; p.y >= 0; --p.y)
 		  for (p.x = c.width - 1; p.x >= 0; --p.x)
 			    epos(p);
-	const Size px = jbxvt.scr.pixels;
-	scr_refresh((xcb_rectangle_t){.width = px.width,
-		.height = px.height});
+	repaint();
 }
 
-/*  Perform any initialisation on the screen data structures.
+/*  Perform any initialization on the screen data structures.
     Called just once at startup. */
 void scr_init(void)
 {
@@ -70,8 +67,7 @@ void scr_change_screen(const bool mode_high)
 		? &jbxvt.scr.s2 : &jbxvt.scr.s1;
 	jbxvt.sel.end2.type = NOSEL;
 	jbxvt.scr.sline.top = 0;
-	const Size c = jbxvt.scr.chars;
-	repaint((xcb_rectangle_t){.width = c.w - 1, .height = c.h - 1});
+	repaint();
 	cursor(CURSOR_DRAW);
 	scr_erase_screen(2); // ENTIRE
 }
@@ -98,10 +94,9 @@ void home_screen(void)
 	if (likely(!jbxvt.scr.offset))
 		  return;
 	jbxvt.scr.offset = 0;
-	xcb_rectangle_t r = { .height = jbxvt.scr.chars.height - 1,
-		.width = jbxvt.scr.chars.width - 1 };
-	repaint(r);
+	repaint();
+	const uint8_t h = jbxvt.scr.chars.height - 1;
 	cursor(CURSOR_DRAW);
-	sbar_show(r.height + jbxvt.scr.sline.top, 0, r.height);
+	sbar_show(h + jbxvt.scr.sline.top, 0, h);
 }
 

@@ -29,8 +29,8 @@ static pixel_t get_pixel_for_word(const uint16_t c)
 	const uint16_t m = 017777;
 	r |= m; g |= m; b |= m;
 	pixel_t p = get_pixel_rgb(r, g, b);
-	CLOG("byte is 0x%x, r: 0x%x, g: 0x%x, b: 0x%x, pixel is 0x%x",
-		c, r, g, b, p);
+	CLOG("byte is 0x%x, r: 0x%x, g: 0x%x, b: 0x%x,"
+		" pixel is 0x%x", c, r, g, b, p);
 	return p;
 }
 
@@ -38,11 +38,13 @@ static pixel_t get_pixel_for_word(const uint16_t c)
 static pixel_t set_rgb_colors(const uint16_t c, const bool fg)
 {
 	pixel_t p = get_pixel_for_word(c);
-	set_color(fg?XCB_GC_FOREGROUND :XCB_GC_BACKGROUND, c, jbxvt.X.gc.tx);
+	set_color(fg ? XCB_GC_FOREGROUND : XCB_GC_BACKGROUND,
+		c, jbxvt.X.gc.tx);
 	return p;
 }
 
-static pixel_t set_index_colors(const uint8_t index, const bool fg)
+static pixel_t set_index_colors(const uint8_t index,
+	const bool fg)
 {
 	const pixel_t p = color_index[index];
 	set_color(fg ? XCB_GC_FOREGROUND : XCB_GC_BACKGROUND,
@@ -97,30 +99,35 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 	bool cmod = set_rval_colors(rval);
 	if (rvid) { // Reverse looked up colors.
 		LOG("rvid");
-		xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, XCB_GC_FOREGROUND
-			| XCB_GC_BACKGROUND, (uint32_t[]){
-			jbxvt.X.color.current_bg, jbxvt.X.color.current_fg});
+		xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx,
+			XCB_GC_FOREGROUND | XCB_GC_BACKGROUND,
+			(uint32_t[]){ jbxvt.X.color.current_bg,
+			jbxvt.X.color.current_fg});
 		cmod = true;
 	}
 	p.y += jbxvt.X.font_ascent;
 	if(bold) {
-		xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, XCB_GC_FONT,
-			&(uint32_t){jbxvt.X.bold_font});
+		xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx,
+			XCB_GC_FONT, &(uint32_t){
+			jbxvt.X.bold_font});
 	}
 	// Draw text with background:
 	xcb_image_text_8(jbxvt.X.xcb, len, jbxvt.X.win.vt,
 		jbxvt.X.gc.tx, p.x, p.y, (const char *)str);
 	xcb_flush(jbxvt.X.xcb);
-	++p.y; // Advance for underline, use underline for italic.
+	++p.y; /* Padding for underline,
+		  use underline for italic. */
 	if (rval & RS_ULINE || unlikely(rval & RS_ITALIC)) {
 		xcb_poly_line(jbxvt.X.xcb, XCB_COORD_MODE_ORIGIN,
-			jbxvt.X.win.vt, jbxvt.X.gc.tx, 2, (xcb_point_t[]){
-			{p.x, p.y}, {p.x + len * jbxvt.X.font_width, p.y}});
+			jbxvt.X.win.vt, jbxvt.X.gc.tx, 2,
+			(xcb_point_t[]){{p.x, p.y},
+			{p.x + len * jbxvt.X.font_size.width,
+			p.y}});
 		xcb_flush(jbxvt.X.xcb);
 	}
 	if(bold) { // restore font
-		xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, XCB_GC_FONT,
-			&(uint32_t){jbxvt.X.font});
+		xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx,
+			XCB_GC_FONT, &(uint32_t){jbxvt.X.font});
 	}
 	if (cmod) {
 		set_fg(NULL);
