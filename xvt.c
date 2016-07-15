@@ -452,8 +452,9 @@ app_loop_head:
 		LOG("TK_SCS1");
 		select_charset(t[0], 1);
 		break;
-	case TK_HTS :
+	case TK_HTS: // set tab stop at current position
 		LOG("TK_HTS");
+		scr_set_tab(jbxvt.scr.current->cursor.x, true);
 		break;
 	case TK_SS2 :
 		LOG("TK_SS2");
