@@ -1,5 +1,6 @@
 /*  Copyright 2016, Jeffrey E. Bedard
-    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+    Copyright 1992, 1997 John Bovey,
+    University of Kent at Canterbury.*/
 
 #include "scr_string.h"
 
@@ -22,6 +23,21 @@
 #define SLOG(...)
 #endif
 
+static bool tab_stops[JBXVT_MAX_COLS];
+
+// Set tab stops:
+// -1 clears all, -2 sets default
+void scr_set_tab(int i, const bool value)
+{
+	if (i == -1)
+		memset(&tab_stops, 0, JBXVT_MAX_COLS);
+	else if (i == -2)
+		for (i = 0; i < JBXVT_MAX_COLS; ++i)
+			tab_stops[i] = (i % 8 == 0);
+	else if (i >= 0)
+		tab_stops[i] = value;
+}
+
 //  Tab to the next tab_stop.
 void scr_tab(void)
 {
@@ -31,7 +47,7 @@ void scr_tab(void)
 	const uint8_t w = jbxvt.scr.chars.width - 1;
 	xcb_point_t c = s->cursor;
 	s->text[c.y][c.x] = '0';
-	while (++c.x % 8 && c.x < w);
+	while (!tab_stops[++c.x] && c.x < w);
 	s->cursor.x = c.x;
 }
 

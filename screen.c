@@ -1,5 +1,6 @@
 /*  Copyright 2016, Jeffrey E. Bedard
-    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.  */
+    Copyright 1992, 1997 John Bovey,
+    University of Kent at Canterbury.  */
 
 #include "screen.h"
 
@@ -14,6 +15,7 @@
 #include "scr_move.h"
 #include "scr_refresh.h"
 #include "scr_reset.h"
+#include "scr_string.h"
 #include "selection.h"
 
 #include <gc.h>
@@ -57,6 +59,7 @@ void scr_init(void)
 #undef SETBOTH
 	jbxvt.scr.current = &jbxvt.scr.s1;
 	scr_reset();
+	scr_set_tab(-2, false);
 }
 
 //  Change between the alternate and the main screens

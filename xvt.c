@@ -461,7 +461,7 @@ app_loop_head:
 	case TK_SS3 :
 		LOG("TK_SS3");
 		break;
-	case TK_TBC :
+	case TK_TBC: // Tabulation clear
 		LOG("TK_TBC");
 		break;
 	case TK_DECPM:
