@@ -38,7 +38,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 
-/*  NOTES ON PORTING
+/*  NOTES ON PORTING -- OBSOLETE, but kept for reference
  *
  * Almost all the non-portable parts of xvt are concerned with setting up
  * and configuring the pseudo-teletype (pty) link that connects xvt itself
@@ -95,7 +95,6 @@
 //  Definitions that enable machine dependent parts of the code.
 
 #ifdef NETBSD
-#define POSIX_PTY
 #define BSD_UTMP
 #include <pwd.h>
 #include <string.h>
@@ -106,7 +105,6 @@
 #endif//NETBSD
 
 #ifdef FREEBSD
-#define POSIX_PTY
 #include <termios.h>
 #include <utempter.h>
 #endif//FREEBSD
@@ -114,7 +112,7 @@
 #ifdef _BSD_SOURCE
 #include <sys/ttycom.h>
 #include <ttyent.h>
-#endif
+#endif//_BSD_SOURCE
 
 #ifdef SUNOS5
 #include <sys/stropts.h>
@@ -123,15 +121,12 @@
 #include <utmpx.h>
 #define SVR4_UTMPX
 #define SVR4_PTY
-#endif /* SUNOS5 */
+#endif//SUNOS5
 
 #ifdef LINUX
 #include <pty.h>
-#include <stropts.h>
 #include <utempter.h>
-#include <utmp.h>
-#define POSIX_PTY
-#endif
+#endif//LINUX
 
 #ifdef _UTEMPTER_H_
 #define UTEMPTER_H
@@ -169,11 +164,8 @@ static void tidy_utmp(void)
 	lseek(ut_fd, sizeof(struct utmp), 0);
 	write(ut_fd,(char *)&utent,sizeof(struct utmp));
 	close(ut_fd);
-#endif /* BSD_UTMP */
-
-#ifdef BSD_PTY
+#endif// BSD_UTMP
 	chmod(tty_name,0666);
-#endif /* BSD_PTY */
 }
 #endif//!UTEMPTER_H
 
@@ -270,39 +262,12 @@ void quit(const int8_t status, const char * restrict msg)
  */
 static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 {
-#ifdef BSD_PTY
-	char *s3, *s4;
-	static char ptyc3[] = "pqrstuvwxyz";
-	static char ptyc4[] = "0123456789abcdef";
-	static char ptynam[] = "/dev/ptyxx";
-	static char ttynam[] = "/dev/ttyxx";
-
-	//  First find a master pty that we can open.
-	fd_t mfd = -1;
-	for (s3 = ptyc3; *s3 != 0; s3++) {
-		for (s4 = ptyc4; *s4 != 0; s4++) {
-			ptynam[8] = ttynam[8] = *s3;
-			ptynam[9] = ttynam[9] = *s4;
-			if ((mfd = open(ptynam,O_RDWR)) >= 0) {
-				if (!geteuid() || !access(ttynam,R_OK|W_OK))
-					break;
-				else {
-					close(mfd);
-					mfd = -1;
-				}
-			}
-		}
-		if (mfd >= 0)
-			break;
-	}
-#endif /* BSD_PTY */
-
-#ifdef POSIX_PTY
 	const fd_t mfd = posix_openpt(O_RDWR);
+	if (mfd < 0)
+		  quit(1, WARN_RES RES_TTY);
 	grantpt(mfd);
 	unlockpt(mfd);
 	char *ttynam = ptsname(mfd);
-#endif//POSIX_PTY
 	const fd_t sfd = open((const char *)ttynam,O_RDWR);
 	if (sfd < 0)
 		quit(1, WARN_RES RES_TTY);
@@ -314,14 +279,10 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 //  Initialise the terminal attributes.
 static void set_ttymodes(void)
 {
-#ifndef BSD_PTY
 	//  Set the terminal using the standard System V termios interface
 	static struct termios term;
-
 	term.c_iflag = BRKINT | IGNPAR | ICRNL | IXON;
-
 	term.c_oflag = OPOST | ONLCR;
-
 	// NetBSD needs CREAD
 	// Linux needs baud setting
 	term.c_cflag = CREAD | CLOCAL | CS8;
@@ -330,9 +291,7 @@ static void set_ttymodes(void)
 #else//!B38400
 	term.c_cflag |= B9600;
 #endif//B38400
-
 	term.c_lflag = ISIG | IEXTEN | ICANON | ECHO | ECHOE | ECHOK;
-
 	term.c_cc[VINTR] = 003;		/* ^C */
 	term.c_cc[VQUIT] = 034;		/* ^\ */
 	term.c_cc[VERASE] = 0177;	/* DEL */
@@ -356,48 +315,7 @@ static void set_ttymodes(void)
 #ifdef VDISCARD
 	term.c_cc[VDISCARD] = 017;	/* ^O */
 #endif /* VDISCARD */
-
 	tcsetattr(0,TCSANOW,&term);
-
-#else /* BSD_PTY */
-	/* Use sgtty rather than termios interface to configure the terminal
-	 */
-	int ldisc, lmode;
-	struct sgttyb tty;
-	struct tchars tc;
-	struct ltchars ltc;
-
-#ifdef NTTYDISC
-	ldisc = NTTYDISC;
-	(void)ioctl(0,TIOCSETD,&ldisc);
-#endif /* NTTYDISC */
-	tty.sg_ispeed = B9600;
-	tty.sg_ospeed = B9600;
-	tty.sg_erase = 0177;
-	tty.sg_kill = 025;		/* ^U */
-	tty.sg_flags = CRMOD | ECHO | EVENP | ODDP;
-	(void)ioctl(0,TIOCSETP,&tty);
-
-	tc.t_intrc = 003;		/* ^C */
-	tc.t_quitc = 034;		/* ^\ */
-	tc.t_startc = 021;		/* ^Q */
-	tc.t_stopc = 023;		/* ^S */
-	tc.t_eofc =  004;		/* ^D */
-	tc.t_brkc = -1;
-	(void)ioctl(0,TIOCSETC,&tc);
-
-	ltc.t_suspc = 032;		/* ^Z */
-	ltc.t_dsuspc = 031;		/* ^Y */
-	ltc.t_rprntc = 022;		/* ^R */
-	ltc.t_flushc = 017;		/* ^O */
-	ltc.t_werasc = 027;		/* ^W */
-	ltc.t_lnextc = 026;		/* ^V */
-	(void)ioctl(0,TIOCSLTC,&ltc);
-
-	lmode = LCRTBS | LCRTERA | LCTLECH | LPASS8 | LCRTKIL;
-	(void)ioctl(0,TIOCLSET,&lmode);
-#endif// BSD_PTY
-
 	tty_set_size(jbxvt.scr.chars.width, jbxvt.scr.chars.height);
 }
 
@@ -439,14 +357,6 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	fcntl(ttyfd, F_DUPFD, 0);
 	if (ttyfd > 2)
 		  close(ttyfd);
-
-#ifdef BSD_PTY
-        r = setpgid(0, pgid);
-	if (r) {
-		perror("Could not set process group ID");
-		r = 0;
-	}
-#endif /* BSD_PTY */
 	set_ttymodes();
 	execvp(argv[0],argv); // Only returns on failure
 	quit(1, WARN_RES RES_SSN);
