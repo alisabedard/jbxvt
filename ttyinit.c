@@ -230,6 +230,16 @@ static void set_ttymodes(void)
 	tty_set_size(jbxvt.scr.chars.width, jbxvt.scr.chars.height);
 }
 
+static void close_checked(const int fd)
+{
+	if (close(fd) != -1)
+		return;
+	const uint8_t sz = 32;
+	char buf[sz];
+	snprintf(buf, sz, "Could not close fd %d", fd);
+	perror(buf);
+}
+
 static void child(char ** restrict argv, fd_t ttyfd)
 {
 #ifndef NETBSD
@@ -257,17 +267,17 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	ttyfd = open(tty_name, O_RDWR);
 	if (ttyfd < 0)
 		quit(1, WARN_RES RES_SSN);
-	close(i);
+	close_checked(i);
 #endif//TIOCSCTTY
 	for (int i = 0; i < jbxvt.com.width; i++)
 		if (i != ttyfd)
-			close(i);
+			close_checked(i);
 	// for stdin, stderr, stdout:
 	fcntl(ttyfd, F_DUPFD, 0);
 	fcntl(ttyfd, F_DUPFD, 0);
 	fcntl(ttyfd, F_DUPFD, 0);
 	if (ttyfd > 2)
-		close(ttyfd);
+		close_checked(ttyfd);
 	set_ttymodes();
 	execvp(argv[0],argv); // Only returns on failure
 	quit(1, WARN_RES RES_SSN);
@@ -300,15 +310,13 @@ fd_t run_command(char ** argv)
 	if (comm_pid == 0)
 		child(argv, ttyfd);
 	signal(SIGCHLD, sigquit);
-
 #ifdef POSIX_UTMPX
 	write_utmpx();
 #endif//POSIX_UTMPX
 #ifdef USE_UTEMPTER
 	utempter_add_record(ptyfd, getenv("DISPLAY"));
 #endif//USE_UTEMPTER
-
-	return(ptyfd);
+	return ptyfd;
 }
 
 /*  Tell the teletype handler what size the window is.  Called initially from
