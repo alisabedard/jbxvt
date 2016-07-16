@@ -114,7 +114,6 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 	// Draw text with background:
 	xcb_image_text_8(jbxvt.X.xcb, len, jbxvt.X.win.vt,
 		jbxvt.X.gc.tx, p.x, p.y, (const char *)str);
-	xcb_flush(jbxvt.X.xcb);
 	++p.y; /* Padding for underline,
 		  use underline for italic. */
 	if (rval & RS_ULINE || unlikely(rval & RS_ITALIC)) {
@@ -123,7 +122,6 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 			(xcb_point_t[]){{p.x, p.y},
 			{p.x + len * jbxvt.X.font_size.width,
 			p.y}});
-		xcb_flush(jbxvt.X.xcb);
 	}
 	if(bold) { // restore font
 		xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx,

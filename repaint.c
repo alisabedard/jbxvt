@@ -109,7 +109,6 @@ void repaint(void)
 		p.y = repaint_generic(p, m, r.x, r.width, str,
 			jbxvt.scr.current->rend[i]);
 	}
-	xcb_flush(jbxvt.X.xcb);
 	show_selection(r.y,r.height,r.x,r.width);
 }
 

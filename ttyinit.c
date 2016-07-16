@@ -27,17 +27,13 @@
 #include "ttyinit.h"
 
 #include "jbxvt.h"
-#include "init_display.h"
 #include "log.h"
-#include "screen.h"
-#include "xsetup.h"
 
 #include <fcntl.h>
-#include <grp.h>
 #include <signal.h>
 #include <stdlib.h>
-#include <sys/stat.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 /*  NOTES ON PORTING -- OBSOLETE, but kept for reference
  *
@@ -141,10 +137,9 @@ static void write_utmpx(void)
 	setutxent();
 	utent.ut_type = USER_PROCESS;
 	utent.ut_pid = comm_pid;
-	struct passwd * pw = getpwuid(getuid());
 	// + 5 to remove "/dev/"
 	strncpy(utent.ut_line, tty_name + 5, sizeof(utent.ut_line));
-	strncpy(utent.ut_user, pw->pw_name, sizeof(utent.ut_user));
+	strncpy(utent.ut_user, getenv("USER"), sizeof(utent.ut_user));
 	strncpy(utent.ut_host, getenv("DISPLAY"), sizeof(utent.ut_host));
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
@@ -231,7 +226,7 @@ static void set_ttymodes(void)
 #ifdef VDISCARD
 	term.c_cc[VDISCARD] = 017;	/* ^O */
 #endif /* VDISCARD */
-	tcsetattr(0,TCSANOW,&term);
+	tcsetattr(0, TCSANOW, &term);
 	tty_set_size(jbxvt.scr.chars.width, jbxvt.scr.chars.height);
 }
 
