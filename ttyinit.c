@@ -326,11 +326,8 @@ fd_t run_command(char ** argv)
 #ifdef TIOCSWINSZ
 void tty_set_size(const uint8_t width, const uint8_t height)
 {
-	if (comm_pid < 0)
-		return;
 	struct winsize wsize = {.ws_row = height, .ws_col = width};
-	const fd_t f = comm_pid == 0 ? 0 : jbxvt.com.fd;
-	ioctl(f, TIOCSWINSZ, &wsize);
+	ioctl(jbxvt.com.fd, TIOCSWINSZ, &wsize);
 }
 #endif//TIOCSWINSZ
 #endif//!NETBSD&&!FREEBSD
