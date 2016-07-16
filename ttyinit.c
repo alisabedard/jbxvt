@@ -1,3 +1,4 @@
+// Copyright 2016, Jeffrey E. Bedard
 /*  Copyright 1992-94, 1997 John Bovey, University of Kent at Canterbury.
  *
  *  Redistribution and use in source code and/or executable forms, with
@@ -104,7 +105,6 @@
 
 #ifdef FREEBSD
 #include <termios.h>
-#include <utempter.h>
 #endif//FREEBSD
 
 #ifdef _BSD_SOURCE
