@@ -243,7 +243,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	const pid_t pgid = getsid(getpid());
 #endif//!NETBSD
 	if(pgid < 0)
-		  quit(1, WARN_RES RES_SSN);
+		quit(1, WARN_RES RES_SSN);
 
 	/*  Having started a new session, we need to establish
 	 *  a controlling teletype for it.  On some systems
@@ -261,18 +261,18 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	fd_t i = ttyfd;
 	ttyfd = open(tty_name, O_RDWR);
 	if (ttyfd < 0)
-		  quit(1, WARN_RES RES_SSN);
+		quit(1, WARN_RES RES_SSN);
 	close(i);
 #endif//TIOCSCTTY
 	for (int i = 0; i < jbxvt.com.width; i++)
-		  if (i != ttyfd)
-			    close(i);
+		if (i != ttyfd)
+			close(i);
 	// for stdin, stderr, stdout:
 	fcntl(ttyfd, F_DUPFD, 0);
 	fcntl(ttyfd, F_DUPFD, 0);
 	fcntl(ttyfd, F_DUPFD, 0);
 	if (ttyfd > 2)
-		  close(ttyfd);
+		close(ttyfd);
 	set_ttymodes();
 	execvp(argv[0],argv); // Only returns on failure
 	quit(1, WARN_RES RES_SSN);
@@ -285,7 +285,7 @@ static void catch_signal(int sig)
 	switch(sig) {
 	case SIGCHLD: // child exited
 		if (wait(&sig) == comm_pid)
-			  quit(sig, NULL);
+			quit(sig, NULL);
 		break;
 	case SIGINT:
 	case SIGKILL: // normal exit
@@ -303,7 +303,7 @@ int run_command(char ** argv)
 	fd_t ptyfd, ttyfd;
 	tty_name = get_pseudo_tty(&ptyfd, &ttyfd);
 	if (!tty_name)
-		  return -1;
+		return -1;
 	fcntl(ptyfd,F_SETFL,O_NONBLOCK);
 	jbxvt.com.width = sysconf(_SC_OPEN_MAX);
 	// Attach relevant signals:
@@ -311,9 +311,9 @@ int run_command(char ** argv)
 	signal(SIGQUIT, catch_signal);
 	comm_pid = fork();
 	if (comm_pid < 0)
-		  quit(1, WARN_RES RES_SSN);
+		quit(1, WARN_RES RES_SSN);
 	if (comm_pid == 0)
-		  child(argv, ttyfd);
+		child(argv, ttyfd);
 	signal(SIGCHLD, catch_signal);
 
 #ifdef POSIX_UTMPX
