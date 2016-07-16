@@ -95,12 +95,10 @@
 //  Definitions that enable machine dependent parts of the code.
 
 #ifdef NETBSD
-#define BSD_UTMP
+#define POSIX_UTMPX
 #include <pwd.h>
-#include <string.h>
 #include <sys/termios.h>
 #include <sys/ttycom.h>
-#include <utmp.h>
 #define UTMP_FILE "/var/run/utmp"
 #endif//NETBSD
 
@@ -114,140 +112,57 @@
 #include <ttyent.h>
 #endif//_BSD_SOURCE
 
-#ifdef SUNOS5
-#include <sys/stropts.h>
-#include <sys/file.h>
-#include <sys/stat.h>
-#include <utmpx.h>
-#define SVR4_UTMPX
-#define SVR4_PTY
-#endif//SUNOS5
-
 #ifdef LINUX
 #include <pty.h>
-#include <utempter.h>
+#define POSIX_UTMPX
 #endif//LINUX
 
-#ifdef _UTEMPTER_H_
-#define UTEMPTER_H
-#endif// use freebsd ulog
+#ifdef USE_UTEMPTER
+#include <utempter.h>
+#undef POSIX_UTMPX
+#endif//USE_UTEMPTER
+
+#ifdef POSIX_UTMPX
+#include <pwd.h>
+#include <string.h>
+#include <sys/types.h>
+#include <utmpx.h>
+static struct utmpx utent; // current utmpx entry
+#endif//POSIX_UTMP
+
 
 static pid_t comm_pid = -1;	// process id of child
 static char *tty_name = NULL;	// name of the slave teletype
-#if defined(BSD_UTMP) || defined(SVR4_UTMP)
-static struct utmp utent;	// our current utmp entry
-#endif//BSD_UTMP||SVR4_UTMP
-
-// Tidy up the utmp entry etc prior to exiting.
-#ifndef UTEMPTER_H
-static void tidy_utmp(void)
-{
-#if defined(SVR4_UTMP) || defined(SVR4_UTMPX)
-	setutent();
-	if (getutid(&utent) == NULL)
-		return;
-	utent.ut_type = DEAD_PROCESS;
-
-	time((time_t *)&utent.ut_time);
-	pututline(&utent);
-#endif /* SVR4_UTMP || SVR4_UTMPX */
-
-#ifdef SVR4_UTMPX
-	updwtmp(WTMP_FILE, &utent);
-#endif /* SVR4_UTMPX */
-
-#ifdef BSD_UTMP
-	int ut_fd;
-	if ((ut_fd = open(UTMP_FILE,O_WRONLY)) < 0)
-		return;
-	memset(&utent,0,sizeof(utent));
-	lseek(ut_fd, sizeof(struct utmp), 0);
-	write(ut_fd,(char *)&utent,sizeof(struct utmp));
-	close(ut_fd);
-#endif// BSD_UTMP
-	chmod(tty_name,0666);
-}
-#endif//!UTEMPTER_H
 
 //  Attempt to create and write an entry to the utmp file
-#ifndef UTEMPTER_H
-static void write_utmp(void)
+#ifdef POSIX_UTMPX
+static void write_utmpx(void)
 {
-#if defined(SVR4_UTMP) || defined(BSD_UTMP)
-	struct passwd *pw;
-#endif
-#ifdef SVR4_UTMP
+	setutxent();
 	utent.ut_type = USER_PROCESS;
-	strncpy(utent.ut_id,tty_name + 8,sizeof(utent.ut_id));
-	strncpy(utent.ut_line,tty_name + 5,sizeof(utent.ut_line));
-	if((pw = getpwuid(getuid())))
-		  strncpy(utent.ut_name, pw->pw_name, sizeof(utent.ut_name));
-	strncpy(utent.ut_host,getenv("DISPLAY"),
-		sizeof(utent.ut_host));
-	time((time_t *)&utent.ut_time);
-	pututline(&utent);
-	endutent();
-#endif /* SVR4_UTMP */
-#ifdef SVR4_UTMPX
-	struct utmpx utentx;
-	memset(&utentx,0,sizeof(utentx));
-	utentx.ut_type = USER_PROCESS;
-	utentx.ut_pid = comm_pid;
-	int n;
-	if (sscanf(tty_name,"/dev/pts/%d",&n) != 1) {
-		jbputs(QUIT_TTY " ");
-		jbputs(tty_name);
-		jbputs("\n");
-		return;
-	}
-	snprintf(utentx.ut_id, sizeof(utentx.ut_id), "vt%02x",n);
-	snprintf(utentx.ut_line, sizeof(utentx.ut_line), "pts/%d",n);
-	pw = getpwuid(getuid());
-	if (pw != NULL)
-		  strncpy(utentx.ut_name,pw->pw_name,sizeof(utent.ut_name));
-	strncpy(utentx.ut_host, getenv("DISPLAY"),
-		sizeof(utentx.ut_host));
-	size_t l = 0;
-	while(utentx.ut_host[++l]);
-	utentx.ut_syslen = l + 1;
-	time(&utentx.ut_xtime);
-	getutmp(&utentx,&utent);
-	pututline(&utent);
-	pututxline(&utentx);
-	updwtmpx(WTMPX_FILE,&utentx);
-	endutent();
-#endif /* SVR4_UTMPX */
-
-#ifdef BSD_UTMP
-	fd_t ut_fd = open(UTMP_FILE, O_WRONLY);
-	if (ut_fd < 0) {
-		jbputs(WARN_RES RES_TMP);
-		return;
-	}
-	memset(&utent,0,sizeof(utent));
-	strncpy(utent.ut_line,tty_name + 5,
-		sizeof(utent.ut_line));
-	pw = getpwuid(getuid());
-	if (pw != NULL)
-		  strncpy(utent.ut_name,pw->pw_name,
-			  sizeof(utent.ut_name));
+	utent.ut_pid = comm_pid;
+	struct passwd * pw = getpwuid(getuid());
+	// + 5 to remove "/dev/"
+	strncpy(utent.ut_line, tty_name + 5, sizeof(utent.ut_line));
+	strncpy(utent.ut_user, pw->pw_name, sizeof(utent.ut_user));
 	strncpy(utent.ut_host, getenv("DISPLAY"), sizeof(utent.ut_host));
-	time(&utent.ut_time);
-	lseek(ut_fd, sizeof(struct utmp), 0);
-	write(ut_fd,(char *)&utent,sizeof(struct utmp));
-	close(ut_fd);
-#endif// BSD_UTMP
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	utent.ut_tv.tv_sec = tv.tv_sec;
+	utent.ut_tv.tv_usec = tv.tv_usec;
+	if(!pututxline(&utent)) {
+		perror("Could not write UTMPX entry!");
+	}
+	endutxent();
 }
-#endif//!UTEMPTER_H
+#endif//POSIX_UTMPX
 
 //  Quit with the status after first removing our entry from the utmp file.
 void quit(const int8_t status, const char * restrict msg)
 {
-#ifdef UTEMPTER_H
+#ifdef USE_UTEMPTER
 	utempter_remove_added_record();
-#else//!UTEMPTER_H
-	tidy_utmp();
-#endif//UTEMPTER_H
+#endif//USE_UTEMPTER
 	if(msg) {
 		jbputs(msg);
 		jbputs("\n");
@@ -291,12 +206,13 @@ static void set_ttymodes(void)
 #else//!B38400
 	term.c_cflag |= B9600;
 #endif//B38400
-	term.c_lflag = ISIG | IEXTEN | ICANON | ECHO | ECHOE | ECHOK;
+	term.c_lflag = ISIG | IEXTEN | ICANON;
 	term.c_cc[VINTR] = 003;		/* ^C */
 	term.c_cc[VQUIT] = 034;		/* ^\ */
 	term.c_cc[VERASE] = 0177;	/* DEL */
 	term.c_cc[VKILL] = 025;		/* ^U */
 	term.c_cc[VEOF] = 004;		/* ^D */
+	term.c_cc[VEOL] = 013;		// ^M
 	term.c_cc[VSTART] = 021;	/* ^Q */
 	term.c_cc[VSTOP] = 023;		/* ^S */
 	term.c_cc[VSUSP] = 032;		/* ^Z */
@@ -400,11 +316,12 @@ int run_command(char ** argv)
 		  child(argv, ttyfd);
 	signal(SIGCHLD, catch_signal);
 
-#ifdef UTEMPTER_H
+#ifdef POSIX_UTMPX
+	write_utmpx();
+#endif//POSIX_UTMPX
+#ifdef USE_UTEMPTER
 	utempter_add_record(ptyfd, getenv("DISPLAY"));
-#else//!UTEMPTER_H
-	write_utmp();
-#endif//UTEMPTER_H
+#endif//USE_UTEMPTER
 
 	return(ptyfd);
 }

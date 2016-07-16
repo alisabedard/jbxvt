@@ -27,7 +27,10 @@ PREFIX=/usr
 
 # Uncomment for GNU/Linux:
 CFLAGS+=-DLINUX -D_GNU_SOURCE
-LIBS+=-lutempter
+
+# Uncomment to use libutempter for utmp access
+#CFLAGS+=-DUSE_UTEMPTER
+#LIBS+=-lutempter
 
 #-------------------------------
 
