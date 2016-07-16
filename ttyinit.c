@@ -273,27 +273,17 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	quit(1, WARN_RES RES_SSN);
 }
 
-//  Catch a SIGCHLD signal and exit if the direct child has died.
-static void catch_signal(int sig)
+// wrap quit for signal function pointer
+__attribute__((noreturn))
+static void sigquit(int sig __attribute__((unused)))
 {
-	LOG("SIGNAL %d received\n", sig);
-	switch(sig) {
-	case SIGCHLD: // child exited
-		if (wait(&sig) == comm_pid)
-			quit(sig, NULL);
-		break;
-	case SIGINT:
-	case SIGKILL: // normal exit
-		quit(0, NULL);
-	default: // something went wrong
-		quit(1, WARN_SIG);
-	}
+	quit(0, NULL);
 }
 
 /*  Run the command in a subprocess and return a file descriptor for the
  *  master end of the pseudo-teletype pair with the command talking to
  *  the slave.  */
-int run_command(char ** argv)
+fd_t run_command(char ** argv)
 {
 	fd_t ptyfd, ttyfd;
 	tty_name = get_pseudo_tty(&ptyfd, &ttyfd);
@@ -302,14 +292,14 @@ int run_command(char ** argv)
 	fcntl(ptyfd,F_SETFL,O_NONBLOCK);
 	jbxvt.com.width = sysconf(_SC_OPEN_MAX);
 	// Attach relevant signals:
-	signal(SIGINT, catch_signal);
-	signal(SIGQUIT, catch_signal);
+	signal(SIGINT, sigquit);
+	signal(SIGQUIT, sigquit);
 	comm_pid = fork();
 	if (comm_pid < 0)
 		quit(1, WARN_RES RES_SSN);
 	if (comm_pid == 0)
 		child(argv, ttyfd);
-	signal(SIGCHLD, catch_signal);
+	signal(SIGCHLD, sigquit);
 
 #ifdef POSIX_UTMPX
 	write_utmpx();

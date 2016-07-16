@@ -4,7 +4,7 @@
 #ifndef TTYINIT_H
 #define TTYINIT_H
 
-#include <stdint.h>
+#include "jbxvt.h"
 
 #ifdef LINUX
 #include <asm-generic/ioctls.h>
@@ -17,7 +17,7 @@ void tty_set_size(const uint8_t width, const uint8_t height);
 #else//!TIOCSWINSZ
 #define tty_set_size(w, h)
 #endif//TIOCSWINSZ
-int run_command(char ** restrict argv);
+fd_t run_command(char ** restrict argv);
 
 #endif//!TTYINIT_H
 
