@@ -317,8 +317,11 @@ fd_t run_command(char ** argv)
 #ifdef TIOCSWINSZ
 void tty_set_size(const uint8_t width, const uint8_t height)
 {
+	if (comm_pid < 0)
+		return;
 	struct winsize wsize = {.ws_row = height, .ws_col = width};
-	if (ioctl(jbxvt.com.fd, TIOCSWINSZ, &wsize) == 1) {
+	const fd_t f = comm_pid == 0 ? 0 : jbxvt.com.fd;
+	if (ioctl(f, TIOCSWINSZ, &wsize) == 1) {
 		quit(1, WARN_IOCTL "TIOCSWINSZ");
 	}
 }
