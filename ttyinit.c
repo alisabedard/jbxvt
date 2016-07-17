@@ -146,9 +146,7 @@ static void write_utmpx(void)
 	gettimeofday(&tv, NULL);
 	utent.ut_tv.tv_sec = tv.tv_sec;
 	utent.ut_tv.tv_usec = tv.tv_usec;
-	if(!pututxline(&utent)) {
-		perror("Could not write UTMPX entry!");
-	}
+	jb_check(pututxline(&utent), "Could not write utmp entry.");
 	endutxent();
 }
 #endif//POSIX_UTMPX
@@ -159,10 +157,8 @@ void quit(const int8_t status, const char * restrict msg)
 #ifdef USE_UTEMPTER
 	utempter_remove_added_record();
 #endif//USE_UTEMPTER
-	if(msg) {
-		jbputs(msg);
-		jbputs("\n");
-	}
+	if (msg)
+		fprintf(stderr, "%s\n", msg);
 	exit(status);
 }
 
@@ -179,7 +175,8 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 	grantpt(mfd);
 	unlockpt(mfd);
 	char *ttynam = ptsname(mfd);
-	const fd_t sfd = open((const char *)ttynam,O_RDWR);
+	jb_check(ttynam, "Could not get tty name");
+	const fd_t sfd = open((const char *)ttynam, O_RDWR);
 	if (sfd < 0)
 		quit(1, WARN_RES RES_TTY);
 	*pslave = sfd;
@@ -245,14 +242,8 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	 *  a controlling teletype for it.  On some systems
 	 *  this can be done with an ioctl but on others
 	 *  we need to re-open the slave tty.  */
-
-	int r; // for return value checking
 #ifdef TIOCSCTTY
-	r = ioctl(ttyfd,TIOCSCTTY,0);
-	if (r == 1) {
-		perror(WARN_IOCTL "TIOCSCTTY");
-		r = 0;
-	}
+	jb_check(ioctl(ttyfd, TIOCSCTTY, 0) != 1, WARN_IOCTL "TIOCSCTTY");
 #else//!TIOCSCTTY
 	fd_t i = ttyfd;
 	ttyfd = open(tty_name, O_RDWR);
@@ -321,9 +312,7 @@ void tty_set_size(const uint8_t width, const uint8_t height)
 		return;
 	struct winsize wsize = {.ws_row = height, .ws_col = width};
 	const fd_t f = comm_pid == 0 ? 0 : jbxvt.com.fd;
-	if (ioctl(f, TIOCSWINSZ, &wsize) == 1) {
-		quit(1, WARN_IOCTL "TIOCSWINSZ");
-	}
+	jb_check(ioctl(f, TIOCSWINSZ, &wsize) != 1, WARN_IOCTL "TIOCSWINSZ");
 }
 #endif//TIOCSWINSZ
 #endif//!NETBSD&&!FREEBSD

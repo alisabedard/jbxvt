@@ -5,7 +5,8 @@
 
 #include "cursor.h"
 #include "jbxvt.h"
-#include "log.h"
+#include "libjb/util.h"
+#include "libjb/log.h"
 #include "lookup_key.h"
 #include "scr_move.h"
 #include "screen.h"

@@ -4,7 +4,8 @@
 #include "handle_sgr.h"
 
 #include "color.h"
-#include "log.h"
+#include "libjb/log.h"
+#include "libjb/util.h"
 #include "screen.h"
 
 // Convert 3 bit color to 9 bit color, store at offset
@@ -50,8 +51,8 @@ static bool handle_color_encoding(const int32_t arg, const bool is_fg,
 		*index_mode = false;
 		return true;
 	} else if (unlikely(*rgb_mode)) {
+		// FIXME:  test rgb color mode
 		const uint8_t o = is_fg ? 0 : 9;
-		jbputs("FIXME: test fg color rgb mode\n");
 		switch(rgb_count) {
 		case 0: // red
 			encode_rgb(arg, 12 + o);

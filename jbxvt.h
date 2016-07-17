@@ -3,6 +3,7 @@
 
 #include "color.h"
 #include "command.h"
+#include "libjb/util.h"
 #include "Size.h"
 #include "VTScreen.h"
 #include "SelEnd.h"
@@ -18,13 +19,6 @@
 #define RES_SSN		"Could not open session"
 #define RES_TTY		"Could not open tty"
 #define RES_TMP		"Could not open utmp database"
-
-// Use for all file descriptors:
-typedef int fd_t;
-
-#define MAX(a,b) ((a) > (b) ? (a) : (b))
-#define MIN(a,b) ((a) < (b) ? (a) : (b))
-#define SWAP(type, a, b) { type x; x = a; a = b; b = x; }
 
 typedef struct {
 	struct {
@@ -90,17 +84,5 @@ typedef struct {
 } JBXVT;
 
 extern JBXVT jbxvt; // in jbxvt.c
-
-
-// Print string to stderr
-ssize_t jbputs(const char * restrict string);
-
-#ifdef USE_LIKELY
-#define likely(x)       __builtin_expect((x), true)
-#define unlikely(x)     __builtin_expect((x), false)
-#else//!USE_LIKELY
-#define likely(x) (x)
-#define unlikely(x) (x)
-#endif//USE_LIKELY
 
 #endif//!JBXVT_H

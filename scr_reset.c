@@ -6,6 +6,7 @@
 #include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"
+#include "libjb/util.h"
 #include "log.h"
 #include "repaint.h"
 #include "sbar.h"

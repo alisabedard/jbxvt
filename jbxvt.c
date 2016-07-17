@@ -10,18 +10,11 @@
 #include "xvt.h"
 
 #include <gc.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
 JBXVT jbxvt;
-
-// Print string to stderr
-ssize_t jbputs(const char * restrict string)
-{
-        size_t s = 0;
-        while(string[++s]);
-	return write(STDERR_FILENO, string, s);
-}
 
 static char ** parse_command_line(const int argc, char ** argv)
 {
@@ -65,14 +58,10 @@ static char ** parse_command_line(const int argc, char ** argv)
 			jbxvt.opt.show_scrollbar=true;
 			break;
 		case 'v': // version
-			jbputs(VERSION "\n");
-			quit(0, NULL);
+			quit(0, VERSION);
 		case 'h': // help
 		default:
-			jbputs(argv[0]);
-			jbputs(" -[");
-			jbputs(optstr);
-			jbputs("]\n");
+			printf("%s -[%s]\n", argv[0], optstr);
 			quit(0, NULL);
 		}
 	}
@@ -102,7 +91,8 @@ int main(int argc, char ** argv)
 		shell_argv[1] = NULL;
 		com_argv = shell_argv;
 	}
-	setenv("TERM", TERM_ENV, true);
+	jb_check(setenv("TERM", TERM_ENV, true) != -1,
+		"Could not set TERM environment variable");
 	init_command(com_argv);
 	jbxvt_app_loop();
 
