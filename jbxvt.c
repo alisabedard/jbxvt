@@ -58,11 +58,12 @@ static char ** parse_command_line(const int argc, char ** argv)
 			jbxvt.opt.show_scrollbar=true;
 			break;
 		case 'v': // version
-			quit(0, VERSION);
+			puts("jbxvt" VERSION);
+			exit(0);
 		case 'h': // help
 		default:
 			printf("%s -[%s]\n", argv[0], optstr);
-			quit(0, NULL);
+			exit(0);
 		}
 	}
 	return NULL;

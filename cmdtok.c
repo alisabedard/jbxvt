@@ -60,7 +60,7 @@ static void handle_client_msg(xcb_generic_event_t * restrict ge)
 	xcb_client_message_event_t * e = (xcb_client_message_event_t *)ge;
 	if (e->format == 32 && e->data.data32[0]
 		== (long)wm_del_win())
-		  quit(0, NULL);
+		  exit(0);
 }
 
 static void handle_expose(xcb_generic_event_t * restrict ge)
@@ -128,8 +128,8 @@ static int_fast16_t output_to_command(int_fast16_t count)
 {
 	count = MIN(jbxvt.com.send_count, 100);
 	count = write(jbxvt.com.fd, jbxvt.com.send_nxt, count);
-	if (count < 0)
-		  quit(1, WARN_RES RES_CMD);
+	if (jb_check(count >= 0, "Could not write to command"))
+		exit(1);
 	jbxvt.com.send_count -= count;
 	jbxvt.com.send_nxt += count;
 

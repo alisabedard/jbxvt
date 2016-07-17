@@ -152,15 +152,13 @@ static void write_utmpx(void)
 }
 #endif//POSIX_UTMPX
 
-//  Quit with the status after first removing our entry from the utmp file.
-void quit(const int8_t status, const char * restrict msg)
+// Put all clean-up tasks here:
+static void exit_cb(void)
 {
 #ifdef USE_UTEMPTER
 	jb_check(utempter_remove_added_record(),
 		"Could not remove utmp record");
 #endif//USE_UTEMPTER
-	jb_check(!msg, msg);
-	exit(status);
 }
 
 /*  Acquire a pseudo teletype from the system.  The return value is the
@@ -171,16 +169,13 @@ void quit(const int8_t status, const char * restrict msg)
 static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 {
 	const fd_t mfd = posix_openpt(O_RDWR);
-	if (mfd < 0)
-		  quit(1, WARN_RES RES_TTY);
+	jb_check(mfd >= 0, WARN_RES RES_TTY);
 	jb_check(grantpt(mfd) != -1,
 		"Could not change mode and owner of slave ptty");
 	jb_check(unlockpt(mfd) != -1, "Could not unlock slave ptty");
 	char *ttynam = ptsname(mfd);
 	jb_check(ttynam, "Could not get tty name");
-	const fd_t sfd = open((const char *)ttynam, O_RDWR);
-	if (sfd < 0)
-		quit(1, WARN_RES RES_TTY);
+	const fd_t sfd = jb_open(ttynam, O_RDWR);
 	*pslave = sfd;
 	*pmaster = mfd;
 	return ttynam;
@@ -237,9 +232,8 @@ static void child(char ** restrict argv, fd_t ttyfd)
 #else//NETBSD
 	const pid_t pgid = getsid(getpid());
 #endif//!NETBSD
-	if(pgid < 0)
-		quit(1, WARN_RES RES_SSN);
-
+	if (jb_check(pgid >= 0, "Could not open session"))
+		exit(1);
 	/*  Having started a new session, we need to establish
 	 *  a controlling teletype for it.  On some systems
 	 *  this can be done with an ioctl but on others
@@ -247,10 +241,8 @@ static void child(char ** restrict argv, fd_t ttyfd)
 #ifdef TIOCSCTTY
 	jb_check(ioctl(ttyfd, TIOCSCTTY, 0) != 1, WARN_IOCTL "TIOCSCTTY");
 #else//!TIOCSCTTY
-	fd_t i = ttyfd;
-	ttyfd = open(tty_name, O_RDWR);
-	if (ttyfd < 0)
-		quit(1, WARN_RES RES_SSN);
+	fd_t i = ttyfd; // save
+	ttyfd = jb_open(tty_name, O_RDWR);
 	jb_close(i);
 #endif//TIOCSCTTY
 	for (int i = 0; i < jbxvt.com.width; i++)
@@ -264,14 +256,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
 		jb_close(ttyfd);
 	set_ttymodes();
 	execvp(argv[0],argv); // Only returns on failure
-	quit(1, WARN_RES RES_SSN);
-}
-
-// wrap quit for signal function pointer
-__attribute__((noreturn))
-static void sigquit(int sig __attribute__((unused)))
-{
-	quit(0, NULL);
+	exit(1);
 }
 
 /*  Run the command in a subprocess and return a file descriptor for the
@@ -281,7 +266,7 @@ fd_t run_command(char ** argv)
 {
 	fd_t ptyfd, ttyfd;
 	tty_name = get_pseudo_tty(&ptyfd, &ttyfd);
-	if (!tty_name)
+	if (jb_check(tty_name, WARN_RES RES_TTY))
 		return -1;
 	jb_check(fcntl(ptyfd,F_SETFL,O_NONBLOCK) != 1,
 		"Could not set file status flags on pty file descriptor");
@@ -289,15 +274,16 @@ fd_t run_command(char ** argv)
 	jb_check(jbxvt.com.width != -1, "_SC_OPEN_MAX");
 
 	// Attach relevant signals:
-	signal(SIGINT, sigquit);
-	signal(SIGQUIT, sigquit);
+	signal(SIGINT, exit);
+	signal(SIGQUIT, exit);
+	// grantpt(3) states this is unspecified behavior:
+	signal(SIGCHLD, exit);
+	atexit(exit_cb);
 	comm_pid = fork();
-	if (comm_pid < 0)
-		quit(1, WARN_RES RES_SSN);
+	if (jb_check(comm_pid >= 0, "Could not start session"))
+		exit(1);
 	if (comm_pid == 0)
 		child(argv, ttyfd);
-	// grantpt(3) states this is unspecified behavior:
-	signal(SIGCHLD, sigquit);
 #ifdef POSIX_UTMPX
 	write_utmpx();
 #endif//POSIX_UTMPX

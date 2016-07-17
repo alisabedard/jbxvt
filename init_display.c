@@ -47,8 +47,8 @@ static xcb_font_t get_font(const char * name)
 		c = xcb_open_font_checked(jbxvt.X.xcb, f,
 			l, fallback);
 		error = xcb_request_check(jbxvt.X.xcb, c);
-		if (error)
-			  quit(1, WARN_RES RES_FNT);
+		if(jb_check(!error, "Could not open fallback font"))
+			exit(1);
 		if (jbxvt.X.font)
 			  // Fall back if bold font
 			  // unavailable:

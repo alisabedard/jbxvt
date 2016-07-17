@@ -220,7 +220,7 @@ app_loop_head:
 		break;
 	case TK_EOF :
 		LOG("TK_EOF");
-		quit(0, NULL);
+		exit(0);
 		break;
 	case TK_ENTRY :	// keyboard focus changed
 		cursor(t[0] ? CURSOR_ENTRY_IN : CURSOR_ENTRY_OUT);

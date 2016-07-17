@@ -10,6 +10,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 static struct {
 	// start and end of queue:
@@ -41,9 +42,9 @@ void init_command(char ** restrict argv)
 {
 	//  Enable the delete window protocol:
 	wm_del_win();
-
-	if ((jbxvt.com.fd = run_command(argv)) < 0)
-		  quit(1, WARN_RES RES_SSN);
+	jbxvt.com.fd = run_command(argv);
+	if (jb_check(jbxvt.com.fd >= 0, "Could not start session"))
+		exit(1);
 	jbxvt.com.buf.next = jbxvt.com.buf.top
 		= jbxvt.com.buf.data;
 	jbxvt.com.stack.top = jbxvt.com.stack.data;
