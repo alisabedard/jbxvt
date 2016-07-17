@@ -6,6 +6,7 @@
 #CFLAGS+=-DDEBUG
 #CFLAGS+=-DGC_DEBUG
 #CC=clang
+CFLAGS+=-Wall -Wextra
 
 exe=jbxvt
 PREFIX=/usr
