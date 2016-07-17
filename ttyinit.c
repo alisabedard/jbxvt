@@ -143,6 +143,7 @@ static void write_utmpx(void)
 	strncpy(utent.ut_user, getenv("USER"), sizeof(utent.ut_user));
 	strncpy(utent.ut_host, getenv("DISPLAY"), sizeof(utent.ut_host));
 	struct timeval tv;
+	// Does not return an error:
 	gettimeofday(&tv, NULL);
 	utent.ut_tv.tv_sec = tv.tv_sec;
 	utent.ut_tv.tv_usec = tv.tv_usec;
@@ -155,10 +156,10 @@ static void write_utmpx(void)
 void quit(const int8_t status, const char * restrict msg)
 {
 #ifdef USE_UTEMPTER
-	utempter_remove_added_record();
+	jb_check(utempter_remove_added_record(),
+		"Could not remove utmp record");
 #endif//USE_UTEMPTER
-	if (msg)
-		fprintf(stderr, "%s\n", msg);
+	jb_check(!msg, msg);
 	exit(status);
 }
 
@@ -172,8 +173,9 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 	const fd_t mfd = posix_openpt(O_RDWR);
 	if (mfd < 0)
 		  quit(1, WARN_RES RES_TTY);
-	grantpt(mfd);
-	unlockpt(mfd);
+	jb_check(grantpt(mfd) != -1,
+		"Could not change mode and owner of slave ptty");
+	jb_check(unlockpt(mfd) != -1, "Could not unlock slave ptty");
 	char *ttynam = ptsname(mfd);
 	jb_check(ttynam, "Could not get tty name");
 	const fd_t sfd = open((const char *)ttynam, O_RDWR);
@@ -281,8 +283,11 @@ fd_t run_command(char ** argv)
 	tty_name = get_pseudo_tty(&ptyfd, &ttyfd);
 	if (!tty_name)
 		return -1;
-	fcntl(ptyfd,F_SETFL,O_NONBLOCK);
+	jb_check(fcntl(ptyfd,F_SETFL,O_NONBLOCK) != 1,
+		"Could not set file status flags on pty file descriptor");
 	jbxvt.com.width = sysconf(_SC_OPEN_MAX);
+	jb_check(jbxvt.com.width != -1, "_SC_OPEN_MAX");
+
 	// Attach relevant signals:
 	signal(SIGINT, sigquit);
 	signal(SIGQUIT, sigquit);
@@ -291,12 +296,14 @@ fd_t run_command(char ** argv)
 		quit(1, WARN_RES RES_SSN);
 	if (comm_pid == 0)
 		child(argv, ttyfd);
+	// grantpt(3) states this is unspecified behavior:
 	signal(SIGCHLD, sigquit);
 #ifdef POSIX_UTMPX
 	write_utmpx();
 #endif//POSIX_UTMPX
 #ifdef USE_UTEMPTER
-	utempter_add_record(ptyfd, getenv("DISPLAY"));
+	jb_check(utempter_add_record(ptyfd, getenv("DISPLAY")),
+		"Could not add utmp record");
 #endif//USE_UTEMPTER
 	return ptyfd;
 }
