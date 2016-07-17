@@ -27,6 +27,7 @@
 #include "ttyinit.h"
 
 #include "jbxvt.h"
+#include "libjb/util.h"
 #include "log.h"
 
 #include <fcntl.h>
@@ -230,16 +231,6 @@ static void set_ttymodes(void)
 	tty_set_size(jbxvt.scr.chars.width, jbxvt.scr.chars.height);
 }
 
-static void close_checked(const int fd)
-{
-	if (close(fd) != -1)
-		return;
-	const uint8_t sz = 32;
-	char buf[sz];
-	snprintf(buf, sz, "Could not close fd %d", fd);
-	perror(buf);
-}
-
 static void child(char ** restrict argv, fd_t ttyfd)
 {
 #ifndef NETBSD
@@ -267,17 +258,17 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	ttyfd = open(tty_name, O_RDWR);
 	if (ttyfd < 0)
 		quit(1, WARN_RES RES_SSN);
-	close_checked(i);
+	jb_close(i);
 #endif//TIOCSCTTY
 	for (int i = 0; i < jbxvt.com.width; i++)
 		if (i != ttyfd)
-			close_checked(i);
+			jb_close(i);
 	// for stdin, stderr, stdout:
 	fcntl(ttyfd, F_DUPFD, 0);
 	fcntl(ttyfd, F_DUPFD, 0);
 	fcntl(ttyfd, F_DUPFD, 0);
 	if (ttyfd > 2)
-		close_checked(ttyfd);
+		jb_close(ttyfd);
 	set_ttymodes();
 	execvp(argv[0],argv); // Only returns on failure
 	quit(1, WARN_RES RES_SSN);
