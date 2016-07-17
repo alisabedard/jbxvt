@@ -100,8 +100,7 @@ static void handle_insert(const uint8_t n, const xcb_point_t p)
 	memmove(r + cur.x + n, r + cur.x,
 		(ch.width - cur.x) * sizeof(uint32_t));
 	const Size f = jbxvt.X.font_size;
-	const uint16_t width = (ch.width - cur.x - n)
-		* f.w;
+	const uint16_t width = (ch.width - cur.x - n) * f.w;
 	const int16_t x = p.x + n * f.w;
 	xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
 		jbxvt.X.gc.tx, p.x, p.y, x, p.y, width, f.h);
@@ -229,10 +228,13 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		s->cursor.x += n;
 		const uint8_t w = jbxvt.scr.chars.width;
 		if (s->cursor.x >= w) {
-			s->cursor.x = w - 1;
-			if (!(s->wrap_next = s->decawm))
-				  break; /* Skip rendering off the edge of the
-					    screen.  */
+			if (!(s->wrap_next = s->decawm)) {
+				s->cursor.x = 0;
+				wrap(s);
+			} else {
+				s->cursor.x = w;
+				break;
+			}
 		}
 	}
 	cursor(CURSOR_DRAW);
