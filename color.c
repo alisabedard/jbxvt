@@ -9,28 +9,15 @@
 __attribute__((nonnull))
 pixel_t get_pixel(const char * restrict color)
 {
-	register uint_fast8_t l = 0;
-	while(color[++l]);
-	xcb_alloc_named_color_cookie_t c = xcb_alloc_named_color(jbxvt.X.xcb,
-		jbxvt.X.screen->default_colormap, l, color);
-	xcb_alloc_named_color_reply_t * r
-		= xcb_alloc_named_color_reply(jbxvt.X.xcb, c, NULL);
-	if(!r) return 0;
-	pixel_t p = r->pixel;
-	free(r);
-	return p;
+	return jb_get_pixel(jbxvt.X.xcb, jbxvt.X.screen->default_colormap,
+		color);
 }
 
 // Use rgb color
-pixel_t get_pixel_rgb(int16_t r, int16_t g, int16_t b)
+pixel_t get_pixel_rgb(const uint16_t r, const uint16_t g, const uint16_t b)
 {
-	xcb_alloc_color_cookie_t c = xcb_alloc_color(jbxvt.X.xcb,
+	return jb_get_rgb_pixel(jbxvt.X.xcb,
 		jbxvt.X.screen->default_colormap, r, g, b);
-	xcb_alloc_color_reply_t * rpl = xcb_alloc_color_reply(jbxvt.X.xcb,
-		c, NULL);
-	pixel_t p = rpl->pixel;
-	free(rpl);
-	return p;
 }
 
 pixel_t set_color(const uint32_t vm, const pixel_t p, const xcb_gcontext_t gc)

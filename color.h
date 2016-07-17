@@ -1,19 +1,16 @@
+// Copyright 2016, Jeffrey E. Bedard
+
 #ifndef JBXVT_COLOR_H
 #define JBXVT_COLOR_H
 
-#include <stdint.h>
-#include <xcb/xcb.h>
-#include <xcb/xproto.h>
-
-// describe var as relating to a pixel:
-typedef uint32_t pixel_t;
+#include "libjb/xcb.h"
 
 // returns pixel value for specified color
 pixel_t get_pixel(const char * restrict color)
 	__attribute__((nonnull));
 
 // Use rgb color
-pixel_t get_pixel_rgb(int16_t r, int16_t g, int16_t b);
+pixel_t get_pixel_rgb(const uint16_t r, const uint16_t g, const uint16_t b);
 
 pixel_t set_color(const uint32_t vm, const pixel_t p, const xcb_gcontext_t gc);
 
