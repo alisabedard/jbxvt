@@ -30,12 +30,12 @@ static bool tab_stops[JBXVT_MAX_COLS];
 // -1 clears all, -2 sets default
 void scr_set_tab(int i, const bool value)
 {
-	if (i == -1)
+	if (i == -1) // clear all
 		memset(&tab_stops, 0, JBXVT_MAX_COLS);
-	else if (i == -2)
+	else if (i == -2) // establish tab stop every 8 columns
 		for (i = 0; i < JBXVT_MAX_COLS; ++i)
 			tab_stops[i] = (i % 8 == 0);
-	else if (i >= 0)
+	else if (i >= 0) // assign
 		tab_stops[i] = value;
 }
 
