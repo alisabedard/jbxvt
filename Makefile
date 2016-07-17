@@ -49,15 +49,17 @@ OBJS+=wm_del_win.o xevents.o xsetup.o xvt.o handle_sgr.o dec_reset.o
 LIBS+= -Llibjb -ljb
 CFLAGS+=-D_XOPEN_SOURCE=700 --std=c99
 CFLAGS+=-Wall -Wextra
-$(exe): $(OBJS) libjb/libjb.a
+
+all:
+	cd libjb && make
+	make $(exe)
+
+$(exe): $(OBJS)
 	$(CC) -o $(exe) $(OBJS) $(CFLAGS) $(LIBS)
 	strip -o $(exe).tmp $(exe)
 	ls -l $(exe).tmp >> sz.log
 	rm -f $(exe).tmp
 	tail -n 5 sz.log
-
-libjb/libjb.a:
-	cd libjb && make
 
 bindest=$(DESTDIR)$(PREFIX)/bin
 install:

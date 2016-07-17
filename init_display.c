@@ -6,6 +6,7 @@
 #include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"
+#include "libjb/xcb.h"
 #include "sbar.h"
 #include "screen.h"
 #include "ttyinit.h"
@@ -190,15 +191,11 @@ static void init_jbxvt_colors(void)
 
 void init_display(char * name)
 {
-	jbxvt.X.xcb = xcb_connect(jbxvt.opt.display,
+	jbxvt.X.xcb = jb_get_xcb_connection(jbxvt.opt.display,
 		&jbxvt.opt.screen);
 	xcb_intern_atom_cookie_t c = xcb_intern_atom(jbxvt.X.xcb,
 		false, 9, "CLIPBOARD");
-	if (unlikely(xcb_connection_has_error(jbxvt.X.xcb))) {
-		quit(1, WARN_RES RES_DPY);
-	}
-	jbxvt.X.screen = xcb_setup_roots_iterator(
-		xcb_get_setup(jbxvt.X.xcb)).data;
+	jbxvt.X.screen = jb_get_xcb_screen(jbxvt.X.xcb);
 	const xcb_window_t root = jbxvt.X.screen->root;
 	init_jbxvt_colors();
 	setup_font();
