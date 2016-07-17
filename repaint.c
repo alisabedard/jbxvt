@@ -8,7 +8,7 @@
 #include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"
-#include "log.h"
+#include "libjb/log.h"
 #include "paint.h"
 #include "screen.h"
 #include "selection.h"

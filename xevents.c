@@ -5,7 +5,7 @@
 
 #include "change_offset.h"
 #include "jbxvt.h"
-#include "log.h"
+#include "libjb/log.h"
 #include "Token.h"
 #include "xeventst.h"
 

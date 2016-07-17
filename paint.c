@@ -5,8 +5,8 @@
 
 #include "color_index.h"
 #include "jbxvt.h"
+#include "libjb/log.h"
 #include "libjb/util.h"
-#include "log.h"
 #include "screen.h"
 
 #include <string.h>

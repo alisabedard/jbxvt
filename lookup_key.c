@@ -2,7 +2,7 @@
 
 #include "command.h"
 #include "jbxvt.h"
-#include "log.h"
+#include "libjb/log.h"
 
 #include <stdio.h>
 #include <xcb/xcb.h>

@@ -4,7 +4,7 @@
 #include "scr_request_selection.h"
 
 #include "jbxvt.h"
-#include "log.h"
+#include "libjb/log.h"
 #include "screen.h"
 #include "selection.h"
 

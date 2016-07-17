@@ -2,7 +2,7 @@
 
 #include "cursor.h"
 #include "jbxvt.h"
-#include "log.h"
+#include "libjb/log.h"
 #include "screen.h"
 #include "scroll.h"
 #include "scr_reset.h"

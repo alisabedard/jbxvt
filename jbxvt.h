@@ -64,6 +64,7 @@ typedef struct {
 	struct {
 		uint8_t * send_nxt; // next char to be sent
 		fd_t fd; // file descriptor connected to the command
+		// type per sysconf(3):
 		long width; // # file descriptors being used
 		struct {
 			uint8_t *next, *top;

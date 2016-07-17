@@ -27,8 +27,8 @@
 #include "ttyinit.h"
 
 #include "jbxvt.h"
+#include "libjb/log.h"
 #include "libjb/util.h"
-#include "log.h"
 
 #include <fcntl.h>
 #include <signal.h>

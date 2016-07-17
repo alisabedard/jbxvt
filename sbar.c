@@ -5,7 +5,7 @@
 
 #include "config.h"
 #include "jbxvt.h"
-#include "log.h"
+#include "libjb/log.h"
 
 #include <stdlib.h>
 

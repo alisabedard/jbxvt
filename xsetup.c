@@ -6,7 +6,7 @@
 #include "config.h"
 #include "init_display.h"
 #include "jbxvt.h"
-#include "log.h"
+#include "libjb/log.h"
 #include "scr_reset.h"
 #include "screen.h"
 #include "sbar.h"
