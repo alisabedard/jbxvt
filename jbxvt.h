@@ -9,17 +9,6 @@
 #include "SelEnd.h"
 #include "SLine.h"
 
-#define WARN_ERR	"Error: "
-#define WARN_SIG	"Signal Received"
-#define WARN_RES	"Resource unavailable: "
-#define WARN_IOCTL	"Bad ioctl: "
-#define RES_DPY		"Bad DISPLAY"
-#define RES_CMD		"Could not execute command"
-#define RES_FNT		"Could not load font"
-#define RES_SSN		"Could not open session"
-#define RES_TTY		"Could not open tty"
-#define RES_TMP		"Could not open utmp database"
-
 typedef struct {
 	struct {
 		xcb_connection_t * xcb;

@@ -155,6 +155,7 @@ static void write_utmpx(void)
 // Put all clean-up tasks here:
 static void exit_cb(void)
 {
+	xcb_disconnect(jbxvt.X.xcb);
 #ifdef USE_UTEMPTER
 	jb_check(utempter_remove_added_record(),
 		"Could not remove utmp record");
@@ -169,14 +170,16 @@ static void exit_cb(void)
 static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 {
 	const fd_t mfd = posix_openpt(O_RDWR);
-	jb_check(mfd >= 0, WARN_RES RES_TTY);
-	jb_check(grantpt(mfd) != -1,
+	bool e = false; // error flag
+	e |= jb_check(mfd >= 0, "Could not open ptty");
+	e |= jb_check(grantpt(mfd) != -1,
 		"Could not change mode and owner of slave ptty");
-	jb_check(unlockpt(mfd) != -1, "Could not unlock slave ptty");
+	e |= jb_check(unlockpt(mfd) != -1, "Could not unlock slave ptty");
 	char *ttynam = ptsname(mfd);
-	jb_check(ttynam, "Could not get tty name");
-	const fd_t sfd = jb_open(ttynam, O_RDWR);
-	*pslave = sfd;
+	e |= jb_check(ttynam, "Could not get tty name");
+	if (e) // error condition
+		exit(1);
+	*pslave = jb_open(ttynam, O_RDWR);
 	*pmaster = mfd;
 	return ttynam;
 }
@@ -239,7 +242,8 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	 *  this can be done with an ioctl but on others
 	 *  we need to re-open the slave tty.  */
 #ifdef TIOCSCTTY
-	jb_check(ioctl(ttyfd, TIOCSCTTY, 0) != 1, WARN_IOCTL "TIOCSCTTY");
+	jb_check(ioctl(ttyfd, TIOCSCTTY, 0) != 1,
+		"Could not run ioctl TIOCSCTTY");
 #else//!TIOCSCTTY
 	fd_t i = ttyfd; // save
 	ttyfd = jb_open(tty_name, O_RDWR);
@@ -266,8 +270,8 @@ fd_t run_command(char ** argv)
 {
 	fd_t ptyfd, ttyfd;
 	tty_name = get_pseudo_tty(&ptyfd, &ttyfd);
-	if (jb_check(tty_name, WARN_RES RES_TTY))
-		return -1;
+	if (!tty_name)
+		exit(1);
 	jb_check(fcntl(ptyfd,F_SETFL,O_NONBLOCK) != 1,
 		"Could not set file status flags on pty file descriptor");
 	jbxvt.com.width = sysconf(_SC_OPEN_MAX);
@@ -305,7 +309,8 @@ void tty_set_size(const uint8_t width, const uint8_t height)
 		return;
 	struct winsize wsize = {.ws_row = height, .ws_col = width};
 	const fd_t f = comm_pid == 0 ? 0 : jbxvt.com.fd;
-	jb_check(ioctl(f, TIOCSWINSZ, &wsize) != 1, WARN_IOCTL "TIOCSWINSZ");
+	jb_check(ioctl(f, TIOCSWINSZ, &wsize) != 1,
+		"Could not set ioctl TIOCSWINSZ");
 }
 #endif//TIOCSWINSZ
 #endif//!NETBSD&&!FREEBSD

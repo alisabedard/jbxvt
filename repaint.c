@@ -51,7 +51,7 @@ static int_fast32_t repaint_generic(xcb_point_t p,
 	// check inputs:
 	if (!str || !m)
 		  return p.y + f.height;
-	m = MIN(m, jbxvt.scr.chars.width - 1);
+	m = MIN(m, jbxvt.scr.chars.width);
 	if (rend && c1 <= jbxvt.scr.chars.width)
 		paint_rvec_text(str, rend + c1, m, p);
 	else
@@ -73,9 +73,7 @@ static int_fast16_t show_scroll_history(const xcb_rectangle_t r,
 		SLine * sl = jbxvt.scr.sline.data[i];
 		if (!sl) // no scroll history
 			  break;
-		const uint16_t lim = jbxvt.scr.chars.width - 1;
-		p->y = repaint_generic(*p,
-			MIN(sl->sl_length, lim),
+		p->y = repaint_generic(*p, sl->sl_length,
 			r.x, r.width, sl->sl_text, sl->sl_rend);
 	}
 	return line;
