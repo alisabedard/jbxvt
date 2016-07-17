@@ -259,7 +259,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
 #ifdef TIOCSCTTY
 	r = ioctl(ttyfd,TIOCSCTTY,0);
 	if (r == 1) {
-		perror("ioctl TIOCSCTTY");
+		perror(WARN_IOCTL "TIOCSCTTY");
 		r = 0;
 	}
 #else//!TIOCSCTTY
@@ -327,7 +327,9 @@ fd_t run_command(char ** argv)
 void tty_set_size(const uint8_t width, const uint8_t height)
 {
 	struct winsize wsize = {.ws_row = height, .ws_col = width};
-	ioctl(jbxvt.com.fd, TIOCSWINSZ, &wsize);
+	if (ioctl(jbxvt.com.fd, TIOCSWINSZ, &wsize) == 1) {
+		quit(1, WARN_IOCTL "TIOCSWINSZ");
+	}
 }
 #endif//TIOCSWINSZ
 #endif//!NETBSD&&!FREEBSD

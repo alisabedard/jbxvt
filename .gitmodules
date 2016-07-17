@@ -1,0 +1,3 @@
+[submodule "libjb"]
+	path = libjb
+	url = git@github.com:jefbed/libjb.git

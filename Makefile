@@ -46,19 +46,25 @@ OBJS+=sbar.o scr_erase.o scr_extend_selection.o scr_edit.o
 OBJS+=scr_request_selection.o scr_reset.o scr_string.o screen.o
 OBJS+=scroll.o selcmp.o selection.o show_selection.o ttyinit.o
 OBJS+=wm_del_win.o xevents.o xsetup.o xvt.o handle_sgr.o dec_reset.o
+LIBS+= -Llibjb -ljb
 CFLAGS+=-D_XOPEN_SOURCE=700 --std=c99
 CFLAGS+=-Wall -Wextra
-$(exe): $(OBJS)
+$(exe): $(OBJS) libjb/libjb.a
 	$(CC) -o $(exe) $(OBJS) $(CFLAGS) $(LIBS)
 	strip -o $(exe).tmp $(exe)
 	ls -l $(exe).tmp >> sz.log
 	rm -f $(exe).tmp
-	tail sz.log
+	tail -n 5 sz.log
+
+libjb/libjb.a:
+	cd libjb && make
+
 bindest=$(DESTDIR)$(PREFIX)/bin
 install:
 	install -d $(bindest)
 	install $(exe) $(bindest)
 clean:
 	rm -f $(exe) *.o
+	cd libjb && make clean
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
