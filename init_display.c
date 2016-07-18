@@ -134,20 +134,18 @@ static void create_vt_window(xcb_size_hints_t * restrict sh)
 
 static void get_sizehints(xcb_size_hints_t * restrict s)
 {
+	const Size f = jbxvt.X.font_size;
 	*s = (xcb_size_hints_t) {
-		.flags = USSize | PMinSize | PResizeInc
-			| PBaseSize,
-		.width = jbxvt.opt.size.width,
-		.height = jbxvt.opt.size.height,
-		.width_inc = jbxvt.X.font_size.width,
-		.height_inc = jbxvt.X.font_size.height
+		.flags = USSize | PMinSize | PResizeInc | PBaseSize,
+		.width = (1 + jbxvt.opt.size.width) * f.w,
+		.height = (1 + jbxvt.opt.size.height) * f.h,
+		.width_inc = f.w,
+		.height_inc = f.h,
+		.base_width = 300+f.w,
+		.base_height = f.h
 	};
-	++s->height;
-	s->width += 2; // adjust to 80 columns by default
-	s->width *= s->width_inc;
-	s->height *= s->height_inc;
-	s->min_width = s->width_inc + s->base_width;
-	s->min_height = s->height_inc + s->base_height;
+	s->min_width = f.w + s->base_width;
+	s->min_height = f.h + s->base_height;
 }
 
 //  Open the window.
