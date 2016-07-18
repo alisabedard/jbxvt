@@ -179,13 +179,19 @@ uint8_t * convert_line(uint8_t * restrict str,
 	uint16_t * restrict lenp, int16_t i1, int16_t i2)
 {
 	// set this before i2 is modified
-	const bool newline = (i2 + 1 == jbxvt.scr.chars.width)
+	const bool newline = (i2 >= jbxvt.scr.chars.width)
 		&& (str[*lenp] == 0);
 	i2 = compute_i2(*lenp, i1, i2, str);
-	static uint8_t buf[JBXVT_MAX_COLS + 3];
-	uint8_t *s = buf;
-	for(; i1 <= i2; ++i1, ++s)
-		  *s = str[i1];
+	//static uint8_t buf[JBXVT_MAX_COLS + 3];
+	uint8_t * buf = GC_MALLOC(PROP_SIZE);
+	uint8_t * s = buf;
+	for (; i1 <= i2; ++i1, ++s)
+		if (str[i1] >= ' ')
+			*s = str[i1];
+		else if (str[i1] == '\n')
+			*s = '\r';
+		else
+			*s = ' ';
 	if (newline)
 		*s++ = '\n';
 	*s = 0;
