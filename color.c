@@ -28,15 +28,10 @@ pixel_t set_color(const uint32_t vm, const pixel_t p, const xcb_gcontext_t gc)
 	return p;
 }
 
-void set_fg(const char * restrict color)
+void set_fg_or_bg(const char * color, const bool is_fg)
 {
-	jbxvt.X.color.current_fg = set_color(XCB_GC_FOREGROUND,
-		color?get_pixel(color):jbxvt.X.color.fg, jbxvt.X.gc.tx);
-}
-
-void set_bg(const char * restrict color)
-{
-	jbxvt.X.color.current_bg = set_color(XCB_GC_BACKGROUND,
-		color?get_pixel(color):jbxvt.X.color.bg, jbxvt.X.gc.tx);
+	set_color(is_fg ? XCB_GC_FOREGROUND : XCB_GC_BACKGROUND,
+		color ? get_pixel(color) : is_fg ? jbxvt.X.color.fg
+		: jbxvt.X.color.bg, jbxvt.X.gc.tx);
 }
 
