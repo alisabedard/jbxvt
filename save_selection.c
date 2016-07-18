@@ -33,7 +33,7 @@ static void handle_savedsel(uint8_t ** str, uint16_t * restrict total,
 			col2 = se2->col - 1;
 			i = 0;	// force loop exit
 		} else
-			  col2 = jbxvt.scr.chars.width - 1;
+			col2 = jbxvt.scr.chars.width - 1;
 		uint16_t len = sl->sl_length;
 		uint8_t * s = convert_line(sl->sl_text,
 			&len, col1, col2);
@@ -79,5 +79,4 @@ void save_selection(void)
 	jbxvt.sel.text = str;
 	jbxvt.sel.length = total - 1;
 }
-
 

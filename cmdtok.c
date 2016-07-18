@@ -124,15 +124,14 @@ static int_fast16_t handle_xev(xcb_generic_event_t * restrict event,
 	return 0;
 }
 
-static int_fast16_t output_to_command(int_fast16_t count)
+static int_fast16_t output_to_command(void)
 {
-	count = MIN(jbxvt.com.send_count, 100);
-	count = write(jbxvt.com.fd, jbxvt.com.send_nxt, count);
-	if (jb_check(count >= 0, "Could not write to command"))
+	const ssize_t count = write(jbxvt.com.fd, jbxvt.com.send_nxt,
+		jbxvt.com.send_count);
+	if (jb_check(count != -1, "Could not write to command"))
 		exit(1);
 	jbxvt.com.send_count -= count;
 	jbxvt.com.send_nxt += count;
-
 	return count;
 }
 
@@ -151,7 +150,7 @@ static int_fast16_t poll_io(int_fast16_t count, fd_set * restrict in_fdset)
 	int sv;
 	sv = select(jbxvt.com.width, in_fdset,&out_fdset, NULL, NULL);
 	if (sv != -1 && FD_ISSET(jbxvt.com.fd, &out_fdset)) {
-		count = output_to_command(count);
+		count = output_to_command();
 	}
 	return count;
 }

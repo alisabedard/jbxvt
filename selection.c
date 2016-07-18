@@ -13,6 +13,7 @@
 
 #include <gc.h>
 #include <stdlib.h>
+#include <string.h>
 
 // Static globals:
 static enum selunit selection_unit;	/* current unit of selection */
@@ -182,7 +183,6 @@ uint8_t * convert_line(uint8_t * restrict str,
 	const bool newline = (i2 >= jbxvt.scr.chars.width)
 		&& (str[*lenp] == 0);
 	i2 = compute_i2(*lenp, i1, i2, str);
-	//static uint8_t buf[JBXVT_MAX_COLS + 3];
 	uint8_t * buf = GC_MALLOC(PROP_SIZE);
 	uint8_t * s = buf;
 	for (; i1 <= i2; ++i1, ++s)
@@ -193,8 +193,8 @@ uint8_t * convert_line(uint8_t * restrict str,
 		else
 			*s = ' ';
 	if (newline)
-		*s++ = '\n';
-	*s = 0;
+		*s++ = '\r';
+	*s = 0; // NULL termination
 	*lenp = s - buf;
 	return (buf);
 }

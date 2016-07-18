@@ -48,17 +48,15 @@ static bool paste_from(const xcb_atom_t clipboard, const xcb_timestamp_t t)
 	o_c = xcb_get_selection_owner_unchecked(x, clipboard);
 	o_r = xcb_get_selection_owner_reply(x, o_c, &e);
 	if (e) {
-		free(o_r);
+		if (o_r)
+			free(o_r);
+		free(e);
 		return false;
 	}
 	xcb_convert_selection(x, o_r->owner, clipboard,
 		XCB_ATOM_STRING, clipboard, t);
-#if 0
-	xcb_convert_selection(x, o_r->owner, clipboard,
-		XCB_ATOM_STRING, clipboard, XCB_CURRENT_TIME);
-#endif
-	p_c = xcb_get_property(x, false, o_r->owner, clipboard, XCB_ATOM_ANY,
-		0, PROP_SIZE);
+	p_c = xcb_get_property(x, false, o_r->owner, clipboard,
+		XCB_ATOM_ANY, 0, PROP_SIZE);
 	free(o_r);
 	p_r = xcb_get_property_reply(x, p_c, NULL);
 	if (!p_r)
