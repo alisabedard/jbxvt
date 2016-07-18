@@ -184,6 +184,15 @@ static void save_render_style(const int_fast16_t n, VTScreen * restrict s)
 		  s->rend[s->cursor.y][s->cursor.x + i] = jbxvt.scr.rstyle;
 }
 
+static void check_wrap(VTScreen * restrict s)
+{
+	const uint8_t w = jbxvt.scr.chars.width;
+	if (s->cursor.x >= w) {
+		s->cursor.x = w;
+		s->wrap_next = s->decawm;
+	}
+}
+
 /*  Display the string at the current position.
     nlcount is the number of new lines in the string.  */
 void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
@@ -226,16 +235,7 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		len -= n;
 		str += n;
 		s->cursor.x += n;
-		const uint8_t w = jbxvt.scr.chars.width;
-		if (s->cursor.x >= w) {
-			if (!(s->wrap_next = s->decawm)) {
-				s->cursor.x = 0;
-				wrap(s);
-			} else {
-				s->cursor.x = w;
-				break;
-			}
-		}
+		check_wrap(s);
 	}
 	cursor(CURSOR_DRAW);
 }
