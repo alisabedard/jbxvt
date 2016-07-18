@@ -96,11 +96,11 @@ static void handle_insert(const uint8_t n, const xcb_point_t p)
 	uint32_t * r = c->rend [c->cursor.y];
 	const Size ch = jbxvt.scr.chars;
 	const xcb_point_t cur = c->cursor;
-	memmove(s + cur.x + n, s + cur.x, ch.width - cur.x);
-	memmove(r + cur.x + n, r + cur.x,
-		(ch.width - cur.x) * sizeof(uint32_t));
+	const uint16_t sz = ch.width - cur.x;
+	memmove(s + cur.x + n, s + cur.x, sz);
+	memmove(r + cur.x + n, r + cur.x, sz << 2);
 	const Size f = jbxvt.X.font_size;
-	const uint16_t width = (ch.width - cur.x - n) * f.w;
+	const uint16_t width = (sz - n) * f.w;
 	const int16_t x = p.x + n * f.w;
 	xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
 		jbxvt.X.gc.tx, p.x, p.y, x, p.y, width, f.h);
