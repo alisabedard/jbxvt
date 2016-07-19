@@ -156,49 +156,6 @@ void selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
 		: jbxvt.scr.offset - se->index - 1;
 }
 
-#if defined(__i386__) || defined(__amd64__)
-	__attribute__((pure,regparm(3)))
-#else
-	__attribute__((pure))
-#endif
-static inline uint8_t compute_i2(const uint16_t len, const int16_t i1,
-	int16_t i2, uint8_t * restrict str)
-{
-	i2 = MIN(i2, len - 1);
-	if (i2 - i1 >= JBXVT_MAX_COLS)
-		i2 = i1 + JBXVT_MAX_COLS;
-	while (i2 >= i1 && str[i2] == 0)
-		--i2;
-	return i2;
-}
-
-/*  Convert a section of displayed text line into a text string suitable
-    for pasting. *lenp is the length of the input string, i1 is index
-    of the first character to convert and i2 is the last.  The length
-    of the returned string is returned in *lenp; */
-uint8_t * convert_line(uint8_t * restrict str,
-	uint16_t * restrict lenp, int16_t i1, int16_t i2)
-{
-	// set this before i2 is modified
-	const bool newline = (i2 >= jbxvt.scr.chars.width)
-		&& (str[*lenp] == 0);
-	i2 = compute_i2(*lenp, i1, i2, str);
-	uint8_t * buf = GC_MALLOC(PROP_SIZE);
-	uint8_t * s = buf;
-	for (; i1 <= i2; ++i1, ++s)
-		if (str[i1] >= ' ')
-			*s = str[i1];
-		else if (str[i1] == '\n')
-			*s = '\r';
-		else
-			*s = ' ';
-	if (newline)
-		*s++ = '\r';
-	*s = 0; // NULL termination
-	*lenp = s - buf;
-	return (buf);
-}
-
 static uint16_t sel_s(SelEnd * restrict se2, uint8_t ** s)
 {
 	const bool ss = se2->type == SCREENSEL;
