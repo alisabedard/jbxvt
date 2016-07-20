@@ -1,5 +1,4 @@
-/*  Copyright 2016, Jeffrey E. Bedard
-    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+// Copyright 2016, Jeffrey E. Bedard
 
 #ifndef JBXVT_XVT_H
 #define JBXVT_XVT_H

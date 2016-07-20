@@ -89,15 +89,3 @@ void scr_index_from(const int8_t count, const int16_t top)
 	cursor(CURSOR_DRAW);
 }
 
-//  Reposition the scrolled text so that the scrollbar is at the bottom.
-void home_screen(void)
-{
-	if (likely(!jbxvt.scr.offset))
-		  return;
-	jbxvt.scr.offset = 0;
-	repaint();
-	const uint8_t h = jbxvt.scr.chars.height - 1;
-	cursor(CURSOR_DRAW);
-	sbar_show(h + jbxvt.scr.sline.top, 0, h);
-}
-
