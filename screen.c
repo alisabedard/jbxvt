@@ -4,22 +4,16 @@
 
 #include "screen.h"
 
-#include "change_offset.h"
 #include "config.h"
 #include "cursor.h"
-#include "libjb/log.h"
-#include "libjb/util.h"
 #include "repaint.h"
-#include "sbar.h"
-#include "scroll.h"
 #include "scr_erase.h"
 #include "scr_move.h"
 #include "scr_reset.h"
 #include "scr_string.h"
-#include "selection.h"
+#include "scroll.h"
 
 #include <gc.h>
-#include <stdlib.h>
 
 // Renderless 'E' at position:
 static void epos(const xcb_point_t p)
