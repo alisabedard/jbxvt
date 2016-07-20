@@ -199,7 +199,8 @@ static void set_ttymodes(void)
 #else//!B38400
 	term.c_cflag |= B9600;
 #endif//B38400
-	term.c_lflag = ISIG | IEXTEN | ICANON;
+	term.c_lflag = ISIG | IEXTEN | ICANON | ECHO | ECHOE | ECHOK
+		| ECHONL;
 	term.c_cc[VINTR] = 003;		/* ^C */
 	term.c_cc[VQUIT] = 034;		/* ^\ */
 	term.c_cc[VERASE] = 0177;	/* DEL */
