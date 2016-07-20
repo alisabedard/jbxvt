@@ -6,7 +6,7 @@
 
 #include "jbxvt.h"
 
-enum RenditionStyleFlags {
+enum RenderFlag {
 	RS_NONE = 0,
 	RS_BOLD = 1,
 	RS_ULINE = (1<<1),
@@ -67,7 +67,7 @@ enum RenditionStyleFlags {
 #define home_screen() change_offset(0)
 
 //  Change the rendition style.
-void scr_style(const uint32_t style);
+void scr_style(const enum RenderFlag style);
 
 //  Change between the alternate and the main screens
 //  mode_high is true for screen 2
