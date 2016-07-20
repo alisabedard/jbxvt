@@ -7,13 +7,7 @@
 #include "jbxvt.h"
 #include "save_selection.h"
 #include "selcmp.h"
-#include "screen.h"
 #include "show_selection.h"
-#include "xsetup.h"
-
-#include <gc.h>
-#include <stdlib.h>
-#include <string.h>
 
 // Static globals:
 static enum selunit selection_unit;	/* current unit of selection */
