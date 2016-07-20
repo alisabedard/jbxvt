@@ -4,14 +4,10 @@
 
 #include "repaint.h"
 
-#include "color.h"
 #include "config.h"
-#include "cursor.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "paint.h"
-#include "screen.h"
-#include "selection.h"
 #include "show_selection.h"
 
 #include <stdlib.h>
