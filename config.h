@@ -16,7 +16,13 @@
 enum {	SBAR_WIDTH = 10, // width of scroll bar
 	MARGIN = 1, // gap between the text and the window edges
 	JBXVT_ROWS = 24, // default # rows
-	JBXVT_COLUMNS = 80 // default # columns
+	JBXVT_COLUMNS = 80, // default # columns
+	MAX_SCROLL = 126, /* max # lines that can scroll at once.
+			    126 is greatest value supported. */
+	JBXVT_MAX_COLS = 255,
+	JBXVT_MAX_ROWS = 255,
+	JBXVT_PROP_SIZE = 1024, // selection property chunk size
+	JBXVT_SEL_KEY_DEL = 2000, // ms for kb input before selection
 };
 
 #endif//!JBXVT_CONFIG_H

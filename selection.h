@@ -6,12 +6,6 @@
 
 #include "jbxvt.h"
 
-enum {
-	PROP_SIZE = 1024, // chunk size for retrieving the selection property
-	SEL_KEY_DEL = 2000 /* time delay in allowing keyboard input
-			      to be accepted before a selection arrives. */
-};
-
 //  The current selection unit
 enum selunit { SEL_CHAR, SEL_WORD, SEL_LINE };
 

@@ -3,10 +3,9 @@
 
 #include "save_selection.h"
 
+#include "config.h"
 #include "jbxvt.h"
-#include "screen.h"
 #include "selcmp.h"
-#include "selection.h"
 
 #include <gc.h>
 #include <stdlib.h>
@@ -48,7 +47,7 @@ static uint8_t * convert_line(uint8_t * restrict str,
 	const bool newline = (i2 >= jbxvt.scr.chars.width)
 		&& (str[*lenp] == 0);
 	i2 = compute_i2(*lenp, i1, i2, str);
-	uint8_t * buf = GC_MALLOC(PROP_SIZE);
+	uint8_t * buf = GC_MALLOC(JBXVT_PROP_SIZE);
 	uint8_t * s = buf;
 	for (; i1 <= i2; ++i1, ++s)
 		if (str[i1] >= ' ')

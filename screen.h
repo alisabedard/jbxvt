@@ -6,13 +6,6 @@
 
 #include "jbxvt.h"
 
-enum {
-	MAX_SCROLL = 126, /* max # lines that can scroll at once.
-			    126 is greatest value supported. */
-	JBXVT_MAX_COLS = 255,
-	JBXVT_MAX_ROWS = 255
-};
-
 enum RenditionStyleFlags {
 	RS_NONE = 0,
 	RS_BOLD = 1,

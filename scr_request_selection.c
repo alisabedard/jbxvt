@@ -3,10 +3,9 @@
 
 #include "scr_request_selection.h"
 
+#include "config.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
-#include "screen.h"
-#include "selection.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -28,7 +27,7 @@ static void paste_root(void)
 	LOG("using root window XCB_ATOM_CUT_BUFFER0");
 	xcb_get_property_cookie_t c = xcb_get_property(jbxvt.X.xcb, false,
 		jbxvt.X.screen->root, XCB_ATOM_CUT_BUFFER0,
-		XCB_ATOM_STRING, 0, PROP_SIZE);
+		XCB_ATOM_STRING, 0, JBXVT_PROP_SIZE);
 	xcb_get_property_reply_t * r = xcb_get_property_reply(
 		jbxvt.X.xcb, c, NULL);
 	send_selection(xcb_get_property_value(r),
@@ -56,7 +55,7 @@ static bool paste_from(const xcb_atom_t clipboard, const xcb_timestamp_t t)
 	xcb_convert_selection(x, o_r->owner, clipboard,
 		XCB_ATOM_STRING, clipboard, t);
 	p_c = xcb_get_property(x, false, o_r->owner, clipboard,
-		XCB_ATOM_ANY, 0, PROP_SIZE);
+		XCB_ATOM_ANY, 0, JBXVT_PROP_SIZE);
 	free(o_r);
 	p_r = xcb_get_property_reply(x, p_c, NULL);
 	if (!p_r)
@@ -100,7 +99,7 @@ void paste_primary(const xcb_window_t window, const xcb_atom_t property)
 		// divide by 4 to convert 32 bit words to bytes
 		xcb_get_property_cookie_t c = xcb_get_property(x,
 			false, window, property, XCB_ATOM_ANY, nread / 4,
-			PROP_SIZE);
+			JBXVT_PROP_SIZE);
 		xcb_get_property_reply_t * r
 			= xcb_get_property_reply(x, c, NULL);
 		if (!r || r->type == XCB_ATOM_NONE)

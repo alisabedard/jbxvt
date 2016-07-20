@@ -10,7 +10,6 @@
 #include "sbar.h"
 #include "screen.h"
 #include "selection.h"
-#include "show_selection.h"
 
 #include <gc.h>
 #include <stdlib.h>
