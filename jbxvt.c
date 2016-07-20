@@ -5,7 +5,6 @@
 #include "config.h"
 #include "init_display.h"
 #include "screen.h"
-#include "ttyinit.h"
 #include "xsetup.h"
 #include "xvt.h"
 

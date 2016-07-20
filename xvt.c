@@ -24,12 +24,7 @@
 #include "scr_string.h"
 #include "selection.h"
 #include "Token.h"
-#include "ttyinit.h"
 #include "xsetup.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 static bool jbxvt_size_set;
 
