@@ -7,7 +7,6 @@
 #include "cursor.h"
 #include "jbxvt.h"
 #include "libjb/xcb.h"
-#include "paint.h"
 #include "sbar.h"
 #include "screen.h"
 #include "ttyinit.h"
@@ -181,11 +180,13 @@ static void setup_gcs(void)
 
 static void init_jbxvt_colors(void)
 {
+	xcb_connection_t * c = jbxvt.X.xcb;
+	const xcb_colormap_t cm = jbxvt.X.screen->default_colormap;
 	jbxvt.X.color.current_fg = jbxvt.X.color.fg
-		= get_pixel(jbxvt.opt.fg);
+		= jb_get_pixel(c, cm, jbxvt.opt.fg);
 	jbxvt.X.color.current_bg = jbxvt.X.color.bg
-		= get_pixel(jbxvt.opt.bg);
-	jbxvt.X.color.cursor = get_pixel(jbxvt.opt.cu);
+		= jb_get_pixel(c, cm, jbxvt.opt.bg);
+	jbxvt.X.color.cursor = jb_get_pixel(c, cm, jbxvt.opt.cu);
 }
 
 void init_display(char * name)

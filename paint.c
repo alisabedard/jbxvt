@@ -18,20 +18,37 @@
 #endif
 
 // returns pixel value for specified color
-__attribute__((nonnull))
-pixel_t get_pixel(const char * restrict color)
+__attribute__((nonnull,pure))
+static inline pixel_t pixel(const char * restrict color)
 {
 	return jb_get_pixel(jbxvt.X.xcb, jbxvt.X.screen->default_colormap,
 		color);
 }
 
-
-void set_fg_or_bg(const char * color, const bool is_fg)
+static inline void set(pixel_t * store, pixel_t (*func)(xcb_connection_t *,
+	const xcb_gc_t, const pixel_t), const pixel_t p)
 {
-	*(is_fg ? &jbxvt.X.color.current_fg : & jbxvt.X.color.current_bg)
-		= (is_fg ? jb_set_fg : jb_set_bg)(jbxvt.X.xcb,
-		jbxvt.X.gc.tx, color ? get_pixel(color) : is_fg
-		? jbxvt.X.color.fg : jbxvt.X.color.bg);
+	*store = func(jbxvt.X.xcb, jbxvt.X.gc.tx, p);
+}
+
+static inline void fg(const pixel_t p)
+{
+	set(&jbxvt.X.color.current_fg, jb_set_fg, p);
+}
+
+static inline void bg(const pixel_t p)
+{
+	set(&jbxvt.X.color.current_bg, jb_set_bg, p);
+}
+
+void set_fg(const char * color)
+{
+	fg(color ? pixel(color) : jbxvt.X.color.fg);
+}
+
+void set_bg(const char * color)
+{
+	bg(color ? pixel(color) : jbxvt.X.color.bg);
 }
 
 // 9-bit color
@@ -54,36 +71,6 @@ static pixel_t rgb_pixel(const uint16_t c)
 	return p;
 }
 
-static void fg(const pixel_t p)
-{
-	jbxvt.X.color.current_fg = jb_set_fg(jbxvt.X.xcb, jbxvt.X.gc.tx, p);
-}
-
-static void bg(const pixel_t p)
-{
-	jbxvt.X.color.current_bg = jb_set_bg(jbxvt.X.xcb, jbxvt.X.gc.tx, p);
-}
-
-static void rgb_fg(const uint16_t c)
-{
-	fg(rgb_pixel(c));
-}
-
-static void rgb_bg(const uint16_t c)
-{
-	bg(rgb_pixel(c));
-}
-
-static void ind_fg(const uint8_t index)
-{
-	fg(color_index[index]);
-}
-
-static void ind_bg(const uint8_t index)
-{
-	bg(color_index[index]);
-}
-
 static bool set_rval_colors(const uint32_t rval)
 {
 	bool fg_rgb_mode = rval & RS_FG_RGB;
@@ -97,27 +84,30 @@ static bool set_rval_colors(const uint32_t rval)
 	bool fg_set = false, bg_set = false;
 	if (fg_rgb_mode) {
 		CLOG("fg_rgb_mode: %d", bf);
-		rgb_fg(bf);
-//		set_rgb_colors(bf, true);
+		fg(rgb_pixel(bf));
 		fg_set = true;
 	} else if (fg_index_mode) {
 		CLOG("fg_index_mode: %d", bf);
-		ind_fg(bf);
+		fg(color_index[bf]);
 		fg_set = true;
 	}
 
 	if (bg_rgb_mode) {
 		CLOG("bg_rgb_mode: %d", bb);
-		rgb_bg(bb);
-//		set_rgb_colors(bb, false);
+		bg(rgb_pixel(bb));
 		bg_set = true;
 	} else if (bg_index_mode) {
 		CLOG("bg_index_mode: %d", bb);
-		ind_bg(bb);
+		bg(color_index[bb]);
 		bg_set = true;
 	}
 
 	return fg_set || bg_set;
+}
+
+static inline void font(const xcb_font_t f)
+{
+	xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, XCB_GC_FONT, &f);
 }
 
 //  Paint the text using the rendition value at the screen position.
@@ -131,39 +121,32 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 	const bool rvid = (rval & RS_RVID) || (rval & RS_BLINK);
 	const bool bold = rval & RS_BOLD;
 	bool cmod = set_rval_colors(rval);
+	xcb_connection_t * c = jbxvt.X.xcb;
+	const xcb_gc_t gc = jbxvt.X.gc.tx;
 	if (rvid) { // Reverse looked up colors.
 		LOG("rvid");
-		xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx,
-			XCB_GC_FOREGROUND | XCB_GC_BACKGROUND,
-			(uint32_t[]){ jbxvt.X.color.current_bg,
-			jbxvt.X.color.current_fg});
+		jb_set_fg(c, gc, jbxvt.X.color.current_bg);
+		jb_set_bg(c, gc, jbxvt.X.color.current_fg);
 		cmod = true;
 	}
 	p.y += jbxvt.X.font_ascent;
-	if(bold) {
-		xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx,
-			XCB_GC_FONT, &(uint32_t){
-			jbxvt.X.bold_font});
-	}
-	// Draw text with background:
-	xcb_image_text_8(jbxvt.X.xcb, len, jbxvt.X.win.vt,
-		jbxvt.X.gc.tx, p.x, p.y, (const char *)str);
+	if(bold)
+		font(jbxvt.X.bold_font);
+	// Draw const xcb_windowtext with background:
+	const xcb_window_t w = jbxvt.X.win.vt;
+	xcb_image_text_8(c, len, w, gc, p.x, p.y, (const char *)str);
 	++p.y; /* Padding for underline,
 		  use underline for italic. */
 	if (rval & RS_ULINE || unlikely(rval & RS_ITALIC)) {
-		xcb_poly_line(jbxvt.X.xcb, XCB_COORD_MODE_ORIGIN,
-			jbxvt.X.win.vt, jbxvt.X.gc.tx, 2,
-			(xcb_point_t[]){{p.x, p.y},
-			{p.x + len * jbxvt.X.font_size.width,
-			p.y}});
+		xcb_poly_line(c, XCB_COORD_MODE_ORIGIN, w, gc, 2,
+			(xcb_point_t[]){p, {p.x + len
+			* jbxvt.X.font_size.width, p.y}});
 	}
-	if(bold) { // restore font
-		xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx,
-			XCB_GC_FONT, &(uint32_t){jbxvt.X.font});
-	}
+	if(bold) // restore font
+		font(jbxvt.X.font);
 	if (cmod) {
-		set_fg(NULL);
-		set_bg(NULL);
+		fg(jbxvt.X.color.fg);
+		bg(jbxvt.X.color.bg);
 	}
 }
 
