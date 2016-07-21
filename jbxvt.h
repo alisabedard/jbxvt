@@ -1,13 +1,13 @@
 #ifndef JBXVT_H
 #define JBXVT_H
 
-#include "color.h"
 #include "command.h"
 #include "libjb/util.h"
-#include "Size.h"
-#include "VTScreen.h"
+#include "libjb/xcb.h"
 #include "SelEnd.h"
+#include "Size.h"
 #include "SLine.h"
+#include "VTScreen.h"
 
 typedef struct {
 	struct {

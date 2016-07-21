@@ -17,7 +17,25 @@
 #define CLOG(...)
 #endif
 
-static pixel_t get_pixel_for_word(const uint16_t c)
+// returns pixel value for specified color
+__attribute__((nonnull))
+pixel_t get_pixel(const char * restrict color)
+{
+	return jb_get_pixel(jbxvt.X.xcb, jbxvt.X.screen->default_colormap,
+		color);
+}
+
+
+void set_fg_or_bg(const char * color, const bool is_fg)
+{
+	*(is_fg ? &jbxvt.X.color.current_fg : & jbxvt.X.color.current_bg)
+		= (is_fg ? jb_set_fg : jb_set_bg)(jbxvt.X.xcb,
+		jbxvt.X.gc.tx, color ? get_pixel(color) : is_fg
+		? jbxvt.X.color.fg : jbxvt.X.color.bg);
+}
+
+// 9-bit color
+static pixel_t rgb_pixel(const uint16_t c)
 {
 	// Mask and scale to 8 bits.
 	uint16_t r = (c & 0700) >> 6;
@@ -29,28 +47,41 @@ static pixel_t get_pixel_for_word(const uint16_t c)
 	// Compensate for bit limitation by increasing intensity:
 	const uint16_t m = 017777;
 	r |= m; g |= m; b |= m;
-	pixel_t p = get_pixel_rgb(r, g, b);
+	const pixel_t p = jb_get_rgb_pixel(jbxvt.X.xcb,
+		jbxvt.X.screen->default_colormap, r, g, b);
 	CLOG("byte is 0x%x, r: 0x%x, g: 0x%x, b: 0x%x,"
 		" pixel is 0x%x", c, r, g, b, p);
 	return p;
 }
 
-// Set 9-bit color
-static pixel_t set_rgb_colors(const uint16_t c, const bool fg)
+static void fg(const pixel_t p)
 {
-	pixel_t p = get_pixel_for_word(c);
-	set_color(fg ? XCB_GC_FOREGROUND : XCB_GC_BACKGROUND,
-		c, jbxvt.X.gc.tx);
-	return p;
+	jbxvt.X.color.current_fg = jb_set_fg(jbxvt.X.xcb, jbxvt.X.gc.tx, p);
 }
 
-static pixel_t set_index_colors(const uint8_t index,
-	const bool fg)
+static void bg(const pixel_t p)
 {
-	const pixel_t p = color_index[index];
-	set_color(fg ? XCB_GC_FOREGROUND : XCB_GC_BACKGROUND,
-		p, jbxvt.X.gc.tx);
-	return p;
+	jbxvt.X.color.current_bg = jb_set_bg(jbxvt.X.xcb, jbxvt.X.gc.tx, p);
+}
+
+static void rgb_fg(const uint16_t c)
+{
+	fg(rgb_pixel(c));
+}
+
+static void rgb_bg(const uint16_t c)
+{
+	bg(rgb_pixel(c));
+}
+
+static void ind_fg(const uint8_t index)
+{
+	fg(color_index[index]);
+}
+
+static void ind_bg(const uint8_t index)
+{
+	bg(color_index[index]);
 }
 
 static bool set_rval_colors(const uint32_t rval)
@@ -66,21 +97,23 @@ static bool set_rval_colors(const uint32_t rval)
 	bool fg_set = false, bg_set = false;
 	if (fg_rgb_mode) {
 		CLOG("fg_rgb_mode: %d", bf);
-		set_rgb_colors(bf, true);
+		rgb_fg(bf);
+//		set_rgb_colors(bf, true);
 		fg_set = true;
 	} else if (fg_index_mode) {
 		CLOG("fg_index_mode: %d", bf);
-		set_index_colors(bf, true);
+		ind_fg(bf);
 		fg_set = true;
 	}
 
 	if (bg_rgb_mode) {
 		CLOG("bg_rgb_mode: %d", bb);
-		set_rgb_colors(bb, false);
+		rgb_bg(bb);
+//		set_rgb_colors(bb, false);
 		bg_set = true;
 	} else if (bg_index_mode) {
 		CLOG("bg_index_mode: %d", bb);
-		set_index_colors(bb, false);
+		ind_bg(bb);
 		bg_set = true;
 	}
 

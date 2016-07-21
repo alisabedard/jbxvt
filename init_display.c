@@ -7,6 +7,7 @@
 #include "cursor.h"
 #include "jbxvt.h"
 #include "libjb/xcb.h"
+#include "paint.h"
 #include "sbar.h"
 #include "screen.h"
 #include "ttyinit.h"
