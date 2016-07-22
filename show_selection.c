@@ -9,6 +9,26 @@
 #include "selend.h"
 #include "selection.h"
 
+static void paint_rvid(xcb_point_t start, xcb_point_t end,
+	int16_t col1, int16_t col2)
+{
+	//  Paint in the revend.yse video:
+	for (int_fast16_t row = start.y; row <= end.y; ++row) {
+		const Size f = jbxvt.X.font_size;
+		const int16_t y = MARGIN + row * f.h;
+		const int16_t x1 = MARGIN + ((row == start.y)
+			? start.x : col1) * f.w;
+		const int16_t x2 = MARGIN + ((row == end.y)
+			? end.x : col2) * f.w;
+		if (x2 > x1) {
+			xcb_poly_fill_rectangle(jbxvt.X.xcb,
+				jbxvt.X.win.vt, jbxvt.X.gc.cu, 1,
+				&(xcb_rectangle_t){
+				x1, y, x2 - x1, f.h});
+		}
+	}
+}
+
 /*  Paint any part of the selection that is
     between rows row1 and row2 inclusive
     and between cols col1 and col2 inclusive.  */
@@ -52,17 +72,7 @@ void show_selection(int16_t row1, int16_t row2, int16_t col1, int16_t col2)
 
 	if (sr > er)
 		return;
-	//  Paint in the reverse video:
-	for (int_fast16_t row = sr; row <= er; ++row) {
-		const Size f = jbxvt.X.font_size;
-		const int16_t y = MARGIN + row * f.h;
-		const int16_t x1 = MARGIN + ((row == sr) ? sc : col1) * f.w;
-		const int16_t x2 = MARGIN + ((row == er) ? ec : col2) * f.w;
-		if (x2 > x1) {
-			xcb_poly_fill_rectangle(jbxvt.X.xcb, jbxvt.X.win.vt,
-				jbxvt.X.gc.cu, 1, &(xcb_rectangle_t){
-				x1, y, x2 - x1, f.h});
-		}
-	}
+	paint_rvid((xcb_point_t){sc, sr}, (xcb_point_t){ec, er},
+		col1, col2);
 }
 
