@@ -82,26 +82,14 @@ static bool set_rval_colors(const uint32_t rval)
 	// Mask background colors, 9 bits offset by 15 bits
 	uint8_t bb = rval >> 16;
 	bool fg_set = false, bg_set = false;
-	if (fg_rgb_mode) {
-		CLOG("fg_rgb_mode: %d", bf);
+	if ((fg_set = fg_rgb_mode))
 		fg(rgb_pixel(bf));
-		fg_set = true;
-	} else if (fg_index_mode) {
-		CLOG("fg_index_mode: %d", bf);
+	else if ((fg_set = fg_index_mode))
 		fg(color_index[bf]);
-		fg_set = true;
-	}
-
-	if (bg_rgb_mode) {
-		CLOG("bg_rgb_mode: %d", bb);
+	if ((bg_set = bg_rgb_mode))
 		bg(rgb_pixel(bb));
-		bg_set = true;
-	} else if (bg_index_mode) {
-		CLOG("bg_index_mode: %d", bb);
+	else if ((bg_set = bg_index_mode))
 		bg(color_index[bb]);
-		bg_set = true;
-	}
-
 	return fg_set || bg_set;
 }
 
