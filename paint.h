@@ -10,10 +10,10 @@
 #include "libjb/xcb.h"
 
 // NULL value resets colors to stored value
-void set_fg(const char * color);
+pixel_t set_fg(const char * color);
 
 // NULL value resets colors to stored value
-void set_bg(const char * color);
+pixel_t set_bg(const char * color);
 
 //  Paint the text using the rendition value at the screen position.
 void paint_rval_text(uint8_t * restrict str, uint32_t rval,

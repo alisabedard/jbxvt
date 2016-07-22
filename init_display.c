@@ -7,6 +7,7 @@
 #include "cursor.h"
 #include "jbxvt.h"
 #include "libjb/xcb.h"
+#include "paint.h"
 #include "sbar.h"
 #include "screen.h"
 #include "ttyinit.h"
@@ -180,32 +181,22 @@ static void setup_gcs(void)
 
 static void init_jbxvt_colors(void)
 {
-	xcb_connection_t * c = jbxvt.X.xcb;
-	const xcb_colormap_t cm = jbxvt.X.screen->default_colormap;
-	jbxvt.X.color.current_fg = jbxvt.X.color.fg
-		= jb_get_pixel(c, cm, jbxvt.opt.fg);
-	jbxvt.X.color.current_bg = jbxvt.X.color.bg
-		= jb_get_pixel(c, cm, jbxvt.opt.bg);
-	jbxvt.X.color.cursor = jb_get_pixel(c, cm, jbxvt.opt.cu);
+	jbxvt.X.color.cursor = set_fg(jbxvt.opt.cu);
+	jbxvt.X.color.fg = set_fg(jbxvt.opt.fg);
+	jbxvt.X.color.bg = set_bg(jbxvt.opt.bg);
 }
 
 void init_display(char * name)
 {
 	jbxvt.X.xcb = jb_get_xcb_connection(jbxvt.opt.display,
 		&jbxvt.opt.screen);
-	xcb_intern_atom_cookie_t c = xcb_intern_atom(jbxvt.X.xcb,
-		false, 9, "CLIPBOARD");
 	jbxvt.X.screen = jb_get_xcb_screen(jbxvt.X.xcb);
-	const xcb_window_t root = jbxvt.X.screen->root;
 	init_jbxvt_colors();
 	setup_font();
-	create_window((uint8_t *)name, root);
+	create_window((uint8_t *)name, jbxvt.X.screen->root);
 	setup_gcs();
 	scr_init();
-	xcb_intern_atom_reply_t * r
-		= xcb_intern_atom_reply(jbxvt.X.xcb, c, NULL);
-	jbxvt.X.clipboard = r->atom;
-	free(r);
+	jbxvt.X.clipboard = jb_get_atom(jbxvt.X.xcb, "CLIPBOARD");
 	cursor(CURSOR_FOCUS_IN);
 }
 

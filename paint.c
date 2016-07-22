@@ -25,30 +25,31 @@ static inline pixel_t pixel(const char * restrict color)
 		color);
 }
 
-static inline void set(pixel_t * store, pixel_t (*func)(xcb_connection_t *,
+static inline pixel_t set(pixel_t * restrict store,
+	pixel_t (*func)(xcb_connection_t *,
 	const xcb_gc_t, const pixel_t), const pixel_t p)
 {
-	*store = func(jbxvt.X.xcb, jbxvt.X.gc.tx, p);
+	return *store = func(jbxvt.X.xcb, jbxvt.X.gc.tx, p);
 }
 
-static inline void fg(const pixel_t p)
+static inline pixel_t fg(const pixel_t p)
 {
-	set(&jbxvt.X.color.current_fg, jb_set_fg, p);
+	return set(&jbxvt.X.color.current_fg, jb_set_fg, p);
 }
 
-static inline void bg(const pixel_t p)
+static inline pixel_t bg(const pixel_t p)
 {
-	set(&jbxvt.X.color.current_bg, jb_set_bg, p);
+	return set(&jbxvt.X.color.current_bg, jb_set_bg, p);
 }
 
-void set_fg(const char * color)
+pixel_t set_fg(const char * color)
 {
-	fg(color ? pixel(color) : jbxvt.X.color.fg);
+	return fg(color ? pixel(color) : jbxvt.X.color.fg);
 }
 
-void set_bg(const char * color)
+pixel_t set_bg(const char * color)
 {
-	bg(color ? pixel(color) : jbxvt.X.color.bg);
+	return bg(color ? pixel(color) : jbxvt.X.color.bg);
 }
 
 // 9-bit color
@@ -120,7 +121,7 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 	p.y += jbxvt.X.font_ascent;
 	if(bold)
 		font(jbxvt.X.bold_font);
-	// Draw const xcb_windowtext with background:
+	// Draw text with background:
 	const xcb_window_t w = jbxvt.X.win.vt;
 	xcb_image_text_8(c, len, w, gc, p.x, p.y, (const char *)str);
 	++p.y; /* Padding for underline,
