@@ -164,19 +164,20 @@ static void create_window(uint8_t * restrict name,
 	switch_scrollbar();
 }
 
+static xcb_gc_t get_gc(const uint32_t vm, const void * vl)
+{
+	xcb_gc_t g = xcb_generate_id(jbxvt.X.xcb);
+	xcb_create_gc(jbxvt.X.xcb, g, jbxvt.X.win.main, vm, vl);
+	return g;
+}
+
 static void setup_gcs(void)
 {
-	jbxvt.X.gc.tx = xcb_generate_id(jbxvt.X.xcb);
-	jbxvt.X.gc.cu = xcb_generate_id(jbxvt.X.xcb);
-	xcb_create_gc(jbxvt.X.xcb, jbxvt.X.gc.tx,
-		jbxvt.X.win.main, XCB_GC_FOREGROUND
-		| XCB_GC_BACKGROUND | XCB_GC_FONT,
-		(uint32_t[]){jbxvt.X.color.fg,
-		jbxvt.X.color.bg, jbxvt.X.font});
-	xcb_create_gc(jbxvt.X.xcb, jbxvt.X.gc.cu,
-		jbxvt.X.win.main, XCB_GC_FUNCTION
-		| XCB_GC_PLANE_MASK, (uint32_t[]){XCB_GX_INVERT,
-		jbxvt.X.color.fg ^ jbxvt.X.color.bg});
+	const pixel_t f = jbxvt.X.color.fg, b = jbxvt.X.color.bg;
+	jbxvt.X.gc.tx = get_gc(XCB_GC_FOREGROUND | XCB_GC_BACKGROUND
+		| XCB_GC_FONT, (uint32_t[]){f, b, jbxvt.X.font});
+	jbxvt.X.gc.cu = get_gc(XCB_GC_FUNCTION | XCB_GC_PLANE_MASK,
+		(uint32_t[]){XCB_GX_INVERT, f ^ b});
 }
 
 static inline void init_jbxvt_colors(void)
