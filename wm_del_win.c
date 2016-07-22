@@ -1,13 +1,12 @@
 /*  Copyright 2016, Jeffrey E. Bedard
-    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+    Copyright 1992, 1997 John Bovey,
+    University of Kent at Canterbury.*/
 
 #include "wm_del_win.h"
 
 #include "jbxvt.h"
 
-#include <stdlib.h>
-
-long unsigned int wm_del_win(void)
+xcb_atom_t wm_del_win(void)
 {
 	static long unsigned int a;
 	if(!a) { // Init on first call:
