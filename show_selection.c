@@ -62,11 +62,10 @@ void show_selection(int16_t row1, int16_t row2, int16_t col1, int16_t col2)
 		e.y = row2;
 		e.x = col2;
 	}
-	if (e.x > col2)
-		e.x = col2;
 	if (s.y > e.y)
 		return;
-	paint_rvid((xcb_point_t){s.x, s.y}, (xcb_point_t){e.x, e.y},
-		col1, col2);
+	if (e.x > col2)
+		e.x = col2;
+	paint_rvid(s, e, col1, col2);
 }
 
