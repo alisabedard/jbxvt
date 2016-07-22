@@ -1,6 +1,6 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
-    University of Kent at Canterbury.*/
+    Unive.ysity of Kent at Cante.ybury.*/
 
 #include "show_selection.h"
 
@@ -39,40 +39,34 @@ void show_selection(int16_t row1, int16_t row2, int16_t col1, int16_t col2)
 		return;
 	if (selcmp(&jbxvt.sel.end1,&jbxvt.sel.end2) == 0)
 		return;
-	int16_t r1, c1, r2, c2;
-	selend_to_rc(&r1,&c1,&jbxvt.sel.end1);
-	selend_to_rc(&r2,&c2,&jbxvt.sel.end2);
-	col2++;
-
+	xcb_point_t p1, p2;
+	selend_to_rc(&p1.y, &p1.x, &jbxvt.sel.end1);
+	selend_to_rc(&p2.y, &p2.x, &jbxvt.sel.end2);
+	++col2;
 	//  Obtain initial and final endpoints for the selection.
-	int16_t sr, sc, er, ec;
-	if (r1 < r2 || (r1 == r2 && c1 <= c2)) {
-		sr = r1;
-		sc = c1;
-		er = r2;
-		ec = c2;
+	xcb_point_t s, e; // start and end
+	if (p1.y < p2.y || (p1.y == p2.y && p1.x <= p2.x)) {
+		s = p1;
+		e = p2;
 	} else {
-		sr = r2;
-		sc = c2;
-		er = r1;
-		ec = c1;
+		s = p2;
+		e = p1;
 	}
-	if (sr < row1) {
-		sr = row1;
-		sc = col1;
+	if (s.y < row1) {
+		s.y = row1;
+		s.x = col1;
 	}
-	if (sc < col1)
-		sc = col1;
-	if (er > row2) {
-		er = row2;
-		ec = col2;
+	if (s.x < col1)
+		s.x = col1;
+	if (e.y > row2) {
+		e.y = row2;
+		e.x = col2;
 	}
-	if (ec > col2)
-		ec = col2;
-
-	if (sr > er)
+	if (e.x > col2)
+		e.x = col2;
+	if (s.y > e.y)
 		return;
-	paint_rvid((xcb_point_t){sc, sr}, (xcb_point_t){ec, er},
+	paint_rvid((xcb_point_t){s.x, s.y}, (xcb_point_t){e.x, e.y},
 		col1, col2);
 }
 
