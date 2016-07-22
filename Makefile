@@ -46,7 +46,7 @@ OBJS+=cursor.o init_display.o repaint.o save_selection.o scr_move.o
 OBJS+=sbar.o scr_erase.o scr_extend_selection.o scr_edit.o
 OBJS+=scr_request_selection.o scr_reset.o scr_string.o screen.o
 OBJS+=scroll.o selcmp.o selection.o show_selection.o ttyinit.o
-OBJS+=wm_del_win.o xevents.o xsetup.o xvt.o handle_sgr.o dec_reset.o
+OBJS+=xevents.o xsetup.o xvt.o handle_sgr.o dec_reset.o
 LIBS+= -Llibjb -ljb
 CFLAGS+=-D_XOPEN_SOURCE=700 --std=c99
 CFLAGS+=-Wall -Wextra

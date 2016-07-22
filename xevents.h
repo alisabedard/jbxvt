@@ -5,8 +5,10 @@
 #define JBXVT_XEVENTS_H
 
 #include "Token.h"
-
 #include <stdbool.h>
+#include <xcb/xcb.h>
+
+xcb_atom_t wm_del_win(void);
 
 // convert next X event into a token
 bool handle_xevents(Token * restrict tk);

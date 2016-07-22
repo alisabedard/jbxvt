@@ -6,7 +6,6 @@
 #include "jbxvt.h"
 #include "lookup_key.h"
 #include "ttyinit.h"
-#include "wm_del_win.h"
 #include "xevents.h"
 #include "xeventst.h"
 

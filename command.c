@@ -5,7 +5,7 @@
 
 #include "jbxvt.h"
 #include "ttyinit.h"
-#include "wm_del_win.h"
+#include "xevents.h"
 #include "xeventst.h"
 
 #include <stdarg.h>

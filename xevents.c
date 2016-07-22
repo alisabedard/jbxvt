@@ -13,6 +13,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+xcb_atom_t wm_del_win(void)
+{
+	static long unsigned int a;
+	if(!a) { // Init on first call:
+		xcb_connection_t * c = jbxvt.X.xcb;
+		a = jb_get_atom(c, "WM_DELETE_WINDOW");
+		xcb_change_property(c, XCB_PROP_MODE_REPLACE,
+			jbxvt.X.win.main, jb_get_atom(c, "WM_PROTOCOLS"),
+			XCB_ATOM_ATOM, 32, 1, &a);
+	}
+	return a;
+}
+
 // Implementation of mouse tracking follows:
 enum TrackFlags {
 	TRACK_MOTION = 1 << 5,
