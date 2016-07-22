@@ -6,11 +6,8 @@
 #include "config.h"
 #include "jbxvt.h"
 #include "save_selection.h"
-#include "selcmp.h"
+#include "screen.h"
 #include "show_selection.h"
-
-// Static globals:
-static enum selunit selection_unit;	/* current unit of selection */
 
 static void prop(const xcb_window_t win, const xcb_atom_t a)
 {
@@ -70,132 +67,12 @@ void scr_start_selection(xcb_point_t p, enum selunit unit)
 	show_selection(0, c.h - 1, 0, c.w - 1);
 	xcb_point_t rc = { .x = (p.x - MARGIN) / f.w,
 		.y = (p.y - MARGIN) / f.h};
-	selection_unit = unit;
+	jbxvt.sel.unit = unit;
 	fix_rc(&rc);
 	rc_to_selend(rc.y, rc.x, &jbxvt.sel.anchor);
 	jbxvt.sel.end2 = jbxvt.sel.end1 = jbxvt.sel.anchor;
 	adjust_selection(&jbxvt.sel.end2);
 	show_selection(0, c.h - 1, 0, c.w - 1);
-}
-
-static bool ipos(int16_t * i)
-{
-	if (*i < 0) {
-		*i = -1 - *i;
-		return false;
-	}
-	return true;
-}
-
-//  Convert a row and column coordinates into a selection endpoint.
-void rc_to_selend(const int16_t row, const int16_t col, SelEnd * se)
-{
-	int16_t i = (row - jbxvt.scr.offset);
-	se->type = ipos(&i) ? SCREENSEL : SAVEDSEL;
-	se->index = i;
-	se->col = col;
-}
-
-#if defined(__i386__) || defined(__amd64__)
-__attribute__((regparm(2)))
-#endif//__i386__||__amd64__
-static uint8_t advance_c(uint8_t c, const uint8_t len,
-	uint8_t * restrict s)
-{
-	if (c && s[c - 1] < ' ')
-		while (c < len && s[c] < ' ')
-			c++;
-	if (c > len)
-		c = jbxvt.scr.chars.width;
-	return c;
-}
-
-#if defined(__i386__) || defined(__amd64__)
-__attribute__((regparm(2)))
-#endif//__i386__||__amd64__
-static uint8_t find_c(uint8_t c, int16_t i)
-{
-	return selection_unit == SEL_CHAR
-		? ipos(&i)
-		? advance_c(c, jbxvt.scr.chars.width,
-			    jbxvt.scr.current->text[i])
-		: advance_c(c, jbxvt.scr.sline.data[i]->sl_length,
-			    jbxvt.scr.sline.data[i]->sl_text)
-		: c;
-}
-
-/*  Fix the coordinates so that they are within the screen and do not lie within
- *  empty space.  */
-void fix_rc(xcb_point_t * restrict rc)
-{
-	const Size c = jbxvt.scr.chars;
-	if(!c.h || !c.w)
-		  return; // prevent segfault on bad window size.
-	rc->x = MAX(rc->x, 0);
-	rc->x = MIN(rc->x, c.w - 1);
-	rc->y = MAX(rc->y, 0);
-	rc->y = MIN(rc->y, c.h - 1);
-	rc->x = find_c(rc->x, rc->y - jbxvt.scr.offset);
-}
-
-//  Convert the selection into a row and column.
-void selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
-	SelEnd * restrict se)
-{
-	if (se->type == NOSEL)
-		return;
-
-	*colp = se->col;
-	*rowp = se->type == SCREENSEL ? se->index + jbxvt.scr.offset
-		: jbxvt.scr.offset - se->index - 1;
-}
-
-static uint16_t sel_s(SelEnd * restrict se2, uint8_t ** s)
-{
-	const bool ss = se2->type == SCREENSEL;
-	*s = ss ? jbxvt.scr.current->text[se2->index]
-		: jbxvt.scr.sline.data[se2->index]->sl_text;
-	return ss ? jbxvt.scr.chars.width
-		: jbxvt.scr.sline.data[se2->index]->sl_length;
-}
-
-static void adj_sel_to_word(SelEnd * include,
-	SelEnd * se1, SelEnd * se2)
-{
-	uint8_t * s = se1->type == SCREENSEL
-		? jbxvt.scr.current->text[se1->index]
-		: jbxvt.scr.sline.data[se1->index]->sl_text;
-	int16_t i = se1->col;
-	while (i && s[i] != ' ')
-		  --i;
-	se1->col = i?i+1:0;
-	i = se2->col;
-	if (se2 == include || !selcmp(se2,&jbxvt.sel.anchor))
-		  ++i;
-	const uint16_t len = sel_s(se2, &s);
-	while (i < len && s[i] && s[i] != ' ' && s[i] != '\n')
-		  ++i;
-	se2->col = i;
-
-}
-
-/*  Adjust the selection to a word or line boundary. If the include endpoint is
- *  non NULL then the selection is forced to be large enough to include it.
- */
-void adjust_selection(SelEnd * restrict include)
-{
-	if (selection_unit == SEL_CHAR)
-		return;
-	SelEnd *se1, *se2;
-	const bool oneless = selcmp(&jbxvt.sel.end1,&jbxvt.sel.end2) <= 0;
-	se1 = oneless ? &jbxvt.sel.end1 : &jbxvt.sel.end2;
-	se2 = oneless ? &jbxvt.sel.end2 : &jbxvt.sel.end1;
-	if (selection_unit == SEL_WORD)
-		  adj_sel_to_word(include, se1, se2);
-	else if (selection_unit == SEL_LINE) {
-		se1->col = 0;
-		se2->col = jbxvt.scr.chars.width;
-	}
 }
 
 /*  Determine if the current selection overlaps row1-row2 and if it does then

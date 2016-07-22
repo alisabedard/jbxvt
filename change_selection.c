@@ -6,7 +6,7 @@
 #include "config.h"
 #include "jbxvt.h"
 #include "screen.h"
-#include "selcmp.h"
+#include "selend.h"
 #include "selection.h"
 
 static void invert(const Size c, const Size f, const int16_t rs,

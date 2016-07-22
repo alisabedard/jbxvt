@@ -62,6 +62,10 @@ enum RenderFlag {
 #define BCOLOR_6 "aquamarine"
 #define BCOLOR_7 "white"
 
+/*  Fix the coordinates so that they are within the screen
+    and do not lie within empty space.  */
+void fix_rc(xcb_point_t * restrict rc);
+
 //  Change the rendition style.
 void scr_style(const enum RenderFlag style);
 

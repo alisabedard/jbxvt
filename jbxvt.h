@@ -4,7 +4,8 @@
 #include "command.h"
 #include "libjb/util.h"
 #include "libjb/xcb.h"
-#include "SelEnd.h"
+#include "selection.h"
+#include "selend.h"
 #include "Size.h"
 #include "SLine.h"
 #include "VTScreen.h"
@@ -48,6 +49,7 @@ typedef struct {
 		uint8_t * text;
 		SelEnd end1, end2, // selection endpoints
 			     anchor; //selection anchor
+		enum selunit unit;
 		uint16_t length;
 	} sel;
 	struct {

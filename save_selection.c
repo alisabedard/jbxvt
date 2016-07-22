@@ -5,7 +5,7 @@
 
 #include "config.h"
 #include "jbxvt.h"
-#include "selcmp.h"
+#include "selend.h"
 
 #include <gc.h>
 #include <stdlib.h>
