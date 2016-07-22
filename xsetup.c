@@ -22,13 +22,14 @@
 //  Map the window
 void map_window(void)
 {
-	xcb_map_window(jbxvt.X.xcb, jbxvt.X.win.main);
-	xcb_map_subwindows(jbxvt.X.xcb, jbxvt.X.win.main);
+	xcb_connection_t * x = jbxvt.X.xcb;
+	xcb_map_window(x, jbxvt.X.win.main);
+	xcb_map_subwindows(x, jbxvt.X.win.main);
 	/*  Setup the window now so that we can add LINES and COLUMNS to
 	 *  the environment.  */
 	resize_window();
 	// Forcibly show the window now:
-	xcb_flush(jbxvt.X.xcb);
+	xcb_flush(x);
 }
 
 #define RSZ_VM (XCB_CONFIG_WINDOW_WIDTH|XCB_CONFIG_WINDOW_HEIGHT)
@@ -44,7 +45,8 @@ static inline void resize_with_scrollbar(xcb_get_geometry_reply_t * r)
 	jbxvt.scr.pixels.width = r->width - SBAR_WIDTH;
 	// -1 to show the border:
 	cfg(jbxvt.X.win.sb, (Size){.w = SBAR_WIDTH - 1, .h = r->height});
-	cfg(jbxvt.X.win.vt, (Size){.w = r->width - SBAR_WIDTH, .h = r->height});
+	cfg(jbxvt.X.win.vt, (Size){.w = r->width - SBAR_WIDTH,
+		.h = r->height});
 }
 
 static inline void resize_without_scrollbar(xcb_get_geometry_reply_t * r)
@@ -78,30 +80,27 @@ void resize_window(void)
 void switch_scrollbar(void)
 {
 	LOG("switch_scrollbar()");
-	xcb_get_geometry_cookie_t c = xcb_get_geometry(jbxvt.X.xcb,
-		jbxvt.X.win.main);
+	xcb_connection_t * x = jbxvt.X.xcb;
+	const xcb_window_t mw = jbxvt.X.win.main;
+	xcb_get_geometry_cookie_t c = xcb_get_geometry(x, mw);
 	const bool sb = jbxvt.opt.show_scrollbar;
 	int16_t w = sb ? 0 : SBAR_WIDTH;
-	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt,
-		XCB_CONFIG_WINDOW_X, &w);
-	xcb_get_geometry_reply_t * r;
-	r = xcb_get_geometry_reply(jbxvt.X.xcb, c, NULL);
-	if (!r) // failed
-		  return;
+	xcb_configure_window(x, jbxvt.X.win.vt, XCB_CONFIG_WINDOW_X, &w);
+	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(x, c, NULL);
+	if (jb_check(r, "Could not get geometry"))
+		abort();
 	w = r->width + (sb ? -SBAR_WIDTH : w);
 	free(r);
-	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.main,
-		XCB_CONFIG_WINDOW_WIDTH, &w);
-	jbxvt.opt.show_scrollbar = !sb;
+	xcb_configure_window(x, mw, XCB_CONFIG_WINDOW_WIDTH, &w);
+	jbxvt.opt.show_scrollbar ^= true;
 }
 
 // Change window or icon name:
 void change_name(uint8_t * restrict str, const bool icon)
 {
-	size_t l = 0;
-	while(str[++l]);
 	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE,
-		jbxvt.X.win.main, icon?XCB_ATOM_WM_ICON_NAME:XCB_ATOM_WM_NAME,
-		XCB_ATOM_STRING, 8, l, str);
+		jbxvt.X.win.main, icon ? XCB_ATOM_WM_ICON_NAME
+		: XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8, strlen((char*)str),
+		str);
 }
 

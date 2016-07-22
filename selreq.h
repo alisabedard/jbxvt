@@ -1,8 +1,9 @@
 /*  Copyright 2016, Jeffrey E. Bedard
-    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+    Copyright 1992, 1997 John Bovey,
+    University of Kent at Canterbury.*/
 
-#ifndef SCR_REQ_SEL_H
-#define SCR_REQ_SEL_H
+#ifndef JBXVT_SELREQ_H
+#define JBXVT_SELREQ_H
 
 #include <xcb/xcb.h>
 
@@ -13,4 +14,4 @@ void request_selection(const xcb_timestamp_t t);
 void paste_primary(const xcb_window_t window, const xcb_atom_t property);
 
 
-#endif//!SCR_REQ_SEL_H
+#endif//!JBXVT_SELREQ_H

@@ -22,7 +22,6 @@ enum KSType {
 	KS_TYPE_NONE,		// No output
 	KS_TYPE_CHAR,           // as printf("%c",ks_value)
 	KS_TYPE_XTERM,          // as printf("\033[%d",ks_value)
-	KS_TYPE_SUN,            // as printf("\033[%dz",ks_value)
 	KS_TYPE_APPKEY,         // as printf("\033O%c",ks_value)
 	KS_TYPE_NONAPP          // as printf("\033[%c",ks_value)
 };

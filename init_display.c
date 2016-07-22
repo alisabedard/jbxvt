@@ -34,25 +34,19 @@ enum EventMasks {
 
 static xcb_font_t get_font(const char * name)
 {
-	xcb_font_t f = xcb_generate_id(jbxvt.X.xcb);
-	size_t l = 0;
-	while(name[++l]);
-	xcb_void_cookie_t c = xcb_open_font_checked(jbxvt.X.xcb,
-		f, l, name);
-	xcb_generic_error_t * error
-		= xcb_request_check(jbxvt.X.xcb, c);
+	xcb_connection_t * restrict x = jbxvt.X.xcb;
+	xcb_font_t f = xcb_generate_id(x);
+	xcb_void_cookie_t c = xcb_open_font_checked(x, f, strlen(name), name);
+	xcb_generic_error_t * error = xcb_request_check(x, c);
 	if (error) {
-		l = 0;
-		const char * fallback = FALLBACK_FONT;
-		while(fallback[++l]);
-		c = xcb_open_font_checked(jbxvt.X.xcb, f,
-			l, fallback);
-		error = xcb_request_check(jbxvt.X.xcb, c);
-		if(jb_check(!error, "Could not open fallback font"))
-			exit(1);
-		if (jbxvt.X.font)
-			  // Fall back if bold font
-			  // unavailable:
+		free(error);
+		const char * fb = FALLBACK_FONT;
+		c = xcb_open_font_checked(x, f, strlen(fb), fb);
+		error = xcb_request_check(x, c);
+		if(jb_check(!error, "Could not open fb font"))
+			exit(1); // no need to free error, exiting
+		if (jbxvt.X.font) // already set
+			  // Fall back if bold font unavailable:
 			  jbxvt.X.bold_font = jbxvt.X.font;
 	}
 	return f;
@@ -77,11 +71,9 @@ static void create_main_window(xcb_size_hints_t * restrict sh,
 	const xcb_window_t root)
 {
 	jbxvt.X.win.main = xcb_generate_id(jbxvt.X.xcb);
-	xcb_create_window(jbxvt.X.xcb, XCB_COPY_FROM_PARENT,
-		jbxvt.X.win.main, root, sh->x, sh->y,
-		sh->width, sh->height, 0,
-		XCB_WINDOW_CLASS_COPY_FROM_PARENT,
-		XCB_COPY_FROM_PARENT, XCB_CW_EVENT_MASK,
+	xcb_create_window(jbxvt.X.xcb, 0, jbxvt.X.win.main, root,
+		sh->x, sh->y, sh->width, sh->height, 0, 0, 0,
+		XCB_CW_EVENT_MASK,
 		(uint32_t[]){MW_EVENTS});
 	const Size f = jbxvt.X.font_size;
 	Size * c = &jbxvt.scr.chars;
@@ -104,18 +96,13 @@ static xcb_cursor_t get_cursor(const uint16_t id,
 
 static void create_sb_window(const uint16_t height)
 {
-	jbxvt.X.win.sb = xcb_generate_id(jbxvt.X.xcb);
-	xcb_cursor_t c = get_cursor(XC_sb_v_double_arrow,
-		0, 0xffff);
-	xcb_create_window(jbxvt.X.xcb, XCB_COPY_FROM_PARENT,
-		jbxvt.X.win.sb, jbxvt.X.win.main, -1, -1,
-		SBAR_WIDTH - 1, height, 1,
-		XCB_WINDOW_CLASS_COPY_FROM_PARENT,
-		XCB_COPY_FROM_PARENT, XCB_CW_BACK_PIXEL
+	xcb_cursor_t c = get_cursor(XC_sb_v_double_arrow, 0, 0xffff);
+	xcb_create_window(jbxvt.X.xcb, 0, jbxvt.X.win.sb
+		= xcb_generate_id(jbxvt.X.xcb), jbxvt.X.win.main, -1, -1,
+		SBAR_WIDTH - 1, height, 1, 0, 0, XCB_CW_BACK_PIXEL
 		| XCB_CW_BORDER_PIXEL | XCB_CW_EVENT_MASK
-		| XCB_CW_CURSOR, (uint32_t[]){
-		jbxvt.X.color.bg, jbxvt.X.color.fg,
-		SUB_EVENTS, c});
+		| XCB_CW_CURSOR, (uint32_t[]){ jbxvt.X.color.bg,
+		jbxvt.X.color.fg, SUB_EVENTS, c});
 	xcb_free_cursor(jbxvt.X.xcb, c);
 }
 

@@ -5,6 +5,7 @@
 #include "libjb/log.h"
 
 #include <stdio.h>
+#include <string.h>
 #include <xcb/xcb.h>
 #include <xcb/xcb_keysyms.h>
 // Not part of xcb (yet):
@@ -80,13 +81,17 @@ void set_keys(const bool mode_high, const bool is_cursor)
 	*(is_cursor ? &lk_app_cur : &lk_app_kp) = mode_high;
 }
 
+struct Format {
+	uint8_t key;
+	const char * value;
+};
+
+
 static char * get_format(const enum KSType type)
 {
 	switch(type) {
 	case KS_TYPE_XTERM:
 		return "\033[%d~";
-	case KS_TYPE_SUN:
-		return "\033[%dz";
 	case KS_TYPE_APPKEY:
 		return "\033O%c";
 	case KS_TYPE_NONAPP:
@@ -176,20 +181,16 @@ uint8_t * lookup_key(void * restrict ev, int_fast16_t * restrict pcount)
 	xcb_key_symbols_free(syms);
 	char *s = get_s(k, (char *)kbuf);
 	if (s) {
-		uint8_t l = 0;
-		while (s[++l]);
+		const size_t l = strlen(s);
 		*pcount = l;
 #ifdef KEY_DEBUG
-		for (uint8_t i = 0; i < l; ++i)
+		for (size_t i = 0; i < l; ++i)
 			LOG("s[%d]: 0x%x", i, s[i]);
 #endif//KEY_DEBUG
 		return (uint8_t *)s;
 	}
-	if (k >= 0xffe0) {
-		// Don't display non-printable characters/modifiers:
-		*pcount = 0;
-		return NULL;
-	}
+	if (k >= 0xffe0) // Don't display non-printable chars
+		return (uint8_t *)(*pcount = 0);
 	kbuf[0] = k;
 	apply_state(ke->state, kbuf);
 #ifdef KEY_DEBUG

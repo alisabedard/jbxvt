@@ -1,7 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 
-#include "scr_extend_selection.h"
+#include "selex.h"
 
 #include "config.h"
 #include "change_selection.h"
