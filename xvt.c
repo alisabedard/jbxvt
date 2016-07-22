@@ -4,27 +4,26 @@
 #include "xvt.h"
 
 #include "cmdtok.h"
-#include "command.h"
 #include "cursor.h"
 #include "dec_reset.h"
-#include "handle_sgr.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "lookup_key.h"
 #include "repaint.h"
 #include "sbar.h"
-#include "screen.h"
-#include "scroll.h"
 #include "scr_edit.h"
 #include "scr_erase.h"
 #include "scr_move.h"
 #include "scr_reset.h"
 #include "scr_string.h"
-#include "selection.h"
+#include "screen.h"
+#include "scroll.h"
 #include "selex.h"
 #include "selreq.h"
 #include "Token.h"
 #include "xsetup.h"
+
+#include <stdlib.h>
 
 static bool jbxvt_size_set;
 
