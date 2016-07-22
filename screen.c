@@ -6,6 +6,7 @@
 
 #include "config.h"
 #include "cursor.h"
+#include "jbxvt.h"
 #include "repaint.h"
 #include "sbar.h"
 #include "scr_erase.h"

@@ -36,9 +36,6 @@ static char ** parse_command_line(const int argc, char ** argv)
 		case 'C': // columns
 			jbxvt.opt.size.cols = atoi(optarg);
 			break;
-		case 'c': // cursor color
-			jbxvt.opt.cu = optarg;
-			break;
 		case 'e': // exec
 			return argv + optind;
 		case 'F': // font
@@ -75,9 +72,8 @@ int main(int argc, char ** argv)
 {
 	GC_INIT();
 	// Set some defaults which may be overridden.
-	jbxvt.opt.fg = COLOR_7;
-	jbxvt.opt.cu = COLOR_7;
-	jbxvt.opt.bg = COLOR_0;
+	jbxvt.opt.fg = JBXVT_FG;
+	jbxvt.opt.bg = JBXVT_BG;
 	jbxvt.opt.font = DEF_FONT;
 	jbxvt.opt.bold_font = BOLD_FONT;
 	jbxvt.opt.size.width = JBXVT_COLUMNS;

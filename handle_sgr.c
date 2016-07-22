@@ -3,8 +3,8 @@
 
 #include "handle_sgr.h"
 
+#include "jbxvt.h"
 #include "libjb/log.h"
-#include "libjb/util.h"
 #include "paint.h"
 #include "screen.h"
 

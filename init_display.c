@@ -176,12 +176,11 @@ static void setup_gcs(void)
 	xcb_create_gc(jbxvt.X.xcb, jbxvt.X.gc.cu,
 		jbxvt.X.win.main, XCB_GC_FUNCTION
 		| XCB_GC_PLANE_MASK, (uint32_t[]){XCB_GX_INVERT,
-		jbxvt.X.color.cursor ^ jbxvt.X.color.bg});
+		jbxvt.X.color.fg ^ jbxvt.X.color.bg});
 }
 
-static void init_jbxvt_colors(void)
+static inline void init_jbxvt_colors(void)
 {
-	jbxvt.X.color.cursor = set_fg(jbxvt.opt.cu);
 	jbxvt.X.color.fg = set_fg(jbxvt.opt.fg);
 	jbxvt.X.color.bg = set_bg(jbxvt.opt.bg);
 }

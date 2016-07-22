@@ -13,6 +13,9 @@
 #define TERM_ENV "xterm-256color" // TERM env var to set
 #define COMMAND "/bin/sh" // default command to run
 
+#define JBXVT_FG "white"
+#define JBXVT_BG "black"
+
 enum {	SBAR_WIDTH = 10, // width of scroll bar
 	MARGIN = 1, // gap between the text and the window edges
 	JBXVT_ROWS = 24, // default # rows

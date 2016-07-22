@@ -25,8 +25,7 @@ typedef struct {
 			xcb_gcontext_t tx, cu;
 		} gc;
 		struct {
-			pixel_t bg, fg, cursor;
-			pixel_t current_fg, current_bg;
+			pixel_t bg, fg, current_fg, current_bg;
 		} color;
 		Size font_size;
 		Size window_size;
@@ -68,7 +67,7 @@ typedef struct {
 		uint16_t send_count; // # chars waiting to be sent
 	} com;
 	struct {
-		char *bg, *fg, *cu, *font, *bold_font, *display;
+		char *bg, *fg, *font, *bold_font, *display;
 		int screen;
 		Size size;
 		bool show_scrollbar;

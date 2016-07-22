@@ -8,6 +8,7 @@
 #include "cursor.h"
 #include "dec_reset.h"
 #include "handle_sgr.h"
+#include "jbxvt.h"
 #include "libjb/log.h"
 #include "lookup_key.h"
 #include "repaint.h"
