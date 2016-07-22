@@ -10,6 +10,7 @@
 #include "libjb/log.h"
 #include "libjb/util.h"
 #include "paint.h"
+#include "sbar.h"
 #include "screen.h"
 #include "scroll.h"
 #include "scr_move.h"
@@ -43,7 +44,7 @@ void scr_set_tab(int i, const bool value)
 void scr_tab(void)
 {
 	LOG("scr_tab()");
-	home_screen();
+	change_offset(0);
 	VTScreen * s = jbxvt.scr.current;
 	const uint8_t w = jbxvt.scr.chars.width - 1;
 	xcb_point_t c = s->cursor;
@@ -198,7 +199,7 @@ static void check_wrap(VTScreen * restrict s)
 void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 {
 	SLOG("scr_string(%s, len: %d, nlcount: %d)", str, len, nlcount);
-	home_screen();
+	change_offset(0);
 	cursor(CURSOR_DRAW);
 	if (nlcount > 0)
 		  handle_new_lines(nlcount);

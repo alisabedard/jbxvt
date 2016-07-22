@@ -33,7 +33,7 @@ static void get_horz_geo(xcb_rectangle_t * restrict h,
 void scr_erase_line(const int8_t mode)
 {
 	LOG("scr_erase_line(%d)", mode);
-	home_screen();
+	change_offset(0);
 	VTScreen * scr = jbxvt.scr.current;
 	xcb_point_t c = scr->cursor;
 	const uint8_t fh = jbxvt.X.font_size.height;
@@ -87,7 +87,7 @@ static void common_scr_erase(const xcb_rectangle_t r,
 void scr_erase_screen(const int8_t mode)
 {
 	LOG("scr_erase_screen(%d)", mode);
-	home_screen();
+	change_offset(0);
 	VTScreen * s = jbxvt.scr.current;
 	s->wrap_next = 0;
 	const Size c = jbxvt.scr.chars;

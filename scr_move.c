@@ -3,7 +3,7 @@
 #include "cursor.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
-#include "screen.h"
+#include "sbar.h"
 #include "scroll.h"
 #include "scr_reset.h"
 #include "selection.h"
@@ -32,7 +32,7 @@ void scr_move(const int16_t x, const int16_t y, const uint8_t relative)
 #ifdef MOVE_DEBUG
 	LOG("scr_move(x:%d, y:%d, relative:%d)", x, y, relative);
 #endif//MOVE_DEBUG
-	home_screen();
+	change_offset(0);
 	cursor(CURSOR_DRAW); // clear
 	xcb_point_t * c = &jbxvt.scr.current->cursor;
 	/* Sanitize non-relative arguments--must be positive.  */

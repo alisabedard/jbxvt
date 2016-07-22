@@ -4,8 +4,10 @@
 #include "sbar.h"
 
 #include "config.h"
+#include "cursor.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "repaint.h"
 
 #include <stdlib.h>
 
@@ -44,5 +46,20 @@ void sbar_show(uint16_t length, const int16_t low,
 	if (bot < sbar.sz.height)
 		xcb_clear_area(jbxvt.X.xcb, false, sb, 0, bot + 1,
 			s.w, s.h - bot - 1);
+}
+
+//  Change the value of the scrolled screen offset and repaint the screen
+void change_offset(int16_t n)
+{
+	const int32_t t = jbxvt.scr.sline.top;
+	n = MIN(MAX(n, 0), t);
+	if (n == jbxvt.scr.offset)
+		return;
+	jbxvt.scr.offset = n;
+	const Size c = jbxvt.scr.chars;
+	cursor(CURSOR_DRAW); // clear
+	repaint();
+	cursor(CURSOR_DRAW); // draw
+	sbar_show(c.h + t - 1, n, n + c.h - 1);
 }
 

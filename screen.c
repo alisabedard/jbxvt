@@ -7,6 +7,7 @@
 #include "config.h"
 #include "cursor.h"
 #include "repaint.h"
+#include "sbar.h"
 #include "scr_erase.h"
 #include "scr_move.h"
 #include "scr_reset.h"
@@ -57,7 +58,7 @@ void scr_init(void)
 //  Change between the alternate and the main screens
 void scr_change_screen(const bool mode_high)
 {
-	home_screen();
+	change_offset(0);
 	jbxvt.scr.current = mode_high
 		? &jbxvt.scr.s2 : &jbxvt.scr.s1;
 	jbxvt.sel.end2.type = NOSEL;
@@ -77,7 +78,7 @@ void scr_style(const enum RenderFlag style)
 // Scroll from top to current bottom margin count lines, moving cursor
 void scr_index_from(const int8_t count, const int16_t top)
 {
-	home_screen();
+	change_offset(0);
 	cursor(CURSOR_DRAW);
 	scroll(top, jbxvt.scr.current->margin.b, count);
 	cursor(CURSOR_DRAW);

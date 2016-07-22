@@ -3,7 +3,6 @@
 
 #include "xevents.h"
 
-#include "change_offset.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "Token.h"

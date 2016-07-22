@@ -62,10 +62,6 @@ enum RenderFlag {
 #define BCOLOR_6 "aquamarine"
 #define BCOLOR_7 "white"
 
-#include "change_offset.h"
-//  Reposition the scrolled text so that the scrollbar is at the bottom.
-#define home_screen() change_offset(0)
-
 //  Change the rendition style.
 void scr_style(const enum RenderFlag style);
 

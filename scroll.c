@@ -230,7 +230,7 @@ void scroll(const uint8_t row1, const uint8_t row2,
 		|| abs(count) > MAX_SCROLL)
 		  return;
 	(count > 0 ? &sc_up : &sc_dn)(row1, row2, count);
-	home_screen();
+	change_offset(0);
 	cursor(CURSOR_DRAW);
 	cursor(CURSOR_DRAW);
 }

@@ -8,6 +8,7 @@
 #include "libjb/util.h"
 #include "libjb/log.h"
 #include "lookup_key.h"
+#include "sbar.h"
 #include "scr_move.h"
 #include "screen.h"
 #include "xsetup.h"
@@ -54,7 +55,7 @@ void dec_reset(Token * restrict token)
 			SET(att610);
 			break;
 		case 25: // DECTCEM -- hide cursor
-			home_screen();
+			change_offset(0);
 			cursor(CURSOR_DRAW); // clear
 			SET(dectcem);
 			cursor(CURSOR_DRAW); // draw

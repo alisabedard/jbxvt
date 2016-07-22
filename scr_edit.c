@@ -7,6 +7,7 @@
 #include "cursor.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "sbar.h"
 #include "screen.h"
 #include "selection.h"
 
@@ -52,7 +53,7 @@ void scr_insert_characters(int8_t count)
 	count = MAX(count, 0);
 	const uint8_t cw = jbxvt.scr.chars.width;
 	count = MIN(count, cw);
-	home_screen();
+	change_offset(0);
 	cursor(CURSOR_DRAW);
 	VTScreen * restrict scr = jbxvt.scr.current;
 	const xcb_point_t c = scr->cursor;
@@ -77,7 +78,7 @@ void scr_delete_characters(uint8_t count)
 	count = MIN(count, end); // keep within the screen
 	if(!count)
 		  return;
-	home_screen();
+	change_offset(0);
 	cursor(CURSOR_DRAW);
 	uint8_t * s = scr->text[c.y];
 	uint32_t * r = scr->rend[c.y];
