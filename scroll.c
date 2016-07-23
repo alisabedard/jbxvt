@@ -167,59 +167,38 @@ static void clear_area(const int16_t y, const int8_t count)
 		jbxvt.scr.pixels.width, count * fh);
 }
 
-static void sc_up(const uint8_t row1, uint8_t row2,
-	int8_t count)
+void scroll1(int16_t n)
 {
-#ifdef SCROLL_DEBUG
-	LOG("scroll_up(count: %d, row1: %d, row2: %d)",
-		count, row1, row2);
-#endif//SCROLL_DEBUG
-	if (jbxvt.scr.current == &jbxvt.scr.s1 && row1 == 0)
-		add_scroll_history(count);
-	uint8_t *save[count];
-	uint32_t *rend[count];
-	++row2;
-	for(int8_t j = copy_screen_area(0, row1,
-		1, count, save, rend); j < row2; ++j)
-		transmogrify(j, -count, jbxvt.scr.current);
-	clear(count, row2, save, rend, true);
-	copy_visible(row1, row2, count, true);
-	clear_area(row2 - count, count);
-}
-
-void scroll1(int16_t count)
-{
-	LOG("scroll1(%d)", count);
-	if(count <= 0)
-		  return;
-	// If count > MAX_SCROLL, scroll in installments
-	const int16_t n = MIN(count, MAX_SCROLL);
-	count -= n;
 	cp_rows(n, n);
 	jbxvt.scr.sline.top = MIN(jbxvt.scr.sline.top + n,
 		jbxvt.scr.sline.max);
 	for (int_fast16_t j = n;
 		j < jbxvt.scr.chars.height; ++j)
 		  transmogrify(j, -n, &jbxvt.scr.s1);
-	scroll1(count);
 }
 
-static void sc_dn(uint8_t row1, const uint8_t row2,
-	int8_t count)
+static void sc_dn(const uint8_t row1, const uint8_t row2,
+	const int16_t count, uint8_t ** save, uint32_t ** rend)
 {
-#ifdef SCROLL_DEBUG
-	LOG("scroll_down(%d, %d, %d)", row1, row2, count);
-#endif//SCROLL_DEBUG
-	count = -count;
-	uint32_t *rend[count];
-	uint8_t *save[count];
-	for(int8_t j = copy_screen_area(0, row2 - 1, -1,
+	for(int8_t j = copy_screen_area(0, row2, -1,
 		count, save, rend); j >= row1; --j)
 		  transmogrify(j, count, jbxvt.scr.current);
 	clear(count, row1, save, rend, false);
-	// +1 to include the last line
-	copy_visible(row1, row2 + 1, count, false);
+	copy_visible(row1, row2, count, false);
 	clear_area(row1, count);
+}
+
+static void sc_up(const uint8_t row1, const uint8_t row2,
+	const int16_t count, uint8_t ** save, uint32_t ** rend)
+{
+	if (jbxvt.scr.current == &jbxvt.scr.s1 && row1 == 0)
+		add_scroll_history(count);
+	for(int8_t j = copy_screen_area(0, row1,
+		1, count, save, rend); j < row2; ++j)
+		transmogrify(j, -count, jbxvt.scr.current);
+	clear(count, row2, save, rend, true);
+	copy_visible(row1, row2, count, true);
+	clear_area(row2 - count, count);
 }
 
 /*  Scroll count lines from row1 to row2 inclusive.
@@ -235,9 +214,14 @@ void scroll(const uint8_t row1, const uint8_t row2,
 		|| row2 >= jbxvt.scr.chars.height
 		|| abs(count) > MAX_SCROLL)
 		  return;
-	(count > 0 ? &sc_up : &sc_dn)(row1, row2, count);
+	const bool up = count > 0;
+	const int16_t n = up ? count : -count;
+	uint8_t *save[n];
+	uint32_t *rend[n];
+	// row2 + 1 to include last line
+	(up ? sc_up : sc_dn)(row1, row2 + 1, n, save, rend);
 	change_offset(0);
-	cursor(CURSOR_DRAW);
+	cursor(CURSOR_DRAW); // clear
 	cursor(CURSOR_DRAW);
 }
 
