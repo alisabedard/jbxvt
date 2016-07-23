@@ -60,7 +60,7 @@ static void clear(int8_t count, const uint8_t rc,
 	memset(text[count], 0, sz + 1);
 	memset(rend[count], 0, sz << 2);
 	VTScreen * cur = jbxvt.scr.current;
-	uint8_t j = up ? rc - count - 1: rc + count;
+	const uint8_t j = rc + (up ? - count - 1 : count);
 	cur->text[j] = text[count];
 	cur->rend[j] = rend[count];
 	clear(count, rc, text, rend, up);
@@ -96,16 +96,23 @@ static void cp_rows(int16_t i, const int16_t count)
 	cp_rows(i, count);
 }
 
+static void get_y(int16_t * restrict y, const uint8_t row1,
+	const int8_t count, const bool up)
+{
+	const uint8_t fh = jbxvt.X.font_size.h;
+	const int16_t a = MARGIN + row1 * fh;
+	const int16_t b = a + count * fh;
+	*(up ? y : y + 1) = b;
+	*(up ? y + 1 : y) = a;
+}
+
 static void cp_repair(const uint8_t row1, const uint8_t row2,
 	const int8_t count, const bool up)
 {
-	int16_t a, b, y[2];
-	a = MARGIN + row1 * jbxvt.X.font_size.h;
-	b = a + count * jbxvt.X.font_size.h;
 	const uint16_t height = (row2 - row1 - count)
 		* jbxvt.X.font_size.h;
-	*(up ? &y[0] : &y[1]) = b;
-	*(up ? &y[1] : &y[0]) = a;
+	int16_t y[2];
+	get_y(y, row1, count, up);
 	xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt,
 		jbxvt.X.win.vt, jbxvt.X.gc.tx, 0, y[0],
 		0, y[1], jbxvt.scr.pixels.width,
@@ -171,11 +178,10 @@ static void sc_up(const uint8_t row1, uint8_t row2,
 		transmogrify(j, -count, jbxvt.scr.current);
 	clear(count, row2, save, rend, true);
 	cp_repair(row1, row2, count, true);
-	const int16_t y = MARGIN + (row2 - count)
-		* jbxvt.X.font_size.h;
+	const uint8_t fh = jbxvt.X.font_size.h;
+	const int16_t y = MARGIN + (row2 - count) * fh;
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, 0, y,
-		jbxvt.scr.pixels.width,
-		count * jbxvt.X.font_size.h);
+		jbxvt.scr.pixels.width, count * fh);
 }
 
 void scroll1(int16_t count)
