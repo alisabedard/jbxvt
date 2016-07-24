@@ -174,7 +174,7 @@ void scroll1(int16_t n)
 		jbxvt.scr.sline.max);
 	for (int_fast16_t j = n;
 		j < jbxvt.scr.chars.height; ++j)
-		  transmogrify(j, -n, &jbxvt.scr.s1);
+		  transmogrify(j, -n, &jbxvt.scr.s[0]);
 }
 
 static void sc_dn(const uint8_t row1, const uint8_t row2,
@@ -191,7 +191,7 @@ static void sc_dn(const uint8_t row1, const uint8_t row2,
 static void sc_up(const uint8_t row1, const uint8_t row2,
 	const int16_t count, uint8_t ** save, uint32_t ** rend)
 {
-	if (jbxvt.scr.current == &jbxvt.scr.s1 && row1 == 0)
+	if (jbxvt.scr.current == &jbxvt.scr.s[0] && row1 == 0)
 		add_scroll_history(count);
 	for(int8_t j = copy_screen_area(0, row1,
 		1, count, save, rend); j < row2; ++j)

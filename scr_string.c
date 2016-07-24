@@ -205,8 +205,8 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		  handle_new_lines(nlcount);
 	xcb_point_t p;
 	VTScreen * restrict s = jbxvt.scr.current;
-	fix_cursor(&jbxvt.scr.s1);
-	fix_cursor(&jbxvt.scr.s2);
+	fix_cursor(&jbxvt.scr.s[0]);
+	fix_cursor(&jbxvt.scr.s[1]);
 	while (len) {
 		if (test_action_char(*str, s)) {
 			--len; ++str; continue;

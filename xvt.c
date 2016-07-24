@@ -46,8 +46,8 @@ static void handle_txtpar(Token * restrict token)
 
 static inline void set_charsel(const uint8_t i)
 {
-	jbxvt.scr.s1.charsel = i;
-	jbxvt.scr.s2.charsel = i;
+	jbxvt.scr.s[0].charsel = i;
+	jbxvt.scr.s[1].charsel = i;
 }
 
 static void form_feed(void)
@@ -112,8 +112,8 @@ static void expose(const uint8_t region)
 
 static void set_cset(const CharacterSet cs, const uint8_t i)
 {
-	jbxvt.scr.s1.charset[i] = cs;
-	jbxvt.scr.s2.charset[i] = cs;
+	jbxvt.scr.s[0].charset[i] = cs;
+	jbxvt.scr.s[1].charset[i] = cs;
 }
 
 static void select_charset(const char c, const uint8_t i)

@@ -55,10 +55,10 @@ static void init(void)
 		r1[y] = GC_MALLOC(sz);
 		r2[y] = GC_MALLOC(sz);
 	}
-	jbxvt.scr.s1.text = s1;
-	jbxvt.scr.s2.text = s2;
-	jbxvt.scr.s1.rend = r1;
-	jbxvt.scr.s2.rend = r2;
+	jbxvt.scr.s[0].text = s1;
+	jbxvt.scr.s[1].text = s2;
+	jbxvt.scr.s[0].rend = r1;
+	jbxvt.scr.s[1].rend = r2;
 }
 
 static inline void fix_margins(const Size c)
@@ -84,16 +84,16 @@ void scr_reset(void)
 		init();
 		created = true;
 	}
-	uint8_t **s1 = jbxvt.scr.s1.text, **s2 = jbxvt.scr.s2.text;
-	uint32_t **r1 = jbxvt.scr.s1.rend, **r2 = jbxvt.scr.s2.rend;
+	uint8_t **s1 = jbxvt.scr.s[0].text, **s2 = jbxvt.scr.s[1].text;
+	uint32_t **r1 = jbxvt.scr.s[0].rend, **r2 = jbxvt.scr.s[1].rend;
 	VTScreen * scr = jbxvt.scr.current;
-	if (likely(scr == &jbxvt.scr.s1 && jbxvt.scr.s1.text)
+	if (likely(scr == &jbxvt.scr.s[0] && jbxvt.scr.s[0].text)
 		&& scr->cursor.y >= c.h) {
 		scroll1(scr->cursor.y - c.h + 1);
 		scr->cursor.y = c.h - 1;
 	}
-	init_screen_elements(&jbxvt.scr.s1, s1, r1);
-	init_screen_elements(&jbxvt.scr.s2, s2, r2);
+	init_screen_elements(&jbxvt.scr.s[0], s1, r1);
+	init_screen_elements(&jbxvt.scr.s[1], s2, r2);
 	scr_start_selection((xcb_point_t){}, SEL_CHAR);
 	// Constrain dimensions:
 	c.w = MIN(c.w, JBXVT_MAX_COLS);

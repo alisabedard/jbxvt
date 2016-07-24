@@ -31,14 +31,15 @@ struct JBXVTXData {
 	int16_t font_ascent;
 };
 
+struct JBXVTScreenSLine {
+	SLine **data; // saved lines
+	int32_t top;
+	uint16_t max; // max # of saved lines
+};
+
 struct JBXVTScreenData {
-	VTScreen * current;
-	VTScreen s1, s2;
-	struct {
-		SLine **data; // saved lines
-		int32_t top;
-		uint16_t max; // max # of saved lines
-	} sline;
+	VTScreen * current, s[2];
+	struct JBXVTScreenSLine sline;
 	Size pixels, chars;
 	uint32_t rstyle; // render style
 	uint32_t saved_rstyle; // saved render style

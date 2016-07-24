@@ -19,8 +19,8 @@ void dec_reset(Token * restrict token)
 
 	const bool set = token->type == TK_SET;
 	VTScreen * scr = jbxvt.scr.current;
-	VTScreen * s1 = &jbxvt.scr.s1;
-	VTScreen * s2 = &jbxvt.scr.s2;
+	VTScreen * s1 = &jbxvt.scr.s[0];
+	VTScreen * s2 = &jbxvt.scr.s[1];
 #undef SET
 #define SET(i) {s1->i = set; s2->i = set;}
 

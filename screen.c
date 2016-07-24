@@ -87,13 +87,13 @@ void scr_init(void)
 	// Initialise the array of lines that have scrolled off the top.
 	jbxvt.scr.sline.max = MAX_SCROLL;
 	jbxvt.scr.sline.data = GC_MALLOC(jbxvt.scr.sline.max * sizeof(void*));
-#define SETBOTH(f, val) jbxvt.scr.s1.f = val; jbxvt.scr.s2.f = val;
+#define SETBOTH(f, val) jbxvt.scr.s[0].f = val; jbxvt.scr.s[1].f = val;
 	SETBOTH(decawm, true);
 	SETBOTH(dectcem, true);
 	SETBOTH(charset[0], CHARSET_ASCII);
 	SETBOTH(charset[1], CHARSET_ASCII);
 #undef SETBOTH
-	jbxvt.scr.current = &jbxvt.scr.s1;
+	jbxvt.scr.current = &jbxvt.scr.s[0];
 	scr_reset();
 	scr_set_tab(-2, false);
 }
@@ -103,7 +103,7 @@ void scr_change_screen(const bool mode_high)
 {
 	change_offset(0);
 	jbxvt.scr.current = mode_high
-		? &jbxvt.scr.s2 : &jbxvt.scr.s1;
+		? &jbxvt.scr.s[1] : &jbxvt.scr.s[0];
 	jbxvt.sel.end[1].type = NOSEL;
 	jbxvt.scr.sline.top = 0;
 	repaint();
