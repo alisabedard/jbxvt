@@ -96,9 +96,9 @@ void adjust_selection(SelEnd * restrict include)
 	if (jbxvt.sel.unit == SEL_CHAR)
 		return;
 	SelEnd *se1, *se2;
-	const bool oneless = selcmp(&jbxvt.sel.end1,&jbxvt.sel.end2) <= 0;
-	se1 = oneless ? &jbxvt.sel.end1 : &jbxvt.sel.end2;
-	se2 = oneless ? &jbxvt.sel.end2 : &jbxvt.sel.end1;
+	const bool oneless = selcmp(&jbxvt.sel.end[0],&jbxvt.sel.end[1]) <= 0;
+	se1 = oneless ? &jbxvt.sel.end[0] : &jbxvt.sel.end[1];
+	se2 = oneless ? &jbxvt.sel.end[1] : &jbxvt.sel.end[0];
 	if (jbxvt.sel.unit == SEL_WORD)
 		  adj_sel_to_word(include, se1, se2);
 	else if (jbxvt.sel.unit == SEL_LINE) {

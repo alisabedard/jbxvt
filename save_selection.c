@@ -113,9 +113,9 @@ void save_selection(void)
 {
 	/*  Set se1 and se2 to point to the first
 	    and second selection endpoints.  */
-	const bool forward = selcmp(&jbxvt.sel.end1, &jbxvt.sel.end2) <= 0;
-	SelEnd * se1 = forward ? &jbxvt.sel.end1 : &jbxvt.sel.end2;
-	SelEnd * se2 = forward ? &jbxvt.sel.end2 : &jbxvt.sel.end1;
+	const bool forward = selcmp(&jbxvt.sel.end[0], &jbxvt.sel.end[1]) <= 0;
+	SelEnd * se1 = forward ? &jbxvt.sel.end[0] : &jbxvt.sel.end[1];
+	SelEnd * se2 = forward ? &jbxvt.sel.end[1] : &jbxvt.sel.end[0];
 	uint16_t total = 1;
 	uint8_t * str = GC_MALLOC(1);
 	handle_savedsel(&str, &total, se1, se2);

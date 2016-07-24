@@ -34,14 +34,14 @@ static void paint_rvid(xcb_point_t start, xcb_point_t end,
     and between cols col1 and col2 inclusive.  */
 void show_selection(int16_t row1, int16_t row2, int16_t col1, int16_t col2)
 {
-	if (jbxvt.sel.end1.type == NOSEL
-		|| jbxvt.sel.end2.type == NOSEL)
+	if (jbxvt.sel.end[0].type == NOSEL
+		|| jbxvt.sel.end[1].type == NOSEL)
 		return;
-	if (selcmp(&jbxvt.sel.end1,&jbxvt.sel.end2) == 0)
+	if (selcmp(&jbxvt.sel.end[0],&jbxvt.sel.end[1]) == 0)
 		return;
 	xcb_point_t p1, p2;
-	selend_to_rc(&p1.y, &p1.x, &jbxvt.sel.end1);
-	selend_to_rc(&p2.y, &p2.x, &jbxvt.sel.end2);
+	selend_to_rc(&p1.y, &p1.x, &jbxvt.sel.end[0]);
+	selend_to_rc(&p2.y, &p2.x, &jbxvt.sel.end[1]);
 	++col2;
 	//  Obtain initial and final endpoints for the selection.
 	xcb_point_t s, e; // start and end

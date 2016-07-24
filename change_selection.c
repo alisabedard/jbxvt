@@ -50,9 +50,9 @@ void change_selection(SelEnd * restrict ose1, SelEnd * restrict ose2)
 		ose1 = ose2;
 		ose2 = se;
 	}
-	const bool fw = selcmp(&jbxvt.sel.end1, &jbxvt.sel.end2) <= 0;
-	*(fw ? &se1 : &se2) = &jbxvt.sel.end1;
-	*(fw ? &se2 : &se1) = &jbxvt.sel.end2;
+	const bool fw = selcmp(&jbxvt.sel.end[0], &jbxvt.sel.end[1]) <= 0;
+	*(fw ? &se1 : &se2) = &jbxvt.sel.end[0];
+	*(fw ? &se2 : &se1) = &jbxvt.sel.end[1];
 	const Size f = jbxvt.X.font_size;
 	const Size c = jbxvt.scr.chars;
 	const uint8_t m = MARGIN;

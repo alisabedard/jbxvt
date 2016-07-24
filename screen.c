@@ -104,7 +104,7 @@ void scr_change_screen(const bool mode_high)
 	change_offset(0);
 	jbxvt.scr.current = mode_high
 		? &jbxvt.scr.s2 : &jbxvt.scr.s1;
-	jbxvt.sel.end2.type = NOSEL;
+	jbxvt.sel.end[1].type = NOSEL;
 	jbxvt.scr.sline.top = 0;
 	repaint();
 	cursor(CURSOR_DRAW);

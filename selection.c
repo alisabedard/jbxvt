@@ -56,7 +56,7 @@ void scr_clear_selection(void)
 		jbxvt.sel.length = 0;
 	const Size c = jbxvt.scr.chars;
 	show_selection(0, c.h - 1, 0, c.w - 1);
-	jbxvt.sel.end1.type = jbxvt.sel.end2.type = NOSEL;
+	jbxvt.sel.end[0].type = jbxvt.sel.end[1].type = NOSEL;
 }
 
 //  start a selection using the specified unit.
@@ -70,8 +70,8 @@ void scr_start_selection(xcb_point_t p, enum selunit unit)
 	jbxvt.sel.unit = unit;
 	fix_rc(&rc);
 	rc_to_selend(rc.y, rc.x, &jbxvt.sel.anchor);
-	jbxvt.sel.end2 = jbxvt.sel.end1 = jbxvt.sel.anchor;
-	adjust_selection(&jbxvt.sel.end2);
+	jbxvt.sel.end[1] = jbxvt.sel.end[0] = jbxvt.sel.anchor;
+	adjust_selection(&jbxvt.sel.end[1]);
 	show_selection(0, c.h - 1, 0, c.w - 1);
 }
 
@@ -79,7 +79,7 @@ void scr_start_selection(xcb_point_t p, enum selunit unit)
  *  remove it from the screen.  */
 void check_selection(const int16_t row1, const int16_t row2)
 {
-	const SelEnd *e1 = &jbxvt.sel.end1, *e2 = &jbxvt.sel.end2;
+	const SelEnd *e1 = &jbxvt.sel.end[0], *e2 = &jbxvt.sel.end[1];
 	if (e1->type == NOSEL || e2->type == NOSEL)
 		return;
 	int16_t r1 = e1->type == SCREENSEL ? e1->index : -1;
@@ -90,6 +90,6 @@ void check_selection(const int16_t row1, const int16_t row2)
 		return;
 	const Size c = jbxvt.scr.chars;
 	show_selection(0, c.h - 1, 0, c.w - 1);
-	jbxvt.sel.end2.type = NOSEL;
+	jbxvt.sel.end[1].type = NOSEL;
 }
 

@@ -31,18 +31,18 @@ static void transmogrify(const int16_t j, const int8_t count,
 	const int16_t k = j + count;
 	s->text[k] = s->text[j];
 	s->rend[k] = s->rend[j];
-	if (jbxvt.sel.end1.type == SCREENSEL
-		&& jbxvt.sel.end1.index == j)
-		  jbxvt.sel.end1.index = k;
-	if (jbxvt.sel.end2.type == SCREENSEL
-		&& jbxvt.sel.end2.index == j)
-		  jbxvt.sel.end2.index = k;
+	if (jbxvt.sel.end[0].type == SCREENSEL
+		&& jbxvt.sel.end[0].index == j)
+		  jbxvt.sel.end[0].index = k;
+	if (jbxvt.sel.end[1].type == SCREENSEL
+		&& jbxvt.sel.end[1].index == j)
+		  jbxvt.sel.end[1].index = k;
 }
 static void ck_sel_on_scr(const int j)
 {
 	// clear selection if it scrolls off screen:
-	if (jbxvt.sel.end1.index == j
-		|| jbxvt.sel.end2.index == j)
+	if (jbxvt.sel.end[0].index == j
+		|| jbxvt.sel.end[1].index == j)
 		  scr_clear_selection();
 }
 
@@ -91,8 +91,8 @@ static void cp_rows(int16_t i, const int16_t count)
 	sl->wrap = t[jbxvt.scr.chars.width];
 	memcpy(sl->sl_rend, r, x << 2);
 	jbxvt.scr.sline.data[count - i - 1] = sl;
-	sel_scr_to_sav(&jbxvt.sel.end1, i, count);
-	sel_scr_to_sav(&jbxvt.sel.end2, i, count);
+	sel_scr_to_sav(&jbxvt.sel.end[0], i, count);
+	sel_scr_to_sav(&jbxvt.sel.end[1], i, count);
 	cp_rows(i, count);
 }
 

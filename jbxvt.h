@@ -47,7 +47,7 @@ struct JBXVTScreenData {
 
 struct JBXVTSelectionData {
 	uint8_t * text;
-	SelEnd end1, end2, // selection endpoints
+	SelEnd end[2], // selection endpoints
 	       anchor; //selection anchor
 	enum selunit unit;
 	uint16_t length;
