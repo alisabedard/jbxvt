@@ -46,11 +46,10 @@ void init_command(char ** restrict argv)
 	jbxvt.com.fd = run_command(argv);
 	if (jb_check(jbxvt.com.fd >= 0, "Could not start session"))
 		exit(1);
-	jbxvt.com.buf.data = GC_MALLOC(COM_BUF_SIZE);
-	jbxvt.com.stack.data = GC_MALLOC(COM_PUSH_MAX);
-	jbxvt.com.buf.next = jbxvt.com.buf.top
-		= jbxvt.com.buf.data;
-	jbxvt.com.stack.top = jbxvt.com.stack.data;
+	struct JBXVTCommandContainer * b = &jbxvt.com.buf,
+				     * s = &jbxvt.com.stack;
+	b->data = b->next = b->top = GC_MALLOC(COM_BUF_SIZE);
+	s->data = s->top = GC_MALLOC(COM_PUSH_MAX);
 }
 
 //  Push an input character back into the input queue.

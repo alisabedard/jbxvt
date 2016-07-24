@@ -174,7 +174,7 @@ static inline void init_jbxvt_colors(void)
 void init_display(char * name)
 {
 	jbxvt.X.xcb = jb_get_xcb_connection(jbxvt.opt.display,
-		&jbxvt.opt.screen);
+		(int*)&jbxvt.opt.screen);
 	jbxvt.X.screen = jb_get_xcb_screen(jbxvt.X.xcb);
 	init_jbxvt_colors();
 	setup_font();
