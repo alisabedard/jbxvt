@@ -8,6 +8,7 @@
 #include "xevents.h"
 #include "xeventst.h"
 
+#include <gc.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,6 +46,8 @@ void init_command(char ** restrict argv)
 	jbxvt.com.fd = run_command(argv);
 	if (jb_check(jbxvt.com.fd >= 0, "Could not start session"))
 		exit(1);
+	jbxvt.com.buf.data = GC_MALLOC(COM_BUF_SIZE);
+	jbxvt.com.stack.data = GC_MALLOC(COM_PUSH_MAX);
 	jbxvt.com.buf.next = jbxvt.com.buf.top
 		= jbxvt.com.buf.data;
 	jbxvt.com.stack.top = jbxvt.com.stack.data;
