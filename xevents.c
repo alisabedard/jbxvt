@@ -54,20 +54,48 @@ static bool track_mouse_sgr(uint8_t b, xcb_point_t p)
 	return true;
 }
 
+static void to_pixels(xcb_point_t * p)
+{
+	const Size f = jbxvt.X.f.size;
+	p->x *= f.w;
+	p->y *= f.h;
+}
+
+static void to_chars(xcb_point_t * p)
+{
+	const Size f = jbxvt.X.f.size;
+	p->x /= f.w;
+	p->y /= f.h;
+}
+
+static void locator_report(const uint8_t b, xcb_point_t p)
+{
+	if (jbxvt.opt.elr) {
+		uint8_t a[2];
+		a[0] = jbxvt.opt.elr & 0x3;
+		a[1] = (jbxvt.opt.elr & 0xc) >> 2;
+		if (!a[0]) // disabled
+			return;
+		if (a[0] == 2) // only enabled for one report
+			jbxvt.opt.elr = 0;
+		if (a[1] == 1) // report in pixels
+			to_pixels(&p);
+		// DECLRP
+		cprintf("\033[%d;%d;%d;%d;0&w]", b * 2, 7, p.y, p.x);
+	}
+}
+
 static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
 {
 	LOG("track_mouse(b=%d, p={%d, %d})", b, p.x, p.y);
 	// get character position:
-	const Size f = jbxvt.X.f.size;
-	p.x /= f.w;
-	p.y /= f.h;
+	to_chars(&p);
 	// modify for a 1-based row/column system
 	++p.x; ++p.y;
 	const bool wheel = b == 4 || b == 5;
+	locator_report(b, p);
 	// base button on 0
 	--b;
-	// DECLRP
-	cprintf("\033[%d;%d;%d;%d;0&w]", b * 2, 7, p.y, p.x);
 	VTScreen * s = jbxvt.scr.current;
 	// Release handling:
 	if (s->mouse_x10)

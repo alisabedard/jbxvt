@@ -448,6 +448,10 @@ app_loop_head:
 			LOG("DECREQTPARAM, unhandled argument %d", t[0]);
 		}
 		break;
+	case TK_DECELR:
+		LOG("TK_DECELR");
+		jbxvt.opt.elr = t[0] | (t[1] <<2);
+		break;
 	case TK_RIS: // Reset Initial State
 		LOG("TK_RIS");
 		scr_reset();

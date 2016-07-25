@@ -80,6 +80,7 @@ struct JBXVTOptionData {
 	char *bg, *fg, *font, *bold_font, *display;
 	Size size;
 	int8_t screen;
+	uint8_t elr; // DECELR
 	bool show_scrollbar;
 };
 
