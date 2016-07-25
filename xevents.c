@@ -58,7 +58,7 @@ static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
 {
 	LOG("track_mouse(b=%d, p={%d, %d})", b, p.x, p.y);
 	// get character position:
-	const Size f = jbxvt.X.font_size;
+	const Size f = jbxvt.X.f.size;
 	p.x /= f.w;
 	p.y /= f.h;
 	// modify for a 1-based row/column system
@@ -266,8 +266,13 @@ bool handle_xevents(Token * restrict tk)
 	else
 		  tk->region = REGION_NONE;
 	switch (xe->type) { // Ordered numerically:
+	case 0: // Unimplemented, undefined
+	case 150: // Undefined
 	case XCB_KEY_RELEASE: // Unimplemented
+	case XCB_NO_EXPOSURE: // Unimplemented
 		break;
+	case XCB_REPARENT_NOTIFY: // handle here to ensure cursor filled.
+	case XCB_MAP_NOTIFY: // handle here to ensure cursor filled.
 	case XCB_ENTER_NOTIFY:
 		tk->type = TK_ENTRY;
 		tk->arg[0] = 1;
@@ -298,8 +303,6 @@ bool handle_xevents(Token * restrict tk)
 		tk->arg[2] = xe->box.width;
 		tk->arg[3] = xe->box.height;
 		tk->nargs = 4;
-		break;
-	case XCB_NO_EXPOSURE: // Unimplemented
 		break;
 	case XCB_CONFIGURE_NOTIFY:
 		tk->type = TK_RESIZE;

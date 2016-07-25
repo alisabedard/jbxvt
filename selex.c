@@ -50,7 +50,7 @@ void scr_extend_selection(const xcb_point_t p, const bool drag)
 {
 	if (jbxvt.sel.end[0].type == NOSEL)
 		return;
-	const Size f = jbxvt.X.font_size;
+	const Size f = jbxvt.X.f.size;
 	xcb_point_t rc = { .x = (p.x - MARGIN) / f.w,
 		.y = (p.y - MARGIN) / f.h};
 	fix_rc(&rc);

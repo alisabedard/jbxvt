@@ -66,7 +66,7 @@ void cprintf(char *fmt,...)
 {
 	va_list args;
 	va_start(args,fmt);
-	static uint8_t buf[7];
+	static uint8_t buf[32];
 	// + 1 to include \0 terminator.
 	const int l = vsnprintf((char *)buf, sizeof(buf),
 		fmt, args) + 1;

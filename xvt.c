@@ -258,7 +258,7 @@ app_loop_head:
 		// fall through
 	case TK_SBUP :
 		change_offset(jbxvt.scr.offset - t[0]
-			/ jbxvt.X.font_size.height);
+			/ jbxvt.X.f.size.height);
 		break;
 	case TK_SELSTART :
 		scr_start_selection((xcb_point_t){t[0], t[1]}, SEL_CHAR);
@@ -426,10 +426,30 @@ app_loop_head:
 			  scr_efill();
 		break;
 	case TK_NEL : // move to first position on next line down.
-		scr_move(0, s->cursor.y + 1, 0);
 		LOG("TK_NEL: NExt Line");
+		scr_move(0, s->cursor.y + 1, 0);
+		break;
+	case TK_DECREQTPARAM:
+		LOG("TK_DECREQTPARAM");
+		// Send DECREPTPARAM
+		switch (t[0]) {
+		case 0:
+		case 1: {
+			const uint8_t sol = t[0] + 2, par = 1, nbits = 1,
+			      flags = 0, clkmul = 1;
+			const uint16_t xspeed = 88, rspeed = 88;
+			cprintf("\033[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
+				xspeed, rspeed, clkmul, flags);
+			LOG("ESC[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
+				xspeed, rspeed, clkmul, flags);
+			break;
+		}
+		default:
+			LOG("DECREQTPARAM, unhandled argument %d", t[0]);
+		}
 		break;
 	case TK_RIS: // Reset Initial State
+		LOG("TK_RIS");
 		scr_reset();
 		break;
 	case TK_DECSAVEPM: // Save private modes

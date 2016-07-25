@@ -10,25 +10,34 @@
 #include "SLine.h"
 #include "VTScreen.h"
 
+struct JBXVTXWindows {
+	xcb_window_t vt, sb, main;
+};
+
+struct JBXVTXGCs {
+	xcb_gcontext_t tx, cu;
+};
+
+struct JBXVTXPixels {
+	pixel_t bg, fg, current_fg, current_bg;
+};
+
+struct JBXVTFontData {
+	xcb_font_t normal, bold;
+	Size size;
+	int8_t ascent;
+};
+
 struct JBXVTXData {
 	xcb_connection_t * xcb;
 	xcb_screen_t * screen;
-	int screen_number;
-	xcb_font_t font;
-	xcb_font_t bold_font;
 	xcb_atom_t clipboard;
-	struct {
-		xcb_window_t vt, sb, main;
-	} win;
-	struct {
-		xcb_gcontext_t tx, cu;
-	} gc;
-	struct {
-		pixel_t bg, fg, current_fg, current_bg;
-	} color;
-	Size font_size;
+	struct JBXVTXWindows win;
+	struct JBXVTXGCs gc;
+	struct JBXVTXPixels color;
+	struct JBXVTFontData f;
 	Size window_size;
-	int16_t font_ascent;
+	int8_t screen_number;
 };
 
 struct JBXVTScreenSLine {

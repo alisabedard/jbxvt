@@ -31,7 +31,7 @@ static void paint_rvec_text(uint8_t * str, uint32_t * rvec,
 		// draw
 		paint_rval_text(str, r, i, p);
 		// advance to next block
-		p.x += i * jbxvt.X.font_size.width;
+		p.x += i * jbxvt.X.f.size.width;
 		str += i;
 		rvec += i;
 		len -= i;
@@ -43,7 +43,7 @@ static int_fast32_t repaint_generic(xcb_point_t p,
 	const int_fast32_t c2, uint8_t * restrict str,
 	uint32_t * rend)
 {
-	const Size f = jbxvt.X.font_size;
+	const Size f = jbxvt.X.f.size;
 	// check inputs:
 	if (!str || !m)
 		  return p.y + f.height;
@@ -81,8 +81,8 @@ void repaint(void)
 	const xcb_rectangle_t r = {.width = jbxvt.scr.chars.width,
 		.height = jbxvt.scr.chars.height};
 	xcb_point_t p = { .x = MARGIN + r.x
-		* jbxvt.X.font_size.width,
-		.y = MARGIN + r.y * jbxvt.X.font_size.height};
+		* jbxvt.X.f.size.width,
+		.y = MARGIN + r.y * jbxvt.X.f.size.height};
 	/* Allocate enough space to process each column, plus
 	 * wrap byte. */
 	uint8_t str[jbxvt.scr.chars.width + 1];

@@ -100,7 +100,7 @@ static void handle_insert(const uint8_t n, const xcb_point_t p)
 	const uint16_t sz = ch.width - cur.x;
 	memmove(s + cur.x + n, s + cur.x, sz);
 	memmove(r + cur.x + n, r + cur.x, sz << 2);
-	const Size f = jbxvt.X.font_size;
+	const Size f = jbxvt.X.f.size;
 	const uint16_t width = (sz - n) * f.w;
 	const int16_t x = p.x + n * f.w;
 	xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
@@ -141,7 +141,7 @@ static void parse_special_charset(uint8_t * restrict str, const uint8_t len)
 
 static inline xcb_point_t get_p(VTScreen * restrict c)
 {
-	const Size f = jbxvt.X.font_size;
+	const Size f = jbxvt.X.f.size;
 	return (xcb_point_t){.x = MARGIN + f.w * c->cursor.x,
 		.y = MARGIN + f.h * c->cursor.y};
 }

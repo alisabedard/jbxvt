@@ -20,12 +20,12 @@ static void copy_area(const int16_t * restrict x, const int16_t y,
 		  return;
 	const xcb_window_t v = jbxvt.X.win.vt;
 	xcb_copy_area(jbxvt.X.xcb, v, v, jbxvt.X.gc.tx, x[0], y,
-		x[1], y, width, jbxvt.X.font_size.height);
+		x[1], y, width, jbxvt.X.f.size.height);
 }
 
 static void finalize(const xcb_point_t p, const int8_t count)
 {
-	const Size f = jbxvt.X.font_size;
+	const Size f = jbxvt.X.f.size;
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt,
 		p.x, p.y, count * f.w, f.h);
 	jbxvt.scr.current->wrap_next = 0;
@@ -59,7 +59,7 @@ void scr_insert_characters(int8_t count)
 	const xcb_point_t c = scr->cursor;
 	check_selection(c.y, c.y);
 	copy_lines(c.x, cw, count);
-	const Size f = jbxvt.X.font_size;
+	const Size f = jbxvt.X.f.size;
 	const xcb_point_t p = { .x = MARGIN + c.x * f.width,
 		.y = MARGIN + c.y * f.height };
 	const uint16_t width = (cw - count - c.x) * f.width;
@@ -92,7 +92,7 @@ void scr_delete_characters(uint8_t count)
 	memset(s + scw - count, 0, count);
 	memset(r + scw - count, 0, count << 2);
 
-	const Size f = jbxvt.X.font_size;
+	const Size f = jbxvt.X.f.size;
 	const int16_t y = MARGIN + c.y * f.height;
 	int16_t x[2] = {[1] = MARGIN + c.x * f.width};
 	x[0] = x[1] + count * f.w;

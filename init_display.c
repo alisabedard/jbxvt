@@ -45,25 +45,25 @@ static xcb_font_t get_font(const char * name)
 		error = xcb_request_check(x, c);
 		if(jb_check(!error, "Could not open fb font"))
 			exit(1); // no need to free error, exiting
-		if (jbxvt.X.font) // already set
+		if (jbxvt.X.f.normal) // already set
 			  // Fall back if bold font unavailable:
-			  jbxvt.X.bold_font = jbxvt.X.font;
+			  jbxvt.X.f.bold = jbxvt.X.f.normal;
 	}
 	return f;
 }
 
 static void setup_font(void)
 {
-	jbxvt.X.font = get_font(jbxvt.opt.font);
+	struct JBXVTFontData * f = &jbxvt.X.f;
 	xcb_query_font_cookie_t qfc = xcb_query_font(jbxvt.X.xcb,
-		jbxvt.X.font);
-	jbxvt.X.bold_font = get_font(jbxvt.opt.bold_font);
-	xcb_query_font_reply_t * r
-		= xcb_query_font_reply(jbxvt.X.xcb, qfc, NULL);
-	jbxvt.X.font_ascent = r->font_ascent;
-	jbxvt.X.font_size.width = r->max_bounds.character_width;
-	jbxvt.X.font_size.height = r->font_ascent
-		+ r->font_descent;
+		f->normal = get_font(jbxvt.opt.font));
+	f->bold = get_font(jbxvt.opt.bold_font);
+	xcb_query_font_reply_t * r = xcb_query_font_reply(jbxvt.X.xcb,
+		qfc, NULL);
+	f->ascent = r->font_ascent;
+	Size * s = &f->size;
+	s->width = r->max_bounds.character_width;
+	s->height = r->font_ascent + r->font_descent;
 	free(r);
 }
 
@@ -75,7 +75,7 @@ static void create_main_window(xcb_size_hints_t * restrict sh,
 		sh->x, sh->y, sh->width, sh->height, 0, 0, 0,
 		XCB_CW_EVENT_MASK,
 		(uint32_t[]){MW_EVENTS});
-	const Size f = jbxvt.X.font_size;
+	const Size f = jbxvt.X.f.size;
 	Size * c = &jbxvt.scr.chars;
 	Size * p = &jbxvt.scr.pixels;
 	c->w = (p->w = sh->width) / f.w;
@@ -120,7 +120,7 @@ static void create_vt_window(xcb_size_hints_t * restrict sh)
 
 static void get_sizehints(xcb_size_hints_t * restrict s)
 {
-	const Size f = jbxvt.X.font_size;
+	const Size f = jbxvt.X.f.size;
 	*s = (xcb_size_hints_t) {
 		.flags = USSize | PMinSize | PResizeInc | PBaseSize,
 		.width = (1 + jbxvt.opt.size.width) * f.w,
@@ -160,7 +160,7 @@ static void setup_gcs(void)
 {
 	const pixel_t f = jbxvt.X.color.fg, b = jbxvt.X.color.bg;
 	jbxvt.X.gc.tx = get_gc(XCB_GC_FOREGROUND | XCB_GC_BACKGROUND
-		| XCB_GC_FONT, (uint32_t[]){f, b, jbxvt.X.font});
+		| XCB_GC_FONT, (uint32_t[]){f, b, jbxvt.X.f.normal});
 	jbxvt.X.gc.cu = get_gc(XCB_GC_FUNCTION | XCB_GC_PLANE_MASK,
 		(uint32_t[]){XCB_GX_INVERT, f ^ b});
 }

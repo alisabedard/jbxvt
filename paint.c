@@ -118,9 +118,9 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 		jb_set_bg(c, gc, jbxvt.X.color.current_fg);
 		cmod = true;
 	}
-	p.y += jbxvt.X.font_ascent;
+	p.y += jbxvt.X.f.ascent;
 	if(bold)
-		font(jbxvt.X.bold_font);
+		font(jbxvt.X.f.bold);
 	// Draw text with background:
 	const xcb_window_t w = jbxvt.X.win.vt;
 	xcb_image_text_8(c, len, w, gc, p.x, p.y, (const char *)str);
@@ -129,10 +129,10 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 	if (rval & RS_ULINE || unlikely(rval & RS_ITALIC)) {
 		xcb_poly_line(c, XCB_COORD_MODE_ORIGIN, w, gc, 2,
 			(xcb_point_t[]){p, {p.x + len
-			* jbxvt.X.font_size.width, p.y}});
+			* jbxvt.X.f.size.width, p.y}});
 	}
 	if(bold) // restore font
-		font(jbxvt.X.font);
+		font(jbxvt.X.f.normal);
 	if (cmod) {
 		fg(jbxvt.X.color.fg);
 		bg(jbxvt.X.color.bg);

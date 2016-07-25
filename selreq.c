@@ -44,7 +44,7 @@ static bool paste_from(const xcb_atom_t clipboard, const xcb_timestamp_t t)
 	xcb_connection_t * x = jbxvt.X.xcb;
 	xcb_generic_error_t *e;
 
-	o_c = xcb_get_selection_owner_unchecked(x, clipboard);
+	o_c = xcb_get_selection_owner(x, clipboard);
 	o_r = xcb_get_selection_owner_reply(x, o_c, &e);
 	if (e) {
 		if (o_r)

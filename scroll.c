@@ -99,7 +99,7 @@ static void cp_rows(int16_t i, const int16_t count)
 static void get_y(int16_t * restrict y, const uint8_t row1,
 	const int8_t count, const bool up)
 {
-	const uint8_t fh = jbxvt.X.font_size.h;
+	const uint8_t fh = jbxvt.X.f.size.h;
 	const int16_t a = MARGIN + row1 * fh;
 	const int16_t b = a + count * fh;
 	*(up ? y : y + 1) = b;
@@ -112,7 +112,7 @@ static void copy_visible(const uint8_t row1, const uint8_t row2,
 	int16_t y[2];
 	get_y(y, row1, count, up);
 	const uint16_t height = (row2 - row1 - count)
-		* jbxvt.X.font_size.h;
+		* jbxvt.X.f.size.h;
 	xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt,
 		jbxvt.X.win.vt, jbxvt.X.gc.tx, 0, y[0],
 		0, y[1], jbxvt.scr.pixels.width, height);
@@ -162,7 +162,7 @@ static int8_t copy_screen_area(const int8_t i,
 
 static void clear_area(const int16_t y, const int8_t count)
 {
-	const uint8_t fh = jbxvt.X.font_size.h;
+	const uint8_t fh = jbxvt.X.f.size.h;
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, 0, MARGIN + y * fh,
 		jbxvt.scr.pixels.width, count * fh);
 }

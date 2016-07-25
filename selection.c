@@ -63,7 +63,7 @@ void scr_clear_selection(void)
 void scr_start_selection(xcb_point_t p, enum selunit unit)
 {
 	const Size c = jbxvt.scr.chars;
-	const Size f = jbxvt.X.font_size;
+	const Size f = jbxvt.X.f.size;
 	show_selection(0, c.h - 1, 0, c.w - 1);
 	xcb_point_t rc = { .x = (p.x - MARGIN) / f.w,
 		.y = (p.y - MARGIN) / f.h};

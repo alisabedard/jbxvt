@@ -33,7 +33,7 @@ __attribute__((pure))
 static Size get_cdim(const Size d)
 {
 	const uint8_t m = MARGIN<<1;
-	const Size f = jbxvt.X.font_size;
+	const Size f = jbxvt.X.f.size;
 	return (Size){.width = (d.w-m)/f.w,
 		.height = (d.h-m)/f.h};
 }

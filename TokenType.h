@@ -73,6 +73,8 @@ typedef enum {
 	TK_DECSTBM = 'r', // set top and bottom margins
         // ^-- also restore DEC mode values
 	TK_DECSAVEPM = 's', // Save DEC (re)set mode values
+	TK_DECREQTPARAM = 'x', // REQuest Terminal PARAMeters
+	TK_DECELR = 'z', // Enable Locator Reporting
 
 	TK_DECSWH = '#', // set character width or height
 	TK_DECALN = '8', // DECALN test, fill with E

@@ -25,8 +25,8 @@ static void zero_line(uint8_t * restrict s,
 static void get_horz_geo(xcb_rectangle_t * restrict h,
 	const uint16_t sz, const uint16_t col)
 {
-	h->x = MARGIN + col * jbxvt.X.font_size.width;
-	h->width = sz * jbxvt.X.font_size.width;
+	h->x = MARGIN + col * jbxvt.X.f.size.width;
+	h->width = sz * jbxvt.X.f.size.width;
 }
 
 //  erase part or the whole of a line
@@ -36,7 +36,7 @@ void scr_erase_line(const int8_t mode)
 	change_offset(0);
 	VTScreen * scr = jbxvt.scr.current;
 	xcb_point_t c = scr->cursor;
-	const uint8_t fh = jbxvt.X.font_size.height;
+	const uint8_t fh = jbxvt.X.f.size.height;
 	xcb_rectangle_t g = { .y = MARGIN + c.y * fh };
 	uint8_t * s = scr->text[c.y];
 	uint32_t * r = scr->rend[c.y];
@@ -91,7 +91,7 @@ void scr_erase_screen(const int8_t mode)
 	VTScreen * s = jbxvt.scr.current;
 	s->wrap_next = 0;
 	const Size c = jbxvt.scr.chars;
-	const uint8_t fh = jbxvt.X.font_size.height;
+	const uint8_t fh = jbxvt.X.f.size.height;
 	const Size p = jbxvt.scr.pixels;
 	xcb_rectangle_t r = {.x = MARGIN, .y = MARGIN,
 		.width = p.width};

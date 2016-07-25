@@ -13,21 +13,19 @@
 #include "screen.h"
 #include "xsetup.h"
 
+#include <stddef.h>
+
 void dec_reset(Token * restrict token)
 {
 	LOG("handle_reset(%d)", token->arg[0]);
-
-	const bool set = token->type == TK_SET;
-	VTScreen * scr = jbxvt.scr.current;
-	VTScreen * s1 = &jbxvt.scr.s[0];
-	VTScreen * s2 = &jbxvt.scr.s[1];
-#undef SET
-#define SET(i) {s1->i = set; s2->i = set;}
-
+	const bool is_set = token->type == TK_SET;
+	struct JBXVTScreenData * s = &jbxvt.scr;
+	VTScreen * scr = s->current;
+#define SET(i) s->s[0].i = is_set; s->s[1].i = is_set;
 	if (likely(token->private == '?')) {
 		switch (token->arg[0]) {
 		case 1: // DECCKM
-			set_keys(set, true);
+			set_keys(is_set, true);
 			break;
 		case 2:
 			SET(decanm);
@@ -103,8 +101,8 @@ void dec_reset(Token * restrict token)
 		case 1047:
 		case 1048:
 		case 1049: // cursor restore and screen change
-			cursor(set?CURSOR_SAVE:CURSOR_RESTORE);
-			scr_change_screen(set);
+			cursor(is_set ? CURSOR_SAVE : CURSOR_RESTORE);
+			scr_change_screen(is_set);
 			break;
 #ifdef DEBUG
 		default:
@@ -112,7 +110,7 @@ void dec_reset(Token * restrict token)
 #endif//DEBUG
 		}
 	} else if (!token->private && token->arg[0] == 4)
-		  scr->insert = set;
+		  scr->insert = is_set;
 }
 
 
