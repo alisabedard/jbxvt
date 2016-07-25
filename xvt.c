@@ -186,6 +186,17 @@ static void handle_dsr(const int16_t arg)
 		//  Send the name of the display to the command.
 		cprintf("%s\r", getenv("DISPLAY"));
 		break;
+	case 15: // Test printer status
+		cprintf("\033[0n");
+		break;
+	case 25: // Test UDK status?
+		cprintf("\033[0n");
+		break;
+	case 26: // Test keyboard status
+		cprintf("\033[0n");
+		break;
+	default:
+		LOG("Unhandled argument: %d", arg);
 	}
 }
 
@@ -500,6 +511,18 @@ app_loop_head:
 	case TK_DECST:
 		LOG("TK_DECST");
 		s->decpm = false;
+		break;
+	case TK_DECLL:
+		switch(t[1]) {
+		case ' ': // DECSCUSR
+			LOG("DECSCUSR -- unimplemented");
+			break;
+		case '"': // DECSCA
+			LOG("DECSCA -- unimplemented");
+			break;
+		default: // DECLL
+			LOG("DECLL -- unimplemented");
+		}
 		break;
 	default:
 #ifdef DEBUG

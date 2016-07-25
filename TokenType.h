@@ -70,6 +70,8 @@ typedef enum {
 	TK_RESET = 'l', // reset mode
 	TK_SGR = 'm', // set graphics rendition
 	TK_DSR = 'n', // report status or position
+	TK_DECLL = 'q', /* Load leds, set cursor style,
+			   or select character protection attribute.  */
 	TK_DECSTBM = 'r', // set top and bottom margins
         // ^-- also restore DEC mode values
 	TK_DECSAVEPM = 's', // Save DEC (re)set mode values
