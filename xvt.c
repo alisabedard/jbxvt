@@ -44,12 +44,6 @@ static void handle_txtpar(Token * restrict token)
 
 }
 
-static inline void set_charsel(const uint8_t i)
-{
-	jbxvt.scr.s[0].charsel = i;
-	jbxvt.scr.s[1].charsel = i;
-}
-
 static void form_feed(void)
 {
 	const Size m = jbxvt.scr.current->margin;
@@ -85,11 +79,11 @@ static void handle_tk_char(const uint8_t tk_char)
 		break;
 	case '\016': // change to char set G1
 		LOG("charset G1");
-		set_charsel(1);
+		jbxvt.mode.charsel = 1;
 		break;
 	case '\017': // change to char set G0
 		LOG("charset G0");
-		set_charsel(0);
+		jbxvt.mode.charsel = 0;
 		break;
 	}
 }
@@ -110,40 +104,33 @@ static void expose(const uint8_t region)
 	}
 }
 
-static void set_cset(const CharacterSet cs, const uint8_t i)
-{
-	jbxvt.scr.s[0].charset[i] = cs;
-	jbxvt.scr.s[1].charset[i] = cs;
-}
-
 static void select_charset(const char c, const uint8_t i)
 {
 	switch(c) {
 	case 'A':
 		LOG("United Kingdom");
-		set_cset(CHARSET_GB, i);
+		jbxvt.mode.charset[i] = CHARSET_GB;
 		break;
 	case 'B': // default
 		LOG("ASCII");
-		set_cset(CHARSET_ASCII, i);
+		jbxvt.mode.charset[i] = CHARSET_ASCII;
 		break;
 	case '0':
 		LOG("Special graphics");
-		set_cset(CHARSET_SG0, i);
+		jbxvt.mode.charset[i] = CHARSET_SG0;
 		break;
 	case '1':
 		LOG("Alt char ROM standard graphics");
-		set_cset(CHARSET_SG1, i);
+		jbxvt.mode.charset[i] = CHARSET_SG1;
 		break;
 	case '2':
 		LOG("Alt char ROM special graphics");
-		set_cset(CHARSET_SG2, i);
+		jbxvt.mode.charset[i] = CHARSET_SG2;
 		break;
 	default: // reset
 		LOG("Unknown character set");
-		set_cset(CHARSET_ASCII, i);
+		jbxvt.mode.charset[i] = CHARSET_ASCII;
 	}
-
 }
 
 static void decstbm(Token * restrict token)
@@ -157,8 +144,8 @@ static void decstbm(Token * restrict token)
 		// FIXME:  Unimplemented
 		LOG("FIXME:  DECRESTOREPM");
 		// At least set char set back to ASCII
-		set_cset(CHARSET_ASCII, 0);
-		set_charsel(0);
+		jbxvt.mode.charset[0] = CHARSET_ASCII;
+		jbxvt.mode.charsel = 0;
 	} else if (token->nargs < 2 || t[0] >= t[1]) {
 		LOG("DECSTBM reset");
 		// reset
@@ -472,8 +459,8 @@ app_loop_head:
 		// FIXME: Unimplemented
 		// At least set char set back to ASCII
 		// This fixes the links browser
-		set_cset(CHARSET_ASCII, 0);
-		set_charsel(0);
+		jbxvt.mode.charset[0] = CHARSET_ASCII;
+		jbxvt.mode.charsel = 0;
 		break;
 	case TK_SCS0: // DEC SCS G0
 		LOG("TK_SCS0");

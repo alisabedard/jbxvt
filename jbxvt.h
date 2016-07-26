@@ -76,13 +76,20 @@ struct JBXVTCommandData {
 	uint16_t send_count; // # chars waiting to be sent
 };
 
+typedef enum {
+	CHARSET_GB, CHARSET_ASCII, CHARSET_SG0, CHARSET_SG1, CHARSET_SG2
+} CharacterSet;
+
 struct JBXVTPrivateModes {
+	CharacterSet charset[2];// graphics mode char set
 	bool att610:1;		// stop blinking cursor
+	uint8_t charsel:1;	// charset index
 	bool decanm:1;		// DECANM -- ANSI/VT52
 	bool decawm:1;		// DECAWM auto-wrap flag
 	bool decom:1;		// origin mode flag
 	bool decsclm:1;		// DECSCLM: slow scroll mode
 	bool dectcem:1;		// DECTCEM -- hide cursor
+	bool insert:1;		// insert mode flag
 	bool mouse_x10:1;	// ptr coord on button press
 	bool mouse_vt200:1;	// ptr press+release
 	bool mouse_vt200hl:1;	// highlight tracking

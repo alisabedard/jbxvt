@@ -224,12 +224,12 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		check_selection(s->cursor.y, s->cursor.y);
 		p = get_p(s);
 		const int_fast16_t n = find_n(str);
-		if (unlikely(s->insert))
+		if (unlikely(jbxvt.mode.insert))
 			  handle_insert(n, p);
 		uint8_t * t = s->text[s->cursor.y];
 		if (!t) return;
 		t += s->cursor.x;
-		if (s->charset[s->charsel] == CHARSET_SG0)
+		if (jbxvt.mode.charset[jbxvt.mode.charsel] == CHARSET_SG0)
 			  parse_special_charset(str, len);
 		// Render the string:
 		if (!s->decpm) {

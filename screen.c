@@ -87,12 +87,10 @@ void scr_init(void)
 	// Initialise the array of lines that have scrolled off the top.
 	jbxvt.scr.sline.max = MAX_SCROLL;
 	jbxvt.scr.sline.data = GC_MALLOC(jbxvt.scr.sline.max * sizeof(void*));
-#define SETBOTH(f, val) jbxvt.scr.s[0].f = val; jbxvt.scr.s[1].f = val;
 	jbxvt.mode.decawm = true;
 	jbxvt.mode.dectcem = true;
-	SETBOTH(charset[0], CHARSET_ASCII);
-	SETBOTH(charset[1], CHARSET_ASCII);
-#undef SETBOTH
+	jbxvt.mode.charset[0] = CHARSET_ASCII;
+	jbxvt.mode.charset[1] = CHARSET_ASCII;
 	jbxvt.scr.current = &jbxvt.scr.s[0];
 	scr_reset();
 	scr_set_tab(-2, false);

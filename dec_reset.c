@@ -22,7 +22,6 @@ void dec_reset(Token * restrict token)
 	struct JBXVTScreenData * s = &jbxvt.scr;
 	VTScreen * scr = s->current;
 	struct JBXVTPrivateModes * m = &jbxvt.mode;
-#define SET(i) s->s[0].i = is_set; s->s[1].i = is_set;
 	if (likely(token->private == '?')) {
 		switch (token->arg[0]) {
 		case 1: // DECCKM
@@ -114,7 +113,7 @@ void dec_reset(Token * restrict token)
 #endif//DEBUG
 		}
 	} else if (!token->private && token->arg[0] == 4)
-		  scr->insert = is_set;
+		m->insert = is_set;
 }
 
 
