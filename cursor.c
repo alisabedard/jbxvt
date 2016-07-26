@@ -5,6 +5,7 @@
 
 #include "config.h"
 #include "jbxvt.h"
+#include "libjb/log.h"
 #include "screen.h"
 
 static xcb_point_t get_p(void)
@@ -18,7 +19,7 @@ static xcb_point_t get_p(void)
 }
 
 //  Draw the cursor at the current position.
-static void draw_cursor(const uint8_t cursor_focus)
+static void draw_cursor(uint8_t cursor_focus)
 {
 	// Don't draw cursor when scrolled
 	if (jbxvt.scr.offset > 0)
@@ -28,12 +29,35 @@ static void draw_cursor(const uint8_t cursor_focus)
 	if (!jbxvt.scr.current->dectcem) // hide cursor
 		  return;
 	xcb_point_t p = get_p();
-	const Size f = jbxvt.X.f.size;
-	xcb_poly_fill_rectangle(jbxvt.X.xcb, jbxvt.X.win.vt,
-		jbxvt.X.gc.cu, cursor_focus? 1 : 2,
-		(xcb_rectangle_t[]){ {p.x, p.y, f.width,
-		f.height}, {p.x + 1, p.y + 1, f.width - 2,
-		f.height - 2}});
+	struct JBXVTXData * X = &jbxvt.X;
+	const Size f = X->f.size;
+	xcb_rectangle_t r = {p.x, p.y, f.w, f.h};
+	xcb_rectangle_t r_unfocused = {p.x + 1, p.y + 1, f.w - 2, f.h - 2};
+	switch (jbxvt.opt.cursor_attr) {
+	case 0: // blinking block
+	case 1: // blinking block
+	case 2: // steady block (default)
+		break;
+	case 3: // blinking underline
+	case 4: // steady underline
+		cursor_focus = 1;
+		r.height = 2;
+		r.y += f.h - 2;
+		break;
+	case 5: // blinking bar
+	case 6: // steady bar
+		cursor_focus = 1;
+		r.width = 2;
+		break;
+	case 7: // blinking overline
+	case 8: // steady overline
+		cursor_focus = 1;
+		r.height = 2;
+		break;
+	}
+	xcb_poly_fill_rectangle(X->xcb, X->win.vt, X->gc.cu, cursor_focus
+		? 1 : 2, (xcb_rectangle_t[]){r, r_unfocused});
+	xcb_flush(X->xcb); // Apply drawing
 }
 
 __attribute__((nonnull(1)))
@@ -46,13 +70,13 @@ static inline void adj_wh(int16_t * restrict grc,
 //  Restore the cursor position and rendition style.
 static void restore(VTScreen * restrict s, const uint32_t r)
 {
-	if (!jbxvt.scr.current)
+	VTScreen * cur = jbxvt.scr.current;
+	if (!cur)
 		  return;
 	cursor(CURSOR_DRAW);
-	adj_wh(&jbxvt.scr.current->cursor.y, s->cursor.y,
-		jbxvt.scr.chars.height);
-	adj_wh(&jbxvt.scr.current->cursor.x, s->cursor.x,
-		jbxvt.scr.chars.width);
+	const Size c = jbxvt.scr.chars;
+	adj_wh(&cur->cursor.y, s->cursor.y, c.h);
+	adj_wh(&cur->cursor.x, s->cursor.x, c.w);
 	scr_style(r);
 	cursor(CURSOR_DRAW);
 }

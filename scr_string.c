@@ -17,6 +17,7 @@
 #include "selection.h"
 
 #include <string.h>
+#include <unistd.h>
 
 //#define STRING_DEBUG
 #ifdef STRING_DEBUG
@@ -77,6 +78,10 @@ static void wrap(VTScreen * restrict c)
 	const Size m = c->margin;
 	if (*y >= m.bottom) {
 		LOG("cursor at bottom margin, scrolling");
+		if (c->decsclm) {
+			LOG("slow scroll");
+			usleep(200000);
+		}
 		scroll(m.top, m.bottom, 1);
 	} else if (*y < sz.height - 1) {
 		SLOG("++*y");

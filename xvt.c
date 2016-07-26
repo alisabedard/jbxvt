@@ -513,9 +513,10 @@ app_loop_head:
 		s->decpm = false;
 		break;
 	case TK_DECLL:
-		switch(t[1]) {
+		switch (t[1]) {
 		case ' ': // DECSCUSR
 			LOG("DECSCUSR -- unimplemented");
+			jbxvt.opt.cursor_attr = t[0];
 			break;
 		case '"': // DECSCA
 			LOG("DECSCA -- unimplemented");

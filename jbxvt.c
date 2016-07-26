@@ -80,6 +80,7 @@ int main(int argc, char ** argv)
 	jbxvt.opt.size.height = JBXVT_ROWS;
 	char ** com_argv = parse_command_line(argc, argv);
 	init_display(argv[0]);
+	jbxvt.opt.cursor_attr = 2; // steady block
 	map_window();
 	char *shell_argv[2]; // here to not lose scope.
 	if(!com_argv) {

@@ -32,6 +32,9 @@ void dec_reset(Token * restrict token)
 			break;
 		case 3: // DECCOLM: 80/132 col mode switch
 			break;
+		case 4: // DECSCLM: slow scroll mode
+			SET(decsclm);
+			break;
 		case 5: // DECSCNM: set reverse-video mode
 			break;
 		case 6 : // DECOM normal cursor mode

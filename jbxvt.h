@@ -82,6 +82,7 @@ struct JBXVTOptionData {
 	int8_t screen;
 	uint8_t elr; // DECELR
 	bool show_scrollbar;
+	uint8_t cursor_attr;
 };
 
 typedef struct {

@@ -3,7 +3,9 @@
 
 #include "cmdtok.h"
 
+#include "cursor.h"
 #include "jbxvt.h"
+#include "libjb/log.h"
 #include "lookup_key.h"
 #include "ttyinit.h"
 #include "xevents.h"
@@ -134,6 +136,19 @@ static int_fast16_t output_to_command(void)
 	return count;
 }
 
+static void timer(void)
+{
+	switch(jbxvt.opt.cursor_attr) {
+	case 0: // blinking block
+	case 1: // blinking block
+	case 3: // blinking underline
+	case 5: // blinking bar
+	case 7: // blinking overline
+		cursor(CURSOR_DRAW);
+		break;
+	}
+}
+
 #if defined(__i386__) || defined(__amd64__)
 	__attribute__((regparm(1)))
 #endif//x86
@@ -147,10 +162,14 @@ static int_fast16_t poll_io(int_fast16_t count, fd_set * restrict in_fdset)
 	if (jbxvt.com.send_count > 0)
 		  FD_SET(jbxvt.com.fd, &out_fdset);
 	int sv;
-	sv = select(jbxvt.com.width, in_fdset,&out_fdset, NULL, NULL);
-	if (sv != -1 && FD_ISSET(jbxvt.com.fd, &out_fdset)) {
-		count = output_to_command();
-	}
+	sv = select(jbxvt.com.width, in_fdset, &out_fdset, NULL,
+		&(struct timeval){.tv_sec = 0, .tv_usec = 500000});
+	if (sv == -1)
+		return count;
+	if (FD_ISSET(jbxvt.com.fd, &out_fdset))
+		return output_to_command();
+	if (!FD_ISSET(x_fd, in_fdset))
+		timer(); // select timed out
 	return count;
 }
 
@@ -191,7 +210,7 @@ static int_fast16_t get_com_char(const int_fast8_t flags)
 				  return xev_ret;
 		}
 		count = poll_io(count, &in_fdset);
-	} while(!FD_ISSET(jbxvt.com.fd,&in_fdset));
+	} while(!FD_ISSET(jbxvt.com.fd, &in_fdset));
 	uint8_t * d = jbxvt.com.buf.data;
 	count = read(jbxvt.com.fd, d, COM_BUF_SIZE);
 	if (count < 1) // buffer is empty
