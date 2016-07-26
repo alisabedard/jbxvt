@@ -78,7 +78,7 @@ static void wrap(VTScreen * restrict c)
 	const Size m = c->margin;
 	if (*y >= m.bottom) {
 		LOG("cursor at bottom margin, scrolling");
-		if (c->decsclm) {
+		if (jbxvt.mode.decsclm) {
 			LOG("slow scroll");
 			usleep(200000);
 		}

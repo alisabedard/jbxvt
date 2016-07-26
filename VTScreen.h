@@ -12,8 +12,8 @@ typedef enum {
 	CHARSET_GB, CHARSET_ASCII, CHARSET_SG0, CHARSET_SG1, CHARSET_SG2
 } CharacterSet;
 
-/*  Structure describing the current state of the screen.
- */
+
+/*  Structure describing the current state of the screen.  */
 typedef struct {
 	uint8_t **text;		// backup copy of text
 	uint32_t **rend;	// rendition styles
@@ -25,8 +25,6 @@ typedef struct {
 	bool wrap_next:1;	// wrap before the next printed character
 	bool insert:1;		// insert mode flag
 	bool decanm:1;		// DECANM -- ANSI/VT52
-	bool decsclm:1;		// DECSCLM: slow scroll mode
-	bool dectcem:1;		// DECTCEM -- hide cursor
 	bool att610:1;		// stop blinking cursor
 	bool ptr_xy:1;		// send x y on button press/release
 	bool ptr_cell:1;	// cell motion mouse tracking

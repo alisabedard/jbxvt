@@ -76,6 +76,11 @@ struct JBXVTCommandData {
 	uint16_t send_count; // # chars waiting to be sent
 };
 
+struct JBXVTPrivateModes {
+	bool decsclm:1;		// DECSCLM: slow scroll mode
+	bool dectcem:1;		// DECTCEM -- hide cursor
+};
+
 struct JBXVTOptionData {
 	char *bg, *fg, *font, *bold_font, *display;
 	Size size;
@@ -91,6 +96,7 @@ typedef struct {
 	struct JBXVTSelectionData sel;
 	struct JBXVTCommandData com;
 	struct JBXVTOptionData opt;
+	struct JBXVTPrivateModes mode;
 } JBXVT;
 
 extern JBXVT jbxvt; // in jbxvt.c

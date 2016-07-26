@@ -23,11 +23,11 @@ static void draw_cursor(uint8_t cursor_focus)
 {
 	// Don't draw cursor when scrolled
 	if (jbxvt.scr.offset > 0)
-		  return;
+		return;
 	if (!jbxvt.scr.current)
-		  return; // prevent segfault
-	if (!jbxvt.scr.current->dectcem) // hide cursor
-		  return;
+		return; // prevent segfault
+	if (!jbxvt.mode.dectcem) // hide cursor
+		return;
 	xcb_point_t p = get_p();
 	struct JBXVTXData * X = &jbxvt.X;
 	const Size f = X->f.size;

@@ -33,7 +33,7 @@ void dec_reset(Token * restrict token)
 		case 3: // DECCOLM: 80/132 col mode switch
 			break;
 		case 4: // DECSCLM: slow scroll mode
-			SET(decsclm);
+			jbxvt.mode.decsclm = is_set;
 			break;
 		case 5: // DECSCNM: set reverse-video mode
 			break;
@@ -58,7 +58,7 @@ void dec_reset(Token * restrict token)
 		case 25: // DECTCEM -- hide cursor
 			change_offset(0);
 			cursor(CURSOR_DRAW); // clear
-			SET(dectcem);
+			jbxvt.mode.dectcem = is_set;
 			cursor(CURSOR_DRAW); // draw
 			break;
 		case 30: // toggle scrollbar -- per rxvt

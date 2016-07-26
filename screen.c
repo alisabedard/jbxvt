@@ -89,7 +89,7 @@ void scr_init(void)
 	jbxvt.scr.sline.data = GC_MALLOC(jbxvt.scr.sline.max * sizeof(void*));
 #define SETBOTH(f, val) jbxvt.scr.s[0].f = val; jbxvt.scr.s[1].f = val;
 	SETBOTH(decawm, true);
-	SETBOTH(dectcem, true);
+	jbxvt.mode.dectcem = true;
 	SETBOTH(charset[0], CHARSET_ASCII);
 	SETBOTH(charset[1], CHARSET_ASCII);
 #undef SETBOTH
