@@ -195,7 +195,7 @@ static void check_wrap(VTScreen * restrict s)
 	const uint8_t w = jbxvt.scr.chars.width;
 	if (s->cursor.x >= w) {
 		s->cursor.x = w;
-		s->wrap_next = s->decawm;
+		s->wrap_next = jbxvt.mode.decawm;
 	}
 }
 

@@ -19,7 +19,7 @@ void reset_row_col(void)
 	l = jbxvt.scr.chars.height - 1;
 	c->y = MAX(MIN(c->y, l), 0);
 	// Implement DECOM, DEC Origin Mode, limits
-	if (jbxvt.scr.current->decom) {
+	if (jbxvt.mode.decom) {
 		const Size m = jbxvt.scr.current->margin;
 		c->y = MAX(MIN(c->y, m.top), m.bottom);
 	}

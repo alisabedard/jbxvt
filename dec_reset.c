@@ -21,6 +21,7 @@ void dec_reset(Token * restrict token)
 	const bool is_set = token->type == TK_SET;
 	struct JBXVTScreenData * s = &jbxvt.scr;
 	VTScreen * scr = s->current;
+	struct JBXVTPrivateModes * m = &jbxvt.mode;
 #define SET(i) s->s[0].i = is_set; s->s[1].i = is_set;
 	if (likely(token->private == '?')) {
 		switch (token->arg[0]) {
@@ -28,32 +29,32 @@ void dec_reset(Token * restrict token)
 			set_keys(is_set, true);
 			break;
 		case 2:
-			SET(decanm);
+			m->decanm = is_set;
 			break;
 		case 3: // DECCOLM: 80/132 col mode switch
 			break;
 		case 4: // DECSCLM: slow scroll mode
-			jbxvt.mode.decsclm = is_set;
+			m->decsclm = is_set;
 			break;
 		case 5: // DECSCNM: set reverse-video mode
 			break;
 		case 6 : // DECOM normal cursor mode
 			/* According to the spec, the cursor is reset to
 			   the home position when this is changed.  */
-			SET(decom);
+			m->decom = is_set;
 			scr_move(scr->margin.top, 0, 0);
 			break;
 		case 7: // DECAWM
 		case 45: // reverse wrap-around mode?
-			SET(decawm);
+			m->decawm = is_set;
 			break;
 		case 9:
 			LOG("X10 mouse");
-			SET(mouse_x10);
+			m->mouse_x10 = is_set;
 			break;
 		case 12:
 			LOG("12: att610 stop blinking cursor");
-			SET(att610);
+			m->att610 = is_set;
 			break;
 		case 25: // DECTCEM -- hide cursor
 			change_offset(0);
@@ -66,39 +67,39 @@ void dec_reset(Token * restrict token)
 			break;
 		case 1000:
 			LOG("vt200 mouse");
-			SET(mouse_vt200);
+			m->mouse_vt200 = is_set;
 			break;
 		case 1001:
 			LOG("VT200 highlight mode");
-			SET(mouse_vt200hl);
+			m->mouse_vt200hl = is_set;
 			break;
 		case 1002:
 			LOG("button event mouse");
-			SET(mouse_btn_evt);
+			m->mouse_btn_evt = is_set;
 			break;
 		case 1003:
 			LOG("any event mouse");
-			SET(mouse_any_evt);
+			m->mouse_any_evt = is_set;
 			break;
 		case 1004:
 			LOG("focus event mouse");
-			SET(mouse_focus_evt);
+			m->mouse_focus_evt = is_set;
 			break;
 		case 1005:
 			LOG("UTF-8 ext mode mouse");
-			SET(mouse_ext);
+			m->mouse_ext = is_set;
 			break;
 		case 1006:
 			LOG("sgr ext mode mouse");
-			SET(mouse_sgr);
+			m->mouse_sgr = is_set;
 			break;
 		case 1007:
 			LOG("alternate scroll");
-			SET(mouse_alt_scroll);
+			m->mouse_alt_scroll = is_set;
 			break;
 		case 1015:
 			LOG("urxvt ext mode mouse");
-			SET(mouse_urxvt);
+			m->mouse_urxvt = is_set;
 			break;
 		case 47: // switch to main screen
 		case 1047:

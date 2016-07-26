@@ -231,7 +231,7 @@ app_loop_head:
 		cursor(t[0] ? CURSOR_ENTRY_IN : CURSOR_ENTRY_OUT);
 		break;
 	case TK_FOCUS :
-		if (s->mouse_focus_evt)
+		if (jbxvt.mode.mouse_focus_evt)
 			cprintf("\033[%c]", t[0] ? 'I' : 'O');
 		cursor(t[0] ? CURSOR_FOCUS_IN : CURSOR_FOCUS_OUT);
 		break;
@@ -339,7 +339,7 @@ app_loop_head:
 		// fall through
 	case TK_CUP: // position cursor
 		LOG("TK_CUP");
-		scr_move(t[1] - 1, t[0] - 1, s->decom
+		scr_move(t[1] - 1, t[0] - 1, jbxvt.mode.decom
 			? ROW_RELATIVE | COL_RELATIVE : 0);
 		break;
 	case TK_HPA: // horizontal position absolute

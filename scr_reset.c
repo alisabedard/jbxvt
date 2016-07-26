@@ -23,7 +23,7 @@ static void init_screen_elements(VTScreen * restrict scr,
 	uint8_t ** restrict text, uint32_t ** restrict rend)
 {
 	scr->margin.bottom = jbxvt.scr.chars.height - 1;
-	scr->decom = scr->wrap_next = false;
+	scr->wrap_next = false;
 	scr->rend = rend;
 	scr->text = text;
 	scr->margin.top = 0;

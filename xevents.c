@@ -45,7 +45,7 @@ static uint8_t get_mod(const uint16_t state)
 
 static bool track_mouse_sgr(uint8_t b, xcb_point_t p)
 {
-	if (!jbxvt.scr.current->mouse_sgr)
+	if (!jbxvt.mode.mouse_sgr)
 		  return false;
 	const bool rel = b & TRACK_RELEASE;
 	if (rel)
@@ -96,9 +96,9 @@ static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
 	locator_report(b, p);
 	// base button on 0
 	--b;
-	VTScreen * s = jbxvt.scr.current;
+	struct JBXVTPrivateModes * m = &jbxvt.mode;
 	// Release handling:
-	if (s->mouse_x10)
+	if (m->mouse_x10)
 		  goto mouse_x10;
 	if (b & TRACK_RELEASE) {
 		LOG("TRACK_RELEASE");
@@ -115,7 +115,7 @@ mouse_x10:
 	b += 32; // X10 encoding:
 	p.x += 32;
 	p.y += 32;
-	if (s->mouse_urxvt)
+	if (m->mouse_urxvt)
 		cprintf("\033[%d;%d;%dM]", b, p.x, p.y);
 	else
 		cprintf("\033[M%c%c%c]", b, p.x, p.y);
@@ -124,23 +124,23 @@ mouse_x10:
 
 static bool is_motion_tracked(void)
 {
-	VTScreen * s = jbxvt.scr.current;
+	struct JBXVTPrivateModes * m = &jbxvt.mode;
 	bool r = false;
-	r |= s->mouse_btn_evt;
-	r |= s->mouse_any_evt;
+	r |= m->mouse_btn_evt;
+	r |= m->mouse_any_evt;
 	return r;
 }
 
 static bool is_tracked(void)
 {
-	VTScreen * s = jbxvt.scr.current;
+	struct JBXVTPrivateModes * m = &jbxvt.mode;
 	bool r = false;
-	r |= s->mouse_x10;
-	r |= s->mouse_vt200;
-	r |= s->mouse_vt200hl;
-	r |= s->mouse_ext;
-	r |= s->mouse_sgr;
-	r |= s->mouse_urxvt;
+	r |= m->mouse_x10;
+	r |= m->mouse_vt200;
+	r |= m->mouse_vt200hl;
+	r |= m->mouse_ext;
+	r |= m->mouse_sgr;
+	r |= m->mouse_urxvt;
 	r |= is_motion_tracked();
 	return r;
 }

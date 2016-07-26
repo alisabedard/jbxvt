@@ -144,7 +144,8 @@ static void timer(void)
 	case 3: // blinking underline
 	case 5: // blinking bar
 	case 7: // blinking overline
-		cursor(CURSOR_DRAW);
+		if (!jbxvt.mode.att610)
+			cursor(CURSOR_DRAW);
 		break;
 	}
 }
