@@ -36,7 +36,7 @@ static uint8_t get_mod(const uint16_t state)
 	// 4=Shift, 8=Meta, 16=Control
 	if (state & XCB_KEY_BUT_MASK_SHIFT)
 		  return 4;
-	if (state & XCB_KEY_BUT_MASK_MOD_1)
+	if (state & XCB_KEY_BUT_MASK_MOD_4)
 		  return 8;
 	if (state & XCB_KEY_BUT_MASK_CONTROL)
 		  return 16;
@@ -102,7 +102,7 @@ static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
 		  goto mouse_x10;
 	if (b & TRACK_RELEASE) {
 		LOG("TRACK_RELEASE");
-		b = 3;
+		b = 3; // release code
 	} else if (wheel) {
 		// up and down are represented as button one and two,
 		// then add 64, plus one since one is lost later
@@ -115,10 +115,8 @@ mouse_x10:
 	b += 32; // X10 encoding:
 	p.x += 32;
 	p.y += 32;
-	if (m->mouse_urxvt)
-		cprintf("\033[%d;%d;%dM]", b, p.x, p.y);
-	else
-		cprintf("\033[M%c%c%c]", b, p.x, p.y);
+	cprintf(m->mouse_urxvt? "\033[%d;%d;%dM]" : "\033[M%c%c%c]",
+		b, p.x, p.y);
 	LOG("track_mouse: CSI M%cC%cC%c", b, p.x, p.y);
 }
 
