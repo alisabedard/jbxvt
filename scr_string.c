@@ -80,7 +80,9 @@ static void wrap(VTScreen * restrict c)
 		LOG("cursor at bottom margin, scrolling");
 		if (jbxvt.mode.decsclm) {
 			LOG("slow scroll");
-			usleep(200000);
+			// Time value per the following:
+			// http://www.vt100.net/docs/vt100-ug/chapter3.html166666
+			usleep(166666);
 		}
 		scroll(m.top, m.bottom, 1);
 	} else if (*y < sz.height - 1) {

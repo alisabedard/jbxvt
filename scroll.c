@@ -215,7 +215,7 @@ void scroll(const uint8_t row1, const uint8_t row2,
 		|| abs(count) > MAX_SCROLL)
 		  return;
 	const bool up = count > 0;
-	const int16_t n = up ? count : -count;
+	const int16_t n = up ? count : -count; // make positive
 	uint8_t *save[n];
 	uint32_t *rend[n];
 	// row2 + 1 to include last line
