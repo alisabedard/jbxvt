@@ -87,6 +87,7 @@ struct JBXVTPrivateModes {
 	bool decanm:1;		// DECANM -- ANSI/VT52
 	bool decawm:1;		// DECAWM auto-wrap flag
 	bool decom:1;		// origin mode flag
+	bool decpff:1;		// DECPFF: print form feed
 	bool decsclm:1;		// DECSCLM: slow scroll mode
 	bool decscnm:1;		// DECSCNM: reverse-video mode
 	bool dectcem:1;		// DECTCEM -- hide cursor

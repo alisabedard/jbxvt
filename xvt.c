@@ -48,6 +48,8 @@ static void form_feed(void)
 {
 	const Size m = jbxvt.scr.current->margin;
 	scr_move(0, m.top, 0);
+	if (jbxvt.mode.decpff)
+		cprintf("FF");
 	scroll(m.top, m.bottom, m.bottom - m.top);
 }
 

@@ -55,8 +55,12 @@ void dec_reset(Token * restrict token)
 			m->mouse_x10 = is_set;
 			break;
 		case 12:
-			LOG("12: att610 stop blinking cursor");
+			LOG("att610 (re)set blinking cursor");
 			m->att610 = is_set;
+			break;
+		case 18:
+			LOG("DECPFF");
+			m->decpff = is_set;
 			break;
 		case 25: // DECTCEM -- hide cursor
 			change_offset(0);
