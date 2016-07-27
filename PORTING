@@ -1,0 +1,54 @@
+NOTES ON PORTING -- OBSOLETE, but kept for reference
+
+Almost all the non-portable parts of xvt are concerned with setting up
+and configuring the pseudo-teletype (pty) link that connects xvt itself
+to the commands running in its window.  In practice, there are four
+different tasks that need to be done to get a pty up and running and
+each of these tasks can be done in different ways, depending on the
+flavour of UNIX.  The four tasks are:
+
+Obtaining a free pty
+--------------------
+This is handled in the function get_pseudo_teletype.  On BSD flavours
+of UNIX, the directory /dev contains a block of pty master devices,
+with names pty??, and a matching set of slave teletype devices with the
+initial 'p' replaced by a 't'.  The way to find a free pseudoteletype
+pair is to try opening pty devices, one by one, until one is opened
+successfully.  Then the matching tty device is opened to form the other
+end of the pair.  The alternative (SVR4?) approach is to open /dev/ptmx
+and then use a sequence of system calls to request and initialise the
+pty pair.  Either of the two approaches are selected by defining one of
+BSD_PTY and SVR4_PTY, but the only system I have found which supports
+SVR4_PTY is SunOS 5.
+
+Creation of a controlling teletype
+----------------------------------
+After the fork(), the slave tty needs to be made into the controlling
+teletype for the child process (which will eventually exec the command
+program, usually a shell).  On some systems this is done with a
+TIOCSCTTY ioctl after calling setsid() to create a new session.  On
+most other systems, the procedure is to call setsid() and then re-open
+the tty.  This latter approach is the default - if your system uses
+TIOCSCTTY then #define SCTTY_IOCTL.
+
+Configure the teletype
+----------------------
+This is handled in set_ttymodes().  SVR4 systems use the termios
+structure and the tcsetattr() system call whereas BSD systems use the
+sgttyb structure and TIOC ioctls.  In the systems I have ported to,
+termios is prevalent and so this is the default.  If your system does
+not have termios then you will need to #define BSD_PTY to enable the
+use of sgttyb instead.
+
+Adding an entry to utmp
+-----------------------
+Xvt needs to add an entry to /etc/utmp if the session is to be visible
+to programs like finger and who.  On BSD systems this involved finding
+the correct position in the utmp file and then using write(2) to insert
+an entry.  On SVR4 systems the work is done by pututline(3) and
+family.  SunOS 5 has a utmp extension which stores additional
+information about each session.  The relevent #defines are SVR4_UTMP,
+BSD_UTMP and SVR4_UTMPX.  If you don't need utmp entries then you don't
+need to define any of these.
+
+
