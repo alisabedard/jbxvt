@@ -104,6 +104,12 @@ void scr_reset(void)
 	--c.h; --c.w;
 	sbar_show(c.h + jbxvt.scr.sline.top, jbxvt.scr.offset,
 		jbxvt.scr.offset + c.h);
+	static bool decscnm_was_last;
+	if ((jbxvt.mode.decscnm && !decscnm_was_last)
+		|| (!jbxvt.mode.decscnm && decscnm_was_last)){
+		SWAP(pixel_t, jbxvt.X.color.fg, jbxvt.X.color.bg);
+		decscnm_was_last ^= true;
+	}
 	repaint();
 	cursor(CURSOR_DRAW);
 }

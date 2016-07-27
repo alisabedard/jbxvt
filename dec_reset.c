@@ -10,6 +10,7 @@
 #include "lookup_key.h"
 #include "sbar.h"
 #include "scr_move.h"
+#include "scr_reset.h"
 #include "screen.h"
 #include "xsetup.h"
 
@@ -24,10 +25,10 @@ void dec_reset(Token * restrict token)
 	struct JBXVTPrivateModes * m = &jbxvt.mode;
 	if (likely(token->private == '?')) {
 		switch (token->arg[0]) {
-		case 1: // DECCKM
+		case 1: // DECCKM: cursor key mode
 			set_keys(is_set, true);
 			break;
-		case 2:
+		case 2: // DECANM: VT52/ANSI mode
 			m->decanm = is_set;
 			break;
 		case 3: // DECCOLM: 80/132 col mode switch
@@ -36,6 +37,8 @@ void dec_reset(Token * restrict token)
 			m->decsclm = is_set;
 			break;
 		case 5: // DECSCNM: set reverse-video mode
+			m->decscnm = is_set;
+			scr_reset();
 			break;
 		case 6 : // DECOM normal cursor mode
 			/* According to the spec, the cursor is reset to

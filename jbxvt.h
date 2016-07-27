@@ -88,6 +88,7 @@ struct JBXVTPrivateModes {
 	bool decawm:1;		// DECAWM auto-wrap flag
 	bool decom:1;		// origin mode flag
 	bool decsclm:1;		// DECSCLM: slow scroll mode
+	bool decscnm:1;		// DECSCNM: reverse-video mode
 	bool dectcem:1;		// DECTCEM -- hide cursor
 	bool insert:1;		// insert mode flag
 	bool mouse_x10:1;	// ptr coord on button press
