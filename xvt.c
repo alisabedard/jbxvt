@@ -23,10 +23,6 @@
 #include "Token.h"
 #include "xsetup.h"
 
-#include <stdlib.h>
-
-static bool jbxvt_size_set;
-
 static void handle_txtpar(Token * restrict token)
 {
 	switch (token->arg[0]) {
@@ -41,7 +37,6 @@ static void handle_txtpar(Token * restrict token)
 		change_name(token->string, false);
 		break;
 	}
-
 }
 
 static void form_feed(void)
@@ -90,11 +85,11 @@ static void handle_tk_char(const uint8_t tk_char)
 	}
 }
 
-static void expose(const uint8_t region)
+static void expose(const uint8_t region, const bool size_set)
 {
 	if (region == REGION_SCROLLBAR)
 		sbar_reset();
-	else if (jbxvt_size_set) {
+	else if (size_set) {
 		cursor(CURSOR_DRAW); // clear
 		repaint();
 		cursor(CURSOR_DRAW); // draw
@@ -102,7 +97,6 @@ static void expose(const uint8_t region)
 		/*  Force a full reset if an exposure event
 		 *  arrives after a resize.  */
 		scr_reset();
-		jbxvt_size_set = true;
 	}
 }
 
@@ -189,14 +183,14 @@ static void handle_dsr(const int16_t arg)
 	}
 }
 
-void jbxvt_app_loop(void)
+static void parse_token(void)
 {
 	LOG("app_loop");
 	Token token;
 	int32_t n; // sanitized first token
 	int32_t * t; // shortcut to token.arg
+	static bool size_set;
 	VTScreen * s;
-app_loop_head:
 	s = jbxvt.scr.current; // update in case screen changed
 	get_token(&token);
 	t = token.arg;
@@ -204,12 +198,10 @@ app_loop_head:
 	n = t[0] ? t[0] : 1;
 	switch (token.type) {
 	case TK_STRING :
-		//LOG("TK_STRING");
 		scr_string(token.string, token.length,
 			token.nlcount);
 		break;
 	case TK_CHAR :
-		//LOG("TK_CHAR");
 		handle_tk_char(token.tk_char);
 		break;
 	case TK_EOF :
@@ -225,10 +217,11 @@ app_loop_head:
 		cursor(t[0] ? CURSOR_FOCUS_IN : CURSOR_FOCUS_OUT);
 		break;
 	case TK_EXPOSE: // window exposed
-		expose(token.region);
+		expose(token.region, size_set);
+		size_set = true;
 		break;
 	case TK_RESIZE :
-		jbxvt_size_set = false;
+		size_set = false;
 		resize_window();
 		break;
 	case TK_TXTPAR:	// change title or icon name
@@ -297,23 +290,19 @@ app_loop_head:
 		paste_primary(t[1], t[2]);
 		break;
 	case TK_CUU: // cursor up
-		LOG("TK_CUU: args: %d, t[0]: %d, n: %d",
-			token.nargs, t[0], n);
+		LOG("TK_CUU");
 		scr_move(0, -n, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_CUD: // cursor down
-		LOG("TK_CUD: args: %d, t[0]: %d, n: %d",
-			token.nargs, t[0], n);
+		LOG("TK_CUD");
 		scr_move(0, n, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_CUF: // cursor forward
-		LOG("TK_CUF: args: %d, t[0]: %d, n: %d",
-			token.nargs, t[0], n);
+		LOG("TK_CUF");
 		scr_move(n, 0, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_CUB: // cursor back
-		LOG("TK_CUB: args: %d, t[0]: %d, n: %d",
-			token.nargs, t[0], n);
+		LOG("TK_CUB");
 		scr_move(-n, 0, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_CPL: // cursor previous line
@@ -523,6 +512,11 @@ app_loop_head:
 #endif//DEBUG
 		break;
 	}
-	goto app_loop_head;
+}
+
+void jbxvt_app_loop(void)
+{
+	for(;;)
+		parse_token();
 }
 
