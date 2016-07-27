@@ -159,9 +159,6 @@ static void decstbm(Token * restrict token)
 static void handle_dsr(const int16_t arg)
 {
 	switch (arg) {
-	case 5: // command from host requesting status
-		// 0 is response for 'Ready, no malfunctions'
-		cprintf("\033[0n");
 	case 6 :
 		cursor(CURSOR_REPORT);
 		break;
@@ -169,17 +166,13 @@ static void handle_dsr(const int16_t arg)
 		//  Send the name of the display to the command.
 		cprintf("%s\r", getenv("DISPLAY"));
 		break;
+	case 5: // command from host requesting status
+		// 0 is response for 'Ready, no malfunctions'
 	case 15: // Test printer status
-		cprintf("\033[0n");
-		break;
 	case 25: // Test UDK status?
-		cprintf("\033[0n");
-		break;
 	case 26: // Test keyboard status
-		cprintf("\033[0n");
-		break;
 	default:
-		LOG("Unhandled argument: %d", arg);
+		cprintf("\033[0n");
 	}
 }
 
