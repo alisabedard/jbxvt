@@ -40,24 +40,16 @@
 #endif//USE_UTEMPTER
 
 #ifdef POSIX_UTMPX
-#include <pwd.h>
 #include <string.h>
-#include <sys/types.h>
 #include <utmpx.h>
-static struct utmpx utent; // current utmpx entry
 #endif//POSIX_UTMP
-
-
-static pid_t comm_pid = -1;	// process id of child
-static char *tty_name = NULL;	// name of the slave teletype
 
 //  Attempt to create and write an entry to the utmp file
 #ifdef POSIX_UTMPX
-static void write_utmpx(void)
+static void write_utmpx(const pid_t comm_pid, char * tty_name)
 {
 	setutxent();
-	utent.ut_type = USER_PROCESS;
-	utent.ut_pid = comm_pid;
+	struct utmpx utent = {.ut_type = USER_PROCESS, .ut_pid = comm_pid};
 	// + 5 to remove "/dev/"
 	strncpy(utent.ut_line, tty_name + 5, sizeof(utent.ut_line));
 	strncpy(utent.ut_user, getenv("USER"), sizeof(utent.ut_user));
@@ -190,7 +182,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
 fd_t run_command(char ** argv)
 {
 	fd_t ptyfd, ttyfd;
-	tty_name = get_pseudo_tty(&ptyfd, &ttyfd);
+	char * tty_name = get_pseudo_tty(&ptyfd, &ttyfd);
 	if (!tty_name)
 		exit(1);
 	jb_check(fcntl(ptyfd,F_SETFL,O_NONBLOCK) != 1,
@@ -204,13 +196,13 @@ fd_t run_command(char ** argv)
 	// grantpt(3) states this is unspecified behavior:
 	signal(SIGCHLD, exit);
 	atexit(exit_cb);
-	comm_pid = fork();
+	const pid_t comm_pid = fork();
 	if (jb_check(comm_pid >= 0, "Could not start session"))
 		exit(1);
 	if (comm_pid == 0)
 		child(argv, ttyfd);
 #ifdef POSIX_UTMPX
-	write_utmpx();
+	write_utmpx(comm_pid, tty_name);
 #endif//POSIX_UTMPX
 #ifdef USE_UTEMPTER
 	jb_check(utempter_add_record(ptyfd, getenv("DISPLAY")),
@@ -226,11 +218,8 @@ fd_t run_command(char ** argv)
 #ifdef TIOCSWINSZ
 void tty_set_size(const uint8_t width, const uint8_t height)
 {
-	if (comm_pid < 0)
-		return;
 	struct winsize wsize = {.ws_row = height, .ws_col = width};
-	const fd_t f = comm_pid == 0 ? 0 : jbxvt.com.fd;
-	jb_check(ioctl(f, TIOCSWINSZ, &wsize) != 1,
+	jb_check(ioctl(jbxvt.com.fd, TIOCSWINSZ, &wsize) != 1,
 		"Could not set ioctl TIOCSWINSZ");
 }
 #endif//TIOCSWINSZ
