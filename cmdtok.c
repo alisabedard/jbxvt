@@ -397,6 +397,16 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 	}
 }
 
+static void default_token(Token * restrict tk, const int_fast16_t c)
+{
+	if (is_string_char(c))
+		handle_string_char(c, tk);
+	else {
+		tk->type = TK_CHAR;
+		tk->tk_char = c;
+	}
+}
+
 //  Return an input token
 void get_token(Token * restrict tk)
 {
@@ -416,12 +426,7 @@ void get_token(Token * restrict tk)
 		handle_esc(c, tk);
 		break;
 	default:
-		if (is_string_char(c))
-			  handle_string_char(c, tk);
-		else {
-			tk->type = TK_CHAR;
-			tk->tk_char = c;
-		}
+		default_token(tk, c);
 	}
 }
 
