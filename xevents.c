@@ -183,9 +183,17 @@ static void handle_motion_notify(Token * restrict tk,
 static void sbop(Token * restrict tk, struct xeventst * restrict xe,
 	const bool up)
 {
-	tk->type = up ? TK_SBUP : TK_SBDOWN;
-	tk->arg[0] = xe->box.y;
-	tk->nargs = 1;
+	if (is_tracked()) // let the application handle scrolling
+		return;
+	if (jbxvt.scr.current == &jbxvt.scr.s[0]) {
+		tk->type = up ? TK_SBUP : TK_SBDOWN;
+		tk->arg[0] = xe->box.y;
+		tk->nargs = 1;
+	} else {
+		tk->type = up ? TK_CUU : TK_CUD;
+		tk->arg[0] = 1;
+		tk->nargs = 1;
+	}
 }
 
 static void handle_button_release(Token * restrict tk,
