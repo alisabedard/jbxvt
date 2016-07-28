@@ -40,6 +40,8 @@ static uint8_t get_mod(const uint16_t state)
 		mod += 4;
 	if (state & XCB_KEY_BUT_MASK_MOD_1)
 		mod += 8;
+	if (state & XCB_KEY_BUT_MASK_MOD_4)
+		mod += 8;
 	if (state & XCB_KEY_BUT_MASK_CONTROL)
 		mod += 16;
 	return mod;
