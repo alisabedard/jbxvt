@@ -28,8 +28,8 @@ xcb_atom_t wm_del_win(void)
 
 // Implementation of mouse tracking follows:
 enum TrackFlags {
-	TRACK_MOTION = 1 << 5,
-	TRACK_RELEASE = 1 << 6
+	TRACK_MOTION = 0x20,
+	TRACK_RELEASE = 0x40
 };
 
 static uint8_t get_mod(const uint16_t state)
@@ -52,8 +52,6 @@ static bool track_mouse_sgr(uint8_t b, xcb_point_t p)
 	const bool rel = b & TRACK_RELEASE;
 	if (rel)
 		b &= ~TRACK_RELEASE;
-	if (b & TRACK_MOTION)
-		b &= ~TRACK_MOTION;
 	cprintf("\033[<%c;%c;%c%c", b, p.x, p.y, rel ? 'm' : 'M');
 	return true;
 }
@@ -104,7 +102,8 @@ static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
 		if (m->mouse_x10)
 			return; // release untracked in x10 mode
 		LOG("TRACK_RELEASE");
-		b = 3; // release code
+		if (!m->mouse_sgr) // sgr reports which button was released
+			b = 3; // release code
 	} else if (wheel) { // wheel release untracked
 		// up and down are represented as button one(0) and two(1),
 		// then add 64, plus one since one was lost earlier
