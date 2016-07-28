@@ -16,7 +16,7 @@ enum CommandLimits {
 
 struct xeventst *pop_xevent(void);
 
-void cprintf(char *, ...);
+char * cprintf(char *, ...);
 
 /*  Initialise the command connection.  This should be called after the X
  *  server connection is established.  */

@@ -62,16 +62,16 @@ void push_com_char(const uint8_t c)
 
 /*  Send printf formatted output to the command.
     Only used for small ammounts of data.  */
-void cprintf(char *fmt,...)
+char * cprintf(char *fmt,...)
 {
 	va_list args;
 	va_start(args,fmt);
-	static uint8_t buf[32];
+	static char buf[32];
 	// + 1 to include \0 terminator.
-	const int l = vsnprintf((char *)buf, sizeof(buf),
-		fmt, args) + 1;
+	const int l = vsnprintf(buf, sizeof(buf), fmt, args) + 1;
 	va_end(args);
-	jbxvt.com.send_nxt = buf;
+	jbxvt.com.send_nxt = (uint8_t *)buf;
 	jbxvt.com.send_count = l;
+	return buf;
 }
 

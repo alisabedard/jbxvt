@@ -11,6 +11,7 @@
 #include <gc.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 xcb_atom_t wm_del_win(void)
 {
@@ -34,23 +35,26 @@ enum TrackFlags {
 static uint8_t get_mod(const uint16_t state)
 {
 	// 4=Shift, 8=Meta, 16=Control
+	uint8_t mod = 0;
 	if (state & XCB_KEY_BUT_MASK_SHIFT)
-		  return 4;
+		mod += 4;
 	if (state & XCB_KEY_BUT_MASK_MOD_4)
-		  return 8;
+		mod += 8;
 	if (state & XCB_KEY_BUT_MASK_CONTROL)
-		  return 16;
-	return 0;
+		mod += 16;
+	return mod;
 }
 
 static bool track_mouse_sgr(uint8_t b, xcb_point_t p)
 {
 	if (!jbxvt.mode.mouse_sgr)
-		  return false;
+		return false;
 	const bool rel = b & TRACK_RELEASE;
 	if (rel)
-		  b &= ~TRACK_RELEASE;
-	cprintf("\033[<%d;%d;%d%c]", b, p.x, p.y, rel ? 'm' : 'M');
+		b &= ~TRACK_RELEASE;
+	if (b & TRACK_MOTION)
+		b &= ~TRACK_MOTION;
+	cprintf("\033[<%c;%c;%c%c", b, p.x, p.y, rel ? 'm' : 'M');
 	return true;
 }
 
@@ -81,7 +85,7 @@ static void locator_report(const uint8_t b, xcb_point_t p)
 		if (a[1] == 1) // report in pixels
 			to_pixels(&p);
 		// DECLRP
-		cprintf("\033[%d;%d;%d;%d;0&w]", b * 2, 7, p.y, p.x);
+		cprintf("\033[%d;%d;%d;%d;0&w", b * 2, 7, p.y, p.x);
 	}
 }
 
@@ -94,30 +98,40 @@ static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
 	++p.x; ++p.y;
 	const bool wheel = b == 4 || b == 5;
 	locator_report(b, p);
-	// base button on 0
-	--b;
 	struct JBXVTPrivateModes * m = &jbxvt.mode;
 	// Release handling:
-	if (m->mouse_x10)
-		  goto mouse_x10;
 	if (b & TRACK_RELEASE) {
+		if (m->mouse_x10)
+			return; // release untracked in x10 mode
 		LOG("TRACK_RELEASE");
 		b = 3; // release code
-	} else if (wheel) {
-		// up and down are represented as button one and two,
-		// then add 64, plus one since one is lost later
+	} else if (wheel) { // wheel release untracked
+		// up and down are represented as button one(0) and two(1),
+		// then add 64, plus one since one was lost earlier
 		b += 61; // Wheel mouse handling
 	}
+	// base button on 0
+	--b;
 	b += get_mod(state);
-	if (track_mouse_sgr(b, p))
-		  return;
-mouse_x10:
+	if (track_mouse_sgr(b, p)) {
+		LOG("mouse_sgr");
+		return;
+	}
+//mouse_x10:
 	b += 32; // X10 encoding:
 	p.x += 32;
 	p.y += 32;
-	cprintf(m->mouse_urxvt? "\033[%d;%d;%dM]" : "\033[M%c%c%c]",
-		b, p.x, p.y);
-	LOG("track_mouse: CSI M%cC%cC%c", b, p.x, p.y);
+	char * format = m->mouse_urxvt ? "\033[%d;%d;%dM" : "\033[M%c%c%c";
+#ifndef DEBUG
+	cprintf(format, b, p.x, p.y);
+#else//DEBUG
+	char * out = strdup(cprintf(format, b, p.x, p.y));
+	for(char * i = out; *i; ++i)
+		if (*i == '\033')
+			*i = 'E';
+	fprintf(stderr, "track_mouse: %s\n", out);
+	free(out);
+#endif//!DEBUG
 }
 
 static bool is_motion_tracked(void)
