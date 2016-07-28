@@ -189,7 +189,7 @@ static void sbop(Token * restrict tk, struct xeventst * restrict xe,
 		tk->type = up ? TK_SBUP : TK_SBDOWN;
 		tk->arg[0] = xe->box.y;
 		tk->nargs = 1;
-	} else {
+	} else { // xterm's behavior if alternate screen in use:
 		tk->type = up ? TK_CUU : TK_CUD;
 		tk->arg[0] = 1;
 		tk->nargs = 1;
