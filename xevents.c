@@ -108,6 +108,7 @@ static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
 		// up and down are represented as button one(0) and two(1),
 		// then add 64, plus one since one was lost earlier
 		b += 61; // Wheel mouse handling
+		LOG("wheel b: %d", b);
 	}
 	// base button on 0
 	--b;
