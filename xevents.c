@@ -38,7 +38,7 @@ static uint8_t get_mod(const uint16_t state)
 	uint8_t mod = 0;
 	if (state & XCB_KEY_BUT_MASK_SHIFT)
 		mod += 4;
-	if (state & XCB_KEY_BUT_MASK_MOD_4)
+	if (state & XCB_KEY_BUT_MASK_MOD_1)
 		mod += 8;
 	if (state & XCB_KEY_BUT_MASK_CONTROL)
 		mod += 16;
@@ -110,15 +110,16 @@ static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
 		b += 61; // Wheel mouse handling
 		LOG("wheel b: %d", b);
 	}
-	// base button on 0
+	// base button on 0:
 	--b;
+	// add modifiers:
 	b += get_mod(state);
 	if (track_mouse_sgr(b, p)) {
 		LOG("mouse_sgr");
 		return;
 	}
-//mouse_x10:
-	b += 32; // X10 encoding:
+	// X10 encoding:
+	b += 32;
 	p.x += 32;
 	p.y += 32;
 	char * format = m->mouse_urxvt ? "\033[%d;%d;%dM" : "\033[M%c%c%c";
