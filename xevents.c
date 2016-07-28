@@ -105,7 +105,7 @@ static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
 			return; // release untracked in x10 mode
 		LOG("TRACK_RELEASE");
 		if (!m->mouse_sgr) // sgr reports which button was released
-			b = 3; // release code
+			b = 4; // release code, -1 later
 	} else if (wheel) { // wheel release untracked
 		// up and down are represented as button one(0) and two(1),
 		// then add 64, plus one since one was lost earlier
