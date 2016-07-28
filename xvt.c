@@ -23,6 +23,8 @@
 #include "Token.h"
 #include "xsetup.h"
 
+#include <string.h>
+
 static void handle_txtpar(Token * restrict token)
 {
 	switch (token->arg[0]) {
@@ -135,13 +137,10 @@ static void decstbm(Token * restrict token)
 	LOG("TK_DECSTBM args: %d, 0: %d, 1: %d",
 		(int)token->nargs, t[0], t[1]);
 	VTScreen * restrict s = jbxvt.scr.current;
-	if (token->private == '?') {
+	if (token->private == '?') { //DECRESTOREPM
 		// Restore private modes
-		// FIXME:  Unimplemented
-		LOG("FIXME:  DECRESTOREPM");
-		// At least set char set back to ASCII
-		jbxvt.mode.charset[0] = CHARSET_ASCII;
-		jbxvt.mode.charsel = 0;
+		memcpy(&jbxvt.mode, &jbxvt.saved_mode,
+			sizeof(struct JBXVTPrivateModes));
 	} else if (token->nargs < 2 || t[0] >= t[1]) {
 		LOG("DECSTBM reset");
 		// reset
@@ -440,11 +439,15 @@ static void parse_token(void)
 		break;
 	case TK_DECSAVEPM: // Save private modes
 		LOG("TK_DECSAVEPM");
+		memcpy(&jbxvt.saved_mode, &jbxvt.mode,
+			sizeof(struct JBXVTPrivateModes));
+#if 0
 		// FIXME: Unimplemented
 		// At least set char set back to ASCII
 		// This fixes the links browser
 		jbxvt.mode.charset[0] = CHARSET_ASCII;
 		jbxvt.mode.charsel = 0;
+#endif
 		break;
 	case TK_SCS0: // DEC SCS G0
 		LOG("TK_SCS0");

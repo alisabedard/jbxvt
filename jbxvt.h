@@ -121,7 +121,7 @@ typedef struct {
 	struct JBXVTSelectionData sel;
 	struct JBXVTCommandData com;
 	struct JBXVTOptionData opt;
-	struct JBXVTPrivateModes mode;
+	struct JBXVTPrivateModes mode, saved_mode;
 } JBXVT;
 
 extern JBXVT jbxvt; // in jbxvt.c
