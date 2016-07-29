@@ -105,43 +105,15 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 static void set_ttymodes(void)
 {
 	//  Set the terminal using the standard System V termios interface
-	static struct termios term;
-	term.c_iflag = BRKINT | IGNPAR | ICRNL | IXON;
-	term.c_oflag = OPOST | ONLCR;
-	// NetBSD needs CREAD
-	// Linux needs baud setting
-	term.c_cflag = CREAD | CLOCAL | CS8;
-#ifdef B38400
-	term.c_cflag |= B38400;
-#else//!B38400
-	term.c_cflag |= B9600;
-#endif//B38400
-	term.c_lflag = ISIG | IEXTEN | ICANON | ECHO | ECHOE | ECHOK
-		| ECHONL;
-	term.c_cc[VINTR] = 003;		/* ^C */
-	term.c_cc[VQUIT] = 034;		/* ^\ */
-	term.c_cc[VERASE] = 0177;	/* DEL */
-	term.c_cc[VKILL] = 025;		/* ^U */
-	term.c_cc[VEOF] = 004;		/* ^D */
-	term.c_cc[VEOL] = 013;		// ^M
-	term.c_cc[VSTART] = 021;	/* ^Q */
-	term.c_cc[VSTOP] = 023;		/* ^S */
-	term.c_cc[VSUSP] = 032;		/* ^Z */
-#ifdef VREPRINT
-	term.c_cc[VREPRINT] = 022;	/* ^R */
-#endif /* VREPRINT */
-#ifdef VWERASE
-	term.c_cc[VWERASE] = 027;	/* ^W */
-#endif /* VWERASE */
-#ifdef VLNEXT
-	term.c_cc[VLNEXT] = 026;	/* ^V */
-#endif /* VLNEXT */
-#ifdef VDSUSP
-	term.c_cc[VDSUSP] = 031;	/* ^Y */
-#endif /* VDSUSP */
-#ifdef VDISCARD
-	term.c_cc[VDISCARD] = 017;	/* ^O */
-#endif /* VDISCARD */
+	static struct termios term = {
+		.c_iflag = BRKINT | IGNPAR | ICRNL | IXON,
+		.c_oflag = OPOST | ONLCR, .c_cflag = B38400 | CREAD
+		| CLOCAL | CS8, .c_lflag = ISIG | IEXTEN | ICANON | ECHO
+		| ECHOE | ECHOK | ECHONL, .c_cc = {[VINTR] = 003,
+		[VQUIT] = 034, [VERASE] = 0177, [VKILL] = 025,
+		[VEOF] = 04, [VEOL] = 013, [VSTART] = 021, [VSTOP] = 023,
+		[VSUSP] = 032, [VREPRINT] = 022, [VWERASE] = 027,
+		[VLNEXT] = 026, [VDISCARD] = 017}};
 	tcsetattr(0, TCSANOW, &term);
 	tty_set_size(jbxvt.scr.chars.width, jbxvt.scr.chars.height);
 }
