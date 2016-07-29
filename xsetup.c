@@ -4,20 +4,13 @@
 #include "xsetup.h"
 
 #include "config.h"
-#include "init_display.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "scr_reset.h"
-#include "screen.h"
-#include "sbar.h"
-#include "ttyinit.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include <xcb/xcb.h>
-#include <xcb/xcb_atom.h>
 
 //  Map the window
 void map_window(void)
