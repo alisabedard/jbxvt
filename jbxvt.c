@@ -4,6 +4,9 @@
 
 #include "config.h"
 #include "init_display.h"
+#include "scr_reset.h"
+#include "scr_string.h"
+#include "screen.h"
 #include "xsetup.h"
 #include "xvt.h"
 
@@ -75,6 +78,23 @@ static void set_defaults(void)
 	jbxvt.opt.size.height = JBXVT_ROWS;
 }
 
+/*  Perform any initialization on the screen data structures.
+    Called just once at startup. */
+static void scr_init(void)
+{
+	// Initialise the array of lines that have scrolled off the top.
+	jbxvt.scr.sline.max = MAX_SCROLL;
+	jbxvt.scr.sline.data = GC_MALLOC(jbxvt.scr.sline.max * sizeof(void*));
+	jbxvt.mode.decawm = true;
+	jbxvt.mode.dectcem = true;
+	jbxvt.mode.charset[0] = CHARSET_ASCII;
+	jbxvt.mode.charset[1] = CHARSET_ASCII;
+	jbxvt.scr.current = &jbxvt.scr.s[0];
+	scr_reset();
+	scr_set_tab(-2, false);
+}
+
+
 /*  Run the command in a subprocess and return a file descriptor for the
  *  master end of the pseudo-teletype pair with the command talking to
  *  the slave.  */
@@ -85,6 +105,7 @@ int main(int argc, char ** argv)
 	char ** com_argv = parse_command_line(argc, argv);
 	init_display(argv[0]);
 	jbxvt.opt.cursor_attr = 2; // steady block
+	scr_init();
 	map_window();
 	char *shell_argv[2]; // here to not lose scope.
 	if(!com_argv) {

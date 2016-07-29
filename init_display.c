@@ -10,17 +10,12 @@
 #include "libjb/xcb.h"
 #include "paint.h"
 #include "sbar.h"
-#include "screen.h"
 #include "xsetup.h"
 
-#include <gc.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <xcb/xcb_icccm.h>
 #include <X11/cursorfont.h>
-#include <X11/Xutil.h>
 
 enum EventMasks {
 	MW_EVENTS = (XCB_EVENT_MASK_KEY_PRESS
@@ -122,7 +117,10 @@ static void get_sizehints(xcb_size_hints_t * restrict s)
 {
 	const Size f = jbxvt.X.f.size;
 	*s = (xcb_size_hints_t) {
-		.flags = USSize | PMinSize | PResizeInc | PBaseSize,
+		.flags = XCB_ICCCM_SIZE_HINT_US_SIZE
+			| XCB_ICCCM_SIZE_HINT_P_MIN_SIZE
+			| XCB_ICCCM_SIZE_HINT_P_RESIZE_INC
+			| XCB_ICCCM_SIZE_HINT_BASE_SIZE,
 		.width = (1 + jbxvt.opt.size.width) * f.w,
 		.height = (1 + jbxvt.opt.size.height) * f.h,
 		.width_inc = f.w,
@@ -180,7 +178,6 @@ void init_display(char * name)
 	setup_font();
 	create_window((uint8_t *)name, jbxvt.X.screen->root);
 	setup_gcs();
-	scr_init();
 	jbxvt.X.clipboard = jb_get_atom(jbxvt.X.xcb, "CLIPBOARD");
 	cursor(CURSOR_FOCUS_IN);
 }
