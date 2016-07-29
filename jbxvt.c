@@ -4,7 +4,6 @@
 
 #include "config.h"
 #include "init_display.h"
-#include "screen.h"
 #include "xsetup.h"
 #include "xvt.h"
 
@@ -65,12 +64,8 @@ static char ** parse_command_line(const int argc, char ** argv)
 	return NULL;
 }
 
-/*  Run the command in a subprocess and return a file descriptor for the
- *  master end of the pseudo-teletype pair with the command talking to
- *  the slave.  */
-int main(int argc, char ** argv)
+static void set_defaults(void)
 {
-	GC_INIT();
 	// Set some defaults which may be overridden.
 	jbxvt.opt.fg = JBXVT_FG;
 	jbxvt.opt.bg = JBXVT_BG;
@@ -78,6 +73,15 @@ int main(int argc, char ** argv)
 	jbxvt.opt.bold_font = BOLD_FONT;
 	jbxvt.opt.size.width = JBXVT_COLUMNS;
 	jbxvt.opt.size.height = JBXVT_ROWS;
+}
+
+/*  Run the command in a subprocess and return a file descriptor for the
+ *  master end of the pseudo-teletype pair with the command talking to
+ *  the slave.  */
+int main(int argc, char ** argv)
+{
+	GC_INIT();
+	set_defaults();
 	char ** com_argv = parse_command_line(argc, argv);
 	init_display(argv[0]);
 	jbxvt.opt.cursor_attr = 2; // steady block
