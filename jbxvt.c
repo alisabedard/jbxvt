@@ -85,15 +85,18 @@ static void scr_init(void)
 	// Initialise the array of lines that have scrolled off the top.
 	jbxvt.scr.sline.max = MAX_SCROLL;
 	jbxvt.scr.sline.data = GC_MALLOC(jbxvt.scr.sline.max * sizeof(void*));
-	jbxvt.mode.decawm = true;
-	jbxvt.mode.dectcem = true;
-	jbxvt.mode.charset[0] = CHARSET_ASCII;
-	jbxvt.mode.charset[1] = CHARSET_ASCII;
 	jbxvt.scr.current = &jbxvt.scr.s[0];
 	scr_reset();
 	scr_set_tab(-2, false);
 }
 
+// Set default values for private modes
+static void mode_init(void)
+{
+	struct JBXVTPrivateModes * m = &jbxvt.mode;
+	m->decawm = m->dectcem = true;
+	m->charset[0] = m->charset[1] = CHARSET_ASCII;
+}
 
 /*  Run the command in a subprocess and return a file descriptor for the
  *  master end of the pseudo-teletype pair with the command talking to
@@ -105,6 +108,7 @@ int main(int argc, char ** argv)
 	char ** com_argv = parse_command_line(argc, argv);
 	init_display(argv[0]);
 	jbxvt.opt.cursor_attr = 2; // steady block
+	mode_init();
 	scr_init();
 	map_window();
 	char *shell_argv[2]; // here to not lose scope.
