@@ -43,12 +43,11 @@ struct JBXVTXData {
 
 struct JBXVTScreenSLine {
 	SLine **data; // saved lines
-	int32_t top;
-	uint16_t max; // max # of saved lines
+	uint16_t top, max;
 };
 
 struct JBXVTScreenData {
-	VTScreen * current, s[2];
+	VTScreen * current, * s;
 	struct JBXVTScreenSLine sline;
 	Size pixels, chars;
 	uint32_t rstyle; // render style
@@ -82,14 +81,14 @@ struct JBXVTCommandData {
 	uint16_t send_count; // # chars waiting to be sent
 };
 
-typedef enum {
+enum CharacterSet{
 	CHARSET_GB, CHARSET_ASCII, CHARSET_SG0, CHARSET_SG1, CHARSET_SG2
-} CharacterSet;
+};
 
 struct JBXVTPrivateModes {
-	CharacterSet charset[2];// graphics mode char set
-	bool att610:1;		// stop blinking cursor
+	uint8_t charset[2];     // graphics mode char set
 	uint8_t charsel:1;	// charset index
+	bool att610:1;		// stop blinking cursor
 	bool decanm:1;		// DECANM -- ANSI/VT52
 	bool decawm:1;		// DECAWM auto-wrap flag
 	bool decom:1;		// origin mode flag
@@ -121,15 +120,15 @@ struct JBXVTOptionData {
 	uint8_t cursor_attr;
 };
 
-typedef struct {
+struct JBXVT {
 	struct JBXVTXData X;
 	struct JBXVTScreenData scr;
 	struct JBXVTSelectionData sel;
 	struct JBXVTCommandData com;
 	struct JBXVTOptionData opt;
 	struct JBXVTPrivateModes mode, saved_mode;
-} JBXVT;
+};
 
-extern JBXVT jbxvt; // in jbxvt.c
+extern struct JBXVT jbxvt; // in jbxvt.c
 
 #endif//!JBXVT_H
