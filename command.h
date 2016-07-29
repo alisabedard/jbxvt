@@ -14,7 +14,7 @@ enum CommandLimits {
 	MP_INTERVAL =	500	// multi-press interval in ms
 };
 
-struct xeventst *pop_xevent(void);
+//JBXVTEvent * pop_xevent(void);
 
 char * cprintf(char *, ...);
 
@@ -25,7 +25,14 @@ void init_command(char ** restrict argv);
 //  Push an input character back into the input queue.
 void push_com_char(const uint8_t c);
 
-//  Push a mini X event onto the queue
-void push_xevent(struct xeventst *);
+#ifdef LINUX
+#include <asm-generic/ioctls.h>
+#endif//LINUX
+
+#ifdef TIOCSWINSZ
+void tty_set_size(const uint8_t width, const uint8_t height);
+#else//!TIOCSWINSZ
+#define tty_set_size(w, h)
+#endif//TIOCSWINSZ
 
 #endif//!COMMAND_H

@@ -3,6 +3,7 @@
 
 #include "init_display.h"
 
+#include "command.h"
 #include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"
@@ -10,7 +11,6 @@
 #include "paint.h"
 #include "sbar.h"
 #include "screen.h"
-#include "ttyinit.h"
 #include "xsetup.h"
 
 #include <gc.h>

@@ -9,6 +9,7 @@
 #include "Size.h"
 #include "SLine.h"
 #include "VTScreen.h"
+#include "xeventst.h"
 
 struct JBXVTXWindows {
 	xcb_window_t vt, sb, main;
@@ -67,8 +68,13 @@ struct JBXVTCommandContainer {
 	uint8_t *next, *top, *data;
 };
 
+struct JBXVTEventQueue {
+	JBXVTEvent * start, * last;
+};
+
 struct JBXVTCommandData {
 	struct JBXVTCommandContainer buf, stack;
+	struct JBXVTEventQueue events;
 	uint8_t * send_nxt; // next char to be sent
 	long width; // # file descriptors being used
 	fd_t fd; // file descriptor connected to the command

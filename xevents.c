@@ -303,11 +303,23 @@ static void handle_button_press(Token * restrict tk,
 	}
 }
 
+static JBXVTEvent * pop_xevent(void)
+{
+	struct JBXVTEventQueue * q = &jbxvt.com.events;
+	JBXVTEvent * xe = q->last;
+	if (xe) {
+		q->last = xe->prev;
+		*(q->last ? &q->last->next : &q->start) = NULL;
+	}
+	return xe;
+}
+
 // convert next X event into a token
 bool handle_xevents(Token * restrict tk)
 {
-	struct xeventst *xe = pop_xevent();
-	if(!xe) return false;
+	JBXVTEvent * xe = pop_xevent();
+	if(!xe)
+		return false;
 	if (xe->window == jbxvt.X.win.vt)
 		  tk->region = REGION_SCREEN;
 	else if (xe->window == jbxvt.X.win.sb)

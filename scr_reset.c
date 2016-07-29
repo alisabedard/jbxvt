@@ -3,6 +3,7 @@
 
 #include "scr_reset.h"
 
+#include "command.h"
 #include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"
@@ -14,7 +15,6 @@
 #include "scroll.h"
 #include "scr_move.h"
 #include "selection.h"
-#include "ttyinit.h"
 
 #include <gc.h>
 #include <string.h>

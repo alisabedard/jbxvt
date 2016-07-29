@@ -7,7 +7,6 @@
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "lookup_key.h"
-#include "ttyinit.h"
 #include "xevents.h"
 #include "xeventst.h"
 
@@ -23,6 +22,14 @@ static JBXVTEvent * ev_alloc(xcb_generic_event_t * restrict e)
 	JBXVTEvent * xe = GC_MALLOC(sizeof(JBXVTEvent));
 	xe->type = e->response_type;
 	return xe;
+}
+
+static void push_xevent(JBXVTEvent * xe)
+{
+	struct JBXVTEventQueue * q = &jbxvt.com.events;
+	xe->next = q->start;
+	xe->prev = NULL;
+	*(xe->next ? &xe->next->prev : &q->last) = xe;
 }
 
 static void handle_focus(xcb_generic_event_t * restrict e)
@@ -161,7 +168,7 @@ static int_fast16_t poll_io(int_fast16_t count, fd_set * restrict in_fdset)
 	fd_set out_fdset;
 	FD_ZERO(&out_fdset);
 	if (jbxvt.com.send_count > 0)
-		  FD_SET(jbxvt.com.fd, &out_fdset);
+		FD_SET(jbxvt.com.fd, &out_fdset);
 	int sv;
 	sv = select(jbxvt.com.width, in_fdset, &out_fdset, NULL,
 		&(struct timeval){.tv_sec = 0, .tv_usec = 500000});
