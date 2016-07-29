@@ -27,25 +27,25 @@ void map_window(void)
 
 #define RSZ_VM (XCB_CONFIG_WINDOW_WIDTH|XCB_CONFIG_WINDOW_HEIGHT)
 
-static inline void cfg(const xcb_window_t win, const Size sz)
+static void cfg(const xcb_window_t win, const Size sz)
 {
 	xcb_configure_window(jbxvt.X.xcb, win, RSZ_VM,
 		(uint32_t[]){sz.w, sz.h});
 }
 
-static inline void resize_with_scrollbar(xcb_get_geometry_reply_t * r)
+static int16_t resize_with_scrollbar(xcb_get_geometry_reply_t * r)
 {
-	jbxvt.scr.pixels.width = r->width - SBAR_WIDTH;
 	// -1 to show the border:
 	cfg(jbxvt.X.win.sb, (Size){.w = SBAR_WIDTH - 1, .h = r->height});
 	cfg(jbxvt.X.win.vt, (Size){.w = r->width - SBAR_WIDTH,
 		.h = r->height});
+	return r->width - SBAR_WIDTH;
 }
 
-static inline void resize_without_scrollbar(xcb_get_geometry_reply_t * r)
+static int16_t resize_without_scrollbar(xcb_get_geometry_reply_t * r)
 {
-	jbxvt.scr.pixels.width = r->width;
 	cfg(jbxvt.X.win.vt, (Size){.w = r->width, .h = r->height});
+	return r->width;
 }
 #undef RSZ_VM
 
@@ -55,16 +55,18 @@ void resize_window(void)
 {
 	xcb_get_geometry_cookie_t c = xcb_get_geometry(jbxvt.X.xcb,
 		jbxvt.X.win.main);
+	Size * ws = &jbxvt.X.window_size;
 	xcb_get_geometry_reply_t *r = xcb_get_geometry_reply(jbxvt.X.xcb,
 		c, NULL);
-	const Size ws = jbxvt.X.window_size;
-	if (r->width == ws.w && r->height == ws.h)
+	if (jb_check(r, "Could not get geometry"))
+		exit(1);
+	if (r->width == ws->w && r->height == ws->h)
 		  return; // Size has not changed.
-	jbxvt.X.window_size.w = r->width;
-	jbxvt.X.window_size.h = r->height;
-	(jbxvt.opt.show_scrollbar ? &resize_with_scrollbar
-		: &resize_without_scrollbar)(r);
-	jbxvt.scr.pixels.height = r->height;
+	ws->w = r->width;
+	ws->h = r->height;
+	jbxvt.scr.pixels.w = (jbxvt.opt.show_scrollbar
+		? &resize_with_scrollbar : &resize_without_scrollbar)(r);
+	jbxvt.scr.pixels.h = r->height;
 	free(r);
 	scr_reset();
 }
