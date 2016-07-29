@@ -27,7 +27,7 @@ static uint8_t advance_c(uint8_t c, const uint8_t len,
 		while (c < len && s[c] < ' ')
 			c++;
 	if (c > len)
-		c = jbxvt.scr.chars.width;
+		return jbxvt.scr.chars.width;
 	return c;
 }
 
@@ -84,8 +84,7 @@ void scr_efill(void)
 void scr_change_screen(const bool mode_high)
 {
 	change_offset(0);
-	jbxvt.scr.current = mode_high
-		? &jbxvt.scr.s[1] : &jbxvt.scr.s[0];
+	jbxvt.scr.current = &jbxvt.scr.s[mode_high];
 	jbxvt.sel.end[1].type = NOSEL;
 	jbxvt.scr.sline.top = 0;
 	repaint();
