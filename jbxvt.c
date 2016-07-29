@@ -10,50 +10,52 @@
 #include "xsetup.h"
 #include "xvt.h"
 
+#include <alloca.h>
 #include <gc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-JBXVT jbxvt;
+struct JBXVT jbxvt;
 
 static char ** parse_command_line(const int argc, char ** argv)
 {
 	static const char * optstr = "B:b:C:c:D:d:eF:f:ehvR:S:s";
 	int8_t opt;
+	struct JBXVTOptionData * o = &jbxvt.opt;
 	while((opt=getopt(argc, argv, optstr)) != -1) {
 		switch (opt) {
 		case 'B': // bold font
-			jbxvt.opt.bold_font = optarg;
+			o->bold_font = optarg;
 			break;
 		case 'b': // background color
-			jbxvt.opt.bg = optarg;
+			o->bg = optarg;
 			break;
 		case 'D': // DISPLAY
-			jbxvt.opt.display = optarg;
+			o->display = optarg;
 			break;
 		case 'd': // screen number
-			jbxvt.opt.screen = atoi(optarg);
+			o->screen = atoi(optarg);
 			break;
 		case 'C': // columns
-			jbxvt.opt.size.cols = atoi(optarg);
+			o->size.cols = atoi(optarg);
 			break;
 		case 'e': // exec
 			return argv + optind;
 		case 'F': // font
-			jbxvt.opt.font = optarg;
+			o->font = optarg;
 			break;
 		case 'f': // foreground color
-			jbxvt.opt.fg = optarg;
+			o->fg = optarg;
 			break;
 		case 'R': // rows
-			jbxvt.opt.size.rows = atoi(optarg);
+			o->size.rows = atoi(optarg);
 			break;
 		case 'S': // scroll history
 			jbxvt.scr.sline.max = atoi(optarg);
 			break;
 		case 's': // use scrollbar
-			jbxvt.opt.show_scrollbar=true;
+			o->show_scrollbar=true;
 			break;
 		case 'v': // version
 			puts("jbxvt" VERSION);
@@ -67,7 +69,7 @@ static char ** parse_command_line(const int argc, char ** argv)
 	return NULL;
 }
 
-static void set_defaults(void)
+static void opt_init(void)
 {
 	// Set some defaults which may be overridden.
 	jbxvt.opt.fg = JBXVT_FG;
@@ -83,9 +85,11 @@ static void set_defaults(void)
 static void scr_init(void)
 {
 	// Initialise the array of lines that have scrolled off the top.
-	jbxvt.scr.sline.max = MAX_SCROLL;
-	jbxvt.scr.sline.data = GC_MALLOC(jbxvt.scr.sline.max * sizeof(void*));
-	jbxvt.scr.current = &jbxvt.scr.s[0];
+	struct JBXVTScreenData * s = &jbxvt.scr;
+	s->sline.max = MAX_SCROLL;
+	s->sline.data = GC_MALLOC(s->sline.max * sizeof(void*));
+	s->s = GC_MALLOC(sizeof(VTScreen)<<1);
+	s->current = &s->s[0];
 	scr_reset();
 	scr_set_tab(-2, false);
 }
@@ -104,19 +108,16 @@ static void mode_init(void)
 int main(int argc, char ** argv)
 {
 	GC_INIT();
-	set_defaults();
+	opt_init();
 	char ** com_argv = parse_command_line(argc, argv);
+	if (!com_argv)
+		com_argv = (char*[2]){getenv("SHELL")};
+	// init_display must come after parse_command_line
 	init_display(argv[0]);
 	jbxvt.opt.cursor_attr = 2; // steady block
 	mode_init();
 	scr_init();
 	map_window();
-	char *shell_argv[2]; // here to not lose scope.
-	if(!com_argv) {
-		shell_argv[0] = getenv("SHELL");
-		shell_argv[1] = NULL;
-		com_argv = shell_argv;
-	}
 	jb_check(setenv("TERM", TERM_ENV, true) != -1,
 		"Could not set TERM environment variable");
 	init_command(com_argv);
