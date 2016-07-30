@@ -31,14 +31,15 @@ static xcb_font_t get_font(const char * name)
 {
 	xcb_connection_t * restrict x = jbxvt.X.xcb;
 	xcb_font_t f = xcb_generate_id(x);
-	xcb_void_cookie_t c = xcb_open_font_checked(x, f, strlen(name), name);
+	xcb_void_cookie_t c = xcb_open_font_checked(x, f,
+		strlen(name), name);
 	xcb_generic_error_t * error = xcb_request_check(x, c);
 	if (error) {
 		free(error);
-		const char * fb = FALLBACK_FONT;
-		c = xcb_open_font_checked(x, f, strlen(fb), fb);
+		c = xcb_open_font_checked(x, f, sizeof(FALLBACK_FONT),
+			FALLBACK_FONT);
 		error = xcb_request_check(x, c);
-		if(jb_check(!error, "Could not open fb font"))
+		if(jb_check(!error, "Could not open fallback font"))
 			exit(1); // no need to free error, exiting
 		if (jbxvt.X.f.normal) // already set
 			  // Fall back if bold font unavailable:
