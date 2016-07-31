@@ -211,6 +211,8 @@ static int_fast16_t get_com_char(const int_fast8_t flags)
 		FD_ZERO(&in_fdset);
 		xcb_generic_event_t * e;
 		if ((e = xcb_poll_for_event(jbxvt.X.xcb))) {
+			if (xcb_connection_has_error(jbxvt.X.xcb))
+				exit(1); // Fix loop when server exits
 			const int_fast16_t xev_ret
 				= handle_xev(e, &count, flags);
 			free(e);
