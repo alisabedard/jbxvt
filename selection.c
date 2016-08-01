@@ -37,7 +37,8 @@ void scr_send_selection(const xcb_time_t time, const uint32_t requestor,
 	xcb_selection_notify_event_t e = {
 		.response_type = XCB_SELECTION_NOTIFY,
 		.selection = XCB_ATOM_PRIMARY, .target = target,
-		.requestor = requestor, .time = time, .property = property};
+		.requestor = requestor, .time = time, .property
+			= property ? property : target}; // per ICCCM
 	// If property is None, use taget, per ICCCM
 	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE, requestor,
 		property == XCB_NONE ? target : property,
@@ -75,15 +76,19 @@ void scr_start_selection(xcb_point_t p, enum selunit unit)
 	show_selection(0, c.h - 1, 0, c.w - 1);
 }
 
+static int16_t row(SelEnd * restrict e)
+{
+	return e->type == SCREENSEL ? e->index : -1;
+}
+
 /*  Determine if the current selection overlaps row1-row2 and if it does then
  *  remove it from the screen.  */
 void check_selection(const int16_t row1, const int16_t row2)
 {
-	const SelEnd *e1 = &jbxvt.sel.end[0], *e2 = &jbxvt.sel.end[1];
+	SelEnd *e1 = &jbxvt.sel.end[0], *e2 = &jbxvt.sel.end[1];
 	if (e1->type == NOSEL || e2->type == NOSEL)
 		return;
-	int16_t r1 = e1->type == SCREENSEL ? e1->index : -1;
-	int16_t r2 = e2->type == SCREENSEL ? e2->index : -1;
+	int16_t r1 = row(e1), r2 = row(e2);
 	if (r1 > r2)
 		SWAP(int16_t, r1, r2);
 	if (row2 < r1 || row1 > r2)
