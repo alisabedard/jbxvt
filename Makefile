@@ -46,7 +46,7 @@ OBJS+=sbar.o scr_erase.o selex.o scr_edit.o command.o selection.o
 OBJS+=selreq.o scr_reset.o scr_string.o screen.o scroll.o selend.o 
 OBJS+=xevents.o xsetup.o xvt.o handle_sgr.o dec_reset.o show_selection.o
 LIBS+= -Llibjb -ljb
-CFLAGS+=-D_XOPEN_SOURCE=700 --std=c99
+CFLAGS+=-D_XOPEN_SOURCE=700 --std=c11
 CFLAGS+=-Wall -Wextra
 
 all:
