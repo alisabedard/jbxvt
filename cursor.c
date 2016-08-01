@@ -18,6 +18,18 @@ static xcb_point_t get_p(void)
 	return p;
 }
 
+static bool is_pointed(xcb_query_pointer_cookie_t c)
+{
+	struct JBXVTXData * X = &jbxvt.X;
+	xcb_query_pointer_reply_t * r = xcb_query_pointer_reply(
+		X->xcb, c, NULL);
+	if (jb_check(r, "Could not locate pointer"))
+		return false;
+	const bool ret = r->same_screen && r->child == X->win.vt;
+	free(r);
+	return ret;
+}
+
 //  Draw the cursor at the current position.
 static void draw_cursor(uint8_t cursor_focus)
 {
@@ -30,6 +42,7 @@ static void draw_cursor(uint8_t cursor_focus)
 		return;
 	xcb_point_t p = get_p();
 	struct JBXVTXData * X = &jbxvt.X;
+	xcb_query_pointer_cookie_t qc = xcb_query_pointer(X->xcb, X->win.vt);
 	const Size f = X->f.size;
 	xcb_rectangle_t r = {p.x, p.y, f.w, f.h};
 	xcb_rectangle_t r_unfocused = {p.x + 1, p.y + 1, f.w - 2, f.h - 2};
@@ -55,6 +68,7 @@ static void draw_cursor(uint8_t cursor_focus)
 		r.height = 2;
 		break;
 	}
+	cursor_focus |= is_pointed(qc);
 	xcb_poly_fill_rectangle(X->xcb, X->win.vt, X->gc.cu, cursor_focus
 		? 1 : 2, (xcb_rectangle_t[]){r, r_unfocused});
 	xcb_flush(X->xcb); // Apply drawing
