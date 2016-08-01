@@ -37,27 +37,23 @@ static void paste_root(void)
 
 static bool paste_from(const xcb_atom_t clipboard, const xcb_timestamp_t t)
 {
-	xcb_get_selection_owner_cookie_t o_c;
-	xcb_get_property_cookie_t p_c;
-	xcb_get_selection_owner_reply_t * o_r;
-	xcb_get_property_reply_t * p_r;
-	xcb_connection_t * x = jbxvt.X.xcb;
-	xcb_generic_error_t *e;
-
-	o_c = xcb_get_selection_owner(x, clipboard);
-	o_r = xcb_get_selection_owner_reply(x, o_c, &e);
-	if (e) {
-		if (o_r)
-			free(o_r);
+	struct JBXVTXData * X = &jbxvt.X;
+	xcb_connection_t * x = X->xcb;
+	xcb_delete_property(x, jbxvt.X.win.vt, XCB_ATOM_STRING);
+	xcb_void_cookie_t c = xcb_convert_selection_checked(x,
+		jbxvt.X.win.vt, clipboard,
+		XCB_ATOM_STRING, XCB_ATOM_STRING, t);
+	xcb_generic_error_t * e = xcb_request_check(x, c);
+	if (jb_check(!e, "Could not convert selection")) {
 		free(e);
 		return false;
 	}
-	xcb_convert_selection(x, o_r->owner, clipboard,
-		XCB_ATOM_STRING, clipboard, t);
-	p_c = xcb_get_property(x, false, o_r->owner, clipboard,
-		XCB_ATOM_ANY, 0, JBXVT_PROP_SIZE);
-	free(o_r);
-	p_r = xcb_get_property_reply(x, p_c, NULL);
+	// Wait for the conversion to occur:
+	free(xcb_wait_for_event(x)); // Discard event
+	xcb_get_property_cookie_t p_c = xcb_get_property(x, true,
+		jbxvt.X.win.vt, XCB_ATOM_STRING, XCB_ATOM_ANY, 0,
+		JBXVT_PROP_SIZE);
+	xcb_get_property_reply_t * p_r = xcb_get_property_reply(x, p_c, NULL);
 	if (!p_r)
 		  return false;
 	if (p_r->type == XCB_ATOM_NONE) {
@@ -72,9 +68,6 @@ static bool paste_from(const xcb_atom_t clipboard, const xcb_timestamp_t t)
 
 void request_selection(const xcb_timestamp_t t)
 {
-	/* FIXME:  For some reason, the CLIPBOARD selection retrieved
-	   first matches the old selection, then updates with a second
-	   paste.  Why?  */
 	if (paste_from(XCB_ATOM_PRIMARY, t))
 		  return;
 	if (paste_from(jbxvt.X.clipboard, t))
