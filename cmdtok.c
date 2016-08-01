@@ -6,6 +6,7 @@
 #include "cursor.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "libjb/xcb.h"
 #include "lookup_key.h"
 #include "xevents.h"
 #include "xeventst.h"
@@ -157,12 +158,6 @@ static void timer(void)
 	}
 }
 
-static void check_x(void)
-{
-	if (xcb_connection_has_error(jbxvt.X.xcb))
-		exit(1); // Fix loop when server exits
-}
-
 #if defined(__i386__) || defined(__amd64__)
 	__attribute__((regparm(1)))
 #endif//x86
@@ -185,7 +180,7 @@ static int_fast16_t poll_io(int_fast16_t count, fd_set * restrict in_fdset)
 	if (!FD_ISSET(x_fd, in_fdset))
 		timer(); // select timed out
 	else // x_fd
-		check_x();
+		jb_check_x(jbxvt.X.xcb);
 	return count;
 }
 
@@ -219,7 +214,7 @@ static int_fast16_t get_com_char(const int_fast8_t flags)
 		FD_ZERO(&in_fdset);
 		xcb_generic_event_t * e;
 		if ((e = xcb_poll_for_event(jbxvt.X.xcb))) {
-			check_x();
+			jb_check_x(jbxvt.X.xcb);
 			const int_fast16_t xev_ret
 				= handle_xev(e, &count, flags);
 			free(e);

@@ -72,7 +72,6 @@ static void write_utmpx(const pid_t comm_pid, char * tty_name)
 // Put all clean-up tasks here:
 static void exit_cb(void)
 {
-	xcb_disconnect(jbxvt.X.xcb);
 #ifdef USE_UTEMPTER
 	jb_check(utempter_remove_added_record(),
 		"Could not remove utmp record");
