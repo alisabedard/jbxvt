@@ -18,6 +18,16 @@
 #include <string.h>
 #include <unistd.h>
 
+//  Special character returned by get_com_char().
+enum ComCharReturn {
+	GCC_NULL = 0x100, // Input buffer is empty
+	CC_ESC = 033,
+	CC_CSI = 0x9b
+};
+
+//  Flags used to control get_com_char();
+enum ComCharFlags {BUF_ONLY=1, GET_XEVENTS=2};
+
 static JBXVTEvent * ev_alloc(xcb_generic_event_t * restrict e)
 {
 	JBXVTEvent * xe = GC_MALLOC(sizeof(JBXVTEvent));
@@ -291,14 +301,14 @@ static void start_esc(int_fast16_t c, Token * restrict tk)
 		}
 		if (i < TK_MAX_ARGS)
 			  tk->arg[i++] = n;
-		if (c == ESC)
+		if (c == CC_ESC)
 			  push_com_char(c);
 		if (c < ' ')
 			  return;
 		if (c < '@')
 			  c = get_com_char(0);
 	} while (c < '@' && c >= ' ');
-	if (c == ESC)
+	if (c == CC_ESC)
 		  push_com_char(c);
 	tk->nargs = i;
 	tk->type = c;
@@ -433,8 +443,12 @@ void get_token(Token * restrict tk)
 	case EOF:
 		tk->type = TK_EOF;
 		break;
-	case ESC:
+	case CC_ESC:
 		handle_esc(c, tk);
+		break;
+	case CC_CSI: // 8-bit CSI
+		LOG("CC_CSI");
+		start_esc(c, tk);
 		break;
 	default:
 		default_token(tk, c);

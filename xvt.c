@@ -177,7 +177,6 @@ static void handle_dsr(const int16_t arg)
 
 static void parse_token(void)
 {
-	LOG("app_loop");
 	Token token;
 	int32_t n; // sanitized first token
 	int32_t * t; // shortcut to token.arg
