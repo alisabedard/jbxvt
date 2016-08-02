@@ -80,13 +80,15 @@ void switch_scrollbar(void)
 	xcb_get_geometry_cookie_t c = xcb_get_geometry(x, mw);
 	const bool sb = jbxvt.opt.show_scrollbar;
 	int16_t w = sb ? 0 : SBAR_WIDTH;
-	xcb_configure_window(x, jbxvt.X.win.vt, XCB_CONFIG_WINDOW_X, &w);
+	xcb_configure_window(x, jbxvt.X.win.vt, XCB_CONFIG_WINDOW_X,
+		&(uint32_t){w});
 	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(x, c, NULL);
 	if (jb_check(r, "Could not get geometry"))
 		abort();
 	w = r->width + (sb ? -SBAR_WIDTH : w);
 	free(r);
-	xcb_configure_window(x, mw, XCB_CONFIG_WINDOW_WIDTH, &w);
+	xcb_configure_window(x, mw, XCB_CONFIG_WINDOW_WIDTH,
+		&(uint32_t){w});
 	jbxvt.opt.show_scrollbar ^= true;
 }
 
