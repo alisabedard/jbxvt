@@ -50,7 +50,7 @@ CFLAGS+=-D_XOPEN_SOURCE=700 --std=c11
 CFLAGS+=-Wall -Wextra
 
 all:
-	cd libjb && make
+	cd libjb && make CFLAGS="${CFLAGS}"
 	make $(exe)
 
 $(exe): $(OBJS)
