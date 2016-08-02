@@ -1,9 +1,33 @@
 #!/bin/sh
 # Copyright 2016, Jeffrey E. Bedard
 
+clr() {
+	echo -n '\2330m'
+}
+rend() {
+	local label="$1"
+	local r="$2"
+	local g="$3"
+	local b="$4"
+	echo -n "\23348;2;${r};${g};${b}m"
+	echo $label
+	clr
+}
+
+if [ $1 ]; then
+	I=$1
+else
+	I=255
+fi
+
+rend BLUE 0 0 $I
+rend GREEN 0 $I 0
+rend RED $I 0 0
+
+exit
 echo 9-bit rgb mode
 echo -n '\23338;2;0;255;0m'
-echo -n 'fg\t'
+echo -n '\t'
 echo -n '\2330m'
 echo -n '\23348;2;0;0;255m'
 echo -n 'bg\t'

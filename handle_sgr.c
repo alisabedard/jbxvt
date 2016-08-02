@@ -11,7 +11,9 @@
 // Convert 3 bit color to 9 bit color, store at offset
 static inline void encode_rgb(uint8_t color, uint8_t offset)
 {
-	jbxvt.scr.rstyle |= ((color>>5)&07)<<offset;
+	color >>= 5;
+	color <<=1;
+	jbxvt.scr.rstyle |= color << offset;
 }
 
 static void sgrc(const uint8_t c, const bool fg)
@@ -51,7 +53,6 @@ static bool handle_color_encoding(const int32_t arg, const bool is_fg,
 		*index_mode = false;
 		return true;
 	} else if (unlikely(*rgb_mode)) {
-		// FIXME:  test rgb color mode
 		const uint8_t o = is_fg ? 0 : 9;
 		switch(rgb_count) {
 		case 0: // red

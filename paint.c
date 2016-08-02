@@ -56,15 +56,14 @@ pixel_t set_bg(const char * color)
 static pixel_t rgb_pixel(const uint16_t c)
 {
 	// Mask and scale to 8 bits.
-	uint16_t r = (c & 0700) >> 6;
-	uint16_t g = (c & 07) >> 3;
+	uint16_t r = (c & 0700) >> 4;
+	uint16_t g = (c & 070) >> 2;
 	uint16_t b = c & 7;
-	const uint8_t o = 13; // scale, leave 3 bits for octal
+
+	//const uint8_t o = 13; // scale, leave 3 bits for octal
+	const uint8_t o = 12; // scale, leave 3 bits for octal
 	// Convert from 3 bit to 16 bit:
 	r <<= o; g <<= o; b <<= o;
-	// Compensate for bit limitation by increasing intensity:
-	const uint16_t m = 017777;
-	r |= m; g |= m; b |= m;
 	const pixel_t p = jb_get_rgb_pixel(jbxvt.X.xcb,
 		jbxvt.X.screen->default_colormap, r, g, b);
 	LOG("byte is 0x%x, r: 0x%x, g: 0x%x, b: 0x%x,"
