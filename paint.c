@@ -67,7 +67,7 @@ static pixel_t rgb_pixel(const uint16_t c)
 	r |= m; g |= m; b |= m;
 	const pixel_t p = jb_get_rgb_pixel(jbxvt.X.xcb,
 		jbxvt.X.screen->default_colormap, r, g, b);
-	CLOG("byte is 0x%x, r: 0x%x, g: 0x%x, b: 0x%x,"
+	LOG("byte is 0x%x, r: 0x%x, g: 0x%x, b: 0x%x,"
 		" pixel is 0x%x", c, r, g, b, p);
 	return p;
 }

@@ -22,7 +22,22 @@
 enum ComCharReturn {
 	GCC_NULL = 0x100, // Input buffer is empty
 	CC_ESC = 033,
-	CC_CSI = 0x9b
+	CC_IND = 0x84,
+	CC_NEL = 0x85,
+	CC_HTS = 0x88,
+	CC_RI = 0x8d,
+	CC_SS2 = 0x8e,
+	CC_SS3 = 0x8f,
+	CC_DCS = 0x90,
+	CC_SPA = 0x96,
+	CC_EPA = 0x97,
+	CC_SOS = 0x98,
+	CC_DECID = 0x9a,
+	CC_CSI = 0x9b,
+	CC_ST = 0x9c,
+	CC_OSC = 0x9d,
+	CC_PM = 0x9e,
+	CC_APC = 0x9f
 };
 
 //  Flags used to control get_com_char();
@@ -420,7 +435,11 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 
 static void default_token(Token * restrict tk, const int_fast16_t c)
 {
-	if (is_string_char(c))
+	if (c > 0x84 && c < 0x9f) {
+		// Pass other controls directly to main switch
+		LOG("8-bit sequence passed directly");
+		tk->type = c;
+	} else if (is_string_char(c))
 		handle_string_char(c, tk);
 	else {
 		tk->type = TK_CHAR;
@@ -447,6 +466,7 @@ void get_token(Token * restrict tk)
 		handle_esc(c, tk);
 		break;
 	case CC_CSI: // 8-bit CSI
+		// Catch this here, since 7-bit CSI is parsed above.
 		LOG("CC_CSI");
 		start_esc(c, tk);
 		break;

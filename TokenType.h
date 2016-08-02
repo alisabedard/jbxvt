@@ -89,14 +89,23 @@ typedef enum {
 
 	TK_DECPM = '^', // Privacy message (ended by ESC \)
 	TK_DECST = '\\', // String Terminator
-
-	TK_IND = 0x100, // index downward
-	TK_NEL = 0x101, // beginning of next line
-	TK_HTS = 0x102, // horizontal tab set
-	TK_RI = 0x103, // reverse index
-	TK_SS2 = 0x104, // single shift 2
-	TK_SS3 = 0x105, // single shift 3
-	TK_DECID = 0x106, // request terminal ID
+	TK_ESC = 033,
+	TK_IND = 0x84,
+	TK_NEL = 0x85,
+	TK_HTS = 0x88,
+	TK_RI = 0x8d,
+	TK_SS2 = 0x8e,
+	TK_SS3 = 0x8f,
+	TK_DCS = 0x90,
+	TK_SPA = 0x96,
+	TK_EPA = 0x97,
+	TK_SOS = 0x98,
+	TK_DECID = 0x9a,
+	TK_CSI = 0x9b,
+	TK_ST = 0x9c,
+	TK_OSC = 0x9d,
+	TK_PM = 0x9e,
+	TK_APC = 0x9f
 } TokenType;
 
 #endif//!TOKEN_H

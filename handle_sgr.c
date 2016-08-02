@@ -24,16 +24,16 @@ static void sgrc(const uint8_t c, const bool fg)
 }
 
 static bool rgb_or_index(int32_t arg, bool * restrict either,
-	bool * restrict index, bool * restrict rgb)
+	bool * restrict index, bool * restrict rgb, const bool is_fg)
 {
 	if (!*either)
 		return false;
 	*either = false;
 	if (arg == 5) {
-		scr_style(RS_FG_INDEX);
+		scr_style(is_fg?RS_FG_INDEX:RS_BG_INDEX);
 		*index = true;
 	} else if (arg == 2) {
-		scr_style(RS_FG_RGB);
+		scr_style(is_fg?RS_FG_RGB:RS_BG_RGB);
 		*rgb = true;
 	}
 	return true;
@@ -97,10 +97,10 @@ void handle_sgr(Token * restrict token)
 		LOG("handle_sgr: arg[%d]: %d", i, token->arg[i]);
 #endif//DEBUG_SGR
 		if (rgb_or_index(token->arg[i], &fg_rgb_or_index,
-			&fg_index_mode, &fg_rgb_mode))
+			&fg_index_mode, &fg_rgb_mode, true))
 			  continue;
 		if (rgb_or_index(token->arg[i], &bg_rgb_or_index,
-			&bg_index_mode, &bg_rgb_mode))
+			&bg_index_mode, &bg_rgb_mode, false))
 			  continue;
 		if (handle_color_encoding(token->arg[i], true,
 			&fg_index_mode, &fg_rgb_mode))

@@ -432,21 +432,22 @@ static void parse_token(void)
 		LOG("TK_DECELR");
 		jbxvt.opt.elr = t[0] | (t[1] <<2);
 		break;
+	case TK_EPA:
+		LOG("FIXME: TK_EPA");
+		break;
+	case TK_HTS: // set tab stop at current position
+		LOG("TK_HTS");
+		scr_set_tab(s->cursor.x, true);
+		break;
+	case TK_OSC:
+		LOG("FIXME: TK_OSC");
+		break;
+	case TK_PM:
+		LOG("FIXME: TK_PM");
+		break;
 	case TK_RIS: // Reset Initial State
 		LOG("TK_RIS");
 		scr_reset();
-		break;
-	case TK_DECSAVEPM: // Save private modes
-		LOG("TK_DECSAVEPM");
-		memcpy(&jbxvt.saved_mode, &jbxvt.mode,
-			sizeof(struct JBXVTPrivateModes));
-#if 0
-		// FIXME: Unimplemented
-		// At least set char set back to ASCII
-		// This fixes the links browser
-		jbxvt.mode.charset[0] = CHARSET_ASCII;
-		jbxvt.mode.charsel = 0;
-#endif
 		break;
 	case TK_SCS0: // DEC SCS G0
 		LOG("TK_SCS0");
@@ -456,15 +457,27 @@ static void parse_token(void)
 		LOG("TK_SCS1");
 		select_charset(t[0], 1);
 		break;
-	case TK_HTS: // set tab stop at current position
-		LOG("TK_HTS");
-		scr_set_tab(s->cursor.x, true);
+	case TK_SPA:
+		LOG("FIXME:  TK_SPA");
 		break;
 	case TK_SS2 :
 		LOG("TK_SS2");
 		break;
 	case TK_SS3 :
 		LOG("TK_SS3");
+		break;
+	case TK_DECPM:
+		LOG("TK_DECPM");
+		s->decpm = true;
+		break;
+	case TK_DECSAVEPM: // Save private modes
+		LOG("TK_DECSAVEPM");
+		memcpy(&jbxvt.saved_mode, &jbxvt.mode,
+			sizeof(struct JBXVTPrivateModes));
+		break;
+	case TK_DECST:
+		LOG("TK_DECST");
+		s->decpm = false;
 		break;
 	case TK_TBC: // Tabulation clear
 		LOG("TK_TBC");
@@ -476,14 +489,6 @@ static void parse_token(void)
 			scr_set_tab(-1, false);
 			break;
 		}
-		break;
-	case TK_DECPM:
-		LOG("TK_DECPM");
-		s->decpm = true;
-		break;
-	case TK_DECST:
-		LOG("TK_DECST");
-		s->decpm = false;
 		break;
 	case TK_DECLL:
 		switch (t[1]) {
@@ -501,7 +506,8 @@ static void parse_token(void)
 	default:
 #ifdef DEBUG
 		if(token.type) { // Ignore TK_NULL
-			LOG("Unhandled token: %d", token.type);
+			LOG("Unhandled token: %d (0x%x)",
+				token.type, token.type);
 			exit(1);
 		}
 #endif//DEBUG
