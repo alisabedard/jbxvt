@@ -10,7 +10,6 @@
 #include "xsetup.h"
 #include "xvt.h"
 
-#include <alloca.h>
 #include <gc.h>
 #include <stdio.h>
 #include <stdlib.h>
