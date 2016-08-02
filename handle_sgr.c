@@ -11,7 +11,7 @@
 // Convert 3 bit color to 9 bit color, store at offset
 static inline void encode_rgb(uint8_t color, uint8_t offset)
 {
-	scr_style(((color>>5)&07)<<offset);
+	jbxvt.scr.rstyle |= ((color>>5)&07)<<offset;
 }
 
 static void sgrc(const uint8_t c, const bool fg)

@@ -36,10 +36,10 @@ enum RenderFlag {
 	RS_B7 = (1<<22),
 	RS_B8 = (1<<23),
 	// extended color support bits
-	RS_FG_RGB = (1<<24),
-	RS_BG_RGB = (1<<25),
-	RS_FG_INDEX = (1<<26),
-	RS_BG_INDEX = (1<<27),
+	RS_FG_RGB = (1<<28),
+	RS_BG_RGB = (1<<29),
+	RS_FG_INDEX = (1<<30),
+	RS_BG_INDEX = (1<<31),
 };
 
 
