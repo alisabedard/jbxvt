@@ -189,8 +189,10 @@ uint8_t * lookup_key(void * restrict ev, int_fast16_t * restrict pcount)
 #endif//KEY_DEBUG
 		return (uint8_t *)s;
 	}
-	if (k >= 0xffe0) // Don't display non-printable chars
-		return (uint8_t *)(*pcount = 0);
+	if (k >= 0xffe0) { // Don't display non-printable chars
+		*pcount = 0;
+		return NULL;
+	}
 	kbuf[0] = k;
 	apply_state(ke->state, kbuf);
 #ifdef KEY_DEBUG
