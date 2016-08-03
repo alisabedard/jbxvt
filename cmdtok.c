@@ -188,9 +188,8 @@ static void timer(void)
 #endif//x86
 static int_fast16_t poll_io(int_fast16_t count, fd_set * restrict in_fdset)
 {
-	const fd_t x_fd = xcb_get_file_descriptor(jbxvt.X.xcb);
 	FD_SET(jbxvt.com.fd, in_fdset);
-	FD_SET(x_fd, in_fdset);
+	FD_SET(jbxvt.com.xfd, in_fdset);
 	fd_set out_fdset;
 	FD_ZERO(&out_fdset);
 	if (jbxvt.com.send_count > 0)
@@ -202,9 +201,9 @@ static int_fast16_t poll_io(int_fast16_t count, fd_set * restrict in_fdset)
 		return count;
 	if (FD_ISSET(jbxvt.com.fd, &out_fdset))
 		return output_to_command();
-	if (!FD_ISSET(x_fd, in_fdset))
+	if (!FD_ISSET(jbxvt.com.xfd, in_fdset))
 		timer(); // select timed out
-	else // x_fd
+	else // jbxvt.com.xfd
 		jb_check_x(jbxvt.X.xcb);
 	return count;
 }
