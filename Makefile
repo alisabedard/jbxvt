@@ -49,11 +49,8 @@ LIBS+= -Llibjb -ljb
 CFLAGS+=-D_XOPEN_SOURCE=700 --std=c11
 CFLAGS+=-Wall -Wextra
 
-all:
-	cd libjb && make CFLAGS="${CFLAGS}"
-	make $(exe)
-
 $(exe): $(OBJS)
+	cd libjb && make CFLAGS="${CFLAGS}"
 	$(CC) -o $(exe) $(OBJS) $(CFLAGS) $(LIBS)
 	strip -o $(exe).tmp $(exe)
 	ls -l $(exe).tmp >> sz.log
