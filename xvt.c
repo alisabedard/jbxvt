@@ -307,7 +307,6 @@ static void parse_token(void)
 		LOG("TK_HVP");
 		// fall through
 	case TK_CUP: // position cursor
-		LOG("TK_CUP");
 		scr_move(t[1] - 1, t[0] - 1, jbxvt.mode.decom
 			? ROW_RELATIVE | COL_RELATIVE : 0);
 		break;
