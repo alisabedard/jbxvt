@@ -6,20 +6,19 @@
 #include "config.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "libjb/util.h"
 
+#include <alloca.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
-//  Send the selection to the command after converting LF to CR.
+//  Send the selection to the command
 static void send_selection(uint8_t * str, const uint16_t count)
 {
-	LOG("send_selection(%s, count: %d)", str, count);
-	if (!count)
-		  return;
-	for (char * i = (char *)str; (i = strchr(i, '\n')); *i = '\r')
-		  ;
-	jbxvt.com.send_nxt = str;
-	jbxvt.com.send_count = count;
+	jb_check(write(jbxvt.com.fd, str, count) != -1,
+		"Could not write to command");
 }
 
 static void paste_root(void)
