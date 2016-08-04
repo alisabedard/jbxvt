@@ -63,8 +63,6 @@ static uint8_t * convert_line(uint8_t * restrict str,
 	return (buf);
 }
 
-
-
 static void handle_savedsel(uint8_t ** str, uint16_t * restrict total,
 	SelEnd * restrict se1, SelEnd * restrict se2)
 {

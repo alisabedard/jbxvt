@@ -230,7 +230,7 @@ void push_com_char(const uint8_t c)
 
 /*  Send printf formatted output to the command.
     Only used for small ammounts of data.  */
-char * cprintf(char *fmt,...)
+char * cprintf(char *fmt, ...)
 {
 	va_list args;
 	va_start(args,fmt);
