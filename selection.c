@@ -22,9 +22,6 @@ void scr_make_selection(void)
 	/* Set all properties which may possibly be requested.  */
 	const xcb_window_t v = jbxvt.X.win.vt;
 	prop(v, XCB_ATOM_PRIMARY);
-	prop(v, XCB_ATOM_SECONDARY);
-	prop(v, jbxvt.X.clipboard);
-	prop(jbxvt.X.screen->root, XCB_ATOM_CUT_BUFFER0);
 	xcb_set_selection_owner(jbxvt.X.xcb, v, XCB_ATOM_PRIMARY,
 		XCB_CURRENT_TIME);
 }
