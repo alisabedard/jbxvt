@@ -8,6 +8,23 @@
 #include "libjb/log.h"
 #include "screen.h"
 
+static uint32_t saved_style;
+static xcb_point_t saved_cursor;
+
+void save_cursor(void)
+{
+	struct JBXVTScreenData * s = &jbxvt.scr;
+	saved_cursor = s->current->cursor;
+	saved_style = s->rstyle;
+}
+
+void restore_cursor(void)
+{
+	struct JBXVTScreenData * s = &jbxvt.scr;
+	s->current->cursor = saved_cursor;
+	s->rstyle = saved_style;
+}
+
 static xcb_point_t get_p(void)
 {
 	xcb_point_t p = jbxvt.scr.current->cursor;
@@ -18,20 +35,7 @@ static xcb_point_t get_p(void)
 	return p;
 }
 
-static bool is_pointed(xcb_query_pointer_cookie_t c)
-{
-	struct JBXVTXData * X = &jbxvt.X;
-	xcb_query_pointer_reply_t * r = xcb_query_pointer_reply(
-		X->xcb, c, NULL);
-	if (jb_check(r, "Could not locate pointer"))
-		return false;
-	const bool ret = r->same_screen && r->child == X->win.vt;
-	free(r);
-	return ret;
-}
-
-//  Draw the cursor at the current position.
-static void draw_cursor(uint8_t cursor_focus)
+void draw_cursor(void)
 {
 	// Don't draw cursor when scrolled
 	if (jbxvt.scr.offset > 0)
@@ -42,10 +46,8 @@ static void draw_cursor(uint8_t cursor_focus)
 		return;
 	xcb_point_t p = get_p();
 	struct JBXVTXData * X = &jbxvt.X;
-	xcb_query_pointer_cookie_t qc = xcb_query_pointer(X->xcb, X->win.vt);
 	const Size f = X->f.size;
 	xcb_rectangle_t r = {p.x, p.y, f.w, f.h};
-	xcb_rectangle_t r_unfocused = {p.x + 1, p.y + 1, f.w - 2, f.h - 2};
 	switch (jbxvt.opt.cursor_attr) {
 	case 0: // blinking block
 	case 1: // blinking block
@@ -53,87 +55,19 @@ static void draw_cursor(uint8_t cursor_focus)
 		break;
 	case 3: // blinking underline
 	case 4: // steady underline
-		cursor_focus = 1;
 		r.height = 2;
 		r.y += f.h - 2;
 		break;
 	case 5: // blinking bar
 	case 6: // steady bar
-		cursor_focus = 1;
 		r.width = 2;
 		break;
 	case 7: // blinking overline
 	case 8: // steady overline
-		cursor_focus = 1;
 		r.height = 2;
 		break;
 	}
-	cursor_focus |= is_pointed(qc);
-	xcb_poly_fill_rectangle(X->xcb, X->win.vt, X->gc.cu, cursor_focus
-		? 1 : 2, (xcb_rectangle_t[]){r, r_unfocused});
+	xcb_poly_fill_rectangle(X->xcb, X->win.vt, X->gc.cu, 1, &r);
 	xcb_flush(X->xcb); // Apply drawing
-}
-
-__attribute__((nonnull(1)))
-static inline void adj_wh(int16_t * restrict grc,
-	int16_t src, uint16_t chw)
-{
-	*grc = src >= chw ? chw - 1 : src;
-}
-
-//  Restore the cursor position and rendition style.
-static void restore(VTScreen * restrict s, const uint32_t r)
-{
-	VTScreen * cur = jbxvt.scr.current;
-	if (!cur)
-		  return;
-	cursor(CURSOR_DRAW);
-	const Size c = jbxvt.scr.chars;
-	adj_wh(&cur->cursor.y, s->cursor.y, c.h);
-	adj_wh(&cur->cursor.x, s->cursor.x, c.w);
-	scr_style(r);
-	cursor(CURSOR_DRAW);
-}
-
-/*  Indicate a change of keyboard focus.  Type is 1 if focusing in,
-    2 for entry events, and 4 for focus events.  */
-static inline bool focus(const bool in, bool cursor_focus)
-{
-	draw_cursor(cursor_focus); // clear via invert gc
-	draw_cursor(in);
-	return in;
-}
-
-void cursor(const CursorOp op)
-{
-	static VTScreen saved_screen; // saved cursor position
-	static uint32_t saved_rstyle; // saved render style
-	static uint8_t cursor_focus; // window has focus if nonzero
-
-	switch(op) {
-	case CURSOR_DRAW:
-		draw_cursor(cursor_focus);
-		break;
-	case CURSOR_FOCUS_IN:
-	case CURSOR_ENTRY_IN:
-		cursor_focus = focus(true, cursor_focus);
-		break;
-	case CURSOR_FOCUS_OUT:
-	case CURSOR_ENTRY_OUT:
-		cursor_focus = focus(false, cursor_focus);
-		break;
-	case CURSOR_RESTORE:
-		restore(&saved_screen, saved_rstyle);
-		break;
-	case CURSOR_SAVE: // Save the cursor position and rendition style.
-		saved_screen.cursor.y = jbxvt.scr.current->cursor.y;
-		saved_screen.cursor.x = jbxvt.scr.current->cursor.x;
-		saved_rstyle = jbxvt.scr.rstyle;
-		break;
-	case CURSOR_REPORT: // Report the current cursor position.
-		cprintf("\033[%d;%dR",jbxvt.scr.current->cursor.y + 1,
-			jbxvt.scr.current->cursor.x + 1);
-		break;
-	}
 }
 

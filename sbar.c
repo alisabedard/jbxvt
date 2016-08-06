@@ -57,9 +57,9 @@ void change_offset(int16_t n)
 		return;
 	jbxvt.scr.offset = n;
 	const Size c = jbxvt.scr.chars;
-	cursor(CURSOR_DRAW); // clear
+	draw_cursor(); // clear
 	repaint();
-	cursor(CURSOR_DRAW); // draw
+	draw_cursor(); // draw
 	sbar_show(c.h + t - 1, n, n + c.h - 1);
 }
 

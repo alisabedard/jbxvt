@@ -221,7 +221,7 @@ void scroll(const uint8_t row1, const uint8_t row2,
 	// row2 + 1 to include last line
 	(up ? sc_up : sc_dn)(row1, row2 + 1, n, save, rend);
 	change_offset(0);
-	cursor(CURSOR_DRAW); // clear
-	cursor(CURSOR_DRAW);
+	draw_cursor(); // clear
+	draw_cursor();
 }
 

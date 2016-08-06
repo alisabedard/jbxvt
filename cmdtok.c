@@ -178,7 +178,7 @@ static void timer(void)
 	case 5: // blinking bar
 	case 7: // blinking overline
 		if (!jbxvt.mode.att610)
-			cursor(CURSOR_DRAW);
+			draw_cursor();
 		break;
 	}
 }

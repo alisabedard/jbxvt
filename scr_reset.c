@@ -111,6 +111,6 @@ void scr_reset(void)
 		decscnm_was_last ^= true;
 	}
 	repaint();
-	cursor(CURSOR_DRAW);
+	draw_cursor();
 }
 

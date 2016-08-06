@@ -29,7 +29,7 @@ static void finalize(const xcb_point_t p, const int8_t count)
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt,
 		p.x, p.y, count * f.w, f.h);
 	jbxvt.scr.current->wrap_next = 0;
-	cursor(CURSOR_DRAW);
+	draw_cursor();
 }
 
 static void copy_lines(const int16_t x, const uint8_t cw,
@@ -54,7 +54,7 @@ void scr_insert_characters(int8_t count)
 	const uint8_t cw = jbxvt.scr.chars.width;
 	count = MIN(count, cw);
 	change_offset(0);
-	cursor(CURSOR_DRAW);
+	draw_cursor();
 	VTScreen * restrict scr = jbxvt.scr.current;
 	const xcb_point_t c = scr->cursor;
 	check_selection(c.y, c.y);
@@ -79,7 +79,7 @@ void scr_delete_characters(uint8_t count)
 	if(!count)
 		  return;
 	change_offset(0);
-	cursor(CURSOR_DRAW);
+	draw_cursor();
 	uint8_t * s = scr->text[c.y];
 	uint32_t * r = scr->rend[c.y];
 

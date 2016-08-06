@@ -207,7 +207,7 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 {
 	SLOG("scr_string(%s, len: %d, nlcount: %d)", str, len, nlcount);
 	change_offset(0);
-	cursor(CURSOR_DRAW);
+	draw_cursor();
 	if (nlcount > 0)
 		  handle_new_lines(nlcount);
 	xcb_point_t p;
@@ -245,7 +245,7 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		s->cursor.x += n;
 		check_wrap(s);
 	}
-	cursor(CURSOR_DRAW);
+	draw_cursor();
 }
 
 

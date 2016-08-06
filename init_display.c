@@ -180,6 +180,5 @@ void init_display(char * name)
 	create_window((uint8_t *)name, jbxvt.X.screen->root);
 	setup_gcs();
 	jbxvt.X.clipboard = jb_get_atom(jbxvt.X.xcb, "CLIPBOARD");
-	cursor(CURSOR_FOCUS_IN);
 }
 

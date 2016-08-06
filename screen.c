@@ -88,7 +88,7 @@ void scr_change_screen(const bool mode_high)
 	jbxvt.sel.end[1].type = NOSEL;
 	jbxvt.scr.sline.top = 0;
 	repaint();
-	cursor(CURSOR_DRAW);
+	draw_cursor();
 	scr_erase_screen(2); // ENTIRE
 }
 
@@ -103,8 +103,8 @@ void scr_style(const enum RenderFlag style)
 void scr_index_from(const int8_t count, const int16_t top)
 {
 	change_offset(0);
-	cursor(CURSOR_DRAW);
+	draw_cursor();
 	scroll(top, jbxvt.scr.current->margin.b, count);
-	cursor(CURSOR_DRAW);
+	draw_cursor();
 }
 

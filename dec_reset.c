@@ -64,9 +64,9 @@ void dec_reset(Token * restrict token)
 			break;
 		case 25: // DECTCEM -- hide cursor
 			change_offset(0);
-			cursor(CURSOR_DRAW); // clear
+			draw_cursor(); // clear
 			jbxvt.mode.dectcem = is_set;
-			cursor(CURSOR_DRAW); // draw
+			draw_cursor(); // draw
 			break;
 		case 30: // toggle scrollbar -- per rxvt
 			switch_scrollbar();
@@ -111,7 +111,10 @@ void dec_reset(Token * restrict token)
 		case 1047:
 		case 1048:
 		case 1049: // cursor restore and screen change
-			cursor(is_set ? CURSOR_SAVE : CURSOR_RESTORE);
+			if (is_set)
+				save_cursor();
+			else
+				restore_cursor();
 			scr_change_screen(is_set);
 			break;
 #ifdef DEBUG

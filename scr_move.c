@@ -33,7 +33,7 @@ void scr_move(const int16_t x, const int16_t y, const uint8_t relative)
 	LOG("scr_move(x:%d, y:%d, relative:%d)", x, y, relative);
 #endif//MOVE_DEBUG
 	change_offset(0);
-	cursor(CURSOR_DRAW); // clear
+	draw_cursor(); // clear
 	xcb_point_t * c = &jbxvt.scr.current->cursor;
 	/* Sanitize non-relative arguments--must be positive.  */
 	c->x = relative & COL_RELATIVE ? c->x + x : MAX(x, 0);
@@ -41,6 +41,6 @@ void scr_move(const int16_t x, const int16_t y, const uint8_t relative)
 	reset_row_col();
 	jbxvt.scr.current->wrap_next = 0;
 	check_selection(c->y, c->y);
-	cursor(CURSOR_DRAW); // draw
+	draw_cursor(); // draw
 }
 

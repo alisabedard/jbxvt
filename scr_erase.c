@@ -58,12 +58,12 @@ void scr_erase_line(const int8_t mode)
 		zero_line(s, r, cw);
 		break;
 	}
-	cursor(CURSOR_DRAW); //clear
+	draw_cursor(); //clear
 	check_selection(c.y, c.y);
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt,
 		g.x, g.y, g.width, fh);
 	scr->wrap_next = false;
-	cursor(CURSOR_DRAW);
+	draw_cursor();
 }
 
 static void zero(const int_fast16_t i)

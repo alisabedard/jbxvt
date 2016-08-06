@@ -92,9 +92,9 @@ static void expose(const uint8_t region, const bool size_set)
 	if (region == REGION_SCROLLBAR)
 		sbar_reset();
 	else if (size_set) {
-		cursor(CURSOR_DRAW); // clear
+		draw_cursor(); // clear
 		repaint();
-		cursor(CURSOR_DRAW); // draw
+		draw_cursor(); // draw
 	} else {
 		/*  Force a full reset if an exposure event
 		 *  arrives after a resize.  */
@@ -158,9 +158,11 @@ static void decstbm(Token * restrict token)
 static void handle_dsr(const int16_t arg)
 {
 	switch (arg) {
-	case 6 :
-		cursor(CURSOR_REPORT);
+	case 6 : {
+		const xcb_point_t c = jbxvt.scr.current->cursor;
+		cprintf("\033[%d;%dR", c.y + 1, c.x + 1);
 		break;
+	}
 	case 7 :
 		//  Send the name of the display to the command.
 		cprintf("%s\r", getenv("DISPLAY"));
@@ -199,13 +201,11 @@ static void parse_token(void)
 		LOG("TK_EOF");
 		exit(0);
 		break;
-	case TK_ENTRY :	// keyboard focus changed
-		cursor(t[0] ? CURSOR_ENTRY_IN : CURSOR_ENTRY_OUT);
+	case TK_ENTRY:	// keyboard focus changed
 		break;
-	case TK_FOCUS :
+	case TK_FOCUS: // mouse focus changed
 		if (jbxvt.mode.mouse_focus_evt)
 			cprintf("\033[%c]", t[0] ? 'I' : 'O');
-		cursor(t[0] ? CURSOR_FOCUS_IN : CURSOR_FOCUS_OUT);
 		break;
 	case TK_EXPOSE: // window exposed
 		expose(token.region, size_set);
@@ -372,11 +372,11 @@ static void parse_token(void)
 		break;
 	case TK_DECSC :
 		LOG("TK_DECSC");
-		cursor(CURSOR_SAVE);
+		save_cursor();
 		break;
 	case TK_DECRC :
 		LOG("TK_DECRC");
-		cursor(CURSOR_RESTORE);
+		restore_cursor();
 		break;
 	case TK_DECPAM :
 		LOG("TK_DECPAM");
