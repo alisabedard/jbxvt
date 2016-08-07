@@ -17,6 +17,6 @@ pixel_t set_bg(const char * color);
 
 //  Paint the text using the rendition value at the screen position.
 void paint_rval_text(uint8_t * restrict str, uint32_t rval,
-	uint8_t len, xcb_point_t p);
+	int16_t len, xcb_point_t p);
 
 #endif//!JBXVT_PAINT_H

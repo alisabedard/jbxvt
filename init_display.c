@@ -122,11 +122,11 @@ static void get_sizehints(xcb_size_hints_t * restrict s)
 			| XCB_ICCCM_SIZE_HINT_P_MIN_SIZE
 			| XCB_ICCCM_SIZE_HINT_P_RESIZE_INC
 			| XCB_ICCCM_SIZE_HINT_BASE_SIZE,
-		.width = (1 + jbxvt.opt.size.width) * f.w,
-		.height = (1 + jbxvt.opt.size.height) * f.h,
+		.width = (2 + jbxvt.opt.size.width) * f.w, // Make 80
+		.height = (1 + jbxvt.opt.size.height) * f.h, // Make 24
 		.width_inc = f.w,
 		.height_inc = f.h,
-		.base_width = 300+f.w,
+		.base_width = f.w,
 		.base_height = f.h
 	};
 	s->min_width = f.w + s->base_width;

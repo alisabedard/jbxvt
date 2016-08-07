@@ -100,9 +100,9 @@ static inline void font(const xcb_font_t f)
 
 //  Paint the text using the rendition value at the screen position.
 void paint_rval_text(uint8_t * restrict str, uint32_t rval,
-	uint8_t len, xcb_point_t p)
+	int16_t len, xcb_point_t p)
 {
-	if (!str || !len) // prevent segfault
+	if (!str || len < 1) // prevent segfault
 		  return;
 	if (rval & RS_INVISIBLE)
 		  return; // nothing to do
@@ -123,8 +123,7 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 	// Draw text with background:
 	const xcb_window_t w = jbxvt.X.win.vt;
 	xcb_image_text_8(c, len, w, gc, p.x, p.y, (const char *)str);
-	++p.y; /* Padding for underline,
-		  use underline for italic. */
+	++p.y; // Padding for underline, use underline for italic
 	if (rval & RS_ULINE || unlikely(rval & RS_ITALIC)) {
 		xcb_poly_line(c, XCB_COORD_MODE_ORIGIN, w, gc, 2,
 			(xcb_point_t[]){p, {p.x + len
