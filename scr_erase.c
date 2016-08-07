@@ -15,11 +15,12 @@
 
 #include <string.h>
 
-static void zero_line(uint8_t * restrict s,
-	uint32_t * restrict r, uint16_t sz)
+static void zero(const int16_t line, const uint16_t sz, const int16_t col)
 {
-	memset(s, 0, sz + 1); // +1 for wrap flag
-	memset(r, 0, sz << 2);
+	VTScreen * s = jbxvt.scr.current;
+	memset(s->text[line] + col, 0, sz);
+	memset(s->rend[line] + col, 0, sz << 2);
+	s->wrap[line] = false;
 }
 
 static void get_horz_geo(xcb_rectangle_t * restrict h,
@@ -38,24 +39,22 @@ void scr_erase_line(const int8_t mode)
 	xcb_point_t c = scr->cursor;
 	const uint8_t fh = jbxvt.X.f.size.height;
 	xcb_rectangle_t g = { .y = MARGIN + c.y * fh };
-	uint8_t * s = scr->text[c.y];
-	uint32_t * r = scr->rend[c.y];
 	const uint8_t cw = jbxvt.scr.chars.width;
 	switch (mode) {
 	case 1:
 		LOG("START");
 		get_horz_geo(&g, c.x, 0);
-		zero_line(s, r, c.x);
+		zero(c.y, c.x, 0);
 		break;
 	case 0:
 		LOG("END");
 		get_horz_geo(&g, cw - c.x, c.x);
-		zero_line(s + c.x, r + c.x, cw - c.x);
+		zero(c.y, cw - c.x, c.x);
 		break;
 	case 2:
 		LOG("ENTIRE");
 		get_horz_geo(&g, cw, 0);
-		zero_line(s, r, cw);
+		zero(c.y, cw, 0);
 		break;
 	}
 	draw_cursor(); //clear
@@ -64,12 +63,6 @@ void scr_erase_line(const int8_t mode)
 		g.x, g.y, g.width, fh);
 	scr->wrap_next = false;
 	draw_cursor();
-}
-
-static void zero(const int_fast16_t i)
-{
-	zero_line(jbxvt.scr.current->text[i], jbxvt.scr.current->rend[i],
-		jbxvt.scr.chars.width);
 }
 
 static void common_scr_erase(const xcb_rectangle_t r,
@@ -99,7 +92,7 @@ void scr_erase_screen(const int8_t mode)
 		LOG("START");
 		r.height = cur.y * fh;
 		for (uint8_t i = 0; i < cur.y; ++i)
-			  zero(i);
+			zero(i, c.w, 0);
 		common_scr_erase(r, 0, cur.y - 1, mode);
 		break;
 	case 0:
@@ -108,7 +101,7 @@ void scr_erase_screen(const int8_t mode)
 			r.y += (cur.y + 1) * fh;
 			r.height = (c.height - cur.y - 1) * fh;
 			for (uint8_t i = cur.y + 1; i < c.height; ++i)
-				  zero(i);
+				zero(i, c.w, 0);
 			common_scr_erase(r, cur.y + 1, c.height - 1, mode);
 			break;
 		}
