@@ -90,7 +90,7 @@ static void wrap(void)
 	if (*y >= m.b) {
 		decsclm();
 		scroll(m.top, m.bottom, 1);
-	} else// if (*y < jbxvt.scr.chars.height - 1)
+	} else
 		++*y;
 }
 
