@@ -92,27 +92,6 @@ static void wrap(void)
 		scroll(m.top, m.bottom, 1);
 	} else// if (*y < jbxvt.scr.chars.height - 1)
 		++*y;
-#if 0
-	int16_t * y = &c->cursor.y;
-	const Size sz = jbxvt.scr.chars;
-	c->text[*y][sz.w] = 1; // wrap flag
-	const Size m = c->margin;
-	if (*y >= m.bottom) {
-		LOG("cursor at bottom margin, scrolling");
-		if (jbxvt.mode.decsclm) {
-			LOG("slow scroll");
-			// Time value per the following:
-			// http://www.vt100.net/docs/vt100-ug/chapter3.html166666
-			usleep(166666);
-		}
-		scroll(m.top, m.bottom, 1);
-	} else if (*y < sz.height - 1) {
-		SLOG("++*y");
-		++*y;
-	}
-	check_selection(*y, *y);
-	c->wrap_next = false;
-#endif
 }
 
 #if defined(__i386__) || defined(__amd64__)
