@@ -88,7 +88,7 @@ static void cp_rows(int16_t i, const int16_t count)
 	uint32_t * r = s->rend[i];
 	SLine * sl = new_sline(x);
 	memcpy(sl->sl_text, t, x);
-	sl->wrap = t[jbxvt.scr.chars.width];
+	sl->wrap = s->wrap[i];
 	memcpy(sl->sl_rend, r, x << 2);
 	jbxvt.scr.sline.data[count - i - 1] = sl;
 	sel_scr_to_sav(&jbxvt.sel.end[0], i, count);

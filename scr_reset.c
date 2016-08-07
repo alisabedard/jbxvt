@@ -59,6 +59,8 @@ static void init(void)
 	jbxvt.scr.s[1].text = s2;
 	jbxvt.scr.s[0].rend = r1;
 	jbxvt.scr.s[1].rend = r2;
+	jbxvt.scr.s[0].wrap = GC_MALLOC(JBXVT_MAX_ROWS);
+	jbxvt.scr.s[1].wrap = GC_MALLOC(JBXVT_MAX_ROWS);
 }
 
 static inline void fix_margins(const Size c)

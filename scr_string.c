@@ -70,8 +70,29 @@ static void handle_new_lines(int8_t nlcount)
 		s->cursor.y, s->margin.b);
 }
 
-static void wrap(VTScreen * restrict c)
+static void decsclm(void)
 {
+	if (!jbxvt.mode.decsclm)
+		return;
+	LOG("slow scroll");
+	// Time value per the following:
+	// http://www.vt100.net/docs/vt100-ug/chapter3.html166666
+	usleep(166666);
+}
+
+static void wrap(void)
+{
+	VTScreen * s = jbxvt.scr.current;
+	s->wrap_next = false;
+	const Size m = s->margin;
+	int16_t * y = &s->cursor.y;
+	s->wrap[*y] = true;
+	if (*y >= m.b) {
+		decsclm();
+		scroll(m.top, m.bottom, 1);
+	} else// if (*y < jbxvt.scr.chars.height - 1)
+		++*y;
+#if 0
 	int16_t * y = &c->cursor.y;
 	const Size sz = jbxvt.scr.chars;
 	c->text[*y][sz.w] = 1; // wrap flag
@@ -91,6 +112,7 @@ static void wrap(VTScreen * restrict c)
 	}
 	check_selection(*y, *y);
 	c->wrap_next = false;
+#endif
 }
 
 #if defined(__i386__) || defined(__amd64__)
@@ -177,7 +199,7 @@ static bool test_action_char(const uint8_t c, VTScreen * restrict s)
 		s->wrap_next = false;
 		return true;
 	case '\n':
-		wrap(s);
+		wrap();
 		return true;
 	case '\t':
 		scr_tab();
@@ -220,7 +242,7 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		} else if (unlikely(*str == 0xe2))
 			  *str = '+';
 		if (s->wrap_next) {
-			wrap(s);
+			wrap();
 			s->cursor.x = 0;
 		}
 		check_selection(s->cursor.y, s->cursor.y);
