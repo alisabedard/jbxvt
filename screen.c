@@ -7,6 +7,7 @@
 #include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"
+#include "libjb/log.h"
 #include "repaint.h"
 #include "sbar.h"
 #include "scr_erase.h"
@@ -70,6 +71,7 @@ static void epos(const xcb_point_t p)
 // Set all chars to 'E'
 void scr_efill(void)
 {
+	LOG("scr_efill");
 	// Move to cursor home in order for all characters to appear.
 	scr_move(0, 0, 0);
 	xcb_point_t p;
