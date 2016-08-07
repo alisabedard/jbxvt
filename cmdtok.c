@@ -280,10 +280,8 @@ static void handle_string_char(int_fast16_t c, Token * restrict tk)
 	do {
 		tk->string[i++] = c;
 		c = get_com_char(1);
-		if (c == '\n' && ++tk->nlcount >= NLMAX) {
-			--tk->nlcount;
-			break;
-		}
+		if (c == '\n')
+			++tk->nlcount;
 	} while (is_string_char(c) && i < TKS_MAX);
 	tk->length = i;
 	tk->string[i] = 0;
