@@ -67,12 +67,36 @@ void scr_insert_characters(int8_t count)
 	finalize(p, count);
 }
 
+static void copy_data_after_count(const uint8_t count, const xcb_point_t c)
+{
+	// copy the data after count
+	const uint16_t offset = c.x + count;
+	const uint16_t end = jbxvt.scr.chars.width - c.x;
+	VTScreen * scr = jbxvt.scr.current;
+	uint8_t * t = scr->text[c.y];
+	uint32_t * r = scr->rend[c.y];
+	memmove(t + c.x, t + offset, end - count);
+	memmove(r + c.x, r + offset,
+		(end - count) * sizeof(uint32_t));
+}
+
+static void delete_source_data(const uint8_t count, const int16_t y)
+{
+	const uint16_t scw = jbxvt.scr.chars.width;
+	VTScreen * scr = jbxvt.scr.current;
+	uint8_t * t = scr->text[y];
+	uint32_t * r = scr->rend[y];
+	// delete the source data copied
+	memset(t + scw - count, 0, count);
+	memset(r + scw - count, 0, count << 2);
+}
+
 //  Delete count characters from the current position.
 void scr_delete_characters(uint8_t count)
 {
 	LOG("scr_delete_characters(%d)", count);
 	const uint8_t scw = jbxvt.scr.chars.width;
-	VTScreen * restrict scr = jbxvt.scr.current;
+	VTScreen * scr = jbxvt.scr.current;
 	const xcb_point_t c = scr->cursor;
 	const uint8_t end = scw - c.x;
 	count = MIN(count, end); // keep within the screen
@@ -80,18 +104,8 @@ void scr_delete_characters(uint8_t count)
 		  return;
 	change_offset(0);
 	draw_cursor();
-	uint8_t * s = scr->text[c.y];
-	uint32_t * r = scr->rend[c.y];
-
-	// copy the data after count
-	const uint8_t offset = c.x + count;
-	memmove(s + c.x, s + offset, end - count);
-	memmove(r + c.x, r + offset,
-		(end - count) * sizeof(uint32_t));
-	// delete the source data copied
-	memset(s + scw - count, 0, count);
-	memset(r + scw - count, 0, count << 2);
-
+	copy_data_after_count(count, c);
+	delete_source_data(count, c.y);
 	const Size f = jbxvt.X.f.size;
 	const int16_t y = MARGIN + c.y * f.height;
 	int16_t x[2] = {[1] = MARGIN + c.x * f.width};
