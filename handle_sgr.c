@@ -118,6 +118,9 @@ void handle_sgr(Token * restrict token)
 		case 1 :
 			scr_style(RS_BOLD);
 			break;
+		case 2: // faint
+			SGRFG(250);
+			break;
 		case 3:
 			scr_style(RS_ITALIC);
 			break;
