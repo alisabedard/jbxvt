@@ -68,10 +68,8 @@ void scr_erase_line(const int8_t mode)
 
 static void zero(const int_fast16_t i)
 {
-	const size_t sz = jbxvt.scr.chars.width;
-	VTScreen * restrict s = jbxvt.scr.current;
-	memset(s->text[i],0, sz + 1);
-	memset(s->rend[i],0, sz << 2);
+	zero_line(jbxvt.scr.current->text[i], jbxvt.scr.current->rend[i],
+		jbxvt.scr.chars.width);
 }
 
 static void common_scr_erase(const xcb_rectangle_t r,
