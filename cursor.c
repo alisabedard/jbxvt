@@ -20,9 +20,11 @@ void save_cursor(void)
 
 void restore_cursor(void)
 {
+	draw_cursor();
 	struct JBXVTScreenData * s = &jbxvt.scr;
 	s->current->cursor = saved_cursor;
 	s->rstyle = saved_style;
+	draw_cursor();
 }
 
 static xcb_point_t get_p(void)
