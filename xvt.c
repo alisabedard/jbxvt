@@ -190,6 +190,7 @@ static void parse_token(void)
 	// n is sanitized for ops with optional args
 	n = t[0] ? t[0] : 1;
 	switch (token.type) {
+// TK_{A-M}
 	case TK_STRING :
 		scr_string(token.string, token.length,
 			token.nlcount);
@@ -197,11 +198,96 @@ static void parse_token(void)
 	case TK_CHAR :
 		handle_tk_char(token.tk_char);
 		break;
-	case TK_EOF :
+	case TK_CHT:
+		for (uint8_t i = 0; i < n; ++i)
+			scr_tab();
+		break;
+	case TK_DECID:
+	case TK_DA:
+		LOG("TK_DECID");
+		cprintf("\033[?6c"); // VT102
+		break;
+	case TK_DECELR:
+		LOG("TK_DECELR");
+		jbxvt.opt.elr = t[0] | (t[1] <<2);
+		break;
+	case TK_DECLL:
+		switch (t[1]) {
+		case ' ': // DECSCUSR
+			LOG("DECSCUSR");
+			jbxvt.opt.cursor_attr = t[0];
+			break;
+		case '"': // DECSCA
+			LOG("DECSCA -- unimplemented");
+			break;
+		default: // DECLL
+			LOG("DECLL -- unimplemented");
+		}
+		break;
+	case TK_DECPM:
+		LOG("TK_DECPM");
+		s->decpm = true;
+		break;
+	case TK_DECREQTPARAM:
+		LOG("TK_DECREQTPARAM");
+		// Send DECREPTPARAM
+		switch (t[0]) {
+		case 0:
+		case 1: {
+			const uint8_t sol = t[0] + 2, par = 1, nbits = 1,
+			      flags = 0, clkmul = 1;
+			const uint16_t xspeed = 88, rspeed = 88;
+			cprintf("\033[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
+				xspeed, rspeed, clkmul, flags);
+			LOG("ESC[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
+				xspeed, rspeed, clkmul, flags);
+			break;
+		}
+		default:
+			LOG("DECREQTPARAM, unhandled argument %d", t[0]);
+		}
+		break;
+	case TK_DECSAVEPM: // Save private modes
+		LOG("TK_DECSAVEPM");
+		memcpy(&jbxvt.saved_mode, &jbxvt.mode,
+			sizeof(struct JBXVTPrivateModes));
+		break;
+	case TK_DECST:
+		LOG("TK_DECST");
+		s->decpm = false;
+		break;
+	case TK_DECSWH: // ESC # digit
+		LOG("TK_DECSWH");
+		switch(t[0]) {
+		case 3: // DECDHL double height line, top half
+			break;
+		case 4: // DECDHL double height line, bottom half
+			break;
+		case 5: // DECSWL single width line
+			break;
+		case 6: // DECDWL double width line
+			break;
+		case 8: // DECALN screen alignment test
+			scr_efill();
+			break;
+		default:
+			LOG("Unhandled # code: %d", t[0]);
+		}
+		break;
+	case TK_ENTGM52:
+		jbxvt.mode.decanm = true;
+		break;
+	case TK_EXTGM52:
+		jbxvt.mode.decanm = false;
+		break;
+	case TK_EOF:
 		LOG("TK_EOF");
 		exit(0);
 		break;
 	case TK_ENTRY:	// keyboard focus changed
+		break;
+	case TK_EPA:
+		LOG("FIXME: TK_EPA");
 		break;
 	case TK_FOCUS: // mouse focus changed
 		if (jbxvt.mode.mouse_focus_evt)
@@ -211,13 +297,115 @@ static void parse_token(void)
 		expose(token.region, size_set);
 		size_set = true;
 		break;
-	case TK_RESIZE :
+	case TK_RESIZE:
 		size_set = false;
 		resize_window();
 		break;
-	case TK_TXTPAR:	// change title or icon name
-		handle_txtpar(&token);
+	case TK_CUU: // cursor up
+		LOG("TK_CUU");
+		scr_move(0, -n, ROW_RELATIVE | COL_RELATIVE);
 		break;
+	case TK_CUD: // cursor down
+		LOG("TK_CUD");
+		scr_move(0, n, ROW_RELATIVE | COL_RELATIVE);
+		break;
+	case TK_CUF: // cursor forward
+		LOG("TK_CUF");
+		scr_move(n, 0, ROW_RELATIVE | COL_RELATIVE);
+		break;
+	case TK_CUB: // cursor back
+		LOG("TK_CUB");
+		scr_move(-n, 0, ROW_RELATIVE | COL_RELATIVE);
+		break;
+	case TK_CPL: // cursor previous line
+		LOG("TK_CPL");
+		n = -n; // fall through
+	case TK_CNL: // cursor next line
+		LOG("TK_CNL");
+		scr_move(0, n, 0);
+		break;
+	case TK_HVP: // horizontal vertical position
+		LOG("TK_HVP");
+		// fall through
+	case TK_CUP: // position cursor
+		// subtract 1 for 0-based coordinates
+		scr_move((t[1]?t[1]:1) - 1, n - 1, jbxvt.mode.decom
+			? ROW_RELATIVE | COL_RELATIVE : 0);
+		break;
+	case TK_HPA: // horizontal position absolute
+		LOG("TK_HPA");
+		scr_move(t[0] - 1, 0, ROW_RELATIVE);
+		break;
+	case TK_HPR: // horizontal position relative
+		LOG("TK_VPA");
+		scr_move(t[0] - 1, 0, COL_RELATIVE | ROW_RELATIVE);
+		break;
+	case TK_VPA: // vertical position absolute
+		LOG("TK_VPA");
+		scr_move(0, t[0] - 1, COL_RELATIVE);
+		break;
+	case TK_VPR: // vertical position relative
+		LOG("TK_VPR");
+		scr_move(0, t[0] - 1, COL_RELATIVE|ROW_RELATIVE);
+		break;
+	case TK_CHA: // cursor CHaracter Absolute column
+		LOG("TK_CHA");
+		scr_move(t[0] - 1, 0, ROW_RELATIVE);
+		break;
+	case TK_DSR: // request for information
+		LOG("TK_DSR");
+		handle_dsr(t[0]);
+		break;
+	case TK_DECSTBM: // set top and bottom margins.
+		decstbm(&token);
+		break;
+	case TK_DECSC :
+		LOG("TK_DECSC");
+		save_cursor();
+		break;
+	case TK_DECRC :
+		LOG("TK_DECRC");
+		restore_cursor();
+		break;
+	case TK_DECPAM :
+		LOG("TK_DECPAM");
+		set_keys(true, false);
+		break;
+	case TK_DECPNM :
+		LOG("TK_DECPNM");
+		set_keys(false, false);
+		break;
+	case TK_ED :
+		LOG("TK_ED"); // don't use n
+		scr_erase_screen(t[0]);
+		break;
+	case TK_EL: // erase line
+		LOG("TK_EL"); // don't use n
+		scr_erase_line(t[0]);
+		break;
+	case TK_IL:
+		n = -n; // fall through
+	case TK_DL:
+		LOG("TK_IL(-)/TK_DL(+): %d", n);
+		scr_index_from(n, s->cursor.y);
+		break;
+	case TK_DCH :
+	case TK_ECH:
+		LOG("TK_DCH");
+		scr_delete_characters(n);
+		break;
+	case TK_ICH :
+		LOG("TK_ICH");
+		scr_insert_characters(n);
+		break;
+// TK_{M-Z}
+	case TK_RESET :
+		LOG("TK_RESET");
+		dec_reset(&token);
+		break;
+	case TK_SET :
+		LOG("TK_SET");
+		// fall through
 	case TK_SBSWITCH :
 		switch_scrollbar();
 		break;
@@ -280,112 +468,11 @@ static void parse_token(void)
 		// arg 0 is time, unused
 		paste_primary(t[1], t[2]);
 		break;
-	case TK_CUU: // cursor up
-		LOG("TK_CUU");
-		scr_move(0, -n, ROW_RELATIVE | COL_RELATIVE);
-		break;
-	case TK_CUD: // cursor down
-		LOG("TK_CUD");
-		scr_move(0, n, ROW_RELATIVE | COL_RELATIVE);
-		break;
-	case TK_CUF: // cursor forward
-		LOG("TK_CUF");
-		scr_move(n, 0, ROW_RELATIVE | COL_RELATIVE);
-		break;
-	case TK_CUB: // cursor back
-		LOG("TK_CUB");
-		scr_move(-n, 0, ROW_RELATIVE | COL_RELATIVE);
-		break;
-	case TK_CPL: // cursor previous line
-		LOG("TK_CPL");
-		n = -n; // fall through
-	case TK_CNL: // cursor next line
-		LOG("TK_CNL");
-		scr_move(0, n, 0);
-		break;
-	case TK_HVP: // horizontal vertical position
-		LOG("TK_HVP");
-		// fall through
-	case TK_CUP: // position cursor
-		// subtract 1 for 0-based coordinates
-		scr_move((t[1]?t[1]:1) - 1, n - 1, jbxvt.mode.decom ?
-			ROW_RELATIVE | COL_RELATIVE : 0);
-		break;
-	case TK_HPA: // horizontal position absolute
-		LOG("TK_HPA");
-		scr_move(t[0] - 1, 0, ROW_RELATIVE);
-		break;
-	case TK_HPR: // horizontal position relative
-		LOG("TK_VPA");
-		scr_move(t[0] - 1, 0, COL_RELATIVE | ROW_RELATIVE);
-		break;
-	case TK_VPA: // vertical position absolute
-		LOG("TK_VPA");
-		scr_move(0, t[0] - 1, COL_RELATIVE);
-		break;
-	case TK_VPR: // vertical position relative
-		LOG("TK_VPR");
-		scr_move(0, t[0] - 1, COL_RELATIVE|ROW_RELATIVE);
-		break;
-	case TK_CHA: // cursor CHaracter Absolute column
-		LOG("TK_CHA");
-		scr_move(t[0] - 1, 0, ROW_RELATIVE);
-		break;
-	case TK_ED :
-		LOG("TK_ED"); // don't use n
-		scr_erase_screen(t[0]);
-		break;
-	case TK_EL: // erase line
-		LOG("TK_EL"); // don't use n
-		scr_erase_line(t[0]);
-		break;
-	case TK_IL:
-		n = -n; // fall through
-	case TK_DL:
-		LOG("TK_IL(-)/TK_DL(+): %d", n);
-		scr_index_from(n, s->cursor.y);
-		break;
-	case TK_DCH :
-	case TK_ECH:
-		LOG("TK_DCH");
-		scr_delete_characters(n);
-		break;
-	case TK_ICH :
-		LOG("TK_ICH");
-		scr_insert_characters(n);
-		break;
-	case TK_SET :
-		LOG("TK_SET");
-		// fall through
-	case TK_RESET :
-		LOG("TK_RESET");
-		dec_reset(&token);
-		break;
-	case TK_SGR :
+	case TK_SGR:
 		handle_sgr(&token);
 		break;
-	case TK_DSR: // request for information
-		LOG("TK_DSR");
-		handle_dsr(t[0]);
-		break;
-	case TK_DECSTBM: // set top and bottom margins.
-		decstbm(&token);
-		break;
-	case TK_DECSC :
-		LOG("TK_DECSC");
-		save_cursor();
-		break;
-	case TK_DECRC :
-		LOG("TK_DECRC");
-		restore_cursor();
-		break;
-	case TK_DECPAM :
-		LOG("TK_DECPAM");
-		set_keys(true, false);
-		break;
-	case TK_DECPNM :
-		LOG("TK_DECPNM");
-		set_keys(false, false);
+	case TK_TXTPAR:	// change title or icon name
+		handle_txtpar(&token);
 		break;
 	case TK_IND: // Index (same as \n)
 		LOG("TK_IND");
@@ -395,58 +482,9 @@ static void parse_token(void)
 		LOG("TK_RI");
 		scr_index_from(-1, s->margin.t);
 		break;
-	case TK_DECID:
-	case TK_DA:
-		LOG("TK_DECID");
-		cprintf("\033[?6c"); // VT102
-		break;
-	case TK_DECSWH: // ESC # digit
-		LOG("TK_DECSWH");
-		switch(t[0]) {
-		case 3: // DECDHL double height line, top half
-			break;
-		case 4: // DECDHL double height line, bottom half
-			break;
-		case 5: // DECSWL single width line
-			break;
-		case 6: // DECDWL double width line
-			break;
-		case 8: // DECALN screen alignment test
-			scr_efill();
-			break;
-		default:
-			LOG("Unhandled # code: %d", t[0]);
-		}
-		break;
 	case TK_NEL : // move to first position on next line down.
 		LOG("TK_NEL: NExt Line");
 		scr_move(0, s->cursor.y + 1, 0);
-		break;
-	case TK_DECREQTPARAM:
-		LOG("TK_DECREQTPARAM");
-		// Send DECREPTPARAM
-		switch (t[0]) {
-		case 0:
-		case 1: {
-			const uint8_t sol = t[0] + 2, par = 1, nbits = 1,
-			      flags = 0, clkmul = 1;
-			const uint16_t xspeed = 88, rspeed = 88;
-			cprintf("\033[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
-				xspeed, rspeed, clkmul, flags);
-			LOG("ESC[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
-				xspeed, rspeed, clkmul, flags);
-			break;
-		}
-		default:
-			LOG("DECREQTPARAM, unhandled argument %d", t[0]);
-		}
-		break;
-	case TK_DECELR:
-		LOG("TK_DECELR");
-		jbxvt.opt.elr = t[0] | (t[1] <<2);
-		break;
-	case TK_EPA:
-		LOG("FIXME: TK_EPA");
 		break;
 	case TK_HTS: // set tab stop at current position
 		LOG("TK_HTS");
@@ -479,19 +517,6 @@ static void parse_token(void)
 	case TK_SS3 :
 		LOG("TK_SS3");
 		break;
-	case TK_DECPM:
-		LOG("TK_DECPM");
-		s->decpm = true;
-		break;
-	case TK_DECSAVEPM: // Save private modes
-		LOG("TK_DECSAVEPM");
-		memcpy(&jbxvt.saved_mode, &jbxvt.mode,
-			sizeof(struct JBXVTPrivateModes));
-		break;
-	case TK_DECST:
-		LOG("TK_DECST");
-		s->decpm = false;
-		break;
 	case TK_TBC: // Tabulation clear
 		LOG("TK_TBC");
 		switch (t[0]) {
@@ -501,19 +526,6 @@ static void parse_token(void)
 		case 3: // clear all
 			scr_set_tab(-1, false);
 			break;
-		}
-		break;
-	case TK_DECLL:
-		switch (t[1]) {
-		case ' ': // DECSCUSR
-			LOG("DECSCUSR");
-			jbxvt.opt.cursor_attr = t[0];
-			break;
-		case '"': // DECSCA
-			LOG("DECSCA -- unimplemented");
-			break;
-		default: // DECLL
-			LOG("DECLL -- unimplemented");
 		}
 		break;
 	default:

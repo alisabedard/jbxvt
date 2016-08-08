@@ -41,15 +41,15 @@ typedef enum {
 	TK_ENTGM52 = 1001, // enter vt52 graphics mode (ESC F)
 	TK_EXTGM52 = 1002, // exit vt52 graphics mode (ESC G);
 
-	TK_CUU = 'A', // Cursor up
+	TK_CUU = 'A', // cursor up
 	TK_CUD = 'B', // cursor down
-	TK_CUF = 'C', // cursor back
+	TK_CUF = 'C', // cursor forward
 	TK_CUB = 'D', // cursor back
 	TK_CNL = 'E', // CNL: cursor next line, first column
 	TK_CPL = 'F', // CNL: cursor prev line, first column
 	TK_CHA = 'G', // cursor CHaracter Absolute [column]
 	TK_CUP = 'H', // position cursor
-
+	TK_CHT = 'I', // Cursor Horizontal Tab (# stops)
 	TK_ED = 'J', // erase to start or end of screen
 	TK_EL = 'K', // erase to start or end of line
 	TK_IL = 'L', // IL: insert lines

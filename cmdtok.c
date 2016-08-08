@@ -385,23 +385,14 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 		tk->type = c;
 		tk->nargs = 0;
 		break;
-	case 'A': // vt52 cursor up
-		if (jbxvt.mode.decanm)
-			tk->type = TK_CUU;
-		break;
-	case 'B': // vt52 cursor up
-		if (jbxvt.mode.decanm)
-			tk->type = TK_CUU;
-		break;
-	case 'C': // vt52 cursor up
-		if (jbxvt.mode.decanm)
-			tk->type = TK_CUU;
-		break;
+	case 'A': // vt52 cursor movement:
+	case 'B':
+	case 'C':
+		tk->type = c;
+	case 'D':
+		tk->type = jbxvt.mode.decanm ? c : TK_IND;
 	case 'c': // Reset to Initial State
 		tk->type = TK_RIS;
-		break;
-	case 'D': // vt52 cursor up
-		tk->type = jbxvt.mode.decanm ? TK_CUU : TK_IND;
 		break;
 	case 'E' :
 		tk->type = TK_NEL;
