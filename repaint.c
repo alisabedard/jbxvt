@@ -25,9 +25,9 @@ static void paint_rvec_text(uint8_t * str, uint32_t * rvec,
 		int_fast16_t i;
 		/* Find the length for which
 		   the current rend val applies.  */
-		for (i = 0, r = *rvec;
-			i < len && rvec[i] == r; ++i)
-			  ;
+		for (i = 0, r = *rvec; i < len
+			&& rvec[i] == r; ++i)
+			;
 		// draw
 		paint_rval_text(str, r, i, p);
 		// advance to next block
@@ -47,7 +47,6 @@ static int_fast32_t repaint_generic(xcb_point_t p,
 	// check inputs:
 	if (!str || !m)
 		  return p.y + f.height;
-	m = MIN(m, jbxvt.scr.chars.width);
 	if (rend && c1 <= jbxvt.scr.chars.width)
 		paint_rvec_text(str, rend + c1, m, p);
 	else
@@ -59,16 +58,15 @@ static int_fast32_t repaint_generic(xcb_point_t p,
 	return p.y + f.height;
 }
 
-static int_fast16_t show_scroll_history(const xcb_rectangle_t r,
+static int_fast16_t show_scroll_history(xcb_rectangle_t r,
 	xcb_point_t * restrict p)
 {
 	int_fast16_t line = r.y;
 	for (int_fast16_t i = jbxvt.scr.offset - r.y - 1;
 		line <= r.height && i >= 0; ++line, --i) {
-		LOG("i: %d, line: %d", (int)i, (int)line);
 		SLine * sl = jbxvt.scr.sline.data[i];
 		if (!sl) // no scroll history
-			  break;
+			break;
 		p->y = repaint_generic(*p, sl->sl_length,
 			r.x, r.width, sl->sl_text, sl->sl_rend);
 	}
@@ -97,7 +95,7 @@ void repaint(void)
 		uint8_t * s = jbxvt.scr.current->text[i];
 		register int_fast16_t x;
 		for (x = r.x; s && x <= r.width
-			&& x < jbxvt.scr.chars.width; x++)
+			&& x < jbxvt.scr.chars.width; ++x)
 			str[x - r.x] = s[x] < ' ' ? ' ' : s[x];
 		const uint16_t m = x - r.x;
 		p.y = repaint_generic(p, m, r.x, r.width, str,

@@ -7,7 +7,6 @@
 #include <stdint.h>
 
 enum CommandLimits {
-	NLMAX =		15,	// max number of lines to scroll
 	KBUFSIZE =	8,	// size of keyboard mapping buffer
 	COM_BUF_SIZE =	512,	// size of command read buffer
 	COM_PUSH_MAX =	20,	// max # chars to push back to input queue

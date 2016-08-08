@@ -195,7 +195,7 @@ static void save_render_style(const int_fast16_t n, VTScreen * restrict s)
 
 static void check_wrap(VTScreen * restrict s)
 {
-	const uint8_t w = jbxvt.scr.chars.width;
+	const uint8_t w = jbxvt.scr.chars.width - 1;
 	if (s->cursor.x >= w) {
 		s->cursor.x = w;
 		s->wrap_next = jbxvt.mode.decawm;
@@ -217,9 +217,11 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 	fix_cursor(&jbxvt.scr.s[1]);
 	while (len) {
 		if (test_action_char(*str, s)) {
-			--len; ++str; continue;
+			--len;
+			++str;
+			continue;
 		} else if (unlikely(*str == 0xe2))
-			  *str = '+';
+			*str = '+';
 		if (s->wrap_next) {
 			wrap();
 			s->cursor.x = 0;
@@ -228,12 +230,12 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		p = get_p(s);
 		const int_fast16_t n = find_n(str);
 		if (unlikely(jbxvt.mode.insert))
-			  handle_insert(n, p);
+			handle_insert(n, p);
 		uint8_t * t = s->text[s->cursor.y];
 		if (!t) return;
 		t += s->cursor.x;
 		if (jbxvt.mode.charset[jbxvt.mode.charsel] == CHARSET_SG0)
-			  parse_special_charset(str, len);
+			parse_special_charset(str, len);
 		// Render the string:
 		if (!s->decpm) {
 			paint_rval_text(str, jbxvt.scr.rstyle, n, p);

@@ -38,7 +38,7 @@ static void transmogrify(const int16_t j, const int8_t count,
 		&& jbxvt.sel.end[1].index == j)
 		  jbxvt.sel.end[1].index = k;
 }
-static void ck_sel_on_scr(const int j)
+static void ck_sel_on_scr(const int16_t j)
 {
 	// clear selection if it scrolls off screen:
 	if (jbxvt.sel.end[0].index == j
@@ -46,7 +46,7 @@ static void ck_sel_on_scr(const int j)
 		  scr_clear_selection();
 }
 
-static uint16_t find_col(uint8_t * restrict s, uint_fast16_t c)
+static int_fast16_t find_col(uint8_t * restrict s, int_fast16_t c)
 {
 	return s[c] ? find_col(s, c + 1) : c;
 }
@@ -74,7 +74,7 @@ static SLine * new_sline(const uint16_t x)
 	sl->sl_rend = GC_MALLOC(x << 2);
 	return sl;
 }
-
+#define SCROLL_DEBUG
 static void cp_rows(int16_t i, const int16_t count)
 {
 #ifdef SCROLL_DEBUG
@@ -84,15 +84,19 @@ static void cp_rows(int16_t i, const int16_t count)
 		  return;
 	VTScreen * s = jbxvt.scr.current;
 	uint8_t * t = s->text[i];
-	const uint16_t x = find_col(t, 0);
 	uint32_t * r = s->rend[i];
-	SLine * sl = new_sline(x);
-	memcpy(sl->sl_text, t, x);
+	int_fast16_t len = find_col(t, 0);
+	SLine * sl = new_sline(len);
 	sl->wrap = s->wrap[i];
-	memcpy(sl->sl_rend, r, x << 2);
-	jbxvt.scr.sline.data[count - i - 1] = sl;
+	memcpy(sl->sl_text, t, len);
+	memcpy(sl->sl_rend, r, len << 2);
+	struct JBXVTScreenSLine * scr_sl = &jbxvt.scr.sline;
+	scr_sl->data[count - i - 1] = sl;
 	sel_scr_to_sav(&jbxvt.sel.end[0], i, count);
 	sel_scr_to_sav(&jbxvt.sel.end[1], i, count);
+	scr_sl->top += count;
+	if (scr_sl->top > scr_sl->max)
+		scr_sl->top = scr_sl->max;
 	cp_rows(i, count);
 }
 
