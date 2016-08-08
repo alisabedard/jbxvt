@@ -222,8 +222,8 @@ static void parse_token(void)
 		switch_scrollbar();
 		break;
 	case TK_SBGOTO :
-	/*  Move the display so that line represented by scrollbar value
-	    is at the top of the screen.  */
+		/*  Move the display so that line represented by scrollbar value
+		    is at the top of the screen.  */
 		change_offset((jbxvt.scr.chars.height + jbxvt.scr.sline.top)
 			* (jbxvt.scr.pixels.height - t[0])
 			/ jbxvt.scr.pixels.height - jbxvt.scr.chars.height);
@@ -307,8 +307,9 @@ static void parse_token(void)
 		LOG("TK_HVP");
 		// fall through
 	case TK_CUP: // position cursor
-		scr_move(t[1] - 1, t[0] - 1, jbxvt.mode.decom
-			? ROW_RELATIVE | COL_RELATIVE : 0);
+		// subtract 1 for 0-based coordinates
+		scr_move((t[1]?t[1]:1) - 1, n - 1, jbxvt.mode.decom ?
+			ROW_RELATIVE | COL_RELATIVE : 0);
 		break;
 	case TK_HPA: // horizontal position absolute
 		LOG("TK_HPA");
@@ -401,8 +402,21 @@ static void parse_token(void)
 		break;
 	case TK_DECSWH: // ESC # digit
 		LOG("TK_DECSWH");
-		if (t[0] == '8') // DECALN
-			  scr_efill();
+		switch(t[0]) {
+		case 3: // DECDHL double height line, top half
+			break;
+		case 4: // DECDHL double height line, bottom half
+			break;
+		case 5: // DECSWL single width line
+			break;
+		case 6: // DECDWL double width line
+			break;
+		case 8: // DECALN screen alignment test
+			scr_efill();
+			break;
+		default:
+			LOG("Unhandled # code: %d", t[0]);
+		}
 		break;
 	case TK_NEL : // move to first position on next line down.
 		LOG("TK_NEL: NExt Line");
