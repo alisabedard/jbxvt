@@ -60,6 +60,19 @@ typedef enum {
 	TK_CS_DEF = 3050, // Default character set
 	TK_CS_UTF8 = 3051, // UTF-8 character set
 
+	// HP
+	TK_MEMLOCK = 3100, // HP term, lock memory above cursor
+	TK_MEMUNLOCK = 3101, // HP term, unlock memory
+
+	// DSR tokens
+	TK_QUERY_DECSCA = 3500, // cursor attributes
+	TK_QUERY_DECSCL = 3501,
+	TK_QUERY_DECSTBM = 3502, // scroll margins
+	TK_QUERY_DECSLRM = 3503, // soft scroll mode
+	TK_QUERY_SGR = 3504, // sgr style
+	TK_QUERY_DECSCUSR = 3505,
+
+	// Cursor tokens
 	TK_CUU = 'A', // Cursor up
 	TK_CUD = 'B', // cursor down
 	TK_CUF = 'C', // cursor back
@@ -68,6 +81,7 @@ typedef enum {
 	TK_CPL = 'F', // CNL: cursor prev line, first column
 	TK_CHA = 'G', // cursor CHaracter Absolute [column]
 	TK_CUP = 'H', // position cursor
+
 
 	TK_ED = 'J', // erase to start or end of screen
 	TK_EL = 'K', // erase to start or end of line

@@ -353,6 +353,75 @@ static void end_esc(int_fast16_t c, Token * restrict tk)
 	tk->type = TK_TXTPAR;
 }
 
+static void check_st(Token * t)
+{
+	int_fast16_t c = get_com_char(0);
+	if (c != TK_DECST)
+		t->type = TK_NULL;
+}
+
+static void start_dcs(Token * t)
+{
+	int_fast16_t c = get_com_char(0);
+	switch (c) {
+	case '0':
+	case '1':
+		LOG("FIXME: User defined keys are unimplemented.");
+		return;
+	case '$':
+		c = get_com_char(0);
+		if (c != 'q')
+			return;
+		// DECRQSS:  Request status string
+		c = get_com_char(0); // next char
+		switch (c) {
+		case '"':
+			c = get_com_char(0); // next
+			switch (c) {
+			case 'q':
+				t->type = TK_QUERY_DECSCA;
+				check_st(t);
+				break;
+			case 'p':
+				t->type = TK_QUERY_DECSCL;
+				check_st(t);
+				break;
+			}
+			break;
+		case 'r':
+			t->type = TK_QUERY_DECSTBM;
+			check_st(t);
+			break;
+		case 's':
+			t->type = TK_QUERY_DECSLRM;
+			check_st(t);
+			break;
+		case 'm':
+			t->type = TK_QUERY_SGR;
+			check_st(t);
+			break;
+		case ' ':
+			c = get_com_char(0);
+			if (c != 'q')
+				return;
+			t->type = TK_QUERY_DECSCUSR;
+			check_st(t);
+			break;
+		}
+		break;
+	case '+':
+		c = get_com_char(0);
+		switch (c) {
+		case 'p':
+		case 'q':
+			LOG("FIXME: termcap support unimplemented");
+		}
+		break;
+	default:
+		LOG("Unhandled device control string");
+	}
+}
+
 #if defined(__i386__) || defined(__amd64__)
 	__attribute__((nonnull,regparm(1)))
 #else
@@ -431,18 +500,17 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 	case '=': // DECPAM: keypad to application mode
 	case '>': // DECPNM: keypad to numeric mode
 	case '^': // DECPM: Privacy message (ended by ESC \)
-	case '\\':
+	case '\\': // ST
 		tk->type = c;
 		tk->nargs = 0;
 		break;
-
 	case 'A': // vt52 cursor up
 	case 'B': // vt52 cursor down
 	case 'C': // vt52 cursor left
 		tk->type = c;
 		break;
 	case 'D': // vt52 cursor right
-		tk->type = jbxvt.mode.decanm ? TK_CUF : TK_IND;
+		tk->type = jbxvt.mode.decanm ? TK_IND : TK_CUF;
 		break;
 	case 'c': // Reset to Initial State
 		tk->type = TK_RIS;
@@ -459,6 +527,9 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 	case 'H' :
 		tk->type = TK_HTS;
 		break;
+	case 'l':
+		tk->type = TK_MEMLOCK;
+		break;
 	case 'M' :
 		tk->type = TK_RI;
 		break;
@@ -467,6 +538,18 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 		break;
 	case 'O' :
 		tk->type = TK_SS3;
+		break;
+	case 'P':
+		start_dcs(tk);
+		break;
+	case 'V':
+		tk->type = TK_SPA;
+		break;
+	case 'W':
+		tk->type = TK_EPA;
+		break;
+	case 'X':
+		tk->type = TK_SOS;
 		break;
 	case 'Z' :
 		tk->type = TK_DECID;
@@ -510,6 +593,9 @@ void get_token(Token * restrict tk)
 		// Catch this here, since 7-bit CSI is parsed above.
 		LOG("CC_CSI");
 		start_esc(c, tk);
+		break;
+	case CC_DCS: // 8-bit DCS
+		start_dcs(tk);
 		break;
 	default:
 		default_token(tk, c);
