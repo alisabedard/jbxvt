@@ -9,8 +9,21 @@
 //  Token types
 typedef enum {
 	TK_NULL = 0, // null token to be ignored
+
 	// Tokens > 1000 are artificial.
 	// Done this way to prevent clash with CSI sequences.
+
+	// DEC VT100 control sequence token types
+	TK_RIS = 1000, // reset to initial state
+	TK_ENTGM52 = 1001, // enter vt52 graphics mode (ESC F)
+	TK_EXTGM52 = 1002, // exit vt52 graphics mode (ESC G);
+	TK_ANSI1 = 1003, // ANSI conformance level 1
+	TK_ANSI2 = 1004, // ANSI conformance level 2
+	TK_ANSI3 = 1005, // ANSI conformance level 3
+	TK_S7C1T = 1006, // 7-bit controls
+	TK_S8C1T = 1007, // 8-bit controls
+
+	// Internal tokens
 	TK_STRING =  2001, // string of printable characters
 	TK_CHAR =  2002, // single character
 	TK_EOF = 2003, // read end of file
@@ -20,7 +33,6 @@ typedef enum {
 	TK_SBSWITCH = 2007, // switch scrollbar in or out
 	TK_SBGOTO = 2008, // scrollbar goto
 	TK_SBUP = 2009, // scrollbar move up
-
 	TK_SBDOWN = 2010, // scrollbar move down
 	TK_SELSTART = 2011, // start the selection
 	TK_SELEXTND = 2012, // extend the selection
@@ -36,15 +48,6 @@ typedef enum {
 	TK_TXTPAR = 2021, // seq with text parameter
 	TK_FOCUS = 2022, // keyboard focus event
 
-	// DEC VT100 control sequence token types
-	TK_RIS = 1000, // reset to initial state
-	TK_ENTGM52 = 1001, // enter vt52 graphics mode (ESC F)
-	TK_EXTGM52 = 1002, // exit vt52 graphics mode (ESC G);
-	TK_ANSI1 = 1003, // ANSI conformance level 1
-	TK_ANSI2 = 1004, // ANSI conformance level 2
-	TK_ANSI3 = 1005, // ANSI conformance level 3
-	TK_S7C1T = 1006, // 7-bit controls
-	TK_S8C1T = 1007, // 8-bit controls
 
 	// ESC # <num + 3000>
 	TK_DECDHLT = 3003, // double height line, top half
@@ -52,6 +55,10 @@ typedef enum {
 	TK_DECSWL = 3005, // single width line
 	TK_DECDWL = 3006, // double width line
 	TK_DECALN = 3008, // screen alignment test (e-fill)
+
+	// ESC % char
+	TK_CS_DEF = 3050, // Default character set
+	TK_CS_UTF8 = 3051, // UTF-8 character set
 
 	TK_CUU = 'A', // Cursor up
 	TK_CUD = 'B', // cursor down

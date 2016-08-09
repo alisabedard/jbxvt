@@ -415,6 +415,17 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 		tk->arg[0] = c;
 		tk->nargs = 1;
 		break;
+	case '%': // UTF charset switch
+		c = get_com_char(0);
+		switch (c) {
+		case '@':
+			tk->type = TK_CS_DEF;
+			break;
+		case 'G':
+			tk->type = TK_CS_UTF8;
+			break;
+		}
+		break;
 	case '7': // DECSC: save cursor
 	case '8': // DECRC: restore cursor
 	case '=': // DECPAM: keypad to application mode
