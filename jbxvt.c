@@ -89,7 +89,6 @@ static void scr_init(void)
 	s->sline.data = GC_MALLOC(s->sline.max * sizeof(void*));
 	s->s = GC_MALLOC(sizeof(VTScreen)<<1);
 	s->current = &s->s[0];
-	scr_reset();
 	scr_set_tab(-2, false);
 }
 

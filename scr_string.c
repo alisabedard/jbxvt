@@ -56,7 +56,7 @@ void scr_tab(void)
 
 static void handle_new_lines(int8_t nlcount)
 {
-	LOG("handle_new_lines(nlcount: %d)", nlcount);
+	SLOG("handle_new_lines(nlcount: %d)", nlcount);
 	VTScreen * restrict s = jbxvt.scr.current;
 	nlcount = s->cursor.y > s->margin.b ? 0
 		: nlcount - s->margin.b - s->cursor.y;
@@ -66,7 +66,7 @@ static void handle_new_lines(int8_t nlcount)
 	nlcount = MIN(nlcount, MAX_SCROLL);
 	scroll(s->margin.t, s->margin.b, nlcount);
 	s->cursor.y -= nlcount;
-	LOG("nlcount: %d, c.y: %d, m.b: %d", nlcount,
+	SLOG("nlcount: %d, c.y: %d, m.b: %d", nlcount,
 		s->cursor.y, s->margin.b);
 }
 

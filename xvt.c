@@ -182,7 +182,7 @@ static void parse_token(void)
 	Token token;
 	int32_t n; // sanitized first token
 	int32_t * t; // shortcut to token.arg
-	static bool size_set;
+	static bool size_set = true;
 	VTScreen * s;
 	s = jbxvt.scr.current; // update in case screen changed
 	get_token(&token);

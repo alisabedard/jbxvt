@@ -16,6 +16,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+//#define SCROLL_DEBUG
+#ifdef SCROLL_DEBUG
+#define SLOG(...) LOG(__VA_ARGS__)
+#else
+#define SLOG(...)
+#endif
+
 static void sel_scr_to_sav(SelEnd * restrict s,
 	const int i, const int count)
 {
@@ -74,12 +81,10 @@ static SLine * new_sline(const uint16_t x)
 	sl->sl_rend = GC_MALLOC(x << 2);
 	return sl;
 }
-#define SCROLL_DEBUG
+
 static void cp_rows(int16_t i, const int16_t count)
 {
-#ifdef SCROLL_DEBUG
-	LOG("cp_rows(i: %d, count: %d)", i, count);
-#endif//SCROLL_DEBUG
+	SLOG("cp_rows(i: %d, count: %d)", i, count);
 	if (--i < 0)
 		  return;
 	VTScreen * s = jbxvt.scr.current;
@@ -212,7 +217,7 @@ static void sc_up(const uint8_t row1, const uint8_t row2,
 void scroll(const uint8_t row1, const uint8_t row2,
 	const int16_t count)
 {
-	LOG("scroll(%d, %d, %d)", row1, row2, count);
+	SLOG("scroll(%d, %d, %d)", row1, row2, count);
 	// Sanitize input:
 	if(!count || row1 > row2
 		|| row2 >= jbxvt.scr.chars.height
