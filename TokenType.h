@@ -8,9 +8,9 @@
 
 //  Token types
 typedef enum {
+	TK_NULL = 0, // null token to be ignored
 	// Tokens > 1000 are artificial.
 	// Done this way to prevent clash with CSI sequences.
-	TK_NULL = 2000, // null token to be ignored
 	TK_STRING =  2001, // string of printable characters
 	TK_CHAR =  2002, // single character
 	TK_EOF = 2003, // read end of file
