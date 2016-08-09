@@ -32,10 +32,8 @@ static void init_screen_elements(VTScreen * restrict scr,
 __attribute__((pure))
 static Size get_cdim(const Size d)
 {
-	const uint8_t m = MARGIN<<1;
 	const Size f = jbxvt.X.f.size;
-	return (Size){.width = (d.w-m)/f.w,
-		.height = (d.h-m)/f.h};
+	return (Size) {.w = d.w/f.w, .h = d.h/f.h - 1};
 }
 
 static void init(void)
