@@ -522,10 +522,10 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 		tk->type = TK_ENTGM52;
 		break;
 	case 'G': // Leave VT52 graphics mode
-		tk->type = TK_EXTGM52;
+		tk->type = jbxvt.mode.decanm ? TK_NULL : TK_EXTGM52;
 		break;
 	case 'H' :
-		tk->type = TK_HTS;
+		tk->type = jbxvt.mode.decanm ? TK_HTS : TK_HOME;
 		break;
 	case 'l':
 		tk->type = TK_MEMLOCK;

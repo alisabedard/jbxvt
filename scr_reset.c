@@ -33,7 +33,9 @@ __attribute__((pure))
 static Size get_cdim(const Size d)
 {
 	const Size f = jbxvt.X.f.size;
-	return (Size) {.w = d.w/f.w, .h = d.h/f.h - 1};
+	// Take advantage of division rounding down for mod
+	return (Size) {.w = (d.w - MARGIN)/f.w,
+		.h = (d.h - MARGIN)/f.h};
 }
 
 static void init(void)
@@ -70,6 +72,24 @@ static inline void fix_margins(const Size c)
 	VTScreen * restrict s = jbxvt.scr.current;
 	if (s->margin.b >= c.h)
 		  s->margin.b = c.h - 1;
+}
+
+static void clear(void)
+{
+	struct JBXVTXData * x = &jbxvt.X;
+	struct JBXVTScreenData * scr = &jbxvt.scr;
+	const Size sz = scr->pixels;
+	xcb_clear_area(x->xcb, false, x->win.vt, 0, 0, sz.w, sz.h<<1);
+	xcb_flush(x->xcb);
+	change_offset(0);
+	VTScreen * s = scr->current;
+	const Size c = scr->chars;
+	for (int i = s->cursor.y; i < c.height; ++i)
+		for (int j = i == s->cursor.y ? s->cursor.x : 0;
+			i < c.w; ++i) {
+			s->text[i][j] = 0;
+			s->rend[i][j] = 0;
+		}
 }
 
 /*  Reset the screen - called whenever the screen
@@ -110,6 +130,7 @@ void scr_reset(void)
 		SWAP(pixel_t, jbxvt.X.color.fg, jbxvt.X.color.bg);
 		decscnm_was_last ^= true;
 	}
+	clear();
 	repaint();
 	draw_cursor();
 }

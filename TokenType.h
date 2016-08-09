@@ -22,6 +22,7 @@ typedef enum {
 	TK_ANSI3 = 1005, // ANSI conformance level 3
 	TK_S7C1T = 1006, // 7-bit controls
 	TK_S8C1T = 1007, // 8-bit controls
+	TK_HOME = 1008, // move cursor to home position
 
 	// Internal tokens
 	TK_STRING =  2001, // string of printable characters

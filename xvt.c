@@ -197,9 +197,74 @@ static void parse_token(void)
 	case TK_CHAR :
 		handle_tk_char(token.tk_char);
 		break;
+	case TK_CUU: // cursor up
+		LOG("TK_CUU");
+		scr_move(0, -n, ROW_RELATIVE | COL_RELATIVE);
+		break;
+	case TK_CUD: // cursor down
+		LOG("TK_CUD");
+		scr_move(0, n, ROW_RELATIVE | COL_RELATIVE);
+		break;
+	case TK_CUF: // cursor forward
+		LOG("TK_CUF");
+		scr_move(n, 0, ROW_RELATIVE | COL_RELATIVE);
+		break;
+	case TK_CUB: // cursor back
+		LOG("TK_CUB");
+		scr_move(-n, 0, ROW_RELATIVE | COL_RELATIVE);
+		break;
+	case TK_CPL: // cursor previous line
+		LOG("TK_CPL");
+		n = -n; // fall through
+	case TK_CNL: // cursor next line
+		LOG("TK_CNL");
+		scr_move(0, n, 0);
+		break;
+	case TK_HVP: // horizontal vertical position
+		LOG("TK_HVP");
+		// fall through
+	case TK_CUP: // position cursor
+		// subtract 1 for 0-based coordinates
+		scr_move((t[1]?t[1]:1) - 1, n - 1, jbxvt.mode.decom ?
+			ROW_RELATIVE | COL_RELATIVE : 0);
+		break;
+	case TK_HPA: // horizontal position absolute
+		LOG("TK_HPA");
+		scr_move(t[0] - 1, 0, ROW_RELATIVE);
+		break;
+	case TK_HPR: // horizontal position relative
+		LOG("TK_VPA");
+		scr_move(t[0] - 1, 0, COL_RELATIVE | ROW_RELATIVE);
+		break;
+	case TK_VPA: // vertical position absolute
+		LOG("TK_VPA");
+		scr_move(0, t[0] - 1, COL_RELATIVE);
+		break;
+	case TK_VPR: // vertical position relative
+		LOG("TK_VPR");
+		scr_move(0, t[0] - 1, COL_RELATIVE|ROW_RELATIVE);
+		break;
+	case TK_CHA: // cursor CHaracter Absolute column
+		LOG("TK_CHA");
+		scr_move(t[0] - 1, 0, ROW_RELATIVE);
+		break;
+	case TK_ED:
+		LOG("TK_ED"); // don't use n
+		scr_erase_screen(t[0]);
+		break;
+	case TK_EL: // erase line
+		LOG("TK_EL"); // don't use n
+		scr_erase_line(t[0]);
+		break;
 	case TK_EOF :
 		LOG("TK_EOF");
 		exit(0);
+		break;
+	case TK_ENTGM52:
+		jbxvt.mode.decanm = false;
+		break;
+	case TK_EXTGM52:
+		jbxvt.mode.decanm = true;
 		break;
 	case TK_ENTRY:	// keyboard focus changed
 		break;
@@ -211,12 +276,13 @@ static void parse_token(void)
 		expose(token.region, size_set);
 		size_set = true;
 		break;
+	case TK_HOME:
+		change_offset(0);
+		scr_move(0, 0, 0);
+		break;
 	case TK_RESIZE :
 		size_set = false;
 		resize_window();
-		break;
-	case TK_TXTPAR:	// change title or icon name
-		handle_txtpar(&token);
 		break;
 	case TK_SBSWITCH :
 		switch_scrollbar();
@@ -275,69 +341,13 @@ static void parse_token(void)
 		LOG("TK_SELINSRT");
 		request_selection(t[0]);
 		break;
-	case TK_SELNOTIFY :
+	case TK_SELNOTIFY:
 		LOG("TK_SELNOTIFY");
 		// arg 0 is time, unused
 		paste_primary(t[1], t[2]);
 		break;
-	case TK_CUU: // cursor up
-		LOG("TK_CUU");
-		scr_move(0, -n, ROW_RELATIVE | COL_RELATIVE);
-		break;
-	case TK_CUD: // cursor down
-		LOG("TK_CUD");
-		scr_move(0, n, ROW_RELATIVE | COL_RELATIVE);
-		break;
-	case TK_CUF: // cursor forward
-		LOG("TK_CUF");
-		scr_move(n, 0, ROW_RELATIVE | COL_RELATIVE);
-		break;
-	case TK_CUB: // cursor back
-		LOG("TK_CUB");
-		scr_move(-n, 0, ROW_RELATIVE | COL_RELATIVE);
-		break;
-	case TK_CPL: // cursor previous line
-		LOG("TK_CPL");
-		n = -n; // fall through
-	case TK_CNL: // cursor next line
-		LOG("TK_CNL");
-		scr_move(0, n, 0);
-		break;
-	case TK_HVP: // horizontal vertical position
-		LOG("TK_HVP");
-		// fall through
-	case TK_CUP: // position cursor
-		// subtract 1 for 0-based coordinates
-		scr_move((t[1]?t[1]:1) - 1, n - 1, jbxvt.mode.decom ?
-			ROW_RELATIVE | COL_RELATIVE : 0);
-		break;
-	case TK_HPA: // horizontal position absolute
-		LOG("TK_HPA");
-		scr_move(t[0] - 1, 0, ROW_RELATIVE);
-		break;
-	case TK_HPR: // horizontal position relative
-		LOG("TK_VPA");
-		scr_move(t[0] - 1, 0, COL_RELATIVE | ROW_RELATIVE);
-		break;
-	case TK_VPA: // vertical position absolute
-		LOG("TK_VPA");
-		scr_move(0, t[0] - 1, COL_RELATIVE);
-		break;
-	case TK_VPR: // vertical position relative
-		LOG("TK_VPR");
-		scr_move(0, t[0] - 1, COL_RELATIVE|ROW_RELATIVE);
-		break;
-	case TK_CHA: // cursor CHaracter Absolute column
-		LOG("TK_CHA");
-		scr_move(t[0] - 1, 0, ROW_RELATIVE);
-		break;
-	case TK_ED :
-		LOG("TK_ED"); // don't use n
-		scr_erase_screen(t[0]);
-		break;
-	case TK_EL: // erase line
-		LOG("TK_EL"); // don't use n
-		scr_erase_line(t[0]);
+	case TK_TXTPAR:	// change title or icon name
+		handle_txtpar(&token);
 		break;
 	case TK_IL:
 		n = -n; // fall through
