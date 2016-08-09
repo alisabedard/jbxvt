@@ -368,6 +368,26 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 	case ']': // OSC
 		end_esc(c, tk);
 		break;
+	case ' ':
+		c = get_com_char(0);
+		switch (c) {
+		case 'F':
+			tk->type = TK_S7C1T;
+			break;
+		case 'G':
+			tk->type = TK_S8C1T;
+			break;
+		case 'L':
+			tk->type = TK_ANSI1;
+			break;
+		case 'M':
+			tk->type = TK_ANSI2;
+			break;
+		case 'N':
+			tk->type = TK_ANSI3;
+			break;
+		}
+		break;
 	case '#': // DECSWH, or prelude to DECALN
 	case '(': // G0 charset
 	case ')': // G1 charset
