@@ -46,6 +46,13 @@ typedef enum {
 	TK_S7C1T = 1006, // 7-bit controls
 	TK_S8C1T = 1007, // 8-bit controls
 
+	// ESC # <num + 3000>
+	TK_DECDHLT = 3003, // double height line, top half
+	TK_DECDHLB = 3004, // double height line, bottom half
+	TK_DECSWL = 3005, // single width line
+	TK_DECDWL = 3006, // double width line
+	TK_DECALN = 3008, // screen alignment test (e-fill)
+
 	TK_CUU = 'A', // Cursor up
 	TK_CUD = 'B', // cursor down
 	TK_CUF = 'C', // cursor back
@@ -82,9 +89,6 @@ typedef enum {
 	TK_DECSAVEPM = 's', // Save DEC (re)set mode values
 	TK_DECREQTPARAM = 'x', // REQuest Terminal PARAMeters
 	TK_DECELR = 'z', // Enable Locator Reporting
-
-	TK_DECSWH = '#', // set character width or height
-	TK_DECALN = '8', // DECALN test, fill with E
 	TK_SCS0 = '(', // set character set G0
 	TK_SCS1 = ')', // set character set G1
 	TK_DECSC = '7', // save cursor position

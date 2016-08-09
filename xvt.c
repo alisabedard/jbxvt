@@ -400,23 +400,21 @@ static void parse_token(void)
 		LOG("TK_DECID");
 		cprintf("\033[?6c"); // VT102
 		break;
-	case TK_DECSWH: // ESC # digit
-		LOG("TK_DECSWH");
-		switch(t[0]) {
-		case 3: // DECDHL double height line, top half
-			break;
-		case 4: // DECDHL double height line, bottom half
-			break;
-		case 5: // DECSWL single width line
-			break;
-		case 6: // DECDWL double width line
-			break;
-		case 8: // DECALN screen alignment test
-			scr_efill();
-			break;
-		default:
-			LOG("Unhandled # code: %d", t[0]);
-		}
+	case TK_DECALN: // screen alignment test
+		LOG("TK_DECALN");
+		scr_efill();
+		break;
+	case TK_DECDHLT: // double height line -- top
+		LOG("FIXME:  TK_DECDHLT");
+		break;
+	case TK_DECDHLB: // double height line -- bottom
+		LOG("FIXME:  TK_DECDHLB");
+		break;
+	case TK_DECSWL: // single width line
+		LOG("FIXME:  TK_DECSWL");
+		break;
+	case TK_DECDWL: // double width line
+		LOG("FIXME:  TK_DECDWL");
 		break;
 	case TK_NEL : // move to first position on next line down.
 		LOG("TK_NEL: NExt Line");

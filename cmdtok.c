@@ -388,7 +388,26 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 			break;
 		}
 		break;
-	case '#': // DECSWH, or prelude to DECALN
+	case '#':
+		c = get_com_char(0);
+		switch(c) {
+		case '3':
+			tk->type = TK_DECDHLT;
+			break;
+		case '4':
+			tk->type = TK_DECDHLB;
+			break;
+		case '5':
+			tk->type = TK_DECSWL;
+			break;
+		case '6':
+			tk->type = TK_DECDWL;
+			break;
+		case '8':
+			tk->type = TK_DECALN;
+			break;
+		}
+		break;
 	case '(': // G0 charset
 	case ')': // G1 charset
 		tk->type = c;
