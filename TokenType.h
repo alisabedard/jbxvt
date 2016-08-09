@@ -8,38 +8,43 @@
 
 //  Token types
 typedef enum {
-	TK_NULL = 0, // null token to be ignored
-	TK_STRING =  1, // string of printable characters
-	TK_CHAR =  2, // single character
-	TK_EOF = 3, // read end of file
-	TK_ENTRY = 4, // cursor crossed window boundery
-	TK_EXPOSE = 5, // window has been exposed
-	TK_RESIZE = 6, // main window has been resized
-	TK_SBSWITCH = 7, // switch scrollbar in or out
-	TK_SBGOTO = 8, // scrollbar goto
-	TK_SBUP = 9, // scrollbar move up
-
-	TK_SBDOWN = 10, // scrollbar move down
-	TK_SELSTART = 11, // start the selection
-	TK_SELEXTND = 12, // extend the selection
-	TK_SELDRAG = 13, // drag the selection
-	TK_SELINSRT = 14, // insert the selection
-	TK_SELWORD = 15, // select a word
-	TK_SELLINE = 16, // select a line
-	TK_SELECT = 17, // confirm the selection
-	TK_SELCLEAR = 18, // selection clear request
-	TK_SELNOTIFY = 19, // selection notify request
-
-	TK_SELREQUEST = 20, // selection request
-	TK_TXTPAR = 21, // seq with text parameter
-	TK_FOCUS = 22, // keyboard focus event
-
-	// DEC VT100 control sequence token types
 	// Tokens > 1000 are artificial.
 	// Done this way to prevent clash with CSI sequences.
+	TK_NULL = 2000, // null token to be ignored
+	TK_STRING =  2001, // string of printable characters
+	TK_CHAR =  2002, // single character
+	TK_EOF = 2003, // read end of file
+	TK_ENTRY = 2004, // cursor crossed window boundery
+	TK_EXPOSE = 2005, // window has been exposed
+	TK_RESIZE = 2006, // main window has been resized
+	TK_SBSWITCH = 2007, // switch scrollbar in or out
+	TK_SBGOTO = 2008, // scrollbar goto
+	TK_SBUP = 2009, // scrollbar move up
+
+	TK_SBDOWN = 2010, // scrollbar move down
+	TK_SELSTART = 2011, // start the selection
+	TK_SELEXTND = 2012, // extend the selection
+	TK_SELDRAG = 2013, // drag the selection
+	TK_SELINSRT = 2014, // insert the selection
+	TK_SELWORD = 2015, // select a word
+	TK_SELLINE = 2016, // select a line
+	TK_SELECT = 2017, // confirm the selection
+	TK_SELCLEAR = 2018, // selection clear request
+	TK_SELNOTIFY = 2019, // selection notify request
+
+	TK_SELREQUEST = 2020, // selection request
+	TK_TXTPAR = 2021, // seq with text parameter
+	TK_FOCUS = 2022, // keyboard focus event
+
+	// DEC VT100 control sequence token types
 	TK_RIS = 1000, // reset to initial state
 	TK_ENTGM52 = 1001, // enter vt52 graphics mode (ESC F)
 	TK_EXTGM52 = 1002, // exit vt52 graphics mode (ESC G);
+	TK_ANSI1 = 1003, // ANSI conformance level 1
+	TK_ANSI2 = 1004, // ANSI conformance level 2
+	TK_ANSI3 = 1005, // ANSI conformance level 3
+	TK_S7C1T = 1006, // 7-bit controls
+	TK_S8C1T = 1007, // 8-bit controls
 
 	TK_CUU = 'A', // Cursor up
 	TK_CUD = 'B', // cursor down
