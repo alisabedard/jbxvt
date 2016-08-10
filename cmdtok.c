@@ -496,6 +496,12 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 			break;
 		}
 		break;
+	case '6': // DECBI: back index
+		tk->type = TK_RI;
+		break;
+	case '9': // DECFI: forward index
+		tk->type = TK_IND;
+		break;
 	case '7': // DECSC: save cursor
 	case '8': // DECRC: restore cursor
 	case '=': // DECPAM: keypad to application mode

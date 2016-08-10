@@ -63,6 +63,7 @@ void scr_erase_line(const int8_t mode)
 		g.x, g.y, g.width, fh);
 	scr->wrap_next = false;
 	draw_cursor();
+	xcb_flush(jbxvt.X.xcb);
 }
 
 static void common_scr_erase(const xcb_rectangle_t r,

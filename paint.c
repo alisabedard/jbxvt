@@ -122,12 +122,21 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 		font(jbxvt.X.f.bold);
 	// Draw text with background:
 	const xcb_window_t w = jbxvt.X.win.vt;
-	xcb_image_text_8(c, len, w, gc, p.x, p.y, (const char *)str);
-	++p.y; // Padding for underline, use underline for italic
-	if (rval & RS_ULINE || unlikely(rval & RS_ITALIC)) {
-		xcb_poly_line(c, XCB_COORD_MODE_ORIGIN, w, gc, 2,
-			(xcb_point_t[]){p, {p.x + len
-			* jbxvt.X.f.size.width, p.y}});
+	const Size f = jbxvt.X.f.size;
+	if (jbxvt.mode.decdwl) {
+		for (int16_t i = 0; i < len; ++i) {
+			const char buf[2] = {str[i], ' '};
+			xcb_image_text_8(c, 2, w, gc, p.x, p.y, buf);
+			p.x += f.w << 1;
+		}
+		jbxvt.mode.decdwl = false;
+	} else {
+		xcb_image_text_8(c, len, w, gc, p.x, p.y, (const char *)str);
+		++p.y; // Padding for underline, use underline for italic
+		if (rval & RS_ULINE || unlikely(rval & RS_ITALIC)) {
+			xcb_poly_line(c, XCB_COORD_MODE_ORIGIN, w, gc, 2,
+				(xcb_point_t[]){p, {p.x + len * f.w, p.y}});
+		}
 	}
 	if(bold) // restore font
 		font(jbxvt.X.f.normal);

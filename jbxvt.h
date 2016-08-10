@@ -93,6 +93,7 @@ struct JBXVTPrivateModes {
 	bool decanm:1;		// DECANM -- ANSI/VT52
 	bool decawm:1;		// DECAWM auto-wrap flag
 	bool deccolm:1;		// 132 column mode
+	bool decdwl:1;		// double width line
 	bool decom:1;		// origin mode flag
 	bool decpff:1;		// DECPFF: print form feed
 	bool decsclm:1;		// DECSCLM: slow scroll mode

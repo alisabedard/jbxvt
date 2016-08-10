@@ -423,10 +423,12 @@ static void parse_token(void)
 		LOG("FIXME:  TK_DECDHLB");
 		break;
 	case TK_DECSWL: // single width line
-		LOG("FIXME:  TK_DECSWL");
+		LOG("TK_DECSWL");
+		jbxvt.mode.decdwl = true;
 		break;
 	case TK_DECDWL: // double width line
-		LOG("FIXME:  TK_DECDWL");
+		LOG("TK_DECDWL");
+		jbxvt.mode.decdwl = true;
 		break;
 	case TK_NEL : // move to first position on next line down.
 		LOG("TK_NEL: NExt Line");

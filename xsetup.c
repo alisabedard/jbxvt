@@ -21,8 +21,7 @@ void map_window(void)
 	/*  Setup the window now so that we can add LINES and COLUMNS to
 	 *  the environment.  */
 	resize_window();
-	// Forcibly show the window now:
-	xcb_flush(x);
+	scr_reset(); // update size
 }
 
 #define RSZ_VM (XCB_CONFIG_WINDOW_WIDTH|XCB_CONFIG_WINDOW_HEIGHT)
@@ -68,7 +67,6 @@ void resize_window(void)
 		? &resize_with_scrollbar : &resize_without_scrollbar)(r);
 	jbxvt.scr.pixels.h = r->height;
 	free(r);
-	scr_reset();
 }
 
 //  Toggle scrollbar.
