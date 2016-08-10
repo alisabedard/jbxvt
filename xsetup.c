@@ -59,8 +59,10 @@ void resize_window(void)
 		c, NULL);
 	if (jb_check(r, "Could not get geometry"))
 		exit(1);
-	if (r->width == ws->w && r->height == ws->h)
-		  return; // Size has not changed.
+	if (r->width == ws->w && r->height == ws->h) {
+		free(r);
+		return; // Size has not changed.
+	}
 	ws->w = r->width;
 	ws->h = r->height;
 	jbxvt.scr.pixels.w = (jbxvt.opt.show_scrollbar
