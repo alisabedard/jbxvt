@@ -261,10 +261,10 @@ static void parse_token(void)
 		exit(0);
 		break;
 	case TK_ENTGM52:
-		jbxvt.mode.decanm = false;
+		jbxvt.mode.gm52 = true;
 		break;
 	case TK_EXTGM52:
-		jbxvt.mode.decanm = true;
+		jbxvt.mode.gm52 = false;
 		break;
 	case TK_ENTRY:	// keyboard focus changed
 		break;

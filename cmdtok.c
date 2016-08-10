@@ -504,6 +504,9 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 		tk->type = c;
 		tk->nargs = 0;
 		break;
+	case '<': // Exit vt52 mode
+		jbxvt.mode.decanm = true;
+		break;
 	case 'A': // vt52 cursor up
 	case 'B': // vt52 cursor down
 	case 'C': // vt52 cursor left
@@ -522,13 +525,22 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 		tk->type = TK_ENTGM52;
 		break;
 	case 'G': // Leave VT52 graphics mode
-		tk->type = jbxvt.mode.decanm ? TK_NULL : TK_EXTGM52;
+		tk->type = TK_EXTGM52;
 		break;
 	case 'H' :
 		tk->type = jbxvt.mode.decanm ? TK_HTS : TK_HOME;
 		break;
 	case 'l':
 		tk->type = TK_MEMLOCK;
+		break;
+	case 'I':
+		tk->type = TK_CUU;
+		break;
+	case 'J': // vt52 erase to end of line
+		tk->type = TK_EL;
+		break;
+	case 'K': // vt42 erase to end of screen
+		tk->type = TK_ED;
 		break;
 	case 'M' :
 		tk->type = TK_RI;
@@ -551,8 +563,17 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 	case 'X':
 		tk->type = TK_SOS;
 		break;
-	case 'Z' :
-		tk->type = TK_DECID;
+	case 'Y':
+		tk->type = TK_CUP;
+		// -32 to decode, + 1 to be vt100 compatible
+		tk->arg[1] = get_com_char(0) - 31;
+		tk->arg[0] = get_com_char(0) - 31;
+		tk->nargs = 2;
+	case 'Z':
+		if (jbxvt.mode.decanm) // vt100+ mode
+			tk->type = TK_DECID;
+		else // I am a VT52
+			cprintf("\033/Z");
 		break;
 	}
 }

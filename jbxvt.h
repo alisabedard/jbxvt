@@ -98,6 +98,7 @@ struct JBXVTPrivateModes {
 	bool decsclm:1;		// DECSCLM: slow scroll mode
 	bool decscnm:1;		// DECSCNM: reverse-video mode
 	bool dectcem:1;		// DECTCEM -- hide cursor
+	bool gm52:1;		// VT52 graphics mode
 	bool insert:1;		// insert mode flag
 	bool mouse_x10:1;	// ptr coord on button press
 	bool mouse_vt200:1;	// ptr press+release
