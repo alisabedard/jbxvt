@@ -58,8 +58,7 @@ void resize_window(void)
 	Size * ws = &jbxvt.X.window_size;
 	xcb_get_geometry_reply_t *r = xcb_get_geometry_reply(jbxvt.X.xcb,
 		c, NULL);
-	if (jb_check(r, "Could not get geometry"))
-		exit(1);
+	jb_assert(r, "Could not get geometry");
 	if (r->width == ws->w && r->height == ws->h) {
 		free(r);
 		return; // Size has not changed.
@@ -85,7 +84,7 @@ void switch_scrollbar(void)
 		&(uint32_t){w});
 	errno = 0;
 	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(x, c, NULL);
-	jb_assert(!r, "Could not get geometry");
+	jb_assert(r, "Could not get geometry");
 	w = r->width + (sb ? -SBAR_WIDTH : w);
 	free(r);
 	xcb_configure_window(x, mw, XCB_CONFIG_WINDOW_WIDTH,
