@@ -105,6 +105,7 @@ static void mode_init(void)
  *  the slave.  */
 int main(int argc, char ** argv)
 {
+	errno = 0;
 	GC_INIT();
 	opt_init();
 	char ** com_argv = parse_command_line(argc, argv);
