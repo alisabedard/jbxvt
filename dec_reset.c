@@ -32,6 +32,7 @@ void dec_reset(Token * restrict token)
 			m->decanm = is_set;
 			break;
 		case 3: // DECCOLM: 80/132 col mode switch
+			m->deccolm = is_set;
 			break;
 		case 4: // DECSCLM: slow scroll mode
 			m->decsclm = is_set;

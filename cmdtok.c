@@ -8,6 +8,7 @@
 #include "libjb/log.h"
 #include "libjb/xcb.h"
 #include "lookup_key.h"
+#include "screen.h"
 #include "xevents.h"
 #include "xeventst.h"
 
@@ -542,6 +543,7 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 		tk->nargs = 1;
 		break;
 	case 'I':
+		scr_index_from(-1, jbxvt.scr.current->cursor.y);
 		tk->type = TK_CUU;
 		break;
 	case 'J': // vt52 erase to end of line
@@ -549,17 +551,20 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 		tk->arg[0] = 0;
 		tk->nargs = 1;
 		break;
-	case 'j': // save cursor (vt52)
+	case 'j': // save cursor (vt52g)
 		tk->type = TK_DECSC;
 		break;
 	case 'K': // vt42 erase to end of screen
 		tk->type = TK_ED;
 		break;
-	case 'k': // restore cursor (vt52)
+	case 'k': // restore cursor (vt52g)
 		tk->type = TK_DECRC;
 		break;
-	case 'M' :
-		tk->type = TK_RI;
+	case 'L': // insert line (vt52)
+		tk->type = TK_IL;
+		break;
+	case 'M':
+		tk->type = jbxvt.mode.decanm ? TK_RI : TK_DL;
 		break;
 	case 'N' :
 		tk->type = TK_SS2;
@@ -567,8 +572,19 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 	case 'O' :
 		tk->type = TK_SS3;
 		break;
+	case 'o': // clear to start of line (vt52g)
+		tk->type = TK_EL;
+		tk->arg[0] = 1;
+		tk->nargs = 1;
+		break;
 	case 'P':
 		start_dcs(tk);
+		break;
+	case 'p': // reverse video mode (vt52g)
+		jbxvt.mode.decscnm = true;
+		break;
+	case 'q': // normal video (vt52g)
+		jbxvt.mode.decscnm = false;
 		break;
 	case 'V':
 		tk->type = TK_SPA;
