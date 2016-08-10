@@ -518,6 +518,12 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 	case 'c': // Reset to Initial State
 		tk->type = TK_RIS;
 		break;
+	case 'e': // enable cursor (vt52 GEMDOS)
+		jbxvt.mode.dectcem = true;
+		break;
+	case 'f': // disable cursor (vt52 GEMDOS)
+		jbxvt.mode.dectcem = false;
+		break;
 	case 'E' :
 		tk->type = TK_NEL;
 		break;
@@ -527,20 +533,30 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 	case 'G': // Leave VT52 graphics mode
 		tk->type = TK_EXTGM52;
 		break;
-	case 'H' :
+	case 'H':
 		tk->type = jbxvt.mode.decanm ? TK_HTS : TK_HOME;
 		break;
 	case 'l':
-		tk->type = TK_MEMLOCK;
+		tk->type = jbxvt.mode.decanm ? TK_MEMLOCK : TK_EL;
+		tk->arg[0] = 2;
+		tk->nargs = 1;
 		break;
 	case 'I':
 		tk->type = TK_CUU;
 		break;
 	case 'J': // vt52 erase to end of line
 		tk->type = TK_EL;
+		tk->arg[0] = 0;
+		tk->nargs = 1;
+		break;
+	case 'j': // save cursor (vt52)
+		tk->type = TK_DECSC;
 		break;
 	case 'K': // vt42 erase to end of screen
 		tk->type = TK_ED;
+		break;
+	case 'k': // restore cursor (vt52)
+		tk->type = TK_DECRC;
 		break;
 	case 'M' :
 		tk->type = TK_RI;
@@ -557,8 +573,14 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 	case 'V':
 		tk->type = TK_SPA;
 		break;
+	case 'v': // wrap on
+		jbxvt.mode.decawm = true;
+		break;
 	case 'W':
 		tk->type = TK_EPA;
+		break;
+	case 'w': // wrap off
+		jbxvt.mode.decawm = false;
 		break;
 	case 'X':
 		tk->type = TK_SOS;
