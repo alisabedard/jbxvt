@@ -23,6 +23,9 @@ void dec_reset(Token * restrict token)
 	struct JBXVTScreenData * s = &jbxvt.scr;
 	VTScreen * scr = s->current;
 	struct JBXVTPrivateModes * m = &jbxvt.mode;
+
+	static bool allow_deccolm = true;
+
 	if (likely(token->private == '?')) {
 		switch (token->arg[0]) {
 		case 1: // DECCKM: cursor key mode
@@ -32,7 +35,8 @@ void dec_reset(Token * restrict token)
 			m->decanm = is_set;
 			break;
 		case 3: // DECCOLM: 80/132 col mode switch
-			m->deccolm = is_set;
+			if (allow_deccolm)
+				m->deccolm = is_set;
 			break;
 		case 4: // DECSCLM: slow scroll mode
 			m->decsclm = is_set;
@@ -71,6 +75,9 @@ void dec_reset(Token * restrict token)
 			break;
 		case 30: // toggle scrollbar -- per rxvt
 			switch_scrollbar();
+			break;
+		case 40: // allow deccolm
+			allow_deccolm = is_set;
 			break;
 		case 1000:
 			LOG("vt200 mouse");

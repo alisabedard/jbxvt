@@ -74,7 +74,7 @@ static inline void fix_margins(const Size c)
 	if (s->margin.b >= c.h)
 		  s->margin.b = c.h - 1;
 }
-
+#if 0
 static void clear(void)
 {
 	struct JBXVTXData * x = &jbxvt.X;
@@ -92,6 +92,7 @@ static void clear(void)
 			s->rend[i][j] = 0;
 		}
 }
+#endif
 
 static void decscnm(void)
 {
@@ -99,6 +100,7 @@ static void decscnm(void)
 	const bool rv = jbxvt.mode.decscnm;
 	if (last_was_rv == rv) // Already has either mode set
 		return;
+	LOG("decscnm()");
 	struct JBXVTXPixels * p = &jbxvt.X.color;
 	SWAP(pixel_t, p->fg, p->bg);
 	SWAP(pixel_t, p->current_fg, p->current_bg);
@@ -143,9 +145,9 @@ void scr_reset(void)
 	--c.h; --c.w;
 	sbar_show(c.h + jbxvt.scr.sline.top, jbxvt.scr.offset,
 		jbxvt.scr.offset + c.h);
-	clear();
 	decscnm();
 	repaint();
 	draw_cursor();
+	xcb_flush(jbxvt.X.xcb);
 }
 

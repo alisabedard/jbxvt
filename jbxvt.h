@@ -113,6 +113,7 @@ struct JBXVTPrivateModes {
 	bool mouse_alt_scroll:1;// send cursor up/down instead
 	bool ptr_xy:1;		// send x y on button press/release
 	bool ptr_cell:1;	// cell motion mouse tracking
+	bool s8c1t:1;		// 7 or 8 bit controls
 };
 
 struct JBXVTOptionData {

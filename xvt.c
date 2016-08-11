@@ -285,9 +285,15 @@ static void parse_token(void)
 		change_offset(0);
 		scr_move(0, 0, 0);
 		break;
-	case TK_RESIZE :
+	case TK_RESIZE:
 		size_set = false;
 		resize_window();
+		break;
+	case TK_S7C1T: // 7-bit controls
+		jbxvt.mode.s8c1t = false;
+		break;
+	case TK_S8C1T: // 8-bit controls
+		jbxvt.mode.s8c1t = true;
 		break;
 	case TK_SBSWITCH :
 		switch_scrollbar();
