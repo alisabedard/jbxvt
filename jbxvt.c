@@ -97,7 +97,7 @@ static void scr_init(void)
 static void mode_init(void)
 {
 	struct JBXVTPrivateModes * m = &jbxvt.mode;
-	m->decawm = m->dectcem = true;
+	m->decanm = m->decawm = m->dectcem = true;
 	m->charset[0] = m->charset[1] = CHARSET_ASCII;
 }
 
