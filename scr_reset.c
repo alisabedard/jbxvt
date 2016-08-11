@@ -18,6 +18,7 @@
 
 #include <gc.h>
 #include <string.h>
+#include <unistd.h>
 
 static void init_screen_elements(VTScreen * restrict scr,
 	uint8_t ** restrict text, uint32_t ** restrict rend)
@@ -106,6 +107,7 @@ static void decscnm(void)
 	xcb_change_window_attributes(jbxvt.X.xcb, jbxvt.X.win.vt,
 		XCB_CW_BACK_PIXEL, &p->bg);
 	xcb_flush(jbxvt.X.xcb);
+	usleep(100000);
 }
 
 /*  Reset the screen - called whenever the screen
