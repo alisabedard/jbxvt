@@ -17,6 +17,8 @@
 
 // Shortcuts
 #define S jbxvt.scr
+#define S0 jbxvt.scr.s[0]
+#define S1 jbxvt.scr.s[1]
 #define P S.pixels
 #define X jbxvt.X
 
@@ -39,26 +41,30 @@ static Size get_cdim(const Size d)
 		.h = (d.h - MARGIN)/f.h};
 }
 
+static void set(const uint8_t i, uint8_t ** t, uint32_t ** r)
+{
+	S.s[i].text = t;
+	S.s[i].rend = r;
+}
+
 static void init(void)
 {
-	uint8_t **s1, **s2;
-	uint32_t **r1, **r2;
+	uint8_t **s0, **s1;
+	uint32_t **r0, **r1;
 	uint16_t sz = JBXVT_MAX_ROWS * sizeof(void *);
 #define ALLOC(v) {v = GC_MALLOC(sz);}
-	ALLOC(s1); ALLOC(s2); ALLOC(r1); ALLOC(r2);
+	ALLOC(s0); ALLOC(s1); ALLOC(r0); ALLOC(r1);
 	for (int_fast16_t y = JBXVT_MAX_ROWS - 1; y >= 0; --y) {
 		sz = JBXVT_MAX_COLS;
-		ALLOC(s1[y]); ALLOC(s2[y]);
+		ALLOC(s0[y]); ALLOC(s1[y]);
 		sz <<= 2;
-		ALLOC(r1[y]); ALLOC(r2[y]);
+		ALLOC(r0[y]); ALLOC(r1[y]);
 	}
-	S.s[0].text = s1;
-	S.s[1].text = s2;
-	S.s[0].rend = r1;
-	S.s[1].rend = r2;
+	set(0, s0, r0);
+	set(1, s1, r1);
 	sz = JBXVT_MAX_ROWS;
-	ALLOC(S.s[0].wrap)
-	ALLOC(S.s[1].wrap)
+	ALLOC(S0.wrap);
+	ALLOC(S1.wrap);
 }
 
 static inline void fix_margins(const Size c)
@@ -110,16 +116,16 @@ void scr_reset(void)
 		init();
 		created = true;
 	}
-	uint8_t **s1 = S.s[0].text, **s2 = S.s[1].text;
-	uint32_t **r1 = S.s[0].rend, **r2 = S.s[1].rend;
+	uint8_t **s0 = S.s[0].text, **s1 = S.s[1].text;
+	uint32_t **r0 = S.s[0].rend, **r1 = S.s[1].rend;
 	VTScreen * scr = S.current;
 	int16_t * y = &scr->cursor.y;
 	if (likely(scr == &S.s[0] && S.s[0].text) && *y >= c.h) {
 		scroll1(*y - c.h + 1);
 		*y = c.h - 1;
 	}
-	init_screen_elements(&S.s[0], s1, r1);
-	init_screen_elements(&S.s[1], s2, r2);
+	init_screen_elements(&S.s[0], s0, r0);
+	init_screen_elements(&S.s[1], s1, r1);
 	scr_start_selection((xcb_point_t){}, SEL_CHAR);
 	// Constrain dimensions:
 	c.w = MIN(c.w, JBXVT_MAX_COLS);
