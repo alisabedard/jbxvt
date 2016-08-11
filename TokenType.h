@@ -83,6 +83,8 @@ typedef enum {
 	TK_CHA = 'G', // cursor CHaracter Absolute [column]
 	TK_CUP = 'H', // position cursor
 
+	TK_CHT = 0x49, // cursor horizontal tab
+
 
 	TK_ED = 'J', // erase to start or end of screen
 	TK_EL = 'K', // erase to start or end of line

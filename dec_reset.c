@@ -38,7 +38,7 @@ void dec_reset(Token * restrict token)
 			m->decsclm = is_set;
 			break;
 		case 5: // DECSCNM: set reverse-video mode
-			m->decscnm = is_set;
+			m->decscnm = !is_set;
 			scr_reset();
 			break;
 		case 6 : // DECOM normal cursor mode

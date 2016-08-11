@@ -15,6 +15,9 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount);
 //  Tab to the next tab stop.
 void scr_tab(void);
 
+// Do v tabs
+void scr_cht(int16_t v);
+
 // Set tab stops:
 // -1 clears all, -2 sets default
 void scr_set_tab(int i, const bool value);

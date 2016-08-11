@@ -54,6 +54,12 @@ void scr_tab(void)
 	s->cursor.x = c.x;
 }
 
+void scr_cht(int16_t v)
+{
+	while (v-- > 0)
+		scr_tab();
+}
+
 static void handle_new_lines(int8_t nlcount)
 {
 	SLOG("handle_new_lines(nlcount: %d)", nlcount);

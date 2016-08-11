@@ -92,11 +92,28 @@ static void clear(void)
 		}
 }
 
+static void decscnm(void)
+{
+	static bool last_was_rv;
+	const bool rv = jbxvt.mode.decscnm;
+	if (last_was_rv == rv) // Already has either mode set
+		return;
+	struct JBXVTXPixels * p = &jbxvt.X.color;
+	SWAP(pixel_t, p->fg, p->bg);
+	SWAP(pixel_t, p->current_fg, p->current_bg);
+	xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, XCB_GC_FOREGROUND
+		| XCB_GC_BACKGROUND, (uint32_t[]){p->fg, p->bg});
+	xcb_change_window_attributes(jbxvt.X.xcb, jbxvt.X.win.vt,
+		XCB_CW_BACK_PIXEL, &p->bg);
+	xcb_flush(jbxvt.X.xcb);
+}
+
 /*  Reset the screen - called whenever the screen
     needs to be repaired completely.  */
 void scr_reset(void)
 {
 	LOG("scr_reset()");
+	decscnm();
 	Size c = get_cdim(jbxvt.scr.pixels);
 	fix_margins(c);
 	static bool created;
@@ -124,13 +141,8 @@ void scr_reset(void)
 	--c.h; --c.w;
 	sbar_show(c.h + jbxvt.scr.sline.top, jbxvt.scr.offset,
 		jbxvt.scr.offset + c.h);
-	static bool decscnm_was_last;
-	if ((jbxvt.mode.decscnm && !decscnm_was_last)
-		|| (!jbxvt.mode.decscnm && decscnm_was_last)){
-		SWAP(pixel_t, jbxvt.X.color.fg, jbxvt.X.color.bg);
-		decscnm_was_last ^= true;
-	}
 	clear();
+	decscnm();
 	repaint();
 	draw_cursor();
 }

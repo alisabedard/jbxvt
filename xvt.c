@@ -197,6 +197,9 @@ static void parse_token(void)
 	case TK_CHAR :
 		handle_tk_char(token.tk_char);
 		break;
+	case TK_CHT:
+		scr_cht(n);
+		break;
 	case TK_CUU: // cursor up
 		LOG("TK_CUU");
 		scr_move(0, -n, ROW_RELATIVE | COL_RELATIVE);
@@ -357,7 +360,7 @@ static void parse_token(void)
 		LOG("TK_IL(-)/TK_DL(+): %d", n);
 		scr_index_from(n, s->cursor.y);
 		break;
-	case TK_DCH :
+	case TK_DCH:
 	case TK_ECH:
 		LOG("TK_DCH");
 		scr_delete_characters(n);
