@@ -190,30 +190,22 @@ static void parse_token(void)
 	// n is sanitized for ops with optional args
 	n = t[0] ? t[0] : 1;
 	switch (token.type) {
+#define CASE(L) break; case L: if (L) { LOG(#L) }
 	case TK_STRING :
 		scr_string(token.string, token.length,
 			token.nlcount);
 		break;
 	case TK_CHAR :
 		handle_tk_char(token.tk_char);
-		break;
-	case TK_CHT:
+	CASE(TK_CHT);
 		scr_cht(n);
-		break;
-	case TK_CUU: // cursor up
-		LOG("TK_CUU");
+	CASE(TK_CUU); // up
 		scr_move(0, -n, ROW_RELATIVE | COL_RELATIVE);
-		break;
-	case TK_CUD: // cursor down
-		LOG("TK_CUD");
+	CASE(TK_CUD); // down
 		scr_move(0, n, ROW_RELATIVE | COL_RELATIVE);
-		break;
-	case TK_CUF: // cursor forward
-		LOG("TK_CUF");
+	CASE(TK_CUF); // forward
 		scr_move(n, 0, ROW_RELATIVE | COL_RELATIVE);
-		break;
-	case TK_CUB: // cursor back
-		LOG("TK_CUB");
+	CASE(TK_CUB); // back
 		scr_move(-n, 0, ROW_RELATIVE | COL_RELATIVE);
 		break;
 	case TK_CPL: // cursor previous line
