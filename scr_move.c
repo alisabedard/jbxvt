@@ -14,15 +14,14 @@
 void reset_row_col(void)
 {
 	xcb_point_t * c = &jbxvt.scr.current->cursor;
-	int16_t l = jbxvt.scr.chars.width - 1;
-	c->x = MAX(MIN(c->x, l), 0);
-	l = jbxvt.scr.chars.height - 1;
-	c->y = MAX(MIN(c->y, l), 0);
+#define CH jbxvt.scr.chars
+#define LIMIT(var, top, bottom) var = MAX(MIN(var, top), bottom)
+	LIMIT(c->x, CH.w - 1, 0);
+	LIMIT(c->y, CH.h - 1, 0);
 	// Implement DECOM, DEC Origin Mode, limits
-	if (jbxvt.mode.decom) {
-		const Size m = jbxvt.scr.current->margin;
-		c->y = MAX(MIN(c->y, m.top), m.bottom);
-	}
+	if (jbxvt.mode.decom)
+#define M jbxvt.scr.current->margin
+		LIMIT(c->y, M.t, M.b);
 }
 
 /*  Move the cursor to a new position.  The relative argument is a pair of
