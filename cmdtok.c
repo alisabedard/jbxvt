@@ -308,9 +308,10 @@ static void start_esc(int_fast16_t c, Token * restrict tk)
 	uint_fast16_t i = 0;
 	do {
 		uint_fast16_t n = 0;
-		while (c >= '0' && c <= '9') {
+		while (c >= '0' && c <= '9') { // is a number
+			// Advance position and convert
 			n = n * 10 + c - '0';
-			c = get_com_char(0);
+			c = get_com_char(0); // next digit
 		}
 		if (i < TK_MAX_ARGS)
 			  tk->arg[i++] = n;
