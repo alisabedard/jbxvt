@@ -58,7 +58,7 @@ static char ** parse_command_line(const int argc, char ** argv)
 			o->show_scrollbar=true;
 			break;
 		case 'v': // version
-			puts("jbxvt" VERSION);
+			puts("jbxvt" JBXVT_VERSION);
 			exit(0);
 		case 'h': // help
 		default:
@@ -72,12 +72,13 @@ static char ** parse_command_line(const int argc, char ** argv)
 static void opt_init(void)
 {
 	// Set some defaults which may be overridden.
-	jbxvt.opt.fg = JBXVT_FG;
-	jbxvt.opt.bg = JBXVT_BG;
-	jbxvt.opt.font = DEF_FONT;
-	jbxvt.opt.bold_font = BOLD_FONT;
-	jbxvt.opt.size.width = JBXVT_COLUMNS;
-	jbxvt.opt.size.height = JBXVT_ROWS;
+#define OPT(field, def) jbxvt.opt.field = JBXVT_##def
+	OPT(fg, FG);
+	OPT(bg, BG);
+	OPT(font, FONT);
+	OPT(bold_font, BOLD_FONT);
+	OPT(size.width, COLUMNS);
+	OPT(size.height, ROWS);
 }
 
 /*  Perform any initialization on the screen data structures.

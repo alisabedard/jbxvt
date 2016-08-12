@@ -4,11 +4,11 @@
 #ifndef JBXVT_CONFIG_H
 #define JBXVT_CONFIG_H
 
-#define VERSION "0.4" // Overall release number of the current version
+#define JBXVT_VERSION "0.4" // Overall release number of the current version
 
 #define FALLBACK_FONT "fixed"
-#define DEF_FONT "-*-terminus-medium-r-*-*-14-*-*-*-*-*-iso10646-*"
-#define BOLD_FONT "-*-terminus-bold-r-*-*-14-*-*-*-*-*-iso10646-*"
+#define JBXVT_FONT "-*-terminus-medium-r-*-*-14-*-*-*-*-*-iso10646-*"
+#define JBXVT_BOLD_FONT "-*-terminus-bold-r-*-*-14-*-*-*-*-*-iso10646-*"
 
 #define TERM_ENV "xterm-256color" // TERM env var to set
 #define COMMAND "/bin/sh" // default command to run
