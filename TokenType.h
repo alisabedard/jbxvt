@@ -13,7 +13,7 @@ typedef enum {
 	// Tokens > 1000 are artificial.
 	// Done this way to prevent clash with CSI sequences.
 
-	// DEC VT100 control sequence token types
+	//  VT100 control sequence token types
 	TK_RIS = 1000, // reset to initial state
 	TK_ENTGM52 = 1001, // enter vt52 graphics mode (ESC F)
 	TK_EXTGM52 = 1002, // exit vt52 graphics mode (ESC G);
@@ -51,11 +51,11 @@ typedef enum {
 
 
 	// ESC # <num + 3000>
-	TK_DECDHLT = 3003, // double height line, top half
-	TK_DECDHLB = 3004, // double height line, bottom half
-	TK_DECSWL = 3005, // single width line
-	TK_DECDWL = 3006, // double width line
-	TK_DECALN = 3008, // screen alignment test (e-fill)
+	TK_DHLT = 3003, // double height line, top half
+	TK_DHLB = 3004, // double height line, bottom half
+	TK_SWL = 3005, // single width line
+	TK_DWL = 3006, // double width line
+	TK_ALN = 3008, // screen alignment test (e-fill)
 
 	// ESC % char
 	TK_CS_DEF = 3050, // Default character set
@@ -66,12 +66,12 @@ typedef enum {
 	TK_MEMUNLOCK = 3101, // HP term, unlock memory
 
 	// DSR tokens
-	TK_QUERY_DECSCA = 3500, // cursor attributes
-	TK_QUERY_DECSCL = 3501,
-	TK_QUERY_DECSTBM = 3502, // scroll margins
-	TK_QUERY_DECSLRM = 3503, // soft scroll mode
+	TK_QUERY_SCA = 3500, // cursor attributes
+	TK_QUERY_SCL = 3501,
+	TK_QUERY_STBM = 3502, // scroll margins
+	TK_QUERY_SLRM = 3503, // soft scroll mode
 	TK_QUERY_SGR = 3504, // sgr style
-	TK_QUERY_DECSCUSR = 3505,
+	TK_QUERY_SCUSR = 3505,
 
 	// Cursor tokens
 	TK_CUU = 'A', // Cursor up
@@ -106,22 +106,20 @@ typedef enum {
 	TK_RESET = 'l', // reset mode
 	TK_SGR = 'm', // set graphics rendition
 	TK_DSR = 'n', // report status or position
-	TK_DECLL = 'q', /* Load leds, set cursor style,
+	TK_LL = 'q', /* Load leds, set cursor style,
 			   or select character protection attribute.  */
-	TK_DECSTBM = 'r', // set top and bottom margins
-        // ^-- also restore DEC mode values
-	TK_DECSAVEPM = 's', // Save DEC (re)set mode values
-	TK_DECREQTPARAM = 'x', // REQuest Terminal PARAMeters
-	TK_DECELR = 'z', // Enable Locator Reporting
+	TK_STBM = 'r', // set top and bottom margins
+        // ^-- also restore  mode values
+	TK_SAVEPM = 's', // Save  (re)set mode values
+	TK_REQTPARAM = 'x', // REQuest Terminal PARAMeters
+	TK_ELR = 'z', // Enable Locator Reporting
 	TK_SCS0 = '(', // set character set G0
 	TK_SCS1 = ')', // set character set G1
-	TK_DECSC = '7', // save cursor position
-	TK_DECRC = '8', // restore cursor position
-	TK_DECPAM = '=', // keypad to applications mode
-	TK_DECPNM = '>', // keypad to numeric mode
+	TK_SC = '7', // save cursor position
+	TK_RC = '8', // restore cursor position
+	TK_PAM = '=', // keypad to applications mode
+	TK_PNM = '>', // keypad to numeric mode
 
-	TK_DECPM = '^', // Privacy message (ended by ESC \)
-	TK_DECST = '\\', // String Terminator
 	TK_ESC = 033,
 	TK_IND = 0x84,
 	TK_NEL = 0x85,
@@ -133,11 +131,11 @@ typedef enum {
 	TK_SPA = 0x96,
 	TK_EPA = 0x97,
 	TK_SOS = 0x98,
-	TK_DECID = 0x9a,
+	TK_ID = 0x9a,
 	TK_CSI = 0x9b,
-	TK_ST = 0x9c,
+	TK_ST = 0x9c,	// String Terminator
 	TK_OSC = 0x9d,
-	TK_PM = 0x9e,
+	TK_PM = 0x9e,	// Privacy message (ended by ESC \ (ST))
 	TK_APC = 0x9f
 } TokenType;
 

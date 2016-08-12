@@ -33,7 +33,7 @@ enum ComCharReturn {
 	CC_SPA = 0x96,
 	CC_EPA = 0x97,
 	CC_SOS = 0x98,
-	CC_DECID = 0x9a,
+	CC_ID = 0x9a,
 	CC_CSI = 0x9b,
 	CC_ST = 0x9c,
 	CC_OSC = 0x9d,
@@ -357,7 +357,7 @@ static void end_esc(int_fast16_t c, Token * restrict tk)
 static void check_st(Token * t)
 {
 	int_fast16_t c = get_com_char(0);
-	if (c != TK_DECST)
+	if (c != TK_ST)
 		t->type = TK_NULL;
 }
 
@@ -373,28 +373,28 @@ static void start_dcs(Token * t)
 		c = get_com_char(0);
 		if (c != 'q')
 			return;
-		// DECRQSS:  Request status string
+		// RQSS:  Request status string
 		c = get_com_char(0); // next char
 		switch (c) {
 		case '"':
 			c = get_com_char(0); // next
 			switch (c) {
 			case 'q':
-				t->type = TK_QUERY_DECSCA;
+				t->type = TK_QUERY_SCA;
 				check_st(t);
 				break;
 			case 'p':
-				t->type = TK_QUERY_DECSCL;
+				t->type = TK_QUERY_SCL;
 				check_st(t);
 				break;
 			}
 			break;
 		case 'r':
-			t->type = TK_QUERY_DECSTBM;
+			t->type = TK_QUERY_STBM;
 			check_st(t);
 			break;
 		case 's':
-			t->type = TK_QUERY_DECSLRM;
+			t->type = TK_QUERY_SLRM;
 			check_st(t);
 			break;
 		case 'm':
@@ -405,7 +405,7 @@ static void start_dcs(Token * t)
 			c = get_com_char(0);
 			if (c != 'q')
 				return;
-			t->type = TK_QUERY_DECSCUSR;
+			t->type = TK_QUERY_SCUSR;
 			check_st(t);
 			break;
 		}
@@ -462,19 +462,19 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 		c = get_com_char(0);
 		switch(c) {
 		case '3':
-			tk->type = TK_DECDHLT;
+			tk->type = TK_DHLT;
 			break;
 		case '4':
-			tk->type = TK_DECDHLB;
+			tk->type = TK_DHLB;
 			break;
 		case '5':
-			tk->type = TK_DECSWL;
+			tk->type = TK_SWL;
 			break;
 		case '6':
-			tk->type = TK_DECDWL;
+			tk->type = TK_DWL;
 			break;
 		case '8':
-			tk->type = TK_DECALN;
+			tk->type = TK_ALN;
 			break;
 		}
 		break;
@@ -496,20 +496,24 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 			break;
 		}
 		break;
-	case '6': // DECBI: back index
+	case '6': // BI: back index
 		tk->type = TK_RI;
 		break;
-	case '9': // DECFI: forward index
+	case '9': // FI: forward index
 		tk->type = TK_IND;
 		break;
-	case '7': // DECSC: save cursor
-	case '8': // DECRC: restore cursor
-	case '=': // DECPAM: keypad to application mode
-	case '>': // DECPNM: keypad to numeric mode
-	case '^': // DECPM: Privacy message (ended by ESC \)
-	case '\\': // ST
+	case '7': // SC: save cursor
+	case '8': // RC: restore cursor
+	case '=': // PAM: keypad to application mode
+	case '>': // PNM: keypad to numeric mode
 		tk->type = c;
 		tk->nargs = 0;
+		break;
+	case '^': // PM: Privacy message (ended by ESC \)
+		tk->type = TK_PM;
+		break;
+	case '\\': // ST
+		tk->type = TK_ST;
 		break;
 	case '<': // Exit vt52 mode
 		jbxvt.mode.decanm = true;
@@ -558,13 +562,13 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 		tk->nargs = 1;
 		break;
 	case 'j': // save cursor (vt52g)
-		tk->type = TK_DECSC;
+		tk->type = TK_SC;
 		break;
 	case 'K': // vt42 erase to end of screen
 		tk->type = TK_ED;
 		break;
 	case 'k': // restore cursor (vt52g)
-		tk->type = TK_DECRC;
+		tk->type = TK_RC;
 		break;
 	case 'L': // insert line (vt52)
 		tk->type = TK_IL;
@@ -615,7 +619,7 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 		tk->nargs = 2;
 	case 'Z':
 		if (jbxvt.mode.decanm) // vt100+ mode
-			tk->type = TK_DECID;
+			tk->type = TK_ID;
 		else // I am a VT52
 			cprintf("\033/Z");
 		break;
