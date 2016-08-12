@@ -189,6 +189,14 @@ static void reqtparam(const uint8_t t)
 		xspeed, rspeed, clkmul, flags);
 }
 
+static void tbc(const uint8_t t)
+{
+	if (t == 3)
+		scr_set_tab(-1, false);
+	else if (!t)
+		scr_set_tab(jbxvt.scr.current->cursor.x, false);
+}
+
 static void parse_token(void)
 {
 	Token token;
@@ -417,15 +425,7 @@ static void parse_token(void)
 	CASE(TK_ST)
 		s->decpm = false;
 	CASE(TK_TBC) // Tabulation clear
-		switch (t[0]) {
-		case 0: // clear at current position
-			scr_set_tab(s->cursor.x, false);
-			break;
-		case 3: // clear all
-			scr_set_tab(-1, false);
-			break;
-		}
-		break;
+		tbc(t[0]);
 	CASE(TK_LL)
 		switch (t[1]) {
 		case ' ': // SCUSR
