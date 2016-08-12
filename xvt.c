@@ -177,6 +177,18 @@ static void handle_dsr(const int16_t arg)
 	}
 }
 
+static void reqtparam(const uint8_t t)
+{
+	// Send REPTPARAM
+	const uint8_t sol = t + 2, par = 1, nbits = 1,
+	      flags = 0, clkmul = 1;
+	const uint16_t xspeed = 88, rspeed = 88;
+	cprintf("\033[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
+		xspeed, rspeed, clkmul, flags);
+	LOG("ESC[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
+		xspeed, rspeed, clkmul, flags);
+}
+
 static void parse_token(void)
 {
 	Token token;
@@ -379,22 +391,7 @@ static void parse_token(void)
 	CASE(TK_NEL) // move to first position on next line down.
 		scr_move(0, s->cursor.y + 1, 0);
 	CASE(TK_REQTPARAM)
-		// Send REPTPARAM
-		switch (t[0]) {
-		case 0:
-		case 1: {
-			const uint8_t sol = t[0] + 2, par = 1, nbits = 1,
-			      flags = 0, clkmul = 1;
-			const uint16_t xspeed = 88, rspeed = 88;
-			cprintf("\033[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
-				xspeed, rspeed, clkmul, flags);
-			LOG("ESC[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
-				xspeed, rspeed, clkmul, flags);
-			break;
-		}
-		default:
-			LOG("REQTPARAM, unhandled argument %d", t[0]);
-		}
+		reqtparam(t[0]);
 	CASE(TK_ELR)
 		jbxvt.opt.elr = t[0] | (t[1] <<2);
 	FIXME(TK_EPA)
