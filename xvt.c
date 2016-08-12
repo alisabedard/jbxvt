@@ -105,29 +105,15 @@ static void expose(const uint8_t region, const bool size_set)
 static void select_charset(const char c, const uint8_t i)
 {
 	switch(c) {
-	case 'A':
-		LOG("United Kingdom");
-		jbxvt.mode.charset[i] = CHARSET_GB;
-		break;
-	case 'B': // default
-		LOG("ASCII");
-		jbxvt.mode.charset[i] = CHARSET_ASCII;
-		break;
-	case '0':
-		LOG("Special graphics");
-		jbxvt.mode.charset[i] = CHARSET_SG0;
-		break;
-	case '1':
-		LOG("Alt char ROM standard graphics");
-		jbxvt.mode.charset[i] = CHARSET_SG1;
-		break;
-	case '2':
-		LOG("Alt char ROM special graphics");
-		jbxvt.mode.charset[i] = CHARSET_SG2;
-		break;
+#define CS(l, cs, d) case l:LOG(d);jbxvt.mode.charset[i]=CHARSET_##cs;break;
+	CS('A', GB, "UK ASCII");
+	CS('0', SG0, "SG0: special graphics");
+	CS('1', SG1, "SG1: alt char ROM standard graphics");
+	CS('2', SG2, "SG2: alt char ROM special graphics");
 	default: // reset
 		LOG("Unknown character set");
-		jbxvt.mode.charset[i] = CHARSET_ASCII;
+		// fall through
+	CS('B', ASCII, "US ASCII");
 	}
 }
 
