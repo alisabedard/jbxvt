@@ -32,18 +32,21 @@ static void sel_scr_to_sav(SelEnd * restrict s,
 	}
 }
 
+__attribute__((nonnull))
+static void mv_sel(SelEnd * e, const int16_t j, const int16_t k)
+{
+	if (e->type == SCREENSEL && e->index == j)
+		e->index = k;
+}
+
 static void transmogrify(const int16_t j, const int8_t count,
 	VTScreen * restrict s)
 {
 	const int16_t k = j + count;
 	s->text[k] = s->text[j];
 	s->rend[k] = s->rend[j];
-	if (jbxvt.sel.end[0].type == SCREENSEL
-		&& jbxvt.sel.end[0].index == j)
-		  jbxvt.sel.end[0].index = k;
-	if (jbxvt.sel.end[1].type == SCREENSEL
-		&& jbxvt.sel.end[1].index == j)
-		  jbxvt.sel.end[1].index = k;
+	mv_sel(&jbxvt.sel.end[0], j, k);
+	mv_sel(&jbxvt.sel.end[1], j, k);
 }
 static void ck_sel_on_scr(const int16_t j)
 {
