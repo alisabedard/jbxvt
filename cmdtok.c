@@ -19,28 +19,6 @@
 #include <string.h>
 #include <unistd.h>
 
-//  Special character returned by get_com_char().
-enum ComCharReturn {
-	GCC_NULL = 0x100, // Input buffer is empty
-	CC_ESC = 033,
-	CC_IND = 0x84,
-	CC_NEL = 0x85,
-	CC_HTS = 0x88,
-	CC_RI = 0x8d,
-	CC_SS2 = 0x8e,
-	CC_SS3 = 0x8f,
-	CC_DCS = 0x90,
-	CC_SPA = 0x96,
-	CC_EPA = 0x97,
-	CC_SOS = 0x98,
-	CC_ID = 0x9a,
-	CC_CSI = 0x9b,
-	CC_ST = 0x9c,
-	CC_OSC = 0x9d,
-	CC_PM = 0x9e,
-	CC_APC = 0x9f
-};
-
 //  Flags used to control get_com_char();
 enum ComCharFlags {BUF_ONLY=1, GET_XEVENTS=2};
 
@@ -155,7 +133,7 @@ static int_fast16_t handle_xev(xcb_generic_event_t * restrict event,
 		handle_other(event);
 	}
 	if (flags & GET_XEVENTS)
-		  return GCC_NULL;
+		  return TK_NULL;
 	return 0;
 }
 
@@ -211,8 +189,8 @@ static int_fast16_t poll_io(int_fast16_t count, fd_set * restrict in_fdset)
 
 /*  Return the next input character after first passing any keyboard input
  *  to the command.  If flags & BUF_ONLY is true then only buffered characters are
- *  returned and once the buffer is empty the special value GCC_NULL is
- *  returned.  If flags and GET_XEVENTS is true then GCC_NULL is returned
+ *  returned and once the buffer is empty the special value TK_NULL is
+ *  returned.  If flags and GET_XEVENTS is true then TK_NULL is returned
  *  when an X event arrives.
  */
 // This is the most often called function.
@@ -230,7 +208,7 @@ static int_fast16_t get_com_char(const int_fast8_t flags)
 		return(*jbxvt.com.buf.next++);
 
 	if (flags & BUF_ONLY)
-		return(GCC_NULL);
+		return(TK_NULL);
 	// Flush here to draw the cursor.
 	xcb_flush(jbxvt.X.xcb);
 	int_fast16_t count = 0;
@@ -251,7 +229,7 @@ static int_fast16_t get_com_char(const int_fast8_t flags)
 	uint8_t * d = jbxvt.com.buf.data;
 	count = read(jbxvt.com.fd, d, COM_BUF_SIZE);
 	if (count < 1) // buffer is empty
-		return errno == EWOULDBLOCK ? GCC_NULL : EOF;
+		return errno == EWOULDBLOCK ? TK_NULL : EOF;
 	jbxvt.com.buf.next = d;
 	jbxvt.com.buf.top = d + count;
 	return *jbxvt.com.buf.next++;
@@ -287,7 +265,7 @@ static void handle_string_char(int_fast16_t c, Token * restrict tk)
 	tk->length = i;
 	tk->string[i] = 0;
 	tk->type = TK_STRING;
-	if (c != GCC_NULL)
+	if (c != TK_NULL)
 		  push_com_char(c);
 }
 
@@ -315,14 +293,14 @@ static void start_esc(int_fast16_t c, Token * restrict tk)
 		}
 		if (i < TK_MAX_ARGS)
 			  tk->arg[i++] = n;
-		if (c == CC_ESC)
+		if (c == TK_ESC)
 			  push_com_char(c);
 		if (c < ' ')
 			  return;
 		if (c < '@')
 			  c = get_com_char(0);
 	} while (c < '@' && c >= ' ');
-	if (c == CC_ESC)
+	if (c == TK_ESC)
 		  push_com_char(c);
 	tk->nargs = i;
 	tk->type = c;
@@ -650,21 +628,21 @@ void get_token(Token * restrict tk)
 		  return;
 	const int_fast16_t c = get_com_char(GET_XEVENTS);
 	switch (c) {
-	case GCC_NULL:
+	case TK_NULL:
 		tk->type = TK_NULL;
 		break;
 	case EOF:
 		tk->type = TK_EOF;
 		break;
-	case CC_ESC:
+	case TK_ESC:
 		handle_esc(c, tk);
 		break;
-	case CC_CSI: // 8-bit CSI
+	case TK_CSI: // 8-bit CSI
 		// Catch this here, since 7-bit CSI is parsed above.
-		LOG("CC_CSI");
+		LOG("TK_CSI");
 		start_esc(c, tk);
 		break;
-	case CC_DCS: // 8-bit DCS
+	case TK_DCS: // 8-bit DCS
 		start_dcs(tk);
 		break;
 	default:
