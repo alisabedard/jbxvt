@@ -398,7 +398,7 @@ static void start_dcs(Token * t)
 		}
 		break;
 	default:
-		LOG("Unhandled device control string");
+		LOG("Unhandled DCS, starting with %c", (int)c);
 	}
 }
 

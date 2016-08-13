@@ -115,7 +115,8 @@ int main(int argc, char ** argv)
 		com_argv = (char*[2]){getenv("SHELL")};
 	// init_display must come after parse_command_line
 	init_display(argv[0]);
-	jbxvt.opt.cursor_attr = 2; // steady block
+	// Default to a steady block cursor to conserve CPU
+	jbxvt.opt.cursor_attr = 2;
 	mode_init();
 	scr_init();
 	map_window();

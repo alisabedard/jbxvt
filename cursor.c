@@ -6,6 +6,7 @@
 #include "config.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "repaint.h"
 #include "screen.h"
 
 static uint32_t saved_style;
@@ -27,9 +28,8 @@ void restore_cursor(void)
 	draw_cursor();
 }
 
-static xcb_point_t get_p(void)
+static xcb_point_t get_p(xcb_point_t p)
 {
-	xcb_point_t p = jbxvt.scr.current->cursor;
 	p.x *= jbxvt.X.f.size.width;
 	p.y *= jbxvt.X.f.size.height;
 	p.x += MARGIN;
@@ -37,16 +37,29 @@ static xcb_point_t get_p(void)
 	return p;
 }
 
+static bool is_blinking(void)
+{
+	switch (jbxvt.opt.cursor_attr) {
+	case 0: // blinking block
+	case 1: // blinking block
+	case 3: // blinking underline
+	case 5: // blinking bar
+	case 7: // blinking overline
+		return true;
+	}
+	return false;
+}
+
 void draw_cursor(void)
 {
-	// Don't draw cursor when scrolled
-	if (jbxvt.scr.offset > 0)
+	struct JBXVTScreenData * s = &jbxvt.scr;
+	// Don't draw if scrolled, non-existent, or hidden
+	VTScreen * current;
+	if (s->offset || !(current = s->current) || !jbxvt.mode.dectcem)
 		return;
-	if (!jbxvt.scr.current)
-		return; // prevent segfault
-	if (!jbxvt.mode.dectcem) // hide cursor
-		return;
-	xcb_point_t p = get_p();
+	if ((current->cursor_visible ^= true) && is_blinking())
+		repaint(); // prevent stale cursor blocks
+	xcb_point_t p = get_p(s->current->cursor);
 	struct JBXVTXData * X = &jbxvt.X;
 	const Size f = X->f.size;
 	xcb_rectangle_t r = {p.x, p.y, f.w, f.h};

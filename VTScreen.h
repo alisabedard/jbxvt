@@ -18,6 +18,7 @@ typedef struct {
 	xcb_point_t cursor;	// cursor position, row and column
 	bool wrap_next:1;	// wrap before the next printed character
 	bool decpm:1;		// privacy message
+	bool cursor_visible:1;
 } VTScreen;
 
 #endif//!SCREENST_H
