@@ -19,27 +19,8 @@
 #include <string.h>
 #include <unistd.h>
 
-//  Special character returned by get_com_char().
-enum ComCharReturn {
-	GCC_NULL = 0x100, // Input buffer is empty
-	CC_ESC = 033,
-	CC_IND = 0x84,
-	CC_NEL = 0x85,
-	CC_HTS = 0x88,
-	CC_RI = 0x8d,
-	CC_SS2 = 0x8e,
-	CC_SS3 = 0x8f,
-	CC_DCS = 0x90,
-	CC_SPA = 0x96,
-	CC_EPA = 0x97,
-	CC_SOS = 0x98,
-	CC_ID = 0x9a,
-	CC_CSI = 0x9b,
-	CC_ST = 0x9c,
-	CC_OSC = 0x9d,
-	CC_PM = 0x9e,
-	CC_APC = 0x9f
-};
+// Input buffer is empty
+#define GCC_NULL 0x100
 
 //  Flags used to control get_com_char();
 enum ComCharFlags {BUF_ONLY=1, GET_XEVENTS=2};
@@ -315,14 +296,14 @@ static void start_esc(int_fast16_t c, Token * restrict tk)
 		}
 		if (i < TK_MAX_ARGS)
 			  tk->arg[i++] = n;
-		if (c == CC_ESC)
+		if (c == TK_ESC)
 			  push_com_char(c);
 		if (c < ' ')
 			  return;
 		if (c < '@')
 			  c = get_com_char(0);
 	} while (c < '@' && c >= ' ');
-	if (c == CC_ESC)
+	if (c == TK_ESC)
 		  push_com_char(c);
 	tk->nargs = i;
 	tk->type = c;
@@ -656,15 +637,15 @@ void get_token(Token * restrict tk)
 	case EOF:
 		tk->type = TK_EOF;
 		break;
-	case CC_ESC:
+	case TK_ESC:
 		handle_esc(c, tk);
 		break;
-	case CC_CSI: // 8-bit CSI
+	case TK_CSI: // 8-bit CSI
 		// Catch this here, since 7-bit CSI is parsed above.
 		LOG("CC_CSI");
 		start_esc(c, tk);
 		break;
-	case CC_DCS: // 8-bit DCS
+	case TK_DCS: // 8-bit DCS
 		start_dcs(tk);
 		break;
 	default:
