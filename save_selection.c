@@ -12,41 +12,36 @@
 #include <stdlib.h>
 #include <string.h>
 
+static uint8_t get_next_char(uint8_t c)
+{
+	if (c == '\n')
+		return '\r';
+	else if (c < ' ' || c > 0x7e)
+		return ' ';
+	return c;
+}
+
 static uint16_t sanitize(uint8_t * str, const uint16_t len)
 {
 	uint16_t i, j;
 	uint8_t null_ct = 0;
 	for (i = 0, j = 0; i < len; ++i, ++j) {
 		if (str[i] == '\0') {
-			LOG("NULL");
 			++null_ct;
 			str[j] = '\r';
 			while(str[++i] == '\0')
 				if (i >= len - 1) {
-					LOG("returning, i: %d, j: %d"
-						", str: %s",
-						i, j, str);
 					str[j] = '\0';
 					if (null_ct == 1)
 						--j;
-
 					return j;
 				}
 			--i;
-		} else if (str[i] == '\n') {
-			LOG("nl conv");
-			str[j] = '\r';
-		} else if (str[i] < ' ' || str[i] > 0x7e) {
-			LOG("clear");
-			str[j] = ' ';
 		} else
-			str[j] = str[i];
+			str[j] = get_next_char(str[i]);
 	}
-	if (j < len) {
-		LOG("null cap");
+	if (j < len)
 		str[j] = '\0';
-	}
-	LOG("STR: %s", str);
 	return j;
 }
 
