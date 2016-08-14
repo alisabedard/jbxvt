@@ -1,22 +1,15 @@
-#CFLAGS+=-Os
-#CFLAGS+=-Werror
-#CFLAGS+=-flto # doesn't work with clang
-#CFLAGS=-O0
-CFLAGS+=-ggdb
-#CFLAGS+=-DDEBUG
-#CFLAGS+=-DGC_DEBUG
-#CC=clang
 CFLAGS+=-Wall -Wextra
-
 exe=jbxvt
 PREFIX=/usr
 
 # Uncomment for NetBSD:
 #CFLAGS+=-DNETBSD -D_NETBSD_SOURCE -D_BSD_SOURCE
 #CFLAGS+=-Wno-missing-field-initializers
-#CFLAGS+=-I/usr/X11R7/include -I/usr/pkg/include
-#LIBS+=-L/usr/X11R7/lib -Wl,-R/usr/X11R7/lib
+#CFLAGS+=-I/usr/pkg/include
+#CFLAGS+=-I/usr/X11R7/include 
 #LIBS+=-L/usr/pkg/lib -Wl,-R/usr/pkg/lib
+#LIBS+=-L/usr/X11R7/lib -Wl,-R/usr/X11R7/lib
+#LIBS+=-L/usr/X11R6/lib -Wl,-R/usr/X11R6/lib
 #PREFIX=/usr/local
 
 # Uncomment for FreeBSD:
@@ -64,5 +57,16 @@ install:
 clean:
 	rm -f $(exe) *.o
 	cd libjb && make clean
+
+d: # DEBUG build
+	CFLAGS='-DDEBUG -ggdb -O0 -Werror' make -j8
+
+f: # Optimized build
+	make clean
+	CFLAGS='-Ofast -march=native -flto' make -j8
+
+s: # Tiny build
+	make clean
+	CFLAGS='-Os -march=native -flto' make -j8
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.

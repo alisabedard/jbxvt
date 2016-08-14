@@ -21,6 +21,7 @@
 #ifdef NETBSD
 #define POSIX_UTMPX
 #include <pwd.h>
+#include <sys/ioctl.h>
 #include <sys/termios.h>
 #include <sys/ttycom.h>
 #define UTMP_FILE "/var/run/utmp"
