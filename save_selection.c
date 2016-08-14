@@ -80,13 +80,12 @@ void save_selection(void)
 	/*  Set se1 and se2 to point to the first
 	    and second selection endpoints.  */
 	struct JBXVTSelectionData * s = &jbxvt.sel;
-	const bool forward = selcmp(&s->end[0],
-		&s->end[1]) <= 0;
-	SelEnd * se1 = &s->end[!forward], * se2 = &s->end[forward];
+	SelEnd * e = s->end;
+	const bool forward = selcmp(e, e+1) <= 0;
+	SelEnd se[] = {e[forward?0:1], e[forward?1:0]};
 	uint16_t total = 1;
 	uint8_t * str = GC_MALLOC(total);
-	//handle_savedsel(&str, &total, se1, se2);
-	handle_screensel(&str, &total, se1, se2);
+	handle_screensel(&str, &total, se, se+1);
 	--total;
 	LOG("SEL.LENGTH = %d", total);
 	str[total] = 0; // null termination
