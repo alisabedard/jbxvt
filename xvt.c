@@ -198,7 +198,9 @@ static void parse_token(void)
 	n = t[0] ? t[0] : 1;
 	switch (token.type) {
 
+// macro to aid in debug logging
 #define CASE(L) case L:LOG(#L);
+// log unimplemented features
 #define FIXME(L) CASE(L);LOG("\tFIXME: Unimplemented");break;
 
 	CASE(TK_ALN) // screen alignment test
@@ -207,7 +209,7 @@ static void parse_token(void)
 	CASE(TK_CHA) // cursor CHaracter Absolute column
 		scr_move(t[0] - 1, 0, ROW_RELATIVE);
 		break;
-	CASE(TK_CHAR)
+	case TK_CHAR: // don't log
 		handle_tk_char(token.tk_char);
 		break;
 	CASE(TK_CHT);
@@ -438,7 +440,7 @@ static void parse_token(void)
 	FIXME(TK_SPA);
 	FIXME(TK_SS2);
 	FIXME(TK_SS3);
-	CASE(TK_STRING)
+	case TK_STRING: // don't log
 		scr_string(token.string, token.length,
 			token.nlcount);
 		break;
