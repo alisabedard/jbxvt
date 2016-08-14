@@ -5,6 +5,7 @@
 #ifndef SLINEST_H
 #define SLINEST_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 //  structure describing a saved line
