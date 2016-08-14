@@ -51,22 +51,22 @@ static uint16_t sanitize(uint8_t * str, const uint16_t len)
 }
 
 static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
-	SelEnd * restrict se1, SelEnd * restrict se2)
+	SelEnd * restrict e)
 {
-	if (se1->index == se2->index && se1->col == se2->col)
+	if (e->index == (e+1)->index && e->col == (e+1)->col)
 		return; // NULL selection
-	for (int_fast16_t i = se1->index, j = se2->index; i <= j; ++i) {
+	for (int_fast16_t i = e->index, j = (e+1)->index; i <= j; ++i) {
 		/* Use full screen width if not first or last lines of
 		   selection, otherwise use the col field in the respective
 		   end point.  */
 		const uint16_t w = jbxvt.scr.chars.width;
-		const int16_t start = i == se1->index ? se1->col : 0;
-		const int16_t end = i == j ? se2->col : w - 1;
+		const int16_t start = i == e->index ? e->col : 0;
+		const int16_t end = i == j ? (e+1)->col : w - 1;
 		const int16_t len = end - start + 1;
 		*str = GC_REALLOC(*str, *total + len);
 		strncpy((char*)*str + *total,
 			(char*)jbxvt.scr.current->text[i]
-			+ (i == se1->index ? se1->col : 0), len);
+			+ (i == e->index ? e->col : 0), len);
 		*total += len;
 	}
 	*total = sanitize(*str, *total) + 1;
@@ -85,7 +85,7 @@ void save_selection(void)
 	SelEnd se[] = {e[forward?0:1], e[forward?1:0]};
 	uint16_t total = 1;
 	uint8_t * str = GC_MALLOC(total);
-	handle_screensel(&str, &total, se, se+1);
+	handle_screensel(&str, &total, se);
 	--total;
 	LOG("SEL.LENGTH = %d", total);
 	str[total] = 0; // null termination
