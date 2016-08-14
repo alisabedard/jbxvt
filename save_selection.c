@@ -64,7 +64,7 @@ static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 		const int16_t end = i == j ? se2->col : w - 1;
 		const int16_t len = end - start + 1;
 		*str = GC_REALLOC(*str, *total + len);
-		strncpy((char*)*str + *total - 1,
+		strncpy((char*)*str + *total,
 			(char*)jbxvt.scr.current->text[i]
 			+ (i == se1->index ? se1->col : 0), len);
 		*total += len;
