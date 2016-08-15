@@ -88,9 +88,7 @@ void save_selection(void)
 	uint16_t total = 1;
 	uint8_t * str = GC_MALLOC(total);
 	handle_screensel(&str, &total, se);
-	--total;
-	LOG("SEL.LENGTH = %d", total);
-	str[total] = 0; // null termination
+	str[--total] = 0; // null termination
 	s->text = str;
 	s->length = total;
 }
