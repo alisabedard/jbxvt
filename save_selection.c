@@ -65,11 +65,10 @@ static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 		const uint16_t w = jbxvt.scr.chars.width;
 		const int16_t start = i == e->index ? e->col : 0;
 		const int16_t end = i == j ? (e+1)->col : w - 1;
-		const int16_t len = end - start + 1;
+		const uint16_t len = end - start + 1;
 		*str = GC_REALLOC(*str, *total + len);
 		strncpy((char*)*str + *total,
-			(char*)jbxvt.scr.current->text[i]
-			+ (i == e->index ? e->col : 0), len);
+			(char*)jbxvt.scr.current->text[i] + start, len);
 		*total += len;
 	}
 	*total = sanitize(*str, *total) + 1;
