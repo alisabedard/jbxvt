@@ -21,6 +21,20 @@ static uint8_t get_next_char(uint8_t c)
 	return c;
 }
 
+static bool skip(uint8_t * restrict str, uint16_t * restrict i,
+	uint16_t * restrict j, const uint16_t len, const uint8_t null_ct)
+{
+	if (str[++*i] != '\0')
+		return false;
+	if (*i >= len - 1) {
+		str[*j] = '\0';
+		if (null_ct == 1)
+			--*j;
+		return true;
+	}
+	return skip(str, i, j, len, null_ct);
+}
+
 static uint16_t sanitize(uint8_t * str, const uint16_t len)
 {
 	uint16_t i, j;
@@ -29,19 +43,13 @@ static uint16_t sanitize(uint8_t * str, const uint16_t len)
 		if (str[i] == '\0') {
 			++null_ct;
 			str[j] = '\r';
-			while(str[++i] == '\0')
-				if (i >= len - 1) {
-					str[j] = '\0';
-					if (null_ct == 1)
-						--j;
-					return j;
-				}
+			if (skip(str, &i, &j, len, null_ct))
+				return j;
 			--i;
 		} else
 			str[j] = get_next_char(str[i]);
 	}
-	if (j < len)
-		str[j] = '\0';
+	str[j] = '\0';
 	return j;
 }
 
