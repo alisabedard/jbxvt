@@ -36,14 +36,8 @@ static uint8_t get_mod(const uint16_t state)
 {
 	// 4=Shift, 8=Meta, 16=Control
 	uint8_t mod = 0;
-	if (state & XCB_KEY_BUT_MASK_SHIFT)
-		mod += 4;
-	if (state & XCB_KEY_BUT_MASK_MOD_1)
-		mod += 8;
-	if (state & XCB_KEY_BUT_MASK_MOD_4)
-		mod += 8;
-	if (state & XCB_KEY_BUT_MASK_CONTROL)
-		mod += 16;
+#define MOD(mk, n) if(state&XCB_KEY_BUT_MASK_##mk) mod+=n;
+	MOD(SHIFT, 4); MOD(MOD_1, 8); MOD(CONTROL, 16);
 	return mod;
 }
 
