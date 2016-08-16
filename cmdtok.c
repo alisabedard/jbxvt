@@ -423,41 +423,22 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 	case ' ':
 		c = get_com_char(0);
 		switch (c) {
-		case 'F':
-			tk->type = TK_S7C1T;
-			break;
-		case 'G':
-			tk->type = TK_S8C1T;
-			break;
-		case 'L':
-			tk->type = TK_ANSI1;
-			break;
-		case 'M':
-			tk->type = TK_ANSI2;
-			break;
-		case 'N':
-			tk->type = TK_ANSI3;
-			break;
+#define CASE_T(ch, tok) case ch: tk->type = TK_##tok; break;
+		CASE_T('F', S7C1T);
+		CASE_T('G', S8C1T);
+		CASE_T('L', ANSI1);
+		CASE_T('M', ANSI2);
+		CASE_T('N', ANSI3);
 		}
 		break;
 	case '#':
 		c = get_com_char(0);
 		switch(c) {
-		case '3':
-			tk->type = TK_DHLT;
-			break;
-		case '4':
-			tk->type = TK_DHLB;
-			break;
-		case '5':
-			tk->type = TK_SWL;
-			break;
-		case '6':
-			tk->type = TK_DWL;
-			break;
-		case '8':
-			tk->type = TK_ALN;
-			break;
+		CASE_T('3', DHLT);
+		CASE_T('4', DHLB);
+		CASE_T('5', SWL);
+		CASE_T('6', DWL);
+		CASE_T('8', ALN);
 		}
 		break;
 	case '(': // G0 charset
@@ -470,12 +451,8 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 	case '%': // UTF charset switch
 		c = get_com_char(0);
 		switch (c) {
-		case '@':
-			tk->type = TK_CS_DEF;
-			break;
-		case 'G':
-			tk->type = TK_CS_UTF8;
-			break;
+		CASE_T('@', CS_DEF);
+		CASE_T('G', CS_UTF8);
 		}
 		break;
 	case '6': // BI: back index
@@ -494,9 +471,7 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 	case '^': // PM: Privacy message (ended by ESC \)
 		tk->type = TK_PM;
 		break;
-	case '\\': // ST
-		tk->type = TK_ST;
-		break;
+	CASE_T('\\', ST);
 	case '<': // Exit vt52 mode
 		jbxvt.mode.decanm = true;
 		break;
