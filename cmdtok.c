@@ -409,40 +409,40 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 	case ' ':
 		c = get_com_char(0);
 		switch (c) {
-#define CASE_T(ch, tok) case ch: tk->type = TK_##tok; break;
-		CASE_T('F', S7C1T);
-		CASE_T('G', S8C1T);
-		CASE_T('L', ANSI1);
-		CASE_T('M', ANSI2);
-		CASE_T('N', ANSI3);
+#define CASE_A(ch, tok, a) case ch: tk->type = tok, tk->arg[0] = a;\
+			tk->nargs=1; break;
+#define CASE_T(ch, tok) case ch: tk->type = tok; break;
+#define CASE_M(ch, mod, v) case ch: jbxvt.mode.mod = v; break;
+		CASE_T('F', TK_S7C1T);
+		CASE_T('G', TK_S8C1T);
+		CASE_T('L', TK_ANSI1);
+		CASE_T('M', TK_ANSI2);
+		CASE_T('N', TK_ANSI3);
 		}
 		break;
 	case '#':
 		c = get_com_char(0);
 		switch(c) {
-		CASE_T('3', DHLT);
-		CASE_T('4', DHLB);
-		CASE_T('5', SWL);
-		CASE_T('6', DWL);
-		CASE_T('8', ALN);
+		CASE_T('3', TK_DHLT);
+		CASE_T('4', TK_DHLB);
+		CASE_T('5', TK_SWL);
+		CASE_T('6', TK_DWL);
+		CASE_T('8', TK_ALN);
 		}
 		break;
+
 	case '(': // G0 charset
-	case ')': // G1 charset
-		tk->type = c;
-		c = get_com_char(0);
-		tk->arg[0] = c;
-		tk->nargs = 1;
-		break;
+	CASE_A(')', c, get_com_char(0));
+
 	case '%': // UTF charset switch
 		c = get_com_char(0);
 		switch (c) {
-		CASE_T('@', CS_DEF);
-		CASE_T('G', CS_UTF8);
+		CASE_T('@', TK_CS_DEF);
+		CASE_T('G', TK_CS_UTF8);
 		}
 		break;
-	CASE_T('6', RI); // BI: back index
-	CASE_T('9', IND); // FI: forward index
+	CASE_T('6', TK_RI); // BI: back index
+	CASE_T('9', TK_IND); // FI: forward index
 	case '7': // SC: save cursor
 	case '8': // RC: restore cursor
 	case '=': // PAM: keypad to application mode
@@ -450,78 +450,46 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 		tk->type = c;
 		tk->nargs = 0;
 		break;
-	CASE_T('^', PM); // PM: Privacy message (ended by ESC \)
-	CASE_T('\\', ST);
-	case '<': // Exit vt52 mode
-		jbxvt.mode.decanm = true;
-		break;
+	CASE_T('^', TK_PM); // PM: Privacy message (ended by ESC \)
+	CASE_T('\\', TK_ST);
+	CASE_M('<', decanm, true); // exit vt52 mode
 	case 'A': // vt52 cursor up
 	case 'B': // vt52 cursor down
 	case 'C': // vt52 cursor left
 		tk->type = c;
 		break;
-	case 'D': // vt52 cursor right
-		tk->type = jbxvt.mode.decanm ? TK_IND : TK_CUF;
-		break;
-	CASE_T('c', RIS); // Reset to Initial State
-	case 'e': // enable cursor (vt52 GEMDOS)
-		jbxvt.mode.dectcem = true;
-		break;
-	case 'f': // disable cursor (vt52 GEMDOS)
-		jbxvt.mode.dectcem = false;
-		break;
-	CASE_T('E', NEL);
-	CASE_T('F', ENTGM52); // Enter VT52 graphics mode
-	CASE_T('G', EXTGM52); // Leave VT52 graphics mode
-	case 'H':
-		tk->type = jbxvt.mode.decanm ? TK_HTS : TK_HOME;
-		break;
-	case 'l':
-		tk->type = jbxvt.mode.decanm ? TK_MEMLOCK : TK_EL;
-		tk->arg[0] = 2;
-		tk->nargs = 1;
-		break;
+	CASE_T('D', jbxvt.mode.decanm ? TK_IND : TK_CUF);
+	CASE_T('c', TK_RIS); // Reset to Initial State
+	CASE_M('e', dectcem, true); // enable cursor (vt52 GEMDOS)
+	CASE_M('f', dectcem, false); // disable cursor (vt52 GEMDOS)
+	CASE_T('E', TK_NEL);
+	CASE_T('F', TK_ENTGM52); // Enter VT52 graphics mode
+	CASE_T('G', TK_EXTGM52); // Leave VT52 graphics mode
+	CASE_T('H', jbxvt.mode.decanm ? TK_HTS : TK_HOME);
+	CASE_A('l', jbxvt.mode.decanm ? TK_MEMLOCK : TK_EL, 2);
 	case 'I':
 		scr_index_from(-1, jbxvt.scr.current->cursor.y);
 		tk->type = TK_CUU;
 		break;
-	case 'J': // vt52 erase to end of line
-		tk->type = TK_EL;
-		tk->arg[0] = 0;
-		tk->nargs = 1;
-		break;
-	CASE_T('j', SC); // save cursor (vt52g)
-	CASE_T('K', ED); // vt42 erase to end of screen
-	CASE_T('k', RC); // restore cursor (vt52g)
-	CASE_T('L', IL); // insert line (vt52)
-	case 'M':
-		tk->type = jbxvt.mode.decanm ? TK_RI : TK_DL;
-		break;
-	CASE_T('N', SS2);
-	CASE_T('O', SS3);
-	case 'o': // clear to start of line (vt52g)
-		tk->type = TK_EL;
-		tk->arg[0] = 1;
-		tk->nargs = 1;
-		break;
+	CASE_A('J', TK_EL, 1); // vt52 erase to end of line
+	CASE_T('j', TK_SC); // save cursor (vt52g)
+	CASE_T('K', TK_ED); // vt42 erase to end of screen
+	CASE_T('k', TK_RC); // restore cursor (vt52g)
+	CASE_T('L', TK_IL); // insert line (vt52)
+	CASE_T('M', jbxvt.mode.decanm ? TK_RI : TK_DL);
+	CASE_T('N', TK_SS2);
+	CASE_T('O', TK_SS3);
+	CASE_A('o', TK_EL, 1); // clear to start of line (vt52g)
 	case 'P':
 		start_dcs(tk);
 		break;
-	case 'p': // reverse video mode (vt52g)
-		jbxvt.mode.decscnm = true;
-		break;
-	case 'q': // normal video (vt52g)
-		jbxvt.mode.decscnm = false;
-		break;
-	CASE_T('V', SPA);
-	case 'v': // wrap on
-		jbxvt.mode.decawm = true;
-		break;
-	CASE_T('W', EPA);
-	case 'w': // wrap off
-		jbxvt.mode.decawm = false;
-		break;
-	CASE_T('X', SOS);
+	CASE_M('p', decscnm, true); // reverse video mode (vt52g)
+	CASE_M('q', decscnm, false); // normal video (vt52g)
+	CASE_T('V', TK_SPA);
+	CASE_M('v', decawm, true); // wrap on
+	CASE_T('W', TK_EPA);
+	CASE_M('w', decawm, false); // wrap off
+	CASE_T('X', TK_SOS);
 	case 'Y':
 		tk->type = TK_CUP;
 		// -32 to decode, + 1 to be vt100 compatible
@@ -560,8 +528,8 @@ void get_token(Token * restrict tk)
 		  return;
 	const int_fast16_t c = get_com_char(GET_XEVENTS);
 	switch (c) {
-	CASE_T(GCC_NULL, NULL);
-	CASE_T(EOF, EOF);
+	CASE_T(GCC_NULL, TK_NULL);
+	CASE_T(EOF, TK_EOF);
 	case TK_ESC:
 		handle_esc(c, tk);
 		break;
