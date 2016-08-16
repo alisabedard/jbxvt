@@ -41,20 +41,15 @@ void scr_erase_line(const int8_t mode)
 	xcb_rectangle_t g = { .y = MARGIN + c.y * fh };
 	const uint8_t cw = jbxvt.scr.chars.width;
 	switch (mode) {
+#define EL(msg, a, b) LOG(msg); get_horz_geo(&g, a, b); zero(c.y, a, b);
 	case 1:
-		LOG("START");
-		get_horz_geo(&g, c.x, 0);
-		zero(c.y, c.x, 0);
+		EL("START", c.x, 0);
 		break;
 	case 0:
-		LOG("END");
-		get_horz_geo(&g, cw - c.x, c.x);
-		zero(c.y, cw - c.x, c.x);
+		EL("END", cw - c.x, c.x);
 		break;
 	case 2:
-		LOG("ENTIRE");
-		get_horz_geo(&g, cw, 0);
-		zero(c.y, cw, 0);
+		EL("ENTIRE", cw, 0);
 		break;
 	}
 	draw_cursor(); //clear
