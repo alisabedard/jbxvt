@@ -361,28 +361,14 @@ static void start_dcs(Token * t)
 		case '"':
 			c = get_com_char(0); // next
 			switch (c) {
-			case 'q':
-				t->type = TK_QUERY_SCA;
-				check_st(t);
-				break;
-			case 'p':
-				t->type = TK_QUERY_SCL;
-				check_st(t);
-				break;
+#define CASE_Q(ch, tk) case ch:t->type=TK_QUERY_##tk;check_st(t);break;
+			CASE_Q('p', SCA);
+			CASE_Q('q', SCL);
 			}
 			break;
-		case 'r':
-			t->type = TK_QUERY_STBM;
-			check_st(t);
-			break;
-		case 's':
-			t->type = TK_QUERY_SLRM;
-			check_st(t);
-			break;
-		case 'm':
-			t->type = TK_QUERY_SGR;
-			check_st(t);
-			break;
+		CASE_Q('m', SLRM);
+		CASE_Q('r', STBM);
+		CASE_Q('s', SLRM);
 		case ' ':
 			c = get_com_char(0);
 			if (c != 'q')
@@ -455,12 +441,8 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 		CASE_T('G', CS_UTF8);
 		}
 		break;
-	case '6': // BI: back index
-		tk->type = TK_RI;
-		break;
-	case '9': // FI: forward index
-		tk->type = TK_IND;
-		break;
+	CASE_T('6', RI); // BI: back index
+	CASE_T('9', IND); // FI: forward index
 	case '7': // SC: save cursor
 	case '8': // RC: restore cursor
 	case '=': // PAM: keypad to application mode
@@ -468,9 +450,7 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 		tk->type = c;
 		tk->nargs = 0;
 		break;
-	case '^': // PM: Privacy message (ended by ESC \)
-		tk->type = TK_PM;
-		break;
+	CASE_T('^', PM); // PM: Privacy message (ended by ESC \)
 	CASE_T('\\', ST);
 	case '<': // Exit vt52 mode
 		jbxvt.mode.decanm = true;
@@ -483,24 +463,16 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 	case 'D': // vt52 cursor right
 		tk->type = jbxvt.mode.decanm ? TK_IND : TK_CUF;
 		break;
-	case 'c': // Reset to Initial State
-		tk->type = TK_RIS;
-		break;
+	CASE_T('c', RIS); // Reset to Initial State
 	case 'e': // enable cursor (vt52 GEMDOS)
 		jbxvt.mode.dectcem = true;
 		break;
 	case 'f': // disable cursor (vt52 GEMDOS)
 		jbxvt.mode.dectcem = false;
 		break;
-	case 'E' :
-		tk->type = TK_NEL;
-		break;
-	case 'F': // Enter VT52 graphics mode
-		tk->type = TK_ENTGM52;
-		break;
-	case 'G': // Leave VT52 graphics mode
-		tk->type = TK_EXTGM52;
-		break;
+	CASE_T('E', NEL);
+	CASE_T('F', ENTGM52); // Enter VT52 graphics mode
+	CASE_T('G', EXTGM52); // Leave VT52 graphics mode
 	case 'H':
 		tk->type = jbxvt.mode.decanm ? TK_HTS : TK_HOME;
 		break;
@@ -518,27 +490,15 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 		tk->arg[0] = 0;
 		tk->nargs = 1;
 		break;
-	case 'j': // save cursor (vt52g)
-		tk->type = TK_SC;
-		break;
-	case 'K': // vt42 erase to end of screen
-		tk->type = TK_ED;
-		break;
-	case 'k': // restore cursor (vt52g)
-		tk->type = TK_RC;
-		break;
-	case 'L': // insert line (vt52)
-		tk->type = TK_IL;
-		break;
+	CASE_T('j', SC); // save cursor (vt52g)
+	CASE_T('K', ED); // vt42 erase to end of screen
+	CASE_T('k', RC); // restore cursor (vt52g)
+	CASE_T('L', IL); // insert line (vt52)
 	case 'M':
 		tk->type = jbxvt.mode.decanm ? TK_RI : TK_DL;
 		break;
-	case 'N' :
-		tk->type = TK_SS2;
-		break;
-	case 'O' :
-		tk->type = TK_SS3;
-		break;
+	CASE_T('N', SS2);
+	CASE_T('O', SS3);
 	case 'o': // clear to start of line (vt52g)
 		tk->type = TK_EL;
 		tk->arg[0] = 1;
@@ -553,21 +513,15 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 	case 'q': // normal video (vt52g)
 		jbxvt.mode.decscnm = false;
 		break;
-	case 'V':
-		tk->type = TK_SPA;
-		break;
+	CASE_T('V', SPA);
 	case 'v': // wrap on
 		jbxvt.mode.decawm = true;
 		break;
-	case 'W':
-		tk->type = TK_EPA;
-		break;
+	CASE_T('W', EPA);
 	case 'w': // wrap off
 		jbxvt.mode.decawm = false;
 		break;
-	case 'X':
-		tk->type = TK_SOS;
-		break;
+	CASE_T('X', SOS);
 	case 'Y':
 		tk->type = TK_CUP;
 		// -32 to decode, + 1 to be vt100 compatible
@@ -606,12 +560,8 @@ void get_token(Token * restrict tk)
 		  return;
 	const int_fast16_t c = get_com_char(GET_XEVENTS);
 	switch (c) {
-	case GCC_NULL:
-		tk->type = TK_NULL;
-		break;
-	case EOF:
-		tk->type = TK_EOF;
-		break;
+	CASE_T(GCC_NULL, NULL);
+	CASE_T(EOF, EOF);
 	case TK_ESC:
 		handle_esc(c, tk);
 		break;
