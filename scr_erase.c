@@ -99,11 +99,12 @@ void scr_erase_screen(const int8_t mode)
 	case 0:
 		LOG("END");
 		if (cur.y || cur.x) {
-			r.y += (cur.y + 1) * fh;
+			const int16_t c1 = cur.y + 1;
+			r.y += c1 * fh;
 			r.height = (c.height - cur.y - 1) * fh;
-			for (uint8_t i = cur.y + 1; i < c.height; ++i)
+			for (uint8_t i = c1; i < c.height; ++i)
 				zero(i, c.w, 0);
-			common_scr_erase(r, cur.y + 1, c.height - 1, mode);
+			common_scr_erase(r, c1, c.height - 1, mode);
 			break;
 		}
 		/*  If we are positioned at the top left hand corner then
