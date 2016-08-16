@@ -26,8 +26,9 @@ static void zero(const int16_t line, const uint16_t sz, const int16_t col)
 static void get_horz_geo(xcb_rectangle_t * restrict h,
 	const uint16_t sz, const uint16_t col)
 {
-	h->x = MARGIN + col * jbxvt.X.f.size.width;
-	h->width = sz * jbxvt.X.f.size.width;
+	const uint16_t w = jbxvt.X.f.size.width;
+	h->x = MARGIN + col * w;
+	h->width = sz * w;
 }
 
 //  erase part or the whole of a line
