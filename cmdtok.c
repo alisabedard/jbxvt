@@ -132,12 +132,13 @@ static int_fast16_t handle_xev(xcb_generic_event_t * restrict event,
 
 static int_fast16_t output_to_command(void)
 {
-	const ssize_t count = write(jbxvt.com.fd, jbxvt.com.send_nxt,
-		jbxvt.com.send_count);
+	struct JBXVTCommandData * c = &jbxvt.com;
+	const ssize_t count = write(c->fd, c->send_nxt,
+		c->send_count);
 	if (jb_check(count != -1, "Could not write to command"))
 		exit(1);
-	jbxvt.com.send_count -= count;
-	jbxvt.com.send_nxt += count;
+	c->send_count -= count;
+	c->send_nxt += count;
 	return count;
 }
 
