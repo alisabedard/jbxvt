@@ -194,10 +194,9 @@ static void sbop(Token * restrict tk, struct xeventst * restrict xe,
 {
 	if (is_tracked()) // let the application handle scrolling
 		return;
-	if (jbxvt.scr.current == &jbxvt.scr.s[0])
-		ARGS(up ? TK_SBUP : TK_SBDOWN, xe->box.y);
-	else // xterm's behavior if alternate screen in use:
-		ARGS(up ? TK_CUU : TK_CUD, 1);
+	// xterm's behavior if alternate screen in use is to move the cursor
+	jbxvt.scr.current == &jbxvt.scr.s[0] ?  ARGS(up ? TK_SBUP : TK_SBDOWN,
+		xe->box.y) : ARGS(up ? TK_CUU : TK_CUD, 1);
 }
 
 static void handle_button_release(Token * restrict tk,
@@ -225,16 +224,10 @@ static void handle_button_release(Token * restrict tk,
 		switch (xe->button) {
 		case 1:
 		case 3:
-			tk->type = TK_SELECT;
-			tk->arg[0] = xe->time;
-			tk->nargs = 1;
+			ARGS(TK_SELECT, xe->time);
 			break;
 		case 2:
-			tk->type = TK_SELINSRT;
-			tk->arg[0] = xe->time;
-			tk->arg[1] = xe->box.x;
-			tk->arg[2] = xe->box.y;
-			tk->nargs = 3;
+			ARGS(TK_SELINSRT, xe->time, xe->box.x, xe->box.y);
 			break;
 		case 4:
 			sbop(tk, xe, false);
@@ -303,20 +296,26 @@ static JBXVTEvent * pop_xevent(void)
 	return xe;
 }
 
+static JBXVTRegion get_region(JBXVTEvent * xe)
+{
+	const xcb_window_t w = xe->window;
+	const struct JBXVTXWindows * j = &jbxvt.X.win;
+	if (w == j->vt)
+		return REGION_SCREEN;
+	else if (w == j->sb)
+		return REGION_SCROLLBAR;
+	else if (w == j->main)
+		return REGION_MAINWIN;
+	return REGION_NONE;
+}
+
 // convert next X event into a token
 bool handle_xevents(Token * restrict tk)
 {
 	JBXVTEvent * xe = pop_xevent();
 	if(!xe)
 		return false;
-	if (xe->window == jbxvt.X.win.vt)
-		  tk->region = REGION_SCREEN;
-	else if (xe->window == jbxvt.X.win.sb)
-		  tk->region = REGION_SCROLLBAR;
-	else if (xe->window == jbxvt.X.win.main)
-		  tk->region = REGION_MAINWIN;
-	else
-		  tk->region = REGION_NONE;
+	tk->region = get_region(xe);
 	switch (xe->type) { // Ordered numerically:
 	case 0: // Unimplemented, undefined
 	case 150: // Undefined
