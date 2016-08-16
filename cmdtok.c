@@ -58,16 +58,15 @@ static void handle_focus(xcb_generic_event_t * restrict e)
 	push_xevent(xe);
 }
 
+#define XESET(a, b) xe->a = e->b
+#define XEEQ(a) XESET(a, a)
+#define EALLOC(t) JBXVTEvent * xe = ev_alloc(ge); t * e = (t*)ge;
+
 static void handle_sel(xcb_generic_event_t * restrict ge)
 {
-	JBXVTEvent * xe = ev_alloc(ge);
-	xcb_selection_request_event_t * e
-		= (xcb_selection_request_event_t *)ge;
-	xe->time = e->time;
-	xe->requestor = e->requestor;
-	xe->target = e->target;
-	xe->property = e->property;
-	xe->window = e->owner;
+	EALLOC(xcb_selection_request_event_t);
+	XEEQ(time); XEEQ(requestor); XEEQ(target); XEEQ(property);
+	XESET(window, owner);
 	push_xevent(xe);
 }
 
@@ -81,26 +80,17 @@ static void handle_client_msg(xcb_generic_event_t * restrict ge)
 
 static void handle_expose(xcb_generic_event_t * restrict ge)
 {
-	xcb_expose_event_t * e = (xcb_expose_event_t *)ge;
-	JBXVTEvent * xe = ev_alloc(ge);
-	xe->window = e->window;
-	xe->box.x = e->x;
-	xe->box.y = e->y;
-	xe->box.width = e->width;
-	xe->box.height = e->height;
+	EALLOC(xcb_expose_event_t);
+	XEEQ(window); XESET(box.x, x); XESET(box.y, y);
+	XESET(box.width, width); XESET(box.height, height);
 	push_xevent(xe);
 }
 
 static void handle_other(xcb_generic_event_t * restrict ge)
 {
-	xcb_key_press_event_t * e = (xcb_key_press_event_t *)ge;
-	JBXVTEvent * xe = ev_alloc(ge);
-	xe->window = e->event;
-	xe->box.x = e->event_x;
-	xe->box.y = e->event_y;
-	xe->state = e->state;
-	xe->button = e->detail;
-	xe->time = e->time;
+	EALLOC(xcb_key_press_event_t);
+	XESET(window, event); XESET(box.x, event_x); XESET(box.y, event_y);
+	XEEQ(state); XEEQ(time); XESET(button, detail);
 	push_xevent(xe);
 }
 
@@ -204,11 +194,12 @@ __attribute__((hot))
 #endif
 static int_fast16_t get_com_char(const int_fast8_t flags)
 {
-	if (jbxvt.com.stack.top > jbxvt.com.stack.data)
-		return(*--jbxvt.com.stack.top);
+	struct JBXVTCommandData * c = &jbxvt.com;
+	if (c->stack.top > c->stack.data)
+		return(*--c->stack.top);
 
-	if (jbxvt.com.buf.next < jbxvt.com.buf.top)
-		return(*jbxvt.com.buf.next++);
+	if (c->buf.next < c->buf.top)
+		return(*c->buf.next++);
 
 	if (flags & BUF_ONLY)
 		return(GCC_NULL);
@@ -228,14 +219,14 @@ static int_fast16_t get_com_char(const int_fast8_t flags)
 				  return xev_ret;
 		}
 		count = poll_io(count, &in_fdset);
-	} while(!FD_ISSET(jbxvt.com.fd, &in_fdset));
-	uint8_t * d = jbxvt.com.buf.data;
-	count = read(jbxvt.com.fd, d, COM_BUF_SIZE);
+	} while(!FD_ISSET(c->fd, &in_fdset));
+	uint8_t * d = c->buf.data;
+	count = read(c->fd, d, COM_BUF_SIZE);
 	if (count < 1) // buffer is empty
 		return errno == EWOULDBLOCK ? GCC_NULL : EOF;
-	jbxvt.com.buf.next = d;
-	jbxvt.com.buf.top = d + count;
-	return *jbxvt.com.buf.next++;
+	c->buf.next = d;
+	c->buf.top = d + count;
+	return *c->buf.next++;
 }
 
 //  Return true if the character is one that can be handled by scr_string()
