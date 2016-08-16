@@ -135,8 +135,8 @@ static bool is_motion_tracked(void)
 {
 	struct JBXVTPrivateModes * m = &jbxvt.mode;
 	bool r = false;
-	r |= m->mouse_btn_evt;
-	r |= m->mouse_any_evt;
+#define TRK(it) r|=m->mouse_##it
+	TRK(btn_evt); TRK(any_evt);
 	return r;
 }
 
@@ -144,12 +144,7 @@ static bool is_tracked(void)
 {
 	struct JBXVTPrivateModes * m = &jbxvt.mode;
 	bool r = false;
-	r |= m->mouse_x10;
-	r |= m->mouse_vt200;
-	r |= m->mouse_vt200hl;
-	r |= m->mouse_ext;
-	r |= m->mouse_sgr;
-	r |= m->mouse_urxvt;
+	TRK(x10); TRK(vt200); TRK(vt200hl); TRK(ext); TRK(sgr); TRK(urxvt);
 	r |= is_motion_tracked();
 	return r;
 }
