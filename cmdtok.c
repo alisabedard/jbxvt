@@ -148,14 +148,15 @@ static int_fast16_t output_to_command(void)
 
 static void timer(void)
 {
+	if (jbxvt.mode.att610)
+		return;
 	switch(jbxvt.opt.cursor_attr) {
 	case 0: // blinking block
 	case 1: // blinking block
 	case 3: // blinking underline
 	case 5: // blinking bar
 	case 7: // blinking overline
-		if (!jbxvt.mode.att610)
-			draw_cursor();
+		draw_cursor();
 		break;
 	}
 }
@@ -182,6 +183,19 @@ static void poll_io(fd_set * restrict in_fdset)
 		jb_check_x(jbxvt.X.xcb);
 }
 
+static bool get_buffered(int_fast16_t * val, const int_fast8_t flags)
+{
+	struct JBXVTCommandData * c = &jbxvt.com;
+	bool r = false;
+	if ((r = (c->stack.top > c->stack.data)))
+		*val = *--c->stack.top;
+	else if ((r = (c->buf.next < c->buf.top)))
+		*val = *c->buf.next++;
+	else if ((r = (flags & BUF_ONLY)))
+		*val = GCC_NULL;
+	return r;
+}
+
 /*  Return the next input character after first passing any keyboard input
  *  to the command.  If flags & BUF_ONLY is true then only buffered characters are
  *  returned and once the buffer is empty the special value GCC_NULL is
@@ -196,27 +210,23 @@ __attribute__((hot))
 #endif
 static int_fast16_t get_com_char(const int_fast8_t flags)
 {
-	struct JBXVTCommandData * c = &jbxvt.com;
-	if (c->stack.top > c->stack.data)
-		return(*--c->stack.top);
-	if (c->buf.next < c->buf.top)
-		return(*c->buf.next++);
-	if (flags & BUF_ONLY)
-		return(GCC_NULL);
+	int_fast16_t ret = 0;
+	if (get_buffered(&ret, flags))
+		return ret;
 	// Flush here to draw the cursor.
 	xcb_flush(jbxvt.X.xcb);
 	fd_set in_fdset;
+	struct JBXVTCommandData * c = &jbxvt.com;
 	do {
 		FD_ZERO(&in_fdset);
 		xcb_generic_event_t * e;
 		if ((e = xcb_poll_for_event(jbxvt.X.xcb))) {
 			// Make sure server connection still good:
 			jb_check_x(jbxvt.X.xcb);
-			const int_fast16_t xev_ret
-				= handle_xev(e, flags);
+			ret = handle_xev(e, flags);
 			free(e);
-			if (xev_ret)
-				  return xev_ret;
+			if (ret)
+				  return ret;
 		}
 		poll_io(&in_fdset);
 	} while(!FD_ISSET(c->fd, &in_fdset));
