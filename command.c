@@ -147,6 +147,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	fcntl(ttyfd, F_DUPFD, 0);
 	fcntl(ttyfd, F_DUPFD, 0);
 	fcntl(ttyfd, F_DUPFD, 0);
+	jb_close(ttyfd);
 	set_ttymodes();
 	execvp(argv[0],argv); // Only returns on failure
 	exit(1);
