@@ -119,6 +119,12 @@ static void set_ttymodes(void)
 	tty_set_size(jbxvt.scr.chars.width, jbxvt.scr.chars.height);
 }
 
+static void redir(const fd_t target, const fd_t ttyfd)
+{
+	jb_close(target);
+	fcntl(ttyfd, F_DUPFD, 0);
+}
+
 static void child(char ** restrict argv, fd_t ttyfd)
 {
 #ifndef NETBSD
@@ -140,23 +146,18 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	ttyfd = jb_open(tty_name, O_RDWR);
 	jb_close(i);
 #endif//TIOCSCTTY
-	jb_close(0);
-	jb_close(1);
-	jb_close(2);
-	// for stdin, stderr, stdout:
-	fcntl(ttyfd, F_DUPFD, 0);
-	fcntl(ttyfd, F_DUPFD, 0);
-	fcntl(ttyfd, F_DUPFD, 0);
+	// redirect stdin, stderr, and stdout:
+	redir(0, ttyfd);
+	redir(1, ttyfd);
+	redir(2, ttyfd);
 	jb_close(ttyfd);
 	set_ttymodes();
 	execvp(argv[0],argv); // Only returns on failure
 	exit(1);
 }
 
-
 /*  Tell the teletype handler what size the window is.  Called initially from
- *  the child and after a window size change from the parent.
- */
+ *  the child and after a window size change from the parent.  */
 #if !defined(NETBSD) && !defined(FREEBSD)
 #ifdef TIOCSWINSZ
 void tty_set_size(const uint8_t width, const uint8_t height)
