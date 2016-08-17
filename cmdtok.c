@@ -94,18 +94,22 @@ static void handle_other(xcb_generic_event_t * restrict ge)
 	push_xevent(xe);
 }
 
-static int_fast16_t handle_xev(xcb_generic_event_t * restrict event,
-	int_fast16_t * restrict count, const uint8_t flags)
+static void key_press(xcb_generic_event_t * restrict e)
 {
-	uint8_t * s;
+	int_fast16_t count = 0;
+	uint8_t * s = lookup_key(e, &count);
+	if (count) {
+		jbxvt.com.send_nxt = s;
+		jbxvt.com.send_count = count;
+	}
+}
 
+static int_fast16_t handle_xev(xcb_generic_event_t * restrict event,
+	const uint8_t flags)
+{
 	switch (event->response_type & ~0x80) {
 	case XCB_KEY_PRESS:
-		s = lookup_key(event, count);
-		if (count) {
-			jbxvt.com.send_nxt = s;
-			jbxvt.com.send_count = *count;
-		}
+		key_press(event);
 		break;
 	case XCB_FOCUS_IN:
 	case XCB_FOCUS_OUT:
@@ -156,10 +160,8 @@ static void timer(void)
 	}
 }
 
-#if defined(__i386__) || defined(__amd64__)
-	__attribute__((regparm(1)))
-#endif//x86
-static int_fast16_t poll_io(int_fast16_t count, fd_set * restrict in_fdset)
+__attribute__((nonnull))
+static void poll_io(fd_set * restrict in_fdset)
 {
 	FD_SET(jbxvt.com.fd, in_fdset);
 	FD_SET(jbxvt.com.xfd, in_fdset);
@@ -171,14 +173,13 @@ static int_fast16_t poll_io(int_fast16_t count, fd_set * restrict in_fdset)
 	sv = select(jbxvt.com.width, in_fdset, &out_fdset, NULL,
 		&(struct timeval){.tv_sec = 0, .tv_usec = 500000});
 	if (sv == -1)
-		return count;
+		return;
 	if (FD_ISSET(jbxvt.com.fd, &out_fdset))
-		return output_to_command();
-	if (!FD_ISSET(jbxvt.com.xfd, in_fdset))
+		output_to_command();
+	else if (!FD_ISSET(jbxvt.com.xfd, in_fdset))
 		timer(); // select timed out
-	else // jbxvt.com.xfd
+	else
 		jb_check_x(jbxvt.X.xcb);
-	return count;
 }
 
 /*  Return the next input character after first passing any keyboard input
@@ -198,35 +199,33 @@ static int_fast16_t get_com_char(const int_fast8_t flags)
 	struct JBXVTCommandData * c = &jbxvt.com;
 	if (c->stack.top > c->stack.data)
 		return(*--c->stack.top);
-
 	if (c->buf.next < c->buf.top)
 		return(*c->buf.next++);
-
 	if (flags & BUF_ONLY)
 		return(GCC_NULL);
 	// Flush here to draw the cursor.
 	xcb_flush(jbxvt.X.xcb);
-	int_fast16_t count = 0;
 	fd_set in_fdset;
 	do {
 		FD_ZERO(&in_fdset);
 		xcb_generic_event_t * e;
 		if ((e = xcb_poll_for_event(jbxvt.X.xcb))) {
+			// Make sure server connection still good:
 			jb_check_x(jbxvt.X.xcb);
 			const int_fast16_t xev_ret
-				= handle_xev(e, &count, flags);
+				= handle_xev(e, flags);
 			free(e);
 			if (xev_ret)
 				  return xev_ret;
 		}
-		count = poll_io(count, &in_fdset);
+		poll_io(&in_fdset);
 	} while(!FD_ISSET(c->fd, &in_fdset));
 	uint8_t * d = c->buf.data;
-	count = read(c->fd, d, COM_BUF_SIZE);
-	if (count < 1) // buffer is empty
+	const ssize_t n = read(c->fd, d, COM_BUF_SIZE);
+	if (n < 1) // buffer is empty
 		return errno == EWOULDBLOCK ? GCC_NULL : EOF;
 	c->buf.next = d;
-	c->buf.top = d + count;
+	c->buf.top = d + n;
 	return *c->buf.next++;
 }
 
