@@ -169,6 +169,15 @@ void tty_set_size(const uint8_t width, const uint8_t height)
 #endif//TIOCSWINSZ
 #endif//!NETBSD&&!FREEBSD
 
+static void attach_signals(void)
+{
+	// Attach relevant signals:
+	signal(SIGINT, exit);
+	signal(SIGQUIT, exit);
+	// grantpt(3) states this is unspecified behavior:
+	signal(SIGCHLD, exit);
+	atexit(exit_cb);
+}
 
 /*  Run the command in a subprocess and return a file descriptor for the
  *  master end of the pseudo-teletype pair with the command talking to
@@ -183,13 +192,7 @@ static fd_t run_command(char ** argv)
 		"Could not set file status flags on pty file descriptor");
 	jbxvt.com.width = sysconf(_SC_OPEN_MAX);
 	jb_check(jbxvt.com.width != -1, "_SC_OPEN_MAX");
-
-	// Attach relevant signals:
-	signal(SIGINT, exit);
-	signal(SIGQUIT, exit);
-	// grantpt(3) states this is unspecified behavior:
-	signal(SIGCHLD, exit);
-	atexit(exit_cb);
+	attach_signals();
 	const pid_t comm_pid = fork();
 	if (jb_check(comm_pid >= 0, "Could not start session"))
 		exit(1);
