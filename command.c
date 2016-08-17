@@ -140,15 +140,13 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	ttyfd = jb_open(tty_name, O_RDWR);
 	jb_close(i);
 #endif//TIOCSCTTY
-	for (int i = 0; i < jbxvt.com.width; i++)
-		if (i != ttyfd)
-			jb_close(i);
+	jb_close(0);
+	jb_close(1);
+	jb_close(2);
 	// for stdin, stderr, stdout:
 	fcntl(ttyfd, F_DUPFD, 0);
 	fcntl(ttyfd, F_DUPFD, 0);
 	fcntl(ttyfd, F_DUPFD, 0);
-	if (ttyfd > 2)
-		jb_close(ttyfd);
 	set_ttymodes();
 	execvp(argv[0],argv); // Only returns on failure
 	exit(1);
@@ -188,10 +186,10 @@ static fd_t run_command(char ** argv)
 	char * tty_name = get_pseudo_tty(&ptyfd, &ttyfd);
 	if (!tty_name)
 		exit(1);
-	jb_check(fcntl(ptyfd,F_SETFL,O_NONBLOCK) != 1,
+	jb_check(fcntl(ptyfd, F_SETFL, O_NONBLOCK) != 1,
 		"Could not set file status flags on pty file descriptor");
-	jbxvt.com.width = sysconf(_SC_OPEN_MAX);
-	jb_check(jbxvt.com.width != -1, "_SC_OPEN_MAX");
+	// +1 to allow for X fd
+	jbxvt.com.width = ptyfd + 1;
 	attach_signals();
 	const pid_t comm_pid = fork();
 	if (jb_check(comm_pid >= 0, "Could not start session"))
