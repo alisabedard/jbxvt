@@ -4,7 +4,6 @@
 
 #include "screen.h"
 
-#include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
@@ -12,8 +11,6 @@
 #include "sbar.h"
 #include "scr_erase.h"
 #include "scr_move.h"
-#include "scr_reset.h"
-#include "scr_string.h"
 #include "scroll.h"
 
 #include <gc.h>
