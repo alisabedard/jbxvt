@@ -97,9 +97,9 @@ static void scr_init(void)
 // Set default values for private modes
 static void mode_init(void)
 {
-	struct JBXVTPrivateModes * m = &jbxvt.mode;
-	m->decanm = m->decawm = m->dectcem = true;
-	m->charset[0] = m->charset[1] = CHARSET_ASCII;
+	jbxvt.mode = (struct JBXVTPrivateModes) { .decanm = true,
+		.decawm = false, .dectcem = true, .charset[0] = CHARSET_ASCII,
+		.charset[1] = CHARSET_ASCII };
 }
 
 /*  Run the command in a subprocess and return a file descriptor for the
