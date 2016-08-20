@@ -449,7 +449,6 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 	case '=': // PAM: keypad to application mode
 	case '>': // PNM: keypad to numeric mode
 		tk->type = c;
-		tk->nargs = 0;
 		break;
 	CASE_T('^', TK_PM); // PM: Privacy message (ended by ESC \)
 	CASE_T('\\', TK_ST);

@@ -30,7 +30,7 @@ static bool tab_stops[JBXVT_MAX_COLS];
 
 // Set tab stops:
 // -1 clears all, -2 sets default
-void scr_set_tab(int i, const bool value)
+void scr_set_tab(int16_t i, const bool value)
 {
 	if (i == -1) // clear all
 		memset(&tab_stops, 0, JBXVT_MAX_COLS);

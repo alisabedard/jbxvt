@@ -20,6 +20,6 @@ void scr_cht(int16_t v);
 
 // Set tab stops:
 // -1 clears all, -2 sets default
-void scr_set_tab(int i, const bool value);
+void scr_set_tab(int16_t i, const bool value);
 
 #endif//!SCR_STRING_H
