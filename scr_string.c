@@ -106,19 +106,19 @@ static void wrap(void)
 static void handle_insert(const uint8_t n, const xcb_point_t p)
 {
 	SLOG("handle_insert(n=%d, p={%d, %d})", n, p.x, p.y);
-	VTScreen * restrict c = jbxvt.scr.current;
-	uint8_t * s = c->text [c->cursor.y];
-	uint32_t * r = c->rend [c->cursor.y];
-	const Size ch = jbxvt.scr.chars;
-	const xcb_point_t cur = c->cursor;
-	const uint16_t sz = ch.width - cur.x;
-	memmove(s + cur.x + n, s + cur.x, sz);
-	memmove(r + cur.x + n, r + cur.x, sz << 2);
-	const Size f = jbxvt.X.f.size;
-	const uint16_t width = (sz - n) * f.w;
-	const int16_t x = p.x + n * f.w;
+#define CHW jbxvt.scr.chars.width
+#define SCR jbxvt.scr.current
+#define FNT jbxvt.X.f.size
+	const xcb_point_t c = SCR->cursor;
+	uint8_t * restrict s = SCR->text[c.y];
+	uint32_t * restrict r = SCR->rend[c.y];
+	const uint16_t sz = CHW - c.x;
+	memmove(s + c.x + n, s + c.x, sz);
+	memmove(r + c.x + n, r + c.x, sz << 2);
+	const uint16_t width = (sz - n) * FNT.width;
+	const int16_t x = p.x + n * FNT.width;
 	xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
-		jbxvt.X.gc.tx, p.x, p.y, x, p.y, width, f.h);
+		jbxvt.X.gc.tx, p.x, p.y, x, p.y, width, FNT.height);
 }
 
 static uint_fast16_t find_n(uint8_t * restrict str)
