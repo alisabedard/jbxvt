@@ -115,8 +115,9 @@ static void handle_insert(const uint8_t n, const xcb_point_t p)
 	const uint16_t sz = CHW - c.x;
 	memmove(s + c.x + n, s + c.x, sz);
 	memmove(r + c.x + n, r + c.x, sz << 2);
-	const uint16_t width = (sz - n) * FNT.width;
-	const int16_t x = p.x + n * FNT.width;
+	const uint16_t n_width = n * FNT.width;
+	const uint16_t width = sz * FNT.width - n_width;
+	const int16_t x = p.x + n_width;
 	xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
 		jbxvt.X.gc.tx, p.x, p.y, x, p.y, width, FNT.height);
 }
