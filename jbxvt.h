@@ -87,7 +87,7 @@ enum CharacterSet{
 };
 
 struct JBXVTPrivateModes {
-	uint8_t charset[2];     // graphics mode char set
+	uint8_t charset[2];	// graphics mode char set
 	uint8_t charsel:1;	// charset index
 	bool att610:1;		// stop blinking cursor
 	bool decanm:1;		// DECANM -- ANSI/VT52
