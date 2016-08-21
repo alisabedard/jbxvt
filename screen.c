@@ -11,6 +11,7 @@
 #include "sbar.h"
 #include "scr_erase.h"
 #include "scr_move.h"
+#include "scr_reset.h"
 #include "scroll.h"
 
 #include <gc.h>
@@ -83,13 +84,13 @@ void scr_efill(void)
 void scr_change_screen(const bool mode_high)
 {
 	change_offset(0);
+	jbxvt.scr.sline.top = 0;
 	jbxvt.scr.current = &jbxvt.scr.s[mode_high];
 	jbxvt.sel.end[1].type = NOSEL;
-	jbxvt.scr.sline.top = 0;
 	jbxvt.mode.charsel = 0; // reset on screen change
-	repaint();
 	draw_cursor();
 	scr_erase_screen(2); // ENTIRE
+	scr_reset();
 }
 
 //  Change the rendition style.

@@ -99,7 +99,7 @@ static void mode_init(void)
 {
 	jbxvt.mode = (struct JBXVTPrivateModes) { .decanm = true,
 		.decawm = false, .dectcem = true, .charset[0] = CHARSET_ASCII,
-		.charset[1] = CHARSET_ASCII };
+		.charset[1] = CHARSET_SG0 };
 }
 
 /*  Run the command in a subprocess and return a file descriptor for the
