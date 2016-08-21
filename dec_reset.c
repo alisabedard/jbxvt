@@ -125,6 +125,10 @@ void dec_reset(Token * restrict token)
 				restore_cursor();
 			scr_change_screen(is_set);
 			break;
+		case 2004: // bracketed paste mode
+			LOG("bracketed paste mode");
+			m->bpaste = is_set;
+			break;
 #ifdef DEBUG
 		default:
 			LOG("Unhandled: %d\n", token->arg[0]);

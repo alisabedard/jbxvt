@@ -114,6 +114,7 @@ struct JBXVTPrivateModes {
 	bool ptr_xy:1;		// send x y on button press/release
 	bool ptr_cell:1;	// cell motion mouse tracking
 	bool s8c1t:1;		// 7 or 8 bit controls
+	bool bpaste:1;		// bracketed paste mode
 };
 
 struct JBXVTOptionData {

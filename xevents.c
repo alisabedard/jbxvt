@@ -26,12 +26,6 @@ xcb_atom_t wm_del_win(void)
 	return a;
 }
 
-// Implementation of mouse tracking follows:
-enum TrackFlags {
-	TRACK_MOTION = 0x20,
-	TRACK_RELEASE = 0x40
-};
-
 static uint8_t get_mod(const uint16_t state)
 {
 	// 4=Shift, 8=Meta, 16=Control
@@ -41,13 +35,15 @@ static uint8_t get_mod(const uint16_t state)
 	return mod;
 }
 
-static bool track_mouse_sgr(uint8_t b, xcb_point_t p)
+enum {
+	JBXVT_RELEASE = 1,
+	JBXVT_MOTION = 2
+};
+
+static bool track_mouse_sgr(uint8_t b, xcb_point_t p, const bool rel)
 {
 	if (!jbxvt.mode.mouse_sgr)
 		return false;
-	const bool rel = b & TRACK_RELEASE;
-	if (rel)
-		b &= ~TRACK_RELEASE;
 	cprintf("\033[<%c;%c;%c%c", b, p.x, p.y, rel ? 'm' : 'M');
 	return true;
 }
@@ -71,7 +67,8 @@ static void locator_report(const uint8_t b, xcb_point_t p)
 	cprintf("\033[%d;%d;%d;%d;0&w", b * 2, 7, p.y, p.x);
 }
 
-static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
+static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p,
+	const uint8_t flags)
 {
 	LOG("track_mouse(b=%d, p={%d, %d})", b, p.x, p.y);
 	// get character position:
@@ -82,23 +79,21 @@ static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p)
 	locator_report(b, p);
 	struct JBXVTPrivateModes * m = &jbxvt.mode;
 	// Release handling:
-	if (b & TRACK_RELEASE) {
-		if (m->mouse_x10)
+	if (flags & JBXVT_RELEASE) {
+		if (m->mouse_x10 || wheel) // wheel release untracked
 			return; // release untracked in x10 mode
 		LOG("TRACK_RELEASE");
 		if (!m->mouse_sgr) // sgr reports which button was released
 			b = 4; // release code, -1 later
 	} else if (wheel) { // wheel release untracked
-		// up and down are represented as button one(0) and two(1),
-		// then add 64, plus one since one was lost earlier
-		b += 61; // Wheel mouse handling
+		b += 64; // Wheel mouse handling
 		LOG("wheel b: %d", b);
 	}
 	// base button on 0:
 	--b;
 	// add modifiers:
 	b += get_mod(state);
-	if (track_mouse_sgr(b, p)) {
+	if (track_mouse_sgr(b, p, flags & JBXVT_RELEASE)) {
 		LOG("mouse_sgr");
 		return;
 	}
@@ -155,8 +150,8 @@ static void handle_motion_notify(Token * restrict tk,
 		&& (xe->state & XCB_KEY_BUT_MASK_BUTTON_2)) {
 		ARGS(TK_SBGOTO, xe->box.y);
 	} else if (xe->window == jbxvt.X.win.vt && is_motion_tracked()) {
-		track_mouse(xe->button | TRACK_MOTION, xe->state,
-			(xcb_point_t){ xe->box.x, xe->box.y});
+		track_mouse(xe->button, xe->state,
+			(xcb_point_t){ xe->box.x, xe->box.y}, JBXVT_MOTION);
 	} else if (xe->window == jbxvt.X.win.vt
 		&& (xe->state & XCB_KEY_BUT_MASK_BUTTON_1)
 		&& !(xe->state & XCB_KEY_BUT_MASK_CONTROL)) {
@@ -194,8 +189,8 @@ static void handle_button_release(Token * restrict tk,
 		&& is_tracked() && xe->button <= 3) {
 		/* check less than or equal to 3, since xterm does not
 		   report mouse wheel release events.  */
-		track_mouse(xe->button | TRACK_RELEASE, xe->state,
-			(xcb_point_t){xe->box.x, xe->box.y});
+		track_mouse(xe->button, xe->state,
+			(xcb_point_t){xe->box.x, xe->box.y}, JBXVT_RELEASE);
 	} else if (xe->window == jbxvt.X.win.vt
 		&& !(xe->state & XCB_KEY_BUT_MASK_CONTROL)) {
 		switch (xe->button) {
@@ -244,7 +239,7 @@ static void handle_button_press(Token * restrict tk,
 	}
 	if (xe->window == v && is_tracked())
 		track_mouse(xe->button, xe->state,
-			(xcb_point_t){xe->box.x, xe->box.y});
+			(xcb_point_t){xe->box.x, xe->box.y}, 0);
 	else if (xe->window == v && !(xe->state & XCB_KEY_BUT_MASK_CONTROL)) {
 		TokenType type = TK_NULL;
 		switch (xe->button) {
