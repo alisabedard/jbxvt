@@ -382,7 +382,6 @@ static void parse_token(void)
 			* (jbxvt.scr.pixels.height - t[0])
 			/ jbxvt.scr.pixels.height - jbxvt.scr.chars.height);
 		break;
-
 	CASE(TK_SBDOWN)
 		t[0] = - t[0]; // fall through
 	CASE(TK_SBUP)

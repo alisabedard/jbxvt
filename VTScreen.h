@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include <xcb/xproto.h>
 
+
 /*  Structure describing the current state of the screen.  */
 typedef struct {
 	uint8_t **text;		// backup copy of text

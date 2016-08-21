@@ -228,7 +228,6 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 			++str;
 			continue;
 		} else if (unlikely(*str == 0xe2))
-			// This fixes tmux appearance
 			*str = '+';
 		if (s->wrap_next) {
 			wrap();
@@ -242,7 +241,7 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		uint8_t * t = s->text[s->cursor.y];
 		if (!t) return;
 		t += s->cursor.x;
-		if (jbxvt.mode.charset[jbxvt.mode.charsel] > CHARSET_SG0)
+		if (jbxvt.mode.charset[jbxvt.mode.charsel] == CHARSET_SG0)
 			parse_special_charset(str, len);
 		// Render the string:
 		if (!s->decpm) {
