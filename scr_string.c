@@ -241,7 +241,7 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		uint8_t * t = s->text[s->cursor.y];
 		if (!t) return;
 		t += s->cursor.x;
-		if (jbxvt.mode.charset[jbxvt.mode.charsel] == CHARSET_SG0)
+		if (jbxvt.mode.charset[jbxvt.mode.charsel] > CHARSET_ASCII)
 			parse_special_charset(str, len);
 		// Render the string:
 		if (!s->decpm) {
