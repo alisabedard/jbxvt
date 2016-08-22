@@ -1,4 +1,4 @@
-CFLAGS+=-Wall -Wextra
+CFLAGS+=-Wall -Wextra -ggdb
 exe=jbxvt
 PREFIX=/usr
 
