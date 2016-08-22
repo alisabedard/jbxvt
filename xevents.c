@@ -86,7 +86,7 @@ static void track_mouse(uint8_t b, uint32_t state, xcb_point_t p,
 		if (!m->mouse_sgr) // sgr reports which button was released
 			b = 4; // release code, -1 later
 	} else if (wheel) { // wheel release untracked
-		b += 64; // Wheel mouse handling
+		b += 65; // Wheel mouse handling
 		LOG("wheel b: %d", b);
 	}
 	// base button on 0:
