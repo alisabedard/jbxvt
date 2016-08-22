@@ -247,8 +247,7 @@ static int_fast16_t get_com_char(const int_fast8_t flags)
 #endif//x86
 static inline bool is_string_char(register int_fast16_t c)
 {
-	c &= 0177;
-	return c >= ' ' || c == '\n' || c == '\r' || c == '\t';
+	return c < 0x7f && (c >= ' ' || c == '\n' || c == '\r' || c == '\t');
 }
 
 #if defined(__i386__) || defined(__amd64__)
@@ -505,17 +504,59 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 	}
 }
 
-static void default_token(Token * restrict tk, const int_fast16_t c)
+static void default_token(Token * restrict tk, int_fast16_t c)
 {
-	if (c > 0x84 && c < 0x9f) {
-		// Pass other controls directly to main switch
-		LOG("8-bit sequence passed directly");
+	switch(c) { // handle 8-bit controls
+	case TK_IND:
+	case TK_NEL:
+	case TK_HTS:
+	case TK_RI:
+	case TK_SS2:
+	case TK_SS3:
+	case TK_DCS:
+	case TK_SPA:
+	case TK_EPA:
+	case TK_SOS:
+	case TK_ID:
+	case TK_CSI:
+	case TK_ST:
+	case TK_OSC:
+	case TK_PM:
+	case TK_APC:
 		tk->type = c;
-	} else if (is_string_char(c))
-		handle_string_char(c, tk);
-	else {
-		tk->type = TK_CHAR;
-		tk->tk_char = c;
+		break;
+	case 0xe2:
+		c = get_com_char(c);
+		switch (c) {
+		case 0x94:
+			c = get_com_char(c);
+			switch (c) {
+			case 0x80:
+				push_com_char('-');
+				break;
+			case 0x82:
+				push_com_char('|');
+				break;
+			case 0xac:
+				push_com_char('+');
+				break;
+			default:
+				LOG("0x%x", (unsigned int)c);
+				push_com_char(c);
+			}
+			break;
+		default:
+			LOG("0xe2 0x%x", (unsigned int)c);
+			push_com_char(c);
+		}
+		break;
+	default:
+		if (is_string_char(c))
+			handle_string_char(c, tk);
+		else {
+			tk->type = TK_CHAR;
+			tk->tk_char = c;
+		}
 	}
 }
 

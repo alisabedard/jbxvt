@@ -16,6 +16,12 @@
 
 #include <stddef.h>
 
+//#define DEBUG_RESET
+#ifndef DEBUG_RESET
+#undef LOG
+#define LOG(...)
+#endif
+
 void dec_reset(Token * restrict token)
 {
 	LOG("handle_reset(%d)", token->arg[0]);

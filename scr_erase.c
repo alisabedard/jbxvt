@@ -15,6 +15,12 @@
 
 #include <string.h>
 
+//#define DEBUG_ERASE
+#ifndef DEBUG_ERASE
+#undef LOG
+#define LOG(...)
+#endif
+
 static void zero(const int16_t line, const uint16_t sz, const int16_t col)
 {
 	VTScreen * s = jbxvt.scr.current;

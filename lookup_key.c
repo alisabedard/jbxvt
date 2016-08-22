@@ -11,6 +11,12 @@
 // Not part of xcb (yet):
 #include <X11/keysym.h>
 
+//#define DEBUG_KEYS
+#ifndef DEBUG_KEYS
+#undef LOG
+#define LOG(...)
+#endif
+
 static bool lk_app_cur;		// cursor keys in app mode
 static bool lk_app_kp;		// app keypad keys set
 

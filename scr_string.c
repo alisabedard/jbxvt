@@ -227,8 +227,7 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 			--len;
 			++str;
 			continue;
-		} else if (unlikely(*str == 0xe2))
-			*str = '+';
+		}
 		if (s->wrap_next) {
 			wrap();
 			s->cursor.x = 0;
