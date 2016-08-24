@@ -48,7 +48,7 @@ static uint8_t find_c(uint8_t c, int16_t i)
     and do not lie within empty space.  */
 void fix_rc(xcb_point_t * restrict rc)
 {
-	const Size c = jbxvt.scr.chars;
+	const struct JBSize8 c = jbxvt.scr.chars;
 	if(!c.h || !c.w)
 		  return; // prevent segfault on bad window size.
 	rc->x = MAX(rc->x, 0);
@@ -73,7 +73,7 @@ void scr_efill(void)
 	// Move to cursor home in order for all characters to appear.
 	scr_move(0, 0, 0);
 	xcb_point_t p;
-	const Size c = jbxvt.scr.chars;
+	const struct JBSize8 c = jbxvt.scr.chars;
 	for (p.y = c.height - 1; p.y >= 0; --p.y)
 		  for (p.x = c.width - 1; p.x >= 0; --p.x)
 			    epos(p);

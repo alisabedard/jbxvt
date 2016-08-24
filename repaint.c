@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define FSZ jbxvt.X.f.size
+
 /* Display the string using the rendition vector
    at the screen coordinates.  */
 static void paint_rvec_text(uint8_t * str, uint32_t * rvec,
@@ -31,7 +33,7 @@ static void paint_rvec_text(uint8_t * str, uint32_t * rvec,
 		// draw
 		paint_rval_text(str, r, i, p);
 		// advance to next block
-		p.x += i * jbxvt.X.f.size.width;
+		p.x += i * FSZ.width;
 		str += i;
 		rvec += i;
 		len -= i;
@@ -43,19 +45,18 @@ static int_fast32_t repaint_generic(xcb_point_t p,
 	const int_fast32_t c2, uint8_t * restrict str,
 	uint32_t * rend)
 {
-	const Size f = jbxvt.X.f.size;
 	// check inputs:
 	if (!str || !m)
-		  return p.y + f.height;
+		  return p.y + FSZ.height;
 	if (rend && c1 <= jbxvt.scr.chars.width)
 		paint_rvec_text(str, rend + c1, m, p);
 	else
 		paint_rval_text(str, 0, m, p);
-	p.x += m * f.width;
-	const uint16_t width = (c2 - c1 + 1 - m) * f.width;
+	p.x += m * FSZ.width;
+	const uint16_t width = (c2 - c1 + 1 - m) * FSZ.width;
 	xcb_clear_area(jbxvt.X.xcb, false, jbxvt.X.win.vt,
-		p.x, p.y, width, f.height);
-	return p.y + f.height;
+		p.x, p.y, width, FSZ.height);
+	return p.y + FSZ.height;
 }
 
 static int_fast16_t show_scroll_history(xcb_rectangle_t r,
@@ -79,8 +80,8 @@ void repaint(void)
 	const xcb_rectangle_t r = {.width = jbxvt.scr.chars.width,
 		.height = jbxvt.scr.chars.height};
 	xcb_point_t p = { .x = MARGIN + r.x
-		* jbxvt.X.f.size.width,
-		.y = MARGIN + r.y * jbxvt.X.f.size.height};
+		* FSZ.width,
+		.y = MARGIN + r.y * FSZ.height};
 	/* Allocate enough space to process each column, plus
 	 * wrap byte. */
 	uint8_t str[jbxvt.scr.chars.width + 1];

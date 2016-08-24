@@ -21,6 +21,7 @@
 #define S1 jbxvt.scr.s[1]
 #define P S.pixels
 #define X jbxvt.X
+#define FSZ X.f.size
 
 static void init_screen_elements(VTScreen * restrict scr,
 	uint8_t ** restrict text, uint32_t ** restrict rend)
@@ -33,12 +34,11 @@ static void init_screen_elements(VTScreen * restrict scr,
 }
 
 __attribute__((pure))
-static Size get_cdim(const Size d)
+static struct JBSize8 get_cdim(const struct JBSize16 d)
 {
-	const Size f = X.f.size;
 	// Take advantage of division rounding down for mod
-	return (Size) {.w = (d.w - MARGIN)/f.w,
-		.h = (d.h - MARGIN)/f.h};
+	return (struct JBSize8) {.w = (d.w - MARGIN)/FSZ.w,
+		.h = (d.h - MARGIN)/FSZ.h};
 }
 
 static void set(const uint8_t i, uint8_t ** t, uint32_t ** r)
@@ -67,7 +67,7 @@ static void init(void)
 	ALLOC(S1.wrap);
 }
 
-static inline void fix_margins(const Size c)
+static inline void fix_margins(const struct JBSize8 c)
 {
 	/* On screen resize, check if old margin was on the bottom line.
 	   If so, set the bottom margin to the new bottom line.  */
@@ -109,7 +109,7 @@ void scr_reset(void)
 {
 	LOG("scr_reset()");
 	decscnm();
-	Size c = get_cdim(P);
+	struct JBSize8 c = get_cdim(P);
 	fix_margins(c);
 	static bool created;
 	if (!created) {

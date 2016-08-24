@@ -2,11 +2,11 @@
 #define JBXVT_H
 
 #include "command.h"
+#include "libjb/size.h"
 #include "libjb/util.h"
 #include "libjb/xcb.h"
 #include "selection.h"
 #include "selend.h"
-#include "Size.h"
 #include "SLine.h"
 #include "VTScreen.h"
 #include "xeventst.h"
@@ -25,7 +25,7 @@ struct JBXVTXPixels {
 
 struct JBXVTFontData {
 	xcb_font_t normal, bold;
-	Size size;
+	struct JBSize8 size;
 	int8_t ascent;
 };
 
@@ -36,8 +36,8 @@ struct JBXVTXData {
 	struct JBXVTXWindows win;
 	struct JBXVTXGCs gc;
 	struct JBXVTXPixels color;
-	struct JBXVTFontData f;
-	Size window_size;
+	union { struct JBXVTFontData f, font; };
+	struct JBSize16 window_size;
 	int8_t screen_number;
 };
 
@@ -49,7 +49,8 @@ struct JBXVTScreenSLine {
 struct JBXVTScreenData {
 	VTScreen * current, * s;
 	struct JBXVTScreenSLine sline;
-	Size pixels, chars;
+	struct JBSize16 pixels;
+	struct JBSize8 chars;
 	uint32_t rstyle; // render style
 	uint32_t saved_rstyle; // saved render style
 	int16_t offset; // current vert saved line
@@ -119,7 +120,7 @@ struct JBXVTPrivateModes {
 
 struct JBXVTOptionData {
 	char *bg, *fg, *font, *bold_font, *display;
-	Size size;
+	struct JBSize8 size;
 	int8_t screen;
 	uint8_t elr; // DECELR
 	bool show_scrollbar;

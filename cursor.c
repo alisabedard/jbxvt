@@ -61,7 +61,7 @@ void draw_cursor(void)
 		repaint(); // prevent stale cursor blocks
 	xcb_point_t p = get_p(s->current->cursor);
 	struct JBXVTXData * X = &jbxvt.X;
-	const Size f = X->f.size;
+	const struct JBSize8 f = X->f.size;
 	xcb_rectangle_t r = {p.x, p.y, f.w, f.h};
 	switch (jbxvt.opt.cursor_attr) {
 	case 0: // blinking block

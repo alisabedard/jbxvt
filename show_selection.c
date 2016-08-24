@@ -14,7 +14,7 @@ static void paint_rvid(xcb_point_t start, xcb_point_t end,
 {
 	//  Paint in the revend.yse video:
 	for (int_fast16_t row = start.y; row <= end.y; ++row) {
-		const Size f = jbxvt.X.f.size;
+		const struct JBSize8 f = jbxvt.X.f.size;
 		const int16_t y = MARGIN + row * f.h;
 		const int16_t x1 = MARGIN + ((row == start.y)
 			? start.x : col1) * f.w;

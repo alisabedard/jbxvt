@@ -122,7 +122,7 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 		font(jbxvt.X.f.bold);
 	// Draw text with background:
 	const xcb_window_t w = jbxvt.X.win.vt;
-	const Size f = jbxvt.X.f.size;
+	const struct JBSize8 f = jbxvt.X.f.size;
 	if (jbxvt.mode.decdwl) {
 		for (int16_t i = 0; i < len; ++i) {
 			const char buf[2] = {str[i], ' '};

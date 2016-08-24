@@ -13,6 +13,8 @@
 
 #include <string.h>
 
+#define FSZ jbxvt.X.f.size
+
 static void copy_area(const int16_t * restrict x, const int16_t y,
 	const uint16_t width)
 {
@@ -25,9 +27,8 @@ static void copy_area(const int16_t * restrict x, const int16_t y,
 
 static void finalize(const xcb_point_t p, const int8_t count)
 {
-	const Size f = jbxvt.X.f.size;
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt,
-		p.x, p.y, count * f.w, f.h);
+		p.x, p.y, count * FSZ.w, FSZ.h);
 	jbxvt.scr.current->wrap_next = 0;
 	draw_cursor();
 }
@@ -59,11 +60,10 @@ void scr_insert_characters(int8_t count)
 	const xcb_point_t c = scr->cursor;
 	check_selection(c.y, c.y);
 	copy_lines(c.x, cw, count);
-	const Size f = jbxvt.X.f.size;
-	const xcb_point_t p = { .x = MARGIN + c.x * f.width,
-		.y = MARGIN + c.y * f.height };
-	const uint16_t width = (cw - count - c.x) * f.width;
-	copy_area((int16_t[]){p.x, p.x + count * f.width}, p.y, width);
+	const xcb_point_t p = { .x = MARGIN + c.x * FSZ.width,
+		.y = MARGIN + c.y * FSZ.height };
+	const uint16_t width = (cw - count - c.x) * FSZ.width;
+	copy_area((int16_t[]){p.x, p.x + count * FSZ.width}, p.y, width);
 	finalize(p, count);
 }
 
@@ -106,11 +106,10 @@ void scr_delete_characters(uint8_t count)
 	draw_cursor();
 	copy_data_after_count(count, c);
 	delete_source_data(count, c.y);
-	const Size f = jbxvt.X.f.size;
-	const int16_t y = MARGIN + c.y * f.height;
-	int16_t x[2] = {[1] = MARGIN + c.x * f.width};
-	x[0] = x[1] + count * f.w;
-	const uint16_t width = (end - count) * f.w;
+	const int16_t y = MARGIN + c.y * FSZ.height;
+	int16_t x[2] = {[1] = MARGIN + c.x * FSZ.width};
+	x[0] = x[1] + count * FSZ.w;
+	const uint16_t width = (end - count) * FSZ.w;
 	copy_area(x, y, width);
 	finalize((xcb_point_t){x[1] + width, y}, count);
 }

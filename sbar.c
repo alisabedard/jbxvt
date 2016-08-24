@@ -12,7 +12,7 @@
 #include <stdlib.h>
 
 static struct {
-	Size sz;
+	struct JBSize8 sz;
 	// most recent arguments to sbar_show:
 	int16_t last_low, last_high, last_length;
 } sbar = { .sz.width = SBAR_WIDTH, .last_length = 100, .last_high = 100 };
@@ -22,6 +22,11 @@ void sbar_reset(void)
 {
 	sbar.sz.height = jbxvt.scr.pixels.height;
 	sbar_show(sbar.last_length, sbar.last_low, sbar.last_high);
+}
+
+static int16_t get_sz(const int16_t lh, const uint16_t length)
+{
+	return sbar.sz.h - sbar.sz.h * lh / length;
 }
 
 /*  Redraw the scrollbar to show the area from low to high,
@@ -34,9 +39,8 @@ void sbar_show(uint16_t length, const int16_t low,
 	sbar.last_length = length;
 	sbar.last_low = low;
 	sbar.last_high = high;
-	const Size s = sbar.sz;
-	const int16_t top = s.h - s.h * high / length;
-	const int16_t bot = s.h - s.h * low / length;
+	const struct JBSize8 s = sbar.sz;
+	const int16_t top = get_sz(high, length), bot = get_sz(low, length);
 	const xcb_window_t sb = jbxvt.X.win.sb;
 	if (top > 0)
 		xcb_clear_area(jbxvt.X.xcb, false, sb, 0, 0, s.w, top - 1);
@@ -56,10 +60,10 @@ void change_offset(int16_t n)
 	if (n == jbxvt.scr.offset)
 		return;
 	jbxvt.scr.offset = n;
-	const Size c = jbxvt.scr.chars;
 	draw_cursor(); // clear
 	repaint();
 	draw_cursor(); // draw
-	sbar_show(c.h + t - 1, n, n + c.h - 1);
+#define C jbxvt.scr.chars
+	sbar_show(C.h + t - 1, n, n + C.h - 1);
 }
 

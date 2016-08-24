@@ -28,6 +28,11 @@
 
 static bool tab_stops[JBXVT_MAX_COLS];
 
+
+#define FSZ jbxvt.X.f.size
+#define CSZ jbxvt.scr.chars.width
+#define SCR jbxvt.scr.current
+
 // Set tab stops:
 // -1 clears all, -2 sets default
 void scr_set_tab(int16_t i, const bool value)
@@ -90,7 +95,7 @@ static void wrap(void)
 {
 	VTScreen * s = jbxvt.scr.current;
 	s->wrap_next = false;
-	const Size m = s->margin;
+	const struct JBSize16 m = s->margin;
 	int16_t * y = &s->cursor.y;
 	s->wrap[*y] = true;
 	if (*y >= m.b) {
@@ -106,20 +111,17 @@ static void wrap(void)
 static void handle_insert(const uint8_t n, const xcb_point_t p)
 {
 	SLOG("handle_insert(n=%d, p={%d, %d})", n, p.x, p.y);
-#define CHW jbxvt.scr.chars.width
-#define SCR jbxvt.scr.current
-#define FNT jbxvt.X.f.size
 	const xcb_point_t c = SCR->cursor;
 	uint8_t * restrict s = SCR->text[c.y];
 	uint32_t * restrict r = SCR->rend[c.y];
-	const uint16_t sz = CHW - c.x;
+	const uint16_t sz = CSZ - c.x;
 	memmove(s + c.x + n, s + c.x, sz);
 	memmove(r + c.x + n, r + c.x, sz << 2);
-	const uint16_t n_width = n * FNT.width;
-	const uint16_t width = sz * FNT.width - n_width;
+	const uint16_t n_width = n * FSZ.width;
+	const uint16_t width = sz * FSZ.width - n_width;
 	const int16_t x = p.x + n_width;
 	xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
-		jbxvt.X.gc.tx, p.x, p.y, x, p.y, width, FNT.height);
+		jbxvt.X.gc.tx, p.x, p.y, x, p.y, width, FSZ.height);
 }
 
 static uint_fast16_t find_n(uint8_t * restrict str)
@@ -156,12 +158,11 @@ static void parse_special_charset(uint8_t * restrict str, const uint8_t len)
 
 static inline xcb_point_t get_p(VTScreen * restrict c)
 {
-	const Size f = jbxvt.X.f.size;
-	return (xcb_point_t){.x = MARGIN + f.w * c->cursor.x,
-		.y = MARGIN + f.h * c->cursor.y};
+	return (xcb_point_t){.x = MARGIN + FSZ.w * c->cursor.x,
+		.y = MARGIN + FSZ.h * c->cursor.y};
 }
 
-static void fix_margins(Size * restrict m, const int16_t cursor_y)
+static void fix_margins(struct JBSize16* restrict m, const int16_t cursor_y)
 {
 	m->b = MAX(m->b, cursor_y);
 	const uint8_t h = jbxvt.scr.chars.height - 1;

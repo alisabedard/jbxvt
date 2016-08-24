@@ -9,6 +9,9 @@
 #include "screen.h"
 #include "show_selection.h"
 
+#define FSZ jbxvt.X.f.size
+#define CSZ jbxvt.scr.chars
+
 static void prop(const xcb_window_t win, const xcb_atom_t a)
 {
 	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE,
@@ -52,25 +55,22 @@ void scr_clear_selection(void)
 {
 	if (jbxvt.sel.text)
 		jbxvt.sel.length = 0;
-	const Size c = jbxvt.scr.chars;
-	show_selection(0, c.h - 1, 0, c.w - 1);
+	show_selection(0, CSZ.h - 1, 0, CSZ.w - 1);
 	jbxvt.sel.end[0].type = jbxvt.sel.end[1].type = NOSEL;
 }
 
 //  start a selection using the specified unit.
 void scr_start_selection(xcb_point_t p, enum selunit unit)
 {
-	const Size c = jbxvt.scr.chars;
-	const Size f = jbxvt.X.f.size;
-	show_selection(0, c.h - 1, 0, c.w - 1);
-	xcb_point_t rc = { .x = (p.x - MARGIN) / f.w,
-		.y = (p.y - MARGIN) / f.h};
+	show_selection(0, CSZ.h - 1, 0, CSZ.w - 1);
+	xcb_point_t rc = { .x = (p.x - MARGIN) / FSZ.w,
+		.y = (p.y - MARGIN) / FSZ.h};
 	jbxvt.sel.unit = unit;
 	fix_rc(&rc);
 	rc_to_selend(rc.y, rc.x, &jbxvt.sel.anchor);
 	jbxvt.sel.end[1] = jbxvt.sel.end[0] = jbxvt.sel.anchor;
 	adjust_selection(&jbxvt.sel.end[1]);
-	show_selection(0, c.h - 1, 0, c.w - 1);
+	show_selection(0, CSZ.h - 1, 0, CSZ.w - 1);
 }
 
 static int16_t row(SelEnd * restrict e)
@@ -90,8 +90,7 @@ void check_selection(const int16_t row1, const int16_t row2)
 		SWAP(int16_t, r1, r2);
 	if (row2 < r1 || row1 > r2)
 		return;
-	const Size c = jbxvt.scr.chars;
-	show_selection(0, c.h - 1, 0, c.w - 1);
+	show_selection(0, CSZ.h - 1, 0, CSZ.w - 1);
 	jbxvt.sel.end[1].type = NOSEL;
 }
 

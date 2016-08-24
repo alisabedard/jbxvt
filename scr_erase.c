@@ -84,29 +84,29 @@ void scr_erase_screen(const int8_t mode)
 	change_offset(0);
 	VTScreen * s = jbxvt.scr.current;
 	s->wrap_next = 0;
-	const Size c = jbxvt.scr.chars;
-	const uint8_t fh = jbxvt.X.f.size.height;
-	const Size p = jbxvt.scr.pixels;
+#define CSZ jbxvt.scr.chars
+#define PSZ jbxvt.scr.pixels
+#define FH jbxvt.X.f.size.height
 	xcb_rectangle_t r = {.x = MARGIN, .y = MARGIN,
-		.width = p.width};
+		.width = PSZ.width};
 	const xcb_point_t cur = s->cursor;
 	switch (mode) {
 	case 1:
 		LOG("START");
-		r.height = cur.y * fh;
+		r.height = cur.y * FH;
 		for (uint8_t i = 0; i < cur.y; ++i)
-			zero(i, c.w, 0);
+			zero(i, CSZ.w, 0);
 		common_scr_erase(r, 0, cur.y - 1, mode);
 		break;
 	case 0:
 		LOG("END");
 		if (cur.y || cur.x) {
 			const int16_t c1 = cur.y + 1;
-			r.y += c1 * fh;
-			r.height = (c.height - cur.y - 1) * fh;
-			for (uint8_t i = c1; i < c.height; ++i)
-				zero(i, c.w, 0);
-			common_scr_erase(r, c1, c.height - 1, mode);
+			r.y += c1 * FH;
+			r.height = (CSZ.height - cur.y - 1) * FH;
+			for (uint8_t i = c1; i < CSZ.height; ++i)
+				zero(i, CSZ.w, 0);
+			common_scr_erase(r, c1, CSZ.height - 1, mode);
 			break;
 		}
 		/*  If we are positioned at the top left hand corner then
@@ -116,7 +116,7 @@ void scr_erase_screen(const int8_t mode)
 	case 2:
 	case 3: // for linux console compatibility
 		LOG("ENTIRE");
-		r.height = c.h - 1;
+		r.height = CSZ.h - 1;
 		scroll(0, r.height, r.height);
 		common_scr_erase(r, 0, r.height, mode);
 	}
