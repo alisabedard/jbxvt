@@ -21,13 +21,13 @@ static void handle_drag(const int16_t row, const int16_t col)
 }
 
 //  Extend the selection.
-void scr_extend_selection(const xcb_point_t p, const bool drag)
+void scr_extend_selection(const struct JBDim p, const bool drag)
 {
 	SelEnd * e = jbxvt.sel.end;
 	if (e->type == NOSEL)
 		return;
 #define F jbxvt.X.f.size
-	xcb_point_t rc = { .x = (p.x - MARGIN) / F.w,
+	struct JBDim rc = { .x = (p.x - MARGIN) / F.w,
 		.y = (p.y - MARGIN) / F.h};
 	fix_rc(&rc);
 	// Save current end points:

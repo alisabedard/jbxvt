@@ -43,7 +43,7 @@ void scr_erase_line(const int8_t mode)
 	LOG("scr_erase_line(%d)", mode);
 	change_offset(0);
 	VTScreen * scr = jbxvt.scr.current;
-	xcb_point_t c = scr->cursor;
+	struct JBDim c = scr->cursor;
 	const uint8_t fh = jbxvt.X.f.size.height;
 	xcb_rectangle_t g = { .y = MARGIN + c.y * fh };
 	const uint8_t cw = jbxvt.scr.chars.width;
@@ -89,7 +89,7 @@ void scr_erase_screen(const int8_t mode)
 #define FH jbxvt.X.f.size.height
 	xcb_rectangle_t r = {.x = MARGIN, .y = MARGIN,
 		.width = PSZ.width};
-	const xcb_point_t cur = s->cursor;
+	const struct JBDim cur = s->cursor;
 	switch (mode) {
 	case 1:
 		LOG("START");

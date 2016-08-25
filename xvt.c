@@ -51,7 +51,7 @@ static void handle_txtpar(Token * restrict token)
 
 static void form_feed(void)
 {
-	const struct JBSize16 m = jbxvt.scr.current->margin;
+	const struct JBDim m = jbxvt.scr.current->margin;
 	scr_move(0, m.top, 0);
 	if (jbxvt.mode.decpff)
 		cprintf("FF");
@@ -153,7 +153,7 @@ static void handle_dsr(const int16_t arg)
 {
 	switch (arg) {
 	case 6 : {
-		const xcb_point_t c = jbxvt.scr.current->cursor;
+		const struct JBDim c = jbxvt.scr.current->cursor;
 		cprintf("\033[%d;%dR", c.y + 1, c.x + 1);
 		break;
 	}
@@ -414,19 +414,24 @@ static void parse_token(void)
 		break;
 
 	CASE(TK_SELSTART)
-		scr_start_selection((xcb_point_t){t[0], t[1]}, SEL_CHAR);
+		scr_start_selection((struct JBDim){.x = t[0], .y = t[1]},
+			SEL_CHAR);
 		break;
 	CASE(TK_SELEXTND)
-		scr_extend_selection((xcb_point_t){t[0], t[1]}, false);
+		scr_extend_selection((struct JBDim){.x = t[0], .y = t[1]},
+			false);
 		break;
 	CASE(TK_SELDRAG)
-		scr_extend_selection((xcb_point_t){t[0], t[1]}, true);
+		scr_extend_selection((struct JBDim){.x = t[0], .y = t[1]},
+			true);
 		break;
 	CASE(TK_SELWORD)
-		scr_start_selection((xcb_point_t){t[0], t[1]}, SEL_WORD);
+		scr_start_selection((struct JBDim){.x = t[0], .y = t[1]},
+			SEL_WORD);
 		break;
 	CASE(TK_SELLINE)
-		scr_start_selection((xcb_point_t){t[0], t[1]}, SEL_LINE);
+		scr_start_selection((struct JBDim){.x = t[0], .y = t[1]},
+			SEL_LINE);
 		break;
 	CASE(TK_SELECT)
 		scr_make_selection();

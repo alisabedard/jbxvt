@@ -5,10 +5,10 @@
 #ifndef JBXVT_SELEX_H
 #define JBXVT_SELEX_H
 
+#include "libjb/size.h"
 #include <stdbool.h>
-#include <xcb/xcb.h>
 
-void scr_extend_selection(const xcb_point_t p, const bool drag);
+void scr_extend_selection(const struct JBDim p, const bool drag);
 
 #endif//!JBXVT_SELEX_H
 

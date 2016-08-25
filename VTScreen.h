@@ -16,8 +16,8 @@ typedef struct {
 	uint8_t **text;		// backup copy of text
 	uint32_t **rend;	// rendition styles
 	bool * wrap;		// wrap flags
-	struct JBSize16 margin;	// scroll margins, top and bottom
-	xcb_point_t cursor;	// cursor position, row and column
+	struct JBDim margin;	// scroll margins, top and bottom
+	struct JBDim cursor;	// cursor position, row and column
 	bool wrap_next:1;	// wrap before the next printed character
 	bool decpm:1;		// privacy message
 	bool cursor_visible:1;

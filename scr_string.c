@@ -53,7 +53,7 @@ void scr_tab(void)
 	change_offset(0);
 	VTScreen * s = jbxvt.scr.current;
 	const uint8_t w = jbxvt.scr.chars.width - 1;
-	xcb_point_t c = s->cursor;
+	struct JBDim c = s->cursor;
 	s->text[c.y][c.x] = '0';
 	while (!tab_stops[++c.x] && c.x < w);
 	s->cursor.x = c.x;
@@ -95,7 +95,7 @@ static void wrap(void)
 {
 	VTScreen * s = jbxvt.scr.current;
 	s->wrap_next = false;
-	const struct JBSize16 m = s->margin;
+	const struct JBDim m = s->margin;
 	int16_t * y = &s->cursor.y;
 	s->wrap[*y] = true;
 	if (*y >= m.b) {
@@ -108,10 +108,10 @@ static void wrap(void)
 #if defined(__i386__) || defined(__amd64__)
        __attribute__((regparm(2)))
 #endif//x86
-static void handle_insert(const uint8_t n, const xcb_point_t p)
+static void handle_insert(const uint8_t n, const struct JBDim p)
 {
 	SLOG("handle_insert(n=%d, p={%d, %d})", n, p.x, p.y);
-	const xcb_point_t c = SCR->cursor;
+	const struct JBDim c = SCR->cursor;
 	uint8_t * restrict s = SCR->text[c.y];
 	uint32_t * restrict r = SCR->rend[c.y];
 	const uint16_t sz = CSZ - c.x;
@@ -156,13 +156,7 @@ static void parse_special_charset(uint8_t * restrict str, const uint8_t len)
 	}
 }
 
-static inline xcb_point_t get_p(VTScreen * restrict c)
-{
-	return (xcb_point_t){.x = MARGIN + FSZ.w * c->cursor.x,
-		.y = MARGIN + FSZ.h * c->cursor.y};
-}
-
-static void fix_margins(struct JBSize16* restrict m, const int16_t cursor_y)
+static void fix_margins(struct JBDim* restrict m, const int16_t cursor_y)
 {
 	m->b = MAX(m->b, cursor_y);
 	const uint8_t h = jbxvt.scr.chars.height - 1;
@@ -219,7 +213,7 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 	draw_cursor();
 	if (nlcount > 0)
 		  handle_new_lines(nlcount);
-	xcb_point_t p;
+	struct JBDim p;
 	VTScreen * restrict s = jbxvt.scr.current;
 	fix_cursor(&jbxvt.scr.s[0]);
 	fix_cursor(&jbxvt.scr.s[1]);
@@ -234,7 +228,7 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 			s->cursor.x = 0;
 		}
 		check_selection(s->cursor.y, s->cursor.y);
-		p = get_p(s);
+		p = get_p(s->cursor);
 		const int_fast16_t n = find_n(str);
 		if (unlikely(jbxvt.mode.insert))
 			handle_insert(n, p);

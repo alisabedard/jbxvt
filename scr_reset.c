@@ -10,6 +10,7 @@
 #include "repaint.h"
 #include "sbar.h"
 #include "scr_move.h"
+#include "screen.h"
 #include "scroll.h"
 
 #include <gc.h>
@@ -31,14 +32,6 @@ static void init_screen_elements(VTScreen * restrict scr,
 	scr->rend = rend;
 	scr->text = text;
 	scr->margin.top = 0;
-}
-
-__attribute__((pure))
-static struct JBSize8 get_cdim(const struct JBSize16 d)
-{
-	// Take advantage of division rounding down for mod
-	return (struct JBSize8) {.w = (d.w - MARGIN)/FSZ.w,
-		.h = (d.h - MARGIN)/FSZ.h};
 }
 
 static void set(const uint8_t i, uint8_t ** t, uint32_t ** r)
@@ -67,7 +60,7 @@ static void init(void)
 	ALLOC(S1.wrap);
 }
 
-static inline void fix_margins(const struct JBSize8 c)
+static inline void fix_margins(const struct JBDim c)
 {
 	/* On screen resize, check if old margin was on the bottom line.
 	   If so, set the bottom margin to the new bottom line.  */
@@ -109,7 +102,7 @@ void scr_reset(void)
 {
 	LOG("scr_reset()");
 	decscnm();
-	struct JBSize8 c = get_cdim(P);
+	struct JBDim c = get_c(P);
 	fix_margins(c);
 	static bool created;
 	if (!created) {
@@ -126,7 +119,7 @@ void scr_reset(void)
 	}
 	init_screen_elements(&S.s[0], s0, r0);
 	init_screen_elements(&S.s[1], s1, r1);
-	scr_start_selection((xcb_point_t){}, SEL_CHAR);
+	scr_start_selection((struct JBDim){}, SEL_CHAR);
 	// Constrain dimensions:
 	c.w = MIN(c.w, JBXVT_MAX_COLS);
 	c.h = MIN(c.h, JBXVT_MAX_ROWS);

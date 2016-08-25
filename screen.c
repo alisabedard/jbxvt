@@ -4,6 +4,7 @@
 
 #include "screen.h"
 
+#include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
@@ -15,6 +16,23 @@
 #include "scroll.h"
 
 #include <gc.h>
+
+#define X jbxvt.X
+#define FSZ X.f.size
+
+struct JBDim get_c(struct JBDim p)
+{
+	p.w = (p.w - MARGIN) / FSZ.w;
+	p.h = (p.h - MARGIN) / FSZ.h;
+	return p;
+}
+
+struct JBDim get_p(struct JBDim c)
+{
+	c.w = MARGIN + c.w * FSZ.w;
+	c.h = MARGIN + c.h * FSZ.h;
+	return c;
+}
 
 #if defined(__i386__) || defined(__amd64__)
 __attribute__((regparm(2)))
@@ -46,9 +64,9 @@ static uint8_t find_c(uint8_t c, int16_t i)
 
 /*  Fix the coordinates so that they are within the screen
     and do not lie within empty space.  */
-void fix_rc(xcb_point_t * restrict rc)
+void fix_rc(struct JBDim * restrict rc)
 {
-	const struct JBSize8 c = jbxvt.scr.chars;
+	const struct JBDim c = jbxvt.scr.chars;
 	if(!c.h || !c.w)
 		  return; // prevent segfault on bad window size.
 	rc->x = MAX(rc->x, 0);
@@ -59,7 +77,7 @@ void fix_rc(xcb_point_t * restrict rc)
 }
 
 // Renderless 'E' at position:
-static void epos(const xcb_point_t p)
+static void epos(const struct JBDim p)
 {
 	VTScreen * restrict s = jbxvt.scr.current;
 	s->text[p.y][p.x] = 'E';
@@ -72,8 +90,8 @@ void scr_efill(void)
 	LOG("scr_efill");
 	// Move to cursor home in order for all characters to appear.
 	scr_move(0, 0, 0);
-	xcb_point_t p;
-	const struct JBSize8 c = jbxvt.scr.chars;
+	struct JBDim p;
+	const struct JBDim c = jbxvt.scr.chars;
 	for (p.y = c.height - 1; p.y >= 0; --p.y)
 		  for (p.x = c.width - 1; p.x >= 0; --p.x)
 			    epos(p);

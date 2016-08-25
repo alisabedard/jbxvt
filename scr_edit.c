@@ -25,7 +25,7 @@ static void copy_area(const int16_t * restrict x, const int16_t y,
 		x[1], y, width, jbxvt.X.f.size.height);
 }
 
-static void finalize(const xcb_point_t p, const int8_t count)
+static void finalize(const struct JBDim p, const int8_t count)
 {
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt,
 		p.x, p.y, count * FSZ.w, FSZ.h);
@@ -37,7 +37,7 @@ static void copy_lines(const int16_t x, const uint8_t cw,
 	const int8_t count)
 {
 	VTScreen * restrict scr = jbxvt.scr.current;
-	const xcb_point_t c = scr->cursor;
+	const struct JBDim c = scr->cursor;
 	uint8_t * s = scr->text[c.y];
 	uint32_t * r = scr->rend[c.y];
 
@@ -57,17 +57,16 @@ void scr_insert_characters(int8_t count)
 	change_offset(0);
 	draw_cursor();
 	VTScreen * restrict scr = jbxvt.scr.current;
-	const xcb_point_t c = scr->cursor;
+	const struct JBDim c = scr->cursor;
 	check_selection(c.y, c.y);
 	copy_lines(c.x, cw, count);
-	const xcb_point_t p = { .x = MARGIN + c.x * FSZ.width,
-		.y = MARGIN + c.y * FSZ.height };
+	const struct JBDim p = get_p(c);
 	const uint16_t width = (cw - count - c.x) * FSZ.width;
 	copy_area((int16_t[]){p.x, p.x + count * FSZ.width}, p.y, width);
 	finalize(p, count);
 }
 
-static void copy_data_after_count(const uint8_t count, const xcb_point_t c)
+static void copy_data_after_count(const uint8_t count, const struct JBDim c)
 {
 	// copy the data after count
 	const uint16_t offset = c.x + count;
@@ -97,7 +96,7 @@ void scr_delete_characters(uint8_t count)
 	LOG("scr_delete_characters(%d)", count);
 	const uint8_t scw = jbxvt.scr.chars.width;
 	VTScreen * scr = jbxvt.scr.current;
-	const xcb_point_t c = scr->cursor;
+	const struct JBDim c = scr->cursor;
 	const uint8_t end = scw - c.x;
 	count = MIN(count, end); // keep within the screen
 	if(!count)
@@ -106,11 +105,10 @@ void scr_delete_characters(uint8_t count)
 	draw_cursor();
 	copy_data_after_count(count, c);
 	delete_source_data(count, c.y);
-	const int16_t y = MARGIN + c.y * FSZ.height;
-	int16_t x[2] = {[1] = MARGIN + c.x * FSZ.width};
-	x[0] = x[1] + count * FSZ.w;
+	const struct JBDim psz = get_p(c);
+	const int16_t x[] = {psz.w, psz.w + count * FSZ.w};
 	const uint16_t width = (end - count) * FSZ.w;
-	copy_area(x, y, width);
-	finalize((xcb_point_t){x[1] + width, y}, count);
+	copy_area(x, psz.height, width);
+	finalize((struct JBDim){.w = x[1] + width, .h = psz.height}, count);
 }
 

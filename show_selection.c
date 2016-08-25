@@ -9,12 +9,12 @@
 #include "selend.h"
 #include "selection.h"
 
-static void paint_rvid(xcb_point_t start, xcb_point_t end,
+static void paint_rvid(struct JBDim start, struct JBDim end,
 	int16_t col1, int16_t col2)
 {
 	//  Paint in the revend.yse video:
 	for (int_fast16_t row = start.y; row <= end.y; ++row) {
-		const struct JBSize8 f = jbxvt.X.f.size;
+		const struct JBDim f = jbxvt.X.f.size;
 		const int16_t y = MARGIN + row * f.h;
 		const int16_t x1 = MARGIN + ((row == start.y)
 			? start.x : col1) * f.w;
@@ -39,12 +39,12 @@ void show_selection(int16_t row1, int16_t row2, int16_t col1, int16_t col2)
 		return;
 	if (selcmp(&jbxvt.sel.end[0],&jbxvt.sel.end[1]) == 0)
 		return;
-	xcb_point_t p1, p2;
+	struct JBDim p1, p2;
 	selend_to_rc(&p1.y, &p1.x, &jbxvt.sel.end[0]);
 	selend_to_rc(&p2.y, &p2.x, &jbxvt.sel.end[1]);
 	++col2;
 	//  Obtain initial and final endpoints for the selection.
-	xcb_point_t s, e; // start and end
+	struct JBDim s, e; // start and end
 	if (p1.y < p2.y || (p1.y == p2.y && p1.x <= p2.x)) {
 		s = p1;
 		e = p2;

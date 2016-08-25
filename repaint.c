@@ -18,7 +18,7 @@
 /* Display the string using the rendition vector
    at the screen coordinates.  */
 static void paint_rvec_text(uint8_t * str, uint32_t * rvec,
-	int16_t len, xcb_point_t p)
+	int16_t len, struct JBDim p)
 {
 	if (!rvec || !str)
 		  return;
@@ -40,7 +40,7 @@ static void paint_rvec_text(uint8_t * str, uint32_t * rvec,
 	}
 }
 
-static int_fast32_t repaint_generic(xcb_point_t p,
+static int_fast32_t repaint_generic(struct JBDim p,
 	int_fast16_t m, const int_fast32_t c1,
 	const int_fast32_t c2, uint8_t * restrict str,
 	uint32_t * rend)
@@ -60,7 +60,7 @@ static int_fast32_t repaint_generic(xcb_point_t p,
 }
 
 static int_fast16_t show_scroll_history(xcb_rectangle_t r,
-	xcb_point_t * restrict p)
+	struct JBDim * restrict p)
 {
 	int_fast16_t line = r.y;
 	for (int_fast16_t i = jbxvt.scr.offset - r.y - 1;
@@ -79,7 +79,7 @@ void repaint(void)
 {
 	const xcb_rectangle_t r = {.width = jbxvt.scr.chars.width,
 		.height = jbxvt.scr.chars.height};
-	xcb_point_t p = { .x = MARGIN + r.x
+	struct JBDim p = { .x = MARGIN + r.x
 		* FSZ.width,
 		.y = MARGIN + r.y * FSZ.height};
 	/* Allocate enough space to process each column, plus

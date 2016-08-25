@@ -25,7 +25,7 @@ struct JBXVTXPixels {
 
 struct JBXVTFontData {
 	xcb_font_t normal, bold;
-	struct JBSize8 size;
+	struct JBDim size;
 	int8_t ascent;
 };
 
@@ -37,7 +37,7 @@ struct JBXVTXData {
 	struct JBXVTXGCs gc;
 	struct JBXVTXPixels color;
 	union { struct JBXVTFontData f, font; };
-	struct JBSize16 window_size;
+	struct JBDim window_size;
 	int8_t screen_number;
 };
 
@@ -49,8 +49,8 @@ struct JBXVTScreenSLine {
 struct JBXVTScreenData {
 	VTScreen * current, * s;
 	struct JBXVTScreenSLine sline;
-	struct JBSize16 pixels;
-	struct JBSize8 chars;
+	struct JBDim pixels;
+	struct JBDim chars;
 	uint32_t rstyle; // render style
 	uint32_t saved_rstyle; // saved render style
 	int16_t offset; // current vert saved line
@@ -120,7 +120,7 @@ struct JBXVTPrivateModes {
 
 struct JBXVTOptionData {
 	char *bg, *fg, *font, *bold_font, *display;
-	struct JBSize8 size;
+	struct JBDim size;
 	int8_t screen;
 	uint8_t elr; // DECELR
 	bool show_scrollbar;

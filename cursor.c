@@ -10,7 +10,7 @@
 #include "screen.h"
 
 static uint32_t saved_style;
-static xcb_point_t saved_cursor;
+static struct JBDim saved_cursor;
 
 void save_cursor(void)
 {
@@ -26,15 +26,6 @@ void restore_cursor(void)
 	s->current->cursor = saved_cursor;
 	s->rstyle = saved_style;
 	draw_cursor();
-}
-
-static xcb_point_t get_p(xcb_point_t p)
-{
-	p.x *= jbxvt.X.f.size.width;
-	p.y *= jbxvt.X.f.size.height;
-	p.x += MARGIN;
-	p.y += MARGIN;
-	return p;
 }
 
 static bool is_blinking(void)
@@ -59,9 +50,9 @@ void draw_cursor(void)
 		return;
 	if ((current->cursor_visible ^= true) && is_blinking())
 		repaint(); // prevent stale cursor blocks
-	xcb_point_t p = get_p(s->current->cursor);
+	struct JBDim p = get_p(s->current->cursor);
 	struct JBXVTXData * X = &jbxvt.X;
-	const struct JBSize8 f = X->f.size;
+	const struct JBDim f = X->f.size;
 	xcb_rectangle_t r = {p.x, p.y, f.w, f.h};
 	switch (jbxvt.opt.cursor_attr) {
 	case 0: // blinking block

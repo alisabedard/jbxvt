@@ -4,6 +4,7 @@
 #ifndef JBXVT_SELECTION_H
 #define JBXVT_SELECTION_H
 
+#include "libjb/size.h"
 #include <xcb/xcb.h>
 
 //  The current selection unit
@@ -24,6 +25,6 @@ void scr_send_selection(const xcb_time_t time, const uint32_t requestor,
 	const uint32_t target, const uint32_t property);
 
 // start selection using specified unit:
-void scr_start_selection(const xcb_point_t p, enum selunit unit);
+void scr_start_selection(const struct JBDim p, enum selunit unit);
 
 #endif//!JBXVT_SELECTION_H

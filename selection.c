@@ -60,11 +60,10 @@ void scr_clear_selection(void)
 }
 
 //  start a selection using the specified unit.
-void scr_start_selection(xcb_point_t p, enum selunit unit)
+void scr_start_selection(struct JBDim p, enum selunit unit)
 {
 	show_selection(0, CSZ.h - 1, 0, CSZ.w - 1);
-	xcb_point_t rc = { .x = (p.x - MARGIN) / FSZ.w,
-		.y = (p.y - MARGIN) / FSZ.h};
+	struct JBDim rc = get_c(p);
 	jbxvt.sel.unit = unit;
 	fix_rc(&rc);
 	rc_to_selend(rc.y, rc.x, &jbxvt.sel.anchor);

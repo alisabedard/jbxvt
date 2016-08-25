@@ -57,7 +57,7 @@ static void setup_font(void)
 	xcb_query_font_reply_t * r = xcb_query_font_reply(jbxvt.X.xcb,
 		qfc, NULL);
 	f->ascent = r->font_ascent;
-	struct JBSize8 * s = &f->size;
+	struct JBDim * s = &f->size;
 	s->width = r->max_bounds.character_width;
 	s->height = r->font_ascent + r->font_descent;
 	free(r);
@@ -71,9 +71,9 @@ static void create_main_window(xcb_size_hints_t * restrict sh,
 		sh->x, sh->y, sh->width, sh->height, 0, 0, 0,
 		XCB_CW_EVENT_MASK,
 		(uint32_t[]){MW_EVENTS});
-	const struct JBSize8 f = jbxvt.X.f.size;
-	struct JBSize8 * c = &jbxvt.scr.chars;
-	struct JBSize16 * p = &jbxvt.scr.pixels;
+	const struct JBDim f = jbxvt.X.f.size;
+	struct JBDim * c = &jbxvt.scr.chars;
+	struct JBDim * p = &jbxvt.scr.pixels;
 	c->w = (p->w = sh->width) / f.w;
 	c->h = (p->h = sh->height) / f.h;
 }
@@ -116,7 +116,7 @@ static void create_vt_window(xcb_size_hints_t * restrict sh)
 
 static void get_sizehints(xcb_size_hints_t * restrict s)
 {
-	const struct JBSize8 f = jbxvt.X.f.size;
+	const struct JBDim f = jbxvt.X.f.size;
 	*s = (xcb_size_hints_t) {
 		.flags = XCB_ICCCM_SIZE_HINT_US_SIZE
 			| XCB_ICCCM_SIZE_HINT_P_MIN_SIZE
