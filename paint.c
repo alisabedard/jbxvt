@@ -19,25 +19,25 @@
 
 // returns pixel value for specified color
 __attribute__((nonnull,pure))
-static inline pixel_t pixel(const char * restrict color)
+static pixel_t pixel(const char * restrict color)
 {
 	return jb_get_pixel(jbxvt.X.xcb, jbxvt.X.screen->default_colormap,
 		color);
 }
 
-static inline pixel_t set(pixel_t * restrict store,
+static pixel_t set(pixel_t * restrict store,
 	pixel_t (*func)(xcb_connection_t *,
 	const xcb_gc_t, const pixel_t), const pixel_t p)
 {
 	return *store = func(jbxvt.X.xcb, jbxvt.X.gc.tx, p);
 }
 
-static inline pixel_t fg(const pixel_t p)
+static pixel_t fg(const pixel_t p)
 {
 	return set(&jbxvt.X.color.current_fg, jb_set_fg, p);
 }
 
-static inline pixel_t bg(const pixel_t p)
+static pixel_t bg(const pixel_t p)
 {
 	return set(&jbxvt.X.color.current_bg, jb_set_bg, p);
 }
