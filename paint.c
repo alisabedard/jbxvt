@@ -42,14 +42,20 @@ static pixel_t bg(const pixel_t p)
 	return set(&jbxvt.X.color.current_bg, jb_set_bg, p);
 }
 
+static pixel_t set_x(const char * color, const pixel_t backup,
+	pixel_t (*func)(const pixel_t))
+{
+	return func(color ? pixel(color) : backup);
+}
+
 pixel_t set_fg(const char * color)
 {
-	return fg(color ? pixel(color) : jbxvt.X.color.fg);
+	return set_x(color, jbxvt.X.color.fg, &fg);
 }
 
 pixel_t set_bg(const char * color)
 {
-	return bg(color ? pixel(color) : jbxvt.X.color.bg);
+	return set_x(color, jbxvt.X.color.bg, &bg);
 }
 
 // 9-bit color
