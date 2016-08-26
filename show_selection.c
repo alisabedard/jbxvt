@@ -6,6 +6,7 @@
 
 #include "config.h"
 #include "jbxvt.h"
+#include "screen.h"
 #include "selend.h"
 #include "selection.h"
 
@@ -15,17 +16,16 @@ static void paint_rvid(struct JBDim start, struct JBDim end,
 	//  Paint in the revend.yse video:
 	for (int_fast16_t row = start.y; row <= end.y; ++row) {
 		const struct JBDim f = jbxvt.X.f.size;
-		const int16_t y = MARGIN + row * f.h;
-		const int16_t x1 = MARGIN + ((row == start.y)
-			? start.x : col1) * f.w;
-		const int16_t x2 = MARGIN + ((row == end.y)
-			? end.x : col2) * f.w;
-		if (x2 > x1) {
+		struct JBDim c = {.row = row, .col = row == start.y
+			? start.x : col1};
+		const struct JBDim p1 = get_p(c);
+		c.col = row == end.y ? end.x : col2;
+		const struct JBDim p2 = get_p(c);
+		if (p2.x > p1.x)
 			xcb_poly_fill_rectangle(jbxvt.X.xcb,
 				jbxvt.X.win.vt, jbxvt.X.gc.cu, 1,
-				&(xcb_rectangle_t){
-				x1, y, x2 - x1, f.h});
-		}
+				&(xcb_rectangle_t){p1.x, p1.y, p2.x - p1.x,
+				f.h});
 	}
 }
 
