@@ -5,6 +5,7 @@
 
 #include "config.h"
 #include "jbxvt.h"
+#include "libjb/log.h"
 #include "save_selection.h"
 #include "screen.h"
 #include "show_selection.h"
@@ -21,6 +22,7 @@ static void prop(const xcb_window_t win, const xcb_atom_t a)
 //  Make the selection currently delimited by the selection end markers.
 void scr_make_selection(void)
 {
+	LOG("scr_make_selection");
 	save_selection();
 	/* Set all properties which may possibly be requested.  */
 	const xcb_window_t v = jbxvt.X.win.vt;
@@ -33,6 +35,7 @@ void scr_make_selection(void)
 void scr_send_selection(const xcb_time_t time, const uint32_t requestor,
 	const uint32_t target, const uint32_t property)
 {
+	LOG("scr_send_selection");
 	// x events must be 32 bytes long:
 	xcb_selection_notify_event_t e = {
 		.response_type = XCB_SELECTION_NOTIFY,
@@ -53,6 +56,7 @@ void scr_send_selection(const xcb_time_t time, const uint32_t requestor,
 //  Clear the current selection.
 void scr_clear_selection(void)
 {
+	LOG("scr_clear_selection");
 	if (jbxvt.sel.text)
 		jbxvt.sel.length = 0;
 	show_selection(0, CSZ.h - 1, 0, CSZ.w - 1);
@@ -62,6 +66,7 @@ void scr_clear_selection(void)
 //  start a selection using the specified unit.
 void scr_start_selection(struct JBDim p, enum selunit unit)
 {
+	LOG("scr_start_selection");
 	show_selection(0, CSZ.h - 1, 0, CSZ.w - 1);
 	struct JBDim rc = get_c(p);
 	jbxvt.sel.unit = unit;

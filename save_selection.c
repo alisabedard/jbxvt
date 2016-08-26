@@ -79,6 +79,7 @@ static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
     and save it as the current saved selection. */
 void save_selection(void)
 {
+	LOG("save_selection");
 	/*  Set se1 and se2 to point to the first
 	    and second selection endpoints.  */
 	struct JBXVTSelectionData * s = &jbxvt.sel;
