@@ -54,25 +54,10 @@ static bool handle_color_encoding(const int32_t arg, const bool is_fg,
 		return true;
 	} else if (unlikely(*rgb_mode)) {
 		const uint8_t o = is_fg ? 0 : 9;
-		switch(rgb_count) {
-		case 0: // red
-			encode_rgb(arg, 12 + o);
-			LOG("red: %d", arg);
-			break;
-		case 1: // green
-			encode_rgb(arg, 9 + o);
-			LOG("green: %d", arg);
-			break;
-		case 2: // blue
-			encode_rgb(arg, 6 + o);
-			LOG("blue: %d", arg);
-			break;
-		}
+		encode_rgb(arg, 12 - rgb_count * 3 + o);
 		// exit mode after 3 colors
-		if (++rgb_count > 2) {
-			*rgb_mode = false;
-			rgb_count = 0;
-		}
+		if (++rgb_count > 2)
+			*rgb_mode = (rgb_count = 0);
 		return true;
 	}
 	return false;
