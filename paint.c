@@ -135,8 +135,8 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 		++p.y; // Padding for underline, use underline for italic
 		if (rval & RS_ULINE || unlikely(rval & RS_ITALIC)) {
 			xcb_poly_line(c, XCB_COORD_MODE_ORIGIN, w, gc, 2,
-				(struct xcb_point_t[]){(xcb_point_t){.x=p.x,
-				.y=p.y}, {p.x + len * f.w, p.y}});
+				(struct xcb_point_t[]){{p.x, p.y},
+				{p.x + len * f.w, p.y}});
 		}
 	}
 	if(bold) // restore font
