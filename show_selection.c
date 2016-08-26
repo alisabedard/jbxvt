@@ -39,15 +39,15 @@ void show_selection(int16_t row1, int16_t row2, int16_t col1, int16_t col2)
 		return;
 	if (selcmp(&jbxvt.sel.end[0],&jbxvt.sel.end[1]) == 0)
 		return;
-	struct JBDim p1, p2;
-	selend_to_rc(&p1.y, &p1.x, &jbxvt.sel.end[0]);
-	selend_to_rc(&p2.y, &p2.x, &jbxvt.sel.end[1]);
+	struct JBDim p[2];
+	selend_to_rc(&p->y, &p->x, &jbxvt.sel.end[0]);
+	selend_to_rc(&p[1].y, &p[1].x, &jbxvt.sel.end[1]);
 	++col2;
 	//  Obtain initial and final endpoints for the selection.
 	struct JBDim s, e; // start and end
-	const bool fwd = p1.y < p2.y || (p1.y == p2.y && p1.x <= p2.x);
-	s = fwd ? p1 : p2;
-	e = fwd ? p2 : p1;
+	const bool fwd = p->y < p[1].y || (p->y == p[1].y && p->x <= p[1].x);
+	s = p[fwd?0:1];
+	e = p[fwd?1:0];
 	if (s.y < row1) {
 		s.y = row1;
 		s.x = col1;
