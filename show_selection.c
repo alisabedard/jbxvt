@@ -29,6 +29,33 @@ static void paint_rvid(struct JBDim start, struct JBDim end,
 	}
 }
 
+static struct JBDim get_s(struct JBDim s, const struct JBDim rc)
+{
+	if (s.y < rc.row) {
+		s.y = rc.row;
+		s.x = rc.col;
+	}
+	if (s.x < rc.col)
+		s.x = rc.col;
+	return s;
+}
+
+static struct JBDim get_e(struct JBDim e, const struct JBDim rc)
+{
+	if (e.y > rc.row) {
+		e.y = rc.row;
+		e.x = rc.col;
+	}
+	if (e.x > rc.col)
+		e.x = rc.col;
+	return e;
+}
+
+static struct JBDim get_rc(const int16_t row, const int16_t col)
+{
+	return (struct JBDim){.r = row, .col = col};
+}
+
 /*  Paint any part of the selection that is
     between rows row1 and row2 inclusive
     and between cols col1 and col2 inclusive.  */
@@ -46,22 +73,10 @@ void show_selection(int16_t row1, int16_t row2, int16_t col1, int16_t col2)
 	//  Obtain initial and final endpoints for the selection.
 	struct JBDim s, e; // start and end
 	const bool fwd = p->y < p[1].y || (p->y == p[1].y && p->x <= p[1].x);
-	s = p[fwd?0:1];
-	e = p[fwd?1:0];
-	if (s.y < row1) {
-		s.y = row1;
-		s.x = col1;
-	}
-	if (s.x < col1)
-		s.x = col1;
-	if (e.y > row2) {
-		e.y = row2;
-		e.x = col2;
-	}
+	s = get_s(p[fwd?0:1], get_rc(row1, col1));
+	e = get_e(p[fwd?1:0], get_rc(row2, col2));
 	if (s.y > e.y)
 		return;
-	if (e.x > col2)
-		e.x = col2;
 	paint_rvid(s, e, col1, col2);
 }
 
