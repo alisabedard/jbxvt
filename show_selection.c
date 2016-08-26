@@ -45,13 +45,9 @@ void show_selection(int16_t row1, int16_t row2, int16_t col1, int16_t col2)
 	++col2;
 	//  Obtain initial and final endpoints for the selection.
 	struct JBDim s, e; // start and end
-	if (p1.y < p2.y || (p1.y == p2.y && p1.x <= p2.x)) {
-		s = p1;
-		e = p2;
-	} else {
-		s = p2;
-		e = p1;
-	}
+	const bool fwd = p1.y < p2.y || (p1.y == p2.y && p1.x <= p2.x);
+	s = fwd ? p1 : p2;
+	e = fwd ? p2 : p1;
 	if (s.y < row1) {
 		s.y = row1;
 		s.x = col1;
