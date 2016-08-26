@@ -362,7 +362,6 @@ static void parse_token(void)
 		scr_index_from(n, s->margin.t);
 		break;
 
-
 	CASE(TK_RESIZE)
 		size_set = false;
 		resize_window();
@@ -373,12 +372,10 @@ static void parse_token(void)
 	CASE(TK_S8C1T) // 8-bit controls
 		jbxvt.mode.s8c1t = true;
 		break;
-
 	CASE(TK_SAVEPM) // Save private modes
 		memcpy(&jbxvt.saved_mode, &jbxvt.mode,
 			sizeof(struct JBXVTPrivateModes));
-
-
+		break;
 	CASE(TK_SBSWITCH)
 		switch_scrollbar();
 		break;
