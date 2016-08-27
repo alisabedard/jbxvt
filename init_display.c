@@ -10,6 +10,7 @@
 #include "libjb/xcb.h"
 #include "paint.h"
 #include "sbar.h"
+#include "screen.h"
 #include "xsetup.h"
 
 #include <stdlib.h>
@@ -17,14 +18,13 @@
 #include <xcb/xcb_icccm.h>
 #include <X11/cursorfont.h>
 
+#define FSZ jbxvt.X.f.size
+
+#define E(n) XCB_EVENT_MASK_##n
+#define EB(n) XCB_EVENT_MASK_BUTTON_##n
 enum EventMasks {
-	MW_EVENTS = (XCB_EVENT_MASK_KEY_PRESS
-		| XCB_EVENT_MASK_FOCUS_CHANGE
-		| XCB_EVENT_MASK_STRUCTURE_NOTIFY),
-	SUB_EVENTS = (XCB_EVENT_MASK_EXPOSURE
-		| XCB_EVENT_MASK_BUTTON_PRESS
-		| XCB_EVENT_MASK_BUTTON_RELEASE
-		| XCB_EVENT_MASK_BUTTON_MOTION)
+	MW_EVENTS = E(KEY_PRESS) | E(FOCUS_CHANGE) | E(STRUCTURE_NOTIFY),
+	SUB_EVENTS = E(EXPOSURE) | EB(PRESS) | EB(RELEASE) | EB(MOTION)
 };
 
 static xcb_font_t get_font(const char * name)
@@ -71,11 +71,11 @@ static void create_main_window(xcb_size_hints_t * restrict sh,
 		sh->x, sh->y, sh->width, sh->height, 0, 0, 0,
 		XCB_CW_EVENT_MASK,
 		(uint32_t[]){MW_EVENTS});
-	const struct JBDim f = jbxvt.X.f.size;
-	struct JBDim * c = &jbxvt.scr.chars;
-	struct JBDim * p = &jbxvt.scr.pixels;
-	c->w = (p->w = sh->width) / f.w;
-	c->h = (p->h = sh->height) / f.h;
+#define PSZ jbxvt.scr.pixels
+#define CSZ jbxvt.scr.chars
+	PSZ.w = sh->width;
+	PSZ.h = sh->height;
+	CSZ = get_c(PSZ);
 }
 
 static xcb_cursor_t get_cursor(const uint16_t id,
@@ -116,14 +116,14 @@ static void create_vt_window(xcb_size_hints_t * restrict sh)
 
 static void get_sizehints(xcb_size_hints_t * restrict s)
 {
-	const struct JBDim f = jbxvt.X.f.size;
+	const struct JBDim f = FSZ;
+	const struct JBDim p = get_p(jbxvt.opt.size);
+
 	*s = (xcb_size_hints_t) {
-		.flags = XCB_ICCCM_SIZE_HINT_US_SIZE
-			| XCB_ICCCM_SIZE_HINT_P_MIN_SIZE
-			| XCB_ICCCM_SIZE_HINT_P_RESIZE_INC
-			| XCB_ICCCM_SIZE_HINT_BASE_SIZE,
-		.width = (2 + jbxvt.opt.size.width) * f.w, // Make 80
-		.height = (1 + jbxvt.opt.size.height) * f.h, // Make 24
+#define SH(n) XCB_ICCCM_SIZE_HINT_##n
+		.flags = SH(US_SIZE) | SH(P_MIN_SIZE) | SH(P_RESIZE_INC)
+			| SH(BASE_SIZE),
+		.width = p.w, .height = p.h,
 		.width_inc = f.w,
 		.height_inc = f.h,
 		.base_width = f.w,
