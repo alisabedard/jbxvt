@@ -32,6 +32,7 @@ static void cfg(const xcb_window_t win, const struct JBDim sz)
 	xcb_configure_window(jbxvt.X.xcb, win, RSZ_VM,
 		(uint32_t[]){sz.w, sz.h});
 }
+#undef RSZ_VM
 
 static int16_t resize_with_scrollbar(xcb_get_geometry_reply_t * r)
 {
@@ -47,7 +48,6 @@ static int16_t resize_without_scrollbar(xcb_get_geometry_reply_t * r)
 	cfg(jbxvt.X.win.vt, (struct JBDim){.w = r->width, .h = r->height});
 	return r->width;
 }
-#undef RSZ_VM
 
 /*  Called after a possible window size change.  If the window size has changed
  *  initiate a redraw by resizing the subwindows. */
@@ -67,7 +67,7 @@ void resize_window(void)
 	ws->h = r->height;
 	jbxvt.scr.pixels.w = (jbxvt.opt.show_scrollbar
 		? &resize_with_scrollbar : &resize_without_scrollbar)(r);
-	jbxvt.scr.pixels.h = r->height;
+	jbxvt.scr.pixels.h = r->height - MARGIN;
 	free(r);
 }
 
@@ -95,9 +95,9 @@ void switch_scrollbar(void)
 // Change window or icon name:
 void change_name(uint8_t * restrict str, const bool icon)
 {
+#define XA(n) XCB_ATOM_##n
 	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE,
-		jbxvt.X.win.main, icon ? XCB_ATOM_WM_ICON_NAME
-		: XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8, strlen((char*)str),
-		str);
+		jbxvt.X.win.main, icon ? XA(WM_ICON_NAME) : XA(WM_NAME),
+		XA(STRING), 8, strlen((char*)str), str);
 }
 

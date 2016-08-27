@@ -20,18 +20,15 @@
 #define X jbxvt.X
 #define FSZ X.f.size
 
+#define GET_X(op) p.w op##= FSZ.w; p.y op##= FSZ.h; return p;
 struct JBDim get_c(struct JBDim p)
 {
-	p.w = (p.w - MARGIN) / FSZ.w;
-	p.h = (p.h - MARGIN) / FSZ.h;
-	return p;
+	GET_X(/);
 }
 
-struct JBDim get_p(struct JBDim c)
+struct JBDim get_p(struct JBDim p)
 {
-	c.w = MARGIN + c.w * FSZ.w;
-	c.h = MARGIN + c.h * FSZ.h;
-	return c;
+	GET_X(*);
 }
 
 #if defined(__i386__) || defined(__amd64__)
