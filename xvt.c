@@ -463,6 +463,7 @@ static void parse_token(void)
 	CASE(TK_SGR)
 		handle_sgr(&token);
 		break;
+	FIXME(TK_SOS); // start of string
 	CASE(TK_ST)
 		s->decpm = false;
 		break;
@@ -481,7 +482,6 @@ static void parse_token(void)
 	CASE(TK_VPR) // vertical position relative
 		scr_move(0, t[0] - 1, COL_RELATIVE|ROW_RELATIVE);
 		break;
-
 	default:
 #ifdef DEBUG
 		if(token.type) { // Ignore TK_NULL
