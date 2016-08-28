@@ -22,7 +22,7 @@ static void copy_area(const int16_t * restrict x, const int16_t y,
 		  return;
 	const xcb_window_t v = jbxvt.X.win.vt;
 	xcb_copy_area(jbxvt.X.xcb, v, v, jbxvt.X.gc.tx, x[0], y,
-		x[1], y, width, jbxvt.X.f.size.height);
+		x[1], y, width, FSZ.height);
 }
 
 static void finalize(const struct JBDim p, const int8_t count)
@@ -60,7 +60,8 @@ void scr_insert_characters(int8_t count)
 	const struct JBDim c = scr->cursor;
 	check_selection(c.y, c.y);
 	copy_lines(c.x, cw, count);
-	const struct JBDim p = get_p(c);
+	const struct JBDim p = { .x = MARGIN + c.x * FSZ.width,
+		.y = MARGIN + c.y * FSZ.height };
 	const uint16_t width = (cw - count - c.x) * FSZ.width;
 	copy_area((int16_t[]){p.x, p.x + count * FSZ.width}, p.y, width);
 	finalize(p, count);
@@ -105,10 +106,11 @@ void scr_delete_characters(uint8_t count)
 	draw_cursor();
 	copy_data_after_count(count, c);
 	delete_source_data(count, c.y);
-	const struct JBDim psz = get_p(c);
-	const int16_t x[] = {psz.w, psz.w + count * FSZ.w};
+	const int16_t y = MARGIN + c.y * FSZ.height;
+	int16_t x[2] = {[1] = MARGIN + c.x * FSZ.width};
+	x[0] = x[1] + count * FSZ.w;
 	const uint16_t width = (end - count) * FSZ.w;
-	copy_area(x, psz.height, width);
-	finalize((struct JBDim){.w = x[1] + width, .h = psz.height}, count);
+	copy_area(x, y, width);
+	finalize((struct JBDim){.x = x[1] + width, .y = y}, count);
 }
 
