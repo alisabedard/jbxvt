@@ -27,8 +27,7 @@ void scr_extend_selection(const struct JBDim p, const bool drag)
 	if (e->type == NOSEL)
 		return;
 #define F jbxvt.X.f.size
-	struct JBDim rc = { .x = (p.x - MARGIN) / F.w,
-		.y = (p.y - MARGIN) / F.h};
+	struct JBDim rc = get_c(p);
 	fix_rc(&rc);
 	// Save current end points:
 	SelEnd s[] = {*e, *(e+1)};

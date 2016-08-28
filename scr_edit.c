@@ -60,8 +60,8 @@ void scr_insert_characters(int8_t count)
 	const struct JBDim c = scr->cursor;
 	check_selection(c.y, c.y);
 	copy_lines(c.x, cw, count);
-	const struct JBDim p = { .x = MARGIN + c.x * FSZ.width,
-		.y = MARGIN + c.y * FSZ.height };
+	const struct JBDim p = { .x = c.x * FSZ.width,
+		.y = c.y * FSZ.height };
 	const uint16_t width = (cw - count - c.x) * FSZ.width;
 	copy_area((int16_t[]){p.x, p.x + count * FSZ.width}, p.y, width);
 	finalize(p, count);
@@ -106,8 +106,8 @@ void scr_delete_characters(uint8_t count)
 	draw_cursor();
 	copy_data_after_count(count, c);
 	delete_source_data(count, c.y);
-	const int16_t y = MARGIN + c.y * FSZ.height;
-	int16_t x[2] = {[1] = MARGIN + c.x * FSZ.width};
+	const int16_t y = c.y * FSZ.height;
+	int16_t x[2] = {[1] = c.x * FSZ.width};
 	x[0] = x[1] + count * FSZ.w;
 	const uint16_t width = (end - count) * FSZ.w;
 	copy_area(x, y, width);

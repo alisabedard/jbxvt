@@ -21,20 +21,45 @@
 #define LOG(...)
 #endif
 
+#define SCR jbxvt.scr.current
+#define CUR SCR->cursor
+#define CSZ jbxvt.scr.chars
+#define PSZ jbxvt.scr.pixels
+#define FSZ jbxvt.X.f.size
+#define FH FSZ.h
+
 static void zero(const int16_t line, const uint16_t sz, const int16_t col)
 {
-	VTScreen * s = jbxvt.scr.current;
-	memset(s->text[line] + col, 0, sz);
-	memset(s->rend[line] + col, 0, sz << 2);
-	s->wrap[line] = false;
+	memset(SCR->text[line] + col, 0, sz);
+	memset(SCR->rend[line] + col, 0, sz << 2);
+	SCR->wrap[line] = false;
+
 }
 
-static void get_horz_geo(xcb_rectangle_t * restrict h,
+static void erase_range(xcb_rectangle_t * restrict h,
 	const uint16_t sz, const uint16_t col)
 {
-	const uint16_t w = jbxvt.X.f.size.width;
-	h->x = MARGIN + col * w;
-	h->width = sz * w;
+	h->x = col * FSZ.w;
+	h->width = sz * FSZ.w;
+	zero(CUR.y, sz, col);
+}
+
+static int16_t get_col(const uint8_t mode)
+{
+	return mode == 0 ? CUR.x : 0;
+}
+
+static int16_t get_sz(const uint8_t mode)
+{
+	switch(mode) {
+	case 0:
+		return CSZ.w - CUR.x;
+	case 2:
+		return CSZ.w;
+	case 1:
+	default:
+		return CUR.x;
+	}
 }
 
 //  erase part or the whole of a line
@@ -45,20 +70,8 @@ void scr_erase_line(const int8_t mode)
 	VTScreen * scr = jbxvt.scr.current;
 	struct JBDim c = scr->cursor;
 	const uint8_t fh = jbxvt.X.f.size.height;
-	xcb_rectangle_t g = { .y = MARGIN + c.y * fh };
-	const uint8_t cw = jbxvt.scr.chars.width;
-	switch (mode) {
-#define EL(msg, a, b) LOG(msg); get_horz_geo(&g, a, b); zero(c.y, a, b);
-	case 1:
-		EL("START", c.x, 0);
-		break;
-	case 0:
-		EL("END", cw - c.x, c.x);
-		break;
-	case 2:
-		EL("ENTIRE", cw, 0);
-		break;
-	}
+	xcb_rectangle_t g = { .y = c.y * fh };
+	erase_range(&g, get_sz(mode), get_col(mode));
 	draw_cursor(); //clear
 	check_selection(c.y, c.y);
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt,
@@ -84,11 +97,7 @@ void scr_erase_screen(const int8_t mode)
 	change_offset(0);
 	VTScreen * s = jbxvt.scr.current;
 	s->wrap_next = 0;
-#define CSZ jbxvt.scr.chars
-#define PSZ jbxvt.scr.pixels
-#define FH jbxvt.X.f.size.height
-	xcb_rectangle_t r = {.x = MARGIN, .y = MARGIN,
-		.width = PSZ.width};
+	xcb_rectangle_t r = {.width = PSZ.width};
 	const struct JBDim cur = s->cursor;
 	switch (mode) {
 	case 1:

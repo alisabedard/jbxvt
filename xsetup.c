@@ -61,13 +61,13 @@ void resize_window(void)
 	jb_assert(r, "Could not get geometry");
 	if (r->width == ws->w && r->height == ws->h) {
 		free(r);
-		return; // struct JBDimhas not changed.
+		return; // size not changed.
 	}
 	ws->w = r->width;
 	ws->h = r->height;
 	jbxvt.scr.pixels.w = (jbxvt.opt.show_scrollbar
 		? &resize_with_scrollbar : &resize_without_scrollbar)(r);
-	jbxvt.scr.pixels.h = r->height - MARGIN;
+	jbxvt.scr.pixels.h = r->height;
 	free(r);
 }
 

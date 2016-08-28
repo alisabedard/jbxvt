@@ -194,15 +194,13 @@ static void tbc(const uint8_t t)
 static void parse_token(void)
 {
 	Token token;
-	int32_t n; // sanitized first token
-	int32_t * t; // shortcut to token.arg
 	static bool size_set = true;
 	VTScreen * s;
 	s = jbxvt.scr.current; // update in case screen changed
 	get_token(&token);
-	t = token.arg;
+	int32_t * t = token.arg;
 	// n is sanitized for ops with optional args
-	n = t[0] ? t[0] : 1;
+	int32_t n = token.nargs ? (t[0] ? t[0] : 1) : 1;
 	switch (token.type) {
 
 // macro to aid in debug logging

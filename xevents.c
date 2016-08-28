@@ -132,8 +132,9 @@ static bool is_tracked(void)
 }
 
 static void set_args(const TokenType type, Token * restrict tk,
-	int32_t * restrict args, const uint8_t nargs)
+	int32_t * restrict args, uint8_t nargs)
 {
+	nargs = MIN(nargs, TK_MAX_ARGS); // prevent buffer overflow
 	memcpy(tk->arg, args, nargs * sizeof(int32_t));
 	tk->nargs = nargs;
 	tk->type = type;
