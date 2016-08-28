@@ -82,7 +82,7 @@ static void handle_tk_char(const uint8_t tk_char)
 		scr_tab();
 		break;
 	case 005: // ENQ
-		cprintf("");
+		cprintf("\033[?6c"); // VT102
 		break;
 	case '\016': // change to char set G1
 		TLOG("charset G1");
