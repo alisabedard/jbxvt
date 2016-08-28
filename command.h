@@ -15,7 +15,8 @@ enum CommandLimits {
 
 //JBXVTEvent * pop_xevent(void);
 
-char * cprintf(char *, ...);
+char * cprintf(char *, ...)
+	__attribute__((format(gnu_printf, 1, 2)));
 
 /*  Initialise the command connection.  This should be called after the X
  *  server connection is established.  */
