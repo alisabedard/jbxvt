@@ -22,10 +22,9 @@
 static void copy_area(const int16_t * restrict x, const int16_t y,
 	const uint16_t width)
 {
-	if (width <= 0)
-		  return;
-	xcb_copy_area(XC, VT, VT, jbxvt.X.gc.tx, x[0], y, x[1], y,
-		width, FSZ.height);
+	if (width > 0)
+		xcb_copy_area(XC, VT, VT, jbxvt.X.gc.tx, x[0], y,
+			x[1], y, width, FSZ.height);
 }
 
 static void finalize(const struct JBDim p, const int8_t count)
@@ -37,10 +36,9 @@ static void finalize(const struct JBDim p, const int8_t count)
 
 static void copy_lines(const int16_t x, const int8_t count)
 {
-	const struct JBDim c = SCR->cursor;
-	uint8_t * s = SCR->text[c.y];
-	uint32_t * r = SCR->rend[c.y];
-
+	const int16_t y = SCR->cursor.y;
+	uint8_t * s = SCR->text[y];
+	uint32_t * r = SCR->rend[y];
 	for (int16_t i = CSZ.w - 1; i >= x + count; --i) {
 		s[i] = s[i - count];
 		r[i] = r[i - count];
