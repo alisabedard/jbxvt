@@ -7,6 +7,7 @@
 #include "cursor.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "libjb/util.h"
 #include "sbar.h"
 #include "screen.h"
 #include "selection.h"
@@ -18,6 +19,8 @@
 #define XC jbxvt.X.xcb
 #define VT jbxvt.X.win.vt
 #define CSZ jbxvt.scr.chars
+#define CUR SCR->cursor
+#define END (CSZ.w - CUR.x)
 
 static void copy_area(const int16_t * restrict x, const int16_t y,
 	const uint16_t width)
@@ -27,8 +30,10 @@ static void copy_area(const int16_t * restrict x, const int16_t y,
 			x[1], y, width, FSZ.height);
 }
 
-static void finalize(const struct JBDim p, const int8_t count)
+static void finalize(const int16_t * restrict x, const struct JBDim p,
+	const uint16_t width, const int8_t count)
 {
+	copy_area(x, p.y, width);
 	xcb_clear_area(XC, 0, VT, p.x, p.y, count * FSZ.w, FSZ.h);
 	SCR->wrap_next = 0;
 	draw_cursor();
@@ -45,21 +50,44 @@ static void copy_lines(const int16_t x, const int8_t count)
 	}
 }
 
+static uint16_t get_width(const uint8_t count, const bool insert)
+{
+	return (insert ? CSZ.w - count - CUR.x : END - count) * FSZ.w;
+}
+
+static uint8_t get_count(int8_t count, const bool insert)
+{
+	count = MAX(count, 0);
+	count = MIN(count, insert ? CSZ.w : CSZ.w - CUR.x);
+	return count;
+}
+
+static void begin(int16_t * x, int8_t * restrict count, const bool insert)
+{
+	*count = get_count(*count, insert);
+	change_offset(0);
+	draw_cursor();
+	const struct JBDim c = CUR;
+	struct JBDim p = get_p(c);
+	x[0] = p.x;
+	x[1] = p.x + *count * FSZ.width;
+	if (!insert) {
+		int16_t a = x[0];
+		x[0] = x[1];
+		x[1] = a;
+	}
+	check_selection(c.y, c.y);
+}
+
 //  Insert count spaces from the current position.
 void scr_insert_characters(int8_t count)
 {
 	LOG("scr_insert_characters(%d)", count);
-	count = MAX(count, 0);
-	count = MIN(count, CSZ.w);
-	change_offset(0);
-	draw_cursor();
+	int16_t x[2];
+	begin(x, &count, true);
 	const struct JBDim c = SCR->cursor;
-	check_selection(c.y, c.y);
 	copy_lines(c.x, count);
-	const struct JBDim p = get_p(c);
-	const uint16_t width = (CSZ.w - count - c.x) * FSZ.width;
-	copy_area((int16_t[]){p.x, p.x + count * FSZ.width}, p.y, width);
-	finalize(p, count);
+	finalize(x, get_p(c), get_width(count, true), count);
 }
 
 static void copy_data_after_count(const uint8_t count, const struct JBDim c)
@@ -86,23 +114,17 @@ static void delete_source_data(const uint8_t count, const int16_t y)
 }
 
 //  Delete count characters from the current position.
-void scr_delete_characters(uint8_t count)
+void scr_delete_characters(int8_t count)
 {
 	LOG("scr_delete_characters(%d)", count);
-	const struct JBDim c = SCR->cursor;
-	const uint8_t end = CSZ.width - c.x;
-	count = MIN(count, end); // keep within the screen
-	if(!count)
-		  return;
-	change_offset(0);
-	draw_cursor();
+	int16_t x[2];
+	begin(x, &count, false);
+	struct JBDim c = CUR;
 	copy_data_after_count(count, c);
 	delete_source_data(count, c.y);
-	struct JBDim p = get_p(c);
-	int16_t x[] = {p.x + count * FSZ.w, p.x};
-	const uint16_t width = (end - count) * FSZ.w;
-	copy_area(x, p.y, width);
-	p.x += width;
-	finalize(p, count);
+	c = get_p(c);
+	const uint16_t width = get_width(count, false);
+	c.x += width;
+	finalize(x, c, width, count);
 }
 
