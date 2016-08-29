@@ -441,8 +441,7 @@ static void parse_token(void)
 		request_selection(t[0]);
 		break;
 	CASE(TK_SELNOTIFY)
-		// arg 0 is time, unused
-		paste_primary(t[1], t[2]);
+		paste_primary(t[0], t[1], t[2]);
 		break;
 	FIXME(TK_SPA);
 	FIXME(TK_SS2);

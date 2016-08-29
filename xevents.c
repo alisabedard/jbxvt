@@ -289,7 +289,7 @@ bool handle_xevents(Token * restrict tk)
 	if(!xe)
 		return false;
 	tk->region = get_region(xe);
-	switch (xe->type) { // Ordered numerically:
+	switch (xe->type &~0x80) { // Ordered numerically:
 	case 0: // Unimplemented, undefined
 	case 150: // Undefined
 	case XCB_KEY_RELEASE: // Unimplemented
@@ -324,7 +324,8 @@ bool handle_xevents(Token * restrict tk)
 		ARGS(TK_SELNOTIFY, xe->time, xe->requestor, xe->property);
 		break;
 	case XCB_SELECTION_REQUEST:
-		ARGS(TK_SELREQUEST);
+		ARGS(TK_SELREQUEST, xe->time, xe->requestor,
+			xe->target, xe->property);
 		break;
 	case XCB_BUTTON_PRESS:
 		handle_button_press(tk, xe);

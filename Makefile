@@ -1,4 +1,4 @@
-include debug.mk
+#include debug.mk
 
 exe=jbxvt
 PREFIX=/usr

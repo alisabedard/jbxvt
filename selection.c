@@ -12,10 +12,12 @@
 
 #define FSZ jbxvt.X.f.size
 #define CSZ jbxvt.scr.chars
+#define XC jbxvt.X.xcb
+#define VT jbxvt.X.win.vt
 
 static void prop(const xcb_window_t win, const xcb_atom_t a)
 {
-	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE,
+	xcb_change_property(XC, XCB_PROP_MODE_REPLACE,
 		win, a, XCB_ATOM_STRING, 8, jbxvt.sel.length, jbxvt.sel.text);
 }
 
@@ -25,9 +27,10 @@ void scr_make_selection(void)
 	LOG("scr_make_selection");
 	save_selection();
 	/* Set all properties which may possibly be requested.  */
-	const xcb_window_t v = jbxvt.X.win.vt;
-	prop(v, XCB_ATOM_PRIMARY);
-	xcb_set_selection_owner(jbxvt.X.xcb, v, XCB_ATOM_PRIMARY,
+	prop(VT, XCB_ATOM_PRIMARY);
+	prop(VT, XCB_ATOM_SECONDARY);
+	prop(VT, jbxvt.X.clipboard);
+	xcb_set_selection_owner(XC, VT, XCB_ATOM_PRIMARY,
 		XCB_CURRENT_TIME);
 }
 
@@ -35,22 +38,22 @@ void scr_make_selection(void)
 void scr_send_selection(const xcb_time_t time, const uint32_t requestor,
 	const uint32_t target, const uint32_t property)
 {
-	LOG("scr_send_selection");
-	// x events must be 32 bytes long:
+	// FIXME!!!
+	LOG("scr_send_selection, %d, %d, %d, %d", (int)time, requestor,
+		target, property);
 	xcb_selection_notify_event_t e = {
 		.response_type = XCB_SELECTION_NOTIFY,
 		.selection = XCB_ATOM_PRIMARY, .target = target,
 		.requestor = requestor, .time = time, .property
-			= property ? property : target}; // per ICCCM
-	// If property is None, use taget, per ICCCM
-	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE, requestor,
-		property == XCB_NONE ? target : property,
-		XCB_ATOM_STRING, 8, jbxvt.sel.length,
+			= property == XCB_NONE
+			? target : property}; // per ICCCM
+	xcb_change_property(XC, XCB_PROP_MODE_REPLACE, requestor,
+		property, target, 8, jbxvt.sel.length,
 		jbxvt.sel.text);
-	xcb_send_event(jbxvt.X.xcb, false, requestor,
+	xcb_flush(XC);
+	xcb_send_event(XC, true, requestor,
 		XCB_SELECTION_NOTIFY, (char *)&e);
-	// send it before e looses scope
-	xcb_flush(jbxvt.X.xcb);
+	xcb_flush(XC);
 }
 
 //  Clear the current selection.
