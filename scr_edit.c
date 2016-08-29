@@ -14,34 +14,34 @@
 #include <string.h>
 
 #define FSZ jbxvt.X.f.size
+#define SCR jbxvt.scr.current
+#define XC jbxvt.X.xcb
+#define VT jbxvt.X.win.vt
+#define CSZ jbxvt.scr.chars
 
 static void copy_area(const int16_t * restrict x, const int16_t y,
 	const uint16_t width)
 {
 	if (width <= 0)
 		  return;
-	const xcb_window_t v = jbxvt.X.win.vt;
-	xcb_copy_area(jbxvt.X.xcb, v, v, jbxvt.X.gc.tx, x[0], y,
-		x[1], y, width, FSZ.height);
+	xcb_copy_area(XC, VT, VT, jbxvt.X.gc.tx, x[0], y, x[1], y,
+		width, FSZ.height);
 }
 
 static void finalize(const struct JBDim p, const int8_t count)
 {
-	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt,
-		p.x, p.y, count * FSZ.w, FSZ.h);
-	jbxvt.scr.current->wrap_next = 0;
+	xcb_clear_area(XC, 0, VT, p.x, p.y, count * FSZ.w, FSZ.h);
+	SCR->wrap_next = 0;
 	draw_cursor();
 }
 
-static void copy_lines(const int16_t x, const uint8_t cw,
-	const int8_t count)
+static void copy_lines(const int16_t x, const int8_t count)
 {
-	VTScreen * restrict scr = jbxvt.scr.current;
-	const struct JBDim c = scr->cursor;
-	uint8_t * s = scr->text[c.y];
-	uint32_t * r = scr->rend[c.y];
+	const struct JBDim c = SCR->cursor;
+	uint8_t * s = SCR->text[c.y];
+	uint32_t * r = SCR->rend[c.y];
 
-	for (int16_t i = cw - 1; i >= x + count; --i) {
+	for (int16_t i = CSZ.w - 1; i >= x + count; --i) {
 		s[i] = s[i - count];
 		r[i] = r[i - count];
 	}
@@ -52,17 +52,14 @@ void scr_insert_characters(int8_t count)
 {
 	LOG("scr_insert_characters(%d)", count);
 	count = MAX(count, 0);
-	const uint8_t cw = jbxvt.scr.chars.width;
-	count = MIN(count, cw);
+	count = MIN(count, CSZ.w);
 	change_offset(0);
 	draw_cursor();
-	VTScreen * restrict scr = jbxvt.scr.current;
-	const struct JBDim c = scr->cursor;
+	const struct JBDim c = SCR->cursor;
 	check_selection(c.y, c.y);
-	copy_lines(c.x, cw, count);
-	const struct JBDim p = { .x = c.x * FSZ.width,
-		.y = c.y * FSZ.height };
-	const uint16_t width = (cw - count - c.x) * FSZ.width;
+	copy_lines(c.x, count);
+	const struct JBDim p = get_p(c);
+	const uint16_t width = (CSZ.w - count - c.x) * FSZ.width;
 	copy_area((int16_t[]){p.x, p.x + count * FSZ.width}, p.y, width);
 	finalize(p, count);
 }
@@ -71,10 +68,9 @@ static void copy_data_after_count(const uint8_t count, const struct JBDim c)
 {
 	// copy the data after count
 	const uint16_t offset = c.x + count;
-	const uint16_t end = jbxvt.scr.chars.width - c.x;
-	VTScreen * scr = jbxvt.scr.current;
-	uint8_t * t = scr->text[c.y];
-	uint32_t * r = scr->rend[c.y];
+	const uint16_t end = CSZ.width - c.x;
+	uint8_t * t = SCR->text[c.y];
+	uint32_t * r = SCR->rend[c.y];
 	memmove(t + c.x, t + offset, end - count);
 	memmove(r + c.x, r + offset,
 		(end - count) * sizeof(uint32_t));
@@ -95,10 +91,8 @@ static void delete_source_data(const uint8_t count, const int16_t y)
 void scr_delete_characters(uint8_t count)
 {
 	LOG("scr_delete_characters(%d)", count);
-	const uint8_t scw = jbxvt.scr.chars.width;
-	VTScreen * scr = jbxvt.scr.current;
-	const struct JBDim c = scr->cursor;
-	const uint8_t end = scw - c.x;
+	const struct JBDim c = SCR->cursor;
+	const uint8_t end = CSZ.width - c.x;
 	count = MIN(count, end); // keep within the screen
 	if(!count)
 		  return;
@@ -106,11 +100,11 @@ void scr_delete_characters(uint8_t count)
 	draw_cursor();
 	copy_data_after_count(count, c);
 	delete_source_data(count, c.y);
-	const int16_t y = c.y * FSZ.height;
-	int16_t x[2] = {[1] = c.x * FSZ.width};
-	x[0] = x[1] + count * FSZ.w;
+	struct JBDim p = get_p(c);
+	int16_t x[] = {p.x + count * FSZ.w, p.x};
 	const uint16_t width = (end - count) * FSZ.w;
-	copy_area(x, y, width);
-	finalize((struct JBDim){.x = x[1] + width, .y = y}, count);
+	copy_area(x, p.y, width);
+	p.x += width;
+	finalize(p, count);
 }
 
