@@ -4,6 +4,7 @@
 #ifndef COMMAND_H
 #define COMMAND_H
 
+#include "libjb/size.h"
 #include <stdint.h>
 
 enum CommandLimits {
@@ -30,9 +31,9 @@ void push_com_char(const uint8_t c);
 #endif//LINUX
 
 #ifdef TIOCSWINSZ
-void tty_set_size(const uint8_t width, const uint8_t height);
+void tty_set_size(const struct JBDim sz);
 #else//!TIOCSWINSZ
-#define tty_set_size(w, h)
+#define tty_set_size(dim)
 #endif//TIOCSWINSZ
 
 #endif//!COMMAND_H

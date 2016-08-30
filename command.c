@@ -51,6 +51,9 @@
 #include <utmpx.h>
 #endif//POSIX_UTMP
 
+// Shortcuts
+#define CSZ jbxvt.scr.chars
+
 //  Attempt to create and write an entry to the utmp file
 #ifdef POSIX_UTMPX
 static void write_utmpx(const pid_t comm_pid, char * tty_name)
@@ -114,7 +117,7 @@ static void set_ttymodes(void)
 		[VSUSP] = 032, [VREPRINT] = 022, [VWERASE] = 027,
 		[VLNEXT] = 026, [VDISCARD] = 017}};
 	tcsetattr(0, TCSANOW, &term);
-	tty_set_size(jbxvt.scr.chars.width, jbxvt.scr.chars.height);
+	tty_set_size(CSZ);
 }
 
 static void redir(const fd_t target, const fd_t ttyfd)
@@ -157,10 +160,10 @@ static void child(char ** restrict argv, fd_t ttyfd)
  *  the child and after a window size change from the parent.  */
 #if !defined(NETBSD) && !defined(FREEBSD)
 #ifdef TIOCSWINSZ
-void tty_set_size(const uint8_t width, const uint8_t height)
+void tty_set_size(const struct JBDim sz)
 {
-	struct winsize wsize = {.ws_row = height, .ws_col = width};
-	jb_check(ioctl(jbxvt.com.fd, TIOCSWINSZ, &wsize) != 1,
+	jb_check(ioctl(jbxvt.com.fd, TIOCSWINSZ, &(struct winsize){
+		.ws_row = sz.row, .ws_col = sz.col}) != 1,
 		"Could not set ioctl TIOCSWINSZ");
 }
 #endif//TIOCSWINSZ

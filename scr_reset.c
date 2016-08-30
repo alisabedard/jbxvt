@@ -124,7 +124,7 @@ void scr_reset(void)
 	// Constrain dimensions:
 	c.w = MIN(c.w, JBXVT_MAX_COLS);
 	c.h = MIN(c.h, JBXVT_MAX_ROWS);
-	tty_set_size(c.w, c.h);
+	tty_set_size(c);
 	S.chars = c;
 	reset_row_col();
 	--c.h; --c.w;
