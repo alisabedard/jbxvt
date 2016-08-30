@@ -130,8 +130,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
 #else//NETBSD
 	const pid_t pgid = getsid(getpid());
 #endif//!NETBSD
-	if (jb_check(pgid >= 0, "Could not open session"))
-		exit(1);
+	jb_assert(pgid >= 0, "Could not open session");
 	/*  Having started a new session, we need to establish
 	 *  a controlling teletype for it.  On some systems
 	 *  this can be done with an ioctl but on others
@@ -151,7 +150,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	jb_close(ttyfd);
 	set_ttymodes();
 	execvp(argv[0],argv); // Only returns on failure
-	exit(1);
+	exit(1); // prevent hang
 }
 
 /*  Tell the teletype handler what size the window is.  Called initially from
@@ -184,16 +183,13 @@ static fd_t run_command(char ** argv)
 {
 	fd_t ptyfd, ttyfd;
 	char * tty_name = get_pseudo_tty(&ptyfd, &ttyfd);
-	if (!tty_name)
-		exit(1);
 	jb_check(fcntl(ptyfd, F_SETFL, O_NONBLOCK) != 1,
 		"Could not set file status flags on pty file descriptor");
 	// +1 to allow for X fd
 	jbxvt.com.width = ptyfd + 1;
 	attach_signals();
 	const pid_t comm_pid = fork();
-	if (jb_check(comm_pid >= 0, "Could not start session"))
-		exit(1);
+	jb_assert(comm_pid >= 0, "Could not start session");
 	if (comm_pid == 0)
 		child(argv, ttyfd);
 #ifdef POSIX_UTMPX
