@@ -28,11 +28,11 @@
 
 static bool tab_stops[JBXVT_MAX_COLS];
 
-
 #define FSZ jbxvt.X.f.size
 #define CSZ jbxvt.scr.chars.width
 #define SCR jbxvt.scr.current
 #define CUR SCR->cursor
+#define VT jbxvt.X.win.vt
 
 // Set tab stops:
 // -1 clears all, -2 sets default
@@ -53,7 +53,7 @@ void scr_tab(void)
 	LOG("scr_tab()");
 	change_offset(0);
 	VTScreen * s = jbxvt.scr.current;
-	const uint8_t w = jbxvt.scr.chars.width - 1;
+	const uint8_t w = CSZ - 1;
 	struct JBDim c = s->cursor;
 	s->text[c.y][c.x] = '0';
 	while (!tab_stops[++c.x] && c.x < w);
@@ -70,9 +70,10 @@ static void handle_new_lines(int8_t nlcount)
 {
 	SLOG("handle_new_lines(nlcount: %d)", nlcount);
 	const uint8_t b = SCR->margin.b;
-	nlcount = SCR->cursor.y > b ? 0 : nlcount - b - SCR->cursor.y;
+	const uint8_t y = SCR->cursor.y;
+	nlcount = y > b ? 0 : nlcount - b - y;
 	const uint8_t t = SCR->margin.t;
-	const int8_t lim = SCR->cursor.y - t;
+	const int8_t lim = y - t;
 	JB_LIMIT(nlcount, lim, 0);
 	nlcount = MIN(nlcount, MAX_SCROLL);
 	scroll(t, b, nlcount);
@@ -92,7 +93,7 @@ static void decsclm(void)
 
 static void wrap(void)
 {
-	SCR->wrap_next = false;
+	//SCR->wrap_next = false;
 	const struct JBDim m = SCR->margin;
 	const int16_t y = CUR.y;
 	SCR->wrap[y] = true;
@@ -101,6 +102,7 @@ static void wrap(void)
 		scroll(m.top, m.bottom, 1);
 	} else
 		++CUR.y;
+	CUR.x = 0;
 }
 
 #if defined(__i386__) || defined(__amd64__)
@@ -118,8 +120,8 @@ static void handle_insert(const uint8_t n, const struct JBDim p)
 	const uint16_t n_width = n * FSZ.width;
 	const uint16_t width = sz * FSZ.width - n_width;
 	const int16_t x = p.x + n_width;
-	xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
-		jbxvt.X.gc.tx, p.x, p.y, x, p.y, width, FSZ.height);
+	xcb_copy_area(jbxvt.X.xcb, VT, VT, jbxvt.X.gc.tx, p.x, p.y,
+		x, p.y, width, FSZ.height);
 }
 
 static uint_fast16_t find_n(uint8_t * restrict str)
@@ -189,8 +191,9 @@ static bool test_action_char(const uint8_t c, VTScreen * restrict s)
 
 static void save_render_style(const int_fast16_t n, VTScreen * restrict s)
 {
+	const struct JBDim c = s->cursor;
 	for (int_fast16_t i = n - 1; i >= 0; --i)
-		  s->rend[s->cursor.y][s->cursor.x + i] = jbxvt.scr.rstyle;
+		  s->rend[c.y][c.x + i] = jbxvt.scr.rstyle;
 }
 
 static void check_wrap(VTScreen * restrict s)
@@ -198,7 +201,7 @@ static void check_wrap(VTScreen * restrict s)
 	const uint8_t w = jbxvt.scr.chars.width - 1;
 	if (s->cursor.x >= w) {
 		s->cursor.x = w;
-		s->wrap_next = jbxvt.mode.decawm;
+		s->wrap_next = !jbxvt.mode.decawm;
 	}
 }
 
