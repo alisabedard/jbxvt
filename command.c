@@ -89,15 +89,12 @@ static void exit_cb(void)
 static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 {
 	const fd_t mfd = posix_openpt(O_RDWR);
-	bool e = false; // error flag
-	e |= jb_check(mfd >= 0, "Could not open ptty");
-	e |= jb_check(grantpt(mfd) != -1,
+	jb_assert(mfd >= 0, "Could not open ptty");
+	jb_assert(grantpt(mfd) != -1,
 		"Could not change mode and owner of slave ptty");
-	e |= jb_check(unlockpt(mfd) != -1, "Could not unlock slave ptty");
+	jb_assert(unlockpt(mfd) != -1, "Could not unlock slave ptty");
 	char *ttynam = ptsname(mfd);
-	e |= jb_check(ttynam, "Could not get tty name");
-	if (e) // error condition
-		exit(1);
+	jb_assert(ttynam, "Could not get tty name");
 	*pslave = jb_open(ttynam, O_RDWR);
 	*pmaster = mfd;
 	return ttynam;
@@ -217,8 +214,7 @@ void init_command(char ** restrict argv)
 	wm_del_win();
 	jbxvt.com.xfd = xcb_get_file_descriptor(jbxvt.X.xcb);
 	jbxvt.com.fd = run_command(argv);
-	if (jb_check(jbxvt.com.fd >= 0, "Could not start session"))
-		exit(1);
+	jb_assert(jbxvt.com.fd >= 0, "Could not start session");
 	struct JBXVTCommandContainer * b = &jbxvt.com.buf,
 				     * s = &jbxvt.com.stack;
 	b->data = b->next = b->top = GC_MALLOC(COM_BUF_SIZE);
