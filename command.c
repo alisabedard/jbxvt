@@ -58,9 +58,10 @@ static void write_utmpx(const pid_t comm_pid, char * tty_name)
 	setutxent();
 	struct utmpx utent = {.ut_type = USER_PROCESS, .ut_pid = comm_pid};
 	// + 5 to remove "/dev/"
-	strncpy(utent.ut_line, tty_name + 5, sizeof(utent.ut_line));
-	strncpy(utent.ut_user, getenv("USER"), sizeof(utent.ut_user));
-	strncpy(utent.ut_host, getenv("DISPLAY"), sizeof(utent.ut_host));
+#define UCP(fld, str) strncpy(utent.fld, str, sizeof(utent.fld))
+	UCP(ut_line, tty_name + 5);
+	UCP(ut_user, getenv("USER"));
+	UCP(ut_host, getenv("DISPLAY"));
 	struct timeval tv;
 	// Does not return an error:
 	gettimeofday(&tv, NULL);
