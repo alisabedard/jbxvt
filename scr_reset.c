@@ -72,12 +72,6 @@ static inline void fix_margins(const struct JBDim c)
 	if (s->margin.b >= c.h)
 		  s->margin.b = c.h - 1;
 }
-static void clear(void)
-{
-	xcb_clear_area(X.xcb, false, X.win.vt, 0, 0, P.w, P.h);
-	change_offset(0);
-	xcb_flush(X.xcb);
-}
 
 static void decscnm(void)
 {
@@ -130,7 +124,6 @@ void scr_reset(void)
 	--c.h; --c.w;
 	sbar_show(c.h + S.sline.top, S.offset,
 		S.offset + c.h);
-	clear();
 	decscnm();
 	xcb_flush(X.xcb);
 	repaint();
