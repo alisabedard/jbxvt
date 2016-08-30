@@ -94,7 +94,7 @@ void check_selection(const int16_t row1, const int16_t row2)
 		return;
 	int16_t r1 = row(e1), r2 = row(e2);
 	if (r1 > r2)
-		SWAP(int16_t, r1, r2);
+		jb_swap(&r1, &r2);
 	if (row2 < r1 || row1 > r2)
 		return;
 	show_selection(0, CSZ.h - 1, 0, CSZ.w - 1);

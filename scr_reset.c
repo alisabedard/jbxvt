@@ -87,8 +87,8 @@ static void decscnm(void)
 		last_was_rv = rv;
 	LOG("decscnm()");
 	struct JBXVTXPixels * p = &X.color;
-	SWAP(pixel_t, p->fg, p->bg);
-	SWAP(pixel_t, p->current_fg, p->current_bg);
+	jb_swap(&p->fg, &p->bg);
+	jb_swap(&p->current_fg, &p->current_bg);
 	xcb_change_gc(X.xcb, X.gc.tx, XCB_GC_FOREGROUND
 		| XCB_GC_BACKGROUND, (uint32_t[]){p->fg, p->bg});
 	xcb_change_window_attributes(X.xcb, X.win.vt,
