@@ -32,6 +32,7 @@ static bool tab_stops[JBXVT_MAX_COLS];
 #define FSZ jbxvt.X.f.size
 #define CSZ jbxvt.scr.chars.width
 #define SCR jbxvt.scr.current
+#define CUR SCR->cursor
 
 // Set tab stops:
 // -1 clears all, -2 sets default
@@ -91,16 +92,15 @@ static void decsclm(void)
 
 static void wrap(void)
 {
-	VTScreen * s = jbxvt.scr.current;
-	s->wrap_next = false;
-	const struct JBDim m = s->margin;
-	int16_t * y = &s->cursor.y;
-	s->wrap[*y] = true;
-	if (*y >= m.b) {
+	SCR->wrap_next = false;
+	const struct JBDim m = SCR->margin;
+	const int16_t y = CUR.y;
+	SCR->wrap[y] = true;
+	if (y >= m.b) {
 		decsclm();
 		scroll(m.top, m.bottom, 1);
 	} else
-		++*y;
+		++CUR.y;
 }
 
 #if defined(__i386__) || defined(__amd64__)
