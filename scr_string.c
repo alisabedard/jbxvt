@@ -68,17 +68,15 @@ void scr_cht(int16_t v)
 static void handle_new_lines(int8_t nlcount)
 {
 	SLOG("handle_new_lines(nlcount: %d)", nlcount);
-	VTScreen * restrict s = jbxvt.scr.current;
-	nlcount = s->cursor.y > s->margin.b ? 0
-		: nlcount - s->margin.b - s->cursor.y;
-	nlcount = MAX(nlcount, 0);
-	const int8_t lim = s->cursor.y - s->margin.t;
-	nlcount = MIN(nlcount, lim);
+	const uint8_t b = SCR->margin.b;
+	nlcount = SCR->cursor.y > b ? 0 : nlcount - b - SCR->cursor.y;
+	const uint8_t t = SCR->margin.t;
+	const int8_t lim = SCR->cursor.y - t;
+	JB_LIMIT(nlcount, lim, 0);
 	nlcount = MIN(nlcount, MAX_SCROLL);
-	scroll(s->margin.t, s->margin.b, nlcount);
-	s->cursor.y -= nlcount;
-	SLOG("nlcount: %d, c.y: %d, m.b: %d", nlcount,
-		s->cursor.y, s->margin.b);
+	scroll(t, b, nlcount);
+	SCR->cursor.y -= nlcount;
+	SLOG("nlcount: %d, c.y: %d, m.b: %d", nlcount, SCR->cursor.y, b);
 }
 
 static void decsclm(void)
