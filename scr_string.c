@@ -29,7 +29,7 @@
 static bool tab_stops[JBXVT_MAX_COLS];
 
 #define FSZ jbxvt.X.f.size
-#define CSZ jbxvt.scr.chars.width
+#define CSZ jbxvt.scr.chars
 #define SCR jbxvt.scr.current
 #define CUR SCR->cursor
 #define VT jbxvt.X.win.vt
@@ -53,9 +53,9 @@ void scr_tab(void)
 	LOG("scr_tab()");
 	change_offset(0);
 	VTScreen * s = jbxvt.scr.current;
-	const uint8_t w = CSZ - 1;
 	struct JBDim c = s->cursor;
 	s->text[c.y][c.x] = '0';
+	const uint16_t w = CSZ.w - 1;
 	while (!tab_stops[++c.x] && c.x < w);
 	s->cursor.x = c.x;
 }
@@ -114,7 +114,7 @@ static void handle_insert(const uint8_t n, const struct JBDim p)
 	const struct JBDim c = SCR->cursor;
 	uint8_t * restrict s = SCR->text[c.y];
 	uint32_t * restrict r = SCR->rend[c.y];
-	const uint16_t sz = CSZ - c.x;
+	const uint16_t sz = CSZ.w - c.x;
 	memmove(s + c.x + n, s + c.x, sz);
 	memmove(r + c.x + n, r + c.x, sz << 2);
 	const uint16_t n_width = n * FSZ.width;
@@ -198,10 +198,11 @@ static void save_render_style(const int_fast16_t n, VTScreen * restrict s)
 
 static void check_wrap(VTScreen * restrict s)
 {
-	const uint8_t w = jbxvt.scr.chars.width - 1;
+	const uint16_t w = jbxvt.scr.chars.width - 1;
 	if (s->cursor.x >= w) {
-		s->cursor.x = w;
-		s->wrap_next = !jbxvt.mode.decawm;
+		if ((s->wrap_next = jbxvt.mode.decawm)) {
+			s->cursor.x = 0;
+		}
 	}
 }
 
