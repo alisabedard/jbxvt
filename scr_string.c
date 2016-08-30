@@ -198,7 +198,7 @@ static void save_render_style(const int_fast16_t n, VTScreen * restrict s)
 
 static void check_wrap(VTScreen * restrict s)
 {
-	const uint16_t w = jbxvt.scr.chars.width - 1;
+	const uint16_t w = CSZ.w - 1;
 	if (s->cursor.x >= w) {
 		if ((s->wrap_next = jbxvt.mode.decawm)) {
 			s->cursor.x = 0;
