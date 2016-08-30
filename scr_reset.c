@@ -18,8 +18,9 @@
 
 // Shortcuts
 #define S jbxvt.scr
-#define S0 jbxvt.scr.s[0]
-#define S1 jbxvt.scr.s[1]
+#define SCR S.current
+#define S0 S.s[0]
+#define S1 S.s[1]
 #define P S.pixels
 #define X jbxvt.X
 #define FSZ X.f.size
@@ -58,6 +59,7 @@ static void init(void)
 	sz = JBXVT_MAX_ROWS;
 	ALLOC(S0.wrap);
 	ALLOC(S1.wrap);
+#undef ALLOC
 }
 
 static inline void fix_margins(const struct JBDim c)
@@ -119,7 +121,6 @@ void scr_reset(void)
 	}
 	init_screen_elements(&S.s[0], s0, r0);
 	init_screen_elements(&S.s[1], s1, r1);
-	scr_start_selection((struct JBDim){}, SEL_CHAR);
 	// Constrain dimensions:
 	c.w = MIN(c.w, JBXVT_MAX_COLS);
 	c.h = MIN(c.h, JBXVT_MAX_ROWS);
