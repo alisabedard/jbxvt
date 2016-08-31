@@ -18,12 +18,13 @@
 #define MW jbxvt.X.win.main
 #define XC jbxvt.X.xcb
 #define SW jbxvt.X.win.sb
+#define SB jbxvt.opt.show_scrollbar
 
 //  Map the window
 void map_window(void)
 {
-	xcb_map_window(XC, jbxvt.X.win.main);
-	xcb_map_subwindows(XC, jbxvt.X.win.main);
+	xcb_map_window(XC, MW);
+	xcb_map_subwindows(XC, MW);
 	/*  Setup the window now so that we can add LINES and COLUMNS to
 	 *  the environment.  */
 	resize_window();
@@ -39,16 +40,16 @@ static void cfg(const xcb_window_t win, const struct JBDim sz)
 }
 #undef RSZ_VM
 
-static int16_t resize_with_scrollbar(xcb_get_geometry_reply_t * r)
+static int16_t rsz(xcb_get_geometry_reply_t * r)
 {
 	// -1 to show the border:
 	cfg(SW, (struct JBDim){.w = SBAR_WIDTH - 1, .h = r->height});
-	cfg(VT, (struct JBDim){.w = r->width - SBAR_WIDTH,
-		.h = r->height});
-	return r->width - SBAR_WIDTH;
+	const uint16_t w = r->width - SBAR_WIDTH;
+	cfg(VT, (struct JBDim){.w = w, .h = r->height});
+	return w;
 }
 
-static int16_t resize_without_scrollbar(xcb_get_geometry_reply_t * r)
+static int16_t rsz_no_sb(xcb_get_geometry_reply_t * r)
 {
 	cfg(jbxvt.X.win.vt, (struct JBDim){.w = r->width, .h = r->height});
 	return r->width;
@@ -68,8 +69,7 @@ void resize_window(void)
 	}
 	ws->w = r->width;
 	ws->h = r->height;
-	jbxvt.scr.pixels.w = (jbxvt.opt.show_scrollbar
-		? &resize_with_scrollbar : &resize_without_scrollbar)(r);
+	jbxvt.scr.pixels.w = (SB ? &rsz : &rsz_no_sb)(r);
 	jbxvt.scr.pixels.h = r->height;
 	free(r);
 	jbxvt.scr.chars = get_c(jbxvt.scr.pixels);
@@ -78,7 +78,6 @@ void resize_window(void)
 //  Toggle scrollbar.
 void switch_scrollbar(void)
 {
-#define SB jbxvt.opt.show_scrollbar
 	xcb_get_geometry_cookie_t c = xcb_get_geometry(XC, MW);
 	xcb_configure_window(XC, VT, XCB_CONFIG_WINDOW_X,
 		&(uint16_t){SB ? 0 : SBAR_WIDTH});
