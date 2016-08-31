@@ -14,12 +14,16 @@
 #include <string.h>
 #include <xcb/xcb.h>
 
+#define VT jbxvt.X.win.vt
+#define MW jbxvt.X.win.main
+#define XC jbxvt.X.xcb
+#define SW jbxvt.X.win.sb
+
 //  Map the window
 void map_window(void)
 {
-	xcb_connection_t * x = jbxvt.X.xcb;
-	xcb_map_window(x, jbxvt.X.win.main);
-	xcb_map_subwindows(x, jbxvt.X.win.main);
+	xcb_map_window(XC, jbxvt.X.win.main);
+	xcb_map_subwindows(XC, jbxvt.X.win.main);
 	/*  Setup the window now so that we can add LINES and COLUMNS to
 	 *  the environment.  */
 	resize_window();
@@ -30,7 +34,7 @@ void map_window(void)
 
 static void cfg(const xcb_window_t win, const struct JBDim sz)
 {
-	xcb_configure_window(jbxvt.X.xcb, win, RSZ_VM,
+	xcb_configure_window(XC, win, RSZ_VM,
 		(uint32_t[]){sz.w, sz.h});
 }
 #undef RSZ_VM
@@ -38,8 +42,8 @@ static void cfg(const xcb_window_t win, const struct JBDim sz)
 static int16_t resize_with_scrollbar(xcb_get_geometry_reply_t * r)
 {
 	// -1 to show the border:
-	cfg(jbxvt.X.win.sb, (struct JBDim){.w = SBAR_WIDTH - 1, .h = r->height});
-	cfg(jbxvt.X.win.vt, (struct JBDim){.w = r->width - SBAR_WIDTH,
+	cfg(SW, (struct JBDim){.w = SBAR_WIDTH - 1, .h = r->height});
+	cfg(VT, (struct JBDim){.w = r->width - SBAR_WIDTH,
 		.h = r->height});
 	return r->width - SBAR_WIDTH;
 }
@@ -54,11 +58,9 @@ static int16_t resize_without_scrollbar(xcb_get_geometry_reply_t * r)
  *  initiate a redraw by resizing the subwindows. */
 void resize_window(void)
 {
-	xcb_get_geometry_cookie_t c = xcb_get_geometry(jbxvt.X.xcb,
-		jbxvt.X.win.main);
+	xcb_get_geometry_cookie_t c = xcb_get_geometry(XC, MW);
 	struct JBDim * ws = &jbxvt.X.window_size;
-	xcb_get_geometry_reply_t *r = xcb_get_geometry_reply(jbxvt.X.xcb,
-		c, NULL);
+	xcb_get_geometry_reply_t *r = xcb_get_geometry_reply(XC, c, NULL);
 	jb_assert(r, "Could not get geometry");
 	if (r->width == ws->w && r->height == ws->h) {
 		free(r);
@@ -76,30 +78,25 @@ void resize_window(void)
 //  Toggle scrollbar.
 void switch_scrollbar(void)
 {
-	LOG("switch_scrollbar()");
-	xcb_connection_t * x = jbxvt.X.xcb;
-	const xcb_window_t mw = jbxvt.X.win.main;
-	xcb_get_geometry_cookie_t c = xcb_get_geometry(x, mw);
-	const bool sb = jbxvt.opt.show_scrollbar;
-	int16_t w = sb ? 0 : SBAR_WIDTH;
-	xcb_configure_window(x, jbxvt.X.win.vt, XCB_CONFIG_WINDOW_X,
-		&(uint32_t){w});
-	errno = 0;
-	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(x, c, NULL);
-	jb_assert(r, "Could not get geometry");
-	w = r->width + (sb ? -SBAR_WIDTH : w);
+#define SB jbxvt.opt.show_scrollbar
+	xcb_get_geometry_cookie_t c = xcb_get_geometry(XC, MW);
+	uint16_t o = SB ? 0 : SBAR_WIDTH;
+	xcb_configure_window(XC, VT, XCB_CONFIG_WINDOW_X, &o);
+	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(XC, c, NULL);
+	uint16_t w = r->width;
 	free(r);
-	xcb_configure_window(x, mw, XCB_CONFIG_WINDOW_WIDTH,
-		&(uint32_t){w});
-	jbxvt.opt.show_scrollbar ^= true;
+	if (SB)
+		w -= SBAR_WIDTH;
+	xcb_configure_window(XC, MW, XCB_CONFIG_WINDOW_WIDTH, &w);
+	SB ^= true;
 }
 
 // Change window or icon name:
 void change_name(uint8_t * restrict str, const bool icon)
 {
 #define XA(n) XCB_ATOM_##n
-	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE,
-		jbxvt.X.win.main, icon ? XA(WM_ICON_NAME) : XA(WM_NAME),
-		XA(STRING), 8, strlen((char*)str), str);
+	xcb_change_property(XC, XCB_PROP_MODE_REPLACE, MW, icon
+		? XA(WM_ICON_NAME) : XA(WM_NAME), XA(STRING), 8,
+		strlen((char*)str), str);
 }
 
