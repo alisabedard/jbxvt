@@ -71,8 +71,8 @@ void resize_window(void)
 	jbxvt.scr.pixels.w = (jbxvt.opt.show_scrollbar
 		? &resize_with_scrollbar : &resize_without_scrollbar)(r);
 	jbxvt.scr.pixels.h = r->height;
-	jbxvt.scr.chars = get_c(jbxvt.scr.pixels);
 	free(r);
+	jbxvt.scr.chars = get_c(jbxvt.scr.pixels);
 }
 
 //  Toggle scrollbar.
