@@ -80,8 +80,8 @@ void switch_scrollbar(void)
 {
 #define SB jbxvt.opt.show_scrollbar
 	xcb_get_geometry_cookie_t c = xcb_get_geometry(XC, MW);
-	uint16_t o = SB ? 0 : SBAR_WIDTH;
-	xcb_configure_window(XC, VT, XCB_CONFIG_WINDOW_X, &o);
+	xcb_configure_window(XC, VT, XCB_CONFIG_WINDOW_X,
+		&(uint16_t){SB ? 0 : SBAR_WIDTH});
 	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(XC, c, NULL);
 	uint16_t w = r->width;
 	free(r);
