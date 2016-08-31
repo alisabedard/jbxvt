@@ -103,6 +103,7 @@ static void wrap(void)
 	} else
 		++CUR.y;
 	CUR.x = 0;
+	SCR->wrap_next = false;
 }
 
 #if defined(__i386__) || defined(__amd64__)
@@ -122,14 +123,6 @@ static void handle_insert(const uint8_t n, const struct JBDim p)
 	const int16_t x = p.x + n_width;
 	xcb_copy_area(jbxvt.X.xcb, VT, VT, jbxvt.X.gc.tx, p.x, p.y,
 		x, p.y, width, FSZ.height);
-}
-
-static uint_fast16_t find_n(uint8_t * restrict str)
-{
-	uint_fast16_t i;
-	for (i = 0; i < jbxvt.scr.chars.width && str[i] >= ' '; ++i)
-		  ;
-	return i;
 }
 
 static void parse_special_charset(uint8_t * restrict str, const uint8_t len)
@@ -165,10 +158,8 @@ static void fix_margins(struct JBDim* restrict m, const int16_t cursor_y)
 
 static void fix_cursor(VTScreen * restrict c)
 {
-	c->cursor.y = MAX(c->cursor.y, 0);
-	c->cursor.y = MIN(c->cursor.y, jbxvt.scr.chars.height - 1);
-	c->cursor.x = MAX(c->cursor.x, 0);
-	c->cursor.x = MIN(c->cursor.x, jbxvt.scr.chars.width - 1);
+	JB_LIMIT(c->cursor.y, jbxvt.scr.chars.height - 1, 0);
+	JB_LIMIT(c->cursor.x, jbxvt.scr.chars.width - 1, 0);
 	fix_margins(&c->margin, c->cursor.y);
 }
 
@@ -198,12 +189,9 @@ static void save_render_style(const int_fast16_t n, VTScreen * restrict s)
 
 static void check_wrap(VTScreen * restrict s)
 {
-	const uint16_t w = CSZ.w - 1;
-	if (s->cursor.x >= w) {
-		if ((s->wrap_next = jbxvt.mode.decawm)) {
-			s->cursor.x = 0;
-		}
-	}
+	const uint16_t w = CSZ.w;
+	if (s->cursor.x >= w)
+		s->wrap_next = !jbxvt.mode.decawm;
 }
 
 /*  Display the string at the current position.
@@ -231,9 +219,8 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		}
 		check_selection(s->cursor.y, s->cursor.y);
 		p = get_p(s->cursor);
-		const int_fast16_t n = find_n(str);
 		if (unlikely(jbxvt.mode.insert))
-			handle_insert(n, p);
+			handle_insert(1, p);
 		uint8_t * t = s->text[s->cursor.y];
 		if (!t) return;
 		t += s->cursor.x;
@@ -241,14 +228,14 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 			parse_special_charset(str, len);
 		// Render the string:
 		if (!s->decpm) {
-			paint_rval_text(str, jbxvt.scr.rstyle, n, p);
+			paint_rval_text(str, jbxvt.scr.rstyle, 1, p);
 			// Save scroll history:
-			memcpy(t, str, n);
+			*t = *str;
 		}
-		save_render_style(n, s);
-		len -= n;
-		str += n;
-		s->cursor.x += n;
+		save_render_style(1, s);
+		--len;
+		++str;
+		++s->cursor.x;
 		check_wrap(s);
 	}
 	draw_cursor();
