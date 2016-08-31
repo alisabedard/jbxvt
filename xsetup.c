@@ -43,16 +43,18 @@ static void cfg(const xcb_window_t win, const struct JBDim sz)
 static int16_t rsz(xcb_get_geometry_reply_t * r)
 {
 	// -1 to show the border:
-	cfg(SW, (struct JBDim){.w = SBAR_WIDTH - 1, .h = r->height});
-	const uint16_t w = r->width - SBAR_WIDTH;
-	cfg(VT, (struct JBDim){.w = w, .h = r->height});
-	return w;
+	struct JBDim sz = {.w = SBAR_WIDTH - 1, .h = r->height};
+	cfg(SW, sz);
+	sz.width = r->width - SBAR_WIDTH;
+	cfg(VT, sz);
+	return sz.width;
 }
 
 static int16_t rsz_no_sb(xcb_get_geometry_reply_t * r)
 {
-	cfg(jbxvt.X.win.vt, (struct JBDim){.w = r->width, .h = r->height});
-	return r->width;
+	const uint16_t w = r->width;
+	cfg(jbxvt.X.win.vt, (struct JBDim){.w = w, .h = r->height});
+	return w;
 }
 
 /*  Called after a possible window size change.  If the window size has changed
