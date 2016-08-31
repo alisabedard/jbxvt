@@ -40,7 +40,7 @@ static void cfg(const xcb_window_t win, const struct JBDim sz)
 }
 #undef RSZ_VM
 
-static int16_t rsz(xcb_get_geometry_reply_t * r)
+static int16_t rsz(const xcb_get_geometry_reply_t * restrict r)
 {
 	// -1 to show the border:
 	struct JBDim sz = {.w = SBAR_WIDTH - 1, .h = r->height};
@@ -50,7 +50,7 @@ static int16_t rsz(xcb_get_geometry_reply_t * r)
 	return sz.width;
 }
 
-static int16_t rsz_no_sb(xcb_get_geometry_reply_t * r)
+static int16_t rsz_no_sb(const xcb_get_geometry_reply_t * restrict r)
 {
 	const uint16_t w = r->width;
 	cfg(jbxvt.X.win.vt, (struct JBDim){.w = w, .h = r->height});
