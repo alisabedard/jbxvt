@@ -37,7 +37,6 @@ struct JBXVTXData {
 	struct JBXVTXGCs gc;
 	struct JBXVTXPixels color;
 	union { struct JBXVTFontData f, font; };
-	struct JBDim window_size;
 	int8_t screen_number;
 };
 

@@ -19,6 +19,8 @@
 #define XC jbxvt.X.xcb
 #define SW jbxvt.X.win.sb
 #define SB jbxvt.opt.show_scrollbar
+#define CSZ jbxvt.scr.chars
+#define PSZ jbxvt.scr.pixels
 
 //  Map the window
 void map_window(void)
@@ -31,50 +33,21 @@ void map_window(void)
 	scr_reset(); // update size
 }
 
-#define RSZ_VM (XCB_CONFIG_WINDOW_WIDTH|XCB_CONFIG_WINDOW_HEIGHT)
-
-static void cfg(const xcb_window_t win, const struct JBDim sz)
-{
-	xcb_configure_window(XC, win, RSZ_VM,
-		(uint32_t[]){sz.w, sz.h});
-}
-#undef RSZ_VM
-
-static int16_t rsz(const xcb_get_geometry_reply_t * restrict r)
-{
-	// -1 to show the border:
-	struct JBDim sz = {.w = SBAR_WIDTH - 1, .h = r->height};
-	cfg(SW, sz);
-	sz.width = r->width - SBAR_WIDTH;
-	cfg(VT, sz);
-	return sz.width;
-}
-
-static int16_t rsz_no_sb(const xcb_get_geometry_reply_t * restrict r)
-{
-	const uint16_t w = r->width;
-	cfg(jbxvt.X.win.vt, (struct JBDim){.w = w, .h = r->height});
-	return w;
-}
-
 /*  Called after a possible window size change.  If the window size has changed
  *  initiate a redraw by resizing the subwindows. */
 void resize_window(void)
 {
-	xcb_get_geometry_cookie_t c = xcb_get_geometry(XC, MW);
-	struct JBDim * ws = &jbxvt.X.window_size;
-	xcb_get_geometry_reply_t *r = xcb_get_geometry_reply(XC, c, NULL);
-	jb_assert(r, "Could not get geometry");
-	if (r->width == ws->w && r->height == ws->h) {
-		free(r);
-		return; // size not changed.
-	}
-	ws->w = r->width;
-	ws->h = r->height;
-	jbxvt.scr.pixels.w = (SB ? &rsz : &rsz_no_sb)(r);
-	jbxvt.scr.pixels.h = r->height;
+	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(XC,
+		xcb_get_geometry(XC, MW), NULL);
+	struct JBDim sz = {.w = r->width, .h = r->height};
 	free(r);
-	jbxvt.scr.chars = get_c(jbxvt.scr.pixels);
+	if (SB) {
+		xcb_configure_window(XC, SW, XCB_CONFIG_WINDOW_HEIGHT, &sz.h);
+		sz.w -= SBAR_WIDTH;
+	}
+	xcb_configure_window(XC, VT, XCB_CONFIG_WINDOW_WIDTH |
+		XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[]){sz.w, sz.h});
+	CSZ = get_c(PSZ = sz);
 }
 
 //  Toggle scrollbar.
