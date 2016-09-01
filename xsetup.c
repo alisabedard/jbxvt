@@ -42,7 +42,8 @@ void resize_window(void)
 	struct JBDim sz = {.w = r->width, .h = r->height};
 	free(r);
 	if (SB) {
-		xcb_configure_window(XC, SW, XCB_CONFIG_WINDOW_HEIGHT, &sz.h);
+		xcb_configure_window(XC, SW, XCB_CONFIG_WINDOW_HEIGHT,
+			(uint32_t[]){sz.h});
 		sz.w -= SBAR_WIDTH;
 	}
 	xcb_configure_window(XC, VT, XCB_CONFIG_WINDOW_WIDTH |
@@ -55,9 +56,9 @@ void switch_scrollbar(void)
 {
 	xcb_get_geometry_cookie_t c = xcb_get_geometry(XC, MW);
 	xcb_configure_window(XC, VT, XCB_CONFIG_WINDOW_X,
-		&(uint16_t){SB ? 0 : SBAR_WIDTH});
+		&(uint32_t){SB ? 0 : SBAR_WIDTH});
 	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(XC, c, NULL);
-	uint16_t w = r->width;
+	uint32_t w = r->width;
 	free(r);
 	if (SB)
 		w -= SBAR_WIDTH;
