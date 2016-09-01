@@ -1,4 +1,5 @@
 #include debug.mk
+#CC=clang
 
 exe=jbxvt
 PREFIX=/usr
