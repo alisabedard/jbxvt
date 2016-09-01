@@ -185,7 +185,12 @@ static void attach_signals(void)
 static fd_t run_command(char ** argv)
 {
 	fd_t ptyfd, ttyfd;
+#ifdef POSIX_UTMPX
 	char * tty_name = get_pseudo_tty(&ptyfd, &ttyfd);
+#else//!POSIX_UTMPX
+	// for FreeBSD:
+	get_pseudo_tty(&ptyfd, &ttyfd);
+#endif//POSIX_UTMPX
 	jb_check(fcntl(ptyfd, F_SETFL, O_NONBLOCK) != 1,
 		"Could not set file status flags on pty file descriptor");
 	// +1 to allow for X fd
