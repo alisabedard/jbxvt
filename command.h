@@ -16,12 +16,12 @@ enum CommandLimits {
 
 //JBXVTEvent * pop_xevent(void);
 
-#ifdef __GNUC__ // We are using GCC
+#ifndef __clang__
 char * cprintf(char *, ...)
 	__attribute__((format(gnu_printf, 1, 2)));
-#else//!__GNUC__
+#else//__clang__
 char * cprintf(char *, ...);
-#endif//__GNUC__
+#endif//!__clang__
 
 /*  Initialise the command connection.  This should be called after the X
  *  server connection is established.  */
