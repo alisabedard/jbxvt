@@ -79,7 +79,7 @@ void repaint(void)
 {
 	const xcb_rectangle_t r = {.width = jbxvt.scr.chars.width,
 		.height = jbxvt.scr.chars.height};
-	struct JBDim p = {0};
+	struct JBDim p = {};
 	/* Allocate enough space to process each column, plus
 	 * wrap byte. */
 	uint8_t str[jbxvt.scr.chars.width + 1];
