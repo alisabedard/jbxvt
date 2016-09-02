@@ -51,7 +51,7 @@ static void handle_txtpar(Token * restrict token)
 
 static void form_feed(void)
 {
-	const struct JBDim m = jbxvt.scr.current->margin;
+	const struct JBDim m = SCR->margin;
 	scr_move(0, m.top, 0);
 	if (jbxvt.mode.decpff)
 		cprintf("FF");
@@ -60,14 +60,13 @@ static void form_feed(void)
 
 static void handle_tk_char(const uint8_t tk_char)
 {
-	VTScreen * s = jbxvt.scr.current;
 	switch (tk_char) {
 	case '\n': // handle line feed
-		scr_index_from(1, s->margin.t);
+		scr_index_from(1, SCR->margin.t);
 		break;
 	case 013: // vertical tab
-		for (uint8_t i = s->cursor.y; i % 8; ++i)
-			  scr_index_from(1, s->margin.t);
+		for (uint8_t i = SCR->cursor.y; i % 8; ++i)
+			  scr_index_from(1, SCR->margin.t);
 		break;
 	case '\f': // form feed
 		form_feed();
@@ -130,30 +129,22 @@ static void decstbm(Token * restrict token)
 	int32_t * restrict t = token->arg;
 	TLOG("TK_STBM args: %d, 0: %d, 1: %d",
 		(int)token->nargs, t[0], t[1]);
-	VTScreen * restrict s = jbxvt.scr.current;
-	if (token->private == '?') { //RESTOREPM
-		// Restore private modes
+	if (token->private == TK_RESTOREPM) {
+		// Restore private modes.
 		memcpy(&jbxvt.mode, &jbxvt.saved_mode,
 			sizeof(struct JBXVTPrivateModes));
-	} else if (token->nargs < 2 || t[0] >= t[1]) {
-		TLOG("STBM reset");
-		// reset
-		s->margin.top = 0;
-		s->margin.bottom = jbxvt.scr.chars.height - 1;
-	} else { // set
-		TLOG("STBM set");
-		TLOG("m.b: %d, c.y: %d", s->margin.bottom, s->cursor.y);
-		s->margin.top = t[0] - 1;
-		s->margin.bottom = t[1] - 1;
+		return;
 	}
-
+	const bool rst = token->nargs < 2 || t[0] >= t[1];
+	SCR->margin = (struct JBDim){.t = rst ? 0 : t[0] - 1,
+		.b = (rst ? CSZ.h : t[1]) - 1};
 }
 
 static void handle_dsr(const int16_t arg)
 {
 	switch (arg) {
 	case 6 : {
-		const struct JBDim c = jbxvt.scr.current->cursor;
+		const struct JBDim c = SCR->cursor;
 		cprintf("\033[%d;%dR", c.y + 1, c.x + 1);
 		break;
 	}
@@ -188,15 +179,13 @@ static void tbc(const uint8_t t)
 	if (t == 3)
 		scr_set_tab(-1, false);
 	else if (!t)
-		scr_set_tab(jbxvt.scr.current->cursor.x, false);
+		scr_set_tab(SCR->cursor.x, false);
 }
 
 static void parse_token(void)
 {
 	Token token;
 	static bool size_set = true;
-	VTScreen * s;
-	s = jbxvt.scr.current; // update in case screen changed
 	get_token(&token);
 	int32_t * t = token.arg;
 	// n is sanitized for ops with optional args
@@ -206,7 +195,7 @@ static void parse_token(void)
 // macro to aid in debug logging
 #define CASE(L) case L:TLOG(#L);
 // log unimplemented features
-#define FIXME(L) CASE(L);TLOG("\tFIXME: Unimplemented");break;
+#define FIXME(L) CASE(L);LOG("\tFIXME: Unimplemented");break;
 
 	CASE(TK_ALN) // screen alignment test
 		scr_efill();
@@ -310,7 +299,7 @@ static void parse_token(void)
 		scr_move(t[0] - 1, 0, COL_RELATIVE | ROW_RELATIVE);
 		break;
 	CASE(TK_HTS) // set tab stop at current position
-		scr_set_tab(s->cursor.x, true);
+		scr_set_tab(SCR->cursor.x, true);
 		break;
 	CASE(TK_ICH)
 		scr_insert_characters(n);
@@ -318,7 +307,7 @@ static void parse_token(void)
 
 	CASE(TK_IL) n = -n; // fall through
 	CASE(TK_DL)
-		scr_index_from(n, s->cursor.y);
+		scr_index_from(n, SCR->cursor.y);
 		break;
 
 	CASE(TK_LL)
@@ -335,14 +324,14 @@ static void parse_token(void)
 		}
 		break;
 	CASE(TK_NEL) // move to first position on next line down.
-		scr_move(0, s->cursor.y + 1, 0);
+		scr_move(0, SCR->cursor.y + 1, 0);
 		break;
 	FIXME(TK_OSC);
 	CASE(TK_PAM)
 		set_keys(true, false);
 		break;
 	CASE(TK_PM)
-		s->decpm = true;
+		SCR->decpm = true;
 		break;
 	CASE(TK_PNM)
 		set_keys(false, false);
@@ -357,7 +346,7 @@ static void parse_token(void)
 	CASE(TK_RI) // Reverse index
 		n = -n; // fall through
 	CASE(TK_IND) // Index (same as \n)
-		scr_index_from(n, s->margin.t);
+		scr_index_from(n, SCR->margin.t);
 		break;
 
 	CASE(TK_RESIZE)
@@ -404,8 +393,8 @@ static void parse_token(void)
 		t[0] = - t[0]; // fall through
 	CASE(TK_SU) // scroll up n lines;
 		TLOG("TK_SU");
-		scroll(s->margin.top,
-			s->margin.bot, t[0]);
+		scroll(SCR->margin.top,
+			SCR->margin.bot, t[0]);
 		break;
 
 	CASE(TK_SELSTART)
@@ -464,7 +453,7 @@ static void parse_token(void)
 		break;
 	FIXME(TK_SOS); // start of string
 	CASE(TK_ST)
-		s->decpm = false;
+		SCR->decpm = false;
 		break;
 	CASE(TK_STBM) // set top and bottom margins.
 		decstbm(&token);
