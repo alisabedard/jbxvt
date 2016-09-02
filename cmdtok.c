@@ -193,12 +193,11 @@ static void poll_io(fd_set * restrict in_fdset)
 
 static bool get_buffered(int_fast16_t * val, const int_fast8_t flags)
 {
-	struct JBXVTCommandData * c = &jbxvt.com;
 	bool r = false;
-	if ((r = (c->stack.top > c->stack.data)))
-		*val = *--c->stack.top;
-	else if ((r = (c->buf.next < c->buf.top)))
-		*val = *c->buf.next++;
+	if ((r = (COM.stack.top > COM.stack.data)))
+		*val = *--COM.stack.top;
+	else if ((r = (COM.buf.next < COM.buf.top)))
+		*val = *COM.buf.next++;
 	else if ((r = (flags & BUF_ONLY)))
 		*val = GCC_NULL;
 	return r;
