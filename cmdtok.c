@@ -170,10 +170,10 @@ static void poll_io(fd_set * restrict in_fdset)
 	FD_ZERO(&out_fdset);
 	if (jbxvt.com.send_count > 0)
 		FD_SET(jbxvt.com.fd, &out_fdset);
-	int sv;
-	sv = select(jbxvt.com.width, in_fdset, &out_fdset, NULL,
-		&(struct timeval){.tv_sec = 0, .tv_usec = 500000});
-	if (sv == -1)
+	errno = 0; // Ensure next error message is accurate
+	if (jb_check(select(jbxvt.com.width, in_fdset, &out_fdset, NULL,
+		&(struct timeval){.tv_usec = 500000}) != -1,
+		"Error performing select()"))
 		return;
 	if (FD_ISSET(jbxvt.com.fd, &out_fdset))
 		output_to_command();
