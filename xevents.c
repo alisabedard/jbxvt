@@ -7,7 +7,6 @@
 #include "libjb/log.h"
 #include "screen.h"
 #include "Token.h"
-#include "xeventst.h"
 
 #include <gc.h>
 #include <stdio.h>
@@ -144,7 +143,7 @@ static void set_args(const TokenType type, Token * restrict tk,
 	sizeof((int32_t[]){__VA_ARGS__}))
 
 static void handle_motion_notify(Token * restrict tk,
-	struct xeventst * restrict xe)
+	struct JBXVTEvent * restrict xe)
 {
 	if (xe->window == jbxvt.X.win.sb
 		&& (xe->state & XCB_KEY_BUT_MASK_BUTTON_2)) {
@@ -161,7 +160,7 @@ static void handle_motion_notify(Token * restrict tk,
 	}
 }
 
-static void sbop(Token * restrict tk, struct xeventst * restrict xe,
+static void sbop(Token * restrict tk, struct JBXVTEvent * restrict xe,
 	const bool up)
 {
 	if (is_tracked()) // let the application handle scrolling
@@ -172,7 +171,7 @@ static void sbop(Token * restrict tk, struct xeventst * restrict xe,
 }
 
 static void handle_button_release(Token * restrict tk,
-	struct xeventst * restrict xe)
+	struct JBXVTEvent * restrict xe)
 {
 	if (xe->window == jbxvt.X.win.sb) {
 		switch (xe->button) {
@@ -213,7 +212,7 @@ static void handle_button_release(Token * restrict tk,
 	}
 }
 
-static TokenType handle_button1_press(struct xeventst * restrict xe)
+static TokenType handle_button1_press(struct JBXVTEvent * restrict xe)
 {
 	static unsigned int time1, time2;
 	if (xe->time - time2
@@ -231,7 +230,7 @@ static TokenType handle_button1_press(struct xeventst * restrict xe)
 }
 
 static void handle_button_press(Token * restrict tk,
-	struct xeventst * restrict xe)
+	struct JBXVTEvent * restrict xe)
 {
 	const xcb_window_t v = jbxvt.X.win.vt;
 	if (xe->window == v && xe->state == XCB_KEY_BUT_MASK_CONTROL) {
@@ -258,10 +257,10 @@ static void handle_button_press(Token * restrict tk,
 		ARGS(TK_SBGOTO, xe->box.y);
 }
 
-static JBXVTEvent * pop_xevent(void)
+static struct JBXVTEvent * pop_xevent(void)
 {
 	struct JBXVTEventQueue * q = &jbxvt.com.events;
-	JBXVTEvent * xe = q->last;
+	struct JBXVTEvent * xe = q->last;
 	if (xe) {
 		q->last = xe->prev;
 		*(q->last ? &q->last->next : &q->start) = NULL;
@@ -269,7 +268,7 @@ static JBXVTEvent * pop_xevent(void)
 	return xe;
 }
 
-static JBXVTRegion get_region(JBXVTEvent * xe)
+static JBXVTRegion get_region(struct JBXVTEvent * xe)
 {
 	const xcb_window_t w = xe->window;
 	const struct JBXVTXWindows * j = &jbxvt.X.win;
@@ -285,7 +284,7 @@ static JBXVTRegion get_region(JBXVTEvent * xe)
 // convert next X event into a token
 bool handle_xevents(Token * restrict tk)
 {
-	JBXVTEvent * xe = pop_xevent();
+	struct JBXVTEvent * xe = pop_xevent();
 	if(!xe)
 		return false;
 	tk->region = get_region(xe);

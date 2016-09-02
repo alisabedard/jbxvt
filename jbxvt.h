@@ -1,3 +1,4 @@
+// Copyright 2016, Jeffrey E. Bedard
 #ifndef JBXVT_H
 #define JBXVT_H
 
@@ -9,7 +10,7 @@
 #include "selend.h"
 #include "SLine.h"
 #include "VTScreen.h"
-#include "xeventst.h"
+#include "JBXVTEvent.h"
 
 struct JBXVTXWindows {
 	xcb_window_t vt, sb, main;
@@ -68,7 +69,7 @@ struct JBXVTCommandContainer {
 };
 
 struct JBXVTEventQueue {
-	JBXVTEvent * start, * last;
+	struct JBXVTEvent * start, * last;
 };
 
 struct JBXVTCommandData {

@@ -10,7 +10,6 @@
 #include "lookup_key.h"
 #include "screen.h"
 #include "xevents.h"
-#include "xeventst.h"
 
 #include <errno.h>
 #include <gc.h>
@@ -31,14 +30,14 @@ enum ComCharFlags {BUF_ONLY=1, GET_XEVENTS=2};
 #define BUF jbxvt.com.buf
 #define CFD COM.fd
 
-static JBXVTEvent * ev_alloc(xcb_generic_event_t * restrict e)
+static struct JBXVTEvent * ev_alloc(xcb_generic_event_t * restrict e)
 {
-	JBXVTEvent * xe = GC_MALLOC(sizeof(JBXVTEvent));
+	struct JBXVTEvent * xe = GC_MALLOC(sizeof(struct JBXVTEvent));
 	xe->type = e->response_type;
 	return xe;
 }
 
-static void push_xevent(JBXVTEvent * xe)
+static void push_xevent(struct JBXVTEvent * xe)
 {
 	struct JBXVTEventQueue * q = &jbxvt.com.events;
 	xe->next = q->start;
@@ -59,14 +58,14 @@ static void handle_focus(xcb_generic_event_t * restrict e)
 	default:
 		return;
 	}
-	JBXVTEvent * xe = ev_alloc(e);
+	struct JBXVTEvent * xe = ev_alloc(e);
 	xe->detail = f->detail;
 	push_xevent(xe);
 }
 
 #define XESET(a, b) xe->a = e->b
 #define XEEQ(a) XESET(a, a)
-#define EALLOC(t) JBXVTEvent * xe = ev_alloc(ge); t * e = (t*)ge;
+#define EALLOC(t) struct JBXVTEvent * xe = ev_alloc(ge); t * e = (t*)ge;
 
 static void handle_sel(xcb_generic_event_t * restrict ge)
 {
