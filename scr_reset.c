@@ -18,12 +18,10 @@
 
 // Shortcuts
 #define S jbxvt.scr
-#define SCR S.current
 #define S0 S.s[0]
 #define S1 S.s[1]
 #define P S.pixels
 #define X jbxvt.X
-#define FSZ X.f.size
 
 static void init_screen_elements(VTScreen * restrict scr,
 	uint8_t ** restrict text, uint32_t ** restrict rend)

@@ -17,10 +17,8 @@
 
 #include <gc.h>
 
-#define X jbxvt.X
-#define FSZ X.f.size
-
 #define GET_X(op) p.w op##= FSZ.w; p.y op##= FSZ.h; return p;
+
 struct JBDim get_c(struct JBDim p)
 {
 	GET_X(/);
