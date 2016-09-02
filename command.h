@@ -8,10 +8,10 @@
 #include <stdint.h>
 
 enum CommandLimits {
-	KBUFSIZE =	8,	// size of keyboard mapping buffer
-	COM_BUF_SIZE =	512,	// size of command read buffer
-	COM_PUSH_MAX =	20,	// max # chars to push back to input queue
-	MP_INTERVAL =	500	// multi-press interval in ms
+	KBUFSIZE =	8,		// size of keyboard mapping buffer
+	COM_BUF_SIZE =	UINT8_MAX,	// size of command read buffer
+	COM_PUSH_MAX =	20,		// max # chars to push back to input queue
+	MP_INTERVAL =	500		// multi-press interval in ms
 };
 
 //JBXVTEvent * pop_xevent(void);

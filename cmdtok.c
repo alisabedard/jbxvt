@@ -25,6 +25,12 @@
 //  Flags used to control get_com_char();
 enum ComCharFlags {BUF_ONLY=1, GET_XEVENTS=2};
 
+// Shortcuts
+#define XC jbxvt.X.xcb
+#define COM jbxvt.com
+#define BUF jbxvt.com.buf
+#define CFD COM.fd
+
 static JBXVTEvent * ev_alloc(xcb_generic_event_t * restrict e)
 {
 	JBXVTEvent * xe = GC_MALLOC(sizeof(JBXVTEvent));
@@ -104,9 +110,12 @@ static void key_press(xcb_generic_event_t * restrict e)
 	}
 }
 
-static int_fast16_t handle_xev(xcb_generic_event_t * restrict event,
-	const uint8_t flags)
+static bool handle_xev(void)
 {
+	jb_check_x(XC);
+	xcb_generic_event_t * event = xcb_poll_for_event(XC);
+	if (!event)
+		return false;
 	switch (event->response_type & ~0x80) {
 	case XCB_KEY_PRESS:
 		key_press(event);
@@ -129,9 +138,8 @@ static int_fast16_t handle_xev(xcb_generic_event_t * restrict event,
 	default:
 		handle_other(event);
 	}
-	if (flags & GET_XEVENTS)
-		  return GCC_NULL;
-	return 0;
+	free(event);
+	return true;
 }
 
 static int_fast16_t output_to_command(void)
@@ -213,30 +221,21 @@ static int_fast16_t get_com_char(const int_fast8_t flags)
 	int_fast16_t ret = 0;
 	if (get_buffered(&ret, flags))
 		return ret;
-	// Flush here to draw the cursor.
 	xcb_flush(jbxvt.X.xcb);
-	fd_set in_fdset;
-	struct JBXVTCommandData * c = &jbxvt.com;
-	do {
-		FD_ZERO(&in_fdset);
-		xcb_generic_event_t * e;
-		if ((e = xcb_poll_for_event(jbxvt.X.xcb))) {
-			// Make sure server connection still good:
-			jb_check_x(jbxvt.X.xcb);
-			ret = handle_xev(e, flags);
-			free(e);
-			if (ret)
-				  return ret;
-		}
-		poll_io(&in_fdset);
-	} while(!FD_ISSET(c->fd, &in_fdset));
-	uint8_t * d = c->buf.data;
-	const ssize_t n = read(c->fd, d, COM_BUF_SIZE);
-	if (n < 1) // buffer is empty
+	fd_set in;
+input:
+	FD_ZERO(&in);
+	if (handle_xev() && (flags & GET_XEVENTS))
+		return GCC_NULL;
+	poll_io(&in);
+	if (!FD_ISSET(CFD, &in))
+		goto input;
+	const uint8_t l = read(CFD, BUF.data, COM_BUF_SIZE);
+	if (l < 1)
 		return errno == EWOULDBLOCK ? GCC_NULL : EOF;
-	c->buf.next = d;
-	c->buf.top = d + n;
-	return *c->buf.next++;
+	BUF.next = BUF.data;
+	BUF.top = BUF.data + l;
+	return *BUF.next++;
 }
 
 //  Return true if the character is one that can be handled by scr_string()
