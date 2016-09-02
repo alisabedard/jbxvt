@@ -3,7 +3,7 @@
 
 #include "Token.h"
 
-void handle_sgr(Token * restrict token)
+void handle_sgr(struct Token * restrict token)
 	__attribute__((hot));
 
 enum RenderFlag {

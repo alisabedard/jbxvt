@@ -11,6 +11,6 @@
 xcb_atom_t wm_del_win(void);
 
 // convert next X event into a token
-bool handle_xevents(Token * restrict tk);
+bool handle_xevents(struct Token * restrict tk);
 
 #endif//!JBXVT_XEVENTS_H

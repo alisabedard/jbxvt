@@ -252,7 +252,7 @@ static inline bool is_string_char(register int_fast16_t c)
 #else
 	__attribute__((nonnull))
 #endif//x86
-static void handle_string_char(int_fast16_t c, Token * restrict tk)
+static void handle_string_char(int_fast16_t c, struct Token * restrict tk)
 {
 	uint_fast16_t i = 0;
 	tk->nlcount = 0;
@@ -274,7 +274,7 @@ static void handle_string_char(int_fast16_t c, Token * restrict tk)
 #else
 	__attribute__((nonnull))
 #endif//x86
-static void start_esc(int_fast16_t c, Token * restrict tk)
+static void start_esc(int_fast16_t c, struct Token * restrict tk)
 {
 	c = get_com_char(0);
 	if (c >= '<' && c <= '?') {
@@ -311,7 +311,7 @@ static void start_esc(int_fast16_t c, Token * restrict tk)
 #else
 	__attribute__((nonnull))
 #endif//x86
-static void end_esc(int_fast16_t c, Token * restrict tk)
+static void end_esc(int_fast16_t c, struct Token * restrict tk)
 {
 	c = get_com_char(0);
 	uint_fast16_t n = 0;
@@ -333,14 +333,14 @@ static void end_esc(int_fast16_t c, Token * restrict tk)
 	tk->type = TK_TXTPAR;
 }
 
-static void check_st(Token * t)
+static void check_st(struct Token * t)
 {
 	int_fast16_t c = get_com_char(0);
 	if (c != TK_ST)
 		t->type = TK_NULL;
 }
 
-static void start_dcs(Token * t)
+static void start_dcs(struct Token * t)
 {
 	int_fast16_t c = get_com_char(0);
 	switch (c) {
@@ -393,7 +393,7 @@ static void start_dcs(Token * t)
 #else
 	__attribute__((nonnull))
 #endif//x86
-static void handle_esc(int_fast16_t c, Token * restrict tk)
+static void handle_esc(int_fast16_t c, struct Token * restrict tk)
 {
 	c = get_com_char(0);
 	switch(c) {
@@ -501,7 +501,7 @@ static void handle_esc(int_fast16_t c, Token * restrict tk)
 	}
 }
 
-static void default_token(Token * restrict tk, int_fast16_t c)
+static void default_token(struct Token * restrict tk, int_fast16_t c)
 {
 	switch(c) { // handle 8-bit controls
 	case TK_IND:
@@ -558,9 +558,9 @@ static void default_token(Token * restrict tk, int_fast16_t c)
 }
 
 //  Return an input token
-void get_token(Token * restrict tk)
+void get_token(struct Token * restrict tk)
 {
-	memset(tk, 0, sizeof(Token));
+	memset(tk, 0, sizeof(struct Token));
 	// set token per event:
 	if(handle_xevents(tk))
 		  return;

@@ -5,6 +5,6 @@
 
 #include "Token.h"
 
-void get_token(Token * restrict tk);
+void get_token(struct Token * restrict tk);
 
 #endif//!CMDTOK_H

@@ -63,7 +63,7 @@ static bool handle_color_encoding(const int32_t arg, const bool is_fg,
 #define SGRFG(c) sgrc(c, true)
 #define SGRBG(c) sgrc(c, false)
 
-void handle_sgr(Token * restrict token)
+void handle_sgr(struct Token * restrict token)
 {
 	if (token->nargs == 0) {
 		scr_style(RS_NONE);

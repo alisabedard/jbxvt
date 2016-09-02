@@ -32,7 +32,7 @@
 #define TLOG(...)
 #endif//DEBUG_TOKENS
 
-static void handle_txtpar(Token * restrict token)
+static void handle_txtpar(struct Token * restrict token)
 {
 	switch (token->arg[0]) {
 	case 0 :
@@ -124,7 +124,7 @@ static void select_charset(const char c, const uint8_t i)
 	}
 }
 
-static void decstbm(Token * restrict token)
+static void decstbm(struct Token * restrict token)
 {
 	int32_t * restrict t = token->arg;
 	TLOG("TK_STBM args: %d, 0: %d, 1: %d",
@@ -184,7 +184,7 @@ static void tbc(const uint8_t t)
 
 static void parse_token(void)
 {
-	Token token;
+	struct Token token;
 	static bool size_set = true;
 	get_token(&token);
 	int32_t * t = token.arg;

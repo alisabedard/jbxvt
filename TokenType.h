@@ -6,7 +6,7 @@
 
 // Reference man console_codes(4) and ctlseqs(ms)
 
-//  Token types
+//  struct Token types
 typedef enum {
 	TK_NULL = 0, // null token to be ignored
 

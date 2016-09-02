@@ -22,7 +22,7 @@
 #define LOG(...)
 #endif
 
-void dec_reset(Token * restrict token)
+void dec_reset(struct Token * restrict token)
 {
 	LOG("handle_reset(%d)", token->arg[0]);
 	const bool is_set = token->type == TK_SET;

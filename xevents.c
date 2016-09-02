@@ -130,7 +130,7 @@ static bool is_tracked(void)
 	return r;
 }
 
-static void set_args(const TokenType type, Token * restrict tk,
+static void set_args(const TokenType type, struct Token * restrict tk,
 	int32_t * restrict args, uint8_t nargs)
 {
 	nargs = MIN(nargs, TK_MAX_ARGS); // prevent buffer overflow
@@ -142,7 +142,7 @@ static void set_args(const TokenType type, Token * restrict tk,
 #define ARGS(type, ...) set_args(type, tk, (int32_t[]){__VA_ARGS__},\
 	sizeof((int32_t[]){__VA_ARGS__}))
 
-static void handle_motion_notify(Token * restrict tk,
+static void handle_motion_notify(struct Token * restrict tk,
 	struct JBXVTEvent * restrict xe)
 {
 	if (xe->window == jbxvt.X.win.sb
@@ -160,7 +160,7 @@ static void handle_motion_notify(Token * restrict tk,
 	}
 }
 
-static void sbop(Token * restrict tk, struct JBXVTEvent * restrict xe,
+static void sbop(struct Token * restrict tk, struct JBXVTEvent * restrict xe,
 	const bool up)
 {
 	if (is_tracked()) // let the application handle scrolling
@@ -170,7 +170,7 @@ static void sbop(Token * restrict tk, struct JBXVTEvent * restrict xe,
 		xe->box.y) : ARGS(up ? TK_CUU : TK_CUD, 1);
 }
 
-static void handle_button_release(Token * restrict tk,
+static void handle_button_release(struct Token * restrict tk,
 	struct JBXVTEvent * restrict xe)
 {
 	if (xe->window == jbxvt.X.win.sb) {
@@ -229,7 +229,7 @@ static TokenType handle_button1_press(struct JBXVTEvent * restrict xe)
 	return TK_SELSTART;
 }
 
-static void handle_button_press(Token * restrict tk,
+static void handle_button_press(struct Token * restrict tk,
 	struct JBXVTEvent * restrict xe)
 {
 	const xcb_window_t v = jbxvt.X.win.vt;
@@ -268,7 +268,7 @@ static struct JBXVTEvent * pop_xevent(void)
 	return xe;
 }
 
-static JBXVTRegion get_region(struct JBXVTEvent * xe)
+static enum Region get_region(struct JBXVTEvent * xe)
 {
 	const xcb_window_t w = xe->window;
 	const struct JBXVTXWindows * j = &jbxvt.X.win;
@@ -282,7 +282,7 @@ static JBXVTRegion get_region(struct JBXVTEvent * xe)
 }
 
 // convert next X event into a token
-bool handle_xevents(Token * restrict tk)
+bool handle_xevents(struct Token * restrict tk)
 {
 	struct JBXVTEvent * xe = pop_xevent();
 	if(!xe)

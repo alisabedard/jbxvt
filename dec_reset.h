@@ -6,7 +6,7 @@
 
 #include "Token.h"
 
-void dec_reset(Token * restrict token)
+void dec_reset(struct Token * restrict token)
 	__attribute__((nonnull));
 
 #endif//!DEC_RESET_H
