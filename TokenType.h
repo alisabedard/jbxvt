@@ -119,6 +119,7 @@ typedef enum {
 	TK_RC = '8', // restore cursor position
 	TK_PAM = '=', // keypad to applications mode
 	TK_PNM = '>', // keypad to numeric mode
+	TK_RESTOREPM = '?', // restore private modes
 
 	TK_ESC = 033,
 	TK_IND = 0x84,
