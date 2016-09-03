@@ -33,7 +33,6 @@ static void zero(const int16_t line, const uint16_t sz, const int16_t col)
 	memset(SCR->text[line] + col, 0, sz);
 	memset(SCR->rend[line] + col, 0, sz << 2);
 	SCR->wrap[line] = false;
-
 }
 
 static void erase_range(xcb_rectangle_t * restrict h,

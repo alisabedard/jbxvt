@@ -24,7 +24,7 @@ static void invert(const int16_t rs, const int16_t re, const int16_t cs,
 
 static void change(SelEnd * se, SelEnd * ose)
 {
-	int16_t rs, cs, re, ce, n;
+	int16_t rs = 0, cs = 0, re = 0, ce = 0, n;
 	n = selcmp(se, ose);
 	if (!n) return;
 	// repaint the start.
