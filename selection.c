@@ -15,10 +15,11 @@
 #define XC jbxvt.X.xcb
 #define VT jbxvt.X.win.vt
 
-static void prop(const xcb_window_t win, const xcb_atom_t a)
+static void prop(const xcb_atom_t a)
 {
 	xcb_change_property(XC, XCB_PROP_MODE_REPLACE,
-		win, a, XCB_ATOM_STRING, 8, jbxvt.sel.length, jbxvt.sel.text);
+		VT, a, XCB_ATOM_STRING, 8, jbxvt.sel.length,
+		jbxvt.sel.text);
 }
 
 //  Make the selection currently delimited by the selection end markers.
@@ -27,9 +28,9 @@ void scr_make_selection(void)
 	LOG("scr_make_selection");
 	save_selection();
 	/* Set all properties which may possibly be requested.  */
-	prop(VT, XCB_ATOM_PRIMARY);
-	prop(VT, XCB_ATOM_SECONDARY);
-	prop(VT, jbxvt.X.clipboard);
+	prop(XCB_ATOM_PRIMARY);
+	prop(XCB_ATOM_SECONDARY);
+	prop(jbxvt.X.clipboard);
 	xcb_set_selection_owner(XC, VT, XCB_ATOM_PRIMARY,
 		XCB_CURRENT_TIME);
 }
@@ -38,7 +39,6 @@ void scr_make_selection(void)
 void scr_send_selection(const xcb_time_t time, const uint32_t requestor,
 	const uint32_t target, const uint32_t property)
 {
-	// FIXME!!!
 	LOG("scr_send_selection, %d, %d, %d, %d", (int)time, requestor,
 		target, property);
 	xcb_selection_notify_event_t e = {
