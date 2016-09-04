@@ -45,7 +45,7 @@ CFLAGS+=-D_XOPEN_SOURCE=700 --std=c11
 CFLAGS+=-Wall -Wextra
 
 $(exe): $(OBJS)
-	cd libjb && make CFLAGS="${CFLAGS}"
+	cd libjb && $(MAKE) CFLAGS="${CFLAGS}"
 	$(CC) -o $(exe) $(OBJS) $(CFLAGS) $(LIBS)
 	strip -o $(exe).tmp $(exe)
 	ls -l $(exe).tmp >> sz.log
@@ -64,11 +64,11 @@ d: # DEBUG build
 	CFLAGS='-DDEBUG -ggdb -O0 -Werror' make -j8
 
 f: # Optimized build
-	make clean
+	$(MAKE) clean
 	CFLAGS='-Ofast -march=native -flto' make -j8
 
 s: # Tiny build
-	make clean
+	$(MAKE) clean
 	CFLAGS='-Os -march=native -flto' make -j8
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.
