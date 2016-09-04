@@ -79,7 +79,7 @@ static void handle_client_msg(xcb_generic_event_t * restrict ge)
 {
 	xcb_client_message_event_t * e = (xcb_client_message_event_t *)ge;
 	if (e->format == 32 && e->data.data32[0]
-		== (long)wm_del_win())
+		== (unsigned long)wm_del_win())
 		  exit(0);
 }
 
