@@ -1,28 +1,11 @@
-#include debug.mk
+# Copyright 2016, Jeffrey E. Bedard
+
 #CC=clang
+#include debug.mk
 
 exe=jbxvt
 PREFIX=/usr
-
-# Uncomment for NetBSD:
-#CFLAGS+=-DNETBSD -D_NETBSD_SOURCE -D_BSD_SOURCE
-#CFLAGS+=-Wno-missing-field-initializers
-#CFLAGS+=-I/usr/pkg/include
-#CFLAGS+=-I/usr/X11R7/include 
-#LIBS+=-L/usr/pkg/lib -Wl,-R/usr/pkg/lib
-#LIBS+=-L/usr/X11R7/lib -Wl,-R/usr/X11R7/lib
-#LIBS+=-L/usr/X11R6/lib -Wl,-R/usr/X11R6/lib
-#PREFIX=/usr/local
-
-# Uncomment for FreeBSD:
-#CFLAGS+=-DFREEBSD -D_BSD_SOURCE -D__BSD_VISIBLE
-#CFLAGS+=-I/usr/local/include
-#LIBS+=-L/usr/local/lib
-#PREFIX=/usr/local
-#LIBS+=-lutempter
-
-# Uncomment for GNU/Linux:
-CFLAGS+=-DLINUX -D_GNU_SOURCE
+include config.mk
 
 # Uncomment to use libutempter for utmp access
 #CFLAGS+=-DUSE_UTEMPTER
@@ -70,5 +53,4 @@ f: # Optimized build
 s: # Tiny build
 	$(MAKE) clean
 	CFLAGS='-Os -march=native -flto' make -j8
-
-# DO NOT DELETE THIS LINE -- make depend depends on it.
+#EOF
