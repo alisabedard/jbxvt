@@ -105,9 +105,8 @@ void scr_reset(void)
 	}
 	uint8_t **s0 = S0.text, **s1 = S1.text;
 	uint32_t **r0 = S0.rend, **r1 = S1.rend;
-	VTScreen * scr = S.current;
-	int16_t * y = &scr->cursor.y;
-	if (likely(scr == &S.s[0] && S0.text) && *y >= c.h) {
+	int16_t * y = &SCR->cursor.y;
+	if (likely(SCR == &S.s[0] && S0.text) && *y >= c.h) {
 		scroll1(*y - c.h + 1);
 		*y = c.h - 1;
 	}
