@@ -51,7 +51,7 @@ void scr_tab(void)
 	change_offset(0);
 	VTScreen * s = jbxvt.scr.current;
 	struct JBDim c = s->cursor;
-	s->text[c.y][c.x] = '0';
+	s->text[c.y][c.x] = ' ';
 	const uint16_t w = CSZ.w - 1;
 	while (!tab_stops[++c.x] && c.x < w);
 	s->cursor.x = c.x;
