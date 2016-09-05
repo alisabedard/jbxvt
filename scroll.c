@@ -79,9 +79,12 @@ static void clear(int8_t count, const uint8_t rc,
 static SLine * new_sline(const uint16_t x)
 {
 	SLine * sl = GC_MALLOC(sizeof(SLine));
+	jb_assert(sl, "Could not allocate saved line");
 	sl->sl_length = x;
-	sl->sl_text = GC_MALLOC(x + 1);
-	sl->sl_rend = GC_MALLOC(x << 2);
+	jb_assert((sl->sl_text = GC_MALLOC((x + 1))),
+		"Could not allocate memory for saved text");
+	jb_assert((sl->sl_rend = GC_MALLOC((x << 2))),
+		"Could not allocate memory for saved graphics");
 	return sl;
 }
 
