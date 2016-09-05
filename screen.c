@@ -64,10 +64,8 @@ void fix_rc(struct JBDim * restrict rc)
 	const struct JBDim c = jbxvt.scr.chars;
 	if(!c.h || !c.w)
 		  return; // prevent segfault on bad window size.
-	rc->x = MAX(rc->x, 0);
-	rc->x = MIN(rc->x, c.w - 1);
-	rc->y = MAX(rc->y, 0);
-	rc->y = MIN(rc->y, c.h - 1);
+	JB_LIMIT(rc->x, c.w - 1, 0);
+	JB_LIMIT(rc->y, c.h - 1, 0);
 	rc->x = find_c(rc->x, rc->y - jbxvt.scr.offset);
 }
 
