@@ -28,8 +28,11 @@
 #define FSZ jbxvt.X.f.size
 #define FH FSZ.h
 
-static void zero(const int16_t line, const uint16_t sz, const int16_t col)
+static void zero(const int16_t line, const uint16_t sz, int16_t col)
 {
+	col = MIN(col, CSZ.width); // Restrict bounds
+	// Check memory
+	jb_assert(SCR->text && SCR->rend, "Out of memory");
 	memset(SCR->text[line] + col, 0, sz);
 	memset(SCR->rend[line] + col, 0, sz << 2);
 	SCR->wrap[line] = false;
