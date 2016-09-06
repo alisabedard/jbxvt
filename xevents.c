@@ -40,9 +40,11 @@ enum {
 	JBXVT_MOTION = 2
 };
 
+#define MD jbxvt.mode
+
 static bool track_mouse_sgr(uint8_t b, struct JBDim p, const bool rel)
 {
-	if (!jbxvt.mode.mouse_sgr)
+	if (!MD.mouse_sgr)
 		return false;
 	cprintf("\033[<%c;%c;%c%c", b, p.x, p.y, rel ? 'm' : 'M');
 	return true;
@@ -50,16 +52,11 @@ static bool track_mouse_sgr(uint8_t b, struct JBDim p, const bool rel)
 
 static void locator_report(const uint8_t b, struct JBDim p)
 {
-	if (!jbxvt.opt.elr)
+	if (!MD.elr)
 		return;
-	uint8_t a[2];
-	a[0] = jbxvt.opt.elr & 0x3;
-	a[1] = (jbxvt.opt.elr & 0xc) >> 2;
-	if (!a[0]) // disabled
-		return;
-	if (a[0] == 2) // only enabled for one report
-		jbxvt.opt.elr = 0;
-	if (a[1] == 1) // report in pixels
+	if (MD.elr_once)
+		MD.elr_once = MD.elr = false;
+	if (MD.elr_pixels)
 		p = get_p(p);
 	// DECLRP
 	cprintf("\033[%d;%d;%d;%d;0&w", b * 2, 7, p.y, p.x);

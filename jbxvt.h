@@ -116,6 +116,9 @@ struct JBXVTPrivateModes {
 	bool ptr_cell:1;	// cell motion mouse tracking
 	bool s8c1t:1;		// 7 or 8 bit controls
 	bool bpaste:1;		// bracketed paste mode
+	bool elr:1;		// locator report
+	bool elr_once:1;	// locator report once
+	bool elr_pixels:1;	// locator report in pixel format
 };
 
 struct JBXVTOptionData {

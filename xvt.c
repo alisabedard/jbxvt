@@ -268,7 +268,18 @@ static void parse_token(void)
 		jbxvt.mode.gm52 = true;
 		break;
 	CASE(TK_ELR)
-		jbxvt.opt.elr = t[0] | (t[1] <<2);
+		switch (t[0]) {
+		case 2:
+			jbxvt.mode.elr_once = true;
+		case 1:
+			jbxvt.mode.elr = true;
+			break;
+		case 0:
+		default:
+			jbxvt.mode.elr = false;
+			jbxvt.mode.elr_once = false;
+		}
+		jbxvt.mode.elr_pixels = t[1] == 1;
 		break;
 
 	CASE(TK_ENTRY) // keyboard focus changed.  fall through:
