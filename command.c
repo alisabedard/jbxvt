@@ -70,7 +70,8 @@ static void write_utmpx(const pid_t comm_pid, char * tty_name)
 	gettimeofday(&tv, NULL);
 	utent.ut_tv.tv_sec = tv.tv_sec;
 	utent.ut_tv.tv_usec = tv.tv_usec;
-	jb_check(pututxline(&utent), "Could not write utmp entry.");
+	jb_check(pututxline(&utent), "Could not write utmp entry "
+		"(are you a member of the utmp group?)");
 	endutxent();
 }
 #endif//POSIX_UTMPX
