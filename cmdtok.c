@@ -37,7 +37,7 @@ static struct JBXVTEvent * ev_alloc(xcb_generic_event_t * restrict e)
 	return xe;
 }
 
-static void push_xevent(struct JBXVTEvent * xe)
+static void put_xevent(struct JBXVTEvent * xe)
 {
 	struct JBXVTEventQueue * q = &jbxvt.com.events;
 	xe->next = q->start;
@@ -60,7 +60,7 @@ static void handle_focus(xcb_generic_event_t * restrict e)
 	}
 	struct JBXVTEvent * xe = ev_alloc(e);
 	xe->detail = f->detail;
-	push_xevent(xe);
+	put_xevent(xe);
 }
 
 #define XESET(a, b) xe->a = e->b
@@ -72,7 +72,7 @@ static void handle_sel(xcb_generic_event_t * restrict ge)
 	EALLOC(xcb_selection_request_event_t);
 	XEEQ(time); XEEQ(requestor); XEEQ(target); XEEQ(property);
 	XESET(window, owner);
-	push_xevent(xe);
+	put_xevent(xe);
 }
 
 static void handle_client_msg(xcb_generic_event_t * restrict ge)
@@ -88,7 +88,7 @@ static void handle_expose(xcb_generic_event_t * restrict ge)
 	EALLOC(xcb_expose_event_t);
 	XEEQ(window); XESET(box.x, x); XESET(box.y, y);
 	XESET(box.width, width); XESET(box.height, height);
-	push_xevent(xe);
+	put_xevent(xe);
 }
 
 static void handle_other(xcb_generic_event_t * restrict ge)
@@ -96,7 +96,7 @@ static void handle_other(xcb_generic_event_t * restrict ge)
 	EALLOC(xcb_key_press_event_t);
 	XESET(window, event); XESET(box.x, event_x); XESET(box.y, event_y);
 	XEEQ(state); XEEQ(time); XESET(button, detail);
-	push_xevent(xe);
+	put_xevent(xe);
 }
 
 static void key_press(xcb_generic_event_t * restrict e)
@@ -266,7 +266,7 @@ static void handle_string_char(int_fast16_t c, struct Token * restrict tk)
 	tk->string[i] = 0;
 	tk->type = TK_STRING;
 	if (c != GCC_NULL)
-		  push_com_char(c);
+		  put_com_char(c);
 }
 
 #if defined(__i386__) || defined(__amd64__)
@@ -294,14 +294,14 @@ static void start_esc(int_fast16_t c, struct Token * restrict tk)
 		if (i < TK_MAX_ARGS)
 			  tk->arg[i++] = n;
 		if (c == TK_ESC)
-			  push_com_char(c);
+			  put_com_char(c);
 		if (c < ' ')
 			  return;
 		if (c < '@')
 			  c = get_com_char(0);
 	} while (c < '@' && c >= ' ');
 	if (c == TK_ESC)
-		  push_com_char(c);
+		  put_com_char(c);
 	tk->nargs = i;
 	tk->type = c;
 }
@@ -383,8 +383,13 @@ static void start_dcs(struct Token * t)
 			LOG("FIXME: termcap support unimplemented");
 		}
 		break;
+	case 0x1b:
+		get_com_char(0);
+		get_com_char(0);
+		put_com_char('-');
+		break;
 	default:
-		LOG("Unhandled DCS, starting with %c", (int)c);
+		LOG("Unhandled DCS, starting with 0x%x", (int)c);
 	}
 }
 
@@ -511,7 +516,6 @@ static void default_token(struct Token * restrict tk, int_fast16_t c)
 	case TK_SS2:
 	case TK_SS3:
 	case TK_DCS:
-	case TK_SPA:
 	case TK_EPA:
 	case TK_SOS:
 	case TK_ID:
@@ -529,24 +533,33 @@ static void default_token(struct Token * restrict tk, int_fast16_t c)
 			c = get_com_char(c);
 			switch (c) {
 			case 0x80:
-				push_com_char('-');
+				put_com_char('-');
 				break;
 			case 0x82:
-				push_com_char('|');
+				put_com_char('|');
 				break;
 			case 0xac:
-				push_com_char('+');
+				put_com_char('+');
 				break;
 			default:
 				LOG("0x%x", (unsigned int)c);
-				push_com_char(c);
+				put_com_char(c);
 			}
+			break;
+		case 0x96:
+		case 0x80:
+			put_com_char('-');
 			break;
 		default:
 			LOG("0xe2 0x%x", (unsigned int)c);
-			push_com_char(c);
+			put_com_char(c);
 		}
 		break;
+#if 0
+	case TK_SPA:
+		handle_string_char('-', tk);
+		break;
+#endif
 	default:
 		if (is_string_char(c))
 			handle_string_char(c, tk);

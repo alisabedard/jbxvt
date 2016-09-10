@@ -227,7 +227,7 @@ void init_command(char ** restrict argv)
 }
 
 //  Push an input character back into the input queue.
-void push_com_char(const uint8_t c)
+void put_com_char(const uint8_t c)
 {
 	if (jbxvt.com.stack.top < jbxvt.com.stack.data
 		+ COM_PUSH_MAX)

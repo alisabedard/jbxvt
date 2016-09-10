@@ -10,7 +10,7 @@
 enum CommandLimits {
 	KBUFSIZE =	8,		// size of keyboard mapping buffer
 	COM_BUF_SIZE =	UINT8_MAX,	// size of command read buffer
-	COM_PUSH_MAX =	20,		// max # chars to push back to input queue
+	COM_PUSH_MAX =	20,		// max # chars to put back to input queue
 	MP_INTERVAL =	500		// multi-press interval in ms
 };
 
@@ -28,7 +28,7 @@ char * cprintf(char *, ...);
 void init_command(char ** restrict argv);
 
 //  Push an input character back into the input queue.
-void push_com_char(const uint8_t c);
+void put_com_char(const uint8_t c);
 
 #ifdef LINUX
 #include <asm-generic/ioctls.h>
