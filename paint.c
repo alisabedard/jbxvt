@@ -11,6 +11,13 @@
 
 #include <string.h>
 
+//#define DEBUG_PAINT
+#ifndef DEBUG_PAINT
+#undef LOG
+#define LOG(...)
+#endif
+
+//#define DEBUG_COLOR
 #ifdef DEBUG_COLOR
 #define CLOG(...) LOG(__VA_ARGS__)
 #else
