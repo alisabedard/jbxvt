@@ -195,7 +195,7 @@ static void parse_token(void)
 // macro to aid in debug logging
 #define CASE(L) case L:TLOG(#L);
 // log unimplemented features
-#define FIXME(L) CASE(L);LOG("\tFIXME: Unimplemented");break;
+#define FIXME(L) CASE(L);LOG("\tFIXME: " #L " Unimplemented");break;
 
 	CASE(TK_ALN) // screen alignment test
 		scr_efill();
