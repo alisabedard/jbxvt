@@ -509,21 +509,22 @@ static void handle_esc(int_fast16_t c, struct Token * restrict tk)
 static void default_token(struct Token * restrict tk, int_fast16_t c)
 {
 	switch(c) { // handle 8-bit controls
-	case TK_IND:
-	case TK_NEL:
-	case TK_HTS:
-	case TK_RI:
-	case TK_SS2:
-	case TK_SS3:
+	case TK_APC:
+	case TK_CSI:
 	case TK_DCS:
 	case TK_EPA:
-	case TK_SOS:
+	case TK_HTS:
 	case TK_ID:
-	case TK_CSI:
-	case TK_ST:
+	case TK_IND:
+	case TK_NEL:
 	case TK_OSC:
 	case TK_PM:
-	case TK_APC:
+	case TK_RI:
+	case TK_SOS:
+	case TK_SPA:
+	case TK_SS2:
+	case TK_SS3:
+	case TK_ST:
 		tk->type = c;
 		break;
 	case 0xe2:
@@ -555,11 +556,6 @@ static void default_token(struct Token * restrict tk, int_fast16_t c)
 			put_com_char(c);
 		}
 		break;
-#if 0
-	case TK_SPA:
-		handle_string_char('-', tk);
-		break;
-#endif
 	default:
 		if (is_string_char(c))
 			handle_string_char(c, tk);
