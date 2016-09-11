@@ -335,6 +335,7 @@ bool handle_xevents(struct Token * restrict tk)
 	default:
 		LOG("Unhandled event %d", xe->type);
 	}
+	free(xe);
 	return true;
 }
 

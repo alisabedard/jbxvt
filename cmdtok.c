@@ -32,7 +32,7 @@ enum ComCharFlags {BUF_ONLY=1, GET_XEVENTS=2};
 
 static struct JBXVTEvent * ev_alloc(xcb_generic_event_t * restrict e)
 {
-	struct JBXVTEvent * xe = GC_MALLOC(sizeof(struct JBXVTEvent));
+	struct JBXVTEvent * xe = calloc(1, sizeof(struct JBXVTEvent));
 	xe->type = e->response_type;
 	return xe;
 }
