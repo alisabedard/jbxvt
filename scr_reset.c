@@ -23,7 +23,7 @@
 #define P S.pixels
 #define X jbxvt.X
 
-static void init_screen_elements(VTScreen * restrict scr,
+static void init_screen_elements(struct JBXVTScreen * restrict scr,
 	uint8_t ** restrict text, uint32_t ** restrict rend)
 {
 	scr->margin.bottom = S.chars.height - 1;
@@ -66,9 +66,8 @@ static inline void fix_margins(const struct JBDim c)
 	   If so, set the bottom margin to the new bottom line.  */
 	if (c.height == S.chars.height)
 		  return;
-	VTScreen * restrict s = S.current;
-	if (s->margin.b >= c.h)
-		  s->margin.b = c.h - 1;
+	if (SCR->margin.b >= c.h)
+		  SCR->margin.b = c.h - 1;
 }
 
 static void decscnm(void)

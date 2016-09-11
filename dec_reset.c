@@ -26,8 +26,6 @@ void dec_reset(struct Token * restrict token)
 {
 	LOG("handle_reset(%d)", token->arg[0]);
 	const bool is_set = token->type == TK_SET;
-	struct JBXVTScreenData * s = &jbxvt.scr;
-	VTScreen * scr = s->current;
 	struct JBXVTPrivateModes * m = &jbxvt.mode;
 
 	static bool allow_deccolm = true;
@@ -55,7 +53,7 @@ void dec_reset(struct Token * restrict token)
 			/* According to the spec, the cursor is reset to
 			   the home position when this is changed.  */
 			m->decom = is_set;
-			scr_move(scr->margin.top, 0, 0);
+			scr_move(SCR->margin.top, 0, 0);
 			break;
 		case 7: // DECAWM
 		case 45: // reverse wrap-around mode?

@@ -9,8 +9,8 @@
 #include "selection.h"
 #include "selend.h"
 #include "SLine.h"
-#include "VTScreen.h"
 #include "JBXVTEvent.h"
+#include "JBXVTScreen.h"
 
 struct JBXVTXWindows {
 	xcb_window_t vt, sb, main;
@@ -47,7 +47,7 @@ struct JBXVTScreenSLine {
 };
 
 struct JBXVTScreenData {
-	VTScreen * current, * s;
+	struct JBXVTScreen * current, * s;
 	struct JBXVTScreenSLine sline;
 	struct JBDim pixels;
 	struct JBDim chars;

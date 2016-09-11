@@ -40,7 +40,7 @@ static void mv_sel(SelEnd * e, const int16_t j, const int16_t k)
 }
 
 static void transmogrify(const int16_t j, const int8_t count,
-	VTScreen * restrict s)
+	struct JBXVTScreen * restrict s)
 {
 	const int16_t k = j + count;
 	s->text[k] = s->text[j];
@@ -69,10 +69,9 @@ static void clear(int8_t count, const uint8_t rc,
 	const uint16_t sz = jbxvt.scr.chars.width;
 	memset(text[count], 0, sz + 1);
 	memset(rend[count], 0, sz << 2);
-	VTScreen * cur = jbxvt.scr.current;
 	const uint8_t j = rc + (up ? - count - 1 : count);
-	cur->text[j] = text[count];
-	cur->rend[j] = rend[count];
+	SCR->text[j] = text[count];
+	SCR->rend[j] = rend[count];
 	clear(count, rc, text, rend, up);
 }
 
@@ -93,12 +92,11 @@ static void cp_rows(int16_t i, const int16_t count)
 	SLOG("cp_rows(i: %d, count: %d)", i, count);
 	if (--i < 0)
 		  return;
-	VTScreen * s = jbxvt.scr.current;
-	uint8_t * t = s->text[i];
-	uint32_t * r = s->rend[i];
+	uint8_t * t = SCR->text[i];
+	uint32_t * r = SCR->rend[i];
 	int_fast16_t len = find_col(t, 0);
 	SLine * sl = new_sline(len);
-	sl->wrap = s->wrap[i];
+	sl->wrap = SCR->wrap[i];
 	memcpy(sl->sl_text, t, len);
 	memcpy(sl->sl_rend, r, len << 2);
 	struct JBXVTScreenSLine * scr_sl = &jbxvt.scr.sline;
@@ -167,9 +165,8 @@ static int8_t copy_screen_area(const int8_t i,
 {
 	if(i >= count)
 		  return j;
-	VTScreen * restrict scr = jbxvt.scr.current;
-	save[i] = scr->text[j];
-	rend[i] = scr->rend[j];
+	save[i] = SCR->text[j];
+	rend[i] = SCR->rend[j];
 	ck_sel_on_scr(j);
 	return copy_screen_area(i + 1, j + mod, mod,
 		count, save, rend);

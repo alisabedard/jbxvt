@@ -89,8 +89,8 @@ static void scr_init(void)
 	struct JBXVTScreenData * s = &jbxvt.scr;
 	s->sline.max = MAX_SCROLL;
 	s->sline.data = GC_MALLOC(s->sline.max * sizeof(void*));
-	s->s = GC_MALLOC(sizeof(VTScreen)<<1);
-	s->current = &s->s[0];
+	static struct JBXVTScreen screens[2];
+	s->current = s->s = screens;
 	scr_set_tab(-2, false);
 }
 

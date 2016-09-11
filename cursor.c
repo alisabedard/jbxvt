@@ -45,7 +45,7 @@ void draw_cursor(void)
 {
 	struct JBXVTScreenData * s = &jbxvt.scr;
 	// Don't draw if scrolled, non-existent, or hidden
-	VTScreen * current;
+	struct JBXVTScreen * current;
 	if (s->offset || !(current = s->current) || !jbxvt.mode.dectcem)
 		return;
 	if ((current->cursor_visible ^= true) && is_blinking())

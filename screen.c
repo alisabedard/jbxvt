@@ -72,9 +72,8 @@ void fix_rc(struct JBDim * restrict rc)
 // Renderless 'E' at position:
 static void epos(const struct JBDim p)
 {
-	VTScreen * restrict s = jbxvt.scr.current;
-	s->text[p.y][p.x] = 'E';
-	s->rend[p.y][p.x] = 0;
+	SCR->text[p.y][p.x] = 'E';
+	SCR->rend[p.y][p.x] = 0;
 }
 
 // Set all chars to 'E'
@@ -96,7 +95,7 @@ void scr_change_screen(const bool mode_high)
 {
 	change_offset(0);
 	jbxvt.scr.sline.top = 0;
-	jbxvt.scr.current = &jbxvt.scr.s[mode_high];
+	SCR = &jbxvt.scr.s[mode_high];
 	jbxvt.sel.end[1].type = NOSEL;
 	jbxvt.mode.charsel = 0; // reset on screen change
 	draw_cursor();
@@ -116,7 +115,7 @@ void scr_index_from(const int8_t count, const int16_t top)
 {
 	change_offset(0);
 	draw_cursor();
-	scroll(top, jbxvt.scr.current->margin.b, count);
+	scroll(top, SCR->margin.b, count);
 	draw_cursor();
 }
 

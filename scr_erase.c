@@ -21,11 +21,7 @@
 #define LOG(...)
 #endif
 
-#define SCR jbxvt.scr.current
 #define CUR SCR->cursor
-#define CSZ jbxvt.scr.chars
-#define PSZ jbxvt.scr.pixels
-#define FSZ jbxvt.X.f.size
 #define FH FSZ.h
 
 static void zero(const int16_t line, const uint16_t sz, int16_t col)
@@ -69,8 +65,7 @@ void scr_erase_line(const int8_t mode)
 {
 	LOG("scr_erase_line(%d)", mode);
 	change_offset(0);
-	VTScreen * scr = jbxvt.scr.current;
-	struct JBDim c = scr->cursor;
+	struct JBDim c = SCR->cursor;
 	const uint8_t fh = jbxvt.X.f.size.height;
 	xcb_rectangle_t g = { .y = c.y * fh };
 	erase_range(&g, get_sz(mode), get_col(mode));
@@ -78,7 +73,7 @@ void scr_erase_line(const int8_t mode)
 	check_selection(c.y, c.y);
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt,
 		g.x, g.y, g.width, fh);
-	scr->wrap_next = false;
+	SCR->wrap_next = false;
 	draw_cursor();
 	xcb_flush(jbxvt.X.xcb);
 }
@@ -97,10 +92,9 @@ void scr_erase_screen(const int8_t mode)
 {
 	LOG("scr_erase_screen(%d)", mode);
 	change_offset(0);
-	VTScreen * s = jbxvt.scr.current;
-	s->wrap_next = 0;
+	SCR->wrap_next = 0;
 	xcb_rectangle_t r = {.width = PSZ.width};
-	const struct JBDim cur = s->cursor;
+	const struct JBDim cur = SCR->cursor;
 	switch (mode) {
 	case 1:
 		LOG("START");

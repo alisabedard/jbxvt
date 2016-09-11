@@ -12,7 +12,7 @@
 
 
 /*  Structure describing the current state of the screen.  */
-typedef struct {
+struct JBXVTScreen {
 	uint8_t **text;		// backup copy of text
 	uint32_t **rend;	// rendition styles
 	bool * wrap;		// wrap flags
@@ -21,6 +21,6 @@ typedef struct {
 	bool wrap_next:1;	// wrap before the next printed character
 	bool decpm:1;		// privacy message
 	bool cursor_visible:1;
-} VTScreen;
+};
 
 #endif//!SCREENST_H
