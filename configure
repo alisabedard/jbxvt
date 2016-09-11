@@ -34,4 +34,7 @@ case $ARCH in
 		EOF
 		;;
 esac
+if [ -f /usr/include/asm-generic/ioctls.h ]; then
+	echo 'CFLAGS+=-DHAVE_ASM_GENERIC_IOCTLS_H' >> $CFG
+fi
 

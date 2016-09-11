@@ -31,7 +31,9 @@ void init_command(char ** restrict argv);
 void put_com_char(const uint8_t c);
 
 #ifdef LINUX
+#ifdef HAVE_ASM_GENERIC_IOCTLS_H
 #include <asm-generic/ioctls.h>
+#endif//HAVE_ASM_GENERIC_IOCTLS_H
 #endif//LINUX
 
 #ifdef TIOCSWINSZ

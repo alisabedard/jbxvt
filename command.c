@@ -159,16 +159,15 @@ static void child(char ** restrict argv, fd_t ttyfd)
 
 /*  Tell the teletype handler what size the window is.  Called initially from
  *  the child and after a window size change from the parent.  */
-#if !defined(NETBSD) && !defined(FREEBSD)
-#ifdef TIOCSWINSZ
+#if !defined(NETBSD) && !defined(FREEBSD)\
+	&& defined(HAVE_ASM_GENERIC_IOCTLS_H) && defined(TIOCSWINSZ)
 void tty_set_size(const struct JBDim sz)
 {
 	jb_check(ioctl(jbxvt.com.fd, TIOCSWINSZ, &(struct winsize){
 		.ws_row = sz.row, .ws_col = sz.col}) != 1,
 		"Could not set ioctl TIOCSWINSZ");
 }
-#endif//TIOCSWINSZ
-#endif//!NETBSD&&!FREEBSD
+#endif//etc
 
 static void attach_signals(void)
 {
