@@ -44,7 +44,7 @@ static void init(void)
 	uint8_t **s0, **s1;
 	uint32_t **r0, **r1;
 	uint16_t sz = JBXVT_MAX_ROWS * sizeof(void *);
-#define ALLOC(v) {v = GC_MALLOC(sz);}
+#define ALLOC(v) {v = malloc(sz);}
 	ALLOC(s0); ALLOC(s1); ALLOC(r0); ALLOC(r1);
 	for (int_fast16_t y = JBXVT_MAX_ROWS - 1; y >= 0; --y) {
 		sz = JBXVT_MAX_COLS;
