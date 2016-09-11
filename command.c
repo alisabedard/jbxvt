@@ -210,6 +210,12 @@ static fd_t run_command(char ** argv)
 	return ptyfd;
 }
 
+static void init_container(struct JBXVTCommandContainer * restrict c,
+	uint8_t * restrict buf)
+{
+	c->data = c->next = c->top = buf;
+}
+
 /*  Initialize the command connection.  This should
     be called after the X server connection is established.  */
 void init_command(char ** restrict argv)
@@ -219,10 +225,9 @@ void init_command(char ** restrict argv)
 	jbxvt.com.xfd = xcb_get_file_descriptor(jbxvt.X.xcb);
 	jbxvt.com.fd = run_command(argv);
 	jb_assert(jbxvt.com.fd >= 0, "Could not start session");
-	struct JBXVTCommandContainer * b = &jbxvt.com.buf,
-				     * s = &jbxvt.com.stack;
-	b->data = b->next = b->top = GC_MALLOC(COM_BUF_SIZE);
-	s->data = s->top = GC_MALLOC(COM_PUSH_MAX);
+	static uint8_t buf[COM_BUF_SIZE], stack[COM_PUSH_MAX];
+	init_container(&jbxvt.com.buf, buf);
+	init_container(&jbxvt.com.stack, stack);
 }
 
 //  Push an input character back into the input queue.
