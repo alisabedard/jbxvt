@@ -67,7 +67,7 @@ static void clear(int8_t count, const uint8_t rc,
 	if(--count < 0)
 		  return;
 	const uint16_t sz = jbxvt.scr.chars.width;
-	memset(text[count], 0, sz + 1);
+	memset(text[count], 0, sz);
 	memset(rend[count], 0, sz << 2);
 	const uint8_t j = rc + (up ? - count - 1 : count);
 	SCR->text[j] = text[count];
@@ -80,10 +80,11 @@ static SLine * new_sline(const uint16_t x)
 	SLine * sl = GC_MALLOC(sizeof(SLine));
 	jb_assert(sl, "Could not allocate saved line");
 	sl->sl_length = x;
-	jb_assert((sl->sl_text = GC_MALLOC((x + 1))),
-		"Could not allocate memory for saved text");
-	jb_assert((sl->sl_rend = GC_MALLOC((x << 2))),
-		"Could not allocate memory for saved graphics");
+	uint8_t * t = GC_MALLOC(x);
+	uint32_t * r = GC_MALLOC(x << 2);
+	jb_assert(t && r, "Could not allocate memory");
+	sl->sl_text = t;
+	sl->sl_rend = r;
 	return sl;
 }
 
