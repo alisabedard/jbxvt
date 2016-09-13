@@ -8,7 +8,20 @@ ARCH=`uname | tr 'a-z' 'A-Z'`
 echo CFLAGS+="-D${ARCH}" > $CFG
 
 case $ARCH in
+	OPENBSD)
+		echo NOTE:  OpenBSD requires llvm
+		cat >> $CFG <<- EOF
+		CC=clang
+		PREFIX=/usr/local
+		LIBS+=-L/usr/X11R6/lib
+		LIBS+=-L/usr/local/lib
+		CFLAGS+=-D_BSD_SOURCE
+		CFLAGS+=-I/usr/X11R6/include 
+		CFLAGS+=-I/usr/local/include 
+		EOF
+		;;
 	LINUX) 
+		echo Edit Makefile to enable libutempter if desired
 		cat >> $CFG <<- EOF
 		CFLAGS+=-D_GNU_SOURCE
 		EOF
@@ -19,6 +32,7 @@ case $ARCH in
 		CFLAGS+=-Wno-missing-field-initializers
 		CFLAGS+=-I/usr/pkg/include
 		CFLAGS+=-I/usr/X11R7/include 
+		CFLAGS+=-I/usr/X11R6/include
 		LIBS+=-L/usr/pkg/lib -Wl,-R/usr/pkg/lib
 		LIBS+=-L/usr/X11R7/lib -Wl,-R/usr/X11R7/lib
 		LIBS+=-L/usr/X11R6/lib -Wl,-R/usr/X11R6/lib

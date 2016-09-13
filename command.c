@@ -18,6 +18,11 @@
 
 //  Definitions that enable machine dependent parts of the code.
 
+#ifdef OPENBSD
+#include <sys/select.h>
+#include <sys/termios.h>
+#endif//OPENBSD
+
 #ifdef NETBSD
 #define POSIX_UTMPX
 #include <pwd.h>

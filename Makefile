@@ -28,7 +28,7 @@ CFLAGS+=-D_XOPEN_SOURCE=700 --std=c11
 CFLAGS+=-Wall -Wextra
 
 $(exe): $(OBJS)
-	cd libjb && $(MAKE) CFLAGS="${CFLAGS}"
+	cd libjb && $(MAKE) CC="${CC}" CFLAGS="${CFLAGS}"
 	$(CC) -o $(exe) $(OBJS) $(CFLAGS) $(LIBS)
 	strip -o $(exe).tmp $(exe)
 	ls -l $(exe).tmp >> sz.log
