@@ -42,6 +42,7 @@ case $ARCH in
 	FREEBSD)
 		cat >> $CFG <<- EOF
 		CFLAGS+=-DFREEBSD -D_BSD_SOURCE -D__BSD_VISIBLE
+		CFLAGS+=-DUSE_UTEMPTER
 		CFLAGS+=-I/usr/local/include
 		LIBS+=-L/usr/local/lib
 		PREFIX=/usr/local
