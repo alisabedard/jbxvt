@@ -8,7 +8,7 @@
 #include "libjb/xcb.h"
 #include "selection.h"
 #include "selend.h"
-#include "SLine.h"
+#include "JBXVTSavedLine.h"
 #include "JBXVTEvent.h"
 #include "JBXVTScreen.h"
 
@@ -41,14 +41,14 @@ struct JBXVTXData {
 	int8_t screen_number;
 };
 
-struct JBXVTScreenSLine {
-	SLine **data; // saved lines
+struct JBXVTScreenSavedLines {
+	struct JBXVTSavedLine **data; // saved lines
 	uint16_t top, max;
 };
 
 struct JBXVTScreenData {
 	struct JBXVTScreen * current, * s;
-	struct JBXVTScreenSLine sline;
+	struct JBXVTScreenSavedLines sline;
 	struct JBDim pixels;
 	struct JBDim chars;
 	uint32_t rstyle; // render style

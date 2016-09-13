@@ -58,7 +58,7 @@ static char ** parse_command_line(const int argc, char ** argv)
 			o->show_scrollbar=true;
 			break;
 		case 'v': // version
-			puts("jbxvt" JBXVT_VERSION);
+			puts("jbxvt " JBXVT_VERSION);
 			exit(0);
 		case 'h': // help
 		default:
@@ -72,13 +72,14 @@ static char ** parse_command_line(const int argc, char ** argv)
 static void opt_init(void)
 {
 	// Set some defaults which may be overridden.
-#define OPT(field, def) jbxvt.opt.field = JBXVT_##def
-	OPT(fg, FG);
-	OPT(bg, BG);
-	OPT(font, FONT);
-	OPT(bold_font, BOLD_FONT);
-	OPT(size.width, COLUMNS);
-	OPT(size.height, ROWS);
+#define O(field, def) jbxvt.opt.field = JBXVT_##def
+	O(fg, FG);
+	O(bg, BG);
+	O(font, FONT);
+	O(bold_font, BOLD_FONT);
+	O(size.width, COLUMNS);
+	O(size.height, ROWS);
+	jbxvt.scr.sline.max = MAX_SCROLL;
 }
 
 /*  Perform any initialization on the screen data structures.
@@ -87,7 +88,6 @@ static void scr_init(void)
 {
 	// Initialise the array of lines that have scrolled off the top.
 	struct JBXVTScreenData * s = &jbxvt.scr;
-	s->sline.max = MAX_SCROLL;
 	s->sline.data = GC_MALLOC(s->sline.max * sizeof(void*));
 	static struct JBXVTScreen screens[2];
 	s->current = s->s = screens;

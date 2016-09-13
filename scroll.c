@@ -75,9 +75,9 @@ static void clear(int8_t count, const uint8_t rc,
 	clear(count, rc, text, rend, up);
 }
 
-static SLine * new_sline(const uint16_t x)
+static struct JBXVTSavedLine * new_sline(const uint16_t x)
 {
-	SLine * sl = GC_MALLOC(sizeof(SLine));
+	struct JBXVTSavedLine * sl = GC_MALLOC(sizeof(struct JBXVTSavedLine));
 	jb_assert(sl, "Could not allocate saved line");
 	sl->sl_length = x;
 	uint8_t * t = GC_MALLOC(x);
@@ -96,17 +96,17 @@ static void cp_rows(int16_t i, const int16_t count)
 	uint8_t * t = SCR->text[i];
 	uint32_t * r = SCR->rend[i];
 	int_fast16_t len = find_col(t, 0);
-	SLine * sl = new_sline(len);
+	struct JBXVTSavedLine * sl = new_sline(len);
 	sl->wrap = SCR->wrap[i];
 	memcpy(sl->sl_text, t, len);
 	memcpy(sl->sl_rend, r, len << 2);
-	struct JBXVTScreenSLine * scr_sl = &jbxvt.scr.sline;
-	scr_sl->data[count - i - 1] = sl;
+#define SLINE jbxvt.scr.sline
+	SLINE.data[count - i - 1] = sl;
 	sel_scr_to_sav(&jbxvt.sel.end[0], i, count);
 	sel_scr_to_sav(&jbxvt.sel.end[1], i, count);
-	scr_sl->top += count;
-	if (scr_sl->top > scr_sl->max)
-		scr_sl->top = scr_sl->max;
+	SLINE.top += count;
+	if (SLINE.top > SLINE.max)
+		SLINE.top = SLINE.max;
 	cp_rows(i, count);
 }
 
@@ -148,7 +148,7 @@ static void add_scroll_history(const int8_t count)
 	const uint16_t max = jbxvt.scr.sline.max;
 	// -1 to avoid going over array bounds
 	int_fast16_t y = max - count - 1;
-	SLine ** i = &jbxvt.scr.sline.data[y],
+	struct JBXVTSavedLine ** i = &jbxvt.scr.sline.data[y],
 		** j = &jbxvt.scr.sline.data[y + count];
 	for (; y >= 0; --y, --i, --j)
 		  *j = *i;
@@ -157,7 +157,7 @@ static void add_scroll_history(const int8_t count)
 	t = jbxvt.scr.sline.top = MIN(t, max);
 	const uint8_t h = jbxvt.scr.chars.height - 1;
 	const int16_t o = jbxvt.scr.offset;
-	sbar_show(h + t, o, o + h);
+	sbar_draw(h + t, o, o + h);
 }
 
 static int8_t copy_screen_area(const int8_t i,

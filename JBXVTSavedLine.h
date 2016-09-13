@@ -9,11 +9,11 @@
 #include <stdint.h>
 
 //  structure describing a saved line
-typedef struct {
+struct JBXVTSavedLine {
 	uint8_t *sl_text;	/* the text of the line */
 	uint32_t *sl_rend;	/* the rendition style */
 	uint16_t sl_length:15;	/* length of the line */
 	bool wrap:1;		// wrap flag
-} SLine;
+};
 
 #endif//!SLINEST_H

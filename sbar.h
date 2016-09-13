@@ -9,12 +9,21 @@
 //  Redraw the scrollbar after a size change
 void sbar_reset(void);
 
-/*  Redraw the scrollbar to show the area from low to high,
+/*  Draw the scrollbar to show the area from low to high,
     proportional to length.  */
-void sbar_show(uint16_t length, const int16_t low,
+void sbar_draw(uint16_t length, const int16_t low,
 	const int16_t high);
 
 //  Change the value of the scrolled screen offset and repaint the screen
 void change_offset(int16_t n);
+
+// Show the scroll bar window
+void jbxvt_show_sbar(void);
+
+// Hide the scroll bar window
+void jbxvt_hide_sbar(void);
+
+// Show or hide the scroll bar window
+void jbxvt_toggle_sbar(void);
 
 #endif//!SBAR_H

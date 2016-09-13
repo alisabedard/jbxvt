@@ -6,6 +6,7 @@
 #include "config.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "sbar.h"
 #include "scr_reset.h"
 #include "screen.h"
 
@@ -27,6 +28,8 @@ void map_window(void)
 {
 	xcb_map_window(XC, MW);
 	xcb_map_subwindows(XC, MW);
+	if (SB)
+		jbxvt_show_sbar();
 	/*  Setup the window now so that we can add LINES and COLUMNS to
 	 *  the environment.  */
 	resize_window();
@@ -49,21 +52,6 @@ void resize_window(void)
 	xcb_configure_window(XC, VT, XCB_CONFIG_WINDOW_WIDTH |
 		XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[]){sz.w, sz.h});
 	CSZ = get_c(PSZ = sz);
-}
-
-//  Toggle scrollbar.
-void switch_scrollbar(void)
-{
-	xcb_get_geometry_cookie_t c = xcb_get_geometry(XC, MW);
-	xcb_configure_window(XC, VT, XCB_CONFIG_WINDOW_X,
-		&(uint32_t){SB ? 0 : SBAR_WIDTH});
-	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(XC, c, NULL);
-	uint32_t w = r->width;
-	free(r);
-	if (SB)
-		w -= SBAR_WIDTH;
-	xcb_configure_window(XC, MW, XCB_CONFIG_WINDOW_WIDTH, &w);
-	SB ^= true;
 }
 
 // Change window or icon name:

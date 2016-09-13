@@ -8,6 +8,8 @@
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "repaint.h"
+#include "screen.h"
+#include "xsetup.h"
 
 #include <stdlib.h>
 
@@ -21,7 +23,7 @@ static struct {
 void sbar_reset(void)
 {
 	sbar.sz.height = jbxvt.scr.pixels.height;
-	sbar_show(sbar.last_length, sbar.last_low, sbar.last_high);
+	sbar_draw(sbar.last_length, sbar.last_low, sbar.last_high);
 }
 
 static int16_t get_sz(const int16_t lh, const uint16_t length)
@@ -31,7 +33,7 @@ static int16_t get_sz(const int16_t lh, const uint16_t length)
 
 /*  Redraw the scrollbar to show the area from low to high,
     proportional to length.  */
-void sbar_show(uint16_t length, const int16_t low,
+void sbar_draw(uint16_t length, const int16_t low,
 	const int16_t high)
 {
 	if (!jbxvt.opt.show_scrollbar || !length)
@@ -63,7 +65,26 @@ void change_offset(int16_t n)
 	draw_cursor(); // clear
 	repaint();
 	draw_cursor(); // draw
-#define C jbxvt.scr.chars
-	sbar_show(C.h + t - 1, n, n + C.h - 1);
+	sbar_draw(CSZ.h + t - 1, n, n + CSZ.h - 1);
+}
+
+void jbxvt_show_sbar(void)
+{
+	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt,
+		XCB_CONFIG_WINDOW_X, &(uint32_t){SBAR_WIDTH});
+	xcb_map_window(jbxvt.X.xcb, jbxvt.X.win.sb);
+}
+
+void jbxvt_hide_sbar(void)
+{
+	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt,
+		XCB_CONFIG_WINDOW_X, &(uint32_t){0});
+	xcb_unmap_window(jbxvt.X.xcb, jbxvt.X.win.sb);
+}
+
+void jbxvt_toggle_sbar(void)
+{
+	(jbxvt.opt.show_scrollbar ^= true)
+		? jbxvt_show_sbar() : jbxvt_hide_sbar();
 }
 

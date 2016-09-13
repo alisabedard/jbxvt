@@ -118,7 +118,7 @@ void scr_reset(void)
 	S.chars = c;
 	reset_row_col();
 	--c.h; --c.w;
-	sbar_show(c.h + S.sline.top, S.offset,
+	sbar_draw(c.h + S.sline.top, S.offset,
 		S.offset + c.h);
 	decscnm();
 	xcb_flush(X.xcb);

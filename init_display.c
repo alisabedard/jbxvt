@@ -144,8 +144,6 @@ static void create_window(uint8_t * restrict name,
 	change_name(name, false);
 	create_sb_window(sh.height);
 	create_vt_window(&sh);
-	jbxvt.opt.show_scrollbar ^= true;
-	switch_scrollbar();
 }
 
 static xcb_gc_t get_gc(const uint32_t vm, const void * vl)
@@ -172,8 +170,8 @@ static inline void init_jbxvt_colors(void)
 
 void init_display(char * name)
 {
-	jbxvt.X.xcb = jb_get_xcb_connection(jbxvt.opt.display,
-		(int*)&jbxvt.opt.screen);
+	int screen = jbxvt.opt.screen;
+	jbxvt.X.xcb = jb_get_xcb_connection(jbxvt.opt.display, &screen);
 	jbxvt.X.screen = jb_get_xcb_screen(jbxvt.X.xcb);
 	init_jbxvt_colors();
 	setup_font();
