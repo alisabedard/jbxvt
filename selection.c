@@ -59,11 +59,13 @@ void scr_send_selection(const xcb_time_t time, const uint32_t requestor,
 //  Clear the current selection.
 void scr_clear_selection(void)
 {
+	if (!jbxvt.sel.length)
+		return; // avoid double-free
 	LOG("scr_clear_selection");
-	if (jbxvt.sel.text)
-		jbxvt.sel.length = 0;
+	jbxvt.sel.length = 0;
 	show_selection(0, CSZ.h - 1, 0, CSZ.w - 1);
 	jbxvt.sel.end[0].type = jbxvt.sel.end[1].type = NOSEL;
+	free(jbxvt.sel.text);
 }
 
 //  start a selection using the specified unit.
