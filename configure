@@ -5,6 +5,8 @@ CFG=config.mk
 
 ARCH=`uname | tr 'a-z' 'A-Z'`
 
+echo "Configuring for $ARCH"
+
 echo CFLAGS+="-D${ARCH}" > $CFG
 
 case $ARCH in
@@ -21,7 +23,6 @@ case $ARCH in
 		EOF
 		;;
 	LINUX) 
-		echo Edit Makefile to enable libutempter if desired
 		cat >> $CFG <<- EOF
 		CFLAGS+=-D_GNU_SOURCE
 		EOF
@@ -42,15 +43,29 @@ case $ARCH in
 	FREEBSD)
 		cat >> $CFG <<- EOF
 		CFLAGS+=-DFREEBSD -D_BSD_SOURCE -D__BSD_VISIBLE
-		CFLAGS+=-DUSE_UTEMPTER
 		CFLAGS+=-I/usr/local/include
 		LIBS+=-L/usr/local/lib
 		PREFIX=/usr/local
-		LIBS+=-lutempter
 		EOF
 		;;
 esac
+
+echo -n 'Checking for libutempter... '
+if [ -f /usr/lib/libutempter.so ]; then
+	echo found
+	cat >> $CFG <<- EOF
+	CFLAGS+=-DUSE_UTEMPTER
+	LIBS+=-lutempter
+	EOF
+else
+	echo not found
+fi
+
+echo -n 'Checking for asm-generic/ioctls.h... '
 if [ -f /usr/include/asm-generic/ioctls.h ]; then
+	echo found
 	echo 'CFLAGS+=-DHAVE_ASM_GENERIC_IOCTLS_H' >> $CFG
+else
+	echo not found
 fi
 

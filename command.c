@@ -85,8 +85,7 @@ static void write_utmpx(const pid_t comm_pid, char * tty_name)
 static void exit_cb(void)
 {
 #ifdef USE_UTEMPTER
-	jb_check(!utempter_remove_added_record(),
-		"Could not remove utmp record");
+	utempter_remove_added_record();
 #endif//USE_UTEMPTER
 }
 
@@ -209,8 +208,7 @@ static fd_t run_command(char ** argv)
 	write_utmpx(comm_pid, tty_name);
 #endif//POSIX_UTMPX
 #ifdef USE_UTEMPTER
-	jb_check(!utempter_add_record(ptyfd, getenv("DISPLAY")),
-		"Could not add utmp record");
+	utempter_add_record(ptyfd, getenv("DISPLAY"));
 #endif//USE_UTEMPTER
 	return ptyfd;
 }

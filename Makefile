@@ -5,11 +5,8 @@
 
 exe=jbxvt
 PREFIX=/usr
-include config.mk
 
-# Uncomment to use libutempter for utmp access
-#CFLAGS+=-DUSE_UTEMPTER
-#LIBS+=-lutempter
+include config.mk
 
 #-------------------------------
 
