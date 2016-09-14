@@ -79,6 +79,8 @@ static void opt_init(void)
 	O(bold_font, BOLD_FONT);
 	O(size.width, COLUMNS);
 	O(size.height, ROWS);
+	// Default to a steady block cursor to conserve CPU
+	jbxvt.opt.cursor_attr = 2;
 	jbxvt.scr.sline.max = MAX_SCROLL;
 }
 
@@ -115,8 +117,6 @@ int main(int argc, char ** argv)
 		com_argv = (char*[2]){getenv("SHELL")};
 	// init_display must come after parse_command_line
 	init_display(argv[0]);
-	// Default to a steady block cursor to conserve CPU
-	jbxvt.opt.cursor_attr = 2;
 	mode_init();
 	scr_init();
 	map_window();
