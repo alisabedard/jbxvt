@@ -14,7 +14,7 @@
 #define XC jbxvt.X.xcb
 #define VT jbxvt.X.win.vt
 #define COM jbxvt.com
-#define PASTE(s, l) write(COM.fd, s, l);
+#define PASTE(s, l) jb_check(write(COM.fd, s, l) != -1, "Cannot paste")
 
 static bool paste_from(const xcb_atom_t cb, const xcb_timestamp_t t)
 {
