@@ -12,6 +12,7 @@
 #include "screen.h"
 #include "selection.h"
 
+#include <assert.h>
 #include <gc.h>
 #include <stdlib.h>
 #include <string.h>
@@ -166,7 +167,12 @@ static int8_t copy_screen_area(const int8_t i,
 {
 	if(i >= count)
 		  return j;
+	assert(SCR);
+	assert(SCR->text);
+	assert(save);
 	save[i] = SCR->text[j];
+	assert(rend);
+	assert(SCR->rend);
 	rend[i] = SCR->rend[j];
 	ck_sel_on_scr(j);
 	return copy_screen_area(i + 1, j + mod, mod,
