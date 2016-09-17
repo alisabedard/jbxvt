@@ -20,7 +20,7 @@ struct JBXVT jbxvt;
 
 static char ** parse_command_line(const int argc, char ** argv)
 {
-	static const char * optstr = "B:b:C:c:D:d:eF:f:ehvR:S:s";
+	static const char * optstr = "B:b:C:c:D:d:eF:f:hR:S:sv";
 	int8_t opt;
 	struct JBXVTOptionData * o = &jbxvt.opt;
 	while((opt=getopt(argc, argv, optstr)) != -1) {
@@ -31,14 +31,14 @@ static char ** parse_command_line(const int argc, char ** argv)
 		case 'b': // background color
 			o->bg = optarg;
 			break;
+		case 'C': // columns
+			o->size.cols = atoi(optarg);
+			break;
 		case 'D': // DISPLAY
 			o->display = optarg;
 			break;
 		case 'd': // screen number
 			o->screen = atoi(optarg);
-			break;
-		case 'C': // columns
-			o->size.cols = atoi(optarg);
 			break;
 		case 'e': // exec
 			return argv + optind;

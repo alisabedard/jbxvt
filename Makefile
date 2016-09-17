@@ -33,9 +33,12 @@ $(exe): $(OBJS)
 	tail -n 5 sz.log
 
 bindest=$(DESTDIR)$(PREFIX)/bin
+docdest=$(DESTDIR)$(PREFIX)/share/man/man1
 install:
 	install -d $(bindest)
 	install $(exe) $(bindest)
+	install -d $(docdest)
+	install $(exe).1 $(docdest)
 clean:
 	rm -f $(exe) *.o
 	cd libjb && make clean
