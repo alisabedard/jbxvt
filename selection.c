@@ -65,7 +65,9 @@ void scr_clear_selection(void)
 	jbxvt.sel.length = 0;
 	show_selection(0, CSZ.h - 1, 0, CSZ.w - 1);
 	jbxvt.sel.end[0].type = jbxvt.sel.end[1].type = NOSEL;
-	free(jbxvt.sel.text);
+	if (jbxvt.sel.text) // avoid double-free
+		free(jbxvt.sel.text);
+	jbxvt.sel.text = NULL;
 }
 
 //  start a selection using the specified unit.
