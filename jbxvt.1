@@ -1,4 +1,4 @@
-.TH jbxvt 1 "17 SEP 2016"
+.TH jbxvt 1 "18 SEP 2016"
 
 .SH NAME
 jbxvt \- minimalistic terminal emulator
@@ -7,25 +7,41 @@ jbxvt \- minimalistic terminal emulator
 .I jbxvt \-[B:b:C:c:D:d:eF:f:hvR:S:s]
 
 .SH DESCRIPTION
-Jbxvt is a minimalistic emulator of the xterm terminal emulator for XCB.
-Jbxvt implements many vt100 control sequences, as well as xterm features.
-Features include mouse support, color support, scrollback history,
-and utmp entry management.  It also features many code cleanups and a small
-memory footprint.  
+Jbxvt is a minimalistic emulator of the xterm terminal emulator X11,
+utilizing the XCB library directly.  Jbxvt implements many vt100 control
+sequences, as well as xterm features.  Features include mouse support,
+color support, scrollback history, and utmp entry management.
+It also features many code cleanups and a small memory footprint.  
 
 .SH OPTIONS
-.IP "\fB-B\fP \fIfont\fP
-Set font
-.IP "\fB-b\fP \fIcolor\fP
-Set background color
-.IP "\fB-C\fP \fIcolumns\fP
-Set number of columns
-.IP "\fB-D\fP \fIdisplay\fP
-Set display string
-.IP "\fB-d\fP \fIscreen\fP
-Set display screen
+.IP "\fB-B\fI font
+Set the bold font.
+.IP "\fB-b\fI color
+Set the background color.
+.IP "\fB-C\fI columns
+Set the number of columns.
+.IP "\fB-D\fI display
+Set the display string.
+.IP "\fB-d\fI screen
+Set the display screen.
+.IP "\fB-e\fI ...
+Execute the remaining arguments in the terminal (stops argument processing).
+.IP "\fB-F\fI font
+Set the normal font.
+.IP "\fB-f\fI color
+Set the foreground color.
+.IP "\fB-R\fI rows
+Set the number of rows.
+.IP "\fB-S\fI lines
+Set the number of lines in the scrollback history.
+.IP "\fB-s
+Show the scrollbar.
+.IP "\fB-v
+Print the version then exit.
+.IP "\fB-h
+Print the usage information then exit.
 
 .SH ENVIRONMENT
-.IP SHELL
+.IP \fBSHELL
 Define the program executed by default.
 
