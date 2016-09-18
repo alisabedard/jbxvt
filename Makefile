@@ -1,28 +1,23 @@
 # Copyright 2016, Jeffrey E. Bedard
-
 #CC=clang
 #include debug.mk
-
 exe=jbxvt
 PREFIX=/usr
 
 include config.mk
 
-#-------------------------------
-
 CFLAGS+=-DUSE_LIKELY
-LIBS+=-lxcb -lxcb-keysyms -lgc
+CFLAGS+=-D_XOPEN_SOURCE=700 --std=c11
+CFLAGS+=-Wall -Wextra
 
-#-------------------------------
+LIBS+=-lxcb -lxcb-keysyms -lgc
+LIBS+=-Llibjb -ljb
 
 OBJS=jbxvt.o lookup_key.o paint.o change_selection.o cmdtok.o
 OBJS+=cursor.o init_display.o repaint.o save_selection.o scr_move.o
 OBJS+=sbar.o scr_erase.o selex.o scr_edit.o command.o selection.o
 OBJS+=selreq.o scr_reset.o scr_string.o screen.o scroll.o selend.o 
 OBJS+=xevents.o xsetup.o xvt.o handle_sgr.o dec_reset.o show_selection.o
-LIBS+= -Llibjb -ljb
-CFLAGS+=-D_XOPEN_SOURCE=700 --std=c11
-CFLAGS+=-Wall -Wextra
 
 $(exe): $(OBJS)
 	cd libjb && $(MAKE) CC="${CC}" CFLAGS="${CFLAGS}"
@@ -34,6 +29,7 @@ $(exe): $(OBJS)
 
 bindest=$(DESTDIR)$(PREFIX)/bin
 docdest=$(DESTDIR)$(PREFIX)/share/man/man1
+
 install:
 	install -d $(bindest)
 	install $(exe) $(bindest)
