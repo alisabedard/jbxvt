@@ -10,9 +10,8 @@
 #include "screen.h"
 #include "show_selection.h"
 
-#define FSZ jbxvt.X.f.size
-#define CSZ jbxvt.scr.chars
-#define XC jbxvt.X.xcb
+#include <assert.h>
+
 #define VT jbxvt.X.win.vt
 
 static void prop(const xcb_atom_t a)
@@ -80,6 +79,7 @@ void scr_start_selection(struct JBDim p, enum selunit unit)
 
 static int16_t row(SelEnd * restrict e)
 {
+	assert(e);
 	return e->type == SCREENSEL ? e->index : -1;
 }
 
