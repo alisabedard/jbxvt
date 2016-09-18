@@ -66,13 +66,13 @@ static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 		const int16_t start = i == e->index ? e->col : 0;
 		const int16_t end = i == j ? (e+1)->col : w - 1;
 		const uint16_t len = end - start + 1;
-		*str = GC_REALLOC(*str, *total + len);
+		*str = realloc(*str, *total + len);
 		strncpy((char*)*str + *total,
 			(char*)jbxvt.scr.current->text[i] + start, len);
 		*total += len;
 	}
 	*total = sanitize(*str, *total) + 1;
-	*str = GC_REALLOC(*str, *total);
+	*str = realloc(*str, *total);
 }
 
 /*  Convert the currently marked screen selection as a text string
@@ -87,7 +87,7 @@ void save_selection(void)
 	const bool forward = selcmp(e, e+1) <= 0;
 	SelEnd se[] = {e[forward?0:1], e[forward?1:0]};
 	uint16_t total = 1;
-	uint8_t * str = GC_MALLOC(total);
+	uint8_t * str = malloc(total);
 	handle_screensel(&str, &total, se);
 	str[--total] = 0; // null termination
 	s->text = str;
