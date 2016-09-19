@@ -3,24 +3,17 @@
 
 #include "scr_edit.h"
 
-#include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
-#include "libjb/util.h"
 #include "sbar.h"
 #include "screen.h"
-#include "selection.h"
 
 #include <string.h>
 
-#define FSZ jbxvt.X.f.size
-#define SCR jbxvt.scr.current
-#define XC jbxvt.X.xcb
-#define VT jbxvt.X.win.vt
-#define CSZ jbxvt.scr.chars
 #define CUR SCR->cursor
 #define END (CSZ.w - CUR.x)
+#define VT jbxvt.X.win.vt
 
 static void copy_area(const int16_t * restrict x, const int16_t y,
 	const uint16_t width)
