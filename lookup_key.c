@@ -4,6 +4,7 @@
 #include "jbxvt.h"
 #include "libjb/log.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 #include <xcb/xcb.h>
@@ -111,6 +112,8 @@ static char * get_format(const enum KSType type)
 static char * get_keycode_value(struct KeyMaps * restrict keymaptable,
 	xcb_keysym_t keysym, char * buf, const int use_alternate)
 {
+	assert(keymaptable);
+	assert(buf);
 	for (struct KeyMaps * km = keymaptable; km->km_keysym; ++km) {
 		if (km->km_keysym != keysym)
 			  continue;
@@ -124,6 +127,7 @@ static char * get_keycode_value(struct KeyMaps * restrict keymaptable,
 
 static char * get_s(const xcb_keysym_t keysym, char * restrict kbuf)
 {
+	assert(kbuf);
 	if (xcb_is_function_key(keysym) || xcb_is_misc_function_key(keysym)
 		|| keysym == XK_Next || keysym == XK_Prior)
 		return get_keycode_value(func_key_table, keysym, kbuf, false);
@@ -156,6 +160,7 @@ static uint8_t shift(uint8_t c)
 
 static void apply_state(const uint16_t state, uint8_t * restrict kbuf)
 {
+	assert(kbuf);
 	switch (state) {
 	case XCB_MOD_MASK_SHIFT:
 	case XCB_MOD_MASK_LOCK:
@@ -176,9 +181,12 @@ static void apply_state(const uint16_t state, uint8_t * restrict kbuf)
 //  Convert the keypress event into a string.
 uint8_t * lookup_key(void * restrict ev, int_fast16_t * restrict pcount)
 {
+	assert(ev);
+	assert(pcount);
 	static uint8_t kbuf[KBUFSIZE];
 	xcb_key_press_event_t * ke = ev;
 	xcb_key_symbols_t *syms = xcb_key_symbols_alloc(jbxvt.X.xcb);
+	assert(syms);
 	xcb_keysym_t k = xcb_key_press_lookup_keysym(syms, ke, 2);
 #ifdef KEY_DEBUG
 	LOG("keycode: 0x%x, keysym: 0x%x, state: 0x%x",
