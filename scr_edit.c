@@ -64,11 +64,8 @@ static void begin(int16_t * x, int8_t * restrict count, const bool insert)
 	struct JBDim p = get_p(c);
 	x[0] = p.x;
 	x[1] = p.x + *count * FSZ.width;
-	if (!insert) {
-		int16_t a = x[0];
-		x[0] = x[1];
-		x[1] = a;
-	}
+	if (!insert)
+		JB_SWAP(int16_t, x[0], x[1]);
 	check_selection(c.y, c.y);
 }
 
