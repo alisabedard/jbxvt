@@ -1,26 +1,9 @@
-CFLAGS+=-DDEBUG -ggdb -Werror
-CFLAGS+=-Wall -Wextra
+# Copyright 2016, Jeffrey E. Bedard
 
-#CFLAGS+=-fsanitize=leak
-#CFLAGS+=-fsanitize=shift
-#CFLAGS+=-fsanitize=integer-divide-by-zero
-#CFLAGS+=-fsanitize=unreachable
-#CFLAGS+=-fsanitize=null
-#CFLAGS+=-fsanitize=alignment
-#CFLAGS+=-fsanitize=object-size
-#CFLAGS+=-fsanitize=nonnull-attribute
-#CFLAGS+=-fsanitize=bool
-#CFLAGS+=-fsanitize=enum
-
-CFLAGS+=-fsanitize=undefined
-CFLAGS+=-ftrapv
-
-CFLAGS+=-Wsuggest-attribute=pure
-CFLAGS+=-Wsuggest-attribute=const
-CFLAGS+=-Wsuggest-attribute=noreturn
-CFLAGS+=-Wsuggest-attribute=format
-CFLAGS+=-Wsuggest-final-types
-CFLAGS+=-Wmissing-format-attribute
-
-#CFLAGS+=-fstack-protector-all
+CFLAGS=-O0
+CFLAGS+=-DDEBUG
+CFLAGS+=-ggdb
+CFLAGS+=-Werror
+CFLAGS+=-Wall
+CFLAGS+=-Wextra
 
