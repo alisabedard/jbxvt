@@ -71,8 +71,11 @@ static void begin(int16_t * x, int8_t * restrict count, const bool insert)
 	struct JBDim p = get_p(c);
 	x[0] = p.x;
 	x[1] = p.x + *count * FSZ.width;
-	if (!insert)
-		jb_swap(x, x+1);
+	if (!insert) {
+		int16_t a = x[0];
+		x[0] = x[1];
+		x[1] = a;
+	}
 	check_selection(c.y, c.y);
 }
 
@@ -101,13 +104,11 @@ static void copy_data_after_count(const uint8_t count, const struct JBDim c)
 
 static void delete_source_data(const uint8_t count, const int16_t y)
 {
-	const uint16_t scw = jbxvt.scr.chars.width;
-	VTScreen * scr = jbxvt.scr.current;
-	uint8_t * t = scr->text[y];
-	uint32_t * r = scr->rend[y];
+	uint8_t * t = SCR->text[y];
+	uint32_t * r = SCR->rend[y];
 	// delete the source data copied
-	memset(t + scw - count, 0, count);
-	memset(r + scw - count, 0, count << 2);
+	memset(t + CSZ.w - count, 0, count);
+	memset(r + CSZ.w - count, 0, count << 2);
 }
 
 //  Delete count characters from the current position.
