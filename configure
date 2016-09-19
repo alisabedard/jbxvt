@@ -85,7 +85,12 @@ search() # 1: cmd 2: var
 }
 
 if [ ! "$CC" ]; then
-	search cc CC && search gcc CC && search clang CC && search icc CC
+	search clang CC \
+		&& search gcc CC \
+		&& search icc CC \
+		&& search cc CC \
+		&& (echo 'FATAL: no compiler found.  Please set CC' \
+			exit 1);
 fi
 
 while getopts 'd' opt
