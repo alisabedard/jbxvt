@@ -1,9 +1,10 @@
 # Copyright 2016, Jeffrey E. Bedard
 
-CFLAGS=-O0
+CFLAGS+=-O0
 CFLAGS+=-DDEBUG
-CFLAGS+=-ggdb
+CFLAGS+=-g
 CFLAGS+=-Werror
 CFLAGS+=-Wall
 CFLAGS+=-Wextra
+CFLAGS+=-ftrapv
 

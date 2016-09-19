@@ -13,6 +13,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/termios.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -20,21 +21,14 @@
 
 #ifdef OPENBSD
 #include <sys/select.h>
-#include <sys/termios.h>
 #endif//OPENBSD
 
 #ifdef NETBSD
 #define POSIX_UTMPX
 #include <pwd.h>
 #include <sys/ioctl.h>
-#include <sys/termios.h>
-#include <sys/ttycom.h>
 #define UTMP_FILE "/var/run/utmp"
 #endif//NETBSD
-
-#ifdef FREEBSD
-#include <termios.h>
-#endif//FREEBSD
 
 #ifdef _BSD_SOURCE
 #include <sys/ttycom.h>
@@ -55,9 +49,6 @@
 #include <string.h>
 #include <utmpx.h>
 #endif//POSIX_UTMP
-
-// Shortcuts
-#define CSZ jbxvt.scr.chars
 
 //  Attempt to create and write an entry to the utmp file
 #ifdef POSIX_UTMPX

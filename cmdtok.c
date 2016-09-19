@@ -16,11 +16,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-
-#ifdef OPENBSD
 #include <sys/select.h>
-#endif//OPENBSD
+#include <unistd.h>
 
 // Input buffer is empty
 #define GCC_NULL 0x100
