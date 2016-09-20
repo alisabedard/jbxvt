@@ -47,8 +47,9 @@ void resize_window(void)
 		sz[0] -= SBAR_WIDTH;
 	}
 	xcb_configure_window(XC, VT, XCW(WIDTH) | XCW(HEIGHT), sz);
-	CSZ = jbxvt_get_char_size(PSZ = (struct JBDim){.w = sz[0],
-		.h = sz[1]});
+	CSZ = jbxvt_get_char_size(PSZ = (struct JBDim){
+		.w = (uint16_t)sz[0],
+		.h = (uint16_t)sz[1]});
 }
 
 // Change window or icon name:
