@@ -10,18 +10,13 @@
 #include "scr_reset.h"
 #include "screen.h"
 
-#include <errno.h>
-#include <stdlib.h>
 #include <string.h>
-#include <xcb/xcb.h>
 
 #define VT jbxvt.X.win.vt
 #define MW jbxvt.X.win.main
 #define XC jbxvt.X.xcb
 #define SW jbxvt.X.win.sb
 #define SB jbxvt.opt.show_scrollbar
-#define CSZ jbxvt.scr.chars
-#define PSZ jbxvt.scr.pixels
 
 //  Map the window
 void map_window(void)
