@@ -10,6 +10,7 @@
 #include "scr_reset.h"
 #include "screen.h"
 
+#include <assert.h>
 #include <string.h>
 
 #define VT jbxvt.X.win.vt
@@ -37,6 +38,7 @@ void resize_window(void)
 {
 	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(XC,
 		xcb_get_geometry(XC, MW), NULL);
+	assert(r);
 	struct JBDim sz = {.w = r->width, .h = r->height};
 	free(r);
 	if (SB) {
@@ -52,6 +54,7 @@ void resize_window(void)
 // Change window or icon name:
 void change_name(uint8_t * restrict str, const bool icon)
 {
+	assert(str);
 #define XA(n) XCB_ATOM_##n
 	xcb_change_property(XC, XCB_PROP_MODE_REPLACE, MW, icon
 		? XA(WM_ICON_NAME) : XA(WM_NAME), XA(STRING), 8,
