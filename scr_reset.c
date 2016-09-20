@@ -95,7 +95,7 @@ void scr_reset(void)
 {
 	LOG("scr_reset()");
 	decscnm();
-	struct JBDim c = get_c(P);
+	struct JBDim c = jbxvt_get_char_size(P);
 	fix_margins(c);
 	static bool created;
 	if (!created) {

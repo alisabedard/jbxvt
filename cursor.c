@@ -50,7 +50,7 @@ void draw_cursor(void)
 		return;
 	if ((current->cursor_visible ^= true) && is_blinking())
 		repaint(); // prevent stale cursor blocks
-	struct JBDim p = get_p(s->current->cursor);
+	struct JBDim p = jbxvt_get_pixel_size(s->current->cursor);
 	struct JBXVTXData * X = &jbxvt.X;
 	const struct JBDim f = X->f.size;
 	xcb_rectangle_t r = {p.x, p.y, f.w, f.h};

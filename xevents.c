@@ -57,7 +57,7 @@ static void locator_report(const uint8_t b, struct JBDim p)
 	if (MD.elr_once)
 		MD.elr_once = MD.elr = false;
 	if (MD.elr_pixels)
-		p = get_p(p);
+		p = jbxvt_get_pixel_size(p);
 	// DECLRP
 	cprintf("\033[%d;%d;%d;%d;0&w", b * 2, 7, p.y, p.x);
 }
@@ -67,7 +67,7 @@ static void track_mouse(uint8_t b, uint32_t state, struct JBDim p,
 {
 	LOG("track_mouse(b=%d, p={%d, %d})", b, p.x, p.y);
 	// get character position:
-	p = get_c(p);
+	p = jbxvt_get_char_size(p);
 	// modify for a 1-based row/column system
 	++p.x; ++p.y;
 	const bool wheel = b == 4 || b == 5;

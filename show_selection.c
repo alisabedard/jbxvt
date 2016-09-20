@@ -18,9 +18,9 @@ static void paint_rvid(struct JBDim start, struct JBDim end,
 		const struct JBDim f = jbxvt.X.f.size;
 		struct JBDim c = {.row = row, .col = row == start.y
 			? start.x : col1};
-		const struct JBDim p1 = get_p(c);
+		const struct JBDim p1 = jbxvt_get_pixel_size(c);
 		c.col = row == end.y ? end.x : col2;
-		const struct JBDim p2 = get_p(c);
+		const struct JBDim p2 = jbxvt_get_pixel_size(c);
 		if (p2.x > p1.x)
 			xcb_poly_fill_rectangle(jbxvt.X.xcb,
 				jbxvt.X.win.vt, jbxvt.X.gc.cu, 1,

@@ -51,7 +51,7 @@ void resize_window(void)
 	}
 	xcb_configure_window(XC, VT, XCB_CONFIG_WINDOW_WIDTH |
 		XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[]){sz.w, sz.h});
-	CSZ = get_c(PSZ = sz);
+	CSZ = jbxvt_get_char_size(PSZ = sz);
 }
 
 // Change window or icon name:

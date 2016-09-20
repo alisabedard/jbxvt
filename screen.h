@@ -12,11 +12,11 @@
 #include <xcb/xcb.h>
 
 // Convert pixel size/position to char size/position
-struct JBDim get_c(struct JBDim p)
+struct JBDim jbxvt_get_char_size(struct JBDim p)
 	__attribute__((pure));
 
 // Convert char size/position to pixel size/position
-struct JBDim get_p(struct JBDim c)
+struct JBDim jbxvt_get_pixel_size(struct JBDim c)
 	__attribute__((pure));
 
 /*  Fix the coordinates so that they are within the screen

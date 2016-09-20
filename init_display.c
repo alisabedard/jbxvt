@@ -75,7 +75,7 @@ static void create_main_window(xcb_size_hints_t * restrict sh,
 #define CSZ jbxvt.scr.chars
 	PSZ.w = sh->width;
 	PSZ.h = sh->height;
-	CSZ = get_c(PSZ);
+	CSZ = jbxvt_get_char_size(PSZ);
 }
 
 static xcb_cursor_t get_cursor(const uint16_t id,
@@ -117,7 +117,7 @@ static void create_vt_window(xcb_size_hints_t * restrict sh)
 static void get_sizehints(xcb_size_hints_t * restrict s)
 {
 	const struct JBDim f = FSZ;
-	const struct JBDim p = get_p(jbxvt.opt.size);
+	const struct JBDim p = jbxvt_get_pixel_size(jbxvt.opt.size);
 
 	*s = (xcb_size_hints_t) {
 #define SH(n) XCB_ICCCM_SIZE_HINT_##n

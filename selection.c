@@ -68,7 +68,7 @@ void scr_start_selection(struct JBDim p, enum selunit unit)
 {
 	LOG("scr_start_selection");
 	show_selection(0, CSZ.h - 1, 0, CSZ.w - 1);
-	struct JBDim rc = get_c(p);
+	struct JBDim rc = jbxvt_get_char_size(p);
 	jbxvt.sel.unit = unit;
 	fix_rc(&rc);
 	rc_to_selend(rc.y, rc.x, &jbxvt.sel.anchor);

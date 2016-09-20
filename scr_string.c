@@ -215,7 +215,7 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 			SCR->cursor.x = 0;
 		}
 		check_selection(SCR->cursor.y, SCR->cursor.y);
-		p = get_p(SCR->cursor);
+		p = jbxvt_get_pixel_size(SCR->cursor);
 		if (unlikely(jbxvt.mode.insert))
 			handle_insert(1, p);
 		uint8_t * t = SCR->text[SCR->cursor.y];

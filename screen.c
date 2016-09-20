@@ -16,12 +16,12 @@
 
 #define GET_X(op) p.w op##= FSZ.w; p.y op##= FSZ.h; return p;
 
-struct JBDim get_c(struct JBDim p)
+struct JBDim jbxvt_get_char_size(struct JBDim p)
 {
 	GET_X(/);
 }
 
-struct JBDim get_p(struct JBDim p)
+struct JBDim jbxvt_get_pixel_size(struct JBDim p)
 {
 	GET_X(*);
 }
@@ -64,7 +64,7 @@ void fix_rc(struct JBDim * restrict rc)
 }
 
 // Renderless 'E' at position:
-static void epos(const struct JBDim p)
+static inline void epos(const struct JBDim p)
 {
 	SCR->text[p.y][p.x] = 'E';
 	SCR->rend[p.y][p.x] = 0;

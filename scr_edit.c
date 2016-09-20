@@ -61,7 +61,7 @@ static void begin(int16_t * x, int8_t * restrict count, const bool insert)
 	change_offset(0);
 	draw_cursor();
 	const struct JBDim c = CUR;
-	struct JBDim p = get_p(c);
+	struct JBDim p = jbxvt_get_pixel_size(c);
 	x[0] = p.x;
 	x[1] = p.x + *count * FSZ.width;
 	if (!insert)
@@ -77,7 +77,7 @@ void scr_insert_characters(int8_t count)
 	begin(x, &count, true);
 	const struct JBDim c = SCR->cursor;
 	copy_lines(c.x, count);
-	finalize(x, get_p(c), get_width(count, true), count);
+	finalize(x, jbxvt_get_pixel_size(c), get_width(count, true), count);
 }
 
 static void copy_data_after_count(const uint8_t count, const struct JBDim c)
@@ -110,7 +110,7 @@ void scr_delete_characters(int8_t count)
 	struct JBDim c = CUR;
 	copy_data_after_count(count, c);
 	delete_source_data(count, c.y);
-	c = get_p(c);
+	c = jbxvt_get_pixel_size(c);
 	const uint16_t width = get_width(count, false);
 	c.x += width;
 	finalize(x, c, width, count);
