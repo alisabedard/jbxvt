@@ -39,16 +39,16 @@ void resize_window(void)
 	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(XC,
 		xcb_get_geometry(XC, MW), NULL);
 	assert(r);
-	struct JBDim sz = {.w = r->width, .h = r->height};
+	uint32_t sz[] = {r->width, r->height};
 	free(r);
 	if (SB) {
-		xcb_configure_window(XC, SW, XCB_CONFIG_WINDOW_HEIGHT,
-			(uint32_t[]){sz.h});
-		sz.w -= SBAR_WIDTH;
+#define XCW(i) XCB_CONFIG_WINDOW_##i
+		xcb_configure_window(XC, SW, XCW(HEIGHT), &sz[1]);
+		sz[0] -= SBAR_WIDTH;
 	}
-	xcb_configure_window(XC, VT, XCB_CONFIG_WINDOW_WIDTH |
-		XCB_CONFIG_WINDOW_HEIGHT, (uint32_t[]){sz.w, sz.h});
-	CSZ = jbxvt_get_char_size(PSZ = sz);
+	xcb_configure_window(XC, VT, XCW(WIDTH) | XCW(HEIGHT), sz);
+	CSZ = jbxvt_get_char_size(PSZ = (struct JBDim){.w = sz[0],
+		.h = sz[1]});
 }
 
 // Change window or icon name:
