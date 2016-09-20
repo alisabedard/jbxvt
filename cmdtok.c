@@ -11,6 +11,7 @@
 #include "screen.h"
 #include "xevents.h"
 
+#include <assert.h>
 #include <errno.h>
 #include <gc.h>
 #include <stdio.h>
@@ -33,13 +34,16 @@ enum ComCharFlags {BUF_ONLY=1, GET_XEVENTS=2};
 
 static struct JBXVTEvent * ev_alloc(xcb_generic_event_t * restrict e)
 {
+	assert(e);
 	struct JBXVTEvent * xe = calloc(1, sizeof(struct JBXVTEvent));
+	assert(xe);
 	xe->type = e->response_type;
 	return xe;
 }
 
 static void put_xevent(struct JBXVTEvent * xe)
 {
+	assert(xe);
 	struct JBXVTEventQueue * q = &jbxvt.com.events;
 	xe->next = q->start;
 	xe->prev = NULL;
@@ -48,6 +52,7 @@ static void put_xevent(struct JBXVTEvent * xe)
 
 static void handle_focus(xcb_generic_event_t * restrict e)
 {
+	assert(e);
 	xcb_focus_in_event_t * f = (xcb_focus_in_event_t *)e;
 	if (f->mode)
 		  return;
@@ -70,6 +75,7 @@ static void handle_focus(xcb_generic_event_t * restrict e)
 
 static void handle_sel(xcb_generic_event_t * restrict ge)
 {
+	assert(ge);
 	EALLOC(xcb_selection_request_event_t);
 	XEEQ(time); XEEQ(requestor); XEEQ(target); XEEQ(property);
 	XESET(window, owner);
@@ -78,6 +84,7 @@ static void handle_sel(xcb_generic_event_t * restrict ge)
 
 static void handle_client_msg(xcb_generic_event_t * restrict ge)
 {
+	assert(ge);
 	xcb_client_message_event_t * e = (xcb_client_message_event_t *)ge;
 	if (e->format == 32 && e->data.data32[0]
 		== (unsigned long)wm_del_win())
@@ -86,6 +93,7 @@ static void handle_client_msg(xcb_generic_event_t * restrict ge)
 
 static void handle_expose(xcb_generic_event_t * restrict ge)
 {
+	assert(ge);
 	EALLOC(xcb_expose_event_t);
 	XEEQ(window); XESET(box.x, x); XESET(box.y, y);
 	XESET(box.width, width); XESET(box.height, height);
@@ -94,6 +102,7 @@ static void handle_expose(xcb_generic_event_t * restrict ge)
 
 static void handle_other(xcb_generic_event_t * restrict ge)
 {
+	assert(ge);
 	EALLOC(xcb_key_press_event_t);
 	XESET(window, event); XESET(box.x, event_x); XESET(box.y, event_y);
 	XEEQ(state); XEEQ(time); XESET(button, detail);
@@ -102,6 +111,7 @@ static void handle_other(xcb_generic_event_t * restrict ge)
 
 static void key_press(xcb_generic_event_t * restrict e)
 {
+	assert(e);
 	int_fast16_t count = 0;
 	uint8_t * s = lookup_key(e, &count);
 	if (count) {
@@ -147,8 +157,7 @@ static int_fast16_t output_to_command(void)
 	struct JBXVTCommandData * c = &jbxvt.com;
 	const ssize_t count = write(c->fd, c->send_nxt,
 		c->send_count);
-	if (jb_check(count != -1, "Could not write to command"))
-		exit(1);
+	jb_assert(count != -1, "Could not write to command");
 	c->send_count -= count;
 	c->send_nxt += count;
 	return count;
@@ -193,6 +202,7 @@ static void poll_io(fd_set * restrict in_fdset)
 
 static bool get_buffered(int_fast16_t * val, const int_fast8_t flags)
 {
+	assert(val);
 	bool r = false;
 	if ((r = (COM.stack.top > COM.stack.data)))
 		*val = *--COM.stack.top;
@@ -336,6 +346,7 @@ static void end_esc(int_fast16_t c, struct Token * restrict tk)
 
 static void check_st(struct Token * t)
 {
+	assert(t);
 	int_fast16_t c = get_com_char(0);
 	if (c != TK_ST)
 		t->type = TK_NULL;
@@ -343,6 +354,7 @@ static void check_st(struct Token * t)
 
 static void start_dcs(struct Token * t)
 {
+	assert(t);
 	int_fast16_t c = get_com_char(0);
 	switch (c) {
 	case '0':
@@ -509,6 +521,7 @@ static void handle_esc(int_fast16_t c, struct Token * restrict tk)
 
 static void default_token(struct Token * restrict tk, int_fast16_t c)
 {
+	assert(tk);
 	switch(c) { // handle 8-bit controls
 	case TK_APC:
 	case TK_CSI:
@@ -570,6 +583,7 @@ static void default_token(struct Token * restrict tk, int_fast16_t c)
 //  Return an input token
 void get_token(struct Token * restrict tk)
 {
+	assert(tk);
 	memset(tk, 0, sizeof(struct Token));
 	// set token per event:
 	if(handle_xevents(tk))
