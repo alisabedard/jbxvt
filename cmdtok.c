@@ -6,18 +6,13 @@
 #include "cursor.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
-#include "libjb/xcb.h"
 #include "lookup_key.h"
 #include "screen.h"
 #include "xevents.h"
 
 #include <assert.h>
 #include <errno.h>
-#include <gc.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <sys/select.h>
 #include <unistd.h>
 
 // Input buffer is empty
