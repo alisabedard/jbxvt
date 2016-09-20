@@ -46,12 +46,9 @@ __attribute__((regparm(2)))
 static uint8_t find_c(uint8_t c, int16_t i)
 {
 	return jbxvt.sel.unit == SEL_CHAR
-		? ipos(&i)
-		? advance_c(c, jbxvt.scr.chars.width,
-			    jbxvt.scr.current->text[i])
+		? ipos(&i) ? advance_c(c, CSZ.w, SCR->text[i])
 		: advance_c(c, jbxvt.scr.sline.data[i]->sl_length,
-			    jbxvt.scr.sline.data[i]->sl_text)
-		: c;
+			jbxvt.scr.sline.data[i]->sl_text) : c;
 }
 
 /*  Fix the coordinates so that they are within the screen
