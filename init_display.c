@@ -13,6 +13,7 @@
 #include "screen.h"
 #include "xsetup.h"
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <xcb/xcb_icccm.h>
@@ -27,6 +28,7 @@ enum EventMasks {
 
 static xcb_font_t get_font(const char * name)
 {
+	assert(name);
 	xcb_connection_t * restrict x = jbxvt.X.xcb;
 	xcb_font_t f = xcb_generate_id(x);
 	xcb_void_cookie_t c = xcb_open_font_checked(x, f,
@@ -36,9 +38,8 @@ static xcb_font_t get_font(const char * name)
 		free(error);
 		c = xcb_open_font_checked(x, f, sizeof(FALLBACK_FONT),
 			FALLBACK_FONT);
-		error = xcb_request_check(x, c);
-		if(jb_check(!error, "Could not open fallback font"))
-			exit(1); // no need to free error, exiting
+		jb_assert(!xcb_request_check(x, c),
+			"Could not open fallback font");
 		if (jbxvt.X.f.normal) // already set
 			  // Fall back if bold font unavailable:
 			  jbxvt.X.f.bold = jbxvt.X.f.normal;
@@ -54,6 +55,7 @@ static void setup_font(void)
 	f->bold = get_font(jbxvt.opt.bold_font);
 	xcb_query_font_reply_t * r = xcb_query_font_reply(jbxvt.X.xcb,
 		qfc, NULL);
+	assert(r);
 	f->ascent = r->font_ascent;
 	struct JBDim * s = &f->size;
 	s->width = r->max_bounds.character_width;
@@ -80,7 +82,12 @@ static xcb_cursor_t get_cursor(const uint16_t id,
 	const uint16_t fg, const uint16_t bg)
 {
 	xcb_font_t f = xcb_generate_id(jbxvt.X.xcb);
-	xcb_open_font(jbxvt.X.xcb, f, 6, "cursor");
+	{
+		xcb_void_cookie_t v = xcb_open_font_checked(jbxvt.X.xcb,
+			f, 6, "cursor");
+		jb_assert(!xcb_request_check(jbxvt.X.xcb, v),
+			"Cannot open cursor font");
+	}
 	xcb_cursor_t c = xcb_generate_id(jbxvt.X.xcb);
 	xcb_create_glyph_cursor(jbxvt.X.xcb, c, f, f,
 		id, id + 1, fg, fg, fg, bg, bg, bg);
