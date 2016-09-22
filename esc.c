@@ -4,7 +4,6 @@
 #include "esc.h"
 
 #include "cmdtok.h"
-#include "command.h"
 #include "dcs.h"
 #include "jbxvt.h"
 #include "screen.h"
