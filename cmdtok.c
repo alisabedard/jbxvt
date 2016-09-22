@@ -4,14 +4,17 @@
 #include "cmdtok.h"
 
 #include "cursor.h"
+#include "dcs.h"
+#include "esc.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "lookup_key.h"
-#include "screen.h"
 #include "xevents.h"
 
 #include <assert.h>
 #include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -209,18 +212,12 @@ static bool get_buffered(int_fast16_t * val, const int_fast8_t flags)
 }
 
 /*  Return the next input character after first passing any keyboard input
- *  to the command.  If flags & BUF_ONLY is true then only buffered characters are
- *  returned and once the buffer is empty the special value GCC_NULL is
- *  returned.  If flags and GET_XEVENTS is true then GCC_NULL is returned
- *  when an X event arrives.
- */
-// This is the most often called function.
-#if defined(__i386__) || defined(__amd64__)
-__attribute__((hot,regparm(1)))
-#else
-__attribute__((hot))
-#endif
-static int_fast16_t get_com_char(const int_fast8_t flags)
+    to the command.  If flags & BUF_ONLY is true then only buffered
+    characters are returned and once the buffer is empty the special value
+    GCC_NULL is returned.  If flags and GET_XEVENTS is true then GCC_NULL
+    is returned when an X event arrives.  This is the most often called
+    function. */
+int_fast16_t get_com_char(const int_fast8_t flags)
 {
 	int_fast16_t ret = 0;
 	if (get_buffered(&ret, flags))
@@ -243,21 +240,11 @@ input:
 }
 
 //  Return true if the character is one that can be handled by scr_string()
-#if defined(__i386__) || defined(__amd64__)
-	__attribute__((hot,const,regparm(1)))
-#else
-	__attribute__((hot,const))
-#endif//x86
 static inline bool is_string_char(register int_fast16_t c)
 {
 	return c < 0x7f && (c >= ' ' || c == '\n' || c == '\r' || c == '\t');
 }
 
-#if defined(__i386__) || defined(__amd64__)
-	__attribute__((nonnull,regparm(1)))
-#else
-	__attribute__((nonnull))
-#endif//x86
 static void handle_string_char(int_fast16_t c, struct Token * restrict tk)
 {
 	uint_fast16_t i = 0;
@@ -273,245 +260,6 @@ static void handle_string_char(int_fast16_t c, struct Token * restrict tk)
 	tk->type = TK_STRING;
 	if (c != GCC_NULL)
 		  put_com_char(c);
-}
-
-#if defined(__i386__) || defined(__amd64__)
-	__attribute__((nonnull,regparm(1)))
-#else
-	__attribute__((nonnull))
-#endif//x86
-static void start_esc(int_fast16_t c, struct Token * restrict tk)
-{
-	c = get_com_char(0);
-	if (c >= '<' && c <= '?') {
-		tk->private = c;
-		c = get_com_char(0);
-	}
-
-	//  read any numerical arguments
-	uint_fast16_t i = 0;
-	do {
-		uint_fast16_t n = 0;
-		while (c >= '0' && c <= '9') { // is a number
-			// Advance position and convert
-			n = n * 10 + c - '0';
-			c = get_com_char(0); // next digit
-		}
-		if (i < TK_MAX_ARGS)
-			  tk->arg[i++] = n;
-		if (c == TK_ESC)
-			  put_com_char(c);
-		if (c < ' ')
-			  return;
-		if (c < '@')
-			  c = get_com_char(0);
-	} while (c < '@' && c >= ' ');
-	if (c == TK_ESC)
-		  put_com_char(c);
-	tk->nargs = i;
-	tk->type = c;
-}
-
-#if defined(__i386__) || defined(__amd64__)
-	__attribute__((nonnull,regparm(1)))
-#else
-	__attribute__((nonnull))
-#endif//x86
-static void end_esc(int_fast16_t c, struct Token * restrict tk)
-{
-	c = get_com_char(0);
-	uint_fast16_t n = 0;
-	while (c >= '0' && c <= '9') {
-		n = n * 10 + c - '0';
-		c = get_com_char(0);
-	}
-	tk->arg[0] = n;
-	tk->nargs = 1;
-	c = get_com_char(0);
-	register uint_fast16_t i = 0;
-	while ((c & 0177) >= ' ' && i < TKS_MAX) {
-		if (c >= ' ')
-			  tk->string[i++] = c;
-		c = get_com_char(0);
-	}
-	tk->length = i;
-	tk->string[i] = 0;
-	tk->type = TK_TXTPAR;
-}
-
-static void check_st(struct Token * t)
-{
-	assert(t);
-	int_fast16_t c = get_com_char(0);
-	if (c != TK_ST)
-		t->type = TK_NULL;
-}
-
-static void start_dcs(struct Token * t)
-{
-	assert(t);
-	int_fast16_t c = get_com_char(0);
-	switch (c) {
-	case '0':
-	case '1':
-		LOG("FIXME: User defined keys are unimplemented.");
-		return;
-	case '$':
-		c = get_com_char(0);
-		if (c != 'q')
-			return;
-		// RQSS:  Request status string
-		c = get_com_char(0); // next char
-		switch (c) {
-		case '"':
-			c = get_com_char(0); // next
-			switch (c) {
-#define CASE_Q(ch, tk) case ch:t->type=TK_QUERY_##tk;check_st(t);break;
-			CASE_Q('p', SCA);
-			CASE_Q('q', SCL);
-			}
-			break;
-		CASE_Q('m', SLRM);
-		CASE_Q('r', STBM);
-		CASE_Q('s', SLRM);
-		case ' ':
-			c = get_com_char(0);
-			if (c != 'q')
-				return;
-			t->type = TK_QUERY_SCUSR;
-			check_st(t);
-			break;
-		}
-		break;
-	case '+':
-		c = get_com_char(0);
-		switch (c) {
-		case 'p':
-		case 'q':
-			LOG("FIXME: termcap support unimplemented");
-		}
-		break;
-	case 0x1b:
-		get_com_char(0);
-		get_com_char(0);
-		put_com_char('-');
-		break;
-	default:
-		LOG("Unhandled DCS, starting with 0x%x", (int)c);
-	}
-}
-
-#if defined(__i386__) || defined(__amd64__)
-	__attribute__((nonnull,regparm(1)))
-#else
-	__attribute__((nonnull))
-#endif//x86
-static void handle_esc(int_fast16_t c, struct Token * restrict tk)
-{
-	c = get_com_char(0);
-	switch(c) {
-	case '[': // CSI
-		start_esc(c, tk);
-		break;
-	case ']': // OSC
-		end_esc(c, tk);
-		break;
-	case ' ':
-		c = get_com_char(0);
-		switch (c) {
-#define CASE_A(ch, tok, a) case ch: tk->type = tok, tk->arg[0] = a;\
-			tk->nargs=1; break;
-#define CASE_T(ch, tok) case ch: tk->type = tok; break;
-#define CASE_M(ch, mod, v) case ch: jbxvt.mode.mod = v; break;
-		CASE_T('F', TK_S7C1T);
-		CASE_T('G', TK_S8C1T);
-		CASE_T('L', TK_ANSI1);
-		CASE_T('M', TK_ANSI2);
-		CASE_T('N', TK_ANSI3);
-		}
-		break;
-	case '#':
-		c = get_com_char(0);
-		switch(c) {
-		CASE_T('3', TK_DHLT);
-		CASE_T('4', TK_DHLB);
-		CASE_T('5', TK_SWL);
-		CASE_T('6', TK_DWL);
-		CASE_T('8', TK_ALN);
-		}
-		break;
-
-	case '(': // G0 charset
-	CASE_A(')', c, get_com_char(0));
-
-	case '%': // UTF charset switch
-		c = get_com_char(0);
-		switch (c) {
-		CASE_T('@', TK_CS_DEF);
-		CASE_T('G', TK_CS_UTF8);
-		}
-		break;
-	CASE_T('6', TK_RI); // BI: back index
-	CASE_T('9', TK_IND); // FI: forward index
-	case '7': // SC: save cursor
-	case '8': // RC: restore cursor
-	case '=': // PAM: keypad to application mode
-	case '>': // PNM: keypad to numeric mode
-		tk->type = c;
-		break;
-	CASE_T('^', TK_PM); // PM: Privacy message (ended by ESC \)
-	CASE_T('\\', TK_ST);
-	CASE_M('<', decanm, true); // exit vt52 mode
-	case 'A': // vt52 cursor up
-	case 'B': // vt52 cursor down
-	case 'C': // vt52 cursor left
-		tk->type = c;
-		break;
-	CASE_T('D', jbxvt.mode.decanm ? TK_IND : TK_CUF);
-	CASE_T('c', TK_RIS); // Reset to Initial State
-	CASE_M('e', dectcem, true); // enable cursor (vt52 GEMDOS)
-	CASE_M('f', dectcem, false); // disable cursor (vt52 GEMDOS)
-	CASE_T('E', TK_NEL);
-	CASE_T('F', TK_ENTGM52); // Enter VT52 graphics mode
-	CASE_T('G', TK_EXTGM52); // Leave VT52 graphics mode
-	CASE_T('H', jbxvt.mode.decanm ? TK_HTS : TK_HOME);
-	CASE_A('l', jbxvt.mode.decanm ? TK_MEMLOCK : TK_EL, 2);
-	case 'I':
-		scr_index_from(-1, jbxvt.scr.current->cursor.y);
-		tk->type = TK_CUU;
-		break;
-	CASE_A('J', TK_EL, 1); // vt52 erase to end of line
-	CASE_T('j', TK_SC); // save cursor (vt52g)
-	CASE_T('K', TK_ED); // vt42 erase to end of screen
-	CASE_T('k', TK_RC); // restore cursor (vt52g)
-	CASE_T('L', TK_IL); // insert line (vt52)
-	CASE_T('M', jbxvt.mode.decanm ? TK_RI : TK_DL);
-	CASE_T('N', TK_SS2);
-	CASE_T('O', TK_SS3);
-	CASE_A('o', TK_EL, 1); // clear to start of line (vt52g)
-	case 'P':
-		start_dcs(tk);
-		break;
-	CASE_M('p', decscnm, true); // reverse video mode (vt52g)
-	CASE_M('q', decscnm, false); // normal video (vt52g)
-	CASE_T('V', TK_SPA);
-	CASE_M('v', decawm, true); // wrap on
-	CASE_T('W', TK_EPA);
-	CASE_M('w', decawm, false); // wrap off
-	CASE_T('X', TK_SOS);
-	case 'Y':
-		tk->type = TK_CUP;
-		// -32 to decode, + 1 to be vt100 compatible
-		tk->arg[1] = get_com_char(0) - 31;
-		tk->arg[0] = get_com_char(0) - 31;
-		tk->nargs = 2;
-	case 'Z':
-		if (jbxvt.mode.decanm) // vt100+ mode
-			tk->type = TK_ID;
-		else // I am a VT52
-			cprintf("\033/Z");
-		break;
-	}
 }
 
 static void default_token(struct Token * restrict tk, int_fast16_t c)
@@ -585,18 +333,22 @@ void get_token(struct Token * restrict tk)
 		  return;
 	const int_fast16_t c = get_com_char(GET_XEVENTS);
 	switch (c) {
-	CASE_T(GCC_NULL, TK_NULL);
-	CASE_T(EOF, TK_EOF);
+	case GCC_NULL:
+		tk->type = TK_NULL;
+		break;
+	case EOF:
+		tk->type = TK_EOF;
+		break;
 	case TK_ESC:
-		handle_esc(c, tk);
+		jbxvt_esc(c, tk);
 		break;
 	case TK_CSI: // 8-bit CSI
 		// Catch this here, since 7-bit CSI is parsed above.
 		LOG("CC_CSI");
-		start_esc(c, tk);
+		jbxvt_csi(c, tk);
 		break;
 	case TK_DCS: // 8-bit DCS
-		start_dcs(tk);
+		jbxvt_dcs(tk);
 		break;
 	default:
 		default_token(tk, c);

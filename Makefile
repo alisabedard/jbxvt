@@ -13,9 +13,9 @@ CFLAGS+=-Wall -Wextra
 LIBS+=-lxcb -lxcb-keysyms -lgc
 LIBS+=-Llibjb -ljb
 
-OBJS=jbxvt.o lookup_key.o paint.o change_selection.o cmdtok.o
+OBJS=jbxvt.o lookup_key.o paint.o change_selection.o cmdtok.o esc.o
 OBJS+=cursor.o init_display.o repaint.o save_selection.o scr_move.o
-OBJS+=sbar.o scr_erase.o selex.o scr_edit.o command.o selection.o
+OBJS+=sbar.o scr_erase.o selex.o scr_edit.o command.o selection.o dcs.o
 OBJS+=selreq.o scr_reset.o scr_string.o screen.o scroll.o selend.o 
 OBJS+=xevents.o xsetup.o xvt.o handle_sgr.o dec_reset.o show_selection.o
 
