@@ -17,11 +17,15 @@ struct JBXVTEvent {
 	};
 	xcb_timestamp_t time;
 	xcb_window_t window;
-	xcb_window_t requestor; // selections
 	xcb_atom_t property; // selections
-	xcb_atom_t target;
-	struct xcb_rectangle_t box;
-	uint16_t state;
+	union {
+		xcb_atom_t target;
+		uint16_t state;
+	};
+	union {
+		struct xcb_rectangle_t box;
+		xcb_window_t requestor; // selections
+	};
 };
 
 #endif//!JBXVTEVENT_H
