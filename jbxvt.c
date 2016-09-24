@@ -127,8 +127,8 @@ int main(int argc, char ** argv)
 	jb_check(setenv("TERM", TERM_ENV, true) != -1,
 		"Could not set TERM environment variable");
 	init_command(com_argv);
-	jbxvt_app_loop();
-
+	for (;;) // app loop
+		jbxvt_parse_token();
 	return 0;
 }
 

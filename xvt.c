@@ -182,7 +182,7 @@ static void tbc(const uint8_t t)
 		scr_set_tab(SCR->cursor.x, false);
 }
 
-static void parse_token(void)
+void jbxvt_parse_token(void)
 {
 	struct Token token;
 	static bool size_set = true;
@@ -492,11 +492,5 @@ static void parse_token(void)
 #endif//DEBUG
 		break;
 	}
-}
-
-void jbxvt_app_loop(void)
-{
-	for(;;)
-		parse_token();
 }
 
