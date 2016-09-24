@@ -104,7 +104,7 @@ static void track_mouse(uint8_t b, uint32_t state, struct JBDim p,
 	for(char * i = out; *i; ++i)
 		if (*i == '\033')
 			*i = 'E';
-	fprintf(stderr, "track_mouse: %s\n", out);
+	LOG("track_mouse: %s\n", out);
 	free(out);
 #endif//!DEBUG
 }
