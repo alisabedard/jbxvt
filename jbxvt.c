@@ -58,15 +58,19 @@ static char ** parse_command_line(const int argc, char ** argv)
 			o->show_scrollbar=true;
 			break;
 		case 'v': // version
-			puts("jbxvt " JBXVT_VERSION);
-			exit(0);
+			goto version;
 		case 'h': // help
 		default:
-			printf("%s -[%s]\n", argv[0], optstr);
-			exit(0);
+			goto usage;
 		}
 	}
 	return NULL;
+version:
+	printf("jbxvt %s\n", JBXVT_VERSION);
+	exit(0);
+usage:
+	printf("%s -[%s]\n", argv[0], optstr);
+	exit(0);
 }
 
 static void opt_init(void)
