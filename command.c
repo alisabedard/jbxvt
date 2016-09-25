@@ -75,6 +75,11 @@ static void write_utmpx(const pid_t comm_pid, char * tty_name)
 // Put all clean-up tasks here:
 static void exit_cb(void)
 {
+	if (jbxvt.com.fd)
+		close(jbxvt.com.fd);
+	if (jbxvt.com.pid)
+		kill(jbxvt.com.pid, SIGTERM);
+
 #ifdef USE_UTEMPTER
 	utempter_remove_added_record();
 #endif//USE_UTEMPTER
@@ -191,12 +196,11 @@ static fd_t run_command(char ** argv)
 	// +1 to allow for X fd
 	jbxvt.com.width = ptyfd + 1;
 	attach_signals();
-	const pid_t comm_pid = fork();
-	jb_assert(comm_pid >= 0, "Could not start session");
-	if (comm_pid == 0)
+	jb_assert((jbxvt.com.pid = fork()) >= 0, "Could not start session");
+	if (jbxvt.com.pid == 0)
 		child(argv, ttyfd);
 #ifdef POSIX_UTMPX
-	write_utmpx(comm_pid, tty_name);
+	write_utmpx(jbxvt.com.pid, tty_name);
 #endif//POSIX_UTMPX
 #ifdef USE_UTEMPTER
 	utempter_add_record(ptyfd, getenv("DISPLAY"));
