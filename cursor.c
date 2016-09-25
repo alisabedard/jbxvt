@@ -74,6 +74,5 @@ void draw_cursor(void)
 		break;
 	}
 	xcb_poly_fill_rectangle(X->xcb, X->win.vt, X->gc.cu, 1, &r);
-	xcb_flush(X->xcb); // Apply drawing
 }
 

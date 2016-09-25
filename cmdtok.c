@@ -172,6 +172,7 @@ static void timer(void)
 	case 5: // blinking bar
 	case 7: // blinking overline
 		draw_cursor();
+		xcb_flush(jbxvt.X.xcb); // enable clearing
 		break;
 	}
 }
