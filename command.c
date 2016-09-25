@@ -159,7 +159,7 @@ void tty_set_size(const struct JBDim sz)
 
 static void exit_handler(void)
 {
-	raise(1);
+	raise(SIGHUP);
 }
 
 // Put all clean-up tasks here:
