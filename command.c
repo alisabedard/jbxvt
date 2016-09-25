@@ -72,19 +72,6 @@ static void write_utmpx(const pid_t comm_pid, char * tty_name)
 }
 #endif//POSIX_UTMPX
 
-// Put all clean-up tasks here:
-static void exit_cb(void)
-{
-	if (jbxvt.com.fd)
-		close(jbxvt.com.fd);
-	if (jbxvt.com.pid)
-		kill(jbxvt.com.pid, SIGHUP);
-
-#ifdef USE_UTEMPTER
-	utempter_remove_added_record();
-#endif//USE_UTEMPTER
-}
-
 /*  Acquire a pseudo teletype from the system.  The return value is the
  *  name of the slave part of the pair or NULL if unsucsessful.  If
  *  successful then the master and slave file descriptors are returned
@@ -169,14 +156,23 @@ void tty_set_size(const struct JBDim sz)
 }
 #endif//etc
 
+// Put all clean-up tasks here:
+static void signal_handler(int sig)
+{
+	if (jbxvt.com.fd)
+		close(jbxvt.com.fd);
+	if (jbxvt.com.pid)
+		kill(jbxvt.com.pid, sig);
+#ifdef USE_UTEMPTER
+	utempter_remove_added_record();
+#endif//USE_UTEMPTER
+	_Exit(0);
+}
+
 static void attach_signals(void)
 {
-	// Attach relevant signals:
-	signal(SIGINT, exit);
-	signal(SIGQUIT, exit);
-	// grantpt(3) states this is unspecified behavior:
-	signal(SIGCHLD, exit);
-	atexit(exit_cb);
+	for (uint8_t i = 1; i <= SIGCHLD; ++i)
+		signal(i, &signal_handler);
 }
 
 /*  Run the command in a subprocess and return a file descriptor for the
