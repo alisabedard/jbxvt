@@ -13,8 +13,8 @@ do
 		DEBUG=true
 		;;
 	?)
-		echo -e '-d\tenable debugging'
-		echo -e '-*\thelp'
+		echo '-d\tenable debugging'
+		echo '-*\thelp'
 		exit 1
 		;;
 	esac
