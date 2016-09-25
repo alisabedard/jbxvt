@@ -5,6 +5,7 @@
 #include "command.h"
 
 #include "jbxvt.h"
+#include "libjb/log.h"
 #include "xevents.h"
 
 #include <fcntl.h>
@@ -156,20 +157,33 @@ void tty_set_size(const struct JBDim sz)
 }
 #endif//etc
 
+static void exit_handler(void)
+{
+	raise(1);
+}
+
 // Put all clean-up tasks here:
 static void signal_handler(int sig)
 {
+	LOG("Caught signal %d", sig);
 #ifdef USE_UTEMPTER
+	// Remove utmp entry:
 	utempter_remove_added_record();
 #endif//USE_UTEMPTER
+	// Ensure child process terminates:
 	kill(jbxvt.com.pid, sig);
+	// Exit without tripping atexit handler:
 	_Exit(sig);
 }
 
 static void attach_signals(void)
 {
+	// Attach relevant signals:
 	for (uint8_t i = 1; i <= SIGCHLD; ++i)
 		signal(i, &signal_handler);
+	/* Catch all other exit calls and convert to a signal
+	   so that cleanup may be done.  */
+	atexit(&exit_handler);
 }
 
 /*  Run the command in a subprocess and return a file descriptor for the
