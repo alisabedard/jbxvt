@@ -26,31 +26,6 @@ struct JBDim jbxvt_get_pixel_size(struct JBDim p)
 	GET_X(*);
 }
 
-#if defined(__i386__) || defined(__amd64__)
-__attribute__((regparm(2)))
-#endif//__i386__||__amd64__
-static uint8_t advance_c(uint8_t c, const uint8_t len,
-	uint8_t * restrict s)
-{
-	if (c && s[c - 1] < ' ')
-		while (c < len && s[c] < ' ')
-			c++;
-	if (c > len)
-		return jbxvt.scr.chars.width;
-	return c;
-}
-
-#if defined(__i386__) || defined(__amd64__)
-__attribute__((regparm(2)))
-#endif//__i386__||__amd64__
-static uint8_t find_c(uint8_t c, int16_t i)
-{
-	return jbxvt.sel.unit == SEL_CHAR
-		? ipos(&i) ? advance_c(c, CSZ.w, SCR->text[i])
-		: advance_c(c, jbxvt.scr.sline.data[i]->sl_length,
-			jbxvt.scr.sline.data[i]->sl_text) : c;
-}
-
 /*  Fix the coordinates so that they are within the screen
     and do not lie within empty space.  */
 void fix_rc(struct JBDim * restrict rc)
@@ -60,7 +35,6 @@ void fix_rc(struct JBDim * restrict rc)
 		  return; // prevent segfault on bad window size.
 	JB_LIMIT(rc->x, c.w - 1, 0);
 	JB_LIMIT(rc->y, c.h - 1, 0);
-	rc->x = find_c(rc->x, rc->y - jbxvt.scr.offset);
 }
 
 // Renderless 'E' at position:
