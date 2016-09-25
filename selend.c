@@ -6,6 +6,8 @@
 
 #include "jbxvt.h"
 
+#define SLD jbxvt.scr.sline.data
+
 // Make i positive, return true if it was already positive
 bool ipos(int16_t * i)
 {
@@ -63,17 +65,17 @@ static uint16_t sel_s(SelEnd * restrict se2, uint8_t ** s)
 {
 	const bool ss = se2->type == SCREENSEL;
 	*s = ss ? jbxvt.scr.current->text[se2->index]
-		: jbxvt.scr.sline.data[se2->index]->sl_text;
+		: SLD[se2->index]->sl_text;
 	return ss ? jbxvt.scr.chars.width
-		: jbxvt.scr.sline.data[se2->index]->sl_length;
+		: SLD[se2->index]->sl_length;
 }
 
 static void adj_sel_to_word(SelEnd * include,
 	SelEnd * se1, SelEnd * se2)
 {
 	uint8_t * s = se1->type == SCREENSEL
-		? jbxvt.scr.current->text[se1->index]
-		: jbxvt.scr.sline.data[se1->index]->sl_text;
+		? SCR->text[se1->index]
+		: SLD[se1->index]->sl_text;
 	int16_t i = se1->col;
 	while (i && s[i] != ' ')
 		  --i;
