@@ -84,8 +84,7 @@ static void opt_init(void)
 	O(size.width, COLUMNS);
 	O(size.height, ROWS);
 	// Default to a steady block cursor to conserve CPU
-	//jbxvt.opt.cursor_attr = 2;
-	jbxvt.opt.cursor_attr = 1;
+	jbxvt.opt.cursor_attr = 2;
 	jbxvt.scr.sline.max = MAX_SCROLL;
 }
 
