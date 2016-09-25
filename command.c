@@ -78,7 +78,7 @@ static void exit_cb(void)
 	if (jbxvt.com.fd)
 		close(jbxvt.com.fd);
 	if (jbxvt.com.pid)
-		kill(jbxvt.com.pid, SIGTERM);
+		kill(jbxvt.com.pid, SIGHUP);
 
 #ifdef USE_UTEMPTER
 	utempter_remove_added_record();
