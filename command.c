@@ -159,14 +159,11 @@ void tty_set_size(const struct JBDim sz)
 // Put all clean-up tasks here:
 static void signal_handler(int sig)
 {
-	if (jbxvt.com.fd)
-		close(jbxvt.com.fd);
-	if (jbxvt.com.pid)
-		kill(jbxvt.com.pid, sig);
 #ifdef USE_UTEMPTER
 	utempter_remove_added_record();
 #endif//USE_UTEMPTER
-	_Exit(0);
+	kill(jbxvt.com.pid, sig);
+	_Exit(sig);
 }
 
 static void attach_signals(void)
