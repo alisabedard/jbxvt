@@ -15,6 +15,7 @@ do
 	?)
 		echo -e '-d\tenable debugging'
 		echo -e '-*\thelp'
+		exit 1
 		;;
 	esac
 done 
