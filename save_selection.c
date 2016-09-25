@@ -37,12 +37,12 @@ static bool skip(uint8_t * restrict str, uint16_t * restrict i,
 
 static uint16_t sanitize(uint8_t * str, const uint16_t len)
 {
+	LOG("str: '%s', len: %d\n", str, len);
 	uint16_t i, j;
 	uint8_t null_ct = 0;
 	for (i = 0, j = 0; i < len; ++i, ++j) {
 		if (str[i] == '\0') {
 			++null_ct;
-			str[j] = '\r';
 			if (skip(str, &i, &j, len, null_ct))
 				return j;
 			--i;
@@ -89,6 +89,13 @@ void save_selection(void)
 	uint16_t total = 1;
 	uint8_t * str = malloc(total);
 	handle_screensel(&str, &total, se);
+	if (total == 0) {
+		// Invalid string.
+		free(str);
+		s->text = NULL;
+		s->length = 0;
+		return;
+	}
 	str[--total] = 0; // null termination
 	s->text = str;
 	s->length = total;
