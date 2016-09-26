@@ -65,7 +65,7 @@ static uint16_t sel_s(SelEnd * restrict se2, uint8_t ** s)
 {
 	const bool ss = se2->type == SCREENSEL;
 	*s = ss ? jbxvt.scr.current->text[se2->index]
-		: SLD[se2->index]->sl_text;
+		: SLD[se2->index]->text;
 	return ss ? jbxvt.scr.chars.width
 		: SLD[se2->index]->sl_length;
 }
@@ -75,7 +75,7 @@ static void adj_sel_to_word(SelEnd * include,
 {
 	uint8_t * s = se1->type == SCREENSEL
 		? SCR->text[se1->index]
-		: SLD[se1->index]->sl_text;
+		: SLD[se1->index]->text;
 	int16_t i = se1->col;
 	while (i && s[i] != ' ')
 		  --i;

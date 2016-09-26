@@ -81,16 +81,11 @@ static void clear(int8_t count, const uint8_t rc,
 	clear(count, rc, text, rend, up);
 }
 
-static struct JBXVTSavedLine * new_sline(const uint16_t x)
+static struct JBXVTSavedLine * new_sline(uint16_t x)
 {
 	struct JBXVTSavedLine * sl = GC_MALLOC(sizeof(struct JBXVTSavedLine));
 	jb_assert(sl, "Could not allocate saved line");
 	sl->sl_length = x;
-	uint8_t * t = GC_MALLOC(x);
-	uint32_t * r = GC_MALLOC(x << 2);
-	jb_assert(t && r, "Could not allocate memory");
-	sl->sl_text = t;
-	sl->sl_rend = r;
 	return sl;
 }
 
@@ -104,8 +99,8 @@ static void cp_rows(int16_t i, const int16_t count)
 	int_fast16_t len = find_col(t, 0);
 	struct JBXVTSavedLine * sl = new_sline(len);
 	sl->wrap = SCR->wrap[i];
-	memcpy(sl->sl_text, t, len);
-	memcpy(sl->sl_rend, r, len << 2);
+	memcpy(sl->text, t, len);
+	memcpy(sl->rend, r, len << 2);
 #define SLINE jbxvt.scr.sline
 	SLINE.data[count - i - 1] = sl;
 	sel_scr_to_sav(&jbxvt.sel.end[0], i, count);

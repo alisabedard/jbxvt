@@ -69,7 +69,7 @@ static int_fast16_t show_scroll_history(xcb_rectangle_t r,
 		if (!sl) // no scroll history
 			break;
 		p->y = repaint_generic(*p, sl->sl_length,
-			r.x, r.width, sl->sl_text, sl->sl_rend);
+			r.x, r.width, sl->text, sl->rend);
 	}
 	return line;
 }

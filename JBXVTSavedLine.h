@@ -5,13 +5,15 @@
 #ifndef SLINEST_H
 #define SLINEST_H
 
+#include "config.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 
 //  structure describing a saved line
 struct JBXVTSavedLine {
-	uint8_t *sl_text;	/* the text of the line */
-	uint32_t *sl_rend;	/* the rendition style */
+	uint8_t text[JBXVT_MAX_COLS];
+	uint32_t rend[JBXVT_MAX_COLS];
 	uint16_t sl_length:15;	/* length of the line */
 	bool wrap:1;		// wrap flag
 };
