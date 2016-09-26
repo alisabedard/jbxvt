@@ -6,7 +6,7 @@ DEBUG=false
 
 rm -f "$CFG"
 
-while getopts 'd' opt
+while getopts 'dg' opt
 do
 	case $opt in
 	d)
@@ -14,6 +14,7 @@ do
 		;;
 	?)
 		echo '-d\tenable debugging'
+		echo '-g\tcheck for gcc first'
 		echo '-*\thelp'
 		exit 1
 		;;
@@ -107,13 +108,24 @@ search() # 1: cmd 2: var
 	return 0
 }
 
+cc_err()
+{
+	echo 'Error: Cannot find a suitable compiler.'
+	echo 'Please set CC to a valid C compiler command'
+	exit 1
+}
+
 if [ ! "$CC" ]; then
-	search clang CC \
-		&& search gcc CC \
-		&& search icc CC \
-		&& search cc CC \
-		&& (echo 'FATAL: no compiler found.  Please set CC' \
-			exit 1);
+	if [ "$ARCH" = "LINUX" ]; then
+		search cc CC && search gcc CC && search clang CC\
+			&& cc_err
+	else
+		# Many BSD systems come with an old version of
+		# gcc without support of required language features.
+		# Search for clang first.
+		search search clang CC && search cc CC && search gcc CC\
+			&& cc_err
+	fi
 fi
 
 if $DEBUG; then
