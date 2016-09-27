@@ -20,6 +20,7 @@
 //  Definitions that enable machine dependent parts of the code.
 
 #ifdef OPENBSD
+#include <sys/ioctl.h>
 #include <sys/select.h>
 #endif//OPENBSD
 
