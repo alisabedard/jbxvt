@@ -67,6 +67,9 @@ version:
 usage:
 	printf("%s -[%s]\n", argv[0], optstr);
 	exit(0);
+#ifdef OPENBSD
+	return NULL;
+#endif//OPENBSD
 }
 
 static void opt_init(void)
