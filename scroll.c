@@ -13,7 +13,6 @@
 #include "selection.h"
 
 #include <assert.h>
-#include <gc.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -83,7 +82,7 @@ static void clear(int8_t count, const uint8_t rc,
 
 static struct JBXVTSavedLine * new_sline(uint16_t x)
 {
-	struct JBXVTSavedLine * sl = GC_MALLOC(sizeof(struct JBXVTSavedLine));
+	struct JBXVTSavedLine * sl = malloc(sizeof(struct JBXVTSavedLine));
 	jb_assert(sl, "Could not allocate saved line");
 	sl->sl_length = x;
 	return sl;
@@ -102,7 +101,8 @@ static void cp_rows(int16_t i, const int16_t count)
 	memcpy(sl->text, t, len);
 	memcpy(sl->rend, r, len << 2);
 #define SLINE jbxvt.scr.sline
-	SLINE.data[count - i - 1] = sl;
+	memcpy(&SLINE.data[count - i - 1], sl, sizeof(struct JBXVTSavedLine));
+	free(sl);
 	sel_scr_to_sav(&jbxvt.sel.end[0], i, count);
 	sel_scr_to_sav(&jbxvt.sel.end[1], i, count);
 	SLINE.top += count;
@@ -148,10 +148,10 @@ static void add_scroll_history(const int8_t count)
 {
 	scroll_off(count);
 	int_fast16_t y = jbxvt.scr.sline.max - count - 1;
-	struct JBXVTSavedLine ** i = &jbxvt.scr.sline.data[y],
-		** j = &jbxvt.scr.sline.data[y + count];
+	struct JBXVTSavedLine * i = &jbxvt.scr.sline.data[y],
+		* j = &jbxvt.scr.sline.data[y + count];
 	for (; y >= 0; --y, --i, --j)
-		*j = *i;
+		memcpy(j, i, sizeof(struct JBXVTSavedLine));
 	cp_rows(count, count);
 	sbar_draw(CSZ.h + jbxvt.scr.sline.top + count, jbxvt.scr.offset,
 		CSZ.h);
@@ -221,7 +221,7 @@ static void sc_up(const uint8_t row1, const uint8_t row2,
 /*  Scroll count lines from row1 to row2 inclusive.
     row1 should be <= row2.  Scrolling is up for
     a positive count and down for a negative count.
-    count is limited to a maximum of MAX_SCROLL lines.  */
+    count is limited to a maximum of JBXVT_MAX_SCROLL lines.  */
 void scroll(const uint8_t row1, const uint8_t row2,
 	const int16_t count)
 {
@@ -229,7 +229,7 @@ void scroll(const uint8_t row1, const uint8_t row2,
 	// Sanitize input:
 	if(!count || row1 > row2
 		|| row2 >= jbxvt.scr.chars.height
-		|| abs(count) > MAX_SCROLL)
+		|| abs(count) > JBXVT_MAX_SCROLL)
 		  return;
 	const bool up = count > 0;
 	const int16_t n = up ? count : -count; // make positive

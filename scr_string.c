@@ -71,7 +71,7 @@ static void handle_new_lines(int8_t nlcount)
 	const uint8_t t = SCR->margin.t;
 	const int8_t lim = y - t;
 	JB_LIMIT(nlcount, lim, 0);
-	nlcount = MIN(nlcount, MAX_SCROLL);
+	nlcount = MIN(nlcount, JBXVT_MAX_SCROLL);
 	scroll(t, b, nlcount);
 	SCR->cursor.y -= nlcount;
 	SLOG("nlcount: %d, c.y: %d, m.b: %d", nlcount, SCR->cursor.y, b);

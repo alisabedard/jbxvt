@@ -8,7 +8,6 @@
 #include "libjb/log.h"
 #include "selend.h"
 
-#include <gc.h>
 #include <stdlib.h>
 #include <string.h>
 

@@ -42,7 +42,7 @@ struct JBXVTXData {
 };
 
 struct JBXVTScreenSavedLines {
-	struct JBXVTSavedLine **data; // saved lines
+	struct JBXVTSavedLine data[JBXVT_MAX_SCROLL]; // saved lines
 	uint16_t top, max;
 };
 

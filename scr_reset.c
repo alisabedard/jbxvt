@@ -13,7 +13,6 @@
 #include "screen.h"
 #include "scroll.h"
 
-#include <gc.h>
 #include <unistd.h>
 
 // Shortcuts

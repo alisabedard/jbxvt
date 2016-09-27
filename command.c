@@ -9,7 +9,6 @@
 #include "xevents.h"
 
 #include <fcntl.h>
-#include <gc.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>

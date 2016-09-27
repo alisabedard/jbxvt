@@ -11,7 +11,6 @@
 #include "xvt.h"
 
 #include <errno.h>
-#include <gc.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -51,9 +50,6 @@ static char ** parse_command_line(const int argc, char ** argv)
 		case 'R': // rows
 			o->size.rows = atoi(optarg);
 			break;
-		case 'S': // scroll history
-			jbxvt.scr.sline.max = atoi(optarg);
-			break;
 		case 's': // use scrollbar
 			o->show_scrollbar=true;
 			break;
@@ -85,7 +81,7 @@ static void opt_init(void)
 	O(size.height, ROWS);
 	// Default to a steady block cursor to conserve CPU
 	jbxvt.opt.cursor_attr = 2;
-	jbxvt.scr.sline.max = MAX_SCROLL;
+	jbxvt.scr.sline.max = JBXVT_MAX_SCROLL;
 }
 
 /*  Perform any initialization on the screen data structures.
@@ -94,7 +90,6 @@ static void scr_init(void)
 {
 	// Initialise the array of lines that have scrolled off the top.
 	struct JBXVTScreenData * s = &jbxvt.scr;
-	s->sline.data = GC_MALLOC(s->sline.max * sizeof(void*));
 	static struct JBXVTScreen screens[2];
 	s->current = s->s = screens;
 	scr_set_tab(-2, false);
@@ -114,7 +109,6 @@ static void mode_init(void)
 int main(int argc, char ** argv)
 {
 	errno = 0;
-	GC_INIT();
 	opt_init();
 	char ** com_argv = parse_command_line(argc, argv);
 	if (!com_argv)

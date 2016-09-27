@@ -10,7 +10,7 @@ CFLAGS+=-DUSE_LIKELY
 CFLAGS+=-D_XOPEN_SOURCE=700 --std=c11
 CFLAGS+=-Wall -Wextra
 
-LIBS+=-lxcb -lxcb-keysyms -lgc
+LIBS+=-lxcb -lxcb-keysyms
 LIBS+=-Llibjb -ljb
 
 OBJS=jbxvt.o lookup_key.o paint.o change_selection.o cmdtok.o esc.o

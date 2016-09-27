@@ -65,9 +65,7 @@ static int_fast16_t show_scroll_history(xcb_rectangle_t r,
 	int_fast16_t line = r.y;
 	for (int_fast16_t i = jbxvt.scr.offset - r.y - 1;
 		line <= r.height && i >= 0; ++line, --i) {
-		struct JBXVTSavedLine * sl = jbxvt.scr.sline.data[i];
-		if (!sl) // no scroll history
-			break;
+		struct JBXVTSavedLine * sl = &jbxvt.scr.sline.data[i];
 		p->y = repaint_generic(*p, sl->sl_length,
 			r.x, r.width, sl->text, sl->rend);
 	}
