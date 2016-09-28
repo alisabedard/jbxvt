@@ -380,15 +380,13 @@ void jbxvt_parse_token(void)
 	CASE(TK_SBGOTO)
 		/*  Move the display so that line represented by scrollbar value
 		    is at the top of the screen.  */
-		change_offset((jbxvt.scr.chars.height + jbxvt.scr.sline.top)
-			* (jbxvt.scr.pixels.height - t[0])
-			/ jbxvt.scr.pixels.height - jbxvt.scr.chars.height);
+		change_offset((CSZ.h + jbxvt.scr.sline.top) * (PSZ.h - t[0])
+			/ PSZ.h - CSZ.h);
 		break;
 	CASE(TK_SBDOWN)
 		t[0] = - t[0]; // fall through
 	CASE(TK_SBUP)
-		change_offset(jbxvt.scr.offset - t[0]
-			/ jbxvt.X.f.size.height);
+		change_offset(jbxvt.scr.offset - t[0] / FSZ.h);
 		break;
 	CASE(TK_SC)
 		save_cursor();
@@ -408,26 +406,19 @@ void jbxvt_parse_token(void)
 			SCR->margin.bot, t[0]);
 		break;
 
+#define SELOP(op, arg) {scr_##op##_selection((struct JBDim){.x = t[0], \
+	.y = t[1]}, arg); break;}
 	CASE(TK_SELSTART)
-		scr_start_selection((struct JBDim){.x = t[0], .y = t[1]},
-			SEL_CHAR);
-		break;
+		SELOP(start, SEL_CHAR);
 	CASE(TK_SELEXTND)
-		scr_extend_selection((struct JBDim){.x = t[0], .y = t[1]},
-			false);
-		break;
+		SELOP(extend, false);
 	CASE(TK_SELDRAG)
-		scr_extend_selection((struct JBDim){.x = t[0], .y = t[1]},
-			true);
-		break;
+		SELOP(extend, true);
 	CASE(TK_SELWORD)
-		scr_start_selection((struct JBDim){.x = t[0], .y = t[1]},
-			SEL_WORD);
-		break;
+		SELOP(start, SEL_WORD);
 	CASE(TK_SELLINE)
-		scr_start_selection((struct JBDim){.x = t[0], .y = t[1]},
-			SEL_LINE);
-		break;
+		SELOP(start, SEL_LINE);
+
 	CASE(TK_SELECT)
 		scr_make_selection();
 		break;
