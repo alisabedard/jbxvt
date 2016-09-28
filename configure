@@ -6,7 +6,7 @@ DEBUG=false
 
 rm -f "$CFG"
 
-while getopts 'dg' opt
+while getopts 'd' opt
 do
 	case $opt in
 	d)
