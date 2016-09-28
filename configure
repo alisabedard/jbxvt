@@ -3,18 +3,21 @@
 
 CFG=config.mk
 DEBUG=false
+UTEMPTER=true
 
 rm -f "$CFG"
 
-while getopts 'd' opt
+while getopts 'dhu' opt
 do
 	case $opt in
-	d)
-		DEBUG=true
-		;;
-	?)
-		echo '-d\tenable debugging'
-		echo '-*\thelp'
+	d) DEBUG=true ;;
+	u) UTEMPTER=false ;;	
+	h|?)
+		for line in '-d enable debugging' \
+			'-u disable libutempter' \
+			'-h help' ; do
+			echo $line
+		done
 		exit 1
 		;;
 	esac
@@ -75,14 +78,18 @@ case $ARCH in
 esac
 
 echo -n 'Checking for libutempter... '
-if [ -f /usr/lib/libutempter.so ]; then
+if $UTEMPTER && [ -f /usr/lib/libutempter.so ]; then
 	echo found
 	cat >> $CFG <<- EOF
 	CFLAGS+=-DUSE_UTEMPTER
 	LIBS+=-lutempter
 	EOF
 else
-	echo not found
+	if $UTEMPTER; then
+		echo not found
+	else
+		echo disabled
+	fi
 fi
 
 echo -n 'Checking for asm-generic/ioctls.h... '
