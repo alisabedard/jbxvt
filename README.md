@@ -33,6 +33,16 @@ Make sure you run the following after checking out jbxvt:
 	git submodule update
 	git config --add --bool fetch.recurseSubmodules true
 
+## Building
+Run ./configure, then make, as usual.  Parallel building on FreeBSD
+and NetBSD requires gmake.  The compiler must support the C11 standard,
+so please use a recent version of gcc or clang.  
+
+## Porting
+Jbxvt builds and runs on FreeBSD and GNU/Linux.  It currently builds
+on OpenBSD and NetBSD, but exits with code 24 on launch.  Any help
+on this issue is appreciated.
+
 ## Help!
-jbxvt is a work in progress, please report all bugs!
+Jbxvt is a work in progress, please report all bugs!
 
