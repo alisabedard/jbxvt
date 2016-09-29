@@ -4,13 +4,7 @@
 #include "jbxvt.h"
 #include "libjb/log.h"
 
-#include <assert.h>
-#include <stdio.h>
-#include <string.h>
-#include <xcb/xcb.h>
 #include <xcb/xcb_keysyms.h>
-// Not part of xcb (yet):
-#include <X11/keysym.h>
 
 //#define DEBUG_KEYS
 #ifndef DEBUG_KEYS
@@ -21,64 +15,87 @@
 static bool lk_app_cur;		// cursor keys in app mode
 static bool lk_app_kp;		// app keypad keys set
 
+// Reference <X11/keysymdef.h>
+#define K_C(n) (0xff00 | n)
+#define K_INS K_C(0x63)
+#define K_DEL K_C(0x9f)
+#define K_F(n) (0xffbd + n)
+// Keypad keys:
+#define KP_F(n) K_C(0x90 | n)
+// Regular keys:
+#define K_N(n) K_C(0x50 | n)
+#define K_PU K_N(5)
+#define K_PD K_N(6)
+
+
 //  Table of function key mappings
 static struct KeyMaps func_key_table[] = {
-	{XK_F1,		{KS_TYPE_APPKEY,'P'},	{KS_TYPE_XTERM,11}},
-	{XK_F2,		{KS_TYPE_APPKEY,'Q'},	{KS_TYPE_XTERM,12}},
-	{XK_F3,		{KS_TYPE_APPKEY,'R'},	{KS_TYPE_XTERM,13}},
-	{XK_F4,		{KS_TYPE_APPKEY,'S'},	{KS_TYPE_XTERM,14}},
-	{XK_F5,		{KS_TYPE_XTERM,15}, {}},
-	{XK_F6,		{KS_TYPE_XTERM,17}, {}},
-	{XK_F7,		{KS_TYPE_XTERM,18}, {}},
-	{XK_F8,		{KS_TYPE_XTERM,19}, {}},
-	{XK_F9,		{KS_TYPE_XTERM,20}, {}},
-	{XK_F10,	{KS_TYPE_XTERM,21}, {}},
-	{XK_F11,	{KS_TYPE_XTERM,23}, {}},
-	{XK_F12,	{KS_TYPE_XTERM,24}, {}},
-	{XK_Insert,	{KS_TYPE_XTERM,2},  {}},
-	{XK_Delete,	{KS_TYPE_XTERM,3},  {}},
-	{XK_Page_Up,	{KS_TYPE_XTERM,5},  {}},
-	{XK_Page_Down,	{KS_TYPE_XTERM,6},  {}},
-	{XK_Menu,	{KS_TYPE_XTERM,29}, {}},
+	{K_F(1),	{KS_TYPE_APPKEY,'P'},	{KS_TYPE_XTERM,11}},
+	{K_F(2),	{KS_TYPE_APPKEY,'Q'},	{KS_TYPE_XTERM,12}},
+	{K_F(3),	{KS_TYPE_APPKEY,'R'},	{KS_TYPE_XTERM,13}},
+	{K_F(4),	{KS_TYPE_APPKEY,'S'},	{KS_TYPE_XTERM,14}},
+	{K_F(5),	{KS_TYPE_XTERM,15}, {}},
+	{K_F(6),	{KS_TYPE_XTERM,17}, {}},
+	{K_F(7),	{KS_TYPE_XTERM,18}, {}},
+	{K_F(8),	{KS_TYPE_XTERM,19}, {}},
+	{K_F(9),	{KS_TYPE_XTERM,20}, {}},
+	{K_F(10),	{KS_TYPE_XTERM,21}, {}},
+	{K_F(11),	{KS_TYPE_XTERM,23}, {}},
+	{K_F(12),	{KS_TYPE_XTERM,24}, {}},
+	{K_INS,		{KS_TYPE_XTERM,2},  {}},
+	{K_DEL,		{KS_TYPE_XTERM,3},  {}},
+	{K_PU,		{KS_TYPE_XTERM,5},  {}},
+	{K_PD,		{KS_TYPE_XTERM,6},  {}},
 	{}
 };
+
 
 //  PC keys and VT100 keypad function keys
 static struct KeyMaps other_key_table[]={
-	{ XK_Up,	{KS_TYPE_NONAPP,'A'},	{KS_TYPE_APPKEY,'A'}},
-	{ XK_Down,	{KS_TYPE_NONAPP,'B'},	{KS_TYPE_APPKEY,'B'}},
-	{ XK_Right,	{KS_TYPE_NONAPP,'C'},	{KS_TYPE_APPKEY,'C'}},
-	{ XK_Left,	{KS_TYPE_NONAPP,'D'},	{KS_TYPE_APPKEY,'D'}},
-	{ XK_Home,	{KS_TYPE_NONAPP,'h'},	{KS_TYPE_APPKEY,'h'}},
-	{ XK_End,	{KS_TYPE_NONAPP,'\0'},	{KS_TYPE_APPKEY,'\0'}},
-	{ XK_KP_F1,	{KS_TYPE_APPKEY,'P'},	{KS_TYPE_APPKEY,'P'}},
-	{ XK_KP_F2,	{KS_TYPE_APPKEY,'Q'},	{KS_TYPE_APPKEY,'Q'}},
-	{ XK_KP_F3,	{KS_TYPE_APPKEY,'R'},	{KS_TYPE_APPKEY,'R'}},
-	{ XK_KP_F4,	{KS_TYPE_APPKEY,'S'},	{KS_TYPE_APPKEY,'S'}},
+	// regular:
+	{ K_N(2), {KS_TYPE_NONAPP,'A'},{KS_TYPE_APPKEY,'A'}}, // up
+	{ K_N(4), {KS_TYPE_NONAPP,'B'},{KS_TYPE_APPKEY,'B'}}, // down
+	{ K_N(3), {KS_TYPE_NONAPP,'C'},{KS_TYPE_APPKEY,'C'}}, // left
+	{ K_N(1), {KS_TYPE_NONAPP,'D'},{KS_TYPE_APPKEY,'D'}}, // right
+	{ K_N(0), {KS_TYPE_NONAPP,'h'},{KS_TYPE_APPKEY,'h'}}, // home
+	{ K_N(7), {KS_TYPE_NONAPP,'\0'},{KS_TYPE_APPKEY,'\0'}}, // end
+	// keypad:
+	{ KP_F(7), {KS_TYPE_NONAPP,'A'},{KS_TYPE_APPKEY,'A'}}, // up
+	{ KP_F(9), {KS_TYPE_NONAPP,'B'},{KS_TYPE_APPKEY,'B'}}, // down
+	{ KP_F(8), {KS_TYPE_NONAPP,'C'},{KS_TYPE_APPKEY,'C'}}, // left
+	{ KP_F(6), {KS_TYPE_NONAPP,'D'},{KS_TYPE_APPKEY,'D'}}, // right
+	{ KP_F(5), {KS_TYPE_NONAPP,'h'},{KS_TYPE_APPKEY,'h'}}, // home
+	{ KP_F(0xc), {KS_TYPE_NONAPP,'\0'},{KS_TYPE_APPKEY,'\0'}}, // end
+	{ KP_F(1), {KS_TYPE_APPKEY,'P'},{KS_TYPE_APPKEY,'P'}}, // f1
+	{ KP_F(2), {KS_TYPE_APPKEY,'Q'},{KS_TYPE_APPKEY,'Q'}}, // f2
+	{ KP_F(3), {KS_TYPE_APPKEY,'R'},{KS_TYPE_APPKEY,'R'}}, // f3
+	{ KP_F(4), {KS_TYPE_APPKEY,'S'},{KS_TYPE_APPKEY,'S'}}, // f4
 	{}
 };
 
+#define KP_N(n) K_C(0xb0 | n)
+
 //  VT100 numeric keypad keys
 static struct KeyMaps kp_key_table[]={
-	{ XK_KP_0,	{KS_TYPE_CHAR,'0'},	{KS_TYPE_APPKEY,'p'}},
-	{ XK_KP_1,	{KS_TYPE_CHAR,'1'},	{KS_TYPE_APPKEY,'q'}},
-	{ XK_KP_2,	{KS_TYPE_CHAR,'2'},	{KS_TYPE_APPKEY,'r'}},
-	{ XK_KP_3,	{KS_TYPE_CHAR,'3'},	{KS_TYPE_APPKEY,'s'}},
-	{ XK_KP_4,	{KS_TYPE_CHAR,'4'},	{KS_TYPE_APPKEY,'t'}},
-	{ XK_KP_5,	{KS_TYPE_CHAR,'5'},	{KS_TYPE_APPKEY,'u'}},
-	{ XK_KP_6,	{KS_TYPE_CHAR,'6'},	{KS_TYPE_APPKEY,'v'}},
-	{ XK_KP_7,	{KS_TYPE_CHAR,'7'},	{KS_TYPE_APPKEY,'w'}},
-	{ XK_KP_8,	{KS_TYPE_CHAR,'8'},	{KS_TYPE_APPKEY,'x'}},
-	{ XK_KP_9,	{KS_TYPE_CHAR,'9'},	{KS_TYPE_APPKEY,'y'}},
-	{ XK_KP_Add,	{KS_TYPE_CHAR,'+'},	{KS_TYPE_APPKEY,'k'}},
-	{ XK_KP_Subtract,{KS_TYPE_CHAR,'-'},	{KS_TYPE_APPKEY,'m'}},
-	{ XK_KP_Multiply,{KS_TYPE_CHAR,'*'},	{KS_TYPE_APPKEY,'j'}},
-	{ XK_KP_Divide,	{KS_TYPE_CHAR,'/'},	{KS_TYPE_APPKEY,'o'}},
-	{ XK_KP_Separator,{KS_TYPE_CHAR,','},	{KS_TYPE_APPKEY,'l'}},
-	{ XK_KP_Decimal,{KS_TYPE_CHAR,'.'},	{KS_TYPE_APPKEY,'n'}},
-	{ XK_KP_Enter,	{KS_TYPE_CHAR,'\r'},	{KS_TYPE_APPKEY,'M'}},
-	{ XK_KP_Space,	{KS_TYPE_CHAR,' '},	{KS_TYPE_APPKEY,' '}},
-	{ XK_KP_Tab,	{KS_TYPE_CHAR,'\t'},	{KS_TYPE_APPKEY,'I'}},
+	{ KP_N(0),	{KS_TYPE_CHAR,'0'},	{KS_TYPE_APPKEY,'p'}},
+	{ KP_N(1),	{KS_TYPE_CHAR,'1'},	{KS_TYPE_APPKEY,'q'}},
+	{ KP_N(2),	{KS_TYPE_CHAR,'2'},	{KS_TYPE_APPKEY,'r'}},
+	{ KP_N(3),	{KS_TYPE_CHAR,'3'},	{KS_TYPE_APPKEY,'s'}},
+	{ KP_N(4),	{KS_TYPE_CHAR,'4'},	{KS_TYPE_APPKEY,'t'}},
+	{ KP_N(5),	{KS_TYPE_CHAR,'5'},	{KS_TYPE_APPKEY,'u'}},
+	{ KP_N(6),	{KS_TYPE_CHAR,'6'},	{KS_TYPE_APPKEY,'v'}},
+	{ KP_N(7),	{KS_TYPE_CHAR,'7'},	{KS_TYPE_APPKEY,'w'}},
+	{ KP_N(8),	{KS_TYPE_CHAR,'8'},	{KS_TYPE_APPKEY,'x'}},
+	{ KP_N(9),	{KS_TYPE_CHAR,'9'},	{KS_TYPE_APPKEY,'y'}},
+	{ K_C(0xab),{KS_TYPE_CHAR,'+'},{KS_TYPE_APPKEY,'k'}},
+	{ K_C(0xad),{KS_TYPE_CHAR,'-'},{KS_TYPE_APPKEY,'m'}},
+	{ K_C(0xaa),{KS_TYPE_CHAR,'*'},{KS_TYPE_APPKEY,'j'}},
+	{ K_C(0xaf),{KS_TYPE_CHAR,'/'},{KS_TYPE_APPKEY,'o'}},
+	{ K_C(0xac),{KS_TYPE_CHAR,','},{KS_TYPE_APPKEY,'l'}},
+	{ K_C(0xae),{KS_TYPE_CHAR,'.'},{KS_TYPE_APPKEY,'n'}},
+	{ K_C(0x8d),{KS_TYPE_CHAR,'\r'},{KS_TYPE_APPKEY,'M'}},
+	{ K_C(0x80),{KS_TYPE_CHAR,' '},{KS_TYPE_APPKEY,' '}},
+	{ K_C(0x89),{KS_TYPE_CHAR,'\t'},{KS_TYPE_APPKEY,'I'}},
 	{}
 };
 
@@ -112,8 +129,6 @@ static char * get_format(const enum KSType type)
 static char * get_keycode_value(struct KeyMaps * restrict keymaptable,
 	xcb_keysym_t keysym, char * buf, const int use_alternate)
 {
-	assert(keymaptable);
-	assert(buf);
 	for (struct KeyMaps * km = keymaptable; km->km_keysym; ++km) {
 		if (km->km_keysym != keysym)
 			  continue;
@@ -127,9 +142,8 @@ static char * get_keycode_value(struct KeyMaps * restrict keymaptable,
 
 static char * get_s(const xcb_keysym_t keysym, char * restrict kbuf)
 {
-	assert(kbuf);
 	if (xcb_is_function_key(keysym) || xcb_is_misc_function_key(keysym)
-		|| keysym == XK_Next || keysym == XK_Prior)
+		|| keysym == K_PD || keysym == K_PU)
 		return get_keycode_value(func_key_table, keysym, kbuf, false);
 	if (xcb_is_cursor_key(keysym) || xcb_is_pf_key(keysym))
 		return get_keycode_value(other_key_table, keysym,
@@ -160,7 +174,6 @@ static uint8_t shift(uint8_t c)
 
 static void apply_state(const uint16_t state, uint8_t * restrict kbuf)
 {
-	assert(kbuf);
 	switch (state) {
 	case XCB_MOD_MASK_SHIFT:
 	case XCB_MOD_MASK_LOCK:
@@ -181,12 +194,9 @@ static void apply_state(const uint16_t state, uint8_t * restrict kbuf)
 //  Convert the keypress event into a string.
 uint8_t * lookup_key(void * restrict ev, int_fast16_t * restrict pcount)
 {
-	assert(ev);
-	assert(pcount);
 	static uint8_t kbuf[KBUFSIZE];
 	xcb_key_press_event_t * ke = ev;
 	xcb_key_symbols_t *syms = xcb_key_symbols_alloc(jbxvt.X.xcb);
-	assert(syms);
 	xcb_keysym_t k = xcb_key_press_lookup_keysym(syms, ke, 2);
 #ifdef KEY_DEBUG
 	LOG("keycode: 0x%x, keysym: 0x%x, state: 0x%x",
@@ -195,7 +205,8 @@ uint8_t * lookup_key(void * restrict ev, int_fast16_t * restrict pcount)
 	xcb_key_symbols_free(syms);
 	char *s = get_s(k, (char *)kbuf);
 	if (s) {
-		const size_t l = strlen(s);
+		size_t l = 0;
+		while (s[++l]);
 		*pcount = l;
 #ifdef KEY_DEBUG
 		for (size_t i = 0; i < l; ++i)
