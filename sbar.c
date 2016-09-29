@@ -14,21 +14,21 @@
 #include <stdlib.h>
 
 static struct {
-	struct JBDim sz;
+	uint16_t height;
 	// most recent arguments to sbar_show:
 	int16_t last_low, last_high, last_length;
-} sbar = { .sz.width = SBAR_WIDTH, .last_length = 100, .last_high = 100 };
+} sbar = {.last_length = 100, .last_high = 100 };
 
 //  Redraw the scrollbar after a size change
 void sbar_reset(void)
 {
-	sbar.sz.height = jbxvt.scr.pixels.height;
+	sbar.height = jbxvt.scr.pixels.height;
 	sbar_draw(sbar.last_length, sbar.last_low, sbar.last_high);
 }
 
 static int16_t get_sz(const int16_t lh, const uint16_t length)
 {
-	return sbar.sz.h - sbar.sz.h * lh / length;
+	return sbar.height - sbar.height * lh / length;
 }
 
 /*  Redraw the scrollbar to show the area from low to high,
@@ -41,17 +41,18 @@ void sbar_draw(uint16_t length, const int16_t low,
 	sbar.last_length = length;
 	sbar.last_low = low;
 	sbar.last_high = high;
-	const struct JBDim s = sbar.sz;
 	const int16_t top = get_sz(high, length), bot = get_sz(low, length);
 	const xcb_window_t sb = jbxvt.X.win.sb;
 	if (top > 0)
-		xcb_clear_area(jbxvt.X.xcb, false, sb, 0, 0, s.w, top - 1);
+		xcb_clear_area(jbxvt.X.xcb, false, sb, 0, 0,
+			SBAR_WIDTH, top - 1);
 	if (bot >= top)
 		xcb_poly_fill_rectangle(jbxvt.X.xcb, sb, jbxvt.X.gc.tx, 1,
-			&(xcb_rectangle_t){0, top, s.w, bot - top + 1});
-	if (bot < sbar.sz.height)
+			&(xcb_rectangle_t){0, top, SBAR_WIDTH,
+			bot - top + 1});
+	if (bot < sbar.height)
 		xcb_clear_area(jbxvt.X.xcb, false, sb, 0, bot + 1,
-			s.w, s.h - bot - 1);
+			SBAR_WIDTH, sbar.height - bot - 1);
 }
 
 //  Change the value of the scrolled screen offset and repaint the screen
