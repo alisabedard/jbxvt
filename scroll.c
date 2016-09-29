@@ -12,7 +12,6 @@
 #include "screen.h"
 #include "selection.h"
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -26,7 +25,6 @@
 static void sel_scr_to_sav(SelEnd * restrict s,
 	const int i, const int count)
 {
-	assert(s);
 	if (s->type == SCREENSEL && s->index == i) {
 		s->type = SAVEDSEL;
 		s->index = count - i - 1;
@@ -35,7 +33,6 @@ static void sel_scr_to_sav(SelEnd * restrict s,
 
 static void mv_sel(SelEnd * e, const int16_t j, const int16_t k)
 {
-	assert(e);
 	if (e->type == SCREENSEL && e->index == j)
 		e->index = k;
 }
@@ -43,7 +40,6 @@ static void mv_sel(SelEnd * e, const int16_t j, const int16_t k)
 static void transmogrify(const int16_t j, const int8_t count,
 	struct JBXVTScreen * restrict s)
 {
-	assert(s);
 	const int16_t k = j + count;
 	s->text[k] = s->text[j];
 	s->rend[k] = s->rend[j];
@@ -60,7 +56,6 @@ static void ck_sel_on_scr(const int16_t j)
 
 static int_fast16_t find_col(uint8_t * restrict s, int_fast16_t c)
 {
-	assert(s);
 	return s[c] ? find_col(s, c + 1) : c;
 }
 
@@ -70,8 +65,6 @@ static void clear(int8_t count, const uint8_t rc,
 	if(--count < 0)
 		  return;
 	const uint16_t sz = jbxvt.scr.chars.width;
-	assert(text);
-	assert(rend);
 	memset(text[count], 0, sz);
 	memset(rend[count], 0, sz << 2);
 	const uint8_t j = rc + (up ? - count - 1 : count);
@@ -83,7 +76,6 @@ static void clear(int8_t count, const uint8_t rc,
 static struct JBXVTSavedLine * new_sline(uint16_t x)
 {
 	struct JBXVTSavedLine * sl = malloc(sizeof(struct JBXVTSavedLine));
-	jb_assert(sl, "Could not allocate saved line");
 	sl->sl_length = x;
 	return sl;
 }
@@ -114,7 +106,6 @@ static void cp_rows(int16_t i, const int16_t count)
 static void get_y(int16_t * restrict y, const uint8_t row1,
 	const int8_t count, const bool up)
 {
-	assert(y);
 	const uint8_t fh = jbxvt.X.f.size.h;
 	const int16_t a = row1 * fh;
 	const int16_t b = a + count * fh;
@@ -161,14 +152,9 @@ static int8_t copy_screen_area(const int8_t i,
 	const int8_t j, const int8_t mod, const int8_t count,
 	uint8_t ** save, uint32_t ** rend)
 {
-	assert(save);
-	assert(rend);
 	if(i >= count)
 		  return j;
-	assert(SCR);
-	assert(SCR->text);
 	save[i] = SCR->text[j];
-	assert(SCR->rend);
 	rend[i] = SCR->rend[j];
 	ck_sel_on_scr(j);
 	return copy_screen_area(i + 1, j + mod, mod,
@@ -206,8 +192,6 @@ static void sc_dn(const uint8_t row1, const uint8_t row2,
 static void sc_up(const uint8_t row1, const uint8_t row2,
 	const int16_t count, uint8_t ** save, uint32_t ** rend)
 {
-	assert(save);
-	assert(rend);
 	if (jbxvt.scr.current == &jbxvt.scr.s[0] && row1 == 0)
 		add_scroll_history(count);
 	for(int8_t j = copy_screen_area(0, row1,
