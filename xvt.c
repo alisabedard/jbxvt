@@ -210,7 +210,7 @@ void jbxvt_parse_token(void)
 		scr_cht(n);
 		break;
 
-	CASE(TK_CPL); // cursor previous line
+	CASE(TK_CPL) // cursor previous line
 		n = -n; // fall through
 	CASE(TK_CNL) // cursor next line
 		TLOG("TK_CNL");
@@ -287,6 +287,7 @@ void jbxvt_parse_token(void)
 		if (jbxvt.mode.mouse_focus_evt)
 			cprintf("\033[%c]", t[0] ? 'I' : 'O');
 		break;
+
 	CASE(TK_EOF)
 		exit(0);
 	FIXME(TK_EPA);
