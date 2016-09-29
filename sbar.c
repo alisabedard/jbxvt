@@ -68,18 +68,21 @@ void change_offset(int16_t n)
 	sbar_draw(CSZ.h + t - 1, n, n + CSZ.h - 1);
 }
 
-void jbxvt_show_sbar(void)
+static void set_vt_x(const int8_t x)
 {
 	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt,
-		XCB_CONFIG_WINDOW_X, &(uint32_t){SBAR_WIDTH});
-	xcb_map_window(jbxvt.X.xcb, jbxvt.X.win.sb);
+		XCB_CONFIG_WINDOW_X, &(uint32_t){x});
+	(x ? xcb_map_window : xcb_unmap_window)(jbxvt.X.xcb, jbxvt.X.win.sb);
+}
+
+void jbxvt_show_sbar(void)
+{
+	set_vt_x(SBAR_WIDTH);
 }
 
 void jbxvt_hide_sbar(void)
 {
-	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt,
-		XCB_CONFIG_WINDOW_X, &(uint32_t){0});
-	xcb_unmap_window(jbxvt.X.xcb, jbxvt.X.win.sb);
+	set_vt_x(0);
 }
 
 void jbxvt_toggle_sbar(void)
