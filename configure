@@ -121,7 +121,7 @@ cc_err()
 	exit 1
 }
 
-if [ ! "$CC" ]; then
+if [ -z "$CC" ]; then
 	if [ "$ARCH" = "LINUX" ]; then
 		search cc CC && search gcc CC && search clang CC\
 			&& cc_err
@@ -132,6 +132,9 @@ if [ ! "$CC" ]; then
 		search search clang CC && search cc CC && search gcc CC\
 			&& cc_err
 	fi
+else
+	echo "CC defined as ${CC}"
+	echo "CC=${CC}" >> $CFG
 fi
 
 if $DEBUG; then
