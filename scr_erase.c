@@ -24,10 +24,14 @@
 #define CUR SCR->cursor
 #define FH FSZ.h
 
-static void zero(const int16_t line, const uint16_t sz, int16_t col)
+static void zero(const uint16_t line, const size_t sz, uint16_t col)
 {
-	col = MIN(col, CSZ.width); // Restrict bounds
-	// Check memory
+	//col = MIN(col, CSZ.width); // restrict bounds
+	if (col > CSZ.width) // outside screen area
+		return; // do nothing
+	if (col + sz > JBXVT_MAX_COLS)
+		return; // don't overflow
+	// check memory
 	jb_assert(SCR->text && SCR->rend, "Out of memory");
 	memset(SCR->text[line] + col, 0, sz);
 	memset(SCR->rend[line] + col, 0, sz << 2);
@@ -35,7 +39,7 @@ static void zero(const int16_t line, const uint16_t sz, int16_t col)
 }
 
 static void erase_range(xcb_rectangle_t * restrict h,
-	const uint16_t sz, const uint16_t col)
+	const size_t sz, const uint16_t col)
 {
 	h->x = col * FSZ.w;
 	h->width = sz * FSZ.w;
@@ -49,12 +53,16 @@ static int16_t get_col(const uint8_t mode)
 
 static int16_t get_sz(const uint8_t mode)
 {
+	fix_rc(&CUR);
 	switch(mode) {
-	case 0:
-		return CSZ.w - CUR.x;
-	case 2:
+	case 0: // to end (cursor column to screen width)
+		if (CSZ.w < CUR.x) // invalid/negative range
+			return 0; // erase nothing
+		else // valid range
+			return CSZ.w - CUR.x;
+	case 2: // entire (col 0 to screen width)
 		return CSZ.w;
-	case 1:
+	case 1: // from start (col 0 to current cursor column)
 	default:
 		return CUR.x;
 	}
