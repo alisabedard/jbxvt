@@ -12,9 +12,9 @@ typedef enum {
 } SelType;
 
 //  structure describing a selection endpoint.
-typedef struct {
+typedef struct SelEnd {
 	SelType type;
-	int16_t index;	// index into the sline or screen array
+	uint16_t index;	// index into the sline or screen array
 	uint8_t col;	// column of the character
 } SelEnd;
 

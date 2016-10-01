@@ -22,10 +22,15 @@
 #define SLOG(...)
 #endif
 
-static void mv_sel(SelEnd * e, const int16_t j, const int16_t k)
+static bool move_selection(struct SelEnd * end, const uint16_t index,
+	const uint16_t new_index)
 {
-	if (e->type == SCREENSEL && e->index == j)
-		e->index = k;
+	if (end->type == SCREENSEL && end->index == index) {
+		end->type = SAVEDSEL;
+		end->index = new_index;
+		return true; // selection end point moved
+	}
+	return false; // no changes
 }
 
 static void transmogrify(const int16_t j, const int8_t count,
@@ -34,8 +39,8 @@ static void transmogrify(const int16_t j, const int8_t count,
 	const int16_t k = j + count;
 	s->text[k] = s->text[j];
 	s->rend[k] = s->rend[j];
-	mv_sel(&jbxvt.sel.end[0], j, k);
-	mv_sel(&jbxvt.sel.end[1], j, k);
+	if (!move_selection(&jbxvt.sel.end[0], j, k))
+		move_selection(&jbxvt.sel.end[1], j, k);
 }
 static void ck_sel_on_scr(const int16_t j)
 {
@@ -59,26 +64,18 @@ static void clear(int8_t count, const uint8_t rc,
 	clear(count, rc, text, rend, up);
 }
 
-static void sel_scr_to_sav(SelEnd * restrict s,
-	const int i, const int count)
-{
-	if (s->type == SCREENSEL && s->index == i) {
-		s->type = SAVEDSEL;
-		s->index = count - i - 1;
-	}
-}
-
 static void copy_lines(const int_fast16_t n)
 {
 	for (int_fast16_t i = n - 1; i >= 0; --i) {
 		uint8_t * t = SCR->text[i];
 #define SLINE jbxvt.scr.sline
-		struct JBXVTSavedLine * sl = &SLINE.data[n - i + 1];
+		const uint16_t new_index = n - i - 1;
+		struct JBXVTSavedLine * sl = &SLINE.data[new_index];
 		sl->wrap = SCR->wrap[i];
 		SLINE.top += n;
 		SLINE.top = MIN(SLINE.top, SLINE.max);
-		sel_scr_to_sav(&jbxvt.sel.end[0], i, n);
-		sel_scr_to_sav(&jbxvt.sel.end[1], i, n);
+		if (!move_selection(&jbxvt.sel.end[0], i, new_index))
+			move_selection(&jbxvt.sel.end[1], i, new_index);
 		int_fast16_t len = 0;
 		while(t[++len]); // strlen
 		memcpy(sl->text, t, len);
