@@ -32,7 +32,6 @@ static void zero(const uint16_t line, const size_t sz, uint16_t col)
 	if (col + sz > JBXVT_MAX_COLS)
 		return; // don't overflow
 	// check memory
-	jb_assert(SCR->text && SCR->rend, "Out of memory");
 	memset(SCR->text[line] + col, 0, sz);
 	memset(SCR->rend[line] + col, 0, sz << 2);
 	SCR->wrap[line] = false;

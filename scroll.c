@@ -151,6 +151,7 @@ static void clear_area(const int16_t y, const int8_t count)
 
 void scroll1(int16_t n)
 {
+	SLOG("scroll1(%d)", n);
 	copy_lines(n);
 	jbxvt.scr.sline.top = MIN(jbxvt.scr.sline.top + n,
 		jbxvt.scr.sline.max);

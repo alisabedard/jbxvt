@@ -22,17 +22,14 @@
 #define P S.pixels
 #define X jbxvt.X
 
-static void init_screen_elements(struct JBXVTScreen * restrict scr,
-	uint8_t ** restrict text, uint32_t ** restrict rend)
+static void init_screen_elements(struct JBXVTScreen * restrict scr)
 {
 	scr->margin.bottom = S.chars.height - 1;
 	scr->wrap_next = false;
-	scr->rend = rend;
-	scr->text = text;
 	scr->margin.top = 0;
 }
 
-static void set(const uint8_t i, uint8_t ** t, uint32_t ** r)
+static inline void set(const uint8_t i, uint8_t ** t, uint32_t ** r)
 {
 	S.s[i].text = t;
 	S.s[i].rend = r;
@@ -53,10 +50,8 @@ static void init(void)
 	}
 	set(0, s0, r0);
 	set(1, s1, r1);
-	sz = JBXVT_MAX_ROWS;
-	ALLOC(S0.wrap);
-	ALLOC(S1.wrap);
-#undef ALLOC
+	jbxvt.scr.s[0].wrap = calloc(1, JBXVT_MAX_ROWS);
+	jbxvt.scr.s[1].wrap = calloc(1, JBXVT_MAX_ROWS);
 }
 
 static inline void fix_margins(const struct JBDim c)
@@ -101,15 +96,13 @@ void scr_reset(void)
 		init();
 		created = true;
 	}
-	uint8_t **s0 = S0.text, **s1 = S1.text;
-	uint32_t **r0 = S0.rend, **r1 = S1.rend;
 	int16_t * y = &SCR->cursor.y;
-	if (likely(SCR == &S.s[0] && S0.text) && *y >= c.h) {
+	if (likely(SCR == &S.s[0]) && *y >= c.h) {
 		scroll1(*y - c.h + 1);
 		*y = c.h - 1;
 	}
-	init_screen_elements(&S.s[0], s0, r0);
-	init_screen_elements(&S.s[1], s1, r1);
+	init_screen_elements(&S.s[0]);
+	init_screen_elements(&S.s[1]);
 	// Constrain dimensions:
 	c.w = MIN(c.w, JBXVT_MAX_COLS);
 	c.h = MIN(c.h, JBXVT_MAX_ROWS);
