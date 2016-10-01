@@ -86,24 +86,16 @@ static pixel_t rgb_pixel(const uint16_t c)
 
 static bool set_rval_colors(const uint32_t rval)
 {
-	bool fg_rgb_mode = rval & RS_FG_RGB;
-	bool bg_rgb_mode = rval & RS_BG_RGB;
-	bool fg_index_mode = rval & RS_FG_INDEX;
-	bool bg_index_mode = rval & RS_BG_INDEX;
 	// Mask foreground colors, 9 bits offset by 6 bits
-	uint8_t bf = rval >> 7;
 	// Mask background colors, 9 bits offset by 15 bits
-	uint8_t bb = rval >> 16;
-	bool fg_set = false, bg_set = false;
-	if ((fg_set = fg_rgb_mode))
-		fg(rgb_pixel(bf));
-	else if ((fg_set = fg_index_mode))
-		fg(color_index[bf]);
-	if ((bg_set = bg_rgb_mode))
-		bg(rgb_pixel(bb));
-	else if ((bg_set = bg_index_mode))
-		bg(color_index[bb]);
-	return fg_set || bg_set;
+	const uint8_t color[] = {rval >> 7, rval >> 16};
+	const bool rgb[] = {rval & RS_FG_RGB, rval & RS_BG_RGB};
+	const bool ind[] = {rval & RS_FG_INDEX, rval & RS_BG_INDEX};
+	if (rgb[0] || ind[0])
+		fg(rgb[0] ? rgb_pixel(color[0]) : color_index[color[0]]);
+	if (rgb[1] || ind[1])
+		bg(rgb[1] ? rgb_pixel(color[1]) : color_index[color[1]]);
+	return rgb[0] || rgb[1] || ind[0] || ind[1];
 }
 
 static inline void font(const xcb_font_t f)
