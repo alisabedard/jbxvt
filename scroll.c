@@ -22,15 +22,6 @@
 #define SLOG(...)
 #endif
 
-static void sel_scr_to_sav(SelEnd * restrict s,
-	const int i, const int count)
-{
-	if (s->type == SCREENSEL && s->index == i) {
-		s->type = SAVEDSEL;
-		s->index = count - i - 1;
-	}
-}
-
 static void mv_sel(SelEnd * e, const int16_t j, const int16_t k)
 {
 	if (e->type == SCREENSEL && e->index == j)
@@ -54,11 +45,6 @@ static void ck_sel_on_scr(const int16_t j)
 		  scr_clear_selection();
 }
 
-static int_fast16_t find_col(uint8_t * restrict s, int_fast16_t c)
-{
-	return s[c] ? find_col(s, c + 1) : c;
-}
-
 static void clear(int8_t count, const uint8_t rc,
 	uint8_t ** text, uint32_t ** rend, const bool up)
 {
@@ -73,34 +59,32 @@ static void clear(int8_t count, const uint8_t rc,
 	clear(count, rc, text, rend, up);
 }
 
-static struct JBXVTSavedLine * new_sline(uint16_t x)
+static void sel_scr_to_sav(SelEnd * restrict s,
+	const int i, const int count)
 {
-	struct JBXVTSavedLine * sl = malloc(sizeof(struct JBXVTSavedLine));
-	sl->sl_length = x;
-	return sl;
+	if (s->type == SCREENSEL && s->index == i) {
+		s->type = SAVEDSEL;
+		s->index = count - i - 1;
+	}
 }
 
-static void cp_rows(int16_t i, const int16_t count)
+static void copy_lines(const int_fast16_t n)
 {
-	SLOG("cp_rows(i: %d, count: %d)", i, count);
-	if (--i < 0)
-		  return;
-	uint8_t * t = SCR->text[i];
-	uint32_t * r = SCR->rend[i];
-	int_fast16_t len = find_col(t, 0);
-	struct JBXVTSavedLine * sl = new_sline(len);
-	sl->wrap = SCR->wrap[i];
-	memcpy(sl->text, t, len);
-	memcpy(sl->rend, r, len << 2);
+	for (int_fast16_t i = n - 1; i >= 0; --i) {
+		uint8_t * t = SCR->text[i];
 #define SLINE jbxvt.scr.sline
-	memcpy(&SLINE.data[count - i - 1], sl, sizeof(struct JBXVTSavedLine));
-	free(sl);
-	sel_scr_to_sav(&jbxvt.sel.end[0], i, count);
-	sel_scr_to_sav(&jbxvt.sel.end[1], i, count);
-	SLINE.top += count;
-	if (SLINE.top > SLINE.max)
-		SLINE.top = SLINE.max;
-	cp_rows(i, count);
+		struct JBXVTSavedLine * sl = &SLINE.data[n - i + 1];
+		sl->wrap = SCR->wrap[i];
+		SLINE.top += n;
+		SLINE.top = MIN(SLINE.top, SLINE.max);
+		sel_scr_to_sav(&jbxvt.sel.end[0], i, n);
+		sel_scr_to_sav(&jbxvt.sel.end[1], i, n);
+		int_fast16_t len = 0;
+		while(t[++len]); // strlen
+		memcpy(sl->text, t, len);
+		memcpy(sl->rend, SCR->rend[i], len << 2);
+		sl->sl_length = len;
+	}
 }
 
 static void get_y(int16_t * restrict y, const uint8_t row1,
@@ -143,7 +127,7 @@ static void add_scroll_history(const int8_t count)
 		* j = &jbxvt.scr.sline.data[y + count];
 	for (; y >= 0; --y, --i, --j)
 		memcpy(j, i, sizeof(struct JBXVTSavedLine));
-	cp_rows(count, count);
+	copy_lines(count);
 	sbar_draw(CSZ.h + jbxvt.scr.sline.top + count, jbxvt.scr.offset,
 		CSZ.h);
 }
@@ -170,7 +154,7 @@ static void clear_area(const int16_t y, const int8_t count)
 
 void scroll1(int16_t n)
 {
-	cp_rows(n, n);
+	copy_lines(n);
 	jbxvt.scr.sline.top = MIN(jbxvt.scr.sline.top + n,
 		jbxvt.scr.sline.max);
 	for (int_fast16_t j = n;
