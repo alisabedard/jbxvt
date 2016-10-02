@@ -31,14 +31,10 @@ static void init_screen_elements(struct JBXVTScreen * restrict scr)
 
 static void init(struct JBXVTScreen * s)
 {
-	const size_t sz = JBXVT_MAX_ROWS * sizeof(void *);
-	s->text = malloc(sz);
-	s->rend = malloc(sz);
 	for (size_t y = 0; y < JBXVT_MAX_ROWS; ++y) {
 		s->text[y] = calloc(JBXVT_MAX_COLS, 1);
 		s->rend[y] = calloc(JBXVT_MAX_COLS, 4);
 	}
-	s->wrap = calloc(JBXVT_MAX_ROWS, 1);
 }
 
 static inline void fix_margins(const struct JBDim c)

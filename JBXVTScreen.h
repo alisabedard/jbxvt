@@ -13,9 +13,9 @@
 
 /*  Structure describing the current state of the screen.  */
 struct JBXVTScreen {
-	uint8_t **text;		// backup copy of text
-	uint32_t **rend;	// rendition styles
-	bool * wrap;		// wrap flags
+	uint8_t *text[JBXVT_MAX_ROWS];	// text
+	uint32_t *rend[JBXVT_MAX_ROWS];	// styles
+	bool wrap[JBXVT_MAX_ROWS];	// wrap flags
 	struct JBDim margin;	// scroll margins, top and bottom
 	struct JBDim cursor;	// cursor position, row and column
 	bool wrap_next:1;	// wrap before the next printed character
