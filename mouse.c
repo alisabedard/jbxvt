@@ -87,21 +87,16 @@ void jbxvt_track_mouse(uint8_t b, uint32_t state, struct JBDim p,
 #endif//!DEBUG
 }
 
+#define TRK(it) jbxvt.mode.mouse_##it
+
 bool jbxvt_get_mouse_motion_tracked(void)
 {
-	struct JBXVTPrivateModes * m = &jbxvt.mode;
-	bool r = false;
-#define TRK(it) r|=m->mouse_##it
-	TRK(btn_evt); TRK(any_evt);
-	return r;
+	return TRK(btn_evt) | TRK(any_evt);
 }
 
 bool jbxvt_get_mouse_tracked(void)
 {
-	struct JBXVTPrivateModes * m = &jbxvt.mode;
-	bool r = false;
-	TRK(x10); TRK(vt200); TRK(vt200hl); TRK(ext); TRK(sgr); TRK(urxvt);
-	r |= jbxvt_get_mouse_motion_tracked();
-	return r;
+	return TRK(x10) | TRK(vt200) | TRK(vt200hl) | TRK(ext) | TRK(sgr)
+	       | TRK(urxvt) | jbxvt_get_mouse_motion_tracked();
 }
 
