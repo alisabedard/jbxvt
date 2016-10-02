@@ -4,15 +4,10 @@
 
 #include "scroll.h"
 
-#include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "sbar.h"
-#include "screen.h"
-#include "selection.h"
-
-#include <stdlib.h>
 #include <string.h>
 
 //#define SCROLL_DEBUG
