@@ -29,29 +29,16 @@ static void init_screen_elements(struct JBXVTScreen * restrict scr)
 	scr->margin.top = 0;
 }
 
-static inline void set(const uint8_t i, uint8_t ** t, uint32_t ** r)
+static void init(struct JBXVTScreen * s)
 {
-	S.s[i].text = t;
-	S.s[i].rend = r;
-}
-
-static void init(void)
-{
-	uint8_t **s0, **s1;
-	uint32_t **r0, **r1;
-	uint16_t sz = JBXVT_MAX_ROWS * sizeof(void *);
-#define ALLOC(v) {v = calloc(1, sz);}
-	ALLOC(s0); ALLOC(s1); ALLOC(r0); ALLOC(r1);
-	for (int_fast16_t y = JBXVT_MAX_ROWS - 1; y >= 0; --y) {
-		sz = JBXVT_MAX_COLS;
-		ALLOC(s0[y]); ALLOC(s1[y]);
-		sz <<= 2;
-		ALLOC(r0[y]); ALLOC(r1[y]);
+	const size_t sz = JBXVT_MAX_ROWS * sizeof(void *);
+	s->text = malloc(sz);
+	s->rend = malloc(sz);
+	for (size_t y = 0; y < JBXVT_MAX_ROWS; ++y) {
+		s->text[y] = calloc(JBXVT_MAX_COLS, 1);
+		s->rend[y] = calloc(JBXVT_MAX_COLS, 4);
 	}
-	set(0, s0, r0);
-	set(1, s1, r1);
-	jbxvt.scr.s[0].wrap = calloc(1, JBXVT_MAX_ROWS);
-	jbxvt.scr.s[1].wrap = calloc(1, JBXVT_MAX_ROWS);
+	s->wrap = calloc(JBXVT_MAX_ROWS, 1);
 }
 
 static inline void fix_margins(const struct JBDim c)
@@ -93,7 +80,8 @@ void scr_reset(void)
 	fix_margins(c);
 	static bool created;
 	if (!created) {
-		init();
+		init(&jbxvt.scr.s[0]);
+		init(&jbxvt.scr.s[1]);
 		created = true;
 	}
 	int16_t * y = &SCR->cursor.y;
