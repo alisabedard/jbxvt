@@ -18,6 +18,7 @@ OBJS+=cursor.o init_display.o repaint.o save_selection.o scr_move.o
 OBJS+=sbar.o scr_erase.o selex.o scr_edit.o command.o selection.o dcs.o
 OBJS+=selreq.o scr_reset.o scr_string.o screen.o scroll.o selend.o 
 OBJS+=xevents.o xsetup.o xvt.o handle_sgr.o dec_reset.o show_selection.o
+OBJS+=mouse.o
 
 $(exe): $(OBJS)
 	cd libjb && $(MAKE) CC="${CC}" CFLAGS="${CFLAGS}"
