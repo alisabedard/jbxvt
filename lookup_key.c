@@ -195,11 +195,8 @@ static void apply_state(const uint16_t state, uint8_t * restrict kbuf)
 	}
 }
 
-//  Convert the keypress event into a string.
-uint8_t * lookup_key(void * restrict ev, int_fast16_t * restrict pcount)
+static xcb_keysym_t get_keysym(xcb_key_press_event_t * ke)
 {
-	static uint8_t kbuf[KBUFSIZE];
-	xcb_key_press_event_t * ke = ev;
 	xcb_key_symbols_t *syms = xcb_key_symbols_alloc(jbxvt.X.xcb);
 	xcb_keysym_t k = xcb_key_press_lookup_keysym(syms, ke, 2);
 #ifdef KEY_DEBUG
@@ -207,6 +204,15 @@ uint8_t * lookup_key(void * restrict ev, int_fast16_t * restrict pcount)
 		ke->detail, k, ke->state);
 #endif//KEY_DEBUG
 	xcb_key_symbols_free(syms);
+	return k;
+}
+
+//  Convert the keypress event into a string.
+uint8_t * lookup_key(void * restrict ev, int_fast16_t * restrict pcount)
+{
+	static uint8_t kbuf[KBUFSIZE];
+	xcb_key_press_event_t * ke = ev;
+	const xcb_keysym_t k = get_keysym(ke);
 	char *s = get_s(k, (char *)kbuf);
 	if (s) {
 		size_t l = 0;
