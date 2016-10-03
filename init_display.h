@@ -1,9 +1,8 @@
-/*  Copyright 2016, Jeffrey E. Bedard
-    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+// Copyright 2016, Jeffrey E. Bedard
 
-#ifndef INIT_DISPLAY_H
-#define INIT_DISPLAY_H
+#ifndef JBXVT_INIT_DISPLAY_H
+#define JBXVT_INIT_DISPLAY_H
 
-void init_display(char * name);
+void init_display(char * restrict name);
 
-#endif//!INIT_DISPLAY_H
+#endif//!JBXVT_INIT_DISPLAY_H
