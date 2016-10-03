@@ -153,6 +153,14 @@ void scroll1(int16_t n)
 		  move_line(j, -n, &jbxvt.scr.s[0]);
 }
 
+static void sc_common(const uint8_t r1, const uint8_t r2,
+	const int16_t count, const bool up,
+	uint8_t ** save, uint32_t ** rend)
+{
+	clear(count, up ? r2 : r1, save, rend, up);
+	copy_visible_area(r1, r2, count, up);
+	clear_line(up ? (r2 - count) : r1, count);
+}
 
 static void sc_dn(const uint8_t row1, const uint8_t row2,
 	const int16_t count, uint8_t ** save, uint32_t ** rend)
@@ -160,9 +168,7 @@ static void sc_dn(const uint8_t row1, const uint8_t row2,
 	for(int8_t j = copy_screen_area(0, row2, -1,
 		count, save, rend); j >= row1; --j)
 		  move_line(j, count, jbxvt.scr.current);
-	clear(count, row1, save, rend, false);
-	copy_visible_area(row1, row2, count, false);
-	clear_line(row1, count);
+	sc_common(row1, row2, count, false, save, rend);
 }
 
 static void sc_up(const uint8_t row1, const uint8_t row2,
@@ -173,9 +179,7 @@ static void sc_up(const uint8_t row1, const uint8_t row2,
 	for(int8_t j = copy_screen_area(0, row1,
 		1, count, save, rend); j < row2; ++j)
 		move_line(j, -count, jbxvt.scr.current);
-	clear(count, row2, save, rend, true);
-	copy_visible_area(row1, row2, count, true);
-	clear_line(row2 - count, count);
+	sc_common(row1, row2, count, true, save, rend);
 }
 
 static inline bool validate(const uint8_t r1, const uint8_t r2,
