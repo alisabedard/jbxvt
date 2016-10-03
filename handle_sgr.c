@@ -33,9 +33,9 @@ static bool rgb_or_index(int32_t arg, bool * restrict either,
 		return false;
 	*either = false;
 	const bool i = arg != 2;
-	*(i?index:rgb) = true;
-	scr_style(i ? is_fg ? RS_FG_INDEX : RS_BG_INDEX : is_fg ? RS_FG_RGB
-		: RS_BG_RGB);
+	*(likely(i)?index:rgb) = true;
+	scr_style(likely(i) ? (is_fg ? RS_FG_INDEX : RS_BG_INDEX)
+		: (is_fg ? RS_FG_RGB : RS_BG_RGB));
 	return true;
 }
 
