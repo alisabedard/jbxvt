@@ -60,7 +60,7 @@ static void clear(int8_t count, const uint8_t rc,
 	clear(count, rc, text, rend, up);
 }
 
-static void copy_lines(const int_fast16_t n)
+static void copy_saved_lines(const int_fast16_t n)
 {
 	for (int_fast16_t i = n - 1; i >= 0; --i) {
 		uint8_t * t = SCR->text[i];
@@ -90,7 +90,7 @@ static void get_y(int16_t * restrict y, const uint8_t row1,
 	*(up ? y : y + 1) = b;
 }
 
-static void copy_visible(const uint8_t row1, const uint8_t row2,
+static void copy_visible_area(const uint8_t row1, const uint8_t row2,
 	const int8_t count, const bool up)
 {
 	int16_t y[2];
@@ -120,7 +120,7 @@ static void add_scroll_history(const int8_t count)
 		* j = &jbxvt.scr.sline.data[y + count];
 	for (; y >= 0; --y, --i, --j)
 		memcpy(j, i, sizeof(struct JBXVTSavedLine));
-	copy_lines(count);
+	copy_saved_lines(count);
 	sbar_draw(CSZ.h + jbxvt.scr.sline.top + count, jbxvt.scr.offset,
 		CSZ.h);
 }
@@ -146,13 +146,14 @@ static void clear_line(const uint8_t row)
 void scroll1(const int16_t n)
 {
 	SLOG("scroll1(%d)", n);
-	copy_lines(n);
+	copy_saved_lines(n);
 	jbxvt.scr.sline.top = MIN(jbxvt.scr.sline.top + n,
 		jbxvt.scr.sline.max);
 	for (int_fast16_t j = n;
 		j < jbxvt.scr.chars.height; ++j)
 		  transmogrify(j, -n, &jbxvt.scr.s[0]);
 }
+
 
 static void sc_dn(const uint8_t row1, const uint8_t row2,
 	const int16_t count, uint8_t ** save, uint32_t ** rend)
@@ -161,7 +162,7 @@ static void sc_dn(const uint8_t row1, const uint8_t row2,
 		count, save, rend); j >= row1; --j)
 		  transmogrify(j, count, jbxvt.scr.current);
 	clear(count, row1, save, rend, false);
-	copy_visible(row1, row2, count, false);
+	copy_visible_area(row1, row2, count, false);
 	clear_line(row1);
 }
 
@@ -174,7 +175,7 @@ static void sc_up(const uint8_t row1, const uint8_t row2,
 		1, count, save, rend); j < row2; ++j)
 		transmogrify(j, -count, jbxvt.scr.current);
 	clear(count, row2, save, rend, true);
-	copy_visible(row1, row2, count, true);
+	copy_visible_area(row1, row2, count, true);
 	clear_line(row2 - count);
 }
 
