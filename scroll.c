@@ -51,9 +51,8 @@ static void clear(int8_t count, const uint8_t rc,
 {
 	if(--count < 0)
 		  return;
-	const uint16_t sz = jbxvt.scr.chars.width;
-	memset(text[count], 0, sz);
-	memset(rend[count], 0, sz << 2);
+	memset(text[count], 0, CSZ.w);
+	memset(rend[count], 0, CSZ.w << 2);
 	const uint8_t j = rc + (up ? - count - 1 : count);
 	SCR->text[j] = text[count];
 	SCR->rend[j] = rend[count];
