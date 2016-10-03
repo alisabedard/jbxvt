@@ -167,18 +167,18 @@ static void sc_dn(const uint8_t row1, const uint8_t row2,
 {
 	for(int8_t j = copy_screen_area(0, row2, -1,
 		count, save, rend); j >= row1; --j)
-		  move_line(j, count, jbxvt.scr.current);
+		  move_line(j, count, SCR);
 	sc_common(row1, row2, count, false, save, rend);
 }
 
 static void sc_up(const uint8_t row1, const uint8_t row2,
 	const int16_t count, uint8_t ** save, uint32_t ** rend)
 {
-	if (jbxvt.scr.current == &jbxvt.scr.s[0] && row1 == 0)
+	if (SCR == &jbxvt.scr.s[0] && row1 == 0)
 		add_scroll_history(count);
 	for(int8_t j = copy_screen_area(0, row1,
 		1, count, save, rend); j < row2; ++j)
-		move_line(j, -count, jbxvt.scr.current);
+		move_line(j, -count, SCR);
 	sc_common(row1, row2, count, true, save, rend);
 }
 
