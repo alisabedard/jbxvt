@@ -1,31 +1,20 @@
+// Copyright 2016, Jeffrey E. Bedard
+
 #include "scr_move.h"
 
 #include "cursor.h"
 #include "jbxvt.h"
-#include "libjb/log.h"
 #include "sbar.h"
-#include "scroll.h"
-#include "scr_reset.h"
-#include "selection.h"
-
-#include <stdlib.h>
-
-#define CSZ jbxvt.scr.chars
-#define SCR jbxvt.scr.current
-#define CUR SCR->cursor
-#define MGN SCR->margin
 
 // Sanitize cursor position, implement DECOM
 void reset_row_col(void)
 {
-	struct JBDim * c = &CUR;
+	struct JBDim * c = &SCR->cursor;
 	JB_LIMIT(c->x, CSZ.w - 1, 0);
 	JB_LIMIT(c->y, CSZ.h - 1, 0);
 	// Implement DECOM, DEC Origin Mode, limits
-	if (jbxvt.mode.decom) {
-		const struct JBDim m = MGN;
-		JB_LIMIT(c->y, m.t, m.b);
-	}
+	if (jbxvt.mode.decom)
+		JB_LIMIT(c->y, SCR->margin.t, SCR->margin.b);
 }
 
 static void set_dimension(int16_t * restrict cursor,
@@ -43,7 +32,7 @@ void scr_move(const int16_t x, const int16_t y, const uint8_t relative)
 #endif//MOVE_DEBUG
 	change_offset(0);
 	draw_cursor(); // clear
-	struct JBDim * c = &CUR;
+	struct JBDim * c = &SCR->cursor;
 	// Sanitize non-relative arguments--must be positive.
 	set_dimension(&c->x, x, relative & COL_RELATIVE);
 	set_dimension(&c->y, y, relative & ROW_RELATIVE);
