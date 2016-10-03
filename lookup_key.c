@@ -109,7 +109,7 @@ void set_keys(const bool mode_high, const bool is_cursor)
 
 struct Format {
 	uint8_t key;
-	const char * value;
+	const uint8_t * value;
 };
 
 
@@ -128,22 +128,22 @@ static char * get_format(const enum KSType type)
 }
 
 //  Look up function key keycode
-static char * get_keycode_value(struct KeyMaps * restrict keymaptable,
-	xcb_keysym_t keysym, char * buf, const int use_alternate)
+static uint8_t * get_keycode_value(struct KeyMaps * restrict keymaptable,
+	xcb_keysym_t keysym, uint8_t * buf, const int use_alternate)
 {
 	for (struct KeyMaps * km = keymaptable; km->km_keysym; ++km) {
 		if (km->km_keysym != keysym)
 			  continue;
 		struct KeyStrings * ks = use_alternate
 			? &km->km_alt : &km->km_normal;
-		snprintf(buf, KBUFSIZE, get_format(ks->ks_type),
+		snprintf((char *)buf, KBUFSIZE, get_format(ks->ks_type),
 			ks->ks_value);
 		return buf;
 	}
 	return NULL;
 }
 
-static char * get_s(const xcb_keysym_t keysym, char * restrict kbuf)
+static uint8_t * get_s(const xcb_keysym_t keysym, uint8_t * restrict kbuf)
 {
 	if (xcb_is_function_key(keysym) || xcb_is_misc_function_key(keysym)
 		|| keysym == K_PD || keysym == K_PU)
@@ -213,7 +213,7 @@ uint8_t * lookup_key(void * restrict ev, int_fast16_t * restrict pcount)
 	static uint8_t kbuf[KBUFSIZE];
 	xcb_key_press_event_t * ke = ev;
 	const xcb_keysym_t k = get_keysym(ke);
-	char *s = get_s(k, (char *)kbuf);
+	uint8_t * s = get_s(k, (uint8_t *)kbuf);
 	if (s) {
 		size_t l = 0;
 		while (s[++l]);
@@ -222,7 +222,7 @@ uint8_t * lookup_key(void * restrict ev, int_fast16_t * restrict pcount)
 		for (size_t i = 0; i < l; ++i)
 			LOG("s[%d]: 0x%x", i, s[i]);
 #endif//KEY_DEBUG
-		return (uint8_t *)s;
+		return s;
 	}
 	if (k >= 0xffe0) { // Don't display non-printable chars
 		*pcount = 0;
