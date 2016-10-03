@@ -12,8 +12,10 @@
 #define LOG(...)
 #endif
 
-static bool lk_app_cur;		// cursor keys in app mode
-static bool lk_app_kp;		// app keypad keys set
+static struct { // key modes
+	bool cursor, // app mode cursor keys
+	     keypad; // keypad keys
+} self;
 
 // Reference <X11/keysymdef.h>
 #define K_C(n) (0xff00 | n)
@@ -102,7 +104,7 @@ static struct KeyMaps kp_key_table[]={
 // Set key mode for cursor keys if is_cursor, else for keypad keys
 void set_keys(const bool mode_high, const bool is_cursor)
 {
-	*(is_cursor ? &lk_app_cur : &lk_app_kp) = mode_high;
+	*(is_cursor ? &self.cursor : &self.keypad) = mode_high;
 }
 
 struct Format {
@@ -149,9 +151,9 @@ static char * get_s(const xcb_keysym_t keysym, char * restrict kbuf)
 			false);
 	if (xcb_is_cursor_key(keysym) || xcb_is_pf_key(keysym))
 		return get_keycode_value(other_key_table, keysym,
-			kbuf, lk_app_cur);
+			kbuf, self.cursor);
 	return get_keycode_value(kp_key_table, keysym,
-		kbuf, lk_app_kp);
+		kbuf, self.keypad);
 }
 
 /* FIXME: Make this portable to non-US keyboards, or write a version
