@@ -83,7 +83,7 @@ static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 
 /*  Convert the currently marked screen selection as a text string
     and save it as the current saved selection. */
-void save_selection(void)
+void jbxvt_save_selection(void)
 {
 	LOG("save_selection");
 	/*  Set se1 and se2 to point to the first

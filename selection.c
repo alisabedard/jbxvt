@@ -25,7 +25,7 @@ static void prop(const xcb_atom_t a)
 void scr_make_selection(void)
 {
 	LOG("scr_make_selection");
-	save_selection();
+	jbxvt_save_selection();
 	/* Set all properties which may possibly be requested.  */
 	prop(XCB_ATOM_PRIMARY);
 	prop(XCB_ATOM_SECONDARY);

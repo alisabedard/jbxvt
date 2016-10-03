@@ -6,6 +6,6 @@
 
 /*  Convert the currently marked screen selection as a text string
     and save it as the current saved selection. */
-void save_selection(void);
+void jbxvt_save_selection(void);
 
 #endif//!JBXVT_SAVE_SELECTION_H
