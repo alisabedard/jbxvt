@@ -66,6 +66,9 @@ void jbxvt_dcs(struct Token * t)
 		get_com_char(0);
 		put_com_char('-');
 		break;
+	case 0xd0:
+		put_com_char('?');
+		break;
 	default:
 		LOG("Unhandled DCS, starting with 0x%x", (int)c);
 	}
