@@ -18,8 +18,8 @@ bool ipos(int16_t * i)
 	return true;
 }
 
-static int8_t cmp(const int8_t mod, SelEnd * restrict se1,
-	SelEnd * restrict se2)
+static int8_t cmp(const int8_t mod, struct JBXVTSelEnd * restrict se1,
+	struct JBXVTSelEnd * restrict se2)
 {
 	if (se1->index == se2->index)
 		return se1->col - se2->col;
@@ -29,7 +29,7 @@ static int8_t cmp(const int8_t mod, SelEnd * restrict se1,
 /*  Compare the two selections and return negtive,
     0 or positive depending on whether se2 is after,
     equal to or before se1.  */
-int8_t selcmp(SelEnd * restrict se1, SelEnd * restrict se2)
+int8_t selcmp(struct JBXVTSelEnd * restrict se1, struct JBXVTSelEnd * restrict se2)
 {
 	const bool se1sv = se1->type == SAVEDSEL;
 	if (se1sv && se2->type == SAVEDSEL)
@@ -41,7 +41,7 @@ int8_t selcmp(SelEnd * restrict se1, SelEnd * restrict se2)
 
 
 //  Convert a row and column coordinates into a selection endpoint.
-void rc_to_selend(const int16_t row, const int16_t col, SelEnd * se)
+void rc_to_selend(const int16_t row, const int16_t col, struct JBXVTSelEnd * se)
 {
 	int16_t i = (row - jbxvt.scr.offset);
 	se->type = ipos(&i) ? SCREENSEL : SAVEDSEL;
@@ -51,7 +51,7 @@ void rc_to_selend(const int16_t row, const int16_t col, SelEnd * se)
 
 //  Convert the selection into a row and column.
 void selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
-	SelEnd * restrict se)
+	struct JBXVTSelEnd * restrict se)
 {
 	if (se->type == NOSEL)
 		return;
@@ -61,7 +61,7 @@ void selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
 		: jbxvt.scr.offset - se->index - 1;
 }
 
-static uint16_t sel_s(SelEnd * restrict se2, uint8_t ** s)
+static uint16_t sel_s(struct JBXVTSelEnd * restrict se2, uint8_t ** s)
 {
 	const bool ss = se2->type == SCREENSEL;
 	*s = ss ? jbxvt.scr.current->text[se2->index]
@@ -70,8 +70,8 @@ static uint16_t sel_s(SelEnd * restrict se2, uint8_t ** s)
 		: SLD[se2->index].sl_length;
 }
 
-static void adj_sel_to_word(SelEnd * include,
-	SelEnd * se1, SelEnd * se2)
+static void adj_sel_to_word(struct JBXVTSelEnd * include,
+	struct JBXVTSelEnd * se1, struct JBXVTSelEnd * se2)
 {
 	uint8_t * s = se1->type == SCREENSEL
 		? SCR->text[se1->index]
@@ -93,11 +93,11 @@ static void adj_sel_to_word(SelEnd * include,
 /*  Adjust the selection to a word or line boundary.
     If the include endpoint is non NULL then the selection
     is forced to be large enough to include it.  */
-void adjust_selection(SelEnd * restrict include)
+void adjust_selection(struct JBXVTSelEnd * restrict include)
 {
 	if (jbxvt.sel.unit == SEL_CHAR)
 		return;
-	SelEnd *se1, *se2;
+	struct JBXVTSelEnd *se1, *se2;
 	const bool oneless = selcmp(&jbxvt.sel.end[0],&jbxvt.sel.end[1]) <= 0;
 	se1 = oneless ? &jbxvt.sel.end[0] : &jbxvt.sel.end[1];
 	se2 = oneless ? &jbxvt.sel.end[1] : &jbxvt.sel.end[0];

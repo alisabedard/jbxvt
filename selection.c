@@ -76,7 +76,7 @@ void scr_start_selection(struct JBDim p, enum selunit unit)
 	show_selection(0, CSZ.h - 1, 0, CSZ.w - 1);
 }
 
-static int16_t row(const SelEnd * restrict e)
+static int16_t row(const struct JBXVTSelEnd * restrict e)
 {
 	return e->type == SCREENSEL ? e->index : -1;
 }
@@ -85,7 +85,7 @@ static int16_t row(const SelEnd * restrict e)
  *  remove it from the screen.  */
 void check_selection(const int16_t row1, const int16_t row2)
 {
-	SelEnd *e1 = &jbxvt.sel.end[0], *e2 = &jbxvt.sel.end[1];
+	struct JBXVTSelEnd *e1 = &jbxvt.sel.end[0], *e2 = &jbxvt.sel.end[1];
 	if (e1->type == NOSEL || e2->type == NOSEL)
 		return;
 	int16_t r1 = row(e1), r2 = row(e2);

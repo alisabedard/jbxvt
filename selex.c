@@ -18,14 +18,14 @@ static void handle_drag(const int16_t row, const int16_t col)
 //  Extend the selection.
 void scr_extend_selection(const struct JBDim p, const bool drag)
 {
-	SelEnd * e = jbxvt.sel.end;
+	struct JBXVTSelEnd * e = jbxvt.sel.end;
 	if (e->type == NOSEL)
 		return;
 #define F jbxvt.X.f.size
 	struct JBDim rc = jbxvt_get_char_size(p);
 	fix_rc(&rc);
 	// Save current end points:
-	SelEnd s[] = {*e, *(e+1)};
+	struct JBXVTSelEnd s[] = {*e, *(e+1)};
 	if (drag)
 		  handle_drag(rc.y, rc.x);
 	change_selection(s, s+1);
