@@ -17,13 +17,13 @@ static void encode_rgb(uint8_t color, uint8_t offset)
 	jbxvt.scr.rstyle |= color << offset;
 }
 
-static void sgrc(const uint8_t c, const bool fg)
+/* c must be uint32_t to allow for shift and OR with rstyle. */
+static void sgrc(const uint32_t c, const bool fg)
 {
 	const uint8_t o = fg ? 7 : 16;
 	jbxvt.scr.rstyle &= ~(0777<<o);
 	jbxvt.scr.rstyle |= (fg?RS_FG_INDEX:RS_BG_INDEX);
-	const uint32_t r = c;
-	jbxvt.scr.rstyle |= r << o;
+	jbxvt.scr.rstyle |= c << o;
 }
 
 static bool rgb_or_index(int32_t arg, bool * restrict either,
@@ -34,7 +34,8 @@ static bool rgb_or_index(int32_t arg, bool * restrict either,
 	*either = false;
 	const bool i = arg != 2;
 	*(i?index:rgb) = true;
-	scr_style(i?is_fg?RS_FG_INDEX:RS_BG_INDEX:is_fg?RS_FG_RGB:RS_BG_RGB);
+	scr_style(i ? is_fg ? RS_FG_INDEX : RS_BG_INDEX : is_fg? RS_FG_RGB
+		: RS_BG_RGB);
 	return true;
 }
 
