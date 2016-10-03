@@ -8,6 +8,7 @@
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "sbar.h"
+
 #include <string.h>
 
 //#define SCROLL_DEBUG
