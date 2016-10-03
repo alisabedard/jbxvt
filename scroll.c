@@ -28,8 +28,8 @@ static bool move_selection(struct SelEnd * end, const uint16_t index,
 	return false; // no changes
 }
 
-static void transmogrify(const int16_t j, const int8_t count,
-	struct JBXVTScreen * restrict s)
+static void move_line(const int16_t j,
+	const int8_t count, struct JBXVTScreen * restrict s)
 {
 	const int16_t k = j + count;
 	s->text[k] = s->text[j];
@@ -150,7 +150,7 @@ void scroll1(int16_t n)
 		jbxvt.scr.sline.max);
 	for (int_fast16_t j = n;
 		j < jbxvt.scr.chars.height; ++j)
-		  transmogrify(j, -n, &jbxvt.scr.s[0]);
+		  move_line(j, -n, &jbxvt.scr.s[0]);
 }
 
 
@@ -159,7 +159,7 @@ static void sc_dn(const uint8_t row1, const uint8_t row2,
 {
 	for(int8_t j = copy_screen_area(0, row2, -1,
 		count, save, rend); j >= row1; --j)
-		  transmogrify(j, count, jbxvt.scr.current);
+		  move_line(j, count, jbxvt.scr.current);
 	clear(count, row1, save, rend, false);
 	copy_visible_area(row1, row2, count, false);
 	clear_line(row1, count);
@@ -172,7 +172,7 @@ static void sc_up(const uint8_t row1, const uint8_t row2,
 		add_scroll_history(count);
 	for(int8_t j = copy_screen_area(0, row1,
 		1, count, save, rend); j < row2; ++j)
-		transmogrify(j, -count, jbxvt.scr.current);
+		move_line(j, -count, jbxvt.scr.current);
 	clear(count, row2, save, rend, true);
 	copy_visible_area(row1, row2, count, true);
 	clear_line(row2 - count, count);
