@@ -18,15 +18,11 @@
 #define SLOG(...)
 #endif
 
-static bool move_selection(struct SelEnd * end, const uint16_t index,
-	const uint16_t new_index)
+static void clear_selection_at(const int16_t j)
 {
-	if (end->type == SCREENSEL && end->index == index) {
-		end->type = SAVEDSEL;
-		end->index = new_index;
-		return true; // selection end point moved
-	}
-	return false; // no changes
+	SelEnd * e = jbxvt.sel.end;
+	if (e[0].index == j || e[1].index == j)
+		e[0].type = e[1].type = NOSEL;
 }
 
 static void move_line(const int16_t j,
@@ -35,17 +31,8 @@ static void move_line(const int16_t j,
 	const int16_t k = j + count;
 	s->text[k] = s->text[j];
 	s->rend[k] = s->rend[j];
-	if (!move_selection(&jbxvt.sel.end[0], j, k))
-		move_selection(&jbxvt.sel.end[1], j, k);
+	clear_selection_at(j);
 }
-static void ck_sel_on_scr(const int16_t j)
-{
-	// clear selection if it scrolls off screen:
-	if (jbxvt.sel.end[0].index == j
-		|| jbxvt.sel.end[1].index == j)
-		  scr_clear_selection();
-}
-
 static void clear(int8_t count, const uint8_t rc,
 	uint8_t ** text, uint32_t ** rend, const bool up)
 {
@@ -69,8 +56,7 @@ static void copy_saved_lines(const int_fast16_t n)
 		sl->wrap = SCR->wrap[i];
 		SLINE.top += n;
 		SLINE.top = MIN(SLINE.top, SLINE.max);
-		if (!move_selection(&jbxvt.sel.end[0], i, new_index))
-			move_selection(&jbxvt.sel.end[1], i, new_index);
+		clear_selection_at(i);
 		int_fast16_t len = 0;
 		while(t[++len]); // strlen
 		memcpy(sl->text, t, len);
@@ -134,7 +120,7 @@ static int8_t copy_screen_area(const int8_t i,
 		  return j;
 	save[i] = SCR->text[j];
 	rend[i] = SCR->rend[j];
-	ck_sel_on_scr(j);
+	clear_selection_at(j);
 	return copy_screen_area(i + 1, j + mod, mod,
 		count, save, rend);
 }
