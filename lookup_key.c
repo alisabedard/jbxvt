@@ -134,7 +134,8 @@ static char * get_keycode_value(struct KeyMaps * restrict keymaptable,
 			  continue;
 		struct KeyStrings * ks = use_alternate
 			? &km->km_alt : &km->km_normal;
-		snprintf(buf, KBUFSIZE, get_format(ks->ks_type), ks->ks_value);
+		snprintf(buf, KBUFSIZE, get_format(ks->ks_type),
+			ks->ks_value);
 		return buf;
 	}
 	return NULL;
@@ -144,7 +145,8 @@ static char * get_s(const xcb_keysym_t keysym, char * restrict kbuf)
 {
 	if (xcb_is_function_key(keysym) || xcb_is_misc_function_key(keysym)
 		|| keysym == K_PD || keysym == K_PU)
-		return get_keycode_value(func_key_table, keysym, kbuf, false);
+		return get_keycode_value(func_key_table, keysym, kbuf,
+			false);
 	if (xcb_is_cursor_key(keysym) || xcb_is_pf_key(keysym))
 		return get_keycode_value(other_key_table, keysym,
 			kbuf, lk_app_cur);
@@ -164,7 +166,7 @@ __attribute__((const))
 static uint8_t shift(uint8_t c)
 {
 	if (c >= 'a' && c <= 'z')
-		return c - 0x20;
+		return c - 0x20; // c - SPACE
 	for (uint8_t i = 0; shift_map[i][0]; ++i) {
 		if (shift_map[i][0] == c)
 			  return shift_map[i][1];
