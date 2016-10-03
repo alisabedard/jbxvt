@@ -181,15 +181,15 @@ static void poll_io(fd_set * restrict in_fdset)
 
 static bool get_buffered(int_fast16_t * val, const int_fast8_t flags)
 {
-
-	bool r = false;
-	if ((r = (COM.stack.top > COM.stack.data)))
+	if (COM.stack.top > COM.stack.data)
 		*val = *--COM.stack.top;
-	else if ((r = (COM.buf.next < COM.buf.top)))
+	else if (COM.buf.next < COM.buf.top)
 		*val = *COM.buf.next++;
-	else if ((r = (flags & BUF_ONLY)))
+	else if (flags & BUF_ONLY)
 		*val = GCC_NULL;
-	return r;
+	else
+		return false;
+	return true;
 }
 
 /*  Return the next input character after first passing any keyboard input
