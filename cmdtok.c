@@ -253,6 +253,38 @@ static void handle_string_char(int_fast16_t c, struct Token * restrict tk)
 		  put_com_char(c);
 }
 
+static void handle_unicode(int_fast16_t c)
+{
+	c = get_com_char(c);
+	switch (c) {
+	case 0x94:
+		c = get_com_char(c);
+		switch (c) {
+		case 0x80:
+			put_com_char('-');
+			break;
+		case 0x82:
+			put_com_char('|');
+			break;
+		case 0xac:
+			put_com_char('+');
+			break;
+		default:
+			LOG("0x%x", (unsigned int)c);
+			put_com_char(c);
+		}
+		break;
+	case 0x96:
+	case 0x80:
+		put_com_char('-');
+		break;
+	default:
+		LOG("0xe2 0x%x", (unsigned int)c);
+		put_com_char(c);
+	}
+}
+
+
 static void default_token(struct Token * restrict tk, int_fast16_t c)
 {
 
@@ -264,33 +296,7 @@ static void default_token(struct Token * restrict tk, int_fast16_t c)
 		tk->type = c;
 		break;
 	case 0xe2:
-		c = get_com_char(c);
-		switch (c) {
-		case 0x94:
-			c = get_com_char(c);
-			switch (c) {
-			case 0x80:
-				put_com_char('-');
-				break;
-			case 0x82:
-				put_com_char('|');
-				break;
-			case 0xac:
-				put_com_char('+');
-				break;
-			default:
-				LOG("0x%x", (unsigned int)c);
-				put_com_char(c);
-			}
-			break;
-		case 0x96:
-		case 0x80:
-			put_com_char('-');
-			break;
-		default:
-			LOG("0xe2 0x%x", (unsigned int)c);
-			put_com_char(c);
-		}
+		handle_unicode(c);
 		break;
 	default:
 		if (is_string_char(c))
