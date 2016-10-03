@@ -246,6 +246,7 @@ static void handle_string_char(int_fast16_t c, struct Token * restrict tk)
 
 static void handle_unicode(int_fast16_t c)
 {
+	LOG("handle_unicode(0x%x)", (unsigned int)c);
 	c = get_com_char(c);
 	switch (c) {
 	case 0x94:
@@ -280,19 +281,31 @@ static void default_token(struct Token * restrict tk, int_fast16_t c)
 {
 
 	switch(c) { // handle 8-bit controls
-	case TK_APC: case TK_CSI: case TK_DCS: case TK_EPA: case TK_HTS:
+	case TK_CSI: case TK_DCS: case TK_EPA: case TK_HTS:
 	case TK_ID: case TK_IND: case TK_NEL: case TK_OSC: case TK_PM:
 	case TK_RI: case TK_SOS: case TK_SPA: case TK_SS2: case TK_SS3:
 	case TK_ST:
 		tk->type = c;
 		break;
+	case TK_APC: // Retrieve and skip sequence
+		c = get_com_char(c);
+		c = get_com_char(c);
+		LOG("0x9f0x%x", (unsigned int)c);
+		break;
+	case 0xd0:
+		LOG("Unknown character 0xd0");
+		break;
 	case 0xe2:
+		LOG("0xe2");
 		handle_unicode(c);
 		break;
 	default:
 		if (is_string_char(c))
 			handle_string_char(c, tk);
 		else {
+#ifdef CHAR_DEBUG
+			LOG("0x%x", (unsigned int)c);
+#endif//CHAR_DEBUG
 			tk->type = TK_CHAR;
 			tk->tk_char = c;
 		}
