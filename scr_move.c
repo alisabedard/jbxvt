@@ -30,6 +30,12 @@ void reset_row_col(void)
 	}
 }
 
+static void set_dimension(int16_t * restrict cursor,
+	const int16_t delta, const bool relative)
+{
+	*cursor = relative ? *cursor + delta : MAX(delta, 0);
+}
+
 /*  Move the cursor to a new position.  The relative argument is a pair of
  *  flags that specify relative rather than absolute motion.  */
 void scr_move(const int16_t x, const int16_t y, const uint8_t relative)
@@ -41,8 +47,8 @@ void scr_move(const int16_t x, const int16_t y, const uint8_t relative)
 	draw_cursor(); // clear
 	struct JBDim * c = &CUR;
 	// Sanitize non-relative arguments--must be positive.
-	c->x = relative & COL_RELATIVE ? c->x + x : MAX(x, 0);
-	c->y = relative & ROW_RELATIVE ? c->y + y : MAX(y, 0);
+	set_dimension(&c->x, x, relative & COL_RELATIVE);
+	set_dimension(&c->y, y, relative & ROW_RELATIVE);
 	reset_row_col();
 	const int16_t cy = c->y;
 	SCR->wrap_next = 0;
