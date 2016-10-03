@@ -257,21 +257,9 @@ static void default_token(struct Token * restrict tk, int_fast16_t c)
 {
 
 	switch(c) { // handle 8-bit controls
-	case TK_APC:
-	case TK_CSI:
-	case TK_DCS:
-	case TK_EPA:
-	case TK_HTS:
-	case TK_ID:
-	case TK_IND:
-	case TK_NEL:
-	case TK_OSC:
-	case TK_PM:
-	case TK_RI:
-	case TK_SOS:
-	case TK_SPA:
-	case TK_SS2:
-	case TK_SS3:
+	case TK_APC: case TK_CSI: case TK_DCS: case TK_EPA: case TK_HTS:
+	case TK_ID: case TK_IND: case TK_NEL: case TK_OSC: case TK_PM:
+	case TK_RI: case TK_SOS: case TK_SPA: case TK_SS2: case TK_SS3:
 	case TK_ST:
 		tk->type = c;
 		break;
