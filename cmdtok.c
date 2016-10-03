@@ -237,16 +237,17 @@ static inline bool is_string_char(register int_fast16_t c)
 
 static void handle_string_char(int_fast16_t c, struct Token * restrict tk)
 {
-	uint_fast16_t i = 0;
-	tk->nlcount = 0;
+	uint_fast16_t i = 0, nl = 0;
+	uint8_t * s = tk->string;
 	do {
-		tk->string[i++] = c;
+		s[i++] = c;
 		c = get_com_char(1);
 		if (c == '\n')
-			++tk->nlcount;
+			++nl;
 	} while (is_string_char(c) && i < TKS_MAX);
+	tk->nlcount = nl;
 	tk->length = i;
-	tk->string[i] = 0;
+	s[i] = 0; // terminating NULL
 	tk->type = TK_STRING;
 	if (c != GCC_NULL)
 		  put_com_char(c);
