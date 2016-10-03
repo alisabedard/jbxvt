@@ -148,36 +148,22 @@ void handle_sgr(struct Token * restrict token)
 			break;
 		case 30: SGRFG(0); break; // black
 		case 90: SGRFG(010); break; // grey
-		case 31:
-		case 91: SGRFG(011); break;
-		case 32:
-		case 92: SGRFG(012); break;
-		case 33:
-		case 93: SGRFG(013); break;
-		case 34:
-		case 94: SGRFG(014); break;
-		case 35:
-		case 95: SGRFG(015); break;
-		case 36:
-		case 96: SGRFG(016); break;
-		case 37:
-		case 97: SGRFG(017); break;
+		case 31: case 91: SGRFG(011); break;
+		case 32: case 92: SGRFG(012); break;
+		case 33: case 93: SGRFG(013); break;
+		case 34: case 94: SGRFG(014); break;
+		case 35: case 95: SGRFG(015); break;
+		case 36: case 96: SGRFG(016); break;
+		case 37: case 97: SGRFG(017); break;
 		case 40: SGRBG(0); break;
 		case 100: SGRBG(010); break;
-		case 41:
-		case 101: SGRBG(011); break;
-		case 42:
-		case 102: SGRBG(012); break;
-		case 43:
-		case 103: SGRBG(013); break;
-		case 44:
-		case 104: SGRBG(014); break;
-		case 45:
-		case 105: SGRBG(015); break;
-		case 46:
-		case 106: SGRBG(016); break;
-		case 47:
-		case 107: SGRBG(017); break;
+		case 41: case 101: SGRBG(011); break;
+		case 42: case 102: SGRBG(012); break;
+		case 43: case 103: SGRBG(013); break;
+		case 44: case 104: SGRBG(014); break;
+		case 45: case 105: SGRBG(015); break;
+		case 46: case 106: SGRBG(016); break;
+		case 47: case 107: SGRBG(017); break;
 		default:
 			LOG("unhandled style %d", token->arg[i]);
 		}
