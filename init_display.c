@@ -173,7 +173,7 @@ static inline void init_jbxvt_colors(void)
 	jbxvt.X.color.bg = set_bg(jbxvt.opt.bg);
 }
 
-void init_display(char * name)
+void init_display(char * restrict name)
 {
 	int screen = jbxvt.opt.screen;
 	jbxvt.X.xcb = jb_get_xcb_connection(jbxvt.opt.display, &screen);
