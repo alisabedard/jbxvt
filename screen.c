@@ -14,6 +14,8 @@
 #include "scr_reset.h"
 #include "scroll.h"
 
+#include <string.h>
+
 #define GET_X(op) p.w op##= FSZ.w; p.y op##= FSZ.h; return p;
 
 struct JBDim jbxvt_get_char_size(struct JBDim p)
@@ -37,24 +39,16 @@ void fix_rc(struct JBDim * restrict rc)
 	JB_LIMIT(rc->y, c.h - 1, 0);
 }
 
-// Renderless 'E' at position:
-static inline void epos(const struct JBDim p)
-{
-	SCR->text[p.y][p.x] = 'E';
-	SCR->rend[p.y][p.x] = 0;
-}
-
 // Set all chars to 'E'
 void scr_efill(void)
 {
 	LOG("scr_efill");
 	// Move to cursor home in order for all characters to appear.
 	scr_move(0, 0, 0);
-	struct JBDim p;
-	const struct JBDim c = jbxvt.scr.chars;
-	for (p.y = c.height - 1; p.y >= 0; --p.y)
-		  for (p.x = c.width - 1; p.x >= 0; --p.x)
-			    epos(p);
+	for (uint8_t y = 0; y < CSZ.h; ++y) {
+		memset(SCR->text[y], 'E', CSZ.w);
+		memset(SCR->rend[y], 0, CSZ.w << 2);
+	}
 	repaint();
 }
 
