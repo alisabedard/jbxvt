@@ -168,10 +168,9 @@ static void poll_io(fd_set * restrict in_fdset)
 	if (jbxvt.com.send_count > 0)
 		FD_SET(jbxvt.com.fd, &out_fdset);
 	errno = 0; // Ensure next error message is accurate
-	if (jb_check(select(jbxvt.com.width, in_fdset, &out_fdset, NULL,
+	jb_assert(select(jbxvt.com.width, in_fdset, &out_fdset, NULL,
 		&(struct timeval){.tv_usec = 500000}) != -1,
-		"Error performing select()"))
-		return;
+		"Select failed.");
 	if (FD_ISSET(jbxvt.com.fd, &out_fdset))
 		output_to_command();
 	else if (!FD_ISSET(jbxvt.com.xfd, in_fdset))
