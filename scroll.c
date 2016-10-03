@@ -113,6 +113,8 @@ static void scroll_off(const int16_t count)
 
 static void add_scroll_history(const int8_t count)
 {
+	if (count < 1) // nothing to do
+		return;
 	scroll_off(count);
 	int_fast16_t y = jbxvt.scr.sline.max - count - 1;
 	struct JBXVTSavedLine * i = &jbxvt.scr.sline.data[y],
