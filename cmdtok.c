@@ -47,14 +47,6 @@ static void handle_focus(xcb_generic_event_t * restrict e)
 	xcb_focus_in_event_t * f = (xcb_focus_in_event_t *)e;
 	if (f->mode)
 		  return;
-	switch (f->detail) {
-	case XCB_NOTIFY_DETAIL_ANCESTOR:
-	case XCB_NOTIFY_DETAIL_INFERIOR:
-	case XCB_NOTIFY_DETAIL_NONLINEAR:
-		break;
-	default:
-		return;
-	}
 	struct JBXVTEvent * xe = ev_alloc(e);
 	xe->detail = f->detail;
 	put_xevent(xe);
