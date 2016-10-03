@@ -22,8 +22,7 @@ static void sgrc(const uint32_t c, const bool fg)
 {
 	const uint8_t o = fg ? 7 : 16;
 	jbxvt.scr.rstyle &= ~(0777<<o);
-	jbxvt.scr.rstyle |= (fg?RS_FG_INDEX:RS_BG_INDEX);
-	jbxvt.scr.rstyle |= c << o;
+	jbxvt.scr.rstyle |= (fg ? RS_FG_INDEX : RS_BG_INDEX) | c << o;
 }
 
 static bool rgb_or_index(int32_t arg, bool * restrict either,
