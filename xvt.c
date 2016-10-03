@@ -27,8 +27,8 @@
 
 //#define DEBUG_TOKENS
 #ifdef DEBUG_TOKENS
-#define TLOG TLOG
-#else//!DEBUG_TOKENS
+#define TLOG(...) LOG(__VA_ARGS__)
+#else
 #define TLOG(...)
 #endif//DEBUG_TOKENS
 
@@ -84,11 +84,11 @@ static void handle_tk_char(const uint8_t tk_char)
 		cprintf("\033[?6c"); // VT102
 		break;
 	case '\016': // change to char set G1
-		TLOG("charset G1");
+		LOG("charset G1");
 		jbxvt.mode.charsel = 1;
 		break;
 	case '\017': // change to char set G0
-		TLOG("charset G0");
+		LOG("charset G0");
 		jbxvt.mode.charsel = 0;
 		break;
 	}
@@ -112,13 +112,13 @@ static void expose(const uint8_t region, const bool size_set)
 static void select_charset(const char c, const uint8_t i)
 {
 	switch(c) {
-#define CS(l, cs, d) case l:TLOG(d);jbxvt.mode.charset[i]=CHARSET_##cs;break;
+#define CS(l, cs, d) case l:LOG(d);jbxvt.mode.charset[i]=CHARSET_##cs;break;
 	CS('A', GB, "UK ASCII");
 	CS('0', SG0, "SG0: special graphics");
 	CS('1', SG1, "SG1: alt char ROM standard graphics");
 	CS('2', SG2, "SG2: alt char ROM special graphics");
 	default: // reset
-		TLOG("Unknown character set");
+		LOG("Unknown character set");
 		// fall through
 	CS('B', ASCII, "US ASCII");
 	}
@@ -127,7 +127,7 @@ static void select_charset(const char c, const uint8_t i)
 static void decstbm(struct Token * restrict token)
 {
 	int32_t * restrict t = token->arg;
-	TLOG("TK_STBM args: %d, 0: %d, 1: %d",
+	LOG("TK_STBM args: %d, 0: %d, 1: %d",
 		(int)token->nargs, t[0], t[1]);
 	if (token->private == TK_RESTOREPM) {
 		// Restore private modes.
@@ -170,7 +170,7 @@ static void reqtparam(const uint8_t t)
 	const uint16_t xspeed = 88, rspeed = 88;
 	cprintf("\033[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
 		xspeed, rspeed, clkmul, flags);
-	TLOG("ESC[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
+	LOG("ESC[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
 		xspeed, rspeed, clkmul, flags);
 }
 
@@ -195,11 +195,12 @@ void jbxvt_parse_token(void)
 // macro to aid in debug logging
 #define CASE(L) case L:TLOG(#L);
 // log unimplemented features
-#define FIXME(L) CASE(L);LOG("\tFIXME: " #L " Unimplemented");break;
+#define FIXME(L) CASE(L);TLOG("\tFIXME: " #L " Unimplemented");break;
 
 	CASE(TK_ALN) // screen alignment test
 		scr_efill();
 		break;
+	FIXME(TK_APC);
 	CASE(TK_CHA) // cursor CHaracter Absolute column
 		scr_move(t[0] - 1, 0, ROW_RELATIVE);
 		break;
@@ -213,7 +214,7 @@ void jbxvt_parse_token(void)
 	CASE(TK_CPL) // cursor previous line
 		n = -n; // fall through
 	CASE(TK_CNL) // cursor next line
-		TLOG("TK_CNL");
+		LOG("TK_CNL");
 		scr_move(0, n, 0);
 		break;
 
@@ -240,7 +241,7 @@ void jbxvt_parse_token(void)
 
 	CASE(TK_DA) // fall through
 	CASE(TK_ID)
-		TLOG("TK_ID");
+		LOG("TK_ID");
 		cprintf("\033[?6c"); // VT102
 		break;
 
@@ -324,14 +325,14 @@ void jbxvt_parse_token(void)
 	CASE(TK_LL)
 		switch (t[1]) {
 		case ' ': // SCUSR
-			TLOG("SCUSR");
+			LOG("SCUSR");
 			jbxvt.opt.cursor_attr = t[0];
 			break;
 		case '"': // SCA
-			TLOG("SCA -- unimplemented");
+			LOG("SCA -- unimplemented");
 			break;
 		default: // LL
-			TLOG("LL -- unimplemented");
+			LOG("LL -- unimplemented");
 		}
 		break;
 	CASE(TK_NEL) // move to first position on next line down.
@@ -401,7 +402,7 @@ void jbxvt_parse_token(void)
 	CASE(TK_SD) // scroll down n lines
 		t[0] = - t[0]; // fall through
 	CASE(TK_SU) // scroll up n lines;
-		TLOG("TK_SU");
+		LOG("TK_SU");
 		scroll(SCR->margin.top,
 			SCR->margin.bot, t[0]);
 		break;
