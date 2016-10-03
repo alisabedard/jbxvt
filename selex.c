@@ -3,14 +3,9 @@
 
 #include "selex.h"
 
-#include "config.h"
 #include "change_selection.h"
 #include "jbxvt.h"
 #include "screen.h"
-#include "selection.h"
-#include "show_selection.h"
-
-#include <stdlib.h>
 
 static void handle_drag(const int16_t row, const int16_t col)
 {
