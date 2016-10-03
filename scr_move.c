@@ -19,10 +19,8 @@
 void reset_row_col(void)
 {
 	struct JBDim * c = &CUR;
-	struct JBDim sz = CSZ;
-	--sz.w; --sz.h;
-	JB_LIMIT(c->x, sz.w, 0);
-	JB_LIMIT(c->y, sz.h, 0);
+	JB_LIMIT(c->x, CSZ.w - 1, 0);
+	JB_LIMIT(c->y, CSZ.h - 1, 0);
 	// Implement DECOM, DEC Origin Mode, limits
 	if (jbxvt.mode.decom) {
 		const struct JBDim m = MGN;
