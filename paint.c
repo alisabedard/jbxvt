@@ -31,18 +31,11 @@ static pixel_t bg(const pixel_t p)
 		= jb_set_bg(jbxvt.X.xcb, jbxvt.X.gc.tx, p);
 }
 
-// returns pixel value for specified color
-__attribute__((nonnull,pure))
-static pixel_t pixel(const char * restrict color)
-{
-	return jb_get_pixel(jbxvt.X.xcb, jbxvt.X.screen->default_colormap,
-		color);
-}
-
 static pixel_t set_x(const char * color, const pixel_t backup,
 	pixel_t (*func)(const pixel_t))
 {
-	return func(color ? pixel(color) : backup);
+	return func(color ? jb_get_pixel(jbxvt.X.xcb,
+		jbxvt.X.screen->default_colormap, color) : backup);
 }
 
 pixel_t set_fg(const char * color)
