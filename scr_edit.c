@@ -66,13 +66,13 @@ static void begin(int16_t * x, int8_t * restrict count, const bool insert)
 	x[1] = p.x + *count * FSZ.width;
 	if (!insert)
 		JB_SWAP(int16_t, x[0], x[1]);
-	check_selection(c.y, c.y);
+	jbxvt_check_selection(c.y, c.y);
 }
 
 //  Insert count spaces from the current position.
-void scr_insert_characters(int8_t count)
+void jbxvt_insert_characters(int8_t count)
 {
-	LOG("scr_insert_characters(%d)", count);
+	LOG("jbxvt_insert_characters(%d)", count);
 	int16_t x[2];
 	begin(x, &count, true);
 	const struct JBDim c = SCR->cursor;
@@ -102,9 +102,9 @@ static void delete_source_data(const uint8_t count, const int16_t y)
 }
 
 //  Delete count characters from the current position.
-void scr_delete_characters(int8_t count)
+void jbxvt_delete_characters(int8_t count)
 {
-	LOG("scr_delete_characters(%d)", count);
+	LOG("jbxvt_delete_characters(%d)", count);
 	int16_t x[2];
 	begin(x, &count, false);
 	struct JBDim c = CUR;

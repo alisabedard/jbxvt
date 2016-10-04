@@ -61,8 +61,7 @@ static struct JBDim get_rc(const int16_t row, const int16_t col)
     and between cols col1 and col2 inclusive.  */
 void show_selection(int16_t row1, int16_t row2, int16_t col1, int16_t col2)
 {
-	if (jbxvt.sel.end[0].type == NOSEL
-		|| jbxvt.sel.end[1].type == NOSEL)
+	if (jbxvt.sel.type == JBXVT_SEL_NONE)
 		return;
 	if (selcmp(&jbxvt.sel.end[0],&jbxvt.sel.end[1]) == 0)
 		return;

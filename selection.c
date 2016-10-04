@@ -11,6 +11,7 @@
 #include "show_selection.h"
 
 #define VT jbxvt.X.win.vt
+#define SE jbxvt.sel.end
 
 static void prop(const xcb_atom_t a)
 {
@@ -20,9 +21,9 @@ static void prop(const xcb_atom_t a)
 }
 
 //  Make the selection currently delimited by the selection end markers.
-void scr_make_selection(void)
+void jbxvt_make_selection(void)
 {
-	LOG("scr_make_selection");
+	LOG("jbxvt_make_selection");
 	jbxvt_save_selection();
 	/* Set all properties which may possibly be requested.  */
 	prop(XCB_ATOM_PRIMARY);
@@ -33,10 +34,10 @@ void scr_make_selection(void)
 }
 
 //  Respond to a request for our current selection.
-void scr_send_selection(const xcb_time_t time, const uint32_t requestor,
+void jbxvt_send_selection(const xcb_time_t time, const uint32_t requestor,
 	const uint32_t target, const uint32_t property)
 {
-	LOG("scr_send_selection, %d, %d, %d, %d", (int)time, requestor,
+	LOG("jbxvt_send_selection, %d, %d, %d, %d", (int)time, requestor,
 		target, property);
 	xcb_selection_notify_event_t e = {
 		.response_type = XCB_SELECTION_NOTIFY,
@@ -54,46 +55,43 @@ void scr_send_selection(const xcb_time_t time, const uint32_t requestor,
 }
 
 //  Clear the current selection.
-void scr_clear_selection(void)
+void jbxvt_clear_selection(void)
 {
 	if (jbxvt.sel.text)
 		free(jbxvt.sel.text);
 	jbxvt.sel.text = NULL;
-	jbxvt.sel.end[0].type = jbxvt.sel.end[1].type = NOSEL;
+	jbxvt.sel.type = JBXVT_SEL_NONE;
+}
+
+static void show(void)
+{
+	show_selection(0, CSZ.h - 1, 0, CSZ.w - 1);
 }
 
 //  start a selection using the specified unit.
-void scr_start_selection(struct JBDim p, enum selunit unit)
+void jbxvt_start_selection(struct JBDim p, enum JBXVTSelUnit unit)
 {
-	LOG("scr_start_selection");
-	show_selection(0, CSZ.h - 1, 0, CSZ.w - 1);
-	struct JBDim rc = jbxvt_get_char_size(p);
+	show(); // clear previous
+	p = jbxvt_get_char_size(p);
 	jbxvt.sel.unit = unit;
-	fix_rc(&rc);
-	rc_to_selend(rc.y, rc.x, &jbxvt.sel.anchor);
-	jbxvt.sel.end[1] = jbxvt.sel.end[0] = jbxvt.sel.anchor;
-	adjust_selection(&jbxvt.sel.end[1]);
-	show_selection(0, CSZ.h - 1, 0, CSZ.w - 1);
-}
-
-static int16_t row(const struct JBXVTSelEnd * restrict e)
-{
-	return e->type == SCREENSEL ? e->index : -1;
+	rc_to_selend(p.y, p.x, &SE[2]);
+	SE[0] = SE[1] = SE[2];
+	adjust_selection(&SE[1]);
+	show();
 }
 
 /*  Determine if the current selection overlaps row1-row2 and if it does then
  *  remove it from the screen.  */
-void check_selection(const int16_t row1, const int16_t row2)
+void jbxvt_check_selection(const int16_t row1, const int16_t row2)
 {
-	struct JBXVTSelEnd *e1 = &jbxvt.sel.end[0], *e2 = &jbxvt.sel.end[1];
-	if (e1->type == NOSEL || e2->type == NOSEL)
+	if (jbxvt.sel.type != JBXVT_SEL_ON_SCREEN)
 		return;
-	int16_t r1 = row(e1), r2 = row(e2);
+	int16_t r1 = SE[0].index, r2 = SE[1].index;
 	if (r1 > r2)
 		JB_SWAP(int16_t, r1, r2);
 	if (row2 < r1 || row1 > r2)
 		return;
-	show_selection(0, CSZ.h - 1, 0, CSZ.w - 1);
-	jbxvt.sel.end[1].type = NOSEL;
+	show(); // clear
+	jbxvt.sel.type = JBXVT_SEL_NONE;
 }
 

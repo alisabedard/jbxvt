@@ -20,9 +20,9 @@
 
 static void clear_selection_at(const int16_t j)
 {
-	struct JBXVTSelEnd * e = jbxvt.sel.end;
+	struct JBDim * e = jbxvt.sel.end;
 	if (e[0].index == j || e[1].index == j)
-		e[0].type = e[1].type = NOSEL;
+		jbxvt_clear_selection();
 }
 
 static void move_line(const int16_t j,

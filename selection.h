@@ -8,23 +8,27 @@
 #include <xcb/xcb.h>
 
 //  The current selection unit
-enum selunit { SEL_CHAR, SEL_WORD, SEL_LINE };
+enum JBXVTSelUnit {
+	JBXVT_SEL_UNIT_CHAR,
+	JBXVT_SEL_UNIT_WORD,
+	JBXVT_SEL_UNIT_LINE
+};
 
 /*  Determine if the current selection overlaps row1-row2 and if it does then
  *  remove it from the screen.  */
-void check_selection(const int16_t row1, const int16_t row2);
+void jbxvt_check_selection(const int16_t row1, const int16_t row2);
 
 // clear the current selection:
-void scr_clear_selection(void);
+void jbxvt_clear_selection(void);
 
 //  Make the selection currently delimited by the selection end markers.
-void scr_make_selection(void);
+void jbxvt_make_selection(void);
 
 //  respond to a request for our current selection.
-void scr_send_selection(const xcb_time_t time, const uint32_t requestor,
+void jbxvt_send_selection(const xcb_time_t time, const uint32_t requestor,
 	const uint32_t target, const uint32_t property);
 
 // start selection using specified unit:
-void scr_start_selection(const struct JBDim p, enum selunit unit);
+void jbxvt_start_selection(const struct JBDim p, enum JBXVTSelUnit unit);
 
 #endif//!JBXVT_SELECTION_H

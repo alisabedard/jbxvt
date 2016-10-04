@@ -68,9 +68,9 @@ static void decscnm(void)
 
 /*  Reset the screen - called whenever the screen
     needs to be repaired completely.  */
-void scr_reset(void)
+void jbxvt_reset(void)
 {
-	LOG("scr_reset()");
+	LOG("jbxvt_reset()");
 	decscnm();
 	struct JBDim c = jbxvt_get_char_size(P);
 	fix_margins(c);

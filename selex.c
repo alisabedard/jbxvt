@@ -7,25 +7,27 @@
 #include "jbxvt.h"
 #include "screen.h"
 
+#define SE jbxvt.sel.end
+
 static void handle_drag(const struct JBDim rc)
 {
 	//  Anchor the selection end.
-	jbxvt.sel.end[0] = jbxvt.sel.anchor;
-	rc_to_selend(rc.row, rc.col, &jbxvt.sel.end[1]);
-	adjust_selection(&jbxvt.sel.end[1]);
+	SE[0] = SE[2];
+	rc_to_selend(rc.row, rc.col, &SE[1]);
+	adjust_selection(&SE[1]);
 }
 
 //  Extend the selection.
-void scr_extend_selection(const struct JBDim p, const bool drag)
+void jbxvt_extend_selection(const struct JBDim point, const bool drag)
 {
-	struct JBXVTSelEnd * e = jbxvt.sel.end;
-	if (e->type == NOSEL)
-		return;
+	struct JBDim * e = SE;
+	if (jbxvt.sel.type == JBXVT_SEL_NONE)
+		return; // no selection
 #define F jbxvt.X.f.size
-	struct JBDim rc = jbxvt_get_char_size(p);
+	struct JBDim rc = jbxvt_get_char_size(point);
 	fix_rc(&rc);
 	// Save current end points:
-	struct JBXVTSelEnd s[] = {*e, *(e+1)};
+	struct JBDim s[] = {e[0], e[1]};
 	if (drag)
 		  handle_drag(rc);
 	change_selection(s, s+1);

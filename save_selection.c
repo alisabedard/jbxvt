@@ -60,7 +60,7 @@ static uint16_t sanitize(uint8_t * str, uint16_t len)
 }
 
 static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
-	struct JBXVTSelEnd * restrict e)
+	struct JBDim * restrict e)
 {
 	if (e->index == (e+1)->index && e->col == (e+1)->col)
 		return; // NULL selection
@@ -89,9 +89,9 @@ void jbxvt_save_selection(void)
 	/*  Set se1 and se2 to point to the first
 	    and second selection endpoints.  */
 	struct JBXVTSelectionData * s = &jbxvt.sel;
-	struct JBXVTSelEnd * e = s->end;
+	struct JBDim * e = s->end;
 	const bool forward = selcmp(e, e+1) <= 0;
-	struct JBXVTSelEnd se[] = {e[forward?0:1], e[forward?1:0]};
+	struct JBDim se[] = {e[forward?0:1], e[forward?1:0]};
 	uint16_t total = 1;
 	uint8_t * str = malloc(total);
 	handle_screensel(&str, &total, se);

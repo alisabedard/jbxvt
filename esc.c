@@ -133,7 +133,7 @@ void jbxvt_esc(int_fast16_t c, struct Token * restrict tk)
 	CASE_T('H', jbxvt.mode.decanm ? TK_HTS : TK_HOME);
 	CASE_A('l', jbxvt.mode.decanm ? TK_MEMLOCK : TK_EL, 2);
 	case 'I':
-		scr_index_from(-1, jbxvt.scr.current->cursor.y);
+		jbxvt_index_from(-1, jbxvt.scr.current->cursor.y);
 		tk->type = TK_CUU;
 		break;
 	CASE_A('J', TK_EL, 1); // vt52 erase to end of line

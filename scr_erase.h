@@ -7,9 +7,9 @@
 #include <stdint.h>
 
 //  erase part or the whole of a line
-void scr_erase_line(const int8_t mode);
+void jbxvt_erase_line(const int8_t mode);
 
 //  erase part or the whole of the screen
-void scr_erase_screen(const int8_t mode);
+void jbxvt_erase_screen(const int8_t mode);
 
 #endif//!JBXVT_SCR_ERASE_H

@@ -8,7 +8,7 @@
 #include "libjb/size.h"
 #include <stdbool.h>
 
-void scr_extend_selection(const struct JBDim p, const bool drag);
+void jbxvt_extend_selection(const struct JBDim p, const bool drag);
 
 #endif//!JBXVT_SELEX_H
 

@@ -25,10 +25,10 @@ static void set_dimension(int16_t * restrict cursor,
 
 /*  Move the cursor to a new position.  The relative argument is a pair of
  *  flags that specify relative rather than absolute motion.  */
-void scr_move(const int16_t x, const int16_t y, const uint8_t relative)
+void jbxvt_move(const int16_t x, const int16_t y, const uint8_t relative)
 {
 #ifdef MOVE_DEBUG
-	LOG("scr_move(x:%d, y:%d, relative:%d)", x, y, relative);
+	LOG("jbxvt_move(x:%d, y:%d, relative:%d)", x, y, relative);
 #endif//MOVE_DEBUG
 	change_offset(0);
 	draw_cursor(); // clear
@@ -39,7 +39,7 @@ void scr_move(const int16_t x, const int16_t y, const uint8_t relative)
 	reset_row_col();
 	const int16_t cy = c->y;
 	SCR->wrap_next = 0;
-	check_selection(cy, cy);
+	jbxvt_check_selection(cy, cy);
 	draw_cursor(); // draw
 }
 

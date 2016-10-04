@@ -40,11 +40,11 @@ void fix_rc(struct JBDim * restrict rc)
 }
 
 // Set all chars to 'E'
-void scr_efill(void)
+void jbxvt_efill(void)
 {
-	LOG("scr_efill");
+	LOG("jbxvt_efill");
 	// Move to cursor home in order for all characters to appear.
-	scr_move(0, 0, 0);
+	jbxvt_move(0, 0, 0);
 	for (uint8_t y = 0; y < CSZ.h; ++y) {
 		memset(SCR->text[y], 'E', CSZ.w);
 		memset(SCR->rend[y], 0, CSZ.w << 2);
@@ -53,27 +53,27 @@ void scr_efill(void)
 }
 
 //  Change between the alternate and the main screens
-void scr_change_screen(const bool mode_high)
+void jbxvt_change_screen(const bool mode_high)
 {
 	change_offset(0);
 	jbxvt.scr.sline.top = 0;
 	SCR = &jbxvt.scr.s[mode_high];
-	jbxvt.sel.end[1].type = NOSEL;
+	jbxvt_clear_selection();
 	jbxvt.mode.charsel = 0; // reset on screen change
 	draw_cursor();
-	scr_erase_screen(2); // ENTIRE
-	scr_reset();
+	jbxvt_erase_screen(2); // ENTIRE
+	jbxvt_reset();
 }
 
 //  Change the rendition style.
-void scr_style(const enum RenderFlag style)
+void jbxvt_style(const enum RenderFlag style)
 {
 	// This allows combining styles, 0 resets
 	jbxvt.scr.rstyle = style ? jbxvt.scr.rstyle | style : 0;
 }
 
 // Scroll from top to current bottom margin count lines, moving cursor
-void scr_index_from(const int8_t count, const int16_t top)
+void jbxvt_index_from(const int8_t count, const int16_t top)
 {
 	change_offset(0);
 	draw_cursor();

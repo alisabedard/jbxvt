@@ -33,7 +33,7 @@ static bool rgb_or_index(int32_t arg, bool * restrict either,
 	*either = false;
 	const bool i = arg != 2;
 	*(likely(i)?index:rgb) = true;
-	scr_style(likely(i) ? (is_fg ? RS_FG_INDEX : RS_BG_INDEX)
+	jbxvt_style(likely(i) ? (is_fg ? RS_FG_INDEX : RS_BG_INDEX)
 		: (is_fg ? RS_FG_RGB : RS_BG_RGB));
 	return true;
 }
@@ -66,7 +66,7 @@ static bool handle_color_encoding(const int32_t arg, const bool is_fg,
 void handle_sgr(struct Token * restrict token)
 {
 	if (token->nargs == 0) {
-		scr_style(RS_NONE);
+		jbxvt_style(RS_NONE);
 		return;
 	}
 	bool fg_rgb_or_index = false;
@@ -93,34 +93,34 @@ void handle_sgr(struct Token * restrict token)
 			  continue;
 		switch (token->arg[i]) {
 		case 0 : // reset
-			scr_style(RS_NONE);
+			jbxvt_style(RS_NONE);
 			set_fg(NULL);
 			set_bg(NULL);
 			break;
 		case 1 :
-			scr_style(RS_BOLD);
+			jbxvt_style(RS_BOLD);
 			break;
 		case 2: // faint
 			SGRFG(250);
 			break;
 		case 3:
-			scr_style(RS_ITALIC);
+			jbxvt_style(RS_ITALIC);
 			break;
 		case 4 :
-			scr_style(RS_ULINE);
+			jbxvt_style(RS_ULINE);
 			break;
 		case 5 :
 		case 6: // sub for rapidly blinking
-			scr_style(RS_BLINK);
+			jbxvt_style(RS_BLINK);
 			break;
 		case 7: // Image negative
-			scr_style(RS_RVID);
+			jbxvt_style(RS_RVID);
 			break;
 		case 8: // Invisible text
-			scr_style(RS_INVISIBLE);
+			jbxvt_style(RS_INVISIBLE);
 			break;
 		case 17: // Alt font
-			scr_style(RS_BOLD);
+			jbxvt_style(RS_BOLD);
 			break;
 		case 23: // Not italic
 			jbxvt.scr.rstyle &= ~RS_ITALIC;

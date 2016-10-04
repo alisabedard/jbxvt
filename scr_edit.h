@@ -7,9 +7,9 @@
 #include <stdint.h>
 
 //  Insert count spaces from the current position.
-void scr_insert_characters(int8_t count);
+void jbxvt_insert_characters(int8_t count);
 
 //  Delete count characters from the current position.
-void scr_delete_characters(int8_t count);
+void jbxvt_delete_characters(int8_t count);
 
 #endif//!SCR_EDIT_H

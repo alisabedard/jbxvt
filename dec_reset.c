@@ -47,13 +47,13 @@ void dec_reset(struct Token * restrict token)
 			break;
 		case 5: // DECSCNM: set reverse-video mode
 			m->decscnm = is_set;
-			scr_reset();
+			jbxvt_reset();
 			break;
 		case 6 : // DECOM normal cursor mode
 			/* According to the spec, the cursor is reset to
 			   the home position when this is changed.  */
 			m->decom = is_set;
-			scr_move(SCR->margin.top, 0, 0);
+			jbxvt_move(SCR->margin.top, 0, 0);
 			break;
 		case 7: // DECAWM
 		case 45: // reverse wrap-around mode?
@@ -127,7 +127,7 @@ void dec_reset(struct Token * restrict token)
 				save_cursor();
 			else
 				restore_cursor();
-			scr_change_screen(is_set);
+			jbxvt_change_screen(is_set);
 			break;
 		case 2004: // bracketed paste mode
 			LOG("bracketed paste mode");

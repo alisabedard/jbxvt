@@ -22,7 +22,7 @@ static void invert(const int16_t rs, const int16_t re, const int16_t cs,
 	}
 }
 
-static void change(struct JBXVTSelEnd * se, struct JBXVTSelEnd * ose)
+static void change(struct JBDim * se, struct JBDim * ose)
 {
 	int16_t rs = 0, cs = 0, re = 0, ce = 0, n;
 	n = selcmp(se, ose);
@@ -39,9 +39,9 @@ static void change(struct JBXVTSelEnd * se, struct JBXVTSelEnd * ose)
 
 /*  Repaint the displayed selection to reflect the new value.  ose1 and ose2
  *  are assumed to represent the currently displayed selection endpoints.  */
-void change_selection(struct JBXVTSelEnd * restrict ose1, struct JBXVTSelEnd * restrict ose2)
+void change_selection(struct JBDim * restrict ose1, struct JBDim * restrict ose2)
 {
-	struct JBXVTSelEnd *se, *se1, *se2;
+	struct JBDim *se, *se1, *se2;
 
 	if (selcmp(ose1, ose2) > 0) {
 		se = ose1;

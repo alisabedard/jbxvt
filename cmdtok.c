@@ -220,7 +220,7 @@ input:
 	return *BUF.next++;
 }
 
-//  Return true if the character is one that can be handled by scr_string()
+//  Return true if the character is one that can be handled by jbxvt_string()
 static inline bool is_string_char(register int_fast16_t c)
 {
 	return c < 0x7f && (c >= ' ' || c == '\n' || c == '\r' || c == '\t');

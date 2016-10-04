@@ -29,7 +29,7 @@ void map_window(void)
 	/*  Setup the window now so that we can add LINES and COLUMNS to
 	 *  the environment.  */
 	resize_window();
-	scr_reset(); // update size
+	jbxvt_reset(); // update size
 }
 
 /*  Called after a possible window size change.  If the window size has changed

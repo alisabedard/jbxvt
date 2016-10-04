@@ -49,8 +49,7 @@ struct JBXVTScreenSavedLines {
 struct JBXVTScreenData {
 	struct JBXVTScreen * current, * s;
 	struct JBXVTScreenSavedLines sline;
-	struct JBDim pixels;
-	struct JBDim chars;
+	struct JBDim chars, pixels;
 	uint32_t rstyle; // render style
 	uint32_t saved_rstyle; // saved render style
 	int16_t offset; // current vert saved line
@@ -58,9 +57,9 @@ struct JBXVTScreenData {
 
 struct JBXVTSelectionData {
 	uint8_t * text;
-	struct JBXVTSelEnd end[2], // selection endpoints
-	       anchor; //selection anchor
-	enum selunit unit;
+	enum JBXVTSelUnit unit;
+	enum JBXVTSelType type;
+	struct JBDim end[3]; // end0, end1, anchor
 	uint16_t length;
 };
 

@@ -10,16 +10,16 @@
 
 /*  Display the string at the current position.
     nlcount is the number of new lines in the string.  */
-void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount);
+void jbxvt_string(uint8_t * restrict str, uint8_t len, int8_t nlcount);
 
 //  Tab to the next tab stop.
-void scr_tab(void);
+void jbxvt_tab(void);
 
 // Do v tabs
-void scr_cht(int16_t v);
+void jbxvt_cht(int16_t v);
 
 // Set tab stops:
 // -1 clears all, -2 sets default
-void scr_set_tab(int16_t i, const bool value);
+void jbxvt_set_tab(int16_t i, const bool value);
 
 #endif//!SCR_STRING_H

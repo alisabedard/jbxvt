@@ -33,7 +33,7 @@ static bool tab_stops[JBXVT_MAX_COLS];
 
 // Set tab stops:
 // -1 clears all, -2 sets default
-void scr_set_tab(int16_t i, const bool value)
+void jbxvt_set_tab(int16_t i, const bool value)
 {
 	if (i == -1) // clear all
 		memset(&tab_stops, 0, JBXVT_MAX_COLS);
@@ -45,9 +45,9 @@ void scr_set_tab(int16_t i, const bool value)
 }
 
 //  Tab to the next tab_stop.
-void scr_tab(void)
+void jbxvt_tab(void)
 {
-	LOG("scr_tab()");
+	LOG("jbxvt_tab()");
 	change_offset(0);
 	struct JBDim c = SCR->cursor;
 	SCR->text[c.y][c.x] = ' ';
@@ -56,10 +56,10 @@ void scr_tab(void)
 	SCR->cursor.x = c.x;
 }
 
-void scr_cht(int16_t v)
+void jbxvt_cht(int16_t v)
 {
 	while (v-- > 0)
-		scr_tab();
+		jbxvt_tab();
 }
 
 static void handle_new_lines(int8_t nlcount)
@@ -171,7 +171,7 @@ static bool test_action_char(const uint8_t c,
 		wrap();
 		return true;
 	case '\t':
-		scr_tab();
+		jbxvt_tab();
 		return true;
 	}
 	return false;
@@ -194,9 +194,9 @@ static void check_wrap(struct JBXVTScreen * restrict s)
 
 /*  Display the string at the current position.
     nlcount is the number of new lines in the string.  */
-void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
+void jbxvt_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 {
-	SLOG("scr_string(%s, len: %d, nlcount: %d)", str, len, nlcount);
+	SLOG("jbxvt_string(%s, len: %d, nlcount: %d)", str, len, nlcount);
 	change_offset(0);
 	draw_cursor();
 	if (nlcount > 0)
@@ -214,7 +214,7 @@ void scr_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 			wrap();
 			SCR->cursor.x = 0;
 		}
-		check_selection(SCR->cursor.y, SCR->cursor.y);
+	jbxvt_check_selection(SCR->cursor.y, SCR->cursor.y);
 		p = jbxvt_get_pixel_size(SCR->cursor);
 		if (unlikely(jbxvt.mode.insert))
 			handle_insert(1, p);
