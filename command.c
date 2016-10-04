@@ -179,12 +179,9 @@ static void signal_handler(int sig)
 static void attach_signals(void)
 {
 	// Attach relevant signals:
-#define SIG(s) signal(s, &signal_handler)
-	SIG(SIGHUP);
-	SIG(SIGINT);
-	SIG(SIGPIPE);
-	SIG(SIGTERM);
-	SIG(SIGCHLD);
+	for (uint8_t i = 1; i <= SIGCHLD; ++i)
+		if (i != SIGKILL) // can't bind to this
+			signal(i, &signal_handler);
 	/* Catch all other exit calls and convert to a signal
 	   so that cleanup may be done.  */
 	atexit(&exit_handler);
