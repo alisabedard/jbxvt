@@ -4,16 +4,9 @@
 
 #include "repaint.h"
 
-#include "config.h"
 #include "jbxvt.h"
-#include "libjb/log.h"
 #include "paint.h"
 #include "show_selection.h"
-
-#include <stdlib.h>
-#include <string.h>
-
-#define FSZ jbxvt.X.f.size
 
 /* Display the string using the rendition vector
    at the screen coordinates.  */
