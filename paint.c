@@ -38,12 +38,12 @@ static pixel_t set_x(const char * color, const pixel_t backup,
 		jbxvt.X.screen->default_colormap, color) : backup);
 }
 
-pixel_t set_fg(const char * color)
+pixel_t jbxvt_set_fg(const char * color)
 {
 	return set_x(color, jbxvt.X.color.fg, &fg);
 }
 
-pixel_t set_bg(const char * color)
+pixel_t jbxvt_set_bg(const char * color)
 {
 	return set_x(color, jbxvt.X.color.bg, &bg);
 }

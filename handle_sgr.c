@@ -94,8 +94,8 @@ void handle_sgr(struct Token * restrict token)
 		switch (token->arg[i]) {
 		case 0 : // reset
 			jbxvt_style(RS_NONE);
-			set_fg(NULL);
-			set_bg(NULL);
+			jbxvt_set_fg(NULL);
+			jbxvt_set_bg(NULL);
 			break;
 		case 1 :
 			jbxvt_style(RS_BOLD);

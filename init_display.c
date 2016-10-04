@@ -169,8 +169,8 @@ static void setup_gcs(void)
 
 static inline void init_jbxvt_colors(void)
 {
-	jbxvt.X.color.fg = set_fg(jbxvt.opt.fg);
-	jbxvt.X.color.bg = set_bg(jbxvt.opt.bg);
+	jbxvt.X.color.fg = jbxvt_set_fg(jbxvt.opt.fg);
+	jbxvt.X.color.bg = jbxvt_set_bg(jbxvt.opt.bg);
 }
 
 void init_display(char * restrict name)
