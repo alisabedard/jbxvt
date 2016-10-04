@@ -112,15 +112,15 @@ void jbxvt_erase_screen(const int8_t mode)
 		break;
 	case 0:
 		LOG("END");
-		if (cur.y || cur.x) {
-			const int16_t c1 = cur.y + 1;
-			r.y += c1 * FH;
-			r.height = (CSZ.height - cur.y - 1) * FH;
-			for (uint8_t i = c1; i < CSZ.height; ++i)
-				zero(i, CSZ.w, 0);
-			common_jbxvt_erase(r, c1, CSZ.height - 1, mode);
+		if (!(cur.y || cur.x))
 			break;
-		}
+		const int16_t c1 = cur.y + 1;
+		r.y += c1 * FH;
+		r.height = (CSZ.height - cur.y - 1) * FH;
+		for (uint8_t i = c1; i < CSZ.height; ++i)
+			zero(i, CSZ.w, 0);
+		common_jbxvt_erase(r, c1, CSZ.height - 1, mode);
+		break;
 		/*  If we are positioned at the top left hand corner then
 		 *  it is effectively a whole screen clear.
 		 *  Drop through so that we do not need to duplicate
