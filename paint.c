@@ -52,10 +52,7 @@ pixel_t set_bg(const char * color)
 static pixel_t rgb_pixel(const uint16_t c)
 {
 	// Mask and scale to 8 bits.
-	uint16_t r = (c & 0700) >> 4;
-	uint16_t g = (c & 070) >> 2;
-	uint16_t b = c & 7;
-
+	uint16_t r = (c & 0700) >> 4, g = (c & 070) >> 2, b = c & 7;
 	//const uint8_t o = 13; // scale, leave 3 bits for octal
 	const uint8_t o = 12; // scale, leave 3 bits for octal
 	// Convert from 3 bit to 16 bit:
