@@ -71,10 +71,14 @@ static bool set_rval_colors(const uint32_t rval)
 	const uint8_t color[] = {rval >> 7, rval >> 16};
 	const bool rgb[] = {rval & RS_FG_RGB, rval & RS_BG_RGB};
 	const bool ind[] = {rval & RS_FG_INDEX, rval & RS_BG_INDEX};
-	if (rgb[0] || ind[0])
-		fg(rgb[0] ? rgb_pixel(color[0]) : color_index[color[0]]);
-	if (rgb[1] || ind[1])
-		bg(rgb[1] ? rgb_pixel(color[1]) : color_index[color[1]]);
+	if (ind[0])
+		fg(color_index[color[0]]);
+	else if (rgb[0])
+		fg(rgb_pixel(color[0]));
+	if (ind[1])
+		bg(color_index[color[1]]);
+	else if (rgb[1])
+		bg(rgb_pixel(color[1]));
 	return rgb[0] || rgb[1] || ind[0] || ind[1];
 }
 
