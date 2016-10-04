@@ -15,14 +15,7 @@
 #ifndef DEBUG_PAINT
 #undef LOG
 #define LOG(...)
-#endif
-
-//#define DEBUG_COLOR
-#ifdef DEBUG_COLOR
-#define CLOG(...) LOG(__VA_ARGS__)
-#else
-#define CLOG(...)
-#endif
+#endif//!DEBUG_PAINT
 
 // returns pixel value for specified color
 __attribute__((nonnull,pure))
