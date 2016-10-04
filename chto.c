@@ -1,3 +1,10 @@
+/* Copyright 2016, Jeffrey E. Bedard
+
+ This program converts a line from color_index.txt into a line
+ in color_index.h.  To use, run:
+	./convert_colors.awk color_index.txt > color_index.h
+ */
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
