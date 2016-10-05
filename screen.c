@@ -54,8 +54,7 @@ void jbxvt_efill(void)
 //  Change between the alternate and the main screens
 void jbxvt_change_screen(const bool mode_high)
 {
-	change_offset(0);
-	jbxvt.scr.sline.top = 0;
+	jbxvt_clear_saved_lines();
 	SCR = &jbxvt.scr.s[mode_high];
 	jbxvt_clear_selection();
 	jbxvt.mode.charsel = 0; // reset on screen change

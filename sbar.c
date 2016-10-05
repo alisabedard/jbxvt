@@ -1,5 +1,6 @@
 /*  Copyright 2016, Jeffrey E. Bedard
-    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+    Copyright 1992, 1997 John Bovey,
+    University of Kent at Canterbury.*/
 
 #include "sbar.h"
 
@@ -12,6 +13,7 @@
 #include "xsetup.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 static struct {
 	uint16_t height;
@@ -67,6 +69,14 @@ void change_offset(int16_t n)
 	repaint();
 	draw_cursor(); // draw
 	sbar_draw(CSZ.h + t - 1, n, n + CSZ.h - 1);
+}
+
+void jbxvt_clear_saved_lines(void)
+{
+	change_offset(0);
+	memset(jbxvt.scr.sline.data, 0,
+		sizeof(struct JBXVTSavedLine) * JBXVT_MAX_SCROLL);
+	jbxvt.scr.sline.top = 0;
 }
 
 static void set_vt_x(const int8_t x)

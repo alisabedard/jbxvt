@@ -17,6 +17,9 @@ void sbar_draw(uint16_t length, const int16_t low,
 //  Change the value of the scrolled screen offset and repaint the screen
 void change_offset(int16_t n);
 
+// Clear the scroll history
+void jbxvt_clear_saved_lines();
+
 // Show the scroll bar window
 void jbxvt_show_sbar(void);
 

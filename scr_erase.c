@@ -85,43 +85,32 @@ void jbxvt_erase_line(const int8_t mode)
 	xcb_flush(jbxvt.X.xcb);
 }
 
-static void common_jbxvt_erase(const xcb_rectangle_t r,
-	const int16_t row1, const int16_t row2, const int8_t mode)
-{
-	jbxvt_check_selection(row1, row2);
-	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, r.x, r.y,
-		r.width, r.height);
-	jbxvt_erase_line(mode);
-}
-
 //  erase part or the whole of the screen
 void jbxvt_erase_screen(const int8_t mode)
 {
-	LOG("jbxvt_erase_screen(%d)", mode);
-	change_offset(0);
-	SCR->wrap_next = 0;
-	xcb_rectangle_t r = {.width = PSZ.width};
+	LOG("jbxvt_erase_screen(mode=%d)", mode);
+	uint16_t start, end;
 	switch (mode) {
-	case 1: {
-		const struct JBDim cur = SCR->cursor;
-		LOG("START");
-		r.height = cur.y * FH;
-		for (uint8_t i = 0; i < cur.y; ++i)
-			zero(i, CSZ.w, 0);
-		common_jbxvt_erase(r, 0, cur.y - 1, mode);
+		// offset by 1 to not include current line, handled later
+	case 0: // below
+		start = SCR->cursor.y + 1;
+		end = CSZ.h;
+		break;
+	case 1: // above
+		start = 0;
+		end = SCR->cursor.y - 1;
+		break;
+	case 3: // saved lines
+		jbxvt_clear_saved_lines();
+		return;
+	default: // all
+		start = 0;
+		end = CSZ.h - 1;
 		break;
 	}
-	case 0:
-		LOG("END");
-		/*  Testing shows that this can be skipped.  If doing nothing
-		    here poses a problem, please provide a test case.  */
-		break;
-	case 2:
-	case 3: // for linux console compatibility
-		LOG("ENTIRE");
-		r.height = CSZ.h - 1;
-		scroll(0, r.height, r.height);
-		common_jbxvt_erase(r, 0, r.height, mode);
-	}
+	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, 0,
+		start * FH, PSZ.w, (end - start) * FH);
+	// clear start of, end of, or entire current line, per mode
+	jbxvt_erase_line(mode);
 }
 
