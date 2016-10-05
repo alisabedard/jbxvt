@@ -78,7 +78,7 @@ void dec_reset(struct Token * restrict token)
 			draw_cursor(); // draw
 			break;
 		case 30: // toggle scrollbar -- per rxvt
-			jbxvt_toggle_sbar();
+			jbxvt_toggle_scrollbar();
 			break;
 		case 40: // allow deccolm
 			allow_deccolm = is_set;

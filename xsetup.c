@@ -24,8 +24,6 @@ void map_window(void)
 {
 	xcb_map_window(XC, MW);
 	xcb_map_subwindows(XC, MW);
-	if (SB)
-		jbxvt_show_sbar();
 	/*  Setup the window now so that we can add LINES and COLUMNS to
 	 *  the environment.  */
 	resize_window();

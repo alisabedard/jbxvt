@@ -376,7 +376,7 @@ void jbxvt_parse_token(void)
 			sizeof(struct JBXVTPrivateModes));
 		break;
 	CASE(TK_SBSWITCH)
-		jbxvt_toggle_sbar();
+		jbxvt_toggle_scrollbar();
 		break;
 	CASE(TK_SBGOTO)
 		/*  Move the display so that line represented by scrollbar value

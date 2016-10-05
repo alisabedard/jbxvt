@@ -49,27 +49,9 @@ void jbxvt_clear_saved_lines(void)
 	jbxvt.scr.sline.top = 0;
 }
 
-static void set_vt_x(const int8_t x)
+void jbxvt_toggle_scrollbar(void)
 {
-	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt,
-		XCB_CONFIG_WINDOW_X, &(uint32_t){x});
-}
-
-void jbxvt_show_sbar(void)
-{
-	set_vt_x(SBAR_WIDTH);
-	xcb_map_window(jbxvt.X.xcb, SB);
-}
-
-void jbxvt_hide_sbar(void)
-{
-	set_vt_x(0);
-	xcb_unmap_window(jbxvt.X.xcb, SB);
-}
-
-void jbxvt_toggle_sbar(void)
-{
-	(jbxvt.opt.show_scrollbar ^= true)
-		? jbxvt_show_sbar() : jbxvt_hide_sbar();
+	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt, XCB_CONFIG_WINDOW_X,
+		&(uint32_t){(jbxvt.opt.show_scrollbar^=true)? SBAR_WIDTH : 0});
 }
 

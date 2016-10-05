@@ -112,7 +112,8 @@ static void create_vt_window(xcb_size_hints_t * restrict sh)
 	xcb_connection_t * xc = jbxvt.X.xcb;
 	jbxvt.X.win.vt = xcb_generate_id(xc);
 	xcb_cursor_t c = get_cursor(XC_xterm, 0xffff, 0);
-	xcb_create_window(xc, 0, jbxvt.X.win.vt, jbxvt.X.win.main, 0, 0,
+	xcb_create_window(xc, 0, jbxvt.X.win.vt, jbxvt.X.win.main,
+		jbxvt.opt.show_scrollbar ? SBAR_WIDTH : 0, 0,
 		sh->width, sh->height, 0, 0, 0, XCB_CW_BACK_PIXEL
 		| XCB_CW_EVENT_MASK | XCB_CW_CURSOR, (uint32_t[]){
 		jbxvt.X.color.bg, SUB_EVENTS, c});

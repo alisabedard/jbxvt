@@ -15,13 +15,7 @@ void jbxvt_set_scroll(int16_t n);
 // Clear the scroll history
 void jbxvt_clear_saved_lines();
 
-// Show the scroll bar window
-void jbxvt_show_sbar(void);
-
-// Hide the scroll bar window
-void jbxvt_hide_sbar(void);
-
 // Show or hide the scroll bar window
-void jbxvt_toggle_sbar(void);
+void jbxvt_toggle_scrollbar(void);
 
 #endif//!SBAR_H
