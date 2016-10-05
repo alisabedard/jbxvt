@@ -23,8 +23,6 @@ static int16_t get_sz(const int16_t margin)
 // Draw the scrollbar.
 void jbxvt_draw_scrollbar(void)
 {
-	if (!jbxvt.opt.show_scrollbar)
-		return;
 	xcb_clear_area(jbxvt.X.xcb, 0, SB, 0, 0, SBAR_WIDTH, PSZ.h);
 	const int16_t top = get_sz(CSZ.h);
 	xcb_poly_fill_rectangle(jbxvt.X.xcb, SB, jbxvt.X.gc.tx, 1,
