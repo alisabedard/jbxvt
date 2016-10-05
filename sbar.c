@@ -18,33 +18,29 @@
 #undef SB
 #define SB jbxvt.X.win.sb
 
-static int16_t get_sz(const int16_t lh, const uint16_t length)
+__attribute__((pure))
+static int16_t get_sz(const int16_t margin)
 {
-	return PSZ.h - PSZ.h * lh / length;
+	return PSZ.h - PSZ.h * (jbxvt.scr.offset + margin)
+		/ (jbxvt.scr.sline.top + CSZ.h);
 }
 
 // Draw the scrollbar.
 void jbxvt_draw_scrollbar(void)
 {
-	uint16_t length = jbxvt.scr.sline.top + CSZ.h;
-	int16_t low = jbxvt.scr.offset;
-	int16_t high = low + CSZ.h;
-	if (!jbxvt.opt.show_scrollbar || !length)
-		  return;
-	const int16_t top = get_sz(high, length), bot = get_sz(low, length);
+	if (!jbxvt.opt.show_scrollbar)
+		return;
 	xcb_clear_area(jbxvt.X.xcb, 0, SB, 0, 0, SBAR_WIDTH, PSZ.h);
+	const int16_t top = get_sz(CSZ.h);
 	xcb_poly_fill_rectangle(jbxvt.X.xcb, SB, jbxvt.X.gc.tx, 1,
 			&(xcb_rectangle_t){0, top, SBAR_WIDTH,
-			bot - top});
+			get_sz(0) - top});
 }
 
 //  Change the value of the scrolled screen offset and repaint the screen
 void jbxvt_set_scroll(int16_t n)
 {
-	const int32_t t = jbxvt.scr.sline.top;
-	n = MIN(MAX(n, 0), t);
-	if (n == jbxvt.scr.offset)
-		return;
+	JB_LIMIT(n, jbxvt.scr.sline.top, 0);
 	jbxvt.scr.offset = n;
 	draw_cursor(); // clear
 	repaint();
