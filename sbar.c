@@ -18,54 +18,28 @@
 #undef SB
 #define SB jbxvt.X.win.sb
 
-static struct {
-	uint16_t height;
-	// most recent arguments to sbar_show:
-	int16_t last_low, last_high, last_length;
-} sbar = {.last_length = 100, .last_high = 100 };
-
-//  Redraw the scrollbar after a size change
-void sbar_reset(void)
-{
-	sbar.height = jbxvt.scr.pixels.height;
-	sbar_draw(sbar.last_length, sbar.last_low, sbar.last_high);
-}
-
 static int16_t get_sz(const int16_t lh, const uint16_t length)
 {
-	return sbar.height - sbar.height * lh / length;
+	return PSZ.h - PSZ.h * lh / length;
 }
 
-static void clear(const int16_t y, const uint16_t height)
+// Draw the scrollbar.
+void jbxvt_draw_scrollbar(void)
 {
-	xcb_clear_area(jbxvt.X.xcb, false, SB,
-		0, y, SBAR_WIDTH, height);
-}
-
-/*  Redraw the scrollbar to show the area from low to high,
-    proportional to length.  */
-void sbar_draw(uint16_t length, const int16_t low,
-	const int16_t high)
-{
+	uint16_t length = jbxvt.scr.sline.top + CSZ.h;
+	int16_t low = jbxvt.scr.offset;
+	int16_t high = low + CSZ.h;
 	if (!jbxvt.opt.show_scrollbar || !length)
 		  return;
-	sbar.last_length = length;
-	sbar.last_low = low;
-	sbar.last_high = high;
 	const int16_t top = get_sz(high, length), bot = get_sz(low, length);
-	const xcb_window_t sb = SB;
-	if (top > 0)
-		clear(0, top - 1);
-	if (bot >= top)
-		xcb_poly_fill_rectangle(jbxvt.X.xcb, sb, jbxvt.X.gc.tx, 1,
+	xcb_clear_area(jbxvt.X.xcb, 0, SB, 0, 0, SBAR_WIDTH, PSZ.h);
+	xcb_poly_fill_rectangle(jbxvt.X.xcb, SB, jbxvt.X.gc.tx, 1,
 			&(xcb_rectangle_t){0, top, SBAR_WIDTH,
-			bot - top + 1});
-	if (bot < sbar.height)
-		clear(bot + 1, sbar.height - bot - 1);
+			bot - top});
 }
 
 //  Change the value of the scrolled screen offset and repaint the screen
-void change_offset(int16_t n)
+void jbxvt_set_scroll(int16_t n)
 {
 	const int32_t t = jbxvt.scr.sline.top;
 	n = MIN(MAX(n, 0), t);
@@ -75,12 +49,12 @@ void change_offset(int16_t n)
 	draw_cursor(); // clear
 	repaint();
 	draw_cursor(); // draw
-	sbar_draw(CSZ.h + t - 1, n, n + CSZ.h - 1);
+	jbxvt_draw_scrollbar();
 }
 
 void jbxvt_clear_saved_lines(void)
 {
-	change_offset(0);
+	jbxvt_set_scroll(0);
 	memset(jbxvt.scr.sline.data, 0,
 		sizeof(struct JBXVTSavedLine) * JBXVT_MAX_SCROLL);
 	jbxvt.scr.sline.top = 0;

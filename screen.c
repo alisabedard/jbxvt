@@ -72,7 +72,7 @@ void jbxvt_style(const enum RenderFlag style)
 // Scroll from top to current bottom margin count lines, moving cursor
 void jbxvt_index_from(const int8_t count, const int16_t top)
 {
-	change_offset(0);
+	jbxvt_set_scroll(0);
 	draw_cursor();
 	scroll(top, SCR->margin.b, count);
 	draw_cursor();

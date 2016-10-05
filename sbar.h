@@ -6,16 +6,11 @@
 
 #include <stdint.h>
 
-//  Redraw the scrollbar after a size change
-void sbar_reset(void);
-
-/*  Draw the scrollbar to show the area from low to high,
-    proportional to length.  */
-void sbar_draw(uint16_t length, const int16_t low,
-	const int16_t high);
+// Draw the scrollbar.
+void jbxvt_draw_scrollbar(void);
 
 //  Change the value of the scrolled screen offset and repaint the screen
-void change_offset(int16_t n);
+void jbxvt_set_scroll(int16_t n);
 
 // Clear the scroll history
 void jbxvt_clear_saved_lines();

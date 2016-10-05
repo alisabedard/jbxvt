@@ -71,7 +71,7 @@ static int16_t get_sz(const uint8_t mode)
 void jbxvt_erase_line(const int8_t mode)
 {
 	LOG("jbxvt_erase_line(%d)", mode);
-	change_offset(0);
+	jbxvt_set_scroll(0);
 	struct JBDim c = SCR->cursor;
 	const uint8_t fh = jbxvt.X.f.size.height;
 	xcb_rectangle_t g = { .y = c.y * fh };

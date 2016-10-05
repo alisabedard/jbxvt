@@ -58,7 +58,7 @@ static uint8_t get_count(int8_t count, const bool insert)
 static void begin(int16_t * x, int8_t * restrict count, const bool insert)
 {
 	*count = get_count(*count, insert);
-	change_offset(0);
+	jbxvt_set_scroll(0);
 	draw_cursor();
 	const struct JBDim c = CUR;
 	struct JBDim p = jbxvt_get_pixel_size(c);

@@ -97,7 +97,7 @@ static void handle_tk_char(const uint8_t tk_char)
 static void expose(const uint8_t region, const bool size_set)
 {
 	if (region == REGION_SCROLLBAR)
-		sbar_reset();
+		jbxvt_draw_scrollbar();
 	else if (size_set) {
 		draw_cursor(); // clear
 		repaint();
@@ -301,7 +301,7 @@ void jbxvt_parse_token(void)
 		jbxvt.mode.gm52 = false;
 		break;
 	CASE(TK_HOME)
-		change_offset(0);
+		jbxvt_set_scroll(0);
 		jbxvt_move(0, 0, 0);
 		break;
 	CASE(TK_HPA) // horizontal position absolute
@@ -381,13 +381,13 @@ void jbxvt_parse_token(void)
 	CASE(TK_SBGOTO)
 		/*  Move the display so that line represented by scrollbar value
 		    is at the top of the screen.  */
-		change_offset((CSZ.h + jbxvt.scr.sline.top) * (PSZ.h - t[0])
+		jbxvt_set_scroll((CSZ.h + jbxvt.scr.sline.top) * (PSZ.h - t[0])
 			/ PSZ.h - CSZ.h);
 		break;
 	CASE(TK_SBDOWN)
 		t[0] = - t[0]; // fall through
 	CASE(TK_SBUP)
-		change_offset(jbxvt.scr.offset - t[0] / FSZ.h);
+		jbxvt_set_scroll(jbxvt.scr.offset - t[0] / FSZ.h);
 		break;
 	CASE(TK_SC)
 		save_cursor();

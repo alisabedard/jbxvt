@@ -48,7 +48,7 @@ void jbxvt_set_tab(int16_t i, const bool value)
 void jbxvt_tab(void)
 {
 	LOG("jbxvt_tab()");
-	change_offset(0);
+	jbxvt_set_scroll(0);
 	struct JBDim c = SCR->cursor;
 	SCR->text[c.y][c.x] = ' ';
 	const uint16_t w = CSZ.w - 1;
@@ -197,7 +197,7 @@ static void check_wrap(struct JBXVTScreen * restrict s)
 void jbxvt_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 {
 	SLOG("jbxvt_string(%s, len: %d, nlcount: %d)", str, len, nlcount);
-	change_offset(0);
+	jbxvt_set_scroll(0);
 	draw_cursor();
 	if (nlcount > 0)
 		  handle_new_lines(nlcount);

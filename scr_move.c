@@ -30,7 +30,7 @@ void jbxvt_move(const int16_t x, const int16_t y, const uint8_t relative)
 #ifdef MOVE_DEBUG
 	LOG("jbxvt_move(x:%d, y:%d, relative:%d)", x, y, relative);
 #endif//MOVE_DEBUG
-	change_offset(0);
+	jbxvt_set_scroll(0);
 	draw_cursor(); // clear
 	struct JBDim * c = &SCR->cursor;
 	// Sanitize non-relative arguments--must be positive.

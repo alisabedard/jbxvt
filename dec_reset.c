@@ -72,7 +72,7 @@ void dec_reset(struct Token * restrict token)
 			m->decpff = is_set;
 			break;
 		case 25: // DECTCEM -- hide cursor
-			change_offset(0);
+			jbxvt_set_scroll(0);
 			draw_cursor(); // clear
 			jbxvt.mode.dectcem = is_set;
 			draw_cursor(); // draw

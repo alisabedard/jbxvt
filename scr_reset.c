@@ -72,7 +72,8 @@ void jbxvt_reset(void)
 {
 	LOG("jbxvt_reset()");
 	decscnm();
-	struct JBDim c = jbxvt_get_char_size(P);
+	//struct JBDim c = jbxvt_get_char_size(P);
+	struct JBDim c = CSZ;
 	fix_margins(c);
 	static bool created;
 	if (!created) {
@@ -94,8 +95,7 @@ void jbxvt_reset(void)
 	S.chars = c;
 	reset_row_col();
 	--c.h; --c.w;
-	sbar_draw(c.h + S.sline.top, S.offset,
-		S.offset + c.h);
+	jbxvt_draw_scrollbar();
 	decscnm();
 	xcb_flush(X.xcb);
 	repaint();
