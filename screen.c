@@ -9,7 +9,6 @@
 #include "libjb/log.h"
 #include "repaint.h"
 #include "sbar.h"
-#include "scr_erase.h"
 #include "scr_move.h"
 #include "scr_reset.h"
 #include "scroll.h"
@@ -61,7 +60,6 @@ void jbxvt_change_screen(const bool mode_high)
 	jbxvt_clear_selection();
 	jbxvt.mode.charsel = 0; // reset on screen change
 	draw_cursor();
-	jbxvt_erase_screen(2); // ENTIRE
 	jbxvt_reset();
 }
 
