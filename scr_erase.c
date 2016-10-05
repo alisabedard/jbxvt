@@ -101,15 +101,16 @@ void jbxvt_erase_screen(const int8_t mode)
 	change_offset(0);
 	SCR->wrap_next = 0;
 	xcb_rectangle_t r = {.width = PSZ.width};
-	const struct JBDim cur = SCR->cursor;
 	switch (mode) {
-	case 1:
+	case 1: {
+		const struct JBDim cur = SCR->cursor;
 		LOG("START");
 		r.height = cur.y * FH;
 		for (uint8_t i = 0; i < cur.y; ++i)
 			zero(i, CSZ.w, 0);
 		common_jbxvt_erase(r, 0, cur.y - 1, mode);
 		break;
+	}
 	case 0:
 		LOG("END");
 		/*  Testing shows that this can be skipped.  If doing nothing
