@@ -203,17 +203,18 @@ void jbxvt_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 			++str;
 			continue;
 		}
+		struct JBDim * c = &jbxvt.scr.current->cursor;
 		if (jbxvt.scr.current->wrap_next) {
 			wrap();
-			jbxvt.scr.current->cursor.x = 0;
+			c->x = 0;
 		}
-	jbxvt_check_selection(jbxvt.scr.current->cursor.y, jbxvt.scr.current->cursor.y);
+		jbxvt_check_selection(c->y, c->y);
 		p = jbxvt_get_pixel_size(jbxvt.scr.current->cursor);
 		if (unlikely(jbxvt.mode.insert))
 			handle_insert(1, p);
-		uint8_t * t = jbxvt.scr.current->text[jbxvt.scr.current->cursor.y];
+		uint8_t * t = jbxvt.scr.current->text[c->y];
 		if (!t) return;
-		t += jbxvt.scr.current->cursor.x;
+		t += c->x;
 		if (jbxvt.mode.charset[jbxvt.mode.charsel] > CHARSET_ASCII)
 			parse_special_charset(str, len);
 		// Render the string:
@@ -225,7 +226,7 @@ void jbxvt_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		save_render_style(1, jbxvt.scr.current);
 		--len;
 		++str;
-		++jbxvt.scr.current->cursor.x;
+		++c->x;
 		check_wrap(jbxvt.scr.current);
 	}
 	draw_cursor();
