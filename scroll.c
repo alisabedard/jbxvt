@@ -55,6 +55,7 @@ static void copy_saved_lines(const int_fast16_t n)
 		sl->wrap = jbxvt.scr.current->wrap[i];
 		SLINE.top += n;
 		SLINE.top = MIN(SLINE.top, SLINE.max);
+#undef SLINE
 		clear_selection_at(i);
 		int_fast16_t len = 0;
 		while(t[++len]); // strlen
