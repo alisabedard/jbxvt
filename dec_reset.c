@@ -28,9 +28,8 @@ void dec_reset(struct Token * restrict token)
 	const bool is_set = token->type == TK_SET;
 	struct JBXVTPrivateModes * m = &jbxvt.mode;
 
-	static bool allow_deccolm = true;
-
 	if (likely(token->private == '?')) {
+		static bool allow_deccolm = true;
 		switch (token->arg[0]) {
 		case 1: // DECCKM: cursor key mode
 			set_keys(is_set, true);
