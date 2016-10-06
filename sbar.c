@@ -16,14 +16,16 @@
 __attribute__((pure))
 static int16_t get_sz(const int16_t margin)
 {
-	return jbxvt.scr.pixels.h - jbxvt.scr.pixels.h * (jbxvt.scr.offset + margin)
+	return jbxvt.scr.pixels.h - jbxvt.scr.pixels.h
+		* (jbxvt.scr.offset + margin)
 		/ (jbxvt.scr.sline.top + jbxvt.scr.chars.h);
 }
 
 // Draw the scrollbar.
 void jbxvt_draw_scrollbar(void)
 {
-	xcb_clear_area(jbxvt.X.xcb, 0, SB, 0, 0, JBXVT_SCROLLBAR_WIDTH, jbxvt.scr.pixels.h);
+	xcb_clear_area(jbxvt.X.xcb, 0, SB, 0, 0,
+		JBXVT_SCROLLBAR_WIDTH, jbxvt.scr.pixels.h);
 	const int16_t top = get_sz(jbxvt.scr.chars.h);
 	xcb_poly_fill_rectangle(jbxvt.X.xcb, SB, jbxvt.X.gc.tx, 1,
 			&(xcb_rectangle_t){0, top, JBXVT_SCROLLBAR_WIDTH,
@@ -34,6 +36,8 @@ void jbxvt_draw_scrollbar(void)
 void jbxvt_set_scroll(int16_t n)
 {
 	JB_LIMIT(n, jbxvt.scr.sline.top, 0);
+	if (n == jbxvt.scr.offset)
+		return;
 	jbxvt.scr.offset = n;
 	draw_cursor(); // clear
 	repaint();
@@ -51,7 +55,9 @@ void jbxvt_clear_saved_lines(void)
 
 void jbxvt_toggle_scrollbar(void)
 {
-	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt, XCB_CONFIG_WINDOW_X,
-		&(uint32_t){(jbxvt.opt.show_scrollbar^=true)? JBXVT_SCROLLBAR_WIDTH : 0});
+	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt,
+		XCB_CONFIG_WINDOW_X, &(uint32_t){(
+		jbxvt.opt.show_scrollbar^=true)
+		? JBXVT_SCROLLBAR_WIDTH : 0});
 }
 
