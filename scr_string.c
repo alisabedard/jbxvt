@@ -61,17 +61,13 @@ void jbxvt_cht(int16_t v)
 
 static void handle_new_lines(int8_t nlcount)
 {
-	SLOG("handle_new_lines(nlcount: %d)", nlcount);
-	const uint8_t b = jbxvt.scr.current->margin.b;
-	const uint8_t y = jbxvt.scr.current->cursor.y;
-	nlcount = y > b ? 0 : nlcount - b - y;
-	const uint8_t t = jbxvt.scr.current->margin.t;
-	const int8_t lim = y - t;
-	JB_LIMIT(nlcount, lim, 0);
+	const int16_t y = jbxvt.scr.current->cursor.y;
+	struct JBDim * m = &jbxvt.scr.current->margin;
+	nlcount = y > m->b ? 0 : nlcount - m->b - y;
+	JB_LIMIT(nlcount, y - m->top, 0);
 	nlcount = MIN(nlcount, JBXVT_MAX_SCROLL);
-	scroll(t, b, nlcount);
+	scroll(m->top, m->bottom, nlcount);
 	jbxvt.scr.current->cursor.y -= nlcount;
-	SLOG("nlcount: %d, c.y: %d, m.b: %d", nlcount, jbxvt.scr.current->cursor.y, b);
 }
 
 static void decsclm(void)
