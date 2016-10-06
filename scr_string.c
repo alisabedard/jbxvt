@@ -82,13 +82,13 @@ static void wrap(void)
 {
 	jbxvt.scr.current->wrap_next = false;
 	const struct JBDim m = jbxvt.scr.current->margin;
-	int16_t * y = &jbxvt.scr.current->cursor.y;
-	jbxvt.scr.current->wrap[*y] = true;
-	if (*y >= m.b) {
+	const int16_t y = jbxvt.scr.current->cursor.y;
+	jbxvt.scr.current->wrap[y] = true;
+	if (y >= m.b) {
 		decsclm();
 		scroll(m.top, m.bottom, 1);
 	} else
-		++*y;
+		++jbxvt.scr.current->cursor.y;
 }
 
 #if defined(__i386__) || defined(__amd64__)
