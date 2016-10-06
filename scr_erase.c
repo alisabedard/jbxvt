@@ -108,12 +108,17 @@ void jbxvt_erase_screen(const int8_t mode)
 		end = jbxvt.scr.chars.h - 1;
 		break;
 	}
-	save_cursor();
-	for (uint_fast16_t l = start; l < end; ++l) {
+	/* Save cursor y locally instead of using save/restore cursor
+	   functions in order to avoid side-effects on applications
+	   using a saved cursor position.  */
+	const uint16_t old_y = jbxvt.scr.current->cursor.y;
+	for (uint_fast16_t l = start; l <= end; ++l) {
 		jbxvt.scr.current->cursor.y = l;
 		jbxvt_erase_line(2); // entire
+		draw_cursor();
 	}
-	restore_cursor();
+	jbxvt.scr.current->cursor.y = old_y;
+
 	// clear start of, end of, or entire current line, per mode
 	jbxvt_erase_line(mode);
 }
