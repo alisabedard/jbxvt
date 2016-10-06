@@ -96,7 +96,7 @@ bool jbxvt_get_mouse_motion_tracked(void)
 
 bool jbxvt_get_mouse_tracked(void)
 {
-	return TRK(x10) | TRK(vt200) | TRK(vt200hl) | TRK(ext) | TRK(sgr)
-	       | TRK(urxvt) | jbxvt_get_mouse_motion_tracked();
+	return TRK(x10) || TRK(vt200) || TRK(vt200hl) || TRK(ext)
+		|| TRK(sgr) || TRK(urxvt) || jbxvt_get_mouse_motion_tracked();
 }
 
