@@ -141,11 +141,4 @@ struct JBXVT {
 
 extern struct JBXVT jbxvt; // in jbxvt.c
 
-// Shortcuts
-#define SCR jbxvt.scr.current
-#define XC jbxvt.X.xcb
-#define CSZ jbxvt.scr.chars
-#define PSZ jbxvt.scr.pixels
-#define FSZ jbxvt.X.f.size
-
 #endif//!JBXVT_H

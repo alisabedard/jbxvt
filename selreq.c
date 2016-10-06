@@ -18,11 +18,11 @@
 
 static bool paste_from(const xcb_atom_t cb, const xcb_timestamp_t t)
 {
-	xcb_convert_selection(XC, VT, cb, XCB_ATOM_STRING, cb, t);
-	xcb_flush(XC);
+	xcb_convert_selection(jbxvt.X.xcb, VT, cb, XCB_ATOM_STRING, cb, t);
+	xcb_flush(jbxvt.X.xcb);
 	free(xcb_wait_for_event(XC)); // discard
-	xcb_get_property_reply_t * r = xcb_get_property_reply(XC,
-		xcb_get_property(XC, false, VT, cb, XCB_ATOM_ANY,
+	xcb_get_property_reply_t * r = xcb_get_property_reply(jbxvt.X.xcb,
+		xcb_get_property(jbxvt.X.xcb, false, VT, cb, XCB_ATOM_ANY,
 		0, JBXVT_PROP_SIZE), NULL);
 	if (!r)
 		return false;

@@ -22,8 +22,8 @@
 //  Map the window
 void map_window(void)
 {
-	xcb_map_window(XC, MW);
-	xcb_map_subwindows(XC, MW);
+	xcb_map_window(jbxvt.X.xcb, MW);
+	xcb_map_subwindows(jbxvt.X.xcb, MW);
 	/*  Setup the window now so that we can add LINES and COLUMNS to
 	 *  the environment.  */
 	resize_window();
@@ -34,18 +34,18 @@ void map_window(void)
  *  initiate a redraw by resizing the subwindows. */
 void resize_window(void)
 {
-	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(XC,
-		xcb_get_geometry(XC, MW), NULL);
+	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(jbxvt.X.xcb,
+		xcb_get_geometry(jbxvt.X.xcb, MW), NULL);
 	assert(r);
 	uint32_t sz[] = {r->width, r->height};
 	free(r);
 	if (SB) {
 #define XCW(i) XCB_CONFIG_WINDOW_##i
-		xcb_configure_window(XC, SW, XCW(HEIGHT), &sz[1]);
-		sz[0] -= SBAR_WIDTH;
+		xcb_configure_window(jbxvt.X.xcb, SW, XCW(HEIGHT), &sz[1]);
+		sz[0] -= JBXVT_SCROLLBAR_WIDTH;
 	}
-	xcb_configure_window(XC, VT, XCW(WIDTH) | XCW(HEIGHT), sz);
-	CSZ = jbxvt_get_char_size(PSZ = (struct JBDim){
+	xcb_configure_window(jbxvt.X.xcb, VT, XCW(WIDTH) | XCW(HEIGHT), sz);
+	jbxvt.scr.chars = jbxvt_get_char_size(jbxvt.scr.pixels = (struct JBDim){
 		.w = (uint16_t)sz[0],
 		.h = (uint16_t)sz[1]});
 }
@@ -55,7 +55,7 @@ void change_name(uint8_t * restrict str, const bool icon)
 {
 	assert(str);
 #define XA(n) XCB_ATOM_##n
-	xcb_change_property(XC, XCB_PROP_MODE_REPLACE, MW, icon
+	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE, MW, icon
 		? XA(WM_ICON_NAME) : XA(WM_NAME), XA(STRING), 8,
 		strlen((char*)str), str);
 }

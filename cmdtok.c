@@ -203,7 +203,7 @@ int_fast16_t get_com_char(const int_fast8_t flags)
 	int_fast16_t ret = 0;
 	if (get_buffered(&ret, flags))
 		return ret;
-	xcb_flush(XC);
+	xcb_flush(jbxvt.X.xcb);
 	fd_set in;
 input:
 	FD_ZERO(&in);

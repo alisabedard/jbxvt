@@ -15,7 +15,7 @@
 
 static void prop(const xcb_atom_t a)
 {
-	xcb_change_property(XC, XCB_PROP_MODE_REPLACE,
+	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE,
 		VT, a, XCB_ATOM_STRING, 8, jbxvt.sel.length,
 		jbxvt.sel.text);
 }
@@ -29,7 +29,7 @@ void jbxvt_make_selection(void)
 	prop(XCB_ATOM_PRIMARY);
 	prop(XCB_ATOM_SECONDARY);
 	prop(jbxvt.X.clipboard);
-	xcb_set_selection_owner(XC, VT, XCB_ATOM_PRIMARY,
+	xcb_set_selection_owner(jbxvt.X.xcb, VT, XCB_ATOM_PRIMARY,
 		XCB_CURRENT_TIME);
 }
 
@@ -45,13 +45,13 @@ void jbxvt_send_selection(const xcb_time_t time, const uint32_t requestor,
 		.requestor = requestor, .time = time, .property
 			= property == XCB_NONE
 			? target : property}; // per ICCCM
-	xcb_change_property(XC, XCB_PROP_MODE_REPLACE, requestor,
+	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE, requestor,
 		property, target, 8, jbxvt.sel.length,
 		jbxvt.sel.text);
-	xcb_flush(XC);
-	xcb_send_event(XC, true, requestor,
+	xcb_flush(jbxvt.X.xcb);
+	xcb_send_event(jbxvt.X.xcb, true, requestor,
 		XCB_SELECTION_NOTIFY, (char *)&e);
-	xcb_flush(XC);
+	xcb_flush(jbxvt.X.xcb);
 }
 
 //  Clear the current selection.
@@ -65,7 +65,7 @@ void jbxvt_clear_selection(void)
 
 static void show(void)
 {
-	show_selection(0, CSZ.h - 1, 0, CSZ.w - 1);
+	show_selection(0, jbxvt.scr.chars.h - 1, 0, jbxvt.scr.chars.w - 1);
 }
 
 //  start a selection using the specified unit.

@@ -73,7 +73,7 @@ static void adj_sel_to_word(struct JBDim * include,
 	struct JBDim * se1, struct JBDim * se2)
 {
 	uint8_t * s = jbxvt.sel.type == JBXVT_SEL_ON_SCREEN
-		? SCR->text[se1->index] : SLD[se1->index].text;
+		? jbxvt.scr.current->text[se1->index] : SLD[se1->index].text;
 	int16_t i = se1->col;
 	while (i && s[i] != ' ')
 		  --i;

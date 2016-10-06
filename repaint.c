@@ -26,6 +26,7 @@ static void paint_rvec_text(uint8_t * str, uint32_t * rvec,
 		// draw
 		paint_rval_text(str, r, i, p);
 		// advance to next block
+#define FSZ jbxvt.X.f.size
 		p.x += i * FSZ.width;
 		str += i;
 		rvec += i;
@@ -50,6 +51,7 @@ static int_fast32_t repaint_generic(struct JBDim p,
 	xcb_clear_area(jbxvt.X.xcb, false, jbxvt.X.win.vt,
 		p.x, p.y, width, FSZ.height);
 	return p.y + FSZ.height;
+#undef FSZ
 }
 
 static int_fast16_t show_scroll_history(xcb_rectangle_t r,

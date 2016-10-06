@@ -51,7 +51,7 @@ static void handle_txtpar(struct Token * restrict token)
 
 static void form_feed(void)
 {
-	const struct JBDim m = SCR->margin;
+	const struct JBDim m = jbxvt.scr.current->margin;
 	jbxvt_move(0, m.top, 0);
 	if (jbxvt.mode.decpff)
 		cprintf("FF");
@@ -62,11 +62,11 @@ static void handle_tk_char(const uint8_t tk_char)
 {
 	switch (tk_char) {
 	case '\n': // handle line feed
-		jbxvt_index_from(1, SCR->margin.t);
+		jbxvt_index_from(1, jbxvt.scr.current->margin.t);
 		break;
 	case 013: // vertical tab
-		for (uint8_t i = SCR->cursor.y; i % 8; ++i)
-			  jbxvt_index_from(1, SCR->margin.t);
+		for (uint8_t i = jbxvt.scr.current->cursor.y; i % 8; ++i)
+			  jbxvt_index_from(1, jbxvt.scr.current->margin.t);
 		break;
 	case '\f': // form feed
 		form_feed();
@@ -96,7 +96,7 @@ static void handle_tk_char(const uint8_t tk_char)
 
 static void expose(const uint8_t region, const bool size_set)
 {
-	if (region == REGION_SCROLLBAR)
+	if (region == JBXVT_REGION_SCROLLBAR)
 		jbxvt_draw_scrollbar();
 	else if (size_set) {
 		draw_cursor(); // clear
@@ -136,15 +136,15 @@ static void decstbm(struct Token * restrict token)
 		return;
 	}
 	const bool rst = token->nargs < 2 || t[0] >= t[1];
-	SCR->margin = (struct JBDim){.t = rst ? 0 : t[0] - 1,
-		.b = (rst ? CSZ.h : t[1]) - 1};
+	jbxvt.scr.current->margin = (struct JBDim){.t = rst ? 0 : t[0] - 1,
+		.b = (rst ? jbxvt.scr.chars.h : t[1]) - 1};
 }
 
 static void handle_dsr(const int16_t arg)
 {
 	switch (arg) {
 	case 6 : {
-		const struct JBDim c = SCR->cursor;
+		const struct JBDim c = jbxvt.scr.current->cursor;
 		cprintf("\033[%d;%dR", c.y + 1, c.x + 1);
 		break;
 	}
@@ -179,7 +179,7 @@ static void tbc(const uint8_t t)
 	if (t == 3)
 		jbxvt_set_tab(-1, false);
 	else if (!t)
-		jbxvt_set_tab(SCR->cursor.x, false);
+		jbxvt_set_tab(jbxvt.scr.current->cursor.x, false);
 }
 
 void jbxvt_parse_token(void)
@@ -311,7 +311,7 @@ void jbxvt_parse_token(void)
 		jbxvt_move(t[0] - 1, 0, COL_RELATIVE | ROW_RELATIVE);
 		break;
 	CASE(TK_HTS) // set tab stop at current position
-		jbxvt_set_tab(SCR->cursor.x, true);
+		jbxvt_set_tab(jbxvt.scr.current->cursor.x, true);
 		break;
 	CASE(TK_ICH)
 		jbxvt_insert_characters(n);
@@ -319,7 +319,7 @@ void jbxvt_parse_token(void)
 
 	CASE(TK_IL) n = -n; // fall through
 	CASE(TK_DL)
-		jbxvt_index_from(n, SCR->cursor.y);
+		jbxvt_index_from(n, jbxvt.scr.current->cursor.y);
 		break;
 
 	CASE(TK_LL)
@@ -336,14 +336,14 @@ void jbxvt_parse_token(void)
 		}
 		break;
 	CASE(TK_NEL) // move to first position on next line down.
-		jbxvt_move(0, SCR->cursor.y + 1, 0);
+		jbxvt_move(0, jbxvt.scr.current->cursor.y + 1, 0);
 		break;
 	FIXME(TK_OSC);
 	CASE(TK_PAM)
 		set_keys(true, false);
 		break;
 	CASE(TK_PM)
-		SCR->decpm = true;
+		jbxvt.scr.current->decpm = true;
 		break;
 	CASE(TK_PNM)
 		set_keys(false, false);
@@ -358,7 +358,7 @@ void jbxvt_parse_token(void)
 	CASE(TK_RI) // Reverse index
 		n = -n; // fall through
 	CASE(TK_IND) // Index (same as \n)
-		jbxvt_index_from(n, SCR->margin.t);
+		jbxvt_index_from(n, jbxvt.scr.current->margin.t);
 		break;
 
 	CASE(TK_RESIZE)
@@ -381,13 +381,14 @@ void jbxvt_parse_token(void)
 	CASE(TK_SBGOTO)
 		/*  Move the display so that line represented by scrollbar value
 		    is at the top of the screen.  */
-		jbxvt_set_scroll((CSZ.h + jbxvt.scr.sline.top) * (PSZ.h - t[0])
-			/ PSZ.h - CSZ.h);
+		jbxvt_set_scroll((jbxvt.scr.chars.h + jbxvt.scr.sline.top) * (jbxvt.scr.pixels.h - t[0])
+			/ jbxvt.scr.pixels.h - jbxvt.scr.chars.h);
 		break;
 	CASE(TK_SBDOWN)
 		t[0] = - t[0]; // fall through
 	CASE(TK_SBUP)
-		jbxvt_set_scroll(jbxvt.scr.offset - t[0] / FSZ.h);
+		jbxvt_set_scroll(jbxvt.scr.offset - t[0]
+			/ jbxvt.X.font.size.h);
 		break;
 	CASE(TK_SC)
 		save_cursor();
@@ -403,8 +404,8 @@ void jbxvt_parse_token(void)
 		t[0] = - t[0]; // fall through
 	CASE(TK_SU) // scroll up n lines;
 		LOG("TK_SU");
-		scroll(SCR->margin.top,
-			SCR->margin.bot, t[0]);
+		scroll(jbxvt.scr.current->margin.top,
+			jbxvt.scr.current->margin.bot, t[0]);
 		break;
 
 #define SELOP(op, arg) {jbxvt_##op##_selection((struct JBDim){.x = t[0], \
@@ -456,7 +457,7 @@ void jbxvt_parse_token(void)
 		break;
 	FIXME(TK_SOS); // start of string
 	CASE(TK_ST)
-		SCR->decpm = false;
+		jbxvt.scr.current->decpm = false;
 		break;
 	CASE(TK_STBM) // set top and bottom margins.
 		decstbm(&token);

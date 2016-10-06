@@ -165,17 +165,17 @@ static struct JBXVTEvent * pop_xevent(void)
 	return xe;
 }
 
-static enum Region get_region(struct JBXVTEvent * xe)
+static enum JBXVTRegion get_region(struct JBXVTEvent * xe)
 {
 	const xcb_window_t w = xe->window;
 	const struct JBXVTXWindows * j = &jbxvt.X.win;
 	if (w == j->vt)
-		return REGION_SCREEN;
+		return JBXVT_REGION_SCREEN;
 	else if (w == j->sb)
-		return REGION_SCROLLBAR;
+		return JBXVT_REGION_SCROLLBAR;
 	else if (w == j->main)
-		return REGION_MAINWIN;
-	return REGION_NONE;
+		return JBXVT_REGION_MAINWIN;
+	return JBXVT_REGION_NONE;
 }
 
 // convert next X event into a token

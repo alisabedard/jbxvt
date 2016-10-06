@@ -14,8 +14,9 @@ enum TokenLimits {
 };
 
 //  Values of tk_region for Xevent generated tokens.
-enum Region {
-	REGION_NONE, REGION_MAINWIN, REGION_SCREEN, REGION_SCROLLBAR
+enum JBXVTRegion {
+	JBXVT_REGION_NONE, JBXVT_REGION_MAINWIN,
+	JBXVT_REGION_SCREEN, JBXVT_REGION_SCROLLBAR
 };
 
 /*  Structure used to represent a piece of input from the program
@@ -24,7 +25,7 @@ struct Token{
 	int32_t arg[TK_MAX_ARGS];	// first numerical arguments
 	uint8_t string[TKS_MAX + 1];	// the text for string tokens
 	TokenType type;			// type of token
-	enum Region region;		// where token applies
+	enum JBXVTRegion region;	// where token applies
 	uint16_t private;		// non zero for priv ctl sequences
 	uint16_t nlcount;		// number of newlines in the string
 	uint16_t length:12;		// length of string

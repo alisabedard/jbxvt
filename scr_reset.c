@@ -43,8 +43,8 @@ static inline void fix_margins(const struct JBDim c)
 	   If so, set the bottom margin to the new bottom line.  */
 	if (c.height == S.chars.height)
 		  return;
-	if (SCR->margin.b >= c.h)
-		  SCR->margin.b = c.h - 1;
+	if (jbxvt.scr.current->margin.b >= c.h)
+		  jbxvt.scr.current->margin.b = c.h - 1;
 }
 
 static void decscnm(void)
@@ -73,7 +73,7 @@ void jbxvt_reset(void)
 	LOG("jbxvt_reset()");
 	decscnm();
 	//struct JBDim c = jbxvt_get_char_size(P);
-	struct JBDim c = CSZ;
+	struct JBDim c = jbxvt.scr.chars;
 	fix_margins(c);
 	static bool created;
 	if (!created) {
@@ -81,8 +81,8 @@ void jbxvt_reset(void)
 		init(&jbxvt.scr.s[1]);
 		created = true;
 	}
-	int16_t * y = &SCR->cursor.y;
-	if (likely(SCR == &S.s[0]) && *y >= c.h) {
+	int16_t * y = &jbxvt.scr.current->cursor.y;
+	if (likely(jbxvt.scr.current == &S.s[0]) && *y >= c.h) {
 		scroll1(*y - c.h + 1);
 		*y = c.h - 1;
 	}

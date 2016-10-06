@@ -66,11 +66,9 @@ static void create_main_window(xcb_size_hints_t * restrict sh,
 		sh->x, sh->y, sh->width, sh->height, 0, 0, 0,
 		XCB_CW_EVENT_MASK,
 		(uint32_t[]){MW_EVENTS});
-#define PSZ jbxvt.scr.pixels
-#define CSZ jbxvt.scr.chars
-	PSZ.w = sh->width;
-	PSZ.h = sh->height;
-	CSZ = jbxvt_get_char_size(PSZ);
+	jbxvt.scr.pixels.w = sh->width;
+	jbxvt.scr.pixels.h = sh->height;
+	jbxvt.scr.chars = jbxvt_get_char_size(jbxvt.scr.pixels);
 }
 
 static xcb_cursor_t get_cursor(const uint16_t id,
@@ -95,7 +93,7 @@ static void create_sb_window(const uint16_t height)
 	xcb_cursor_t c = get_cursor(XC_sb_v_double_arrow, 0, 0xffff);
 	xcb_create_window(jbxvt.X.xcb, 0, jbxvt.X.win.sb
 		= xcb_generate_id(jbxvt.X.xcb), jbxvt.X.win.main, -1, -1,
-		SBAR_WIDTH - 1, height, 1, 0, 0, XCB_CW_BACK_PIXEL
+		JBXVT_SCROLLBAR_WIDTH - 1, height, 1, 0, 0, XCB_CW_BACK_PIXEL
 		| XCB_CW_BORDER_PIXEL | XCB_CW_EVENT_MASK
 		| XCB_CW_CURSOR, (uint32_t[]){ jbxvt.X.color.bg,
 		jbxvt.X.color.fg, SUB_EVENTS, c});
@@ -108,7 +106,7 @@ static void create_vt_window(xcb_size_hints_t * restrict sh)
 	jbxvt.X.win.vt = xcb_generate_id(xc);
 	xcb_cursor_t c = get_cursor(XC_xterm, 0xffff, 0);
 	xcb_create_window(xc, 0, jbxvt.X.win.vt, jbxvt.X.win.main,
-		jbxvt.opt.show_scrollbar ? SBAR_WIDTH : 0, 0,
+		jbxvt.opt.show_scrollbar ? JBXVT_SCROLLBAR_WIDTH : 0, 0,
 		sh->width, sh->height, 0, 0, 0, XCB_CW_BACK_PIXEL
 		| XCB_CW_EVENT_MASK | XCB_CW_CURSOR, (uint32_t[]){
 		jbxvt.X.color.bg, SUB_EVENTS, c});
@@ -117,7 +115,6 @@ static void create_vt_window(xcb_size_hints_t * restrict sh)
 
 static void get_sizehints(xcb_size_hints_t * restrict s)
 {
-	const struct JBDim f = FSZ;
 	const struct JBDim p = jbxvt_get_pixel_size(jbxvt.opt.size);
 
 	*s = (xcb_size_hints_t) {
@@ -125,13 +122,15 @@ static void get_sizehints(xcb_size_hints_t * restrict s)
 		.flags = SH(US_SIZE) | SH(P_MIN_SIZE) | SH(P_RESIZE_INC)
 			| SH(BASE_SIZE),
 		.width = p.w, .height = p.h,
-		.width_inc = f.w,
-		.height_inc = f.h,
-		.base_width = f.w,
-		.base_height = f.h
+#define FSZ jbxvt.X.f.size
+		.width_inc = FSZ.w,
+		.height_inc = FSZ.h,
+		.base_width = FSZ.w,
+		.base_height = FSZ.h
 	};
-	s->min_width = f.w + s->base_width;
-	s->min_height = f.h + s->base_height;
+	s->min_width = FSZ.w + s->base_width;
+	s->min_height = FSZ.h + s->base_height;
+#undef FSZ
 }
 
 //  Open the window.

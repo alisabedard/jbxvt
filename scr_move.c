@@ -9,12 +9,12 @@
 // Sanitize cursor position, implement DECOM
 void reset_row_col(void)
 {
-	struct JBDim * c = &SCR->cursor;
-	JB_LIMIT(c->x, CSZ.w - 1, 0);
-	JB_LIMIT(c->y, CSZ.h - 1, 0);
+	struct JBDim * c = &jbxvt.scr.current->cursor;
+	JB_LIMIT(c->x, jbxvt.scr.chars.w - 1, 0);
+	JB_LIMIT(c->y, jbxvt.scr.chars.h - 1, 0);
 	// Implement DECOM, DEC Origin Mode, limits
 	if (jbxvt.mode.decom)
-		JB_LIMIT(c->y, SCR->margin.t, SCR->margin.b);
+		JB_LIMIT(c->y, jbxvt.scr.current->margin.t, jbxvt.scr.current->margin.b);
 }
 
 static void set_dimension(int16_t * restrict cursor,
@@ -32,13 +32,13 @@ void jbxvt_move(const int16_t x, const int16_t y, const uint8_t relative)
 #endif//MOVE_DEBUG
 	jbxvt_set_scroll(0);
 	draw_cursor(); // clear
-	struct JBDim * c = &SCR->cursor;
+	struct JBDim * c = &jbxvt.scr.current->cursor;
 	// Sanitize non-relative arguments--must be positive.
 	set_dimension(&c->x, x, relative & COL_RELATIVE);
 	set_dimension(&c->y, y, relative & ROW_RELATIVE);
 	reset_row_col();
 	const int16_t cy = c->y;
-	SCR->wrap_next = 0;
+	jbxvt.scr.current->wrap_next = 0;
 	jbxvt_check_selection(cy, cy);
 	draw_cursor(); // draw
 }

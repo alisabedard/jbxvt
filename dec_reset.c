@@ -53,7 +53,7 @@ void dec_reset(struct Token * restrict token)
 			/* According to the spec, the cursor is reset to
 			   the home position when this is changed.  */
 			m->decom = is_set;
-			jbxvt_move(SCR->margin.top, 0, 0);
+			jbxvt_move(jbxvt.scr.current->margin.top, 0, 0);
 			break;
 		case 7: // DECAWM
 		case 45: // reverse wrap-around mode?

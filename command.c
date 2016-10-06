@@ -106,7 +106,7 @@ static void set_ttymodes(void)
 		[VSUSP] = 032, [VREPRINT] = 022, [VWERASE] = 027,
 		[VLNEXT] = 026, [VDISCARD] = 017}};
 	tcsetattr(0, TCSANOW, &term);
-	tty_set_size(CSZ);
+	tty_set_size(jbxvt.scr.chars);
 }
 
 static void redir(const fd_t target, const fd_t ttyfd)
