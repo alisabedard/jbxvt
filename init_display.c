@@ -3,21 +3,16 @@
 
 #include "init_display.h"
 
-#include "command.h"
-#include "config.h"
-#include "cursor.h"
 #include "jbxvt.h"
-#include "libjb/xcb.h"
 #include "paint.h"
-#include "sbar.h"
 #include "screen.h"
 #include "xsetup.h"
 
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include <xcb/xcb_icccm.h>
 #include <X11/cursorfont.h>
+#include <xcb/xcb_icccm.h>
 
 #define E(n) XCB_EVENT_MASK_##n
 #define EB(n) XCB_EVENT_MASK_BUTTON_##n
