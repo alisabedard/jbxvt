@@ -11,47 +11,47 @@
 
 #include <string.h>
 
-#define CUR SCR->cursor
-#define END (CSZ.w - CUR.x)
-#define VT jbxvt.X.win.vt
-
 static void copy_area(const int16_t * restrict x, const int16_t y,
 	const uint16_t width)
 {
 	if (width > 0)
-		xcb_copy_area(XC, VT, VT, jbxvt.X.gc.tx, x[0], y,
-			x[1], y, width, FSZ.height);
+		xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
+			jbxvt.X.gc.tx, x[0], y, x[1], y, width,
+			jbxvt.X.font.size.height);
 }
 
 static void finalize(const int16_t * restrict x, const struct JBDim p,
 	const uint16_t width, const int8_t count)
 {
 	copy_area(x, p.y, width);
-	xcb_clear_area(XC, 0, VT, p.x, p.y, count * FSZ.w, FSZ.h);
-	SCR->wrap_next = 0;
+	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, p.x, p.y,
+		count * jbxvt.X.font.size.w, jbxvt.X.font.size.h);
+	jbxvt.scr.current->wrap_next = 0;
 	draw_cursor();
 }
 
 static void copy_lines(const int16_t x, const int8_t count)
 {
-	const int16_t y = SCR->cursor.y;
-	uint8_t * s = SCR->text[y];
-	uint32_t * r = SCR->rend[y];
-	for (int16_t i = CSZ.w - 1; i >= x + count; --i) {
+	const int16_t y = jbxvt.scr.current->cursor.y;
+	uint8_t * s = jbxvt.scr.current->text[y];
+	uint32_t * r = jbxvt.scr.current->rend[y];
+	for (int16_t i = jbxvt.scr.chars.w - 1; i >= x + count; --i) {
 		s[i] = s[i - count];
 		r[i] = r[i - count];
 	}
 }
 
-static uint16_t get_width(const uint8_t count, const bool insert)
+static uint16_t get_width(const uint8_t count)
 {
-	return (insert ? CSZ.w - count - CUR.x : END - count) * FSZ.w;
+	return (jbxvt.scr.chars.w - count - jbxvt.scr.current->cursor.x)
+		* jbxvt.X.font.size.w;
 }
 
 static uint8_t get_count(int8_t count, const bool insert)
 {
 	count = MAX(count, 0);
-	count = MIN(count, insert ? CSZ.w : CSZ.w - CUR.x);
+	count = MIN(count, insert ? jbxvt.scr.chars.w
+		: jbxvt.scr.chars.w - jbxvt.scr.current->cursor.x);
 	return count;
 }
 
@@ -60,10 +60,10 @@ static void begin(int16_t * x, int8_t * restrict count, const bool insert)
 	*count = get_count(*count, insert);
 	jbxvt_set_scroll(0);
 	draw_cursor();
-	const struct JBDim c = CUR;
+	const struct JBDim c = jbxvt.scr.current->cursor;
 	struct JBDim p = jbxvt_get_pixel_size(c);
 	x[0] = p.x;
-	x[1] = p.x + *count * FSZ.width;
+	x[1] = p.x + *count * jbxvt.X.font.size.width;
 	if (!insert)
 		JB_SWAP(int16_t, x[0], x[1]);
 	jbxvt_check_selection(c.y, c.y);
@@ -75,18 +75,18 @@ void jbxvt_insert_characters(int8_t count)
 	LOG("jbxvt_insert_characters(%d)", count);
 	int16_t x[2];
 	begin(x, &count, true);
-	const struct JBDim c = SCR->cursor;
+	const struct JBDim c = jbxvt.scr.current->cursor;
 	copy_lines(c.x, count);
-	finalize(x, jbxvt_get_pixel_size(c), get_width(count, true), count);
+	finalize(x, jbxvt_get_pixel_size(c), get_width(count), count);
 }
 
 static void copy_data_after_count(const uint8_t count, const struct JBDim c)
 {
 	// copy the data after count
 	const uint16_t offset = c.x + count;
-	const uint16_t end = CSZ.width - c.x;
-	uint8_t * t = SCR->text[c.y];
-	uint32_t * r = SCR->rend[c.y];
+	const uint16_t end = jbxvt.scr.chars.width - c.x;
+	uint8_t * t = jbxvt.scr.current->text[c.y];
+	uint32_t * r = jbxvt.scr.current->rend[c.y];
 	memmove(t + c.x, t + offset, end - count);
 	memmove(r + c.x, r + offset,
 		(end - count) * sizeof(uint32_t));
@@ -94,11 +94,11 @@ static void copy_data_after_count(const uint8_t count, const struct JBDim c)
 
 static void delete_source_data(const uint8_t count, const int16_t y)
 {
-	uint8_t * t = SCR->text[y];
-	uint32_t * r = SCR->rend[y];
+	uint8_t * t = jbxvt.scr.current->text[y];
+	uint32_t * r = jbxvt.scr.current->rend[y];
 	// delete the source data copied
-	memset(t + CSZ.w - count, 0, count);
-	memset(r + CSZ.w - count, 0, count << 2);
+	memset(t + jbxvt.scr.chars.w - count, 0, count);
+	memset(r + jbxvt.scr.chars.w - count, 0, count << 2);
 }
 
 //  Delete count characters from the current position.
@@ -107,11 +107,11 @@ void jbxvt_delete_characters(int8_t count)
 	LOG("jbxvt_delete_characters(%d)", count);
 	int16_t x[2];
 	begin(x, &count, false);
-	struct JBDim c = CUR;
+	struct JBDim c = jbxvt.scr.current->cursor;
 	copy_data_after_count(count, c);
 	delete_source_data(count, c.y);
 	c = jbxvt_get_pixel_size(c);
-	const uint16_t width = get_width(count, false);
+	const uint16_t width = get_width(count);
 	c.x += width;
 	finalize(x, c, width, count);
 }
