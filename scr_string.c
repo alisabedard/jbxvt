@@ -72,12 +72,10 @@ static void handle_new_lines(int8_t nlcount)
 
 static void decsclm(void)
 {
-	if (!jbxvt.mode.decsclm)
-		return;
-	LOG("slow scroll");
 	// Time value per the following:
 	// http://www.vt100.net/docs/vt100-ug/chapter3.html166666
-	usleep(166666);
+	if (jbxvt.mode.decsclm)
+		usleep(166666);
 }
 
 static void wrap(void)
