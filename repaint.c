@@ -80,8 +80,7 @@ void repaint(void)
 	int_fast32_t line = show_scroll_history(r, &p);
 
 	// Do the remainder from the current screen:
-	int_fast32_t i = jbxvt.scr.offset > r.y ? 0
-		: r.y - jbxvt.scr.offset;
+	uint_fast16_t i = 0;
 
 	for (; line <= r.height; ++line, ++i) {
 		uint8_t * s = jbxvt.scr.current->text[i];
