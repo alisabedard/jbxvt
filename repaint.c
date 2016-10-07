@@ -69,8 +69,6 @@ static int_fast16_t show_scroll_history(struct JBDim * restrict p)
 // Repaint the screen
 void repaint(void)
 {
-	// Allocate enough space to process each column
-	uint8_t str[jbxvt.scr.chars.width];
 	//  First do any 'scrolled off' lines that are visible.
 	struct JBDim p = {};
 	int_fast32_t line = show_scroll_history(&p);
@@ -79,6 +77,8 @@ void repaint(void)
 		++line, ++i) {
 		uint8_t * s = jbxvt.scr.current->text[i];
 		register int_fast16_t x;
+		// Allocate enough space to process each column
+		uint8_t str[jbxvt.scr.chars.width];
 		for (x = 0; s && x < jbxvt.scr.chars.width; ++x)
 			str[x] = s[x] < ' ' ? ' ' : s[x];
 		p.y = repaint_generic(p, x, 0, jbxvt.scr.chars.width, str,
