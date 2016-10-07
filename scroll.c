@@ -32,6 +32,7 @@ static void move_line(const int16_t j,
 	s->rend[k] = s->rend[j];
 	clear_selection_at(j);
 }
+
 static void clear(int8_t count, const uint8_t rc,
 	uint8_t ** text, uint32_t ** rend, const bool up)
 {
@@ -68,11 +69,9 @@ static void copy_saved_lines(const int_fast16_t n)
 static void get_y(int16_t * restrict y, const uint8_t row1,
 	const int8_t count, const bool up)
 {
-	const uint8_t fh = jbxvt.X.f.size.h;
-	const int16_t a = row1 * fh;
-	const int16_t b = a + count * fh;
+	const int16_t a = row1 * jbxvt.X.f.size.h;
 	*(up ? y + 1 : y) = a;
-	*(up ? y : y + 1) = b;
+	*(up ? y : y + 1) = a + count * jbxvt.X.f.size.h;
 }
 
 static void copy_visible_area(const uint8_t row1, const uint8_t row2,
