@@ -54,15 +54,14 @@ static int_fast32_t repaint_generic(struct JBDim p,
 #undef FSZ
 }
 
-static int_fast16_t show_scroll_history(xcb_rectangle_t r,
-	struct JBDim * restrict p)
+static int_fast16_t show_scroll_history(struct JBDim * restrict p)
 {
-	int_fast16_t line = r.y;
-	for (int_fast16_t i = jbxvt.scr.offset - r.y - 1;
-		line <= r.height && i >= 0; ++line, --i) {
+	int_fast16_t line = 0;
+	for (int_fast16_t i = jbxvt.scr.offset - 0 - 1;
+		line <= jbxvt.scr.chars.height && i >= 0; ++line, --i) {
 		struct JBXVTSavedLine * sl = &jbxvt.scr.sline.data[i];
 		p->y = repaint_generic(*p, sl->sl_length,
-			r.x, r.width, sl->text, sl->rend);
+			0, jbxvt.scr.chars.width, sl->text, sl->rend);
 	}
 	return line;
 }
@@ -70,28 +69,21 @@ static int_fast16_t show_scroll_history(xcb_rectangle_t r,
 // Repaint the screen
 void repaint(void)
 {
-	const xcb_rectangle_t r = {.width = jbxvt.scr.chars.width,
-		.height = jbxvt.scr.chars.height};
-	struct JBDim p = {};
-	/* Allocate enough space to process each column, plus
-	 * wrap byte. */
-	uint8_t str[jbxvt.scr.chars.width + 1];
+	// Allocate enough space to process each column
+	uint8_t str[jbxvt.scr.chars.width];
 	//  First do any 'scrolled off' lines that are visible.
-	int_fast32_t line = show_scroll_history(r, &p);
-
+	struct JBDim p = {};
+	int_fast32_t line = show_scroll_history(&p);
 	// Do the remainder from the current screen:
-	uint_fast16_t i = 0;
-
-	for (; line <= r.height; ++line, ++i) {
+	for (uint_fast16_t i = 0; line <= jbxvt.scr.chars.height;
+		++line, ++i) {
 		uint8_t * s = jbxvt.scr.current->text[i];
 		register int_fast16_t x;
-		for (x = r.x; s && x <= r.width
-			&& x < jbxvt.scr.chars.width; ++x)
-			str[x - r.x] = s[x] < ' ' ? ' ' : s[x];
-		const uint16_t m = x - r.x;
-		p.y = repaint_generic(p, m, r.x, r.width, str,
+		for (x = 0; s && x < jbxvt.scr.chars.width; ++x)
+			str[x] = s[x] < ' ' ? ' ' : s[x];
+		p.y = repaint_generic(p, x, 0, jbxvt.scr.chars.width, str,
 			jbxvt.scr.current->rend[i]);
 	}
-	show_selection(r.y,r.height,r.x,r.width);
+	show_selection(0,jbxvt.scr.chars.height,0,jbxvt.scr.chars.width);
 }
 
