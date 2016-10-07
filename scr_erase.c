@@ -76,7 +76,6 @@ void jbxvt_erase_line(const int8_t mode)
 	struct JBDim c = jbxvt.scr.current->cursor;
 	xcb_rectangle_t g = { .y = c.y * FSZ.h };
 	erase_range(&g, get_sz(mode), get_col(mode));
-	draw_cursor(); //clear
 	jbxvt_check_selection(c.y, c.y);
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt,
 		g.x, g.y, g.width, FSZ.h);
