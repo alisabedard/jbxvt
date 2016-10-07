@@ -34,20 +34,19 @@ static void paint_rvec_text(uint8_t * str, uint32_t * rvec,
 	}
 }
 
-static int_fast32_t repaint_generic(struct JBDim p,
-	int_fast16_t m, const int_fast32_t c1,
-	const int_fast32_t c2, uint8_t * restrict str,
-	uint32_t * rend)
+static int_fast32_t repaint_generic(struct JBDim p, uint_fast16_t len,
+	uint8_t * restrict str, uint32_t * rend)
 {
 	// check inputs:
-	if (!str || !m)
+	if (!str || !len)
 		  return p.y + FSZ.height;
-	if (rend && c1 <= jbxvt.scr.chars.width)
-		paint_rvec_text(str, rend + c1, m, p);
+	if (rend)
+		paint_rvec_text(str, rend + 0, len, p);
 	else
-		paint_rval_text(str, 0, m, p);
-	p.x += m * FSZ.width;
-	const uint16_t width = (c2 - c1 + 1 - m) * FSZ.width;
+		paint_rval_text(str, 0, len, p);
+	p.x += len * FSZ.width;
+	const uint16_t width = (jbxvt.scr.chars.width + 1 - len)
+		* FSZ.width;
 	xcb_clear_area(jbxvt.X.xcb, false, jbxvt.X.win.vt,
 		p.x, p.y, width, FSZ.height);
 	return p.y + FSZ.height;
@@ -60,8 +59,7 @@ static int_fast16_t show_scroll_history(struct JBDim * restrict p)
 	for (int_fast16_t i = jbxvt.scr.offset - 1;
 		line <= jbxvt.scr.chars.height && i >= 0; ++line, --i) {
 		struct JBXVTSavedLine * sl = &jbxvt.scr.sline.data[i];
-		p->y = repaint_generic(*p, sl->sl_length,
-			0, jbxvt.scr.chars.width, sl->text, sl->rend);
+		p->y = repaint_generic(*p, sl->sl_length, sl->text, sl->rend);
 	}
 	return line;
 }
@@ -76,13 +74,12 @@ void repaint(void)
 	for (uint_fast16_t i = 0; line <= jbxvt.scr.chars.height;
 		++line, ++i) {
 		uint8_t * s = jbxvt.scr.current->text[i];
-		register int_fast16_t x;
+		register uint_fast16_t x;
 		// Allocate enough space to process each column
 		uint8_t str[jbxvt.scr.chars.width];
 		for (x = 0; s && x < jbxvt.scr.chars.width; ++x)
 			str[x] = s[x] < ' ' ? ' ' : s[x];
-		p.y = repaint_generic(p, x, 0, jbxvt.scr.chars.width, str,
-			jbxvt.scr.current->rend[i]);
+		p.y = repaint_generic(p, x, str, jbxvt.scr.current->rend[i]);
 	}
 	show_selection(0,jbxvt.scr.chars.height,0,jbxvt.scr.chars.width);
 }
