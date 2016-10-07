@@ -165,13 +165,6 @@ static void sc_up(const uint8_t row1, const uint8_t row2,
 	sc_common(row1, row2, count, true, save, rend);
 }
 
-static inline bool validate(const uint8_t r1, const uint8_t r2,
-	const int16_t count)
-{
-	return count == 0 || r1 > r2 || r2 >= jbxvt.scr.chars.h
-		|| abs(count) > JBXVT_MAX_SCROLL;
-}
-
 /*  Scroll count lines from row1 to row2 inclusive.
     row1 should be <= row2.  Scrolling is up for
     a positive count and down for a negative count.
@@ -180,15 +173,15 @@ void scroll(const uint8_t row1, const uint8_t row2,
 	const int16_t count)
 {
 	LOG("scroll(%d, %d, %d)", row1, row2, count);
-	// Sanitize input:
-	if (validate(row1, row2, count))
+	if (!count)
 		return;
-	const bool up = count > 0;
-	const int16_t n = up ? count : -count; // make positive
-	uint8_t *save[n];
-	uint32_t *rend[n];
-	// row2 + 1 to include last line
-	(up ? sc_up : sc_dn)(row1, row2 + 1, n, save, rend);
+	const uint16_t abs_count = abs(count);
+	uint8_t *save[abs_count];
+	uint32_t *rend[abs_count];
+	if (count > 0)
+		sc_up(row1, row2 + 1, abs_count, save, rend);
+	else
+		sc_dn(row1, row2 + 1, abs_count, save, rend);
 	jbxvt_set_scroll(0);
 	draw_cursor(); // clear
 	draw_cursor();
