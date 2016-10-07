@@ -88,19 +88,13 @@ static void copy_visible_area(const uint8_t row1, const uint8_t row2,
 	xcb_flush(jbxvt.X.xcb);
 }
 
-// Handle lines that scroll off the top of the screen.
-static void scroll_off(const int16_t count)
-{
-	// -1 to avoid going over array bounds
-	memcpy(jbxvt.scr.sline.data + count,
-		jbxvt.scr.sline.data, count - 1);
-}
-
 static void add_scroll_history(const int8_t count)
 {
 	if (count < 1) // nothing to do
 		return;
-	scroll_off(count);
+	// Handle lines that scroll off the top of the screen.
+	memcpy(jbxvt.scr.sline.data + count, jbxvt.scr.sline.data,
+		count - 1); // -1 to avoid going over array bounds
 	int_fast16_t y = jbxvt.scr.sline.max - count - 1;
 	struct JBXVTSavedLine * i = &jbxvt.scr.sline.data[y],
 		* j = &jbxvt.scr.sline.data[y + count];
