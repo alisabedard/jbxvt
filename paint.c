@@ -87,6 +87,24 @@ static inline void font(const xcb_font_t f)
 	xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, XCB_GC_FONT, &f);
 }
 
+static void draw_underline(uint16_t len, struct JBDim p)
+{
+	xcb_poly_line(jbxvt.X.xcb, XCB_COORD_MODE_ORIGIN, jbxvt.X.win.vt,
+		jbxvt.X.gc.tx, 2,
+		(struct xcb_point_t[]){{p.x, p.y},
+		{p.x + len * jbxvt.X.font.size.width, p.y}});
+}
+
+static void draw_text(uint8_t * restrict str, uint16_t len,
+	struct JBDim * restrict p, uint32_t rval)
+{
+	xcb_image_text_8(jbxvt.X.xcb, len, jbxvt.X.win.vt,
+		jbxvt.X.gc.tx, p->x, p->y, (const char *)str);
+	++p->y; // Padding for underline, use underline for italic
+	if (rval & RS_ULINE || unlikely(rval & RS_ITALIC))
+		draw_underline(len, *p);
+}
+
 //  Paint the text using the rendition value at the screen position.
 void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 	int16_t len, struct JBDim p)
@@ -119,15 +137,8 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 			p.x += f.w << 1;
 		}
 		jbxvt.mode.decdwl = false;
-	} else {
-		xcb_image_text_8(c, len, w, gc, p.x, p.y, (const char *)str);
-		++p.y; // Padding for underline, use underline for italic
-		if (rval & RS_ULINE || unlikely(rval & RS_ITALIC)) {
-			xcb_poly_line(c, XCB_COORD_MODE_ORIGIN, w, gc, 2,
-				(struct xcb_point_t[]){{p.x, p.y},
-				{p.x + len * f.w, p.y}});
-		}
-	}
+	} else
+		draw_text(str, len, &p, rval);
 	if(bold) // restore font
 		font(jbxvt.X.f.normal);
 	if (cmod) {

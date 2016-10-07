@@ -81,5 +81,6 @@ void repaint(void)
 			: jbxvt.X.f.size.h + p.y;
 	}
 	show_selection(0, jbxvt.scr.chars.height, 0, jbxvt.scr.chars.width);
+	xcb_flush(jbxvt.X.xcb);
 }
 
