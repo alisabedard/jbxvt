@@ -74,11 +74,10 @@ void repaint(void)
 	for (uint_fast16_t i = 0; y <= jbxvt.scr.chars.height; ++y, ++i) {
 		uint8_t * s = jbxvt.scr.current->text[i];
 		int_fast16_t x = 0;
-		for (x = 0; s[x]; ++x)
+		for (x = 0; s && s[x] && x < jbxvt.scr.chars.width; ++x)
 			str[x] = s[x] < ' ' ? ' ' : s[x];
-		p.y = x > 0 ? repaint_generic(p, x, 0, jbxvt.scr.chars.width,
-			str, jbxvt.scr.current->rend[i])
-			: jbxvt.X.f.size.h + p.y;
+		p.y = repaint_generic(p, x, 0, jbxvt.scr.chars.width,
+			str, jbxvt.scr.current->rend[i]);
 	}
 	show_selection(0, jbxvt.scr.chars.height, 0, jbxvt.scr.chars.width);
 	xcb_flush(jbxvt.X.xcb);
