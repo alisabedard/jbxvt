@@ -51,8 +51,7 @@ static void copy_saved_lines(const int_fast16_t n)
 	for (int_fast16_t i = n - 1; i >= 0; --i) {
 		uint8_t * t = jbxvt.scr.current->text[i];
 #define SLINE jbxvt.scr.sline
-		const uint16_t new_index = n - i - 1;
-		struct JBXVTSavedLine * sl = &SLINE.data[new_index];
+		struct JBXVTSavedLine * sl = SLINE.data + n - i - 1;
 		sl->wrap = jbxvt.scr.current->wrap[i];
 		SLINE.top += n;
 		SLINE.top = MIN(SLINE.top, SLINE.max);
