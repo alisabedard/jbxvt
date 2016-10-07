@@ -4,7 +4,6 @@
 
 #include "scroll.h"
 
-#include "cursor.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "sbar.h"
@@ -182,7 +181,5 @@ void scroll(const uint8_t row1, const uint8_t row2,
 	else
 		sc_dn(row1, row2 + 1, abs_count, save, rend);
 	jbxvt_set_scroll(0);
-	draw_cursor(); // clear
-	draw_cursor();
 }
 
