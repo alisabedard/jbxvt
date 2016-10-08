@@ -8,15 +8,9 @@
 #include "mouse.h"
 #include "sbar.h"
 #include "scr_move.h"
-#include "screen.h"
 #include "selection.h"
 #include "selex.h"
 #include "selreq.h"
-#include "Token.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 xcb_atom_t wm_del_win(void)
 {
