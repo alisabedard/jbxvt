@@ -94,11 +94,11 @@ static void copy_data_after_count(const uint8_t count, const struct JBDim c)
 
 static void delete_source_data(const uint8_t count, const int16_t y)
 {
-	uint8_t * t = jbxvt.scr.current->text[y];
-	uint32_t * r = jbxvt.scr.current->rend[y];
 	// delete the source data copied
-	memset(t + jbxvt.scr.chars.w - count, 0, count);
-	memset(r + jbxvt.scr.chars.w - count, 0, count << 2);
+	memset(jbxvt.scr.current->text[y] + jbxvt.scr.chars.w - count,
+		0, count);
+	memset(jbxvt.scr.current->rend[y] + jbxvt.scr.chars.w - count,
+		0, count << 2);
 }
 
 //  Delete count characters from the current position.
