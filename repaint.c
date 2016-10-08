@@ -23,8 +23,7 @@ static void paint_rvec_text(uint8_t * str, uint32_t * rvec,
 		int_fast16_t i;
 		/* Find the length for which
 		   the current rend val applies.  */
-		for (i = 0, r = *rvec; i < len
-			&& rvec[i] == r; ++i)
+		for (i = 0, r = *rvec; i < len && rvec[i] == r; ++i)
 			;
 		// draw
 		paint_rval_text(str, r, i, p);
@@ -84,7 +83,6 @@ void repaint(void)
 		p.y = repaint_generic(p, x, str,
 			jbxvt.scr.current->rend[i]);
 	}
-	show_selection(0, CSZ.height,
-		0, CSZ.width);
+	show_selection(0, CSZ.height, 0, CSZ.width);
 }
 
