@@ -62,6 +62,7 @@ static void write_utmpx(const pid_t comm_pid, char * tty_name)
 	UCP(ut_line, tty_name + 5);
 	UCP(ut_user, getenv("USER"));
 	UCP(ut_host, getenv("DISPLAY"));
+#undef UCP
 	struct timeval tv;
 	// Does not return an error:
 	gettimeofday(&tv, NULL);

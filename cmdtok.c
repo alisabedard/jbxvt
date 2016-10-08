@@ -15,11 +15,10 @@
 #include <string.h>
 #include <unistd.h>
 
-// Input buffer is empty
-#define GCC_NULL 0x100
+enum {INPUT_BUFFER_EMPTY = 0x100};
 
 //  Flags used to control get_com_char();
-enum ComCharFlags {BUF_ONLY=1, GET_XEVENTS=2};
+enum ComCharFlags {GET_INPUT_ONLY=1, GET_XEVENTS_ONLY=2};
 
 // Shortcuts
 #define XC jbxvt.X.xcb
@@ -179,26 +178,26 @@ static void poll_io(fd_set * restrict in_fdset)
 		jb_check_x(jbxvt.X.xcb);
 }
 
-static bool get_buffered(int_fast16_t * val, const int_fast8_t flags)
+static bool get_buffered(int_fast16_t * val, const uint8_t flags)
 {
 	if (COM.stack.top > COM.stack.data)
 		*val = *--COM.stack.top;
 	else if (COM.buf.next < COM.buf.top)
 		*val = *COM.buf.next++;
-	else if (flags & BUF_ONLY)
-		*val = GCC_NULL;
+	else if (flags & GET_INPUT_ONLY)
+		*val = INPUT_BUFFER_EMPTY;
 	else
 		return false;
 	return true;
 }
 
 /*  Return the next input character after first passing any keyboard input
-    to the command.  If flags & BUF_ONLY is true then only buffered
+    to the command.  If flags & GET_INPUT_ONLY is true then only buffered
     characters are returned and once the buffer is empty the special value
-    GCC_NULL is returned.  If flags and GET_XEVENTS is true then GCC_NULL
-    is returned when an X event arrives.  This is the most often called
-    function. */
-int_fast16_t get_com_char(const int_fast8_t flags)
+    INPUT_BUFFER_EMPTY is returned.  If flags and GET_XEVENTS_ONLY is true,
+    then INPUT_BUFFER_EMPTY is returned when an X event arrives.
+    This is the most often called function. */
+int_fast16_t get_com_char(const uint8_t flags)
 {
 	int_fast16_t ret = 0;
 	if (get_buffered(&ret, flags))
@@ -207,14 +206,14 @@ int_fast16_t get_com_char(const int_fast8_t flags)
 	fd_set in;
 input:
 	FD_ZERO(&in);
-	if (handle_xev() && (flags & GET_XEVENTS))
-		return GCC_NULL;
+	if (handle_xev() && (flags & GET_XEVENTS_ONLY))
+		return INPUT_BUFFER_EMPTY;
 	poll_io(&in);
 	if (!FD_ISSET(CFD, &in))
 		goto input;
 	const uint8_t l = read(CFD, BUF.data, COM_BUF_SIZE);
 	if (l < 1)
-		return errno == EWOULDBLOCK ? GCC_NULL : EOF;
+		return errno == EWOULDBLOCK ? INPUT_BUFFER_EMPTY : EOF;
 	BUF.next = BUF.data;
 	BUF.top = BUF.data + l;
 	return *BUF.next++;
@@ -232,7 +231,7 @@ static void handle_string_char(int_fast16_t c, struct Token * restrict tk)
 	uint8_t * restrict s = tk->string;
 	do {
 		s[i++] = c;
-		c = get_com_char(1);
+		c = get_com_char(GET_INPUT_ONLY);
 		if (c == '\n')
 			++nl;
 	} while (is_string_char(c) && i < TKS_MAX);
@@ -240,7 +239,7 @@ static void handle_string_char(int_fast16_t c, struct Token * restrict tk)
 	tk->length = i;
 	s[i] = 0; // terminating NULL
 	tk->type = TK_STRING;
-	if (c != GCC_NULL)
+	if (c != INPUT_BUFFER_EMPTY)
 		  put_com_char(c);
 }
 
@@ -319,9 +318,9 @@ void get_token(struct Token * restrict tk)
 	// set token per event:
 	if(handle_xevents(tk))
 		  return;
-	const int_fast16_t c = get_com_char(GET_XEVENTS);
+	const int_fast16_t c = get_com_char(GET_XEVENTS_ONLY);
 	switch (c) {
-	case GCC_NULL:
+	case INPUT_BUFFER_EMPTY:
 		tk->type = TK_NULL;
 		break;
 	case EOF:

@@ -7,7 +7,7 @@
 
 void get_token(struct Token * restrict tk);
 
-int_fast16_t get_com_char(const int_fast8_t flags)
+int_fast16_t get_com_char(const uint8_t flags)
 	__attribute__((hot));
 
 #endif//!CMDTOK_H
