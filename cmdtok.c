@@ -24,10 +24,8 @@ enum {INPUT_BUFFER_EMPTY = 0x100};
 enum ComCharFlags {GET_INPUT_ONLY=1, GET_XEVENTS_ONLY=2};
 
 // Shortcuts
-#define XC jbxvt.X.xcb
 #define COM jbxvt.com
 #define BUF jbxvt.com.buf
-#define CFD COM.fd
 
 static void handle_focus(xcb_generic_event_t * restrict ge)
 {
@@ -86,8 +84,8 @@ static void key_press(xcb_generic_event_t * restrict e)
 
 static bool handle_xev(void)
 {
-	jb_check_x(XC);
-	xcb_generic_event_t * event = xcb_poll_for_event(XC);
+	jb_check_x(jbxvt.X.xcb);
+	xcb_generic_event_t * event = xcb_poll_for_event(jbxvt.X.xcb);
 	if (!event)
 		return false;
 	switch (event->response_type & ~0x80) {
@@ -199,9 +197,9 @@ input:
 	if (handle_xev() && (flags & GET_XEVENTS_ONLY))
 		return INPUT_BUFFER_EMPTY;
 	poll_io(&in);
-	if (!FD_ISSET(CFD, &in))
+	if (!FD_ISSET(jbxvt.com.fd, &in))
 		goto input;
-	const uint8_t l = read(CFD, BUF.data, COM_BUF_SIZE);
+	const uint8_t l = read(jbxvt.com.fd, BUF.data, COM_BUF_SIZE);
 	if (l < 1)
 		return errno == EWOULDBLOCK ? INPUT_BUFFER_EMPTY : EOF;
 	BUF.next = BUF.data;
