@@ -8,6 +8,7 @@
 #include "mouse.h"
 #include "sbar.h"
 #include "screen.h"
+#include "selection.h"
 #include "selex.h"
 #include "selreq.h"
 #include "Token.h"
@@ -112,45 +113,46 @@ static void handle_button_release(struct Token * restrict tk,
 	}
 }
 
-static TokenType handle_button1_press(struct JBXVTEvent * restrict xe)
+static void handle_button1_press(struct JBXVTEvent * restrict xe,
+	const struct JBDim b)
 {
+
 	static unsigned int time1, time2;
 	if (xe->time - time2
 		< MP_INTERVAL) {
 		time1 = 0;
 		time2 = 0;
-		return TK_SELLINE;
+		jbxvt_start_selection(b, JBXVT_SEL_UNIT_LINE);
 	} else if (xe->time - time1
 		< MP_INTERVAL) {
 		time2 = xe->time;
-		return TK_SELWORD;
+		jbxvt_start_selection(b, JBXVT_SEL_UNIT_WORD);
+	} else {
+		time1 = xe->time;
+		jbxvt_start_selection(b, JBXVT_SEL_UNIT_CHAR);
 	}
-	time1 = xe->time;
-	return TK_SELSTART;
 }
 
-static void handle_button_press(struct Token * restrict tk,
-	struct JBXVTEvent * restrict xe)
+static void handle_button_press(struct JBXVTEvent * restrict xe)
 {
 	const xcb_window_t v = jbxvt.X.win.vt;
 	if (xe->window == v && xe->state == XCB_KEY_BUT_MASK_CONTROL) {
-		ARGS(TK_SBSWITCH);
+		jbxvt_toggle_scrollbar();
 		return;
 	}
+	const struct JBDim b = {.x = xe->box.x, .y = xe->box.y};
 	if (xe->window == v && jbxvt_get_mouse_tracked())
 		jbxvt_track_mouse(xe->button, xe->state,
 			(struct JBDim){.x = xe->box.x, .y = xe->box.y}, 0);
 	else if (xe->window == v && !(xe->state & XCB_KEY_BUT_MASK_CONTROL)) {
-		TokenType type = TK_NULL;
 		switch (xe->button) {
 		case 1:
-			type = handle_button1_press(xe);
-			break;
+			handle_button1_press(xe, b);
+			return;
 		case 3:
-			type = TK_SELEXTND;
-			break;
+			jbxvt_extend_selection(b, false);
+			return;
 		}
-		ARGS(type, xe->box.x, xe->box.y);
 		return;
 	}
 	if (xe->window == jbxvt.X.win.sb && xe->button == 2)
@@ -196,7 +198,7 @@ bool handle_xevents(struct Token * restrict tk)
 			xe->property);
 		break;
 	case XCB_BUTTON_PRESS:
-		handle_button_press(tk, xe);
+		handle_button_press(xe);
 		break;
 	case XCB_BUTTON_RELEASE:
 		handle_button_release(tk, xe);

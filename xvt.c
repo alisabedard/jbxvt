@@ -382,17 +382,6 @@ void jbxvt_parse_token(void)
 			jbxvt.scr.current->margin.bot, t[0]);
 		break;
 
-#define SELOP(op, arg) {jbxvt_##op##_selection((struct JBDim){.x = t[0], \
-	.y = t[1]}, arg); break;}
-	CASE(TK_SELSTART)
-		SELOP(start, JBXVT_SEL_UNIT_CHAR);
-	CASE(TK_SELEXTND)
-		SELOP(extend, false);
-	CASE(TK_SELWORD)
-		SELOP(start, JBXVT_SEL_UNIT_WORD);
-	CASE(TK_SELLINE)
-		SELOP(start, JBXVT_SEL_UNIT_LINE);
-
 	CASE(TK_SELINSRT)
 		jbxvt_request_selection(t[0]);
 		break;
