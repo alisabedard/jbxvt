@@ -154,17 +154,6 @@ static void handle_button_press(struct Token * restrict tk,
 		ARGS(TK_SBGOTO, xe->box.y);
 }
 
-static struct JBXVTEvent * pop_xevent(void)
-{
-	struct JBXVTEventQueue * q = &jbxvt.com.events;
-	struct JBXVTEvent * xe = q->last;
-	if (xe) {
-		q->last = xe->prev;
-		*(q->last ? &q->last->next : &q->start) = NULL;
-	}
-	return xe;
-}
-
 static enum JBXVTRegion get_region(struct JBXVTEvent * xe)
 {
 	const xcb_window_t w = xe->window;
@@ -181,12 +170,11 @@ static enum JBXVTRegion get_region(struct JBXVTEvent * xe)
 // convert next X event into a token
 bool handle_xevents(struct Token * restrict tk)
 {
-	struct JBXVTEvent * xe = pop_xevent();
-	if(!xe)
-		return false;
+	struct JBXVTEvent * xe = &jbxvt.com.xev;
 	tk->region = get_region(xe);
 	switch (xe->type &~0x80) { // Ordered numerically:
-	case 0: // Unimplemented, undefined
+	case 0: // Unimplemented, undefined, no event
+		return false;
 	case 150: // Undefined
 	case XCB_KEY_RELEASE: // Unimplemented
 	case XCB_NO_EXPOSURE: // Unimplemented
@@ -235,7 +223,8 @@ bool handle_xevents(struct Token * restrict tk)
 	default:
 		LOG("Unhandled event %d", xe->type);
 	}
-	free(xe);
+	// Zero out event structure for next event:
+	jbxvt.com.xev = (struct JBXVTEvent){};
 	return true;
 }
 

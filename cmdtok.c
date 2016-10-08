@@ -26,55 +26,24 @@ enum ComCharFlags {GET_INPUT_ONLY=1, GET_XEVENTS_ONLY=2};
 #define BUF jbxvt.com.buf
 #define CFD COM.fd
 
-#ifdef DEBUG
-static void print_queued_event_count(void)
+static void handle_focus(xcb_generic_event_t * restrict ge)
 {
-	uint16_t i = 0;
-	for (struct JBXVTEvent * e = jbxvt.com.events.start; e; e = e->next)
-		++i;
-	if (i)
-		LOG("%u events queued", i);
-}
-#else//!DEBUG
-#define print_queued_event_count()
-#endif//DEBUG
-
-static struct JBXVTEvent * ev_alloc(xcb_generic_event_t * restrict e)
-{
-	struct JBXVTEvent * xe = calloc(1, sizeof(struct JBXVTEvent));
-	xe->type = e->response_type;
-	return xe;
-}
-
-static void put_xevent(struct JBXVTEvent * xe)
-{
-	struct JBXVTEventQueue * q = &jbxvt.com.events;
-	xe->next = q->start;
-	xe->prev = NULL;
-	*(xe->next ? &xe->next->prev : &q->last) = xe;
-	print_queued_event_count();
-}
-
-static void handle_focus(xcb_generic_event_t * restrict e)
-{
-	xcb_focus_in_event_t * f = (xcb_focus_in_event_t *)e;
-	if (f->mode)
+	xcb_focus_in_event_t * e = (xcb_focus_in_event_t *)ge;
+	jbxvt.com.xev = (struct JBXVTEvent) {.type = e->response_type,
+		.detail = e->detail};
+	if (e->mode)
 		  return;
-	struct JBXVTEvent * xe = ev_alloc(e);
-	xe->detail = f->detail;
-	put_xevent(xe);
+	jbxvt.com.xev.detail = e->detail;
 }
-
-#define XESET(a, b) xe->a = e->b
-#define XEEQ(a) XESET(a, a)
-#define EALLOC(t) struct JBXVTEvent * xe = ev_alloc(ge); t * e = (t*)ge;
 
 static void handle_sel(xcb_generic_event_t * restrict ge)
 {
-	EALLOC(xcb_selection_request_event_t);
-	XEEQ(time); XEEQ(requestor); XEEQ(target); XEEQ(property);
-	XESET(window, owner);
-	put_xevent(xe);
+	xcb_selection_request_event_t * e
+		= (xcb_selection_request_event_t *)ge;
+	jbxvt.com.xev = (struct JBXVTEvent) {.type = e->response_type,
+		.time = e->time, .requestor = e->requestor,
+		.target = e->target, .property = e->property,
+		.window = e->owner};
 }
 
 static void handle_client_msg(xcb_generic_event_t * restrict ge)
@@ -87,18 +56,19 @@ static void handle_client_msg(xcb_generic_event_t * restrict ge)
 
 static void handle_expose(xcb_generic_event_t * restrict ge)
 {
-	EALLOC(xcb_expose_event_t);
-	XEEQ(window); XESET(box.x, x); XESET(box.y, y);
-	XESET(box.width, width); XESET(box.height, height);
-	put_xevent(xe);
+	xcb_expose_event_t * e = (xcb_expose_event_t *)ge;
+	jbxvt.com.xev = (struct JBXVTEvent) {.type = e->response_type,
+		.window = e->window, .box.x = e->x, .box.y = e->y,
+		.box.width = e->width, .box.height = e->height};
 }
 
 static void handle_other(xcb_generic_event_t * restrict ge)
 {
-	EALLOC(xcb_key_press_event_t);
-	XESET(window, event); XESET(box.x, event_x); XESET(box.y, event_y);
-	XEEQ(state); XEEQ(time); XESET(button, detail);
-	put_xevent(xe);
+	xcb_key_press_event_t * e = (xcb_key_press_event_t *)ge;
+	jbxvt.com.xev = (struct JBXVTEvent) {.type = e->response_type,
+		.window = e->event, .box.x = e->event_x,
+		.box.y = e->event_y, .state = e->state,
+		.time = e->time, .button = e->detail};
 }
 
 static void key_press(xcb_generic_event_t * restrict e)

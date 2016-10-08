@@ -67,13 +67,9 @@ struct JBXVTCommandContainer {
 	uint8_t *next, *top, *data;
 };
 
-struct JBXVTEventQueue {
-	struct JBXVTEvent * start, * last;
-};
-
 struct JBXVTCommandData {
 	struct JBXVTCommandContainer buf, stack;
-	struct JBXVTEventQueue events;
+	struct JBXVTEvent xev;
 	uint8_t * send_nxt; // next char to be sent
 	long width; // # file descriptors being used
 	fd_t fd; // file descriptor connected to the command
