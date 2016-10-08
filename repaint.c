@@ -65,6 +65,18 @@ static int_fast16_t show_scroll_history(struct JBDim * restrict p)
 	return line;
 }
 
+__attribute__((nonnull(1)))
+static uint_fast16_t filter_string(uint8_t * restrict buf,
+	uint8_t * restrict input)
+{
+	if (!input)
+		return 0;
+	uint_fast16_t x;
+	for (x = 0; x < CSZ.width; ++x)
+		buf[x] = input[x] < ' ' ? ' ' : input[x];
+	return x;
+}
+
 // Repaint the screen
 void repaint(void)
 {
@@ -72,15 +84,11 @@ void repaint(void)
 	struct JBDim p = {};
 	int_fast32_t line = show_scroll_history(&p);
 	// Do the remainder from the current screen:
-	for (uint_fast16_t i = 0; line <= CSZ.height;
-		++line, ++i) {
-		uint8_t * s = jbxvt.scr.current->text[i];
-		register uint_fast16_t x;
+	for (uint_fast16_t i = 0; line <= CSZ.height; ++line, ++i) {
 		// Allocate enough space to process each column
 		uint8_t str[CSZ.width];
-		for (x = 0; s && x < CSZ.width; ++x)
-			str[x] = s[x] < ' ' ? ' ' : s[x];
-		p.y = repaint_generic(p, x, str,
+		p.y = repaint_generic(p, filter_string(str,
+			jbxvt.scr.current->text[i]), str,
 			jbxvt.scr.current->rend[i]);
 	}
 	show_selection(0, CSZ.height, 0, CSZ.width);
