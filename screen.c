@@ -16,6 +16,7 @@
 #include <string.h>
 
 #define FSZ jbxvt.X.font.size
+
 #define GET_X(op) p.w op##= FSZ.w; p.y op##= FSZ.h; return p;
 
 struct JBDim jbxvt_get_char_size(struct JBDim p)
@@ -34,11 +35,12 @@ struct JBDim jbxvt_get_pixel_size(struct JBDim p)
     and do not lie within empty space.  */
 void fix_rc(struct JBDim * restrict rc)
 {
-	const struct JBDim c = jbxvt.scr.chars;
-	if(!c.h || !c.w)
+#define CSZ jbxvt.scr.chars
+	if(!CSZ.h || !CSZ.w)
 		  return; // prevent segfault on bad window size.
-	JB_LIMIT(rc->x, c.w - 1, 0);
-	JB_LIMIT(rc->y, c.h - 1, 0);
+	JB_LIMIT(rc->x, CSZ.w - 1, 0);
+	JB_LIMIT(rc->y, CSZ.h - 1, 0);
+#undef CSZ
 }
 
 // Set all chars to 'E'

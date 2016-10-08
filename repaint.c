@@ -8,6 +8,9 @@
 #include "paint.h"
 #include "show_selection.h"
 
+#define CSZ jbxvt.scr.chars
+#define FSZ jbxvt.X.f.size
+
 /* Display the string using the rendition vector
    at the screen coordinates.  */
 static void paint_rvec_text(uint8_t * str, uint32_t * rvec,
@@ -26,7 +29,6 @@ static void paint_rvec_text(uint8_t * str, uint32_t * rvec,
 		// draw
 		paint_rval_text(str, r, i, p);
 		// advance to next block
-#define FSZ jbxvt.X.f.size
 		p.x += i * FSZ.width;
 		str += i;
 		rvec += i;
@@ -45,21 +47,21 @@ static int_fast32_t repaint_generic(struct JBDim p, uint_fast16_t len,
 	else
 		paint_rval_text(str, 0, len, p);
 	p.x += len * FSZ.width;
-	const uint16_t width = (jbxvt.scr.chars.width + 1 - len)
+	const uint16_t width = (CSZ.width + 1 - len)
 		* FSZ.width;
 	xcb_clear_area(jbxvt.X.xcb, false, jbxvt.X.win.vt,
 		p.x, p.y, width, FSZ.height);
 	return p.y + FSZ.height;
-#undef FSZ
 }
 
 static int_fast16_t show_scroll_history(struct JBDim * restrict p)
 {
 	int_fast16_t line = 0;
 	for (int_fast16_t i = jbxvt.scr.offset - 1;
-		line <= jbxvt.scr.chars.height && i >= 0; ++line, --i) {
+		line <= CSZ.height && i >= 0; ++line, --i) {
 		struct JBXVTSavedLine * sl = &jbxvt.scr.sline.data[i];
-		p->y = repaint_generic(*p, sl->sl_length, sl->text, sl->rend);
+		p->y = repaint_generic(*p, sl->sl_length,
+			sl->text, sl->rend);
 	}
 	return line;
 }
@@ -71,16 +73,18 @@ void repaint(void)
 	struct JBDim p = {};
 	int_fast32_t line = show_scroll_history(&p);
 	// Do the remainder from the current screen:
-	for (uint_fast16_t i = 0; line <= jbxvt.scr.chars.height;
+	for (uint_fast16_t i = 0; line <= CSZ.height;
 		++line, ++i) {
 		uint8_t * s = jbxvt.scr.current->text[i];
 		register uint_fast16_t x;
 		// Allocate enough space to process each column
-		uint8_t str[jbxvt.scr.chars.width];
-		for (x = 0; s && x < jbxvt.scr.chars.width; ++x)
+		uint8_t str[CSZ.width];
+		for (x = 0; s && x < CSZ.width; ++x)
 			str[x] = s[x] < ' ' ? ' ' : s[x];
-		p.y = repaint_generic(p, x, str, jbxvt.scr.current->rend[i]);
+		p.y = repaint_generic(p, x, str,
+			jbxvt.scr.current->rend[i]);
 	}
-	show_selection(0,jbxvt.scr.chars.height,0,jbxvt.scr.chars.width);
+	show_selection(0, CSZ.height,
+		0, CSZ.width);
 }
 
