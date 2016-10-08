@@ -36,7 +36,7 @@ static void handle_txtpar(struct Token * restrict token)
 {
 	switch (token->arg[0]) {
 	case 0 :
-#define CN(b) change_name(token->string, b)
+#define CN(b) jbxvt_change_name(token->string, b)
 		CN(false);
 		CN(true);
 		break;
@@ -91,21 +91,6 @@ static void handle_tk_char(const uint8_t tk_char)
 		LOG("charset G0");
 		jbxvt.mode.charsel = 0;
 		break;
-	}
-}
-
-static void expose(const uint8_t region, const bool size_set)
-{
-	if (region == JBXVT_REGION_SCROLLBAR)
-		jbxvt_draw_scrollbar();
-	else if (size_set) {
-		draw_cursor(); // clear
-		repaint();
-		draw_cursor(); // draw
-	} else {
-		/*  Force a full reset if an exposure event
-		 *  arrives after a resize.  */
-		jbxvt_reset();
 	}
 }
 
@@ -185,7 +170,6 @@ static void tbc(const uint8_t t)
 void jbxvt_parse_token(void)
 {
 	struct Token token;
-	static bool size_set = true;
 	get_token(&token);
 	int32_t * t = token.arg;
 	// n is sanitized for ops with optional args
@@ -292,10 +276,6 @@ void jbxvt_parse_token(void)
 	CASE(TK_EOF)
 		exit(0);
 	FIXME(TK_EPA);
-	CASE(TK_EXPOSE)
-		expose(token.region, size_set);
-		size_set = true;
-		break;
 	CASE(TK_EXTGM52)
 		jbxvt.mode.charsel = 0;
 		jbxvt.mode.gm52 = false;
@@ -360,11 +340,6 @@ void jbxvt_parse_token(void)
 	CASE(TK_IND) // Index (same as \n)
 		jbxvt_index_from(n, jbxvt.scr.current->margin.t);
 		break;
-
-	CASE(TK_RESIZE)
-		size_set = false;
-		resize_window();
-		break;
 	CASE(TK_S7C1T) // 7-bit controls
 		jbxvt.mode.s8c1t = false;
 		break;
@@ -421,21 +396,10 @@ void jbxvt_parse_token(void)
 	CASE(TK_SELLINE)
 		SELOP(start, JBXVT_SEL_UNIT_LINE);
 
-	CASE(TK_SELECT)
-		jbxvt_make_selection();
-		break;
-	CASE(TK_SELCLEAR)
-		jbxvt_clear_selection();
-		break;
-	CASE(TK_SELREQUEST)
-		jbxvt_send_selection(t[0], t[1], t[2], t[3]);
-		break;
 	CASE(TK_SELINSRT)
-		request_selection(t[0]);
+		jbxvt_request_selection(t[0]);
 		break;
-	CASE(TK_SELNOTIFY)
-		paste_primary(t[0], t[1], t[2]);
-		break;
+
 	FIXME(TK_SPA);
 	FIXME(TK_SS2);
 	FIXME(TK_SS3);

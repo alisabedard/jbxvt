@@ -8,10 +8,10 @@
 #include <stdint.h>
 
 // Change window or icon name:
-void change_name(uint8_t * restrict str, const bool icon);
+void jbxvt_change_name(uint8_t * restrict str, const bool icon);
 
-void map_window(void);
+void jbxvt_map_window(void);
 
-void resize_window(void);
+void jbxvt_resize_window(void);
 
 #endif//JBXVT_XSETUP_H

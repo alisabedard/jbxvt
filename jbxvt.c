@@ -120,7 +120,7 @@ int main(int argc, char ** argv)
 	init_display(argv[0]);
 	mode_init();
 	jbxvt_init();
-	map_window();
+	jbxvt_map_window();
 	jb_check(setenv("TERM", TERM_ENV, true) != -1,
 		"Could not set TERM environment variable");
 	init_command(com_argv);

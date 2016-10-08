@@ -140,8 +140,8 @@ static void create_window(uint8_t * restrict name,
 	xcb_size_hints_t sh;
 	get_sizehints(&sh);
 	create_main_window(&sh, root);
-	change_name(name, true);
-	change_name(name, false);
+	jbxvt_change_name(name, true);
+	jbxvt_change_name(name, false);
 	create_sb_window(sh.height);
 	create_vt_window(&sh);
 }

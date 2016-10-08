@@ -7,6 +7,7 @@
 #include "libjb/log.h"
 #include "mouse.h"
 #include "screen.h"
+#include "selreq.h"
 #include "Token.h"
 
 #include <stdio.h>
@@ -93,7 +94,7 @@ static void handle_button_release(struct Token * restrict tk,
 		switch (xe->button) {
 		case 1:
 		case 3:
-			ARGS(TK_SELECT, xe->time);
+			jbxvt_make_selection();
 			break;
 		case 2:
 			ARGS(TK_SELINSRT, xe->time, xe->box.x, xe->box.y);
@@ -167,6 +168,12 @@ static enum JBXVTRegion get_region(struct JBXVTEvent * xe)
 	return JBXVT_REGION_NONE;
 }
 
+static void handle_focus(const bool in)
+{
+	if (jbxvt.mode.mouse_focus_evt)
+		cprintf("\033[%c]", in ? 'I' : 'O');
+}
+
 // convert next X event into a token
 bool handle_xevents(struct Token * restrict tk)
 {
@@ -178,38 +185,26 @@ bool handle_xevents(struct Token * restrict tk)
 	case 150: // Undefined
 	case XCB_KEY_RELEASE: // Unimplemented
 	case XCB_NO_EXPOSURE: // Unimplemented
-		break;
 	case XCB_REPARENT_NOTIFY: // handle here to ensure cursor filled.
 	case XCB_MAP_NOTIFY: // handle here to ensure cursor filled.
+		break;
 	case XCB_ENTER_NOTIFY:
-		ARGS(TK_ENTRY, 1);
+	case XCB_FOCUS_IN:
+		handle_focus(true);
 		break;
 	case XCB_LEAVE_NOTIFY:
-		ARGS(TK_ENTRY, 0);
-		break;
-	case XCB_FOCUS_IN:
-		ARGS(TK_FOCUS, 1, xe->detail);
-		break;
 	case XCB_FOCUS_OUT:
-		ARGS(TK_FOCUS, 0, xe->detail);
-		break;
-	case XCB_EXPOSE:
-	case XCB_GRAPHICS_EXPOSURE:
-		ARGS(TK_EXPOSE, xe->box.x, xe->box.y,
-			xe->box.width, xe->box.height);
-		break;
-	case XCB_CONFIGURE_NOTIFY:
-		ARGS(TK_RESIZE);
+		handle_focus(false);
 		break;
 	case XCB_SELECTION_CLEAR:
-		ARGS(TK_SELCLEAR, xe->time);
+		jbxvt_clear_selection();
 		break;
 	case XCB_SELECTION_NOTIFY:
-		ARGS(TK_SELNOTIFY, xe->time, xe->requestor, xe->property);
+		jbxvt_paste_primary(xe->time, xe->requestor, xe->property);
 		break;
 	case XCB_SELECTION_REQUEST:
-		ARGS(TK_SELREQUEST, xe->time, xe->requestor,
-			xe->target, xe->property);
+		jbxvt_send_selection(xe->time, xe->requestor, xe->target,
+			xe->property);
 		break;
 	case XCB_BUTTON_PRESS:
 		handle_button_press(tk, xe);

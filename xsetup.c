@@ -20,19 +20,19 @@
 #define SB jbxvt.opt.show_scrollbar
 
 //  Map the window
-void map_window(void)
+void jbxvt_map_window(void)
 {
 	xcb_map_window(jbxvt.X.xcb, MW);
 	xcb_map_subwindows(jbxvt.X.xcb, MW);
 	/*  Setup the window now so that we can add LINES and COLUMNS to
 	 *  the environment.  */
-	resize_window();
+	jbxvt_resize_window();
 	jbxvt_reset(); // update size
 }
 
 /*  Called after a possible window size change.  If the window size has changed
  *  initiate a redraw by resizing the subwindows. */
-void resize_window(void)
+void jbxvt_resize_window(void)
 {
 	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(jbxvt.X.xcb,
 		xcb_get_geometry(jbxvt.X.xcb, MW), NULL);
@@ -51,7 +51,7 @@ void resize_window(void)
 }
 
 // Change window or icon name:
-void change_name(uint8_t * restrict str, const bool icon)
+void jbxvt_change_name(uint8_t * restrict str, const bool icon)
 {
 	assert(str);
 #define XA(n) XCB_ATOM_##n

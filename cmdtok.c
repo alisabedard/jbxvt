@@ -9,7 +9,10 @@
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "lookup_key.h"
+#include "sbar.h"
+#include "scr_reset.h"
 #include "xevents.h"
+#include "xsetup.h"
 
 #include <errno.h>
 #include <string.h>
@@ -56,10 +59,10 @@ static void handle_client_msg(xcb_generic_event_t * restrict ge)
 
 static void handle_expose(xcb_generic_event_t * restrict ge)
 {
-	xcb_expose_event_t * e = (xcb_expose_event_t *)ge;
-	jbxvt.com.xev = (struct JBXVTEvent) {.type = e->response_type,
-		.window = e->window, .box.x = e->x, .box.y = e->y,
-		.box.width = e->width, .box.height = e->height};
+	if (((xcb_expose_event_t *)ge)->window == jbxvt.X.win.sb)
+		jbxvt_draw_scrollbar();
+	else
+		jbxvt_reset();
 }
 
 static void handle_other(xcb_generic_event_t * restrict ge)
@@ -88,6 +91,9 @@ static bool handle_xev(void)
 	if (!event)
 		return false;
 	switch (event->response_type & ~0x80) {
+	case XCB_CONFIGURE_NOTIFY:
+		jbxvt_resize_window();
+		break;
 	case XCB_KEY_PRESS:
 		key_press(event);
 		break;

@@ -35,11 +35,8 @@ static bool paste_from(const xcb_atom_t cb, const xcb_timestamp_t t)
 	return true;
 }
 
-void request_selection(const xcb_timestamp_t t)
+void jbxvt_request_selection(const xcb_timestamp_t t)
 {
-	/* FIXME:  For some reason, the CLIPBOARD selection retrieved
-	   first matches the old selection, then updates with a second
-	   paste.  Why?  */
 	if (paste_from(XCB_ATOM_PRIMARY, t))
 		  return;
 	if (paste_from(jbxvt.X.clipboard, t))
@@ -49,7 +46,7 @@ void request_selection(const xcb_timestamp_t t)
 }
 
 //  Respond to a notification that a primary selection has been sent
-void paste_primary(const xcb_timestamp_t t, const xcb_window_t window,
+void jbxvt_paste_primary(const xcb_timestamp_t t, const xcb_window_t window,
 	const xcb_atom_t property)
 {
 	LOG("paste_primary()");
