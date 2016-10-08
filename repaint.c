@@ -53,16 +53,15 @@ static int_fast32_t repaint_generic(struct JBDim p, uint_fast16_t len,
 	return p.y + FSZ.height;
 }
 
-static int_fast16_t show_scroll_history(struct JBDim * restrict p)
+__attribute__((nonnull(1)))
+static int_fast16_t show_scroll_history(struct JBDim * restrict p,
+	const int_fast16_t line, const int_fast16_t i)
 {
-	int_fast16_t line = 0;
-	for (int_fast16_t i = jbxvt.scr.offset - 1;
-		line <= CSZ.height && i >= 0; ++line, --i) {
-		struct JBXVTSavedLine * sl = &jbxvt.scr.sline.data[i];
-		p->y = repaint_generic(*p, sl->sl_length,
-			sl->text, sl->rend);
-	}
-	return line;
+	if (line > CSZ.h || i < 0)
+		return line;
+	struct JBXVTSavedLine * sl = &jbxvt.scr.sline.data[i];
+	p->y = repaint_generic(*p, sl->sl_length, sl->text, sl->rend);
+	return show_scroll_history(p, line + 1, i - 1);
 }
 
 __attribute__((nonnull(1)))
@@ -82,7 +81,7 @@ void repaint(void)
 {
 	//  First do any 'scrolled off' lines that are visible.
 	struct JBDim p = {};
-	int_fast32_t line = show_scroll_history(&p);
+	int_fast32_t line = show_scroll_history(&p, 0, jbxvt.scr.offset - 1);
 	// Do the remainder from the current screen:
 	for (uint_fast16_t i = 0; line <= CSZ.height; ++line, ++i) {
 		// Allocate enough space to process each column
