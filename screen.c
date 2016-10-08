@@ -59,12 +59,7 @@ void jbxvt_efill(void)
 //  Change between the alternate and the main screens
 void jbxvt_change_screen(const bool mode_high)
 {
-	jbxvt_clear_saved_lines();
 	jbxvt.scr.current = &jbxvt.scr.s[mode_high];
-	jbxvt_clear_selection();
-	jbxvt.mode.charsel = 0; // reset on screen change
-	jbxvt.mode.charset[0] = CHARSET_ASCII;
-	draw_cursor();
 	jbxvt_reset();
 }
 
