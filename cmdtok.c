@@ -306,7 +306,7 @@ void get_token(struct Token * restrict tk)
 {
 	memset(tk, 0, sizeof(struct Token));
 	// set token per event:
-	if(handle_xevents(tk))
+	if(handle_xevents(&jbxvt.com.xev))
 		  return;
 	const int_fast16_t c = get_com_char(GET_XEVENTS_ONLY);
 	switch (c) {

@@ -4,13 +4,12 @@
 #ifndef JBXVT_XEVENTS_H
 #define JBXVT_XEVENTS_H
 
-#include "Token.h"
+#include "JBXVTEvent.h"
 #include <stdbool.h>
-#include <xcb/xcb.h>
 
 xcb_atom_t wm_del_win(void);
 
-// convert next X event into a token
-bool handle_xevents(struct Token * restrict tk);
+// Handle X11 event described by xe
+bool handle_xevents(struct JBXVTEvent * xe);
 
 #endif//!JBXVT_XEVENTS_H

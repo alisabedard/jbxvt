@@ -31,18 +31,6 @@ xcb_atom_t wm_del_win(void)
 	return a;
 }
 
-static void set_args(const TokenType type, struct Token * restrict tk,
-	int32_t * restrict args, uint8_t nargs)
-{
-	nargs = MIN(nargs, TK_MAX_ARGS); // prevent buffer overflow
-	memcpy(tk->arg, args, nargs * sizeof(int32_t));
-	tk->nargs = nargs;
-	tk->type = type;
-}
-
-#define ARGS(type, ...) set_args(type, tk, (int32_t[]){__VA_ARGS__},\
-	sizeof((int32_t[]){__VA_ARGS__}))
-
 static void handle_motion_notify(struct JBXVTEvent * restrict xe)
 {
 	const xcb_rectangle_t r = xe->box;
@@ -74,8 +62,7 @@ static void sbop(struct JBXVTEvent * restrict xe, const bool up)
 		jbxvt_move(0, up ? -1 : 1, ROW_RELATIVE | COL_RELATIVE);
 }
 
-static void handle_button_release(struct Token * restrict tk,
-	struct JBXVTEvent * restrict xe)
+static void handle_button_release(struct JBXVTEvent * restrict xe)
 {
 	if (xe->window == jbxvt.X.win.sb) {
 		switch (xe->button) {
@@ -103,7 +90,7 @@ static void handle_button_release(struct Token * restrict tk,
 			jbxvt_make_selection();
 			break;
 		case 2:
-			ARGS(TK_SELINSRT, xe->time, xe->box.x, xe->box.y);
+			jbxvt_request_selection(xe->time);
 			break;
 		case 4:
 			sbop(xe, false);
@@ -168,10 +155,9 @@ static void handle_focus(const bool in)
 		cprintf("\033[%c]", in ? 'I' : 'O');
 }
 
-// convert next X event into a token
-bool handle_xevents(struct Token * restrict tk)
+// Handle X11 event described by xe
+bool handle_xevents(struct JBXVTEvent * xe)
 {
-	struct JBXVTEvent * xe = &jbxvt.com.xev;
 	switch (xe->type &~0x80) { // Ordered numerically:
 	case 0: // Unimplemented, undefined, no event
 		return false;
@@ -204,7 +190,7 @@ bool handle_xevents(struct Token * restrict tk)
 		handle_button_press(xe);
 		break;
 	case XCB_BUTTON_RELEASE:
-		handle_button_release(tk, xe);
+		handle_button_release(xe);
 		break;
 	case XCB_MOTION_NOTIFY:
 		handle_motion_notify(xe);
