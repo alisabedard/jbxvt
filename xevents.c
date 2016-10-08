@@ -7,6 +7,7 @@
 #include "libjb/log.h"
 #include "mouse.h"
 #include "sbar.h"
+#include "scr_move.h"
 #include "screen.h"
 #include "selection.h"
 #include "selex.h"
@@ -61,14 +62,16 @@ static void handle_motion_notify(struct JBXVTEvent * restrict xe)
 	}
 }
 
-static void sbop(struct Token * restrict tk, struct JBXVTEvent * restrict xe,
-	const bool up)
+static void sbop(struct JBXVTEvent * restrict xe, const bool up)
 {
 	if (jbxvt_get_mouse_tracked()) // let the application handle scrolling
 		return;
 	// xterm's behavior if alternate screen in use is to move the cursor
-	jbxvt.scr.current == &jbxvt.scr.s[0] ?  ARGS(up ? TK_SBUP : TK_SBDOWN,
-		xe->box.y) : ARGS(up ? TK_CUU : TK_CUD, 1);
+	if (jbxvt.scr.current == jbxvt.scr.s) // first screen
+		jbxvt_set_scroll(jbxvt.scr.offset + (up ? -xe->box.y
+			: xe->box.y) / jbxvt.X.font.size.h);
+	else
+		jbxvt_move(0, up ? -1 : 1, ROW_RELATIVE | COL_RELATIVE);
 }
 
 static void handle_button_release(struct Token * restrict tk,
@@ -78,11 +81,11 @@ static void handle_button_release(struct Token * restrict tk,
 		switch (xe->button) {
 		case 1:
 		case 5:
-			sbop(tk, xe, true);
+			sbop(xe, true);
 			break;
 		case 3:
 		case 4:
-			sbop(tk, xe, false);
+			sbop(xe, false);
 			break;
 		}
 	} else if (xe->window == jbxvt.X.win.vt
@@ -103,10 +106,10 @@ static void handle_button_release(struct Token * restrict tk,
 			ARGS(TK_SELINSRT, xe->time, xe->box.x, xe->box.y);
 			break;
 		case 4:
-			sbop(tk, xe, false);
+			sbop(xe, false);
 			break;
 		case 5:
-			sbop(tk, xe, true);
+			sbop(xe, true);
 			break;
 
 		}

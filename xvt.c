@@ -358,12 +358,14 @@ void jbxvt_parse_token(void)
 		    is at the top of the screen.  */
 		jbxvt_scroll_to(t[0]);
 		break;
+#if 0
 	CASE(TK_SBDOWN)
 		t[0] = - t[0]; // fall through
 	CASE(TK_SBUP)
 		jbxvt_set_scroll(jbxvt.scr.offset - t[0]
 			/ jbxvt.X.font.size.h);
 		break;
+#endif
 	CASE(TK_SC)
 		save_cursor();
 		break;
