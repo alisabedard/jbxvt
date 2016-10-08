@@ -157,19 +157,6 @@ static void handle_button_press(struct Token * restrict tk,
 		jbxvt_scroll_to(xe->box.y);
 }
 
-static enum JBXVTRegion get_region(struct JBXVTEvent * xe)
-{
-	const xcb_window_t w = xe->window;
-	const struct JBXVTXWindows * j = &jbxvt.X.win;
-	if (w == j->vt)
-		return JBXVT_REGION_SCREEN;
-	else if (w == j->sb)
-		return JBXVT_REGION_SCROLLBAR;
-	else if (w == j->main)
-		return JBXVT_REGION_MAINWIN;
-	return JBXVT_REGION_NONE;
-}
-
 static void handle_focus(const bool in)
 {
 	if (jbxvt.mode.mouse_focus_evt)
@@ -180,10 +167,10 @@ static void handle_focus(const bool in)
 bool handle_xevents(struct Token * restrict tk)
 {
 	struct JBXVTEvent * xe = &jbxvt.com.xev;
-	tk->region = get_region(xe);
 	switch (xe->type &~0x80) { // Ordered numerically:
 	case 0: // Unimplemented, undefined, no event
 		return false;
+	// Put things to ignore here:
 	case 150: // Undefined
 	case XCB_KEY_RELEASE: // Unimplemented
 	case XCB_NO_EXPOSURE: // Unimplemented
