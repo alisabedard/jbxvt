@@ -34,41 +34,42 @@ void dec_reset(struct Token * restrict token)
 		case 1: // DECCKM: cursor key mode
 			set_keys(is_set, true);
 			break;
+#define MODE(mode) m->mode = is_set
 		case 2: // DECANM: VT52/ANSI mode
-			m->decanm = is_set;
+			MODE(decanm);
 			break;
 		case 3: // DECCOLM: 80/132 col mode switch
 			if (allow_deccolm)
-				m->deccolm = is_set;
+				MODE(deccolm);
 			break;
 		case 4: // DECSCLM: slow scroll mode
-			m->decsclm = is_set;
+			MODE(decsclm);
 			break;
 		case 5: // DECSCNM: set reverse-video mode
-			m->decscnm = is_set;
+			MODE(decscnm);
 			jbxvt_reset();
 			break;
 		case 6 : // DECOM normal cursor mode
 			/* According to the spec, the cursor is reset to
 			   the home position when this is changed.  */
-			m->decom = is_set;
+			MODE(decom);
 			jbxvt_move(jbxvt.scr.current->margin.top, 0, 0);
 			break;
 		case 7: // DECAWM
 		case 45: // reverse wrap-around mode?
-			m->decawm = is_set;
+			MODE(decawm);
 			break;
 		case 9:
 			LOG("X10 mouse");
-			m->mouse_x10 = is_set;
+			MODE(mouse_x10);
 			break;
 		case 12:
 			LOG("att610 (re)set blinking cursor");
-			m->att610 = is_set;
+			MODE(att610);
 			break;
 		case 18:
 			LOG("DECPFF");
-			m->decpff = is_set;
+			MODE(decpff);
 			break;
 		case 25: // DECTCEM -- hide cursor
 			jbxvt_set_scroll(0);
@@ -84,39 +85,39 @@ void dec_reset(struct Token * restrict token)
 			break;
 		case 1000:
 			LOG("vt200 mouse");
-			m->mouse_vt200 = is_set;
+			MODE(mouse_vt200);
 			break;
 		case 1001:
 			LOG("VT200 highlight mode");
-			m->mouse_vt200hl = is_set;
+			MODE(mouse_vt200hl);
 			break;
 		case 1002:
 			LOG("button event mouse");
-			m->mouse_btn_evt = is_set;
+			MODE(mouse_btn_evt);
 			break;
 		case 1003:
 			LOG("any event mouse");
-			m->mouse_any_evt = is_set;
+			MODE(mouse_any_evt);
 			break;
 		case 1004:
 			LOG("focus event mouse");
-			m->mouse_focus_evt = is_set;
+			MODE(mouse_focus_evt);
 			break;
 		case 1005:
 			LOG("UTF-8 ext mode mouse");
-			m->mouse_ext = is_set;
+			MODE(mouse_ext);
 			break;
 		case 1006:
 			LOG("sgr ext mode mouse");
-			m->mouse_sgr = is_set;
+			MODE(mouse_sgr);
 			break;
 		case 1007:
 			LOG("alternate scroll");
-			m->mouse_alt_scroll = is_set;
+			MODE(mouse_alt_scroll);
 			break;
 		case 1015:
 			LOG("urxvt ext mode mouse");
-			m->mouse_urxvt = is_set;
+			MODE(mouse_urxvt);
 			break;
 		case 47: // switch to main screen
 		case 1047:
@@ -130,7 +131,7 @@ void dec_reset(struct Token * restrict token)
 			break;
 		case 2004: // bracketed paste mode
 			LOG("bracketed paste mode");
-			m->bpaste = is_set;
+			MODE(bpaste);
 			break;
 #ifdef DEBUG
 		default:
@@ -138,7 +139,7 @@ void dec_reset(struct Token * restrict token)
 #endif//DEBUG
 		}
 	} else if (!token->private && token->arg[0] == 4)
-		m->insert = is_set;
+		MODE(insert);
 }
 
 
