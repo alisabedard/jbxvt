@@ -26,6 +26,19 @@ enum ComCharFlags {GET_INPUT_ONLY=1, GET_XEVENTS_ONLY=2};
 #define BUF jbxvt.com.buf
 #define CFD COM.fd
 
+#ifdef DEBUG
+static void print_queued_event_count(void)
+{
+	uint16_t i = 0;
+	for (struct JBXVTEvent * e = jbxvt.com.events.start; e; e = e->next)
+		++i;
+	if (i)
+		LOG("%u events queued", i);
+}
+#else//!DEBUG
+#define print_queued_event_count()
+#endif//DEBUG
+
 static struct JBXVTEvent * ev_alloc(xcb_generic_event_t * restrict e)
 {
 	struct JBXVTEvent * xe = calloc(1, sizeof(struct JBXVTEvent));
@@ -39,6 +52,7 @@ static void put_xevent(struct JBXVTEvent * xe)
 	xe->next = q->start;
 	xe->prev = NULL;
 	*(xe->next ? &xe->next->prev : &q->last) = xe;
+	print_queued_event_count();
 }
 
 static void handle_focus(xcb_generic_event_t * restrict e)
