@@ -6,7 +6,9 @@
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "mouse.h"
+#include "sbar.h"
 #include "screen.h"
+#include "selex.h"
 #include "selreq.h"
 #include "Token.h"
 
@@ -39,22 +41,22 @@ static void set_args(const TokenType type, struct Token * restrict tk,
 #define ARGS(type, ...) set_args(type, tk, (int32_t[]){__VA_ARGS__},\
 	sizeof((int32_t[]){__VA_ARGS__}))
 
-static void handle_motion_notify(struct Token * restrict tk,
-	struct JBXVTEvent * restrict xe)
+static void handle_motion_notify(struct JBXVTEvent * restrict xe)
 {
+	const xcb_rectangle_t r = xe->box;
+	const struct JBDim b = {.x = r.x, .y = r.y};
 	if (xe->window == jbxvt.X.win.sb
-		&& (xe->state & XCB_KEY_BUT_MASK_BUTTON_2)) {
-		ARGS(TK_SBGOTO, xe->box.y);
-	} else if (xe->window == jbxvt.X.win.vt
-		&& jbxvt_get_mouse_motion_tracked()) {
-		jbxvt_track_mouse(xe->button, xe->state, (struct JBDim){
-			.x = xe->box.x, .y = xe->box.y}, JBXVT_MOTION);
-	} else if (xe->window == jbxvt.X.win.vt
+		&& (xe->state & XCB_KEY_BUT_MASK_BUTTON_2))
+		jbxvt_scroll_to(b.y);
+	else if (xe->window == jbxvt.X.win.vt
+		&& jbxvt_get_mouse_motion_tracked())
+		jbxvt_track_mouse(xe->button, xe->state, b, JBXVT_MOTION);
+	else if (xe->window == jbxvt.X.win.vt
 		&& (xe->state & XCB_KEY_BUT_MASK_BUTTON_1)
 		&& !(xe->state & XCB_KEY_BUT_MASK_CONTROL)) {
 		if (jbxvt_get_mouse_tracked())
 			  return;
-		ARGS(TK_SELDRAG, xe->box.x, xe->box.y);
+		jbxvt_extend_selection(b, true);
 	}
 }
 
@@ -152,7 +154,7 @@ static void handle_button_press(struct Token * restrict tk,
 		return;
 	}
 	if (xe->window == jbxvt.X.win.sb && xe->button == 2)
-		ARGS(TK_SBGOTO, xe->box.y);
+		jbxvt_scroll_to(xe->box.y);
 }
 
 static enum JBXVTRegion get_region(struct JBXVTEvent * xe)
@@ -213,7 +215,7 @@ bool handle_xevents(struct Token * restrict tk)
 		handle_button_release(tk, xe);
 		break;
 	case XCB_MOTION_NOTIFY:
-		handle_motion_notify(tk, xe);
+		handle_motion_notify(xe);
 		break;
 	default:
 		LOG("Unhandled event %d", xe->type);

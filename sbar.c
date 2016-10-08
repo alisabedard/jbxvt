@@ -44,6 +44,14 @@ void jbxvt_set_scroll(int16_t n)
 	jbxvt_draw_scrollbar();
 }
 
+// Scroll to the specified y position (in pixels)
+void jbxvt_scroll_to(const int16_t y)
+{
+	jbxvt_set_scroll((jbxvt.scr.chars.h + jbxvt.scr.sline.top)
+			* (jbxvt.scr.pixels.h - y) / jbxvt.scr.pixels.h
+			- jbxvt.scr.chars.h);
+}
+
 void jbxvt_clear_saved_lines(void)
 {
 	jbxvt_set_scroll(0);

@@ -356,8 +356,7 @@ void jbxvt_parse_token(void)
 	CASE(TK_SBGOTO)
 		/*  Move the display so that line represented by scrollbar value
 		    is at the top of the screen.  */
-		jbxvt_set_scroll((jbxvt.scr.chars.h + jbxvt.scr.sline.top) * (jbxvt.scr.pixels.h - t[0])
-			/ jbxvt.scr.pixels.h - jbxvt.scr.chars.h);
+		jbxvt_scroll_to(t[0]);
 		break;
 	CASE(TK_SBDOWN)
 		t[0] = - t[0]; // fall through
@@ -389,8 +388,6 @@ void jbxvt_parse_token(void)
 		SELOP(start, JBXVT_SEL_UNIT_CHAR);
 	CASE(TK_SELEXTND)
 		SELOP(extend, false);
-	CASE(TK_SELDRAG)
-		SELOP(extend, true);
 	CASE(TK_SELWORD)
 		SELOP(start, JBXVT_SEL_UNIT_WORD);
 	CASE(TK_SELLINE)
