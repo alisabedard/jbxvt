@@ -2,19 +2,13 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 
 #include "dec_reset.h"
-
 #include "cursor.h"
 #include "jbxvt.h"
-#include "libjb/util.h"
-#include "libjb/log.h"
 #include "lookup_key.h"
 #include "sbar.h"
 #include "scr_move.h"
 #include "scr_reset.h"
 #include "screen.h"
-#include "window.h"
-
-#include <stddef.h>
 
 //#define DEBUG_RESET
 #ifndef DEBUG_RESET
