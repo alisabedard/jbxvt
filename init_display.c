@@ -6,7 +6,7 @@
 #include "jbxvt.h"
 #include "paint.h"
 #include "screen.h"
-#include "xsetup.h"
+#include "window.h"
 
 #include <assert.h>
 #include <stdlib.h>

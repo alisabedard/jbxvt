@@ -12,7 +12,7 @@
 #include "scr_move.h"
 #include "scr_reset.h"
 #include "screen.h"
-#include "xsetup.h"
+#include "window.h"
 
 #include <stddef.h>
 

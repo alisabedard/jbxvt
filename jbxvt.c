@@ -7,7 +7,7 @@
 #include "scr_reset.h"
 #include "scr_string.h"
 #include "screen.h"
-#include "xsetup.h"
+#include "window.h"
 #include "xvt.h"
 
 #include <errno.h>

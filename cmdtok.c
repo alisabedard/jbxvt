@@ -12,7 +12,7 @@
 #include "sbar.h"
 #include "scr_reset.h"
 #include "xevents.h"
-#include "xsetup.h"
+#include "window.h"
 
 #include <errno.h>
 #include <string.h>

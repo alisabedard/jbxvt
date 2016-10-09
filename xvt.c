@@ -18,7 +18,7 @@
 #include "screen.h"
 #include "scroll.h"
 #include "selreq.h"
-#include "xsetup.h"
+#include "window.h"
 
 #include <string.h>
 
