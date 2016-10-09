@@ -63,8 +63,8 @@ static void create_main_window(xcb_size_hints_t * restrict sh,
 	jbxvt.X.win.main = xcb_generate_id(jbxvt.X.xcb);
 	xcb_create_window(jbxvt.X.xcb, 0, jbxvt.X.win.main, root,
 		sh->x, sh->y, sh->width, sh->height, 0, 0, 0,
-		XCB_CW_EVENT_MASK,
-		(uint32_t[]){MW_EVENTS});
+		XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK,
+		(uint32_t[]){jbxvt.X.color.bg, MW_EVENTS});
 	jbxvt.scr.pixels.w = sh->width;
 	jbxvt.scr.pixels.h = sh->height;
 	jbxvt.scr.chars = jbxvt_get_char_size(jbxvt.scr.pixels);
