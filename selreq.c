@@ -16,6 +16,7 @@
 
 static bool paste_from(const xcb_atom_t cb, const xcb_timestamp_t t)
 {
+	LOG("paste_from(clipboard: %d, timestamp: %d)", cb, t);
 	xcb_convert_selection(jbxvt.X.xcb, jbxvt.X.win.main, cb,
 		XCB_ATOM_STRING, cb, t);
 	xcb_flush(jbxvt.X.xcb);
@@ -36,6 +37,7 @@ static bool paste_from(const xcb_atom_t cb, const xcb_timestamp_t t)
 
 void jbxvt_request_selection(const xcb_timestamp_t t)
 {
+	LOG("jbxvt_request_selection(timestamp: %d)", t);
 	if (paste_from(XCB_ATOM_PRIMARY, t))
 		  return;
 	if (paste_from(jbxvt.X.clipboard, t))
