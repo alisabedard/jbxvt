@@ -9,7 +9,7 @@
 #define SLD jbxvt.scr.sline.data
 
 // Make i positive, return true if it was already positive
-bool ipos(int16_t * i)
+bool jbxvt_ipos(int16_t * i)
 {
 	if (*i < 0) {
 		*i = -1 - *i;
@@ -29,7 +29,7 @@ static int8_t cmp(const int8_t mod, struct JBDim * restrict se1,
 /*  Compare the two selections and return negtive,
     0 or positive depending on whether se2 is after,
     equal to or before se1.  */
-int8_t selcmp(struct JBDim * restrict se1, struct JBDim * restrict se2)
+int8_t jbxvt_selcmp(struct JBDim * restrict se1, struct JBDim * restrict se2)
 {
 	if (jbxvt.sel.type == JBXVT_SEL_SAVED)
 		  return cmp(1, se1, se2);
@@ -39,16 +39,16 @@ int8_t selcmp(struct JBDim * restrict se1, struct JBDim * restrict se2)
 }
 
 //  Convert a row and column coordinates into a selection endpoint.
-void rc_to_selend(const int16_t row, const int16_t col, struct JBDim * se)
+void jbxvt_rc_to_selend(const int16_t row, const int16_t col, struct JBDim * se)
 {
 	int16_t i = (row - jbxvt.scr.offset);
-	jbxvt.sel.type = ipos(&i) ? JBXVT_SEL_ON_SCREEN : JBXVT_SEL_SAVED;
+	jbxvt.sel.type = jbxvt_ipos(&i) ? JBXVT_SEL_ON_SCREEN : JBXVT_SEL_SAVED;
 	se->index = i;
 	se->col = col;
 }
 
 //  Convert the selection into a row and column.
-void selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
+void jbxvt_selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
 	struct JBDim * restrict se)
 {
 	if (jbxvt.sel.type == JBXVT_SEL_NONE)
@@ -79,7 +79,7 @@ static void adj_sel_to_word(struct JBDim * include,
 		  --i;
 	se1->col = i?i+1:0;
 	i = se2->col;
-	if (se2 == include || !selcmp(se2, &jbxvt.sel.end[2]))
+	if (se2 == include || !jbxvt_selcmp(se2, &jbxvt.sel.end[2]))
 		  ++i;
 	const uint16_t len = sel_s(se2, &s);
 	while (i < len && s[i] && s[i] != ' ' && s[i] != '\n')
@@ -91,14 +91,16 @@ static void adj_sel_to_word(struct JBDim * include,
 /*  Adjust the selection to a word or line boundary.
     If the include endpoint is non NULL then the selection
     is forced to be large enough to include it.  */
-void adjust_selection(struct JBDim * restrict include)
+void jbxvt_adjust_selection(struct JBDim * restrict include)
 {
 	if (jbxvt.sel.unit == JBXVT_SEL_UNIT_CHAR)
 		return;
 	struct JBDim *se1, *se2;
-	const bool oneless = selcmp(&jbxvt.sel.end[0],&jbxvt.sel.end[1]) <= 0;
-	se1 = oneless ? &jbxvt.sel.end[0] : &jbxvt.sel.end[1];
-	se2 = oneless ? &jbxvt.sel.end[1] : &jbxvt.sel.end[0];
+#define SE jbxvt.sel.end
+	const bool oneless = jbxvt_selcmp(SE, SE + 1) <= 0;
+	*(oneless ? &se1 : &se2) = SE;
+	*(oneless ? &se2 : &se1) = SE + 1;
+#undef SE
 	if (jbxvt.sel.unit == JBXVT_SEL_UNIT_WORD)
 		  adj_sel_to_word(include, se1, se2);
 	else if (jbxvt.sel.unit == JBXVT_SEL_UNIT_LINE) {

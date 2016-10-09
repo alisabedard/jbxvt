@@ -13,8 +13,8 @@ static void handle_drag(const struct JBDim rc)
 {
 	//  Anchor the selection end.
 	SE[0] = SE[2];
-	rc_to_selend(rc.row, rc.col, &SE[1]);
-	adjust_selection(&SE[1]);
+	jbxvt_rc_to_selend(rc.row, rc.col, &SE[1]);
+	jbxvt_adjust_selection(&SE[1]);
 }
 
 //  Extend the selection.
@@ -27,6 +27,6 @@ void jbxvt_extend_selection(const struct JBDim point, const bool drag)
 	fix_rc(s + 2);
 	if (drag)
 		  handle_drag(s[2]);
-	change_selection(s, s + 1);
+	jbxvt_change_selection(s, s + 1);
 }
 

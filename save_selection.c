@@ -90,7 +90,7 @@ void jbxvt_save_selection(void)
 	    and second selection endpoints.  */
 	struct JBXVTSelectionData * s = &jbxvt.sel;
 	struct JBDim * e = s->end;
-	const bool forward = selcmp(e, e+1) <= 0;
+	const bool forward = jbxvt_selcmp(e, e+1) <= 0;
 	struct JBDim se[] = {e[forward?0:1], e[forward?1:0]};
 	uint16_t total = 1;
 	uint8_t * str = malloc(total);

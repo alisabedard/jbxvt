@@ -63,11 +63,11 @@ void show_selection(int16_t row1, int16_t row2, int16_t col1, int16_t col2)
 {
 	if (jbxvt.sel.type == JBXVT_SEL_NONE)
 		return;
-	if (selcmp(&jbxvt.sel.end[0],&jbxvt.sel.end[1]) == 0)
+	if (jbxvt_selcmp(&jbxvt.sel.end[0],&jbxvt.sel.end[1]) == 0)
 		return;
 	struct JBDim p[2];
-	selend_to_rc(&p->y, &p->x, &jbxvt.sel.end[0]);
-	selend_to_rc(&p[1].y, &p[1].x, &jbxvt.sel.end[1]);
+	jbxvt_selend_to_rc(&p->y, &p->x, &jbxvt.sel.end[0]);
+	jbxvt_selend_to_rc(&p[1].y, &p[1].x, &jbxvt.sel.end[1]);
 	++col2;
 	//  Obtain initial and final endpoints for the selection.
 	struct JBDim s, e; // start and end

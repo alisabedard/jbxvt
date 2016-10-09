@@ -27,12 +27,12 @@ static void invert(const int16_t rs, const int16_t re, const int16_t cs,
 static void change(struct JBDim * se, struct JBDim * ose)
 {
 	int16_t rs = 0, cs = 0, re = 0, ce = 0, n;
-	n = selcmp(se, ose);
+	n = jbxvt_selcmp(se, ose);
 	if (!n) return;
 	// repaint the start.
 	const bool nn = n < 0;
-	selend_to_rc(&rs, &cs, nn ? se : ose);
-	selend_to_rc(&re, &ce, nn ? ose : se);
+	jbxvt_selend_to_rc(&rs, &cs, nn ? se : ose);
+	jbxvt_selend_to_rc(&re, &ce, nn ? ose : se);
 	uint8_t row1 = rs < 0 ? 0 : rs;
 	uint8_t row2 = re >= jbxvt.scr.chars.h ? jbxvt.scr.chars.h - 1 : re;
 	//  Invert the changed area
@@ -41,16 +41,17 @@ static void change(struct JBDim * se, struct JBDim * ose)
 
 /*  Repaint the displayed selection to reflect the new value.  ose1 and ose2
  *  are assumed to represent the currently displayed selection endpoints.  */
-void change_selection(struct JBDim * restrict ose1, struct JBDim * restrict ose2)
+void jbxvt_change_selection(struct JBDim * restrict ose1,
+	struct JBDim * restrict ose2)
 {
 	struct JBDim *se, *se1, *se2;
 
-	if (selcmp(ose1, ose2) > 0) {
+	if (jbxvt_selcmp(ose1, ose2) > 0) {
 		se = ose1;
 		ose1 = ose2;
 		ose2 = se;
 	}
-	const bool fw = selcmp(&jbxvt.sel.end[0], &jbxvt.sel.end[1]) <= 0;
+	const bool fw = jbxvt_selcmp(&jbxvt.sel.end[0], &jbxvt.sel.end[1]) <= 0;
 	*(fw ? &se1 : &se2) = &jbxvt.sel.end[0];
 	*(fw ? &se2 : &se1) = &jbxvt.sel.end[1];
 	change(se1, ose1);

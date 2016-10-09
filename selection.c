@@ -74,9 +74,9 @@ void jbxvt_start_selection(struct JBDim p, enum JBXVTSelUnit unit)
 	show(); // clear previous
 	p = jbxvt_get_char_size(p);
 	jbxvt.sel.unit = unit;
-	rc_to_selend(p.y, p.x, &SE[2]);
+	jbxvt_rc_to_selend(p.y, p.x, &SE[2]);
 	SE[0] = SE[1] = SE[2];
-	adjust_selection(&SE[1]);
+	jbxvt_adjust_selection(&SE[1]);
 	show();
 }
 
