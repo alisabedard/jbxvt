@@ -11,8 +11,11 @@
 #include <string.h>
 #include <unistd.h>
 
-#define COM jbxvt.com
-#define PASTE(s, l) jb_check(write(COM.fd, s, l) != -1, "Cannot paste")
+static inline void paste(const uint8_t * data, const size_t length)
+{
+	jb_check(write(jbxvt.com.fd, data, length) != -1,
+		"Cannot paste");
+}
 
 static bool paste_from(const xcb_atom_t cb, const xcb_timestamp_t t)
 {
@@ -30,7 +33,7 @@ static bool paste_from(const xcb_atom_t cb, const xcb_timestamp_t t)
 		free(r);
 		return false;
 	}
-	PASTE(xcb_get_property_value(r), xcb_get_property_value_length(r));
+	paste(xcb_get_property_value(r), xcb_get_property_value_length(r));
 	free(r);
 	return true;
 }
@@ -71,7 +74,7 @@ void jbxvt_paste_primary(const xcb_timestamp_t t, const xcb_window_t window,
 		const int l = xcb_get_property_value_length(r);
 		nread += l;
 		bytes_after = r->bytes_after;
-		PASTE(data, l);
+		paste(data, l);
 		free(r);
 	} while (bytes_after > 0);
 }
