@@ -32,7 +32,7 @@ void jbxvt_rc_to_selend(const int16_t row, const int16_t col, struct JBDim * se)
 {
 	int16_t i = (row - jbxvt.scr.offset);
 	if (i < 0) {
-		i = -1 - i;
+		i = -i;
 		jbxvt.sel.type = JBXVT_SEL_SAVED;
 	} else
 		jbxvt.sel.type = JBXVT_SEL_ON_SCREEN;
@@ -50,7 +50,7 @@ void jbxvt_selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
 	*colp = se->col;
 	*rowp = jbxvt.sel.type == JBXVT_SEL_ON_SCREEN
 		? se->index + jbxvt.scr.offset
-		: jbxvt.scr.offset - se->index - 1;
+		: jbxvt.scr.offset - se->index;
 }
 
 static uint16_t sel_s(struct JBDim * restrict se2, uint8_t ** s)
