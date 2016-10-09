@@ -20,16 +20,13 @@ static void handle_drag(const struct JBDim rc)
 //  Extend the selection.
 void jbxvt_extend_selection(const struct JBDim point, const bool drag)
 {
-	struct JBDim * e = SE;
 	if (jbxvt.sel.type == JBXVT_SEL_NONE)
 		return; // no selection
-#define F jbxvt.X.f.size
-	struct JBDim rc = jbxvt_get_char_size(point);
-	fix_rc(&rc);
 	// Save current end points:
-	struct JBDim s[] = {e[0], e[1]};
+	struct JBDim s[] = {SE[0], SE[1], jbxvt_get_char_size(point)};
+	fix_rc(s + 2);
 	if (drag)
-		  handle_drag(rc);
-	change_selection(s, s+1);
+		  handle_drag(s[2]);
+	change_selection(s, s + 1);
 }
 
