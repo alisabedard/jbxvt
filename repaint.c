@@ -90,6 +90,6 @@ void repaint(void)
 			jbxvt.scr.current->text[i]), str,
 			jbxvt.scr.current->rend[i]);
 	}
-	show_selection(0, CSZ.height, 0, CSZ.width);
+	jbxvt_show_selection();
 }
 

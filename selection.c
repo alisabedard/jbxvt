@@ -63,21 +63,16 @@ void jbxvt_clear_selection(void)
 	jbxvt.sel.type = JBXVT_SEL_NONE;
 }
 
-static void show(void)
-{
-	show_selection(0, jbxvt.scr.chars.h - 1, 0, jbxvt.scr.chars.w - 1);
-}
-
 //  start a selection using the specified unit.
 void jbxvt_start_selection(struct JBDim p, enum JBXVTSelUnit unit)
 {
-	show(); // clear previous
+	jbxvt_show_selection(); // clear previous
 	p = jbxvt_get_char_size(p);
 	jbxvt.sel.unit = unit;
 	jbxvt_rc_to_selend(p.y, p.x, &SE[2]);
 	SE[0] = SE[1] = SE[2];
 	jbxvt_adjust_selection(&SE[1]);
-	show();
+	jbxvt_show_selection();
 }
 
 /*  Determine if the current selection overlaps row1-row2 and if it does then
@@ -91,7 +86,7 @@ void jbxvt_check_selection(const int16_t row1, const int16_t row2)
 		JB_SWAP(int16_t, r1, r2);
 	if (row2 < r1 || row1 > r2)
 		return;
-	show(); // clear
+	jbxvt_show_selection();
 	jbxvt.sel.type = JBXVT_SEL_NONE;
 }
 
