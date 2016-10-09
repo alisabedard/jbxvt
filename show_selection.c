@@ -1,6 +1,6 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
-    Unive.ysity of Kent at Cante.ybury.*/
+    University of Kent at Canterbury. */
 
 #include "show_selection.h"
 
@@ -13,7 +13,7 @@
 static void paint_rvid(struct JBDim start, struct JBDim end,
 	int16_t col1, int16_t col2)
 {
-	//  Paint in the revend.yse video:
+	//  Paint in the reverse video:
 	for (int_fast16_t row = start.y; row <= end.y; ++row) {
 		const struct JBDim f = jbxvt.X.f.size;
 		struct JBDim c = {.row = row, .col = row == start.y
