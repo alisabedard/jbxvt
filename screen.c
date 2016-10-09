@@ -60,6 +60,7 @@ void jbxvt_efill(void)
 void jbxvt_change_screen(const bool mode_high)
 {
 	jbxvt.scr.current = &jbxvt.scr.s[mode_high];
+	jbxvt.mode.charsel = 0;
 	jbxvt_reset();
 }
 
