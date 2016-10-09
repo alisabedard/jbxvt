@@ -56,8 +56,7 @@ static void copy_saved_lines(const int_fast16_t n)
 		SLINE.top = MIN(SLINE.top, SLINE.max);
 #undef SLINE
 		clear_selection_at(i);
-		int_fast16_t len = 0;
-		while(t[++len]); // strlen
+		const size_t len = strlen((const char *)t);
 		memcpy(sl->text, t, len);
 		memcpy(sl->rend, jbxvt.scr.current->rend[i], len << 2);
 		sl->sl_length = len;
