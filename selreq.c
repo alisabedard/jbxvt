@@ -3,12 +3,10 @@
 
 #include "selreq.h"
 
-#include "config.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
 static inline void paste(const uint8_t * data, const size_t length)
