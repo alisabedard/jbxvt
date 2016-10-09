@@ -68,9 +68,9 @@ static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 		/* Use full screen width if not first or last lines of
 		   selection, otherwise use the col field in the respective
 		   end point.  */
-		const uint16_t w = jbxvt.scr.chars.width;
 		const int16_t start = i == e->index ? e->col : 0;
-		const int16_t end = i == j ? (e+1)->col : w - 1;
+		const int16_t end = i == j ? (e+1)->col
+			: jbxvt.scr.chars.width - 1;
 		const uint16_t len = end - start + 1;
 		*str = realloc(*str, *total + len);
 		strncpy((char*)*str + *total,
