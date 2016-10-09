@@ -8,7 +8,6 @@
 #include "screen.h"
 #include "window.h"
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <X11/cursorfont.h>
@@ -23,7 +22,6 @@ enum EventMasks {
 
 static xcb_font_t get_font(const char * name)
 {
-	assert(name);
 	xcb_connection_t * restrict x = jbxvt.X.xcb;
 	xcb_font_t f = xcb_generate_id(x);
 	xcb_void_cookie_t c = xcb_open_font_checked(x, f,
@@ -50,7 +48,8 @@ static void setup_font(void)
 	f->bold = get_font(jbxvt.opt.bold_font);
 	xcb_query_font_reply_t * r = xcb_query_font_reply(jbxvt.X.xcb,
 		qfc, NULL);
-	assert(r);
+	if (!r)
+		abort();
 	f->ascent = r->font_ascent;
 	struct JBDim * s = &f->size;
 	s->width = r->max_bounds.character_width;

@@ -181,7 +181,9 @@ static void attach_signals(void)
 {
 	// Attach relevant signals:
 	for (uint8_t i = 1; i <= SIGCHLD; ++i)
-		if (i != SIGKILL) // can't bind to this
+		if (i == SIGKILL || i == SIGABRT)
+			continue; // exclude these signals
+		else
 			signal(i, &signal_handler);
 	/* Catch all other exit calls and convert to a signal
 	   so that cleanup may be done.  */
