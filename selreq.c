@@ -11,19 +11,18 @@
 #include <string.h>
 #include <unistd.h>
 
-#define XC jbxvt.X.xcb
-#define VT jbxvt.X.win.vt
 #define COM jbxvt.com
 #define PASTE(s, l) jb_check(write(COM.fd, s, l) != -1, "Cannot paste")
 
 static bool paste_from(const xcb_atom_t cb, const xcb_timestamp_t t)
 {
-	xcb_convert_selection(jbxvt.X.xcb, VT, cb, XCB_ATOM_STRING, cb, t);
+	xcb_convert_selection(jbxvt.X.xcb, jbxvt.X.win.main, cb,
+		XCB_ATOM_STRING, cb, t);
 	xcb_flush(jbxvt.X.xcb);
-	free(xcb_wait_for_event(XC)); // discard
+	free(xcb_wait_for_event(jbxvt.X.xcb)); // discard
 	xcb_get_property_reply_t * r = xcb_get_property_reply(jbxvt.X.xcb,
-		xcb_get_property(jbxvt.X.xcb, false, VT, cb, XCB_ATOM_ANY,
-		0, JBXVT_PROP_SIZE), NULL);
+		xcb_get_property(jbxvt.X.xcb, false, jbxvt.X.win.main,
+		cb, XCB_ATOM_ANY, 0, JBXVT_PROP_SIZE), NULL);
 	if (!r)
 		return false;
 	if (r->type == XCB_ATOM_NONE) {

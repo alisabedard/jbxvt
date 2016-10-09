@@ -9,15 +9,13 @@
 #include "save_selection.h"
 #include "screen.h"
 #include "show_selection.h"
+#include "window.h"
 
-#define VT jbxvt.X.win.vt
 #define SE jbxvt.sel.end
 
-static void prop(const xcb_atom_t a)
+static inline void prop(const xcb_atom_t a)
 {
-	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE,
-		VT, a, XCB_ATOM_STRING, 8, jbxvt.sel.length,
-		jbxvt.sel.text);
+	jbxvt_set_property(a, jbxvt.sel.length, jbxvt.sel.text);
 }
 
 //  Make the selection currently delimited by the selection end markers.
@@ -29,8 +27,8 @@ void jbxvt_make_selection(void)
 	prop(XCB_ATOM_PRIMARY);
 	prop(XCB_ATOM_SECONDARY);
 	prop(jbxvt.X.clipboard);
-	xcb_set_selection_owner(jbxvt.X.xcb, VT, XCB_ATOM_PRIMARY,
-		XCB_CURRENT_TIME);
+	xcb_set_selection_owner(jbxvt.X.xcb, jbxvt.X.win.main,
+		XCB_ATOM_PRIMARY, XCB_CURRENT_TIME);
 }
 
 //  Respond to a request for our current selection.

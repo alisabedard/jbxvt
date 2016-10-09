@@ -6,6 +6,11 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <xcb/xproto.h>
+
+// Set main window property string
+void jbxvt_set_property(const xcb_atom_t prop, const size_t sz,
+	uint8_t * value);
 
 // Change window or icon name:
 void jbxvt_change_name(uint8_t * restrict str, const bool icon);

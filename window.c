@@ -54,13 +54,18 @@ void jbxvt_resize_window(void)
 	jbxvt.scr.chars = jbxvt_get_char_size(jbxvt.scr.pixels = p);
 }
 
+// Set main window property string
+void jbxvt_set_property(const xcb_atom_t prop, const size_t sz,
+	uint8_t * value)
+{
+	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE,
+		jbxvt.X.win.main, prop, XCB_ATOM_STRING, 8, sz, value);
+}
+
 // Change window or icon name:
 void jbxvt_change_name(uint8_t * restrict str, const bool icon)
 {
-#define XA(n) XCB_ATOM_##n
-	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE,
-		jbxvt.X.win.main, icon ? XA(WM_ICON_NAME) : XA(WM_NAME),
-		XA(STRING), 8, strlen((const char *)str), str);
-#undef XA
+	jbxvt_set_property(icon ? XCB_ATOM_WM_ICON_NAME
+		: XCB_ATOM_WM_NAME, strlen((const char *)str), str);
 }
 
