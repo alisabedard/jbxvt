@@ -6,17 +6,6 @@
 
 #include "jbxvt.h"
 
-#define SLD jbxvt.scr.sline.data
-
-// Make i positive, return true if it was already positive
-static bool jbxvt_ipos(int16_t * i)
-{
-	if (*i < 0) {
-		*i = -1 - *i;
-		return false;
-	}
-	return true;
-}
 
 static int8_t cmp(const int8_t mod, struct JBDim * restrict se1,
 	struct JBDim * restrict se2)
@@ -42,7 +31,11 @@ int8_t jbxvt_selcmp(struct JBDim * restrict se1, struct JBDim * restrict se2)
 void jbxvt_rc_to_selend(const int16_t row, const int16_t col, struct JBDim * se)
 {
 	int16_t i = (row - jbxvt.scr.offset);
-	jbxvt.sel.type = jbxvt_ipos(&i) ? JBXVT_SEL_ON_SCREEN : JBXVT_SEL_SAVED;
+	if (i < 0) {
+		i = -1 - i;
+		jbxvt.sel.type = JBXVT_SEL_SAVED;
+	} else
+		jbxvt.sel.type = JBXVT_SEL_ON_SCREEN;
 	se->index = i;
 	se->col = col;
 }
@@ -63,6 +56,7 @@ void jbxvt_selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
 static uint16_t sel_s(struct JBDim * restrict se2, uint8_t ** s)
 {
 	const bool ss = jbxvt.sel.type == JBXVT_SEL_ON_SCREEN;
+#define SLD jbxvt.scr.sline.data
 	*s = ss ? jbxvt.scr.current->text[se2->index]
 		: SLD[se2->index].text;
 	return ss ? jbxvt.scr.chars.width
@@ -74,6 +68,7 @@ static void adj_sel_to_word(struct JBDim * include,
 {
 	uint8_t * s = jbxvt.sel.type == JBXVT_SEL_ON_SCREEN
 		? jbxvt.scr.current->text[se1->index] : SLD[se1->index].text;
+#undef SLD
 	int16_t i = se1->col;
 	while (i && s[i] != ' ')
 		  --i;
@@ -95,9 +90,9 @@ void jbxvt_adjust_selection(struct JBDim * restrict include)
 {
 	if (jbxvt.sel.unit == JBXVT_SEL_UNIT_CHAR)
 		return;
-	struct JBDim *se1, *se2;
 #define SE jbxvt.sel.end
 	const bool oneless = jbxvt_selcmp(SE, SE + 1) <= 0;
+	struct JBDim *se1, *se2;
 	*(oneless ? &se1 : &se2) = SE;
 	*(oneless ? &se2 : &se1) = SE + 1;
 #undef SE
