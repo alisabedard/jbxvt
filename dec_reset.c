@@ -26,7 +26,6 @@ void dec_reset(struct Token * restrict token)
 {
 	LOG("handle_reset(%d)", token->arg[0]);
 	const bool is_set = token->type == TK_SET;
-	struct JBXVTPrivateModes * m = &jbxvt.mode;
 
 	if (likely(token->private == '?')) {
 		static bool allow_deccolm = true;
@@ -34,7 +33,7 @@ void dec_reset(struct Token * restrict token)
 		case 1: // DECCKM: cursor key mode
 			set_keys(is_set, true);
 			break;
-#define MODE(mode) m->mode = is_set
+#define MODE(field) jbxvt.mode.field = is_set
 		case 2: // DECANM: VT52/ANSI mode
 			MODE(decanm);
 			break;
