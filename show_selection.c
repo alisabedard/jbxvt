@@ -4,11 +4,8 @@
 
 #include "show_selection.h"
 
-#include "config.h"
 #include "jbxvt.h"
 #include "screen.h"
-#include "selend.h"
-#include "selection.h"
 
 static void paint_rvid(struct JBDim start, struct JBDim end,
 	int16_t col1, int16_t col2)
@@ -29,28 +26,6 @@ static void paint_rvid(struct JBDim start, struct JBDim end,
 	}
 }
 
-static struct JBDim get_s(struct JBDim s, const struct JBDim rc)
-{
-	if (s.y < rc.row) {
-		s.y = rc.row;
-		s.x = rc.col;
-	}
-	if (s.x < rc.col)
-		s.x = rc.col;
-	return s;
-}
-
-static struct JBDim get_e(struct JBDim e, const struct JBDim rc)
-{
-	if (e.y > rc.row) {
-		e.y = rc.row;
-		e.x = rc.col;
-	}
-	if (e.x > rc.col)
-		e.x = rc.col;
-	return e;
-}
-
 // Paint the selection on screen
 void jbxvt_show_selection(void)
 {
@@ -62,12 +37,7 @@ void jbxvt_show_selection(void)
 	jbxvt_selend_to_rc(&p[1].y, &p[1].x, &jbxvt.sel.end[1]);
 	struct JBDim r[] = {{}, jbxvt.scr.chars};
 	//  Obtain initial and final endpoints for the selection.
-	struct JBDim s, e; // start and end
 	const bool fwd = p->y < p[1].y || (p->y == p[1].y && p->x <= p[1].x);
-	s = get_s(p[fwd?0:1], r[0]);
-	e = get_e(p[fwd?1:0], r[1]);
-	if (s.y > e.y)
-		return;
-	paint_rvid(s, e, r[0].x, r[1].x);
+	paint_rvid(p[fwd?0:1], p[fwd?1:0], r[0].x, r[1].x);
 }
 
