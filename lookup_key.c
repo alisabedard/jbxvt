@@ -4,6 +4,7 @@
 #include "jbxvt.h"
 #include "libjb/log.h"
 
+#include <string.h>
 #include <xcb/xcb_keysyms.h>
 
 //#define DEBUG_KEYS
@@ -215,11 +216,9 @@ uint8_t * lookup_key(void * restrict ev, int_fast16_t * restrict pcount)
 	const xcb_keysym_t k = get_keysym(ke);
 	uint8_t * s = get_s(k, (uint8_t *)kbuf);
 	if (s) {
-		size_t l = 0;
-		while (s[++l]);
-		*pcount = l;
+		*pcount = strlen((const char *)s);
 #ifdef KEY_DEBUG
-		for (size_t i = 0; i < l; ++i)
+		for (int_fast16_t i = *pcount; i >= 0; --i)
 			LOG("s[%d]: 0x%x", i, s[i]);
 #endif//KEY_DEBUG
 		return s;
