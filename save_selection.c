@@ -82,20 +82,17 @@ static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
     and save it as the current saved selection. */
 void jbxvt_save_selection(void)
 {
-	LOG("save_selection");
-	/*  Set se1 and se2 to point to the first
-	    and second selection endpoints.  */
-	struct JBXVTSelectionData * s = &jbxvt.sel;
-	struct JBDim * e = s->end;
-	const bool forward = jbxvt_selcmp(e, e+1) <= 0;
-	struct JBDim se[] = {e[forward?0:1], e[forward?1:0]};
+#define SE jbxvt.sel.end
+	const bool fwd = jbxvt_selcmp(SE, SE + 1) <= 0;
+	// properly order start and end points:
+	struct JBDim se[] = {SE[fwd ? 0 : 1], SE[fwd ? 1 : 0]};
+#undef SE
 	uint16_t total = 1;
 	uint8_t * str = malloc(total);
 	handle_screensel(&str, &total, se);
-	if (total) {
-		str[--total] = 0; // null termination
-		s->text = str;
-		s->length = total;
-	}
+	if (!total)
+		return;
+	str[jbxvt.sel.length = --total] = 0; // null termination
+	jbxvt.sel.text = str;
 }
 
