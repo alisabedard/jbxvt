@@ -33,6 +33,9 @@ static char ** parse_command_line(const int argc, char ** argv)
 		case 'C': // columns
 			o->size.cols = atoi(optarg);
 			break;
+		case 'c': // cursor style
+			jbxvt.opt.cursor_attr = atoi(optarg);
+			break;
 		case 'D': // DISPLAY
 			o->display = optarg;
 			break;
