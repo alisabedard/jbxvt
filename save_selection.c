@@ -23,14 +23,11 @@ static uint8_t get_next_char(uint8_t c)
 static bool skip(uint8_t * restrict str, uint16_t * restrict i,
 	uint16_t * restrict j, const uint16_t len, const uint8_t null_ct)
 {
-	if (str[++*i] != '\0')
+	++*i;
+	if (str[*i] != '\0')
 		return false;
-	if (*i >= len - 1) {
-		str[*j] = '\0';
-		if (null_ct == 1)
-			--*j;
+	if (*i >= len - 1)
 		return true;
-	}
 	return skip(str, i, j, len, null_ct);
 }
 
