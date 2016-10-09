@@ -8,13 +8,6 @@
 /*  Small X event structure used to queue interesting X events that need to
  *  be converted into tokens.  */
 struct JBXVTEvent {
-	struct JBXVTEvent *next;
-	struct JBXVTEvent *prev;
-	uint8_t type;
-	union {
-		uint8_t detail;
-		uint8_t button;
-	};
 	xcb_timestamp_t time;
 	xcb_window_t window;
 	xcb_atom_t property; // selections
@@ -23,9 +16,14 @@ struct JBXVTEvent {
 		uint16_t state;
 	};
 	union {
-		struct xcb_rectangle_t box;
 		xcb_window_t requestor; // selections
+		struct xcb_rectangle_t box;
 	};
+	union {
+		uint8_t detail;
+		uint8_t button;
+	};
+	uint8_t type;
 };
 
 #endif//!JBXVTEVENT_H
