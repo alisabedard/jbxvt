@@ -21,6 +21,7 @@ static bool paste_from(const xcb_atom_t cb, const xcb_timestamp_t t)
 	xcb_convert_selection(jbxvt.X.xcb, jbxvt.X.win.main, cb,
 		XCB_ATOM_STRING, cb, t);
 	xcb_flush(jbxvt.X.xcb);
+	// This prevents pasting stale data:
 	free(xcb_wait_for_event(jbxvt.X.xcb)); // discard
 	xcb_get_property_reply_t * r = xcb_get_property_reply(jbxvt.X.xcb,
 		xcb_get_property(jbxvt.X.xcb, false, jbxvt.X.win.main,
