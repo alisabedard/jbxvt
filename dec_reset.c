@@ -123,10 +123,7 @@ void dec_reset(struct Token * restrict token)
 		case 1047:
 		case 1048:
 		case 1049: // cursor restore and screen change
-			if (is_set)
-				save_cursor();
-			else
-				restore_cursor();
+			(is_set ? save_cursor : restore_cursor)();
 			jbxvt_change_screen(is_set);
 			break;
 		case 2004: // bracketed paste mode
