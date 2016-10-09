@@ -75,7 +75,7 @@ static void handle_other(xcb_generic_event_t * restrict ge)
 static void key_press(xcb_generic_event_t * restrict e)
 {
 	int_fast16_t count = 0;
-	uint8_t * s = lookup_key(e, &count);
+	uint8_t * s = jbxvt_lookup_key(e, &count);
 	if (count) {
 		jbxvt.com.send_nxt = s;
 		jbxvt.com.send_count = count;

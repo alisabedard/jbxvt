@@ -317,13 +317,13 @@ void jbxvt_parse_token(void)
 		break;
 	FIXME(TK_OSC);
 	CASE(TK_PAM)
-		set_keys(true, false);
+		jbxvt_set_keys(true, false);
 		break;
 	CASE(TK_PM)
 		jbxvt.scr.current->decpm = true;
 		break;
 	CASE(TK_PNM)
-		set_keys(false, false);
+		jbxvt_set_keys(false, false);
 		break;
 	CASE(TK_RC)
 		restore_cursor();

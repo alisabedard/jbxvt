@@ -24,7 +24,7 @@ void dec_reset(struct Token * restrict token)
 		static bool allow_deccolm = true;
 		switch (token->arg[0]) {
 		case 1: // DECCKM: cursor key mode
-			set_keys(is_set, true);
+			jbxvt_set_keys(is_set, true);
 			break;
 #define MODE(field) jbxvt.mode.field = is_set
 		case 2: // DECANM: VT52/ANSI mode

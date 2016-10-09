@@ -103,7 +103,7 @@ static struct KeyMaps kp_key_table[]={
 };
 
 // Set key mode for cursor keys if is_cursor, else for keypad keys
-void set_keys(const bool mode_high, const bool is_cursor)
+void jbxvt_set_keys(const bool mode_high, const bool is_cursor)
 {
 	*(is_cursor ? &self.cursor : &self.keypad) = mode_high;
 }
@@ -209,7 +209,7 @@ static xcb_keysym_t get_keysym(xcb_key_press_event_t * ke)
 }
 
 //  Convert the keypress event into a string.
-uint8_t * lookup_key(void * restrict ev, int_fast16_t * restrict pcount)
+uint8_t * jbxvt_lookup_key(void * restrict ev, int_fast16_t * restrict pcount)
 {
 	static uint8_t kbuf[KBUFSIZE];
 	xcb_key_press_event_t * ke = ev;

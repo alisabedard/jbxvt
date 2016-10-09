@@ -34,10 +34,10 @@ struct KeyMaps {
 };
 
 // Set key mode for cursor keys if is_cursor, else for keypad keys
-void set_keys(const bool mode_high, const bool is_cursor);
+void jbxvt_set_keys(const bool mode_high, const bool is_cursor);
 
 // Convert the keypress event into a string
-uint8_t *lookup_key(void * restrict ev, int_fast16_t * restrict pcount)
+uint8_t *jbxvt_lookup_key(void * restrict ev, int_fast16_t * restrict pcount)
 	__attribute__((nonnull));
 
 #endif//LOOKUP_KEY_H
