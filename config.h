@@ -4,7 +4,7 @@
 #ifndef JBXVT_CONFIG_H
 #define JBXVT_CONFIG_H
 
-#define JBXVT_VERSION "0.4" // Overall release number of the current version
+#define JBXVT_VERSION "0.5" // Overall release number of the current version
 
 #define FALLBACK_FONT "fixed"
 #define JBXVT_FONT "-*-terminus-medium-r-*-*-14-*-*-*-*-*-iso10646-*"
