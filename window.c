@@ -21,26 +21,37 @@ void jbxvt_map_window(void)
 	jbxvt_reset(); // update size
 }
 
+static struct JBDim get_geometry(void)
+{
+	xcb_get_geometry_cookie_t c = xcb_get_geometry(jbxvt.X.xcb,
+		jbxvt.X.win.main);
+	xcb_generic_error_t * e;
+	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(jbxvt.X.xcb,
+		c, &e);
+	if (e)
+		abort();
+	struct JBDim ret = {.w = r->width, .height = r->height };
+	free(r);
+	// Resize area to fit characters
+	ret.w -= ret.w % jbxvt.X.f.size.w;
+	ret.h -= ret.h % jbxvt.X.f.size.h;
+	return ret;
+}
+#include <stdio.h>
 /*  Called after a possible window size change.  If the window size has changed
  *  initiate a redraw by resizing the subwindows. */
 void jbxvt_resize_window(void)
 {
-	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(jbxvt.X.xcb,
-		xcb_get_geometry(jbxvt.X.xcb, jbxvt.X.win.main), NULL);
-	uint32_t sz[] = {r->width, r->height};
-	free(r);
-	if (jbxvt.opt.show_scrollbar) {
+	struct JBDim p = get_geometry();
 #define XCW(i) XCB_CONFIG_WINDOW_##i
-		xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.sb,
-			XCW(HEIGHT), &sz[1]);
-		sz[0] -= JBXVT_SCROLLBAR_WIDTH;
-	}
-	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt,
-		XCW(WIDTH) | XCW(HEIGHT), sz);
+	if (jbxvt.opt.show_scrollbar)
+		p.width -= JBXVT_SCROLLBAR_WIDTH;
+	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.sb, XCW(HEIGHT),
+		&(uint32_t){p.height});
+	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt, XCW(WIDTH)
+		| XCW(HEIGHT), (uint32_t[]){p.w, p.h});
 #undef XCW
-	jbxvt.scr.chars = jbxvt_get_char_size(jbxvt.scr.pixels
-		= (struct JBDim){ .w = (uint16_t)sz[0],
-		.h = (uint16_t)sz[1]});
+	jbxvt.scr.chars = jbxvt_get_char_size(jbxvt.scr.pixels = p);
 }
 
 // Change window or icon name:
