@@ -6,7 +6,6 @@
 
 #include "jbxvt.h"
 
-
 static int8_t cmp(const int8_t mod, struct JBDim * restrict se1,
 	struct JBDim * restrict se2)
 {
@@ -20,8 +19,6 @@ static int8_t cmp(const int8_t mod, struct JBDim * restrict se1,
     equal to or before se1.  */
 int8_t jbxvt_selcmp(struct JBDim * restrict se1, struct JBDim * restrict se2)
 {
-	if (jbxvt.sel.type == JBXVT_SEL_SAVED)
-		  return cmp(1, se1, se2);
 	if (jbxvt.sel.type == JBXVT_SEL_ON_SCREEN)
 		  return cmp(-1, se1, se2);
 	return 1;
@@ -30,13 +27,8 @@ int8_t jbxvt_selcmp(struct JBDim * restrict se1, struct JBDim * restrict se2)
 //  Convert a row and column coordinates into a selection endpoint.
 void jbxvt_rc_to_selend(const int16_t row, const int16_t col, struct JBDim * se)
 {
-	int16_t i = (row - jbxvt.scr.offset);
-	if (i < 0) {
-		i = -i;
-		jbxvt.sel.type = JBXVT_SEL_SAVED;
-	} else
-		jbxvt.sel.type = JBXVT_SEL_ON_SCREEN;
-	se->index = i;
+	jbxvt.sel.type = JBXVT_SEL_ON_SCREEN;
+	se->index = row - jbxvt.scr.offset;
 	se->col = col;
 }
 
@@ -46,29 +38,20 @@ void jbxvt_selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
 {
 	if (jbxvt.sel.type == JBXVT_SEL_NONE)
 		return;
-
 	*colp = se->col;
-	*rowp = jbxvt.sel.type == JBXVT_SEL_ON_SCREEN
-		? se->index + jbxvt.scr.offset
-		: jbxvt.scr.offset - se->index;
+	*rowp = se->row + jbxvt.scr.offset;
 }
 
 static uint16_t sel_s(struct JBDim * restrict se2, uint8_t ** s)
 {
-	const bool ss = jbxvt.sel.type == JBXVT_SEL_ON_SCREEN;
-#define SLD jbxvt.scr.sline.data
-	*s = ss ? jbxvt.scr.current->text[se2->index]
-		: SLD[se2->index].text;
-	return ss ? jbxvt.scr.chars.width
-		: SLD[se2->index].sl_length;
+	*s = jbxvt.scr.current->text[se2->index];
+	return jbxvt.scr.chars.width;
 }
 
 static void adj_sel_to_word(struct JBDim * include,
 	struct JBDim * se1, struct JBDim * se2)
 {
-	uint8_t * s = jbxvt.sel.type == JBXVT_SEL_ON_SCREEN
-		? jbxvt.scr.current->text[se1->index] : SLD[se1->index].text;
-#undef SLD
+	uint8_t * s = jbxvt.scr.current->text[se1->index];
 	int16_t i = se1->col;
 	while (i && s[i] != ' ')
 		  --i;
@@ -80,7 +63,6 @@ static void adj_sel_to_word(struct JBDim * include,
 	while (i < len && s[i] && s[i] != ' ' && s[i] != '\n')
 		  ++i;
 	se2->col = i;
-
 }
 
 /*  Adjust the selection to a word or line boundary.
@@ -100,7 +82,7 @@ void jbxvt_adjust_selection(struct JBDim * restrict include)
 		  adj_sel_to_word(include, se1, se2);
 	else if (jbxvt.sel.unit == JBXVT_SEL_UNIT_LINE) {
 		se1->col = 0;
-		se2->col = jbxvt.scr.chars.width;
+		se2->col = jbxvt.scr.chars.width - 1;
 	}
 }
 
