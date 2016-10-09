@@ -8,6 +8,7 @@
 #include "screen.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 //  Map the window
 void jbxvt_map_window(void)
@@ -36,6 +37,7 @@ void jbxvt_resize_window(void)
 	}
 	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt,
 		XCW(WIDTH) | XCW(HEIGHT), sz);
+#undef XCW
 	jbxvt.scr.chars = jbxvt_get_char_size(jbxvt.scr.pixels
 		= (struct JBDim){ .w = (uint16_t)sz[0],
 		.h = (uint16_t)sz[1]});
@@ -45,10 +47,9 @@ void jbxvt_resize_window(void)
 void jbxvt_change_name(uint8_t * restrict str, const bool icon)
 {
 #define XA(n) XCB_ATOM_##n
-	uint16_t l = 0;
-	while (str[++l]);
 	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE,
 		jbxvt.X.win.main, icon ? XA(WM_ICON_NAME) : XA(WM_NAME),
-		XA(STRING), 8, l, str);
+		XA(STRING), 8, strlen((const char *)str), str);
+#undef XA
 }
 
