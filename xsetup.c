@@ -3,27 +3,17 @@
 
 #include "xsetup.h"
 
-#include "config.h"
 #include "jbxvt.h"
-#include "libjb/log.h"
-#include "sbar.h"
 #include "scr_reset.h"
 #include "screen.h"
 
-#include <assert.h>
-#include <string.h>
-
-#define VT jbxvt.X.win.vt
-#define MW jbxvt.X.win.main
-#define XC jbxvt.X.xcb
-#define SW jbxvt.X.win.sb
-#define SB jbxvt.opt.show_scrollbar
+#include <stdlib.h>
 
 //  Map the window
 void jbxvt_map_window(void)
 {
-	xcb_map_window(jbxvt.X.xcb, MW);
-	xcb_map_subwindows(jbxvt.X.xcb, MW);
+	xcb_map_window(jbxvt.X.xcb, jbxvt.X.win.main);
+	xcb_map_subwindows(jbxvt.X.xcb, jbxvt.X.win.main);
 	/*  Setup the window now so that we can add LINES and COLUMNS to
 	 *  the environment.  */
 	jbxvt_resize_window();
@@ -35,28 +25,30 @@ void jbxvt_map_window(void)
 void jbxvt_resize_window(void)
 {
 	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(jbxvt.X.xcb,
-		xcb_get_geometry(jbxvt.X.xcb, MW), NULL);
-	assert(r);
+		xcb_get_geometry(jbxvt.X.xcb, jbxvt.X.win.main), NULL);
 	uint32_t sz[] = {r->width, r->height};
 	free(r);
-	if (SB) {
+	if (jbxvt.opt.show_scrollbar) {
 #define XCW(i) XCB_CONFIG_WINDOW_##i
-		xcb_configure_window(jbxvt.X.xcb, SW, XCW(HEIGHT), &sz[1]);
+		xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.sb,
+			XCW(HEIGHT), &sz[1]);
 		sz[0] -= JBXVT_SCROLLBAR_WIDTH;
 	}
-	xcb_configure_window(jbxvt.X.xcb, VT, XCW(WIDTH) | XCW(HEIGHT), sz);
-	jbxvt.scr.chars = jbxvt_get_char_size(jbxvt.scr.pixels = (struct JBDim){
-		.w = (uint16_t)sz[0],
+	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt,
+		XCW(WIDTH) | XCW(HEIGHT), sz);
+	jbxvt.scr.chars = jbxvt_get_char_size(jbxvt.scr.pixels
+		= (struct JBDim){ .w = (uint16_t)sz[0],
 		.h = (uint16_t)sz[1]});
 }
 
 // Change window or icon name:
 void jbxvt_change_name(uint8_t * restrict str, const bool icon)
 {
-	assert(str);
 #define XA(n) XCB_ATOM_##n
-	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE, MW, icon
-		? XA(WM_ICON_NAME) : XA(WM_NAME), XA(STRING), 8,
-		strlen((char*)str), str);
+	uint16_t l = 0;
+	while (str[++l]);
+	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE,
+		jbxvt.X.win.main, icon ? XA(WM_ICON_NAME) : XA(WM_NAME),
+		XA(STRING), 8, l, str);
 }
 
