@@ -131,17 +131,9 @@ static int_fast16_t output_to_command(void)
 
 static void timer(void)
 {
-	if (jbxvt.mode.att610)
-		return;
-	switch(jbxvt.opt.cursor_attr) {
-	case 0: // blinking block
-	case 1: // blinking block
-	case 3: // blinking underline
-	case 5: // blinking bar
-	case 7: // blinking overline
-		draw_cursor();
-		xcb_flush(jbxvt.X.xcb); // enable clearing
-		break;
+	if (!jbxvt.mode.att610 && jbxvt.opt.cursor_attr % 2) {
+		draw_cursor(); // blinking cursor
+		xcb_flush(jbxvt.X.xcb);
 	}
 }
 
