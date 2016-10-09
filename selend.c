@@ -9,7 +9,7 @@
 #define SLD jbxvt.scr.sline.data
 
 // Make i positive, return true if it was already positive
-bool jbxvt_ipos(int16_t * i)
+static bool jbxvt_ipos(int16_t * i)
 {
 	if (*i < 0) {
 		*i = -1 - *i;

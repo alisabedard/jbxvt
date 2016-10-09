@@ -16,9 +16,6 @@ enum JBXVTSelType {
     is forced to be large enough to include it.  */
 void jbxvt_adjust_selection(struct JBDim * restrict include);
 
-// Make i positive, return true if it was already positive
-bool jbxvt_ipos(int16_t * i);
-
 //  Convert a row and column coordinates into a selection endpoint.
 void jbxvt_rc_to_selend(const int16_t row, const int16_t col,
 	struct JBDim * se);
