@@ -6,9 +6,8 @@
 
 // selection endpoint types:
 enum JBXVTSelType {
-	JBXVT_SEL_NONE,
-	JBXVT_SEL_ON_SCREEN,
-	JBXVT_SEL_SAVED
+	JBXVT_SEL_NONE = false,
+	JBXVT_SEL_ON_SCREEN = true,
 };
 
 /*  Adjust the selection to a word or line boundary.
