@@ -21,7 +21,6 @@
 #define LOG(...)
 #endif
 
-
 static void zero(const uint16_t line, const size_t sz, uint16_t col)
 {
 	//col = MIN(col, jbxvt.scr.chars.width); // restrict bounds
