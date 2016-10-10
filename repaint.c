@@ -16,23 +16,14 @@
 static void paint_rvec_text(uint8_t * str, uint32_t * rvec,
 	int16_t len, struct JBDim p)
 {
-	if (!rvec || !str)
-		  return;
-	while (len > 0) {
-		uint32_t r;
-		int_fast16_t i;
-		/* Find the length for which
-		   the current rend val applies.  */
-		for (i = 0, r = *rvec; i < len && rvec[i] == r; ++i)
-			;
-		// draw
-		paint_rval_text(str, r, i, p);
-		// advance to next block
-		p.x += i * FSZ.width;
-		str += i;
-		rvec += i;
-		len -= i;
-	}
+	if (!len)
+		return;
+	int_fast16_t i = 0;
+	while (i < len && rvec[i] == rvec[0])
+		++i;
+	paint_rval_text(str, rvec[0], i, p);
+	p.x += FSZ.width;
+	paint_rvec_text(str + i, rvec + i, len - i, p);
 }
 
 static int_fast32_t repaint_generic(struct JBDim p, uint_fast16_t len,
