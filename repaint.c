@@ -34,10 +34,9 @@ static int_fast32_t repaint_generic(struct JBDim p, uint_fast16_t len,
 		  return p.y + jbxvt.X.f.size.height;
 	paint_rvec_text(str, rend + 0, len, p);
 	p.x += len * jbxvt.X.f.size.width;
-	const uint16_t width = (jbxvt.scr.chars.width + 1 - len)
-		* jbxvt.X.f.size.width;
 	xcb_clear_area(jbxvt.X.xcb, false, jbxvt.X.win.vt,
-		p.x, p.y, width, jbxvt.X.f.size.height);
+		p.x, p.y, jbxvt.scr.pixels.width,
+		jbxvt.X.f.size.height);
 	return p.y + jbxvt.X.f.size.height;
 }
 
