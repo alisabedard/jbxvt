@@ -253,8 +253,7 @@ char * cprintf(char *fmt, ...)
 	// + 1 to include \0 terminator.
 	const int l = vsnprintf(buf, sizeof(buf), fmt, args) + 1;
 	va_end(args);
-	jbxvt.com.send_nxt = (uint8_t *)buf;
-	jbxvt.com.send_count = l;
+	jb_assert(write(jbxvt.com.fd, buf, l), "Cannot write to command");
 	return buf;
 }
 
