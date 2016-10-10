@@ -103,6 +103,10 @@ static void set_ttymodes(void)
 		[VEOF] = 04, [VEOL] = 013, [VSTART] = 021, [VSTOP] = 023,
 		[VSUSP] = 032, [VREPRINT] = 022, [VWERASE] = 027,
 		[VLNEXT] = 026, [VDISCARD] = 017}};
+#ifdef NETBSD
+	term.c_cflag = B9600 | CREAD | CS8;
+	term.c_lflag |= ECHOCTL | ECHOKE;
+#endif//NETBSD
 	tcsetattr(0, TCSANOW, &term);
 	tty_set_size(jbxvt.scr.chars);
 }
@@ -164,6 +168,15 @@ static void exit_handler(void)
 static void signal_handler(int sig)
 {
 	LOG("Caught signal %d", sig);
+#if defined(NETBSD) || defined(OPENBSD)
+	static bool caught_stop;
+	if (sig == 20) {
+		if (!caught_stop) {
+			caught_stop = true;
+			return;
+		}
+	}
+#endif
 #ifdef USE_UTEMPTER
 	// Remove utmp entry:
 	utempter_remove_added_record();
