@@ -1,5 +1,6 @@
-#ifndef COLOR_INDEX_H
-#define COLOR_INDEX_H
+/* Copyright 2016, Jeffrey E. Bedard */
+#ifndef JBXVT_COLOR_INDEX_H
+#define JBXVT_COLOR_INDEX_H
 #include <stdint.h>
 static uint32_t color_index[256] = {
 	[0] = 0x000000,
@@ -259,4 +260,4 @@ static uint32_t color_index[256] = {
 	[254] = 0xe4e4e4,
 	[255] = 0xeeeeee,
 };
-#endif//!COLOR_INDEX_H
+#endif//!JBXVT_COLOR_INDEX_H

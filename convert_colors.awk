@@ -8,8 +8,9 @@
 # ./convert_colors.awk color_index.txt > color_index.h
 
 BEGIN {
-	print "#ifndef COLOR_INDEX_H"
-	print "#define COLOR_INDEX_H"
+	print "/* Copyright 2016, Jeffrey E. Bedard */"
+	print "#ifndef JBXVT_COLOR_INDEX_H"
+	print "#define JBXVT_COLOR_INDEX_H"
 	print "#include <stdint.h>"
 	print "static uint32_t color_index[256] = {"
 	FS=":";
@@ -23,6 +24,6 @@ BEGIN {
 
 END {
 	print "};";
-	print "#endif//!COLOR_INDEX_H"
+	print "#endif//!JBXVT_COLOR_INDEX_H"
 }
 
