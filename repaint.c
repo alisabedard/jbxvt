@@ -20,7 +20,7 @@ static void paint_rvec_text(uint8_t * str, uint32_t * rvec,
 	int_fast16_t i = 0;
 	while (i < len && rvec[i] == rvec[0])
 		++i;
-	paint_rval_text(str, rvec[0], i, p);
+	paint_rstyle_text(str, rvec[0], i, p);
 	p.x += i * jbxvt.X.f.size.width;
 	paint_rvec_text(str + i, rvec + i, len - i, p);
 }

@@ -220,7 +220,7 @@ void jbxvt_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 			parse_special_charset(str, len);
 		// Render the string:
 		if (!jbxvt.scr.current->decpm) {
-			paint_rval_text(str, jbxvt.scr.rstyle, 1, p);
+			paint_rstyle_text(str, jbxvt.scr.rstyle, 1, p);
 			// Save scroll history:
 			*t = *str;
 		}

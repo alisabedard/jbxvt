@@ -64,13 +64,13 @@ static pixel_t rgb_pixel(const uint16_t c)
 	return p;
 }
 
-static bool set_rval_colors(const uint32_t rval)
+static bool set_rstyle_colors(const uint32_t rstyle)
 {
 	// Mask foreground colors, 9 bits offset by 6 bits
 	// Mask background colors, 9 bits offset by 15 bits
-	const uint8_t color[] = {rval >> 7, rval >> 16};
-	const bool rgb[] = {rval & RS_FG_RGB, rval & RS_BG_RGB};
-	const bool ind[] = {rval & RS_FG_INDEX, rval & RS_BG_INDEX};
+	const uint8_t color[] = {rstyle >> 7, rstyle >> 16};
+	const bool rgb[] = {rstyle & JBXVT_RS_FG_RGB, rstyle & JBXVT_RS_BG_RGB};
+	const bool ind[] = {rstyle & JBXVT_RS_FG_INDEX, rstyle & JBXVT_RS_BG_INDEX};
 	if (ind[0])
 		fg(color_index[color[0]]);
 	else if (rgb[0])
@@ -96,26 +96,26 @@ static void draw_underline(uint16_t len, struct JBDim p)
 }
 
 static void draw_text(uint8_t * restrict str, uint16_t len,
-	struct JBDim * restrict p, uint32_t rval)
+	struct JBDim * restrict p, uint32_t rstyle)
 {
 	xcb_image_text_8(jbxvt.X.xcb, len, jbxvt.X.win.vt,
 		jbxvt.X.gc.tx, p->x, p->y, (const char *)str);
 	++p->y; // Padding for underline, use underline for italic
-	if (rval & RS_ULINE || unlikely(rval & RS_ITALIC))
+	if (rstyle & JBXVT_RS_ULINE || unlikely(rstyle & JBXVT_RS_ITALIC))
 		draw_underline(len, *p);
 }
 
 //  Paint the text using the rendition value at the screen position.
-void paint_rval_text(uint8_t * restrict str, uint32_t rval,
+void paint_rstyle_text(uint8_t * restrict str, uint32_t rstyle,
 	int16_t len, struct JBDim p)
 {
 	if (!str || len < 1) // prevent segfault
 		  return;
-	if (rval & RS_INVISIBLE)
+	if (rstyle & JBXVT_RS_INVISIBLE)
 		  return; // nothing to do
-	const bool rvid = (rval & RS_RVID) || (rval & RS_BLINK);
-	const bool bold = rval & RS_BOLD;
-	bool cmod = set_rval_colors(rval);
+	const bool rvid = (rstyle & JBXVT_RS_RVID) || (rstyle & JBXVT_RS_BLINK);
+	const bool bold = rstyle & JBXVT_RS_BOLD;
+	bool cmod = set_rstyle_colors(rstyle);
 	xcb_connection_t * c = jbxvt.X.xcb;
 	const xcb_gc_t gc = jbxvt.X.gc.tx;
 	if (rvid) { // Reverse looked up colors.
@@ -128,17 +128,19 @@ void paint_rval_text(uint8_t * restrict str, uint32_t rval,
 	if(bold)
 		font(jbxvt.X.f.bold);
 	// Draw text with background:
-	const xcb_window_t w = jbxvt.X.win.vt;
-	const struct JBDim f = jbxvt.X.f.size;
-	if (jbxvt.mode.decdwl) {
+#ifdef JBXVT_FIXME
+	if (jbxvt.mode.decdwl || (rstyle & JBXVT_RS_DWL)) {
+		LOG("PAINTING DWL");
 		for (int16_t i = 0; i < len; ++i) {
 			const char buf[2] = {str[i], ' '};
-			xcb_image_text_8(c, 2, w, gc, p.x, p.y, buf);
-			p.x += f.w << 1;
+			p.x += jbxvt.X.f.size.w * 2;
+			xcb_image_text_8(c, 2, jbxvt.X.win.vt,
+				gc, p.x, p.y, buf);
 		}
-		jbxvt.mode.decdwl = false;
+		p.y += jbxvt.X.f.size.h;
 	} else
-		draw_text(str, len, &p, rval);
+#endif//JBXVT_FIXME
+	draw_text(str, len, &p, rstyle);
 	if(bold) // restore font
 		font(jbxvt.X.f.normal);
 	if (cmod) {

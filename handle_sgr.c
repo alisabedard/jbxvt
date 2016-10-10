@@ -22,7 +22,7 @@ static void sgrc(const uint32_t c, const bool fg)
 {
 	const uint8_t o = fg ? 7 : 16;
 	jbxvt.scr.rstyle &= ~(0777<<o);
-	jbxvt.scr.rstyle |= (fg ? RS_FG_INDEX : RS_BG_INDEX) | c << o;
+	jbxvt.scr.rstyle |= (fg ? JBXVT_RS_FG_INDEX : JBXVT_RS_BG_INDEX) | c << o;
 }
 
 static bool rgb_or_index(int32_t arg, bool * restrict either,
@@ -33,8 +33,8 @@ static bool rgb_or_index(int32_t arg, bool * restrict either,
 	*either = false;
 	const bool i = arg != 2;
 	*(likely(i)?index:rgb) = true;
-	jbxvt_style(likely(i) ? (is_fg ? RS_FG_INDEX : RS_BG_INDEX)
-		: (is_fg ? RS_FG_RGB : RS_BG_RGB));
+	jbxvt_style(likely(i) ? (is_fg ? JBXVT_RS_FG_INDEX : JBXVT_RS_BG_INDEX)
+		: (is_fg ? JBXVT_RS_FG_RGB : JBXVT_RS_BG_RGB));
 	return true;
 }
 
@@ -66,7 +66,7 @@ static bool handle_color_encoding(const int32_t arg, const bool is_fg,
 void handle_sgr(struct Token * restrict token)
 {
 	if (token->nargs == 0) {
-		jbxvt_style(RS_NONE);
+		jbxvt_style(JBXVT_RS_NONE);
 		return;
 	}
 	bool fg_rgb_or_index = false;
@@ -93,43 +93,43 @@ void handle_sgr(struct Token * restrict token)
 			  continue;
 		switch (token->arg[i]) {
 		case 0 : // reset
-			jbxvt_style(RS_NONE);
+			jbxvt_style(JBXVT_RS_NONE);
 			jbxvt_set_fg(NULL);
 			jbxvt_set_bg(NULL);
 			break;
 		case 1 :
-			jbxvt_style(RS_BOLD);
+			jbxvt_style(JBXVT_RS_BOLD);
 			break;
 		case 2: // faint
 			SGRFG(250);
 			break;
 		case 3:
-			jbxvt_style(RS_ITALIC);
+			jbxvt_style(JBXVT_RS_ITALIC);
 			break;
 		case 4 :
-			jbxvt_style(RS_ULINE);
+			jbxvt_style(JBXVT_RS_ULINE);
 			break;
 		case 5 :
 		case 6: // sub for rapidly blinking
-			jbxvt_style(RS_BLINK);
+			jbxvt_style(JBXVT_RS_BLINK);
 			break;
 		case 7: // Image negative
-			jbxvt_style(RS_RVID);
+			jbxvt_style(JBXVT_RS_RVID);
 			break;
 		case 8: // Invisible text
-			jbxvt_style(RS_INVISIBLE);
+			jbxvt_style(JBXVT_RS_INVISIBLE);
 			break;
 		case 17: // Alt font
-			jbxvt_style(RS_BOLD);
+			jbxvt_style(JBXVT_RS_BOLD);
 			break;
 		case 23: // Not italic
-			jbxvt.scr.rstyle &= ~RS_ITALIC;
+			jbxvt.scr.rstyle &= ~JBXVT_RS_ITALIC;
 			break;
 		case 24: // Underline none
-			jbxvt.scr.rstyle &= ~RS_ULINE;
+			jbxvt.scr.rstyle &= ~JBXVT_RS_ULINE;
 			break;
 		case 27: // Image positive ( rvid off)
-			jbxvt.scr.rstyle &= ~RS_RVID;
+			jbxvt.scr.rstyle &= ~JBXVT_RS_RVID;
 			break;
 		case 26: // reserved
 			break;

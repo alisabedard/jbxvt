@@ -239,16 +239,20 @@ void jbxvt_parse_token(void)
 		break;
 	CASE(TK_DWL) // double width line
 		jbxvt.mode.decdwl = true;
+		jbxvt.scr.rstyle |= JBXVT_RS_DWL;
 		break;
 	CASE(TK_ED) // erase display
 		jbxvt_erase_screen(t[0]); // don't use n
 		break;
 	CASE(TK_EL) // erase line
 		jbxvt_erase_line(t[0]); // don't use n
-		CASE(TK_ENTGM52)
+		break;
+
+	CASE(TK_ENTGM52)
 		jbxvt.mode.charsel = 1;
 		jbxvt.mode.gm52 = true;
 		break;
+
 	CASE(TK_ELR)
 		switch (t[0]) {
 		case 2:
@@ -405,6 +409,7 @@ void jbxvt_parse_token(void)
 		break;
 	CASE(TK_SWL) // single width line
 		jbxvt.mode.decdwl = false;
+		jbxvt.scr.rstyle &= ~JBXVT_RS_DWL;
 		break;
 	CASE(TK_TBC) // Tabulation clear
 		tbc(t[0]);
