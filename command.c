@@ -116,11 +116,11 @@ static void redir(const fd_t target, const fd_t ttyfd)
 
 static void child(char ** restrict argv, fd_t ttyfd)
 {
-#ifndef NETBSD
+#if !defined(NETBSD) && !defined(OPENBSD)
 	const pid_t pgid = setsid();
-#else//NETBSD
+#else//NETBSD || OPENBSD
 	const pid_t pgid = getsid(getpid());
-#endif//!NETBSD
+#endif//!NETBSD && !OPENBSD
 	jb_assert(pgid >= 0, "Could not open session");
 	/*  Having started a new session, we need to establish
 	 *  a controlling teletype for it.  On some systems
