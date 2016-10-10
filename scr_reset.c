@@ -71,8 +71,9 @@ static void decscnm(void)
 void jbxvt_reset(void)
 {
 	LOG("jbxvt_reset()");
+	xcb_clear_area(X.xcb, 0, X.win.vt, 0, 0,
+		jbxvt.scr.pixels.width, jbxvt.scr.pixels.height);
 	decscnm();
-	//struct JBDim c = jbxvt_get_char_size(P);
 	struct JBDim c = jbxvt.scr.chars;
 	fix_margins(c);
 	static bool created;
