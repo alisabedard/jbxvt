@@ -11,6 +11,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <stdarg.h>
+#include <sys/wait.h>
 #include <termios.h>
 #include <unistd.h>
 
@@ -179,6 +180,11 @@ static void signal_handler(int sig)
 #endif//USE_UTEMPTER
 	// Ensure child process terminates:
 	kill(jbxvt.com.pid, sig);
+	// Ensure the child does not become a zombie:
+	{
+		int wstatus;
+		wait(&wstatus);
+	}
 	// Exit without tripping atexit handler:
 	_Exit(sig);
 }
@@ -186,11 +192,11 @@ static void signal_handler(int sig)
 static void attach_signals(void)
 {
 	// Attach relevant signals:
-	for (uint8_t i = 1; i <= SIGCHLD; ++i)
-		if (i == SIGKILL || i == SIGABRT)
-			continue; // exclude these signals
-		else
-			signal(i, &signal_handler);
+	signal(SIGHUP, &signal_handler);
+	signal(SIGINT, &signal_handler);
+	signal(SIGPIPE, &signal_handler);
+	signal(SIGTERM, &signal_handler);
+	signal(SIGCHLD, &signal_handler);
 	/* Catch all other exit calls and convert to a signal
 	   so that cleanup may be done.  */
 	atexit(&exit_handler);
