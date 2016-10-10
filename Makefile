@@ -3,6 +3,7 @@
 #include debug.mk
 exe=jbxvt
 PREFIX=/usr
+AWK=/usr/bin/gawk
 
 include config.mk
 
@@ -20,13 +21,16 @@ OBJS+=selreq.o scr_reset.o scr_string.o screen.o scroll.o selend.o
 OBJS+=xevents.o window.o xvt.o handle_sgr.o dec_reset.o show_selection.o
 OBJS+=mouse.o
 
-$(exe): $(OBJS)
+$(exe): $(OBJS) color_index.h
 	cd libjb && $(MAKE) CC="${CC}" CFLAGS="${CFLAGS}"
 	$(CC) -o $(exe) $(OBJS) $(CFLAGS) $(LIBS)
 	strip -o $(exe).tmp $(exe)
 	ls -l $(exe).tmp >> sz.log
 	rm -f $(exe).tmp
 	tail -n 5 sz.log
+
+color_index.h: color_index.txt
+	$(AWK) -f convert_colors.awk color_index.txt > color_index.h
 
 bindest=$(DESTDIR)$(PREFIX)/bin
 docdest=$(DESTDIR)$(PREFIX)/share/man/man1
