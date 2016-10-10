@@ -4,11 +4,11 @@
 #ifndef JBXVT_CURSOR_H
 #define JBXVT_CURSOR_H
 
-void save_cursor(void);
+void jbxvt_save_cursor(void);
 
-void restore_cursor(void);
+void jbxvt_restore_cursor(void);
 
 //  Draw the cursor at the current position.
-void draw_cursor(void);
+void jbxvt_draw_cursor(void);
 
 #endif//!JBXVT_CURSOR_H

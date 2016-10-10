@@ -191,7 +191,7 @@ void jbxvt_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 {
 	SLOG("jbxvt_string(%s, len: %d, nlcount: %d)", str, len, nlcount);
 	jbxvt_set_scroll(0);
-	draw_cursor();
+	jbxvt_draw_cursor();
 	if (nlcount > 0)
 		  handle_new_lines(nlcount);
 	struct JBDim p;
@@ -229,7 +229,7 @@ void jbxvt_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		++c->x;
 		check_wrap(jbxvt.scr.current);
 	}
-	draw_cursor();
+	jbxvt_draw_cursor();
 }
 
 

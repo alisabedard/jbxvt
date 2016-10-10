@@ -65,9 +65,9 @@ void dec_reset(struct Token * restrict token)
 			break;
 		case 25: // DECTCEM -- hide cursor
 			jbxvt_set_scroll(0);
-			draw_cursor(); // clear
+			jbxvt_draw_cursor(); // clear
 			jbxvt.mode.dectcem = is_set;
-			draw_cursor(); // draw
+			jbxvt_draw_cursor(); // draw
 			break;
 		case 30: // toggle scrollbar -- per rxvt
 			jbxvt_toggle_scrollbar();
@@ -115,7 +115,7 @@ void dec_reset(struct Token * restrict token)
 		case 1047:
 		case 1048:
 		case 1049: // cursor restore and screen change
-			(is_set ? save_cursor : restore_cursor)();
+			(is_set ? jbxvt_save_cursor : jbxvt_restore_cursor)();
 			jbxvt_change_screen(is_set);
 			break;
 		case 2004: // bracketed paste mode

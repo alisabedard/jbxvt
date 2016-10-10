@@ -80,7 +80,7 @@ void jbxvt_erase_line(const int8_t mode)
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt,
 		g.x, g.y, g.width, FSZ.h);
 	jbxvt.scr.current->wrap_next = false;
-	draw_cursor();
+	jbxvt_draw_cursor();
 	xcb_flush(jbxvt.X.xcb);
 }
 
@@ -114,7 +114,7 @@ void jbxvt_erase_screen(const int8_t mode)
 	for (uint_fast16_t l = start; l <= end; ++l) {
 		jbxvt.scr.current->cursor.y = l;
 		jbxvt_erase_line(2); // entire
-		draw_cursor();
+		jbxvt_draw_cursor();
 	}
 	jbxvt.scr.current->cursor.y = old_y;
 	// clear start of, end of, or entire current line, per mode

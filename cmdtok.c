@@ -132,7 +132,7 @@ static int_fast16_t output_to_command(void)
 static void timer(void)
 {
 	if (!jbxvt.mode.att610 && jbxvt.opt.cursor_attr % 2) {
-		draw_cursor(); // blinking cursor
+		jbxvt_draw_cursor(); // blinking cursor
 		xcb_flush(jbxvt.X.xcb);
 	}
 }

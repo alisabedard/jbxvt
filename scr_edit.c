@@ -27,7 +27,7 @@ static void finalize(const int16_t * restrict x, const struct JBDim p,
 	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, p.x, p.y,
 		count * jbxvt.X.font.size.w, jbxvt.X.font.size.h);
 	jbxvt.scr.current->wrap_next = 0;
-	draw_cursor();
+	jbxvt_draw_cursor();
 }
 
 static void copy_lines(const int16_t x, const int8_t count)
@@ -59,7 +59,7 @@ static void begin(int16_t * x, int8_t * restrict count, const bool insert)
 {
 	*count = get_count(*count, insert);
 	jbxvt_set_scroll(0);
-	draw_cursor();
+	jbxvt_draw_cursor();
 	const struct JBDim c = jbxvt.scr.current->cursor;
 	struct JBDim p = jbxvt_get_pixel_size(c);
 	x[0] = p.x;

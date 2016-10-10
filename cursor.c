@@ -12,20 +12,20 @@
 static uint32_t saved_style;
 static struct JBDim saved_cursor;
 
-void save_cursor(void)
+void jbxvt_save_cursor(void)
 {
 	struct JBXVTScreenData * s = &jbxvt.scr;
 	saved_cursor = s->current->cursor;
 	saved_style = s->rstyle;
 }
 
-void restore_cursor(void)
+void jbxvt_restore_cursor(void)
 {
-	draw_cursor();
+	jbxvt_draw_cursor();
 	struct JBXVTScreenData * s = &jbxvt.scr;
 	s->current->cursor = saved_cursor;
 	s->rstyle = saved_style;
-	draw_cursor();
+	jbxvt_draw_cursor();
 }
 
 static bool is_blinking(void)
@@ -41,7 +41,7 @@ static bool is_blinking(void)
 	return false;
 }
 
-void draw_cursor(void)
+void jbxvt_draw_cursor(void)
 {
 	struct JBXVTScreenData * s = &jbxvt.scr;
 	// Don't draw if scrolled, non-existent, or hidden

@@ -31,7 +31,7 @@ void jbxvt_move(const int16_t x, const int16_t y, const uint8_t relative)
 	LOG("jbxvt_move(x:%d, y:%d, relative:%d)", x, y, relative);
 #endif//MOVE_DEBUG
 	jbxvt_set_scroll(0);
-	draw_cursor(); // clear
+	jbxvt_draw_cursor(); // clear
 	struct JBDim * c = &jbxvt.scr.current->cursor;
 	// Sanitize non-relative arguments--must be positive.
 	set_dimension(&c->x, x, relative & COL_RELATIVE);
@@ -40,6 +40,6 @@ void jbxvt_move(const int16_t x, const int16_t y, const uint8_t relative)
 	const int16_t cy = c->y;
 	jbxvt.scr.current->wrap_next = 0;
 	jbxvt_check_selection(cy, cy);
-	draw_cursor(); // draw
+	jbxvt_draw_cursor(); // draw
 }
 

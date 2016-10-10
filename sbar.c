@@ -40,7 +40,7 @@ void jbxvt_set_scroll(int16_t n)
 		return;
 	jbxvt.scr.offset = n;
 	repaint();
-	draw_cursor();
+	jbxvt_draw_cursor();
 	jbxvt_draw_scrollbar();
 }
 

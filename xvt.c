@@ -326,7 +326,7 @@ void jbxvt_parse_token(void)
 		jbxvt_set_keys(false, false);
 		break;
 	CASE(TK_RC)
-		restore_cursor();
+		jbxvt_restore_cursor();
 		break;
 	CASE(TK_REQTPARAM)
 		reqtparam(t[0]);
@@ -356,7 +356,7 @@ void jbxvt_parse_token(void)
 		jbxvt_scroll_to(t[0]);
 		break;
 	CASE(TK_SC)
-		save_cursor();
+		jbxvt_save_cursor();
 		break;
 	CASE(TK_SCS0) //  SCS G0
 		select_charset(t[0], 0);

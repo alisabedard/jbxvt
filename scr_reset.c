@@ -99,6 +99,6 @@ void jbxvt_reset(void)
 	decscnm();
 	xcb_flush(X.xcb);
 	repaint();
-	draw_cursor();
+	jbxvt_draw_cursor();
 }
 
