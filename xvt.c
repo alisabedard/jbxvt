@@ -22,7 +22,7 @@
 
 #include <string.h>
 
-//#define DEBUG_TOKENS
+#define DEBUG_TOKENS
 #ifdef DEBUG_TOKENS
 #define TLOG(...) LOG(__VA_ARGS__)
 #else
@@ -404,7 +404,7 @@ void jbxvt_parse_token(void)
 		decstbm(&token);
 		break;
 	CASE(TK_SWL) // single width line
-		jbxvt.mode.decdwl = true;
+		jbxvt.mode.decdwl = false;
 		break;
 	CASE(TK_TBC) // Tabulation clear
 		tbc(t[0]);
