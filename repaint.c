@@ -22,20 +22,18 @@ static void paint_rvec_text(uint8_t * str, uint32_t * rvec,
 	while (i < len && rvec[i] == rvec[0])
 		++i;
 	paint_rval_text(str, rvec[0], i, p);
-	p.x += FSZ.width;
+	p.x += i * FSZ.width;
 	paint_rvec_text(str + i, rvec + i, len - i, p);
 }
 
+__attribute__((nonnull(4)))
 static int_fast32_t repaint_generic(struct JBDim p, uint_fast16_t len,
 	uint8_t * restrict str, uint32_t * rend)
 {
 	// check inputs:
 	if (!str || !len)
 		  return p.y + FSZ.height;
-	if (rend)
-		paint_rvec_text(str, rend + 0, len, p);
-	else
-		paint_rval_text(str, 0, len, p);
+	paint_rvec_text(str, rend + 0, len, p);
 	p.x += len * FSZ.width;
 	const uint16_t width = (CSZ.width + 1 - len)
 		* FSZ.width;
