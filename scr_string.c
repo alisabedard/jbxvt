@@ -49,7 +49,8 @@ void jbxvt_tab(void)
 	struct JBDim c = jbxvt.scr.current->cursor;
 	jbxvt.scr.current->text[c.y][c.x] = ' ';
 	const uint16_t w = jbxvt.scr.chars.w - 1;
-	while (!tab_stops[++c.x] && c.x < w);
+	while (!tab_stops[++c.x] && c.x < w)
+		jbxvt.scr.current->text[c.y][c.x] = ' ';
 	jbxvt.scr.current->cursor.x = c.x;
 }
 
