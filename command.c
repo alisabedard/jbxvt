@@ -103,10 +103,6 @@ static void set_ttymodes(void)
 		[VEOF] = 04, [VEOL] = 013, [VSTART] = 021, [VSTOP] = 023,
 		[VSUSP] = 032, [VREPRINT] = 022, [VWERASE] = 027,
 		[VLNEXT] = 026, [VDISCARD] = 017}};
-#ifdef NETBSD
-	term.c_cflag = B9600 | CREAD | CS8;
-	term.c_lflag |= ECHOCTL | ECHOKE;
-#endif//NETBSD
 	tcsetattr(0, TCSANOW, &term);
 	tty_set_size(jbxvt.scr.chars);
 }
