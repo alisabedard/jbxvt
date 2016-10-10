@@ -2,11 +2,8 @@
 
 #include "jbxvt.h"
 
-#include "config.h"
 #include "init_display.h"
-#include "scr_reset.h"
 #include "scr_string.h"
-#include "screen.h"
 #include "window.h"
 #include "xvt.h"
 
