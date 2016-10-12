@@ -175,10 +175,7 @@ void scroll(const uint8_t row1, const uint8_t row2,
 	const uint16_t abs_count = abs(count);
 	uint8_t *save[abs_count];
 	uint32_t *rend[abs_count];
-	if (count > 0)
-		sc_up(row1, row2 + 1, abs_count, save, rend);
-	else
-		sc_dn(row1, row2 + 1, abs_count, save, rend);
+	(count > 0 ? sc_up : sc_dn)(row1, row2 + 1, abs_count, save, rend);
 	jbxvt_set_scroll(0);
 }
 
