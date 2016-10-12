@@ -47,8 +47,7 @@ static void clear(int8_t count, const uint8_t rc,
 
 static void adjust_saved_lines_top(const int_fast16_t n)
 {
-	jbxvt.scr.sline.top += n;
-	jbxvt.scr.sline.top = MIN(jbxvt.scr.sline.top,
+	jbxvt.scr.sline.top = MIN(jbxvt.scr.sline.top + n,
 		jbxvt.scr.sline.max);
 }
 
@@ -130,8 +129,6 @@ void scroll1(int16_t n)
 {
 	LOG("scroll1(%d)", n);
 	copy_saved_lines(n);
-	jbxvt.scr.sline.top = MIN(jbxvt.scr.sline.top + n,
-		jbxvt.scr.sline.max);
 	for (int_fast16_t j = n;
 		j < jbxvt.scr.chars.height; ++j)
 		  move_line(j, -n, &jbxvt.scr.s[0]);
