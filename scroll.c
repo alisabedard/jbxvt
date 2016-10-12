@@ -45,16 +45,20 @@ static void clear(int8_t count, const uint8_t rc,
 	clear(count, rc, text, rend, up);
 }
 
+static void adjust_saved_lines_top(const int_fast16_t n)
+{
+	jbxvt.scr.sline.top += n;
+	jbxvt.scr.sline.top = MIN(jbxvt.scr.sline.top,
+		jbxvt.scr.sline.max);
+}
+
 static void copy_saved_lines(const int_fast16_t n)
 {
 	for (int_fast16_t i = n - 1; i >= 0; --i) {
 		uint8_t * t = jbxvt.scr.current->text[i];
-#define SLINE jbxvt.scr.sline
-		struct JBXVTSavedLine * sl = SLINE.data + n - i - 1;
+		struct JBXVTSavedLine * sl = jbxvt.scr.sline.data + n - i - 1;
 		sl->wrap = jbxvt.scr.current->wrap[i];
-		SLINE.top += n;
-		SLINE.top = MIN(SLINE.top, SLINE.max);
-#undef SLINE
+		adjust_saved_lines_top(n);
 		clear_selection_at(i);
 		const size_t len = strlen((const char *)t);
 		memcpy(sl->text, t, len);
