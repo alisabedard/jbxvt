@@ -179,12 +179,7 @@ static void signal_handler(int sig)
 	utempter_remove_added_record();
 #endif//USE_UTEMPTER
 	// Ensure child process terminates:
-	kill(jbxvt.com.pid, sig);
-	// Ensure the child does not become a zombie:
-	{
-		int wstatus;
-		wait(&wstatus);
-	}
+	kill(jbxvt.com.pid, SIGHUP); // hang up on it
 	// Exit without tripping atexit handler:
 	_Exit(sig);
 }
