@@ -51,7 +51,7 @@ static uint16_t sel_s(struct JBDim * restrict se2, uint8_t ** s)
 static void adj_sel_to_word(struct JBDim * include,
 	struct JBDim * se1, struct JBDim * se2)
 {
-	if (*se1->index < 0)
+	if (se1->index < 0)
 		return; // protect against segfault if ends invalid
 	uint8_t * s = jbxvt.scr.current->text[se1->index];
 	int16_t i = se1->col;
