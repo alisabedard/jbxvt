@@ -35,7 +35,7 @@ static void copy_lines(const int16_t x, const int8_t count)
 	const int16_t y = jbxvt.scr.current->cursor.y;
 	uint8_t * s = jbxvt.scr.current->text[y];
 	uint32_t * r = jbxvt.scr.current->rend[y];
-	for (int16_t i = jbxvt.scr.chars.w - 1; i >= x + count; --i) {
+	for (int_fast16_t i = x + count; i < jbxvt.scr.chars.w; ++i) {
 		s[i] = s[i - count];
 		r[i] = r[i - count];
 	}
