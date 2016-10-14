@@ -214,7 +214,8 @@ void jbxvt_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		if (unlikely(jbxvt.mode.insert))
 			handle_insert(1, p);
 		uint8_t * t = jbxvt.scr.current->text[c->y];
-		if (!t) return;
+		if (!t) // should never be NULL.
+			abort();
 		t += c->x;
 		if (jbxvt.mode.charset[jbxvt.mode.charsel] > CHARSET_ASCII)
 			parse_special_charset(str, len);
