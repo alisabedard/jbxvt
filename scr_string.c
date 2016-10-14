@@ -47,10 +47,10 @@ void jbxvt_tab(void)
 	LOG("jbxvt_tab()");
 	jbxvt_set_scroll(0);
 	struct JBDim c = jbxvt.scr.current->cursor;
-	jbxvt.scr.current->text[c.y][c.x] = ' ';
-	const uint16_t w = jbxvt.scr.chars.w - 1;
-	while (!tab_stops[++c.x] && c.x < w)
-		jbxvt.scr.current->text[c.y][c.x] = ' ';
+	uint8_t * restrict s = jbxvt.scr.current->text[c.y];
+	s[c.x] = ' ';
+	while (!tab_stops[++c.x] && c.x < jbxvt.scr.chars.w)
+		s[c.x] = ' ';
 	jbxvt.scr.current->cursor.x = c.x;
 }
 
