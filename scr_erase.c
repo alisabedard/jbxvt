@@ -112,7 +112,7 @@ void jbxvt_erase_screen(const int8_t mode)
 	const uint16_t old_y = jbxvt.scr.current->cursor.y;
 	for (uint_fast16_t l = start; l <= end; ++l) {
 		jbxvt.scr.current->cursor.y = l;
-		jbxvt_erase_line(2); // entire
+		jbxvt_erase_line(JBXVT_ERASE_ALL); // entire
 		jbxvt_draw_cursor();
 	}
 	jbxvt.scr.current->cursor.y = old_y;
