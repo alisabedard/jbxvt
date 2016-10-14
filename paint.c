@@ -131,9 +131,9 @@ void paint_rstyle_text(uint8_t * restrict str, uint32_t rstyle,
 	if (dwl) {
 		LOG("PAINTING DWL");
 		for (int16_t i = 0; i < len; ++i) {
-			const char buf[] = {str[i], ' ', 0};
-			xcb_image_text_8(c, sizeof(buf), jbxvt.X.win.vt,
-				gc, p.x, p.y, buf);
+			xcb_image_text_8(c, 2, jbxvt.X.win.vt,
+				gc, p.x, p.y,
+				(const char []){str[i], ' '});
 			p.x += jbxvt.X.f.size.w << 1;
 		}
 		p.y += jbxvt.X.f.size.h;
