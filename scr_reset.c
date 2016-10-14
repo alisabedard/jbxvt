@@ -13,18 +13,12 @@
 #include "screen.h"
 #include "scroll.h"
 
+#include <string.h>
 #include <unistd.h>
-
-// Shortcuts
-#define S jbxvt.scr
-#define S0 S.s[0]
-#define S1 S.s[1]
-#define P S.pixels
-#define X jbxvt.X
 
 static void init_screen_elements(struct JBXVTScreen * restrict scr)
 {
-	scr->margin.bottom = S.chars.height - 1;
+	scr->margin.bottom = jbxvt.scr.chars.height - 1;
 	scr->wrap_next = false;
 	scr->margin.top = 0;
 }
@@ -32,8 +26,8 @@ static void init_screen_elements(struct JBXVTScreen * restrict scr)
 static void init(struct JBXVTScreen * s)
 {
 	for (size_t y = 0; y < JBXVT_MAX_ROWS; ++y) {
-		s->text[y] = calloc(JBXVT_MAX_COLS, 1);
-		s->rend[y] = calloc(JBXVT_MAX_COLS, 4);
+		s->text[y] = calloc(1, JBXVT_MAX_COLS);
+		s->rend[y] = calloc(4, JBXVT_MAX_COLS);
 	}
 }
 
@@ -41,7 +35,7 @@ static inline void fix_margins(const struct JBDim c)
 {
 	/* On screen resize, check if old margin was on the bottom line.
 	   If so, set the bottom margin to the new bottom line.  */
-	if (c.height == S.chars.height)
+	if (c.height == jbxvt.scr.chars.height)
 		  return;
 	if (jbxvt.scr.current->margin.b >= c.h)
 		  jbxvt.scr.current->margin.b = c.h - 1;
@@ -56,12 +50,12 @@ static void decscnm(void)
 	else
 		last_was_rv = rv;
 	LOG("decscnm()");
-	struct JBXVTXPixels * p = &X.color;
+	struct JBXVTXPixels * p = &jbxvt.X.color;
 	JB_SWAP(pixel_t, p->fg, p->bg);
 	JB_SWAP(pixel_t, p->current_fg, p->current_bg);
-	xcb_change_gc(X.xcb, X.gc.tx, XCB_GC_FOREGROUND
+	xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, XCB_GC_FOREGROUND
 		| XCB_GC_BACKGROUND, (uint32_t[]){p->fg, p->bg});
-	xcb_change_window_attributes(X.xcb, X.win.vt,
+	xcb_change_window_attributes(jbxvt.X.xcb, jbxvt.X.win.vt,
 		XCB_CW_BACK_PIXEL, &p->bg);
 	usleep(100000);
 }
@@ -71,8 +65,6 @@ static void decscnm(void)
 void jbxvt_reset(void)
 {
 	LOG("jbxvt_reset()");
-	xcb_clear_area(X.xcb, 0, X.win.vt, 0, 0,
-		jbxvt.scr.pixels.width, jbxvt.scr.pixels.height);
 	decscnm();
 	struct JBDim c = jbxvt.scr.chars;
 	fix_margins(c);
@@ -83,22 +75,22 @@ void jbxvt_reset(void)
 		created = true;
 	}
 	int16_t * y = &jbxvt.scr.current->cursor.y;
-	if (likely(jbxvt.scr.current == &S.s[0]) && *y >= c.h) {
+	if (likely(jbxvt.scr.current == &jbxvt.scr.s[0]) && *y >= c.h) {
 		scroll1(*y - c.h + 1);
 		*y = c.h - 1;
 	}
-	init_screen_elements(&S.s[0]);
-	init_screen_elements(&S.s[1]);
+	init_screen_elements(&jbxvt.scr.s[0]);
+	init_screen_elements(&jbxvt.scr.s[1]);
 	// Constrain dimensions:
 	c.w = MIN(c.w, JBXVT_MAX_COLS);
 	c.h = MIN(c.h, JBXVT_MAX_ROWS);
 	tty_set_size(c);
-	S.chars = c;
+	jbxvt.scr.chars = c;
 	reset_row_col();
 	--c.h; --c.w;
 	jbxvt_draw_scrollbar();
 	decscnm();
-	xcb_flush(X.xcb);
+	xcb_flush(jbxvt.X.xcb);
 	repaint();
 	jbxvt_draw_cursor();
 }
