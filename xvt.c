@@ -240,12 +240,8 @@ void jbxvt_parse_token(void)
 		break;
 	CASE(TK_DWL) // double width line
 		jbxvt.scr.current->dwl[jbxvt.scr.current->cursor.y] = true;
-		jbxvt_repaint();
-		jbxvt_draw_cursor();
-#if 0
-		jbxvt.mode.decdwl = true;
-		jbxvt.scr.rstyle |= JBXVT_RS_DWL;
-#endif
+		jbxvt_repaint(); // in case set mid-line
+		jbxvt_draw_cursor(); // clear stale cursor block
 		break;
 	CASE(TK_ED) // erase display
 		jbxvt_erase_screen(t[0]); // don't use n
@@ -414,12 +410,8 @@ void jbxvt_parse_token(void)
 		break;
 	CASE(TK_SWL) // single width line
 		jbxvt.scr.current->dwl[jbxvt.scr.current->cursor.y] = false;
-		jbxvt_repaint();
-		jbxvt_draw_cursor();
-#if 0
-		jbxvt.mode.decdwl = false;
-		jbxvt.scr.rstyle &= ~JBXVT_RS_DWL;
-#endif
+		jbxvt_repaint(); // in case mode is set mid-line
+		jbxvt_draw_cursor(); // clear stale cursor block
 		break;
 	CASE(TK_TBC) // Tabulation clear
 		tbc(t[0]);
