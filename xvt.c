@@ -12,7 +12,7 @@
 #include "lookup_key.h"
 #include "repaint.h"
 #include "sbar.h"
-#include "scr_edit.h"
+#include "edit.h"
 #include "scr_erase.h"
 #include "scr_move.h"
 #include "scr_string.h"

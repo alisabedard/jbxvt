@@ -1,7 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 
-#include "scr_edit.h"
+#include "edit.h"
 
 #include "cursor.h"
 #include "jbxvt.h"
