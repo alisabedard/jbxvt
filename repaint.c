@@ -40,16 +40,15 @@ static int_fast32_t repaint_generic(struct JBDim p, uint_fast16_t len,
 {
 	// check inputs:
 	if (!str || !len)
-		  return p.y + FSZ.height;
+		return p.y + FSZ.height;
 	if (rend)
 		paint_rvec_text(str, rend + 0, len, p);
 	else
 		paint_rstyle_text(str, 0, len, p);
 	p.x += len * FSZ.width;
-	const uint16_t width = (CSZ.width + 1 - len)
-		* FSZ.width;
-	xcb_clear_area(jbxvt.X.xcb, false, jbxvt.X.win.vt,
-		p.x, p.y, width, FSZ.height);
+	const uint16_t width = (CSZ.width + 1 - len) * FSZ.width;
+	xcb_clear_area(jbxvt.X.xcb, false, jbxvt.X.win.vt, p.x, p.y,
+		width, FSZ.height);
 	return p.y + FSZ.height;
 }
 
@@ -76,6 +75,8 @@ static uint_fast16_t filter_string(uint8_t * restrict buf,
 	return x;
 }
 
+
+
 // Repaint the screen
 void repaint(void)
 {
@@ -83,7 +84,7 @@ void repaint(void)
 	struct JBDim p = {};
 	int_fast32_t line = show_scroll_history(&p, 0, jbxvt.scr.offset - 1);
 	// Do the remainder from the current screen:
-	for (uint_fast16_t i = 0; line <= CSZ.height; ++line, ++i) {
+	for (uint_fast16_t i = 0; line < CSZ.height; ++line, ++i) {
 		// Allocate enough space to process each column
 		uint8_t str[CSZ.width];
 		p.y = repaint_generic(p, filter_string(str,
