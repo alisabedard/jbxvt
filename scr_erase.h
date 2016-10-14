@@ -6,6 +6,13 @@
 
 #include <stdint.h>
 
+enum {
+	JBXVT_ERASE_AFTER = 0,
+	JBXVT_ERASE_BEFORE = 1,
+	JBXVT_ERASE_ALL = 2,
+	JBXVT_ERASE_SAVED = 3
+};
+
 //  erase part or the whole of a line
 void jbxvt_erase_line(const int8_t mode);
 

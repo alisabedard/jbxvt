@@ -54,16 +54,16 @@ static int16_t get_sz(const uint8_t mode)
 {
 	fix_rc(&CUR);
 	switch(mode) {
-	case 0: // to end (cursor column to screen width)
+	case JBXVT_ERASE_ALL:
+		return jbxvt.scr.chars.w;
+	case JBXVT_ERASE_BEFORE: // from start (col 0 to current cursor column)
+		return CUR.x;
+	default: // JBXVT_ERASE_AFTER
 		if (jbxvt.scr.chars.w < CUR.x) // invalid/negative range
 			return 0; // erase nothing
 		else // valid range
+			// to end (cursor column to screen width)
 			return jbxvt.scr.chars.w - CUR.x;
-	case 2: // entire (col 0 to screen width)
-		return jbxvt.scr.chars.w;
-	case 1: // from start (col 0 to current cursor column)
-	default:
-		return CUR.x;
 	}
 }
 
@@ -90,18 +90,18 @@ void jbxvt_erase_screen(const int8_t mode)
 	uint16_t start, end;
 	switch (mode) {
 		// offset by 1 to not include current line, handled later
-	case 0: // below
+	case JBXVT_ERASE_AFTER:
 		start = jbxvt.scr.current->cursor.y + 1;
 		end = jbxvt.scr.chars.h;
 		break;
-	case 1: // above
+	case JBXVT_ERASE_BEFORE:
 		start = 0;
 		end = jbxvt.scr.current->cursor.y - 1;
 		break;
-	case 3: // saved lines
+	case JBXVT_ERASE_SAVED:
 		jbxvt_clear_saved_lines();
 		return;
-	default: // all
+	default: // JBXVT_ERASE_ALL
 		start = 0;
 		end = jbxvt.scr.chars.h - 1;
 		break;
