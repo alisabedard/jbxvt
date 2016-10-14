@@ -5,8 +5,8 @@
 #include <stdint.h>
 #include <xcb/xproto.h>
 
-/*  Small X event structure used to queue interesting X events that need to
- *  be converted into tokens.  */
+/*  Small X event structure used to queue interesting X events
+    that need to be converted into tokens.  */
 struct JBXVTEvent {
 	xcb_timestamp_t time;
 	xcb_window_t window;
