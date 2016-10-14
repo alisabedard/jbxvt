@@ -20,7 +20,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#define STRING_DEBUG
+//#define STRING_DEBUG
 #ifndef STRING_DEBUG
 #undef LOG
 #define LOG(...)
@@ -198,7 +198,6 @@ void jbxvt_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 	struct JBDim p;
 	fix_cursor(&jbxvt.scr.s[0]);
 	fix_cursor(&jbxvt.scr.s[1]);
-	bool double_width_sent = false;
 	while (len) {
 		if (test_action_char(*str, jbxvt.scr.current)) {
 			--len;
@@ -221,10 +220,6 @@ void jbxvt_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 			parse_special_charset(str, len);
 		// Render the string:
 		if (!jbxvt.scr.current->decpm) {
-#ifdef STRING_DEBUG
-			if (jbxvt.scr.current->dwl[c->y])
-				LOG("\t\tDOUBLE_WIDTH_LINE");
-#endif
 			paint_rstyle_text(str, jbxvt.scr.rstyle, 1, p,
 				jbxvt.scr.current->dwl[c->y]);
 			// Save scroll history:
@@ -237,8 +232,6 @@ void jbxvt_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		check_wrap(jbxvt.scr.current);
 	}
 	jbxvt_draw_cursor();
-	if (double_width_sent)
-		jbxvt_repaint();
 }
 
 
