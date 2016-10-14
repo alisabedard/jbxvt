@@ -16,7 +16,7 @@
 #define JBXVT_FG "white"
 #define JBXVT_BG "black"
 
-enum {	JBXVT_SCROLLBAR_WIDTH = 10, // width of scroll bar
+enum {	JBXVT_SCROLLBAR_WIDTH = 8, // width of scroll bar
 	JBXVT_MARGIN = 1, // gap between the text and the window edges
 	JBXVT_ROWS = 24, // default # rows
 	JBXVT_COLUMNS = 80, // default # columns
