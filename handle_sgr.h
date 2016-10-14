@@ -14,7 +14,9 @@ enum RenderFlag {
 	JBXVT_RS_RVID = (1<<3),
 	JBXVT_RS_ITALIC = (1<<4),
 	JBXVT_RS_INVISIBLE = (1<<5),
+#if 0
 	JBXVT_RS_DWL = (1<<24),
+#endif
 	// colors:
 	// foreground: index or 9 bit octal rgb
 	JBXVT_RS_F0 = (1<<6),

@@ -91,7 +91,7 @@ void jbxvt_reset(void)
 	jbxvt_draw_scrollbar();
 	decscnm();
 	xcb_flush(jbxvt.X.xcb);
-	repaint();
+	jbxvt_repaint();
 	jbxvt_draw_cursor();
 }
 

@@ -5,6 +5,6 @@
 #define JBXVT_REPAINT_H
 
 // Repaint the screen
-void repaint(void);
+void jbxvt_repaint(void);
 
 #endif//JBXVT_REPAINT_H

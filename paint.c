@@ -11,7 +11,7 @@
 
 #include <string.h>
 
-//#define DEBUG_PAINT
+#define DEBUG_PAINT
 #ifndef DEBUG_PAINT
 #undef LOG
 #define LOG(...)
@@ -107,7 +107,7 @@ static void draw_text(uint8_t * restrict str, uint16_t len,
 
 //  Paint the text using the rendition value at the screen position.
 void paint_rstyle_text(uint8_t * restrict str, uint32_t rstyle,
-	int16_t len, struct JBDim p)
+	int16_t len, struct JBDim p, const bool dwl)
 {
 	if (!str || len < 1) // prevent segfault
 		  return;
@@ -128,19 +128,17 @@ void paint_rstyle_text(uint8_t * restrict str, uint32_t rstyle,
 	if(bold)
 		font(jbxvt.X.f.bold);
 	// Draw text with background:
-#ifdef JBXVT_FIXME
-	if (jbxvt.mode.decdwl || (rstyle & JBXVT_RS_DWL)) {
+	if (dwl) {
 		LOG("PAINTING DWL");
 		for (int16_t i = 0; i < len; ++i) {
-			const char buf[2] = {str[i], ' '};
-			p.x += jbxvt.X.f.size.w * 2;
-			xcb_image_text_8(c, 2, jbxvt.X.win.vt,
+			const char buf[] = {str[i], ' ', 0};
+			xcb_image_text_8(c, sizeof(buf), jbxvt.X.win.vt,
 				gc, p.x, p.y, buf);
+			p.x += jbxvt.X.f.size.w << 1;
 		}
 		p.y += jbxvt.X.f.size.h;
 	} else
-#endif//JBXVT_FIXME
-	draw_text(str, len, &p, rstyle);
+		draw_text(str, len, &p, rstyle);
 	if(bold) // restore font
 		font(jbxvt.X.f.normal);
 	if (cmod) {

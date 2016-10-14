@@ -49,7 +49,7 @@ void jbxvt_draw_cursor(void)
 	if (s->offset || !(current = s->current) || !jbxvt.mode.dectcem)
 		return;
 	if ((current->cursor_visible ^= true) && is_blinking())
-		repaint(); // prevent stale cursor blocks
+		jbxvt_repaint(); // prevent stale cursor blocks
 	struct JBDim p = jbxvt_get_pixel_size(s->current->cursor);
 	struct JBXVTXData * X = &jbxvt.X;
 	const struct JBDim f = X->f.size;

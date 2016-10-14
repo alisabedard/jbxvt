@@ -32,6 +32,7 @@ static void zero(const uint16_t line, const size_t sz, uint16_t col)
 	memset(jbxvt.scr.current->text[line] + col, 0, sz);
 	memset(jbxvt.scr.current->rend[line] + col, 0, sz << 2);
 	jbxvt.scr.current->wrap[line] = false;
+	jbxvt.scr.current->dwl[line] = false;
 }
 
 #define CUR jbxvt.scr.current->cursor

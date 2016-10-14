@@ -14,7 +14,7 @@
 /* Display the string using the rendition vector
    at the screen coordinates.  */
 static void paint_rvec_text(uint8_t * str, uint32_t * rvec,
-	int16_t len, struct JBDim p)
+	int16_t len, struct JBDim p, const bool dwl)
 {
 	if (!rvec || !str)
 		  return;
@@ -26,7 +26,7 @@ static void paint_rvec_text(uint8_t * str, uint32_t * rvec,
 		for (i = 0, r = *rvec; i < len && rvec[i] == r; ++i)
 			;
 		// draw
-		paint_rstyle_text(str, r, i, p);
+		paint_rstyle_text(str, r, i, p, dwl);
 		// advance to next block
 		p.x += i * FSZ.width;
 		str += i;
@@ -36,15 +36,15 @@ static void paint_rvec_text(uint8_t * str, uint32_t * rvec,
 }
 
 static int_fast32_t repaint_generic(struct JBDim p, uint_fast16_t len,
-	uint8_t * restrict str, uint32_t * rend)
+	uint8_t * restrict str, uint32_t * rend, const bool dwl)
 {
 	// check inputs:
 	if (!str || !len)
 		return p.y + FSZ.height;
 	if (rend)
-		paint_rvec_text(str, rend + 0, len, p);
+		paint_rvec_text(str, rend + 0, len, p, dwl);
 	else
-		paint_rstyle_text(str, 0, len, p);
+		paint_rstyle_text(str, 0, len, p, dwl);
 	p.x += len * FSZ.width;
 	const uint16_t width = (CSZ.width + 1 - len) * FSZ.width;
 	xcb_clear_area(jbxvt.X.xcb, false, jbxvt.X.win.vt, p.x, p.y,
@@ -59,7 +59,7 @@ static int_fast16_t show_scroll_history(struct JBDim * restrict p,
 	if (line > CSZ.h || i < 0)
 		return line;
 	struct JBXVTSavedLine * sl = &jbxvt.scr.sline.data[i];
-	p->y = repaint_generic(*p, sl->size, sl->text, sl->rend);
+	p->y = repaint_generic(*p, sl->size, sl->text, sl->rend, sl->dwl);
 	return show_scroll_history(p, line + 1, i - 1);
 }
 
@@ -78,7 +78,7 @@ static uint_fast16_t filter_string(uint8_t * restrict buf,
 
 
 // Repaint the screen
-void repaint(void)
+void jbxvt_repaint(void)
 {
 	//  First do any 'scrolled off' lines that are visible.
 	struct JBDim p = {};
@@ -89,7 +89,7 @@ void repaint(void)
 		uint8_t str[CSZ.width];
 		p.y = repaint_generic(p, filter_string(str,
 			jbxvt.scr.current->text[i]), str,
-			jbxvt.scr.current->rend[i]);
+			jbxvt.scr.current->rend[i], jbxvt.scr.current->dwl[i]);
 	}
 	jbxvt_show_selection();
 }

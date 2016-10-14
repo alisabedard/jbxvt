@@ -10,6 +10,7 @@
 #include "libjb/log.h"
 #include "libjb/util.h"
 #include "paint.h"
+#include "repaint.h"
 #include "sbar.h"
 #include "screen.h"
 #include "scroll.h"
@@ -19,12 +20,11 @@
 #include <string.h>
 #include <unistd.h>
 
-//#define STRING_DEBUG
-#ifdef STRING_DEBUG
-#define SLOG(...) LOG(__VA_ARGS__)
-#else
-#define SLOG(...)
-#endif
+#define STRING_DEBUG
+#ifndef STRING_DEBUG
+#undef LOG
+#define LOG(...)
+#endif//!STRING_DEBUG
 
 static bool tab_stops[JBXVT_MAX_COLS];
 
@@ -97,7 +97,7 @@ static void wrap(void)
 #endif//x86
 static void handle_insert(const uint8_t n, const struct JBDim p)
 {
-	SLOG("handle_insert(n=%d, p={%d, %d})", n, p.x, p.y);
+	LOG("handle_insert(n=%d, p={%d, %d})", n, p.x, p.y);
 	const struct JBDim c = jbxvt.scr.current->cursor;
 	uint8_t * restrict s = jbxvt.scr.current->text[c.y];
 	uint32_t * restrict r = jbxvt.scr.current->rend[c.y];
@@ -116,7 +116,7 @@ static void handle_insert(const uint8_t n, const struct JBDim p)
 static void parse_special_charset(uint8_t * restrict str,
 	const uint8_t len)
 {
-	SLOG("CHARSET_SG0");
+	LOG("CHARSET_SG0");
 	for (int_fast16_t i = len ; i >= 0; --i) {
 		uint8_t * ch = &str[i];
 		switch (*ch) {
@@ -190,7 +190,7 @@ static void check_wrap(struct JBXVTScreen * restrict s)
     nlcount is the number of new lines in the string.  */
 void jbxvt_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 {
-	SLOG("jbxvt_string(%s, len: %d, nlcount: %d)", str, len, nlcount);
+	LOG("jbxvt_string(%s, len: %d, nlcount: %d)", str, len, nlcount);
 	jbxvt_set_scroll(0);
 	jbxvt_draw_cursor();
 	if (nlcount > 0)
@@ -198,6 +198,7 @@ void jbxvt_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 	struct JBDim p;
 	fix_cursor(&jbxvt.scr.s[0]);
 	fix_cursor(&jbxvt.scr.s[1]);
+	bool double_width_sent = false;
 	while (len) {
 		if (test_action_char(*str, jbxvt.scr.current)) {
 			--len;
@@ -220,7 +221,12 @@ void jbxvt_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 			parse_special_charset(str, len);
 		// Render the string:
 		if (!jbxvt.scr.current->decpm) {
-			paint_rstyle_text(str, jbxvt.scr.rstyle, 1, p);
+#ifdef STRING_DEBUG
+			if (jbxvt.scr.current->dwl[c->y])
+				LOG("\t\tDOUBLE_WIDTH_LINE");
+#endif
+			paint_rstyle_text(str, jbxvt.scr.rstyle, 1, p,
+				jbxvt.scr.current->dwl[c->y]);
 			// Save scroll history:
 			*t = *str;
 		}
@@ -231,6 +237,8 @@ void jbxvt_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		check_wrap(jbxvt.scr.current);
 	}
 	jbxvt_draw_cursor();
+	if (double_width_sent)
+		jbxvt_repaint();
 }
 
 

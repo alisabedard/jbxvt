@@ -10,6 +10,7 @@
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "lookup_key.h"
+#include "repaint.h"
 #include "sbar.h"
 #include "scr_edit.h"
 #include "scr_erase.h"
@@ -22,7 +23,7 @@
 
 #include <string.h>
 
-#define DEBUG_TOKENS
+//#define DEBUG_TOKENS
 #ifdef DEBUG_TOKENS
 #define TLOG(...) LOG(__VA_ARGS__)
 #else
@@ -238,8 +239,13 @@ void jbxvt_parse_token(void)
 		handle_dsr(t[0]);
 		break;
 	CASE(TK_DWL) // double width line
+		jbxvt.scr.current->dwl[jbxvt.scr.current->cursor.y] = true;
+		jbxvt_repaint();
+		jbxvt_draw_cursor();
+#if 0
 		jbxvt.mode.decdwl = true;
 		jbxvt.scr.rstyle |= JBXVT_RS_DWL;
+#endif
 		break;
 	CASE(TK_ED) // erase display
 		jbxvt_erase_screen(t[0]); // don't use n
@@ -407,8 +413,13 @@ void jbxvt_parse_token(void)
 		decstbm(&token);
 		break;
 	CASE(TK_SWL) // single width line
+		jbxvt.scr.current->dwl[jbxvt.scr.current->cursor.y] = false;
+		jbxvt_repaint();
+		jbxvt_draw_cursor();
+#if 0
 		jbxvt.mode.decdwl = false;
 		jbxvt.scr.rstyle &= ~JBXVT_RS_DWL;
+#endif
 		break;
 	CASE(TK_TBC) // Tabulation clear
 		tbc(t[0]);

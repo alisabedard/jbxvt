@@ -54,7 +54,7 @@ void jbxvt_efill(void)
 		memset(jbxvt.scr.current->text[y], 'E', jbxvt.scr.chars.w);
 		memset(jbxvt.scr.current->rend[y], 0, jbxvt.scr.chars.w << 2);
 	}
-	repaint();
+	jbxvt_repaint();
 }
 
 //  Change between the alternate and the main screens
