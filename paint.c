@@ -113,7 +113,8 @@ void paint_rstyle_text(uint8_t * restrict str, uint32_t rstyle,
 		  return;
 	if (rstyle & JBXVT_RS_INVISIBLE)
 		  return; // nothing to do
-	const bool rvid = (rstyle & JBXVT_RS_RVID) || (rstyle & JBXVT_RS_BLINK);
+	const bool rvid = (rstyle & JBXVT_RS_RVID)
+		|| (rstyle & JBXVT_RS_BLINK);
 	const bool bold = rstyle & JBXVT_RS_BOLD;
 	bool cmod = set_rstyle_colors(rstyle);
 	xcb_connection_t * c = jbxvt.X.xcb;
