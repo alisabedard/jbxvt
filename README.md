@@ -39,9 +39,8 @@ and NetBSD requires gmake.  The compiler must support the C11 standard,
 so please use a recent version of gcc or clang.  
 
 ## Porting
-Jbxvt builds and runs on FreeBSD and GNU/Linux.  It currently builds
-on OpenBSD and NetBSD, but exits with code 24 on launch.  Any help
-on this issue is appreciated.
+Jbxvt is developed on x86\_64 Arch GNU/Linux.  Currently, it builds and
+runs on FreeBSD, NetBSD and OpenBSD.
 
 ## Help!
 Jbxvt is a work in progress, please report all bugs!
