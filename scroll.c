@@ -57,12 +57,13 @@ static void copy_saved_lines(const int_fast16_t n)
 		uint8_t * t = jbxvt.scr.current->text[i];
 		struct JBXVTSavedLine * sl = jbxvt.scr.sline.data + n - i - 1;
 		sl->wrap = jbxvt.scr.current->wrap[i];
+		sl->dwl = jbxvt.scr.current->dwl[i];
 		adjust_saved_lines_top(n);
 		clear_selection_at(i);
 		const size_t len = strlen((const char *)t);
 		memcpy(sl->text, t, len);
 		memcpy(sl->rend, jbxvt.scr.current->rend[i], len << 2);
-		sl->sl_length = len;
+		sl->size = len;
 	}
 }
 

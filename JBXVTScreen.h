@@ -16,6 +16,7 @@ struct JBXVTScreen {
 	uint8_t *text[JBXVT_MAX_ROWS];	// text
 	uint32_t *rend[JBXVT_MAX_ROWS];	// styles
 	bool wrap[JBXVT_MAX_ROWS];	// wrap flags
+	bool dwl[JBXVT_MAX_ROWS];	// double-width line flags
 	struct JBDim margin;	// scroll margins, top and bottom
 	struct JBDim cursor;	// cursor position, row and column
 	bool wrap_next:1;	// wrap before the next printed character

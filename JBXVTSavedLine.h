@@ -14,8 +14,9 @@
 struct JBXVTSavedLine {
 	uint8_t text[JBXVT_MAX_COLS];
 	uint32_t rend[JBXVT_MAX_COLS];
-	uint16_t sl_length:15;	/* length of the line */
+	uint16_t size:14;	// line length
 	bool wrap:1;		// wrap flag
+	bool dwl:1;		// double-width line
 };
 
 #endif//!SLINEST_H

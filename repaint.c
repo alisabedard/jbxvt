@@ -59,7 +59,7 @@ static int_fast16_t show_scroll_history(struct JBDim * restrict p,
 	if (line > CSZ.h || i < 0)
 		return line;
 	struct JBXVTSavedLine * sl = &jbxvt.scr.sline.data[i];
-	p->y = repaint_generic(*p, sl->sl_length, sl->text, sl->rend);
+	p->y = repaint_generic(*p, sl->size, sl->text, sl->rend);
 	return show_scroll_history(p, line + 1, i - 1);
 }
 
