@@ -8,6 +8,7 @@
 #include "cursor.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "libjb/time.h"
 #include "libjb/util.h"
 #include "paint.h"
 #include "repaint.h"
@@ -76,7 +77,7 @@ static void decsclm(void)
 	// Time value per the following:
 	// http://www.vt100.net/docs/vt100-ug/chapter3.html166666
 	if (jbxvt.mode.decsclm)
-		usleep(166666);
+		jb_sleep(166);
 }
 
 static void wrap(void)
