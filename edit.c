@@ -84,14 +84,13 @@ static void copy_data_after_count(const uint8_t count, const struct JBDim c)
 {
 	// copy the data after count
 	const uint16_t diff = jbxvt.scr.chars.width - count;
-	const int16_t offset = c.x + count;
 	{
-		uint8_t * i = jbxvt.scr.current->text[c.y];
-		memmove(i + c.x, i + offset, diff);
+		uint8_t * i = jbxvt.scr.current->text[c.y] + c.x;
+		memmove(i, i + count, diff);
 	}
 	{
-		uint32_t * i = jbxvt.scr.current->rend[c.y];
-		memmove(i + c.x, i + offset, diff << 2);
+		uint32_t * i = jbxvt.scr.current->rend[c.y] + c.x;
+		memmove(i, i + count, diff << 2);
 	}
 }
 
