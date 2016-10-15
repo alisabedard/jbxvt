@@ -15,6 +15,9 @@ enum JBXVTSelType {
     is forced to be large enough to include it.  */
 void jbxvt_adjust_selection(struct JBDim * restrict include);
 
+// Make sure selection end point 0 comes before end point 1
+void jbxvt_order_selection_ends(void);
+
 //  Convert a row and column coordinates into a selection endpoint.
 void jbxvt_rc_to_selend(const int16_t row, const int16_t col,
 	struct JBDim * se);

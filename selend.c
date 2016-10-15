@@ -67,6 +67,17 @@ static void adj_sel_to_word(struct JBDim * include,
 	se2->col = i;
 }
 
+// Make sure selection end point 0 comes before end point 1
+void jbxvt_order_selection_ends(void)
+{
+	if (jbxvt_selcmp(jbxvt.sel.end, jbxvt.sel.end + 1) <= 0) {
+		// copy data, not addresses, here
+		const struct JBDim tmp = jbxvt.sel.end[0];
+		jbxvt.sel.end[0] = jbxvt.sel.end[1];
+		jbxvt.sel.end[1] = tmp;
+	}
+}
+
 /*  Adjust the selection to a word or line boundary.
     If the include endpoint is non NULL then the selection
     is forced to be large enough to include it.  */
@@ -74,17 +85,12 @@ void jbxvt_adjust_selection(struct JBDim * restrict include)
 {
 	if (jbxvt.sel.unit == JBXVT_SEL_UNIT_CHAR)
 		return;
-#define SE jbxvt.sel.end
-	const bool oneless = jbxvt_selcmp(SE, SE + 1) <= 0;
-	struct JBDim *se1, *se2;
-	*(oneless ? &se1 : &se2) = SE;
-	*(oneless ? &se2 : &se1) = SE + 1;
-#undef SE
+	jbxvt_order_selection_ends();
 	if (jbxvt.sel.unit == JBXVT_SEL_UNIT_WORD)
-		  adj_sel_to_word(include, se1, se2);
+		  adj_sel_to_word(include, jbxvt.sel.end, jbxvt.sel.end + 1);
 	else if (jbxvt.sel.unit == JBXVT_SEL_UNIT_LINE) {
-		se1->col = 0;
-		se2->col = jbxvt.scr.chars.width - 1;
+		jbxvt.sel.end[0].col = 0;
+		jbxvt.sel.end[1].col = jbxvt.scr.chars.width - 1;
 	}
 }
 

@@ -44,21 +44,12 @@ static void change(struct JBDim * se, struct JBDim * ose)
 void jbxvt_change_selection(struct JBDim * restrict ose0,
 	struct JBDim * restrict ose1)
 {
-	struct JBDim *se, *se0, *se1;
-
 	if (jbxvt_selcmp(ose0, ose1) > 0) {
-		se = ose0;
+		struct JBDim * se = ose0;
 		ose0 = ose1;
 		ose1 = se;
 	}
-	const bool fw = jbxvt_selcmp(&jbxvt.sel.end[0], &jbxvt.sel.end[1]) <= 0;
-	if (fw) {
-		se0 = jbxvt.sel.end;
-		se1 = jbxvt.sel.end + 1;
-	} else {
-		se1 = jbxvt.sel.end;
-		se0 = jbxvt.sel.end + 1;
-	}
-	change(se0, ose0);
-	change(se1, ose1);
+	jbxvt_order_selection_ends();
+	change(jbxvt.sel.end, ose0);
+	change(jbxvt.sel.end + 1, ose1);
 }
