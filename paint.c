@@ -102,7 +102,8 @@ static void draw_text(uint8_t * restrict str, uint16_t len,
 	xcb_image_text_8(jbxvt.X.xcb, len, jbxvt.X.win.vt,
 		jbxvt.X.gc.tx, p->x, p->y, (const char *)str);
 	++p->y; // Padding for underline, use underline for italic
-	if (rstyle & JBXVT_RS_ULINE || unlikely(rstyle & JBXVT_RS_ITALIC))
+	if (rstyle & JBXVT_RS_ULINE || (rstyle & JBXVT_RS_ITALIC
+		&& jbxvt.X.f.italic == jbxvt.X.f.normal))
 		draw_underline(len, *p);
 }
 
@@ -116,27 +117,28 @@ void paint_rstyle_text(uint8_t * restrict str, uint32_t rstyle,
 		  return; // nothing to do
 	const bool rvid = (rstyle & JBXVT_RS_RVID)
 		|| (rstyle & JBXVT_RS_BLINK);
-	const bool bold = rstyle & JBXVT_RS_BOLD;
 	bool cmod = set_rstyle_colors(rstyle);
-	xcb_connection_t * c = jbxvt.X.xcb;
-	const xcb_gc_t gc = jbxvt.X.gc.tx;
 	if (rvid) { // Reverse looked up colors.
 		LOG("rvid");
-		jb_set_fg(c, gc, jbxvt.X.color.current_bg);
-		jb_set_bg(c, gc, jbxvt.X.color.current_fg);
+		jb_set_fg(jbxvt.X.xcb, jbxvt.X.gc.tx,
+			jbxvt.X.color.current_bg);
+		jb_set_bg(jbxvt.X.xcb, jbxvt.X.gc.tx,
+			jbxvt.X.color.current_fg);
 		cmod = true;
 	}
 	p.y += jbxvt.X.f.ascent;
-	if(bold)
+	if (rstyle & JBXVT_RS_BOLD)
 		font(jbxvt.X.f.bold);
+	if (rstyle & JBXVT_RS_ITALIC)
+		font(jbxvt.X.f.italic);
 	// Draw text with background:
 	if (dwl)
 		str = jbxvt_get_double_width_string(str, &len);
 	draw_text(str, len, &p, rstyle);
 	if (dwl)
 		free(str);
-	if(bold) // restore font
-		font(jbxvt.X.f.normal);
+	if(rstyle & JBXVT_RS_BOLD || rstyle & JBXVT_RS_ITALIC)
+		font(jbxvt.X.f.normal); // restore font
 	if (cmod) {
 		fg(jbxvt.X.color.fg);
 		bg(jbxvt.X.color.bg);

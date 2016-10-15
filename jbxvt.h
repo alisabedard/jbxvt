@@ -25,7 +25,7 @@ struct JBXVTXPixels {
 };
 
 struct JBXVTFontData {
-	xcb_font_t normal, bold;
+	xcb_font_t normal, bold, italic;
 	struct JBDim size;
 	int8_t ascent;
 };
@@ -117,7 +117,7 @@ struct JBXVTPrivateModes {
 };
 
 struct JBXVTOptionData {
-	char *bg, *fg, *font, *bold_font, *display;
+	char *bg, *fg, *font, *bold_font, *italic_font, *display;
 	struct JBDim size;
 	int8_t screen;
 	uint8_t elr; // DECELR

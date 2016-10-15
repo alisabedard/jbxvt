@@ -9,6 +9,8 @@
 #define FALLBACK_FONT "fixed"
 #define JBXVT_FONT "-*-terminus-medium-r-*-*-14-*-*-*-*-*-iso10646-*"
 #define JBXVT_BOLD_FONT "-*-terminus-bold-r-*-*-14-*-*-*-*-*-iso10646-*"
+//#define JBXVT_ITALIC_FONT "-*-terminus-bold-r-*-*-14-*-*-*-*-*-iso10646-*"
+#define JBXVT_ITALIC_FONT "-*-fixed-*-o-*-*-13-*-*-*-*-*-*-*-*"
 
 #define TERM_ENV "xterm-256color" // TERM env var to set
 #define COMMAND "/bin/sh" // default command to run

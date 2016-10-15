@@ -16,7 +16,7 @@ struct JBXVT jbxvt;
 
 static char ** parse_command_line(const int argc, char ** argv)
 {
-	static const char * optstr = "B:b:C:c:D:d:eF:f:hR:S:sv";
+	static const char * optstr = "B:b:C:c:D:d:eF:f:hI:R:S:sv";
 	int8_t opt;
 	struct JBXVTOptionData * o = &jbxvt.opt;
 	while((opt=getopt(argc, argv, optstr)) != -1) {
@@ -80,6 +80,7 @@ static void opt_init(void)
 	O(bg, BG);
 	O(font, FONT);
 	O(bold_font, BOLD_FONT);
+	O(italic_font, ITALIC_FONT);
 	O(size.width, COLUMNS);
 	O(size.height, ROWS);
 	// Default to a steady block cursor to conserve CPU

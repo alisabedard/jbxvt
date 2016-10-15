@@ -8,6 +8,7 @@
 #include "screen.h"
 #include "window.h"
 
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <X11/cursorfont.h>
@@ -20,41 +21,51 @@ enum EventMasks {
 	SUB_EVENTS = E(EXPOSURE) | EB(PRESS) | EB(RELEASE) | EB(MOTION)
 };
 
+static bool font_has_error(const xcb_void_cookie_t c)
+{
+	xcb_generic_error_t * error = xcb_request_check(jbxvt.X.xcb, c);
+	if (!error)
+		return false;
+	free(error);
+	return true;
+}
+
 static xcb_font_t get_font(const char * name)
 {
-	xcb_connection_t * restrict x = jbxvt.X.xcb;
-	xcb_font_t f = xcb_generate_id(x);
-	xcb_void_cookie_t c = xcb_open_font_checked(x, f,
+	errno = 0;
+	xcb_font_t f = xcb_generate_id(jbxvt.X.xcb);
+	xcb_void_cookie_t c = xcb_open_font_checked(jbxvt.X.xcb, f,
 		strlen(name), name);
-	xcb_generic_error_t * error = xcb_request_check(x, c);
-	if (error) {
-		free(error);
-		c = xcb_open_font_checked(x, f, sizeof(FALLBACK_FONT),
+	if (font_has_error(c)) {
+		if (jbxvt.X.f.normal) // Fall back to normal font first
+			return jbxvt.X.f.normal;
+		c = xcb_open_font_checked(jbxvt.X.xcb, f, sizeof(FALLBACK_FONT),
 			FALLBACK_FONT);
-		jb_assert(!xcb_request_check(x, c),
-			"Could not open fallback font");
-		if (jbxvt.X.f.normal) // already set
-			  // Fall back if bold font unavailable:
-			  jbxvt.X.f.bold = jbxvt.X.f.normal;
+		jb_assert(!font_has_error(c), "Could not load any fonts");
 	}
 	return f;
 }
 
-static void setup_font(void)
+static void setup_font_metrics(const xcb_query_font_cookie_t c)
 {
-	struct JBXVTFontData * f = &jbxvt.X.f;
-	xcb_query_font_cookie_t qfc = xcb_query_font(jbxvt.X.xcb,
-		f->normal = get_font(jbxvt.opt.font));
-	f->bold = get_font(jbxvt.opt.bold_font);
+	errno = 0;
 	xcb_query_font_reply_t * r = xcb_query_font_reply(jbxvt.X.xcb,
-		qfc, NULL);
-	if (!r)
-		abort();
-	f->ascent = r->font_ascent;
-	struct JBDim * s = &f->size;
-	s->width = r->max_bounds.character_width;
-	s->height = r->font_ascent + r->font_descent;
+		c, NULL);
+	jb_assert(r, "Cannot get font information");
+	jbxvt.X.f.ascent = r->font_ascent;
+	jbxvt.X.f.size.width = r->max_bounds.character_width;
+	jbxvt.X.f.size.height = r->font_ascent + r->font_descent;
 	free(r);
+}
+
+static void setup_fonts(void)
+{
+	jbxvt.X.f.normal = get_font(jbxvt.opt.font);
+	const xcb_query_font_cookie_t c = xcb_query_font(jbxvt.X.xcb,
+		jbxvt.X.f.normal);
+	jbxvt.X.f.bold = get_font(jbxvt.opt.bold_font);
+	jbxvt.X.f.italic = get_font(jbxvt.opt.italic_font);
+	setup_font_metrics(c);
 }
 
 static void create_main_window(xcb_size_hints_t * restrict sh,
@@ -173,7 +184,7 @@ void init_display(char * restrict name)
 	jbxvt.X.xcb = jb_get_xcb_connection(jbxvt.opt.display, &screen);
 	jbxvt.X.screen = jb_get_xcb_screen(jbxvt.X.xcb);
 	init_jbxvt_colors();
-	setup_font();
+	setup_fonts();
 	create_window((uint8_t *)name, jbxvt.X.screen->root);
 	setup_gcs();
 	jbxvt.X.clipboard = jb_get_atom(jbxvt.X.xcb, "CLIPBOARD");
