@@ -7,6 +7,7 @@
 #include "cursor.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "libjb/time.h"
 #include "repaint.h"
 #include "sbar.h"
 #include "scr_move.h"
@@ -57,7 +58,7 @@ static void decscnm(void)
 		| XCB_GC_BACKGROUND, (uint32_t[]){p->fg, p->bg});
 	xcb_change_window_attributes(jbxvt.X.xcb, jbxvt.X.win.vt,
 		XCB_CW_BACK_PIXEL, &p->bg);
-	usleep(100000);
+	jb_sleep(100);
 }
 
 /*  Reset the screen - called whenever the screen
