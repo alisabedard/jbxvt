@@ -6,6 +6,7 @@
 #include "cmdtok.h"
 #include "cursor.h"
 #include "dec_reset.h"
+#include "double.h"
 #include "handle_sgr.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
@@ -239,9 +240,7 @@ void jbxvt_parse_token(void)
 		handle_dsr(t[0]);
 		break;
 	CASE(TK_DWL) // double width line
-		jbxvt.scr.current->dwl[jbxvt.scr.current->cursor.y] = true;
-		jbxvt_repaint(); // in case set mid-line
-		jbxvt_draw_cursor(); // clear stale cursor block
+		jbxvt_set_double_width_line(true);
 		break;
 	CASE(TK_ED) // erase display
 		jbxvt_erase_screen(t[0]); // don't use n
@@ -409,9 +408,7 @@ void jbxvt_parse_token(void)
 		decstbm(&token);
 		break;
 	CASE(TK_SWL) // single width line
-		jbxvt.scr.current->dwl[jbxvt.scr.current->cursor.y] = false;
-		jbxvt_repaint(); // in case mode is set mid-line
-		jbxvt_draw_cursor(); // clear stale cursor block
+		jbxvt_set_double_width_line(false);
 		break;
 	CASE(TK_TBC) // Tabulation clear
 		tbc(t[0]);
