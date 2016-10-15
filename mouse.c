@@ -91,7 +91,7 @@ void jbxvt_track_mouse(uint8_t b, uint32_t state, struct JBDim p,
 
 bool jbxvt_get_mouse_motion_tracked(void)
 {
-	return TRK(btn_evt) | TRK(any_evt);
+	return TRK(btn_evt) || TRK(any_evt);
 }
 
 bool jbxvt_get_mouse_tracked(void)
