@@ -166,8 +166,8 @@ static void signal_handler(int sig)
 {
 	LOG("Caught signal %d", sig);
 #if defined(NETBSD) || defined(OPENBSD)
-	static bool caught_stop;
 	if (sig == 20) {
+		static bool caught_stop;
 		if (!caught_stop) {
 			caught_stop = true;
 			return;
