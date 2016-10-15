@@ -56,8 +56,8 @@ s: # Tiny build
 	CFLAGS='-Os -march=native -flto' make -j8
 
 cppcheck:
-	cppcheck --enable=all --inconclusive --std=posix \
-		-D TIOCSCTTY -I /usr/include -I /usr/lib/clang/3.8.?/include \
+	cppcheck --enable=all --inconclusive --std=c11 \
+		-D TIOCSCTTY -I /usr/include \
 		. 2> cppcheck.log
 	echo 'Results written to cppcheck.log'
 
