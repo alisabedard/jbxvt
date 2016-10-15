@@ -80,22 +80,20 @@ void jbxvt_insert_characters(int8_t count)
 	finalize(x, jbxvt_get_pixel_size(c), get_width(count), count);
 }
 
-static void move(void * data, const int16_t x, const int16_t offset,
-	const int16_t diff, const size_t n)
-{
-	memmove(data + x, data + offset, n * diff);
-}
-
 static void copy_data_after_count(const uint8_t count, const struct JBDim c)
 {
 	// copy the data after count
 	const int16_t end = jbxvt.scr.chars.width - c.x;
-	const int16_t diff = end - count;
+	const uint16_t diff = end - count;
 	const int16_t offset = c.x + count;
-	move (jbxvt.scr.current->text[c.y], c.x, offset,
-		diff, sizeof(uint8_t));
-	move (jbxvt.scr.current->text[c.y], c.x, offset,
-		diff, sizeof(uint32_t));
+	{
+		uint8_t * i = jbxvt.scr.current->text[c.y];
+		memmove(i + c.x, i + offset, diff);
+	}
+	{
+		uint32_t * i = jbxvt.scr.current->rend[c.y];
+		memmove(i + c.x, i + offset, diff << 2);
+	}
 }
 
 static void delete_source_data(const uint8_t count, const int16_t y)
