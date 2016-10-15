@@ -9,11 +9,13 @@ void handle_sgr(struct Token * restrict token)
 enum RenderFlag {
 	JBXVT_RS_NONE = 0,
 	JBXVT_RS_BOLD = 1,
-	JBXVT_RS_ULINE = (1<<1),
+	JBXVT_RS_UNDERLINE = (1<<1),
 	JBXVT_RS_BLINK = (1<<2),
 	JBXVT_RS_RVID = (1<<3),
 	JBXVT_RS_ITALIC = (1<<4),
 	JBXVT_RS_INVISIBLE = (1<<5),
+	JBXVT_RS_CROSSED_OUT = (1<<24),
+	JBXVT_RS_DOUBLE_UNDERLINE = (1<<25),
 	// colors:
 	// foreground: index or 9 bit octal rgb
 	JBXVT_RS_F0 = (1<<6),

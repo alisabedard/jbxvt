@@ -107,7 +107,7 @@ void handle_sgr(struct Token * restrict token)
 			jbxvt_style(JBXVT_RS_ITALIC);
 			break;
 		case 4 :
-			jbxvt_style(JBXVT_RS_ULINE);
+			jbxvt_style(JBXVT_RS_UNDERLINE);
 			break;
 		case 5 :
 		case 6: // sub for rapidly blinking
@@ -119,14 +119,21 @@ void handle_sgr(struct Token * restrict token)
 		case 8: // Invisible text
 			jbxvt_style(JBXVT_RS_INVISIBLE);
 			break;
+		case 9: // crossed out
+			jbxvt_style(JBXVT_RS_CROSSED_OUT);
+			break;
 		case 17: // Alt font
 			jbxvt_style(JBXVT_RS_BOLD);
+			break;
+		case 21: // doubly underlined
+			jbxvt_style(JBXVT_RS_DOUBLE_UNDERLINE);
 			break;
 		case 23: // Not italic
 			jbxvt.scr.rstyle &= ~JBXVT_RS_ITALIC;
 			break;
 		case 24: // Underline none
-			jbxvt.scr.rstyle &= ~JBXVT_RS_ULINE;
+			jbxvt.scr.rstyle &= ~JBXVT_RS_UNDERLINE;
+			jbxvt.scr.rstyle &= ~JBXVT_RS_DOUBLE_UNDERLINE;
 			break;
 		case 27: // Image positive ( rvid off)
 			jbxvt.scr.rstyle &= ~JBXVT_RS_RVID;

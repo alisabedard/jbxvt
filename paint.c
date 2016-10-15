@@ -88,12 +88,12 @@ static inline void font(const xcb_font_t f)
 	xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, XCB_GC_FONT, &f);
 }
 
-static void draw_underline(uint16_t len, struct JBDim p)
+static void draw_underline(uint16_t len, struct JBDim p, int8_t offset)
 {
 	xcb_poly_line(jbxvt.X.xcb, XCB_COORD_MODE_ORIGIN, jbxvt.X.win.vt,
 		jbxvt.X.gc.tx, 2,
-		(struct xcb_point_t[]){{p.x, p.y},
-		{p.x + len * jbxvt.X.font.size.width, p.y}});
+		(struct xcb_point_t[]){{p.x, p.y + offset},
+		{p.x + len * jbxvt.X.font.size.width, p.y + offset}});
 }
 
 static void draw_text(uint8_t * restrict str, uint16_t len,
@@ -102,9 +102,16 @@ static void draw_text(uint8_t * restrict str, uint16_t len,
 	xcb_image_text_8(jbxvt.X.xcb, len, jbxvt.X.win.vt,
 		jbxvt.X.gc.tx, p->x, p->y, (const char *)str);
 	++p->y; // Padding for underline, use underline for italic
-	if (rstyle & JBXVT_RS_ULINE || (rstyle & JBXVT_RS_ITALIC
-		&& jbxvt.X.f.italic == jbxvt.X.f.normal))
-		draw_underline(len, *p);
+	if (((rstyle & JBXVT_RS_ITALIC)
+		&& (jbxvt.X.f.italic == jbxvt.X.f.normal))
+		|| (rstyle & JBXVT_RS_UNDERLINE))
+		draw_underline(len, *p, 0);
+	if (rstyle & JBXVT_RS_DOUBLE_UNDERLINE) {
+		draw_underline(len, *p, -2);
+		draw_underline(len, *p, 0);
+	}
+	if (rstyle & JBXVT_RS_CROSSED_OUT)
+		draw_underline(len, *p, -(jbxvt.X.f.size.h>>1));
 }
 
 //  Paint the text using the rendition value at the screen position.
