@@ -83,8 +83,7 @@ void jbxvt_insert_characters(int8_t count)
 static void copy_data_after_count(const uint8_t count, const struct JBDim c)
 {
 	// copy the data after count
-	const int16_t end = jbxvt.scr.chars.width - c.x;
-	const uint16_t diff = end - count;
+	const uint16_t diff = jbxvt.scr.chars.width - count;
 	const int16_t offset = c.x + count;
 	{
 		uint8_t * i = jbxvt.scr.current->text[c.y];
