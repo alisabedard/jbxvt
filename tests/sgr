@@ -1,0 +1,15 @@
+#!/bin/sh
+chk() {
+	echo "\0233${1}m${1}:${2}\02330m"
+}
+chk 1 bold
+chk 2 faint
+chk 3 italic
+chk 4 underline
+chk 5 blink
+chk 6 unknown
+chk 7 inverse
+chk 8 invisible
+chk 9 crossed_out
+chk 21 doubly-underlined
+
