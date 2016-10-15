@@ -41,19 +41,24 @@ static void change(struct JBDim * se, struct JBDim * ose)
 
 /*  Repaint the displayed selection to reflect the new value.  ose1 and ose2
  *  are assumed to represent the currently displayed selection endpoints.  */
-void jbxvt_change_selection(struct JBDim * restrict ose1,
-	struct JBDim * restrict ose2)
+void jbxvt_change_selection(struct JBDim * restrict ose0,
+	struct JBDim * restrict ose1)
 {
-	struct JBDim *se, *se1, *se2;
+	struct JBDim *se, *se0, *se1;
 
-	if (jbxvt_selcmp(ose1, ose2) > 0) {
-		se = ose1;
-		ose1 = ose2;
-		ose2 = se;
+	if (jbxvt_selcmp(ose0, ose1) > 0) {
+		se = ose0;
+		ose0 = ose1;
+		ose1 = se;
 	}
 	const bool fw = jbxvt_selcmp(&jbxvt.sel.end[0], &jbxvt.sel.end[1]) <= 0;
-	*(fw ? &se1 : &se2) = &jbxvt.sel.end[0];
-	*(fw ? &se2 : &se1) = &jbxvt.sel.end[1];
+	if (fw) {
+		se0 = jbxvt.sel.end;
+		se1 = jbxvt.sel.end + 1;
+	} else {
+		se1 = jbxvt.sel.end;
+		se0 = jbxvt.sel.end + 1;
+	}
+	change(se0, ose0);
 	change(se1, ose1);
-	change(se2, ose2);
 }
