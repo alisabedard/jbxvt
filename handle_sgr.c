@@ -138,6 +138,9 @@ void handle_sgr(struct Token * restrict token)
 		case 27: // Image positive ( rvid off)
 			jbxvt.scr.rstyle &= ~JBXVT_RS_RVID;
 			break;
+		case 28: // not invisible
+			jbxvt.scr.rstyle &= ~JBXVT_RS_INVISIBLE;
+			break;
 		case 29: // Not crossed out
 			jbxvt.scr.rstyle &= ~JBXVT_RS_CROSSED_OUT;
 			break;
