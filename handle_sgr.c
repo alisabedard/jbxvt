@@ -66,7 +66,7 @@ static bool handle_color_encoding(const int32_t arg, const bool is_fg,
 void handle_sgr(struct Token * restrict token)
 {
 	if (token->nargs == 0) {
-		jbxvt.scr.rstyle |= JBXVT_RS_NONE;
+		jbxvt.scr.rstyle = JBXVT_RS_NONE;
 		return;
 	}
 	bool fg_rgb_or_index = false;
@@ -93,7 +93,7 @@ void handle_sgr(struct Token * restrict token)
 			  continue;
 		switch (token->arg[i]) {
 		case 0 : // reset
-			jbxvt.scr.rstyle |= JBXVT_RS_NONE;
+			jbxvt.scr.rstyle = JBXVT_RS_NONE;
 			jbxvt_set_fg(NULL);
 			jbxvt_set_bg(NULL);
 			break;
