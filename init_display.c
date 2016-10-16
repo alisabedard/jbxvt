@@ -73,16 +73,19 @@ static void create_main_window(xcb_size_hints_t * restrict sh,
 	jbxvt.scr.chars = jbxvt_get_char_size(jbxvt.scr.pixels);
 }
 
+static void open_cursor(const xcb_font_t f)
+{
+	xcb_void_cookie_t v = xcb_open_font_checked(jbxvt.X.xcb, f, 6,
+		"cursor");
+	jb_assert(!jb_xcb_cookie_has_error(jbxvt.X.xcb, v),
+		"Cannot open cursor font");
+}
+
 static xcb_cursor_t get_cursor(const uint16_t id,
 	const uint16_t fg, const uint16_t bg)
 {
 	xcb_font_t f = xcb_generate_id(jbxvt.X.xcb);
-	{
-		xcb_void_cookie_t v = xcb_open_font_checked(jbxvt.X.xcb,
-			f, 6, "cursor");
-		jb_assert(!xcb_request_check(jbxvt.X.xcb, v),
-			"Cannot open cursor font");
-	}
+	open_cursor(f);
 	xcb_cursor_t c = xcb_generate_id(jbxvt.X.xcb);
 	xcb_create_glyph_cursor(jbxvt.X.xcb, c, f, f,
 		id, id + 1, fg, fg, fg, bg, bg, bg);
