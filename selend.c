@@ -25,7 +25,8 @@ int8_t jbxvt_selcmp(struct JBDim * restrict se1, struct JBDim * restrict se2)
 }
 
 //  Convert a row and column coordinates into a selection endpoint.
-void jbxvt_rc_to_selend(const int16_t row, const int16_t col, struct JBDim * se)
+void jbxvt_rc_to_selend(const int16_t row, const int16_t col,
+	struct JBDim * se)
 {
 	jbxvt.sel.type = JBXVT_SEL_ON_SCREEN;
 	se->index = row - jbxvt.scr.offset;
