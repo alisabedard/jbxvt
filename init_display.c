@@ -75,6 +75,7 @@ static void create_main_window(xcb_size_hints_t * restrict sh,
 
 static void open_cursor(const xcb_font_t f)
 {
+	errno = 0;
 	xcb_void_cookie_t v = xcb_open_font_checked(jbxvt.X.xcb, f, 6,
 		"cursor");
 	jb_assert(!jb_xcb_cookie_has_error(jbxvt.X.xcb, v),
