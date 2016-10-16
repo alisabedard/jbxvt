@@ -3,6 +3,7 @@
 
 #include "dcs.h"
 
+#include "command.h"
 #include "cmdtok.h"
 #include "jbxvt.h"
 #include "libjb/log.h"

@@ -1,7 +1,7 @@
 // Copyright 2016, Jeffrey E. Bedard
 
-#ifndef JBXVT_PRIVATE_MODES_H
-#define JBXVT_PRIVATE_MODES_H
+#ifndef JBXVT_JBXVTPRIVATEMODES_H
+#define JBXVT_JBXVTPRIVATEMODES_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -39,4 +39,4 @@ struct JBXVTPrivateModes {
 	bool elr_pixels:1;	// locator report in pixel format
 };
 
-#endif//!JBXVT_PRIVATE_MODES_H
+#endif//!JBXVT_JBXVTPRIVATEMODES_H

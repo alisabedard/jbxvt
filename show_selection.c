@@ -6,6 +6,7 @@
 
 #include "jbxvt.h"
 #include "screen.h"
+#include "selend.h"
 
 static void paint_rvid(struct JBDim start, struct JBDim end,
 	int16_t col1, int16_t col2)

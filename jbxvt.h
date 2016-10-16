@@ -2,45 +2,14 @@
 #ifndef JBXVT_H
 #define JBXVT_H
 
-#include "command.h"
-#include "libjb/size.h"
 #include "libjb/util.h"
-#include "libjb/xcb.h"
 #include "selection.h"
-#include "selend.h"
+
 #include "JBXVTPrivateModes.h"
 #include "JBXVTSavedLine.h"
 #include "JBXVTEvent.h"
 #include "JBXVTScreen.h"
-
-struct JBXVTXWindows {
-	xcb_window_t vt, sb, main;
-};
-
-struct JBXVTXGCs {
-	xcb_gcontext_t tx, cu;
-};
-
-struct JBXVTXPixels {
-	pixel_t bg, fg, current_fg, current_bg;
-};
-
-struct JBXVTFontData {
-	xcb_font_t normal, bold, italic;
-	struct JBDim size;
-	int8_t ascent;
-};
-
-struct JBXVTXData {
-	xcb_connection_t * xcb;
-	xcb_screen_t * screen;
-	xcb_atom_t clipboard;
-	struct JBXVTXWindows win;
-	struct JBXVTXGCs gc;
-	struct JBXVTXPixels color;
-	union { struct JBXVTFontData f, font; };
-	int8_t screen_number;
-};
+#include "JBXVTXData.h"
 
 struct JBXVTScreenSavedLines {
 	struct JBXVTSavedLine data[JBXVT_MAX_SCROLL]; // saved lines

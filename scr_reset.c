@@ -3,6 +3,7 @@
 
 #include "scr_reset.h"
 
+#include "command.h"
 #include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"

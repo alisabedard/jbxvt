@@ -2,6 +2,7 @@
 
 #include "jbxvt.h"
 
+#include "command.h"
 #include "init_display.h"
 #include "scr_string.h"
 #include "window.h"

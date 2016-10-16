@@ -3,6 +3,7 @@
 
 #include "esc.h"
 
+#include "command.h"
 #include "cmdtok.h"
 #include "dcs.h"
 #include "jbxvt.h"

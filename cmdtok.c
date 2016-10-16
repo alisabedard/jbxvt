@@ -3,6 +3,7 @@
 
 #include "cmdtok.h"
 
+#include "command.h"
 #include "cursor.h"
 #include "dcs.h"
 #include "esc.h"

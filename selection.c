@@ -7,6 +7,7 @@
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "save_selection.h"
+#include "selend.h"
 #include "screen.h"
 #include "show_selection.h"
 #include "window.h"

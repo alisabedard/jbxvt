@@ -1,6 +1,7 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "mouse.h"
 
+#include "command.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "screen.h"

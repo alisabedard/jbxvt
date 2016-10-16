@@ -4,6 +4,7 @@
 #include "xvt.h"
 
 #include "cmdtok.h"
+#include "command.h"
 #include "cursor.h"
 #include "dec_reset.h"
 #include "double.h"
