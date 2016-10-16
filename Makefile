@@ -1,11 +1,9 @@
 # Copyright 2016, Jeffrey E. Bedard
-#CC=clang
-#include debug.mk
+include config.mk
+
 exe=jbxvt
 PREFIX=/usr
 AWK=/usr/bin/gawk
-
-include config.mk
 
 CFLAGS+=-DUSE_LIKELY
 CFLAGS+=-D_XOPEN_SOURCE=700 --std=c11
