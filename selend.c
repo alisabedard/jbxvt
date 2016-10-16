@@ -49,15 +49,20 @@ static uint16_t sel_s(struct JBDim * restrict se2, uint8_t ** s)
 	return jbxvt.scr.chars.width;
 }
 
+static int16_t get_start_of_word(uint8_t * restrict s, int16_t i)
+{
+	while (i && s[i] != ' ')
+		  --i;
+	return i;
+}
+
 static void adj_sel_to_word(struct JBDim * include,
 	struct JBDim * se1, struct JBDim * se2)
 {
 	if (se1->index < 0)
 		return; // protect against segfault if ends invalid
 	uint8_t * s = jbxvt.scr.current->text[se1->index];
-	int16_t i = se1->col;
-	while (i && s[i] != ' ')
-		  --i;
+	int16_t i = get_start_of_word(s, se1->col);
 	se1->col = i?i+1:0;
 	i = se2->col;
 	if (se2 == include || !jbxvt_selcmp(se2, &jbxvt.sel.end[2]))
