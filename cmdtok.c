@@ -76,10 +76,7 @@ static void key_press(xcb_generic_event_t * restrict e)
 {
 	int_fast16_t count = 0;
 	uint8_t * s = jbxvt_lookup_key(e, &count);
-	if (count) {
-		jbxvt.com.send_nxt = s;
-		jbxvt.com.send_count = count;
-	}
+	write(jbxvt.com.fd, s, count);
 }
 
 static bool handle_xev(void)
