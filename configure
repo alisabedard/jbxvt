@@ -138,12 +138,20 @@ else
 fi
 
 if $DEBUG; then
-	echo 'Enabling debug code...'
+	echo -n 'Enabling debug code... '
 	if [ "$CC" = "clang" ]; then
+		echo clang
 		echo 'include debug_clang.mk' >> $CFG
 	elif [ "$CC" = "gcc" ]; then
+		echo gcc
 		echo 'include debug_gcc.mk' >> $CFG
 	else
-		echo 'include debug.mk' >> $CFG
+		if [ "$ARCH" = "LINUX" ]; then
+			echo gcc
+			echo 'include debug_gcc.mk' >> $CFG
+		else
+			echo generic
+			echo 'include debug.mk' >> $CFG
+		fi
 	fi
 fi
