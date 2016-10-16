@@ -21,27 +21,19 @@ enum EventMasks {
 	SUB_EVENTS = E(EXPOSURE) | EB(PRESS) | EB(RELEASE) | EB(MOTION)
 };
 
-static bool font_has_error(const xcb_void_cookie_t c)
-{
-	xcb_generic_error_t * error = xcb_request_check(jbxvt.X.xcb, c);
-	if (!error)
-		return false;
-	free(error);
-	return true;
-}
-
 static xcb_font_t get_font(const char * name)
 {
 	errno = 0;
 	xcb_font_t f = xcb_generate_id(jbxvt.X.xcb);
 	xcb_void_cookie_t c = xcb_open_font_checked(jbxvt.X.xcb, f,
 		strlen(name), name);
-	if (font_has_error(c)) {
+	if (jb_xcb_cookie_has_error(jbxvt.X.xcb, c)) {
 		if (jbxvt.X.f.normal) // Fall back to normal font first
 			return jbxvt.X.f.normal;
 		c = xcb_open_font_checked(jbxvt.X.xcb, f, sizeof(FALLBACK_FONT),
 			FALLBACK_FONT);
-		jb_assert(!font_has_error(c), "Could not load any fonts");
+		jb_assert(!jb_xcb_cookie_has_error(jbxvt.X.xcb, c),
+			"Could not load any fonts");
 	}
 	return f;
 }
