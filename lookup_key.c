@@ -3,6 +3,7 @@
 #include "command.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "sbar.h"
 
 #include <string.h>
 #include <xcb/xcb_keysyms.h>
@@ -221,9 +222,27 @@ uint8_t * jbxvt_lookup_key(void * restrict ev, int_fast16_t * restrict pcount)
 		for (int_fast16_t i = *pcount; i >= 0; --i)
 			LOG("s[%d]: 0x%x", i, s[i]);
 #endif//KEY_DEBUG
+		/* The following implements a hook into keyboard input
+		 for shift-pageup/dn scrolling and future features.  */
+		if (ke->state == XCB_MOD_MASK_SHIFT && *pcount > 2) {
+			LOG("Handling shift combination...");
+			switch (s[2]) {
+			case '5':
+				LOG("KEY scroll down");
+				jbxvt_set_scroll(jbxvt.scr.offset + 10);
+				goto do_not_display;
+				break;
+			case '6':
+				LOG("KEY scroll up");
+				jbxvt_set_scroll(jbxvt.scr.offset - 10);
+				goto do_not_display;
+				break;
+			}
+		}
 		return s;
 	}
 	if (k >= 0xffe0) { // Don't display non-printable chars
+do_not_display:
 		*pcount = 0;
 		return NULL;
 	}
@@ -235,5 +254,4 @@ uint8_t * jbxvt_lookup_key(void * restrict ev, int_fast16_t * restrict pcount)
 	*pcount = 1;
 	return (uint8_t *)kbuf;
 }
-
 
