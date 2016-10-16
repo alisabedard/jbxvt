@@ -59,7 +59,8 @@ static uint16_t sanitize(uint8_t * str, uint16_t len)
 static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 	struct JBDim * restrict e)
 {
-	if (e->index == (e+1)->index && e->col == (e+1)->col)
+	if ((e->index == (e+1)->index && e->col == (e+1)->col)
+		|| e->y < 1) // not within the screen area
 		return; // NULL selection
 	for (int_fast16_t i = e->index, j = (e+1)->index; i <= j; ++i) {
 		/* Use full screen width if not first or last lines of
@@ -89,6 +90,8 @@ void jbxvt_save_selection(void)
 #undef SE
 	uint16_t total = 1;
 	uint8_t * str = malloc(total);
+	if (jb_check(str != NULL, "Cannot allocate selection buffer"))
+		return;
 	handle_screensel(&str, &total, se);
 	if (!total)
 		return;
