@@ -4,15 +4,9 @@
 #ifndef JBXVT_SELECTION_H
 #define JBXVT_SELECTION_H
 
+#include "JBXVTSelectionUnit.h"
 #include "libjb/size.h"
 #include <xcb/xcb.h>
-
-//  The current selection unit
-enum JBXVTSelUnit {
-	JBXVT_SEL_UNIT_CHAR,
-	JBXVT_SEL_UNIT_WORD,
-	JBXVT_SEL_UNIT_LINE
-};
 
 /*  Determine if the current selection overlaps row1-row2 and if it does then
  *  remove it from the screen.  */
@@ -29,6 +23,6 @@ void jbxvt_send_selection(const xcb_time_t time, const uint32_t requestor,
 	const uint32_t target, const uint32_t property);
 
 // start selection using specified unit:
-void jbxvt_start_selection(const struct JBDim p, enum JBXVTSelUnit unit);
+void jbxvt_start_selection(const struct JBDim p, enum JBXVTSelectionUnit unit);
 
 #endif//!JBXVT_SELECTION_H

@@ -63,7 +63,7 @@ void jbxvt_clear_selection(void)
 }
 
 //  start a selection using the specified unit.
-void jbxvt_start_selection(struct JBDim p, enum JBXVTSelUnit unit)
+void jbxvt_start_selection(struct JBDim p, enum JBXVTSelectionUnit unit)
 {
 	jbxvt_show_selection(); // clear previous
 	p = jbxvt_get_char_size(p);

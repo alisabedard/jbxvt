@@ -27,7 +27,7 @@ struct JBXVTScreenData {
 
 struct JBXVTSelectionData {
 	uint8_t * text;
-	enum JBXVTSelUnit unit;
+	enum JBXVTSelectionUnit unit;
 	struct JBDim end[3]; // end0, end1, anchor
 	uint16_t length;
 	bool type;
