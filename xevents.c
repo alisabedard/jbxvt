@@ -1,8 +1,6 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-
 #include "xevents.h"
-
 #include "command.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
@@ -12,7 +10,6 @@
 #include "selection.h"
 #include "selex.h"
 #include "selreq.h"
-
 xcb_atom_t wm_del_win(void)
 {
 	static long unsigned int a;
@@ -25,7 +22,6 @@ xcb_atom_t wm_del_win(void)
 	}
 	return a;
 }
-
 static void handle_motion_notify(struct JBXVTEvent * restrict xe)
 {
 	const xcb_rectangle_t r = xe->box;
@@ -44,7 +40,6 @@ static void handle_motion_notify(struct JBXVTEvent * restrict xe)
 		jbxvt_extend_selection(b, true);
 	}
 }
-
 static void sbop(struct JBXVTEvent * restrict xe, const bool up)
 {
 	if (jbxvt_get_mouse_tracked()) // let the application handle scrolling
@@ -56,7 +51,6 @@ static void sbop(struct JBXVTEvent * restrict xe, const bool up)
 	else
 		jbxvt_move(0, up ? -1 : 1, ROW_RELATIVE | COL_RELATIVE);
 }
-
 static void handle_button_release(struct JBXVTEvent * restrict xe)
 {
 	if (xe->window == jbxvt.X.win.sb) {
@@ -93,15 +87,12 @@ static void handle_button_release(struct JBXVTEvent * restrict xe)
 		case 5:
 			sbop(xe, true);
 			break;
-
 		}
 	}
 }
-
 static void handle_button1_press(struct JBXVTEvent * restrict xe,
 	const struct JBDim b)
 {
-
 	static unsigned int time1, time2;
 	if (xe->time - time2
 		< MP_INTERVAL) {
@@ -117,7 +108,6 @@ static void handle_button1_press(struct JBXVTEvent * restrict xe,
 		jbxvt_start_selection(b, JBXVT_SEL_UNIT_CHAR);
 	}
 }
-
 static void handle_button_press(struct JBXVTEvent * restrict xe)
 {
 	const xcb_window_t v = jbxvt.X.win.vt;
@@ -143,13 +133,11 @@ static void handle_button_press(struct JBXVTEvent * restrict xe)
 	if (xe->window == jbxvt.X.win.sb && xe->button == 2)
 		jbxvt_scroll_to(xe->box.y);
 }
-
 static void handle_focus(const bool in)
 {
 	if (jbxvt.mode.mouse_focus_evt)
 		cprintf("\033[%c]", in ? 'I' : 'O');
 }
-
 // Handle X11 event described by xe
 bool handle_xevents(struct JBXVTEvent * xe)
 {
@@ -197,4 +185,3 @@ bool handle_xevents(struct JBXVTEvent * xe)
 	jbxvt.com.xev = (struct JBXVTEvent){};
 	return true;
 }
-

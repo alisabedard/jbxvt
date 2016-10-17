@@ -1,11 +1,8 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
-
 #include "selend.h"
-
 #include "jbxvt.h"
-
 static int8_t cmp(const int8_t mod, struct JBDim * restrict se1,
 	struct JBDim * restrict se2)
 {
@@ -13,7 +10,6 @@ static int8_t cmp(const int8_t mod, struct JBDim * restrict se1,
 		return se1->col - se2->col;
 	return (se2->index - se1->index) * mod;
 }
-
 /*  Compare the two selections and return negtive,
     0 or positive depending on whether se2 is after,
     equal to or before se1.  */
@@ -23,7 +19,6 @@ int8_t jbxvt_selcmp(struct JBDim * restrict se1, struct JBDim * restrict se2)
 		  return cmp(-1, se1, se2);
 	return 1;
 }
-
 //  Convert a row and column coordinates into a selection endpoint.
 void jbxvt_rc_to_selend(const int16_t row, const int16_t col,
 	struct JBDim * se)
@@ -32,7 +27,6 @@ void jbxvt_rc_to_selend(const int16_t row, const int16_t col,
 	se->index = row - jbxvt.scr.offset;
 	se->col = col;
 }
-
 //  Convert the selection into a row and column.
 void jbxvt_selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
 	struct JBDim * restrict se)
@@ -42,20 +36,17 @@ void jbxvt_selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
 	*colp = se->col;
 	*rowp = se->row + jbxvt.scr.offset;
 }
-
 static uint16_t sel_s(struct JBDim * restrict se2, uint8_t ** s)
 {
 	*s = jbxvt.scr.current->text[se2->index];
 	return jbxvt.scr.chars.width;
 }
-
 static int16_t get_start_of_word(uint8_t * restrict s, int16_t i)
 {
 	while (i && s[i] != ' ')
 		  --i;
 	return i;
 }
-
 static void adj_sel_to_word(struct JBDim * include,
 	struct JBDim * se1, struct JBDim * se2)
 {
@@ -72,7 +63,6 @@ static void adj_sel_to_word(struct JBDim * include,
 		  ++i;
 	se2->col = i;
 }
-
 // Make sure selection end point 0 comes before end point 1
 void jbxvt_order_selection_ends(void)
 {
@@ -83,7 +73,6 @@ void jbxvt_order_selection_ends(void)
 		jbxvt.sel.end[1] = tmp;
 	}
 }
-
 /*  Adjust the selection to a word or line boundary.
     If the include endpoint is non NULL then the selection
     is forced to be large enough to include it.  */
@@ -99,5 +88,3 @@ void jbxvt_adjust_selection(struct JBDim * restrict include)
 		jbxvt.sel.end[1].col = jbxvt.scr.chars.width - 1;
 	}
 }
-
-

@@ -1,9 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
-
 #include "scr_string.h"
-
 #include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"
@@ -17,18 +15,14 @@
 #include "scroll.h"
 #include "scr_move.h"
 #include "selection.h"
-
 #include <string.h>
 #include <unistd.h>
-
 //#define STRING_DEBUG
 #ifndef STRING_DEBUG
 #undef LOG
 #define LOG(...)
 #endif//!STRING_DEBUG
-
 static bool tab_stops[JBXVT_MAX_COLS];
-
 // Set tab stops:
 // -1 clears all, -2 sets default
 void jbxvt_set_tab(int16_t i, const bool value)
@@ -41,7 +35,6 @@ void jbxvt_set_tab(int16_t i, const bool value)
 	else if (i >= 0) // assign
 		tab_stops[i] = value;
 }
-
 //  Tab to the next tab_stop.
 void jbxvt_tab(void)
 {
@@ -54,13 +47,11 @@ void jbxvt_tab(void)
 		s[c.x] = ' ';
 	jbxvt.scr.current->cursor.x = c.x;
 }
-
 void jbxvt_cht(int16_t v)
 {
 	while (v-- > 0)
 		jbxvt_tab();
 }
-
 static void handle_new_lines(int8_t nlcount)
 {
 	const int16_t y = jbxvt.scr.current->cursor.y;
@@ -71,7 +62,6 @@ static void handle_new_lines(int8_t nlcount)
 	scroll(m->top, m->bottom, nlcount);
 	jbxvt.scr.current->cursor.y -= nlcount;
 }
-
 static void decsclm(void)
 {
 	// Time value per the following:
@@ -79,7 +69,6 @@ static void decsclm(void)
 	if (jbxvt.mode.decsclm)
 		jb_sleep(166);
 }
-
 static void wrap(void)
 {
 	jbxvt.scr.current->wrap_next = false;
@@ -92,7 +81,6 @@ static void wrap(void)
 	} else
 		++jbxvt.scr.current->cursor.y;
 }
-
 #if defined(__i386__) || defined(__amd64__)
        __attribute__((regparm(2)))
 #endif//x86
@@ -113,7 +101,6 @@ static void handle_insert(const uint8_t n, const struct JBDim p)
 		jbxvt.X.gc.tx, p.x, p.y, x, p.y, width, FSZ.height);
 #undef FSZ
 }
-
 static void parse_special_charset(uint8_t * restrict str,
 	const uint8_t len)
 {
@@ -138,7 +125,6 @@ static void parse_special_charset(uint8_t * restrict str,
 		}
 	}
 }
-
 static void fix_margins(struct JBDim* restrict m,
 	const int16_t cursor_y)
 {
@@ -146,14 +132,12 @@ static void fix_margins(struct JBDim* restrict m,
 	const uint8_t h = jbxvt.scr.chars.height - 1;
 	m->b = MIN(m->b, h);
 }
-
 static void fix_cursor(struct JBXVTScreen * restrict c)
 {
 	JB_LIMIT(c->cursor.y, jbxvt.scr.chars.height - 1, 0);
 	JB_LIMIT(c->cursor.x, jbxvt.scr.chars.width - 1, 0);
 	fix_margins(&c->margin, c->cursor.y);
 }
-
 static bool test_action_char(const uint8_t c,
 	struct JBXVTScreen * restrict s)
 {
@@ -171,7 +155,6 @@ static bool test_action_char(const uint8_t c,
 	}
 	return false;
 }
-
 static void save_render_style(const int_fast16_t n,
 	struct JBXVTScreen * restrict s)
 {
@@ -179,14 +162,12 @@ static void save_render_style(const int_fast16_t n,
 	for (int_fast16_t i = n - 1; i >= 0; --i)
 		  s->rend[c.y][c.x + i] = jbxvt.scr.rstyle;
 }
-
 static void check_wrap(struct JBXVTScreen * restrict s)
 {
 	const uint16_t w = jbxvt.scr.chars.w;
 	if (s->cursor.x >= w)
 		s->wrap_next = !jbxvt.mode.decawm;
 }
-
 /*  Display the string at the current position.
     nlcount is the number of new lines in the string.  */
 void jbxvt_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
@@ -235,5 +216,3 @@ void jbxvt_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 	}
 	jbxvt_draw_cursor();
 }
-
-

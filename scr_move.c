@@ -1,11 +1,8 @@
 // Copyright 2016, Jeffrey E. Bedard
-
 #include "scr_move.h"
-
 #include "cursor.h"
 #include "jbxvt.h"
 #include "sbar.h"
-
 // Sanitize cursor position, implement DECOM
 void reset_row_col(void)
 {
@@ -16,13 +13,11 @@ void reset_row_col(void)
 	if (jbxvt.mode.decom)
 		JB_LIMIT(c->y, jbxvt.scr.current->margin.t, jbxvt.scr.current->margin.b);
 }
-
 static void set_dimension(int16_t * restrict cursor,
 	const int16_t delta, const bool relative)
 {
 	*cursor = relative ? *cursor + delta : MAX(delta, 0);
 }
-
 /*  Move the cursor to a new position.  The relative argument is a pair of
  *  flags that specify relative rather than absolute motion.  */
 void jbxvt_move(const int16_t x, const int16_t y, const uint8_t relative)
@@ -42,4 +37,3 @@ void jbxvt_move(const int16_t x, const int16_t y, const uint8_t relative)
 	jbxvt_check_selection(cy, cy);
 	jbxvt_draw_cursor(); // draw
 }
-

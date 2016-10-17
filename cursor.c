@@ -1,24 +1,19 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-
 #include "cursor.h"
-
 #include "config.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "repaint.h"
 #include "screen.h"
-
 static uint32_t saved_style;
 static struct JBDim saved_cursor;
-
 void jbxvt_save_cursor(void)
 {
 	struct JBXVTScreenData * s = &jbxvt.scr;
 	saved_cursor = s->current->cursor;
 	saved_style = s->rstyle;
 }
-
 void jbxvt_restore_cursor(void)
 {
 	jbxvt_draw_cursor();
@@ -27,7 +22,6 @@ void jbxvt_restore_cursor(void)
 	s->rstyle = saved_style;
 	jbxvt_draw_cursor();
 }
-
 static bool is_blinking(void)
 {
 	switch (jbxvt.opt.cursor_attr) {
@@ -40,7 +34,6 @@ static bool is_blinking(void)
 	}
 	return false;
 }
-
 void jbxvt_draw_cursor(void)
 {
 	struct JBXVTScreenData * s = &jbxvt.scr;
@@ -75,4 +68,3 @@ void jbxvt_draw_cursor(void)
 	}
 	xcb_poly_fill_rectangle(X->xcb, X->win.vt, X->gc.cu, 1, &r);
 }
-

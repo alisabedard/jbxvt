@@ -1,18 +1,13 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-
 #ifndef TOKEN_TYPE_H
 #define TOKEN_TYPE_H
-
 // Reference man console_codes(4) and ctlseqs(ms)
-
 //  struct Token types
 typedef enum {
 	TK_NULL = 0, // null token to be ignored
-
 	// Tokens > 1000 are artificial.
 	// Done this way to prevent clash with CSI sequences.
-
 	//  VT100 control sequence token types
 	TK_RIS = 1000, // reset to initial state
 	TK_ENTGM52 = 1001, // enter vt52 graphics mode (ESC F)
@@ -23,7 +18,6 @@ typedef enum {
 	TK_S7C1T = 1006, // 7-bit controls
 	TK_S8C1T = 1007, // 8-bit controls
 	TK_HOME = 1008, // move cursor to home position
-
 	// Internal tokens
 	TK_STRING =  2001, // string of printable characters
 	TK_CHAR =  2002, // single character
@@ -44,27 +38,21 @@ typedef enum {
 	TK_SELECT = 2017, // confirm the selection
 	TK_SELCLEAR = 2018, // selection clear request
 	TK_SELNOTIFY = 2019, // selection notify request
-
 	TK_SELREQUEST = 2020, // selection request
 	TK_TXTPAR = 2021, // seq with text parameter
 	TK_FOCUS = 2022, // keyboard focus event
-
-
 	// ESC # <num + 3000>
 	TK_DHLT = 3003, // double height line, top half
 	TK_DHLB = 3004, // double height line, bottom half
 	TK_SWL = 3005, // single width line
 	TK_DWL = 3006, // double width line
 	TK_ALN = 3008, // screen alignment test (e-fill)
-
 	// ESC % char
 	TK_CS_DEF = 3050, // Default character set
 	TK_CS_UTF8 = 3051, // UTF-8 character set
-
 	// HP
 	TK_MEMLOCK = 3100, // HP term, lock memory above cursor
 	TK_MEMUNLOCK = 3101, // HP term, unlock memory
-
 	// DSR tokens
 	TK_QUERY_SCA = 3500, // cursor attributes
 	TK_QUERY_SCL = 3501,
@@ -72,7 +60,6 @@ typedef enum {
 	TK_QUERY_SLRM = 3503, // soft scroll mode
 	TK_QUERY_SGR = 3504, // sgr style
 	TK_QUERY_SCUSR = 3505,
-
 	// Cursor tokens
 	TK_CUU = 'A', // Cursor up
 	TK_CUD = 'B', // cursor down
@@ -82,10 +69,7 @@ typedef enum {
 	TK_CPL = 'F', // CNL: cursor prev line, first column
 	TK_CHA = 'G', // cursor CHaracter Absolute [column]
 	TK_CUP = 'H', // position cursor
-
 	TK_CHT = 0x49, // cursor horizontal tab
-
-
 	TK_ED = 'J', // erase to start or end of screen
 	TK_EL = 'K', // erase to start or end of line
 	TK_IL = 'L', // IL: insert lines
@@ -120,7 +104,6 @@ typedef enum {
 	TK_PAM = '=', // keypad to applications mode
 	TK_PNM = '>', // keypad to numeric mode
 	TK_RESTOREPM = '?', // restore private modes
-
 	TK_ESC = 033,
 	TK_IND = 0x84,
 	TK_NEL = 0x85,
@@ -139,5 +122,4 @@ typedef enum {
 	TK_PM = 0x9e,	// Privacy message (ended by ESC \ (ST))
 	TK_APC = 0x9f
 } TokenType;
-
 #endif//!TOKEN_H

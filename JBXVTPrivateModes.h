@@ -1,11 +1,8 @@
 // Copyright 2016, Jeffrey E. Bedard
-
 #ifndef JBXVT_JBXVTPRIVATEMODES_H
 #define JBXVT_JBXVTPRIVATEMODES_H
-
 #include <stdbool.h>
 #include <stdint.h>
-
 struct JBXVTPrivateModes {
 	uint8_t charset[2];     // graphics mode char set
 	uint8_t charsel:1;	// charset index
@@ -38,5 +35,4 @@ struct JBXVTPrivateModes {
 	bool elr_once:1;	// locator report once
 	bool elr_pixels:1;	// locator report in pixel format
 };
-
 #endif//!JBXVT_JBXVTPRIVATEMODES_H

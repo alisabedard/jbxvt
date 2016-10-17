@@ -1,16 +1,12 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-
 #include "change_selection.h"
-
 #include "config.h"
 #include "jbxvt.h"
 #include "screen.h"
 #include "selend.h"
 #include "selection.h"
-
 #define FSZ jbxvt.X.f.size
-
 static void invert(const int16_t rs, const int16_t re, const int16_t cs,
 	const int16_t ce, const uint8_t row1, const uint8_t row2)
 {
@@ -23,7 +19,6 @@ static void invert(const int16_t rs, const int16_t re, const int16_t cs,
 			.y = y, .width = x2 - x1, .height = FSZ.h});
 	}
 }
-
 static void change(struct JBDim * se, struct JBDim * ose)
 {
 	int16_t rs = 0, cs = 0, re = 0, ce = 0, n;
@@ -38,7 +33,6 @@ static void change(struct JBDim * se, struct JBDim * ose)
 	//  Invert the changed area
 	invert(rs, re, cs, ce, row1, row2);
 }
-
 /*  Repaint the displayed selection to reflect the new value.  ose1 and ose2
  *  are assumed to represent the currently displayed selection endpoints.  */
 void jbxvt_change_selection(struct JBDim * restrict ose0,

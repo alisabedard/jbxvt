@@ -1,8 +1,6 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-
 #include "selection.h"
-
 #include "config.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
@@ -11,14 +9,11 @@
 #include "screen.h"
 #include "show_selection.h"
 #include "window.h"
-
 #define SE jbxvt.sel.end
-
 static inline void prop(const xcb_atom_t a)
 {
 	jbxvt_set_property(a, jbxvt.sel.length, jbxvt.sel.text);
 }
-
 //  Make the selection currently delimited by the selection end markers.
 void jbxvt_make_selection(void)
 {
@@ -31,7 +26,6 @@ void jbxvt_make_selection(void)
 	xcb_set_selection_owner(jbxvt.X.xcb, jbxvt.X.win.main,
 		XCB_ATOM_PRIMARY, XCB_CURRENT_TIME);
 }
-
 //  Respond to a request for our current selection.
 void jbxvt_send_selection(const xcb_time_t time, const uint32_t requestor,
 	const uint32_t target, const uint32_t property)
@@ -52,7 +46,6 @@ void jbxvt_send_selection(const xcb_time_t time, const uint32_t requestor,
 		XCB_SELECTION_NOTIFY, (char *)&e);
 	xcb_flush(jbxvt.X.xcb);
 }
-
 //  Clear the current selection.
 void jbxvt_clear_selection(void)
 {
@@ -61,7 +54,6 @@ void jbxvt_clear_selection(void)
 	jbxvt.sel.text = NULL;
 	jbxvt.sel.type = JBXVT_SEL_NONE;
 }
-
 //  start a selection using the specified unit.
 void jbxvt_start_selection(struct JBDim p, enum JBXVTSelectionUnit unit)
 {
@@ -73,7 +65,6 @@ void jbxvt_start_selection(struct JBDim p, enum JBXVTSelectionUnit unit)
 	jbxvt_adjust_selection(&SE[1]);
 	jbxvt_show_selection();
 }
-
 /*  Determine if the current selection overlaps row1-row2 and if it does then
  *  remove it from the screen.  */
 void jbxvt_check_selection(const int16_t row1, const int16_t row2)
@@ -88,4 +79,3 @@ void jbxvt_check_selection(const int16_t row1, const int16_t row2)
 	jbxvt_show_selection();
 	jbxvt.sel.type = JBXVT_SEL_NONE;
 }
-

@@ -1,13 +1,10 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury. */
-
 #include "show_selection.h"
-
 #include "jbxvt.h"
 #include "screen.h"
 #include "selend.h"
-
 static void paint_rvid(struct JBDim start, struct JBDim end,
 	int16_t col1, int16_t col2)
 {
@@ -25,7 +22,6 @@ static void paint_rvid(struct JBDim start, struct JBDim end,
 			p2.x - p1.x, jbxvt.X.f.size.h});
 	}
 }
-
 // Paint the selection on screen
 void jbxvt_show_selection(void)
 {
@@ -40,4 +36,3 @@ void jbxvt_show_selection(void)
 	const bool fwd = p->y < p[1].y || (p->y == p[1].y && p->x <= p[1].x);
 	paint_rvid(p[fwd?0:1], p[fwd?1:0], r[0].x, r[1].x);
 }
-

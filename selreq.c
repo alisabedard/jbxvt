@@ -1,20 +1,15 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-
 #include "selreq.h"
-
 #include "jbxvt.h"
 #include "libjb/log.h"
-
 #include <stdlib.h>
 #include <unistd.h>
-
 static inline void paste(const uint8_t * data, const size_t length)
 {
 	jb_check(write(jbxvt.com.fd, data, length) != -1,
 		"Cannot paste");
 }
-
 static bool paste_from(const xcb_atom_t cb, const xcb_timestamp_t t)
 {
 	LOG("paste_from(clipboard: %d, timestamp: %d)", cb, t);
@@ -36,7 +31,6 @@ static bool paste_from(const xcb_atom_t cb, const xcb_timestamp_t t)
 	free(r);
 	return true;
 }
-
 void jbxvt_request_selection(const xcb_timestamp_t t)
 {
 	LOG("jbxvt_request_selection(timestamp: %d)", t);
@@ -47,7 +41,6 @@ void jbxvt_request_selection(const xcb_timestamp_t t)
 	if (paste_from(XCB_ATOM_SECONDARY, t))
 		  return;
 }
-
 //  Respond to a notification that a primary selection has been sent
 void jbxvt_paste_primary(const xcb_timestamp_t t, const xcb_window_t window,
 	const xcb_atom_t property)
@@ -77,4 +70,3 @@ void jbxvt_paste_primary(const xcb_timestamp_t t, const xcb_window_t window,
 		free(r);
 	} while (bytes_after > 0);
 }
-

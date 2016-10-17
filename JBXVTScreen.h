@@ -1,16 +1,11 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-
 #ifndef SCREENST_H
 #define SCREENST_H
-
 #include "libjb/size.h"
-
 #include <stdbool.h>
 #include <stdint.h>
 #include <xcb/xproto.h>
-
-
 /*  Structure describing the current state of the screen.  */
 struct JBXVTScreen {
 	uint8_t *text[JBXVT_MAX_ROWS];	// text
@@ -23,5 +18,4 @@ struct JBXVTScreen {
 	bool decpm:1;		// privacy message
 	bool cursor_visible:1;
 };
-
 #endif//!SCREENST_H

@@ -1,10 +1,8 @@
 // Copyright 2016, Jeffrey E. Bedard
 #ifndef JBXVTEVENT_H
 #define JBXVTEVENT_H
-
 #include <stdint.h>
 #include <xcb/xproto.h>
-
 /*  Small X event structure used to queue interesting X events
     that need to be converted into tokens.  */
 struct JBXVTEvent {
@@ -25,5 +23,4 @@ struct JBXVTEvent {
 	};
 	uint8_t type;
 };
-
 #endif//!JBXVTEVENT_H

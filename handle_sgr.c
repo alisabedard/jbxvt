@@ -1,12 +1,9 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-
 #include "handle_sgr.h"
-
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "paint.h"
-
 // Convert 3 bit color to 9 bit color, store at offset
 __attribute__((cold))
 static void encode_rgb(uint8_t color, uint8_t offset)
@@ -15,7 +12,6 @@ static void encode_rgb(uint8_t color, uint8_t offset)
 	color <<= 1;
 	jbxvt.scr.rstyle |= color << offset;
 }
-
 /* c must be uint32_t to allow for shift and OR with rstyle. */
 static void sgrc(const uint32_t c, const bool fg)
 {
@@ -23,7 +19,6 @@ static void sgrc(const uint32_t c, const bool fg)
 	jbxvt.scr.rstyle &= ~(0777<<o);
 	jbxvt.scr.rstyle |= (fg ? JBXVT_RS_FG_INDEX : JBXVT_RS_BG_INDEX) | c << o;
 }
-
 static bool rgb_or_index(int32_t arg, bool * restrict either,
 	bool * restrict index, bool * restrict rgb, const bool is_fg)
 {
@@ -37,13 +32,11 @@ static bool rgb_or_index(int32_t arg, bool * restrict either,
 		: JBXVT_RS_BG_RGB);
 	return true;
 }
-
 // continue if true
 static bool handle_color_encoding(const int32_t arg, const bool is_fg,
 	bool * restrict index_mode, bool * restrict rgb_mode)
 {
 	static uint8_t rgb_count;
-
 	if (*index_mode) {
 		sgrc(arg, is_fg);
 		// exit mode after handling index
@@ -59,10 +52,8 @@ static bool handle_color_encoding(const int32_t arg, const bool is_fg,
 	}
 	return false;
 }
-
 #define SGRFG(c) sgrc(c, true)
 #define SGRBG(c) sgrc(c, false)
-
 void handle_sgr(struct Token * restrict token)
 {
 	if (token->nargs == 0) {
@@ -181,5 +172,3 @@ void handle_sgr(struct Token * restrict token)
 		}
 	}
 }
-
-

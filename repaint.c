@@ -1,16 +1,12 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
-
 #include "repaint.h"
-
 #include "jbxvt.h"
 #include "paint.h"
 #include "show_selection.h"
-
 #define CSZ jbxvt.scr.chars
 #define FSZ jbxvt.X.f.size
-
 /* Display the string using the rendition vector
    at the screen coordinates.  */
 static void paint_rvec_text(uint8_t * str, uint32_t * rvec,
@@ -34,7 +30,6 @@ static void paint_rvec_text(uint8_t * str, uint32_t * rvec,
 		len -= i;
 	}
 }
-
 static int_fast32_t repaint_generic(struct JBDim p, uint_fast16_t len,
 	uint8_t * restrict str, uint32_t * rend, const bool dwl)
 {
@@ -51,7 +46,6 @@ static int_fast32_t repaint_generic(struct JBDim p, uint_fast16_t len,
 		width, FSZ.height);
 	return p.y + FSZ.height;
 }
-
 __attribute__((nonnull(1)))
 static int_fast16_t show_scroll_history(struct JBDim * restrict p,
 	const int_fast16_t line, const int_fast16_t i)
@@ -62,7 +56,6 @@ static int_fast16_t show_scroll_history(struct JBDim * restrict p,
 	p->y = repaint_generic(*p, sl->size, sl->text, sl->rend, sl->dwl);
 	return show_scroll_history(p, line + 1, i - 1);
 }
-
 __attribute__((nonnull(1)))
 static uint_fast16_t filter_string(uint8_t * restrict buf,
 	uint8_t * restrict input)
@@ -74,9 +67,6 @@ static uint_fast16_t filter_string(uint8_t * restrict buf,
 		buf[x] = input[x] < ' ' ? ' ' : input[x];
 	return x;
 }
-
-
-
 // Repaint the screen
 void jbxvt_repaint(void)
 {
@@ -93,4 +83,3 @@ void jbxvt_repaint(void)
 	}
 	jbxvt_show_selection();
 }
-

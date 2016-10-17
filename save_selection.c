@@ -1,16 +1,12 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-
 #include "save_selection.h"
-
 #include "config.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "selend.h"
-
 #include <stdlib.h>
 #include <string.h>
-
 static uint8_t get_next_char(uint8_t c)
 {
 	if (c == '\n')
@@ -19,7 +15,6 @@ static uint8_t get_next_char(uint8_t c)
 		return ' ';
 	return c;
 }
-
 static bool skip(uint8_t * restrict str, uint16_t * restrict i,
 	uint16_t * restrict j, const uint16_t len, const uint8_t null_ct)
 {
@@ -30,7 +25,6 @@ static bool skip(uint8_t * restrict str, uint16_t * restrict i,
 		return true;
 	return skip(str, i, j, len, null_ct);
 }
-
 static uint16_t sanitize(uint8_t * str, uint16_t len)
 {
 	uint16_t i = 0, j;
@@ -55,7 +49,6 @@ static uint16_t sanitize(uint8_t * str, uint16_t len)
 	str[j] = '\0';
 	return j;
 }
-
 static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 	struct JBDim * restrict e)
 {
@@ -78,7 +71,6 @@ static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 	*total = sanitize(*str, *total) + 1;
 	*str = realloc(*str, *total);
 }
-
 /*  Convert the currently marked screen selection as a text string
     and save it as the current saved selection. */
 void jbxvt_save_selection(void)
@@ -98,4 +90,3 @@ void jbxvt_save_selection(void)
 	str[jbxvt.sel.length = --total] = 0; // null termination
 	jbxvt.sel.text = str;
 }
-

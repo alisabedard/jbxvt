@@ -1,20 +1,15 @@
 // Copyright 2016, Jeffrey E. Bedard
-
 #include "jbxvt.h"
-
 #include "command.h"
 #include "init_display.h"
 #include "scr_string.h"
 #include "window.h"
 #include "xvt.h"
-
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-
 struct JBXVT jbxvt;
-
 static char ** parse_command_line(const int argc, char ** argv)
 {
 	static const char * optstr = "B:b:C:c:D:d:eF:f:hI:R:S:sv";
@@ -72,7 +67,6 @@ usage:
 	return NULL;
 #endif//OPENBSD
 }
-
 static void opt_init(void)
 {
 	// Set some defaults which may be overridden.
@@ -88,7 +82,6 @@ static void opt_init(void)
 	jbxvt.opt.cursor_attr = 2;
 	jbxvt.scr.sline.max = JBXVT_MAX_SCROLL;
 }
-
 /*  Perform any initialization on the screen data structures.
     Called just once at startup. */
 static void jbxvt_init(void)
@@ -99,7 +92,6 @@ static void jbxvt_init(void)
 	s->current = s->s = screens;
 	jbxvt_set_tab(-2, false);
 }
-
 // Set default values for private modes
 static void mode_init(void)
 {
@@ -107,7 +99,6 @@ static void mode_init(void)
 		.decawm = false, .dectcem = true,
 		.charset = {CHARSET_ASCII, CHARSET_ASCII}};
 }
-
 /*  Run the command in a subprocess and return a file descriptor for the
  *  master end of the pseudo-teletype pair with the command talking to
  *  the slave.  */
@@ -130,4 +121,3 @@ int main(int argc, char ** argv)
 		jbxvt_parse_token();
 	return 0;
 }
-

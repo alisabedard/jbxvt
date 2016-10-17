@@ -1,15 +1,11 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-
 #include "dcs.h"
-
 #include "command.h"
 #include "cmdtok.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
-
 #include <assert.h>
-
 static void check_st(struct Token * t)
 {
 	assert(t);
@@ -17,7 +13,6 @@ static void check_st(struct Token * t)
 	if (c != TK_ST)
 		t->type = TK_NULL;
 }
-
 void jbxvt_dcs(struct Token * t)
 {
 	assert(t);

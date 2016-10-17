@@ -1,28 +1,22 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
-
 #include "scroll.h"
-
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "sbar.h"
-
 #include <string.h>
-
 //#define SCROLL_DEBUG
 #ifndef SCROLL_DEBUG
 #undef LOG
 #define LOG(...)
 #endif//!SCROLL_DEBUG
-
 static void clear_selection_at(const int16_t j)
 {
 	if (jbxvt.sel.end[0].index == j
 		|| jbxvt.sel.end[1].index == j)
 		jbxvt_clear_selection();
 }
-
 static void move_line(const int16_t j,
 	const int8_t count, struct JBXVTScreen * restrict s)
 {
@@ -31,7 +25,6 @@ static void move_line(const int16_t j,
 	s->rend[k] = s->rend[j];
 	clear_selection_at(j);
 }
-
 static void clear(int8_t count, const uint8_t rc,
 	uint8_t ** text, uint32_t ** rend, const bool up)
 {
@@ -44,14 +37,12 @@ static void clear(int8_t count, const uint8_t rc,
 	jbxvt.scr.current->rend[j] = rend[count];
 	clear(count, rc, text, rend, up);
 }
-
 static void adjust_saved_lines_top(const int_fast16_t n)
 {
 	jbxvt.scr.sline.top += n;
 	jbxvt.scr.sline.top = MIN(jbxvt.scr.sline.top,
 		jbxvt.scr.sline.max);
 }
-
 static void copy_saved_lines(const int_fast16_t n)
 {
 	for (int_fast16_t i = n - 1; i >= 0; --i) {
@@ -67,7 +58,6 @@ static void copy_saved_lines(const int_fast16_t n)
 		sl->size = len;
 	}
 }
-
 static void get_y(int16_t * restrict y, const uint8_t row1,
 	const int8_t count, const bool up)
 {
@@ -75,7 +65,6 @@ static void get_y(int16_t * restrict y, const uint8_t row1,
 	*(up ? y + 1 : y) = a;
 	*(up ? y : y + 1) = a + count * jbxvt.X.f.size.h;
 }
-
 static void copy_visible_area(const uint8_t row1, const uint8_t row2,
 	const int8_t count, const bool up)
 {
@@ -89,7 +78,6 @@ static void copy_visible_area(const uint8_t row1, const uint8_t row2,
 	// the above blocks the event queue, flush it
 	xcb_flush(jbxvt.X.xcb);
 }
-
 static void add_scroll_history(const int8_t count)
 {
 	if (count < 1) // nothing to do
@@ -105,7 +93,6 @@ static void add_scroll_history(const int8_t count)
 	copy_saved_lines(count);
 	jbxvt_draw_scrollbar();
 }
-
 static int8_t copy_screen_area(const int8_t i,
 	const int8_t j, const int8_t mod, const int8_t count,
 	uint8_t ** save, uint32_t ** rend)
@@ -118,7 +105,6 @@ static int8_t copy_screen_area(const int8_t i,
 	return copy_screen_area(i + 1, j + mod, mod,
 		count, save, rend);
 }
-
 static void clear_line(const int16_t y, const int8_t count)
 {
 #define FH jbxvt.X.font.size.height
@@ -126,7 +112,6 @@ static void clear_line(const int16_t y, const int8_t count)
 		jbxvt.scr.pixels.width, count * FH);
 #undef FH
 }
-
 void scroll1(int16_t n)
 {
 	LOG("scroll1(%d)", n);
@@ -135,7 +120,6 @@ void scroll1(int16_t n)
 		j < jbxvt.scr.chars.height; ++j)
 		  move_line(j, -n, &jbxvt.scr.s[0]);
 }
-
 static void sc_common(const uint8_t r1, const uint8_t r2,
 	const int16_t count, const bool up,
 	uint8_t ** save, uint32_t ** rend)
@@ -144,7 +128,6 @@ static void sc_common(const uint8_t r1, const uint8_t r2,
 	copy_visible_area(r1, r2, count, up);
 	clear_line(up ? (r2 - count) : r1, count);
 }
-
 static void sc_dn(const uint8_t row1, const uint8_t row2,
 	const int16_t count, uint8_t ** save, uint32_t ** rend)
 {
@@ -153,7 +136,6 @@ static void sc_dn(const uint8_t row1, const uint8_t row2,
 		  move_line(j, count, jbxvt.scr.current);
 	sc_common(row1, row2, count, false, save, rend);
 }
-
 static void sc_up(const uint8_t row1, const uint8_t row2,
 	const int16_t count, uint8_t ** save, uint32_t ** rend)
 {
@@ -164,7 +146,6 @@ static void sc_up(const uint8_t row1, const uint8_t row2,
 		move_line(j, -count, jbxvt.scr.current);
 	sc_common(row1, row2, count, true, save, rend);
 }
-
 /*  Scroll count lines from row1 to row2 inclusive.
     row1 should be <= row2.  Scrolling is up for
     a positive count and down for a negative count.
@@ -181,4 +162,3 @@ void scroll(const uint8_t row1, const uint8_t row2,
 	(count > 0 ? sc_up : sc_dn)(row1, row2 + 1, abs_count, save, rend);
 	jbxvt_set_scroll(0);
 }
-

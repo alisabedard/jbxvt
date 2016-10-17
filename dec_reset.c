@@ -1,6 +1,5 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-
 #include "dec_reset.h"
 #include "cursor.h"
 #include "jbxvt.h"
@@ -9,13 +8,11 @@
 #include "scr_move.h"
 #include "scr_reset.h"
 #include "screen.h"
-
 //#define DEBUG_RESET
 #ifndef DEBUG_RESET
 #undef LOG
 #define LOG(...)
 #endif
-
 void dec_reset(struct Token * restrict token)
 {
 	LOG("handle_reset(%d)", token->arg[0]);
@@ -130,5 +127,3 @@ void dec_reset(struct Token * restrict token)
 	} else if (!token->private && token->arg[0] == 4)
 		MODE(insert);
 }
-
-

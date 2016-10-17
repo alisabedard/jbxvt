@@ -1,14 +1,11 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-
 #include "esc.h"
-
 #include "command.h"
 #include "cmdtok.h"
 #include "dcs.h"
 #include "jbxvt.h"
 #include "screen.h"
-
 void jbxvt_csi(int_fast16_t c, struct Token * restrict tk)
 {
 	c = get_com_char(0);
@@ -16,7 +13,6 @@ void jbxvt_csi(int_fast16_t c, struct Token * restrict tk)
 		tk->private = c;
 		c = get_com_char(0);
 	}
-
 	//  read any numerical arguments
 	uint_fast16_t i = 0;
 	do {
@@ -40,7 +36,6 @@ void jbxvt_csi(int_fast16_t c, struct Token * restrict tk)
 	tk->nargs = i;
 	tk->type = c;
 }
-
 void jbxvt_end_cs(int_fast16_t c, struct Token * restrict tk)
 {
 	c = get_com_char(0);
@@ -62,7 +57,6 @@ void jbxvt_end_cs(int_fast16_t c, struct Token * restrict tk)
 	tk->string[i] = 0;
 	tk->type = TK_TXTPAR;
 }
-
 void jbxvt_esc(int_fast16_t c, struct Token * restrict tk)
 {
 	c = get_com_char(0);
@@ -97,10 +91,8 @@ void jbxvt_esc(int_fast16_t c, struct Token * restrict tk)
 		CASE_T('8', TK_ALN);
 		}
 		break;
-
 	case '(': // G0 charset
 	CASE_A(')', c, get_com_char(0));
-
 	case '%': // UTF charset switch
 		c = get_com_char(0);
 		switch (c) {
@@ -170,4 +162,3 @@ void jbxvt_esc(int_fast16_t c, struct Token * restrict tk)
 		break;
 	}
 }
-

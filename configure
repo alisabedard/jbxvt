@@ -1,12 +1,9 @@
 #!/bin/sh
 # Copyright 2016, Jeffrey E. Bedard
-
 CFG=config.mk
 DEBUG=false
 UTEMPTER=true
-
 rm -f "$CFG"
-
 while getopts 'dhu' opt
 do
 	case $opt in
@@ -22,19 +19,14 @@ do
 		;;
 	esac
 done 
-
 ARCH=`uname | tr 'a-z' 'A-Z'`
-
 echo "Configuring for $ARCH"
-
 if $DEBUG; then
 	echo "CFLAGS=" >> $CFG
 else
 	echo "CFLAGS=$CFLAGS" >> $CFG
 fi
-
 echo CFLAGS+="-D${ARCH}" >> $CFG
-
 case $ARCH in
 	OPENBSD)
 		CC=clang
@@ -76,7 +68,6 @@ case $ARCH in
 		EOF
 		;;
 esac
-
 echo -n 'Checking for libutempter... '
 if $UTEMPTER && [ -f /usr/lib/libutempter.so ]; then
 	echo found
@@ -91,7 +82,6 @@ else
 		echo disabled
 	fi
 fi
-
 echo -n 'Checking for asm-generic/ioctls.h... '
 if [ -f /usr/include/asm-generic/ioctls.h ]; then
 	echo found
@@ -99,7 +89,6 @@ if [ -f /usr/include/asm-generic/ioctls.h ]; then
 else
 	echo not found
 fi
-
 search() # 1: cmd 2: var
 {
 	echo -n "Checking for $1... "
@@ -113,14 +102,12 @@ search() # 1: cmd 2: var
 	echo not found
 	return 0
 }
-
 cc_err()
 {
 	echo 'Error: Cannot find a suitable compiler.'
 	echo 'Please set CC to a valid C compiler command'
 	exit 1
 }
-
 if [ -z "$CC" ]; then
 	if [ "$ARCH" = "LINUX" ]; then
 		search cc CC && search gcc CC && search clang CC\
@@ -136,7 +123,6 @@ else
 	echo "CC defined as ${CC}"
 	echo "CC=${CC}" >> $CFG
 fi
-
 if $DEBUG; then
 	echo -n 'Enabling debug code... '
 	if [ "$CC" = "clang" ]; then

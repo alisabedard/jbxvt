@@ -1,11 +1,8 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-
 #ifndef JBXVT_SIZE_H
 #define JBXVT_SIZE_H
-
 #include <stdint.h>
-
 typedef struct Size {
 	union {
 		uint16_t width;
@@ -28,5 +25,4 @@ typedef struct Size {
 		int16_t b;
 	};
 } Size;
-
 #endif//!JBXVT_SIZE_H

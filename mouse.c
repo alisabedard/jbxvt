@@ -1,14 +1,11 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "mouse.h"
-
 #include "command.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "screen.h"
-
 #include <stdlib.h>
 #include <string.h>
-
 static uint8_t get_mod(const uint16_t state)
 {
 	// 4=Shift, 8=Meta, 16=Control
@@ -17,10 +14,7 @@ static uint8_t get_mod(const uint16_t state)
 	MOD(SHIFT, 4); MOD(MOD_1, 8); MOD(CONTROL, 16);
 	return mod;
 }
-
-
 #define MD jbxvt.mode
-
 static bool track_mouse_sgr(uint8_t b, struct JBDim p, const bool rel)
 {
 	if (!MD.mouse_sgr)
@@ -28,7 +22,6 @@ static bool track_mouse_sgr(uint8_t b, struct JBDim p, const bool rel)
 	cprintf("\033[<%c;%c;%c%c", b, p.x, p.y, rel ? 'm' : 'M');
 	return true;
 }
-
 static void locator_report(const uint8_t b, struct JBDim p)
 {
 	if (!MD.elr)
@@ -40,7 +33,6 @@ static void locator_report(const uint8_t b, struct JBDim p)
 	// DECLRP
 	cprintf("\033[%d;%d;%d;%d;0&w", b * 2, 7, p.y, p.x);
 }
-
 void jbxvt_track_mouse(uint8_t b, uint32_t state, struct JBDim p,
 	const uint8_t flags)
 {
@@ -87,17 +79,13 @@ void jbxvt_track_mouse(uint8_t b, uint32_t state, struct JBDim p,
 	free(out);
 #endif//!DEBUG
 }
-
 #define TRK(it) jbxvt.mode.mouse_##it
-
 bool jbxvt_get_mouse_motion_tracked(void)
 {
 	return TRK(btn_evt) || TRK(any_evt);
 }
-
 bool jbxvt_get_mouse_tracked(void)
 {
 	return TRK(x10) || TRK(vt200) || TRK(vt200hl) || TRK(ext)
 		|| TRK(sgr) || TRK(urxvt) || jbxvt_get_mouse_motion_tracked();
 }
-

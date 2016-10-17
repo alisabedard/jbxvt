@@ -1,54 +1,43 @@
 /* Copyright 2016, Jeffrey E. Bedard
    Copyright 1992-94, 1997 John Bovey,
    University of Kent at Canterbury. */
-
 #include "command.h"
-
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "xevents.h"
-
 #include <fcntl.h>
 #include <signal.h>
 #include <stdarg.h>
 #include <sys/wait.h>
 #include <termios.h>
 #include <unistd.h>
-
 //  Definitions that enable machine dependent parts of the code.
-
 #ifdef OPENBSD
 #include <sys/ioctl.h>
 #include <sys/select.h>
 #endif//OPENBSD
-
 #ifdef NETBSD
 #define POSIX_UTMPX
 #include <pwd.h>
 #include <sys/ioctl.h>
 #define UTMP_FILE "/var/run/utmp"
 #endif//NETBSD
-
 #ifdef _BSD_SOURCE
 #include <sys/ttycom.h>
 #include <ttyent.h>
 #endif//_BSD_SOURCE
-
 #ifdef LINUX
 #include <pty.h>
 #define POSIX_UTMPX
 #endif//LINUX
-
 #ifdef USE_UTEMPTER
 #include <utempter.h>
 #undef POSIX_UTMPX
 #endif//USE_UTEMPTER
-
 #ifdef POSIX_UTMPX
 #include <string.h>
 #include <utmpx.h>
 #endif//POSIX_UTMP
-
 //  Attempt to create and write an entry to the utmp file
 #ifdef POSIX_UTMPX
 static void write_utmpx(const pid_t comm_pid, char * tty_name)
@@ -71,7 +60,6 @@ static void write_utmpx(const pid_t comm_pid, char * tty_name)
 	endutxent();
 }
 #endif//POSIX_UTMPX
-
 /*  Acquire a pseudo teletype from the system.  The return value is the
  *  name of the slave part of the pair or NULL if unsucsessful.  If
  *  successful then the master and slave file descriptors are returned
@@ -90,7 +78,6 @@ static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 	*pmaster = mfd;
 	return ttynam;
 }
-
 //  Initialise the terminal attributes.
 static void set_ttymodes(void)
 {
@@ -107,13 +94,11 @@ static void set_ttymodes(void)
 	tcsetattr(0, TCSANOW, &term);
 	tty_set_size(jbxvt.scr.chars);
 }
-
 static void redir(const fd_t target, const fd_t ttyfd)
 {
 	jb_close(target);
 	fcntl(ttyfd, F_DUPFD, 0);
 }
-
 static void child(char ** restrict argv, fd_t ttyfd)
 {
 #if !defined(NETBSD) && !defined(OPENBSD)
@@ -143,7 +128,6 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	execvp(argv[0],argv); // Only returns on failure
 	exit(1); // prevent hang
 }
-
 /*  Tell the teletype handler what size the window is.  Called initially from
  *  the child and after a window size change from the parent.  */
 #if !defined(NETBSD) && !defined(FREEBSD)\
@@ -155,12 +139,10 @@ void tty_set_size(const struct JBDim sz)
 		"Could not set ioctl TIOCSWINSZ");
 }
 #endif//etc
-
 static void exit_handler(void)
 {
 	raise(SIGHUP);
 }
-
 // Put all clean-up tasks here:
 static void signal_handler(int sig)
 {
@@ -183,7 +165,6 @@ static void signal_handler(int sig)
 	// Exit without tripping atexit handler:
 	_Exit(sig);
 }
-
 static void attach_signals(void)
 {
 	// Attach relevant signals:
@@ -196,7 +177,6 @@ static void attach_signals(void)
 	   so that cleanup may be done.  */
 	atexit(&exit_handler);
 }
-
 /*  Run the command in a subprocess and return a file descriptor for the
  *  master end of the pseudo-teletype pair with the command talking to
  *  the slave.  */
@@ -225,13 +205,11 @@ static fd_t run_command(char ** argv)
 #endif//USE_UTEMPTER
 	return ptyfd;
 }
-
 static void init_container(struct JBXVTCommandContainer * restrict c,
 	uint8_t * restrict buf)
 {
 	c->data = c->next = c->top = buf;
 }
-
 /*  Initialize the command connection.  This should
     be called after the X server connection is established.  */
 void init_command(char ** restrict argv)
@@ -245,7 +223,6 @@ void init_command(char ** restrict argv)
 	init_container(&jbxvt.com.buf, buf);
 	init_container(&jbxvt.com.stack, stack);
 }
-
 //  Push an input character back into the input queue.
 void put_com_char(const uint8_t c)
 {
@@ -253,7 +230,6 @@ void put_com_char(const uint8_t c)
 		+ COM_PUSH_MAX)
 		*jbxvt.com.stack.top++ = c;
 }
-
 /*  Send printf formatted output to the command.
     Only used for small ammounts of data.  */
 char * cprintf(char *fmt, ...)
@@ -267,4 +243,3 @@ char * cprintf(char *fmt, ...)
 	jb_assert(write(jbxvt.com.fd, buf, l), "Cannot write to command");
 	return buf;
 }
-

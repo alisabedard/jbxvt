@@ -1,8 +1,6 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-
 #include "xvt.h"
-
 #include "cmdtok.h"
 #include "command.h"
 #include "cursor.h"
@@ -22,16 +20,13 @@
 #include "scroll.h"
 #include "selreq.h"
 #include "window.h"
-
 #include <string.h>
-
 //#define DEBUG_TOKENS
 #ifdef DEBUG_TOKENS
 #define TLOG(...) LOG(__VA_ARGS__)
 #else
 #define TLOG(...)
 #endif//DEBUG_TOKENS
-
 static void handle_txtpar(struct Token * restrict token)
 {
 	switch (token->arg[0]) {
@@ -48,7 +43,6 @@ static void handle_txtpar(struct Token * restrict token)
 		break;
 	}
 }
-
 static void form_feed(void)
 {
 	const struct JBDim m = jbxvt.scr.current->margin;
@@ -57,7 +51,6 @@ static void form_feed(void)
 		cprintf("FF");
 	scroll(m.top, m.bottom, m.bottom - m.top);
 }
-
 static void handle_tk_char(const uint8_t tk_char)
 {
 	switch (tk_char) {
@@ -93,7 +86,6 @@ static void handle_tk_char(const uint8_t tk_char)
 		break;
 	}
 }
-
 static void select_charset(const char c, const uint8_t i)
 {
 	switch(c) {
@@ -108,7 +100,6 @@ static void select_charset(const char c, const uint8_t i)
 	CS('B', ASCII, "US ASCII");
 	}
 }
-
 static void decstbm(struct Token * restrict token)
 {
 	int32_t * restrict t = token->arg;
@@ -124,7 +115,6 @@ static void decstbm(struct Token * restrict token)
 	jbxvt.scr.current->margin = (struct JBDim){.t = rst ? 0 : t[0] - 1,
 		.b = (rst ? jbxvt.scr.chars.h : t[1]) - 1};
 }
-
 static void handle_dsr(const int16_t arg)
 {
 	switch (arg) {
@@ -146,7 +136,6 @@ static void handle_dsr(const int16_t arg)
 		cprintf("\033[0n");
 	}
 }
-
 static void reqtparam(const uint8_t t)
 {
 	// Send REPTPARAM
@@ -158,7 +147,6 @@ static void reqtparam(const uint8_t t)
 	LOG("ESC[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
 		xspeed, rspeed, clkmul, flags);
 }
-
 static void tbc(const uint8_t t)
 {
 	if (t == 3)
@@ -166,7 +154,6 @@ static void tbc(const uint8_t t)
 	else if (!t)
 		jbxvt_set_tab(jbxvt.scr.current->cursor.x, false);
 }
-
 void jbxvt_parse_token(void)
 {
 	struct Token token;
@@ -175,12 +162,10 @@ void jbxvt_parse_token(void)
 	// n is sanitized for ops with optional args
 	int32_t n = token.nargs ? (t[0] ? t[0] : 1) : 1;
 	switch (token.type) {
-
 // macro to aid in debug logging
 #define CASE(L) case L:TLOG(#L);
 // log unimplemented features
 #define FIXME(L) CASE(L);TLOG("\tFIXME: " #L " Unimplemented");break;
-
 	CASE(TK_ALN) // screen alignment test
 		jbxvt_efill();
 		break;
@@ -194,14 +179,12 @@ void jbxvt_parse_token(void)
 	CASE(TK_CHT);
 		jbxvt_cht(n);
 		break;
-
 	CASE(TK_CPL) // cursor previous line
 		n = -n; // fall through
 	CASE(TK_CNL) // cursor next line
 		LOG("TK_CNL");
 		jbxvt_move(0, n, 0);
 		break;
-
 	CASE(TK_CUB); // back
 		jbxvt_move(-n, 0, ROW_RELATIVE | COL_RELATIVE);
 		break;
@@ -211,32 +194,26 @@ void jbxvt_parse_token(void)
 	CASE(TK_CUF); // forward
 		jbxvt_move(n, 0, ROW_RELATIVE | COL_RELATIVE);
 		break;
-
 	CASE(TK_CUP) // fall through
 	CASE(TK_HVP)
 		// subtract 1 for 0-based coordinates
 		jbxvt_move((t[1]?t[1]:1) - 1, n - 1, jbxvt.mode.decom ?
 			ROW_RELATIVE | COL_RELATIVE : 0);
 		break;
-
 	CASE(TK_CUU); // up
 		jbxvt_move(0, -n, ROW_RELATIVE | COL_RELATIVE);
 		break;
-
 	CASE(TK_DA) // fall through
 	CASE(TK_ID)
 		LOG("TK_ID");
 		cprintf("\033[?6c"); // VT102
 		break;
-
 	CASE(TK_DCH) // fall through
 	CASE(TK_ECH)
 		jbxvt_delete_characters(n);
 		break;
-
 	FIXME(TK_DHLT); // double height line -- top
 	FIXME(TK_DHLB); // double height line -- bottom
-
 	CASE(TK_DSR) // request for information
 		handle_dsr(t[0]);
 		break;
@@ -249,12 +226,10 @@ void jbxvt_parse_token(void)
 	CASE(TK_EL) // erase line
 		jbxvt_erase_line(t[0]); // don't use n
 		break;
-
 	CASE(TK_ENTGM52)
 		jbxvt.mode.charsel = 1;
 		jbxvt.mode.gm52 = true;
 		break;
-
 	CASE(TK_ELR)
 		switch (t[0]) {
 		case 2:
@@ -269,7 +244,6 @@ void jbxvt_parse_token(void)
 		}
 		jbxvt.mode.elr_pixels = t[1] == 1;
 		break;
-
 	CASE(TK_ENTRY) // keyboard focus changed.  fall through:
 	CASE(TK_FOCUS) // mouse focus changed
 		if (jbxvt.mode.mouse_focus_evt)
@@ -298,12 +272,10 @@ void jbxvt_parse_token(void)
 	CASE(TK_ICH)
 		jbxvt_insert_characters(n);
 		break;
-
 	CASE(TK_IL) n = -n; // fall through
 	CASE(TK_DL)
 		jbxvt_index_from(n, jbxvt.scr.current->cursor.y);
 		break;
-
 	CASE(TK_LL)
 		switch (t[1]) {
 		case ' ': // SCUSR
@@ -336,7 +308,6 @@ void jbxvt_parse_token(void)
 	CASE(TK_REQTPARAM)
 		reqtparam(t[0]);
 		break;
-
 	CASE(TK_RI) // Reverse index
 		n = -n; // fall through
 	CASE(TK_IND) // Index (same as \n)
@@ -369,7 +340,6 @@ void jbxvt_parse_token(void)
 	CASE(TK_SCS1) //  SCS G1
 		select_charset(t[0], 1);
 		break;
-
 	CASE(TK_SD) // scroll down n lines
 		t[0] = - t[0]; // fall through
 	CASE(TK_SU) // scroll up n lines;
@@ -377,11 +347,9 @@ void jbxvt_parse_token(void)
 		scroll(jbxvt.scr.current->margin.top,
 			jbxvt.scr.current->margin.bot, t[0]);
 		break;
-
 	CASE(TK_SELINSRT)
 		jbxvt_request_selection(t[0]);
 		break;
-
 	FIXME(TK_SPA);
 	FIXME(TK_SS2);
 	FIXME(TK_SS3);
@@ -392,12 +360,10 @@ void jbxvt_parse_token(void)
 	CASE(TK_TXTPAR)	// change title or icon name
 		handle_txtpar(&token);
 		break;
-
 	CASE(TK_SET) // fall through
 	CASE(TK_RESET)
 		dec_reset(&token);
 		break;
-
 	CASE(TK_SGR)
 		handle_sgr(&token);
 		break;
@@ -432,4 +398,3 @@ void jbxvt_parse_token(void)
 		break;
 	}
 }
-

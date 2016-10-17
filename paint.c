@@ -1,54 +1,44 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-
 #include "paint.h"
-
 #include "color_index.h"
 #include "double.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "libjb/util.h"
 #include "screen.h"
-
 #include <string.h>
-
 #define DEBUG_PAINT
 #ifndef DEBUG_PAINT
 #undef LOG
 #define LOG(...)
 #endif//!DEBUG_PAINT
-
 // not pure, has side-effects
 static pixel_t fg(const pixel_t p)
 {
 	return jbxvt.X.color.current_fg
 		= jb_set_fg(jbxvt.X.xcb, jbxvt.X.gc.tx, p);
 }
-
 // not pure, has side-effects
 static pixel_t bg(const pixel_t p)
 {
 	return jbxvt.X.color.current_bg
 		= jb_set_bg(jbxvt.X.xcb, jbxvt.X.gc.tx, p);
 }
-
 static pixel_t set_x(const char * color, const pixel_t backup,
 	pixel_t (*func)(const pixel_t))
 {
 	return func(color ? jb_get_pixel(jbxvt.X.xcb,
 		jbxvt.X.screen->default_colormap, color) : backup);
 }
-
 pixel_t jbxvt_set_fg(const char * color)
 {
 	return set_x(color, jbxvt.X.color.fg, &fg);
 }
-
 pixel_t jbxvt_set_bg(const char * color)
 {
 	return set_x(color, jbxvt.X.color.bg, &bg);
 }
-
 // 9-bit color
 static pixel_t rgb_pixel(const uint16_t c)
 {
@@ -64,7 +54,6 @@ static pixel_t rgb_pixel(const uint16_t c)
 		" pixel is 0x%x", c, r, g, b, p);
 	return p;
 }
-
 static bool set_rstyle_colors(const uint32_t rstyle)
 {
 	// Mask foreground colors, 9 bits offset by 6 bits
@@ -82,12 +71,10 @@ static bool set_rstyle_colors(const uint32_t rstyle)
 		bg(rgb_pixel(color[1]));
 	return rgb[0] || rgb[1] || ind[0] || ind[1];
 }
-
 static inline void font(const xcb_font_t f)
 {
 	xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, XCB_GC_FONT, &f);
 }
-
 static void draw_underline(uint16_t len, struct JBDim p, int8_t offset)
 {
 	xcb_poly_line(jbxvt.X.xcb, XCB_COORD_MODE_ORIGIN, jbxvt.X.win.vt,
@@ -95,7 +82,6 @@ static void draw_underline(uint16_t len, struct JBDim p, int8_t offset)
 		(struct xcb_point_t[]){{p.x, p.y + offset},
 		{p.x + len * jbxvt.X.font.size.width, p.y + offset}});
 }
-
 static void draw_text(uint8_t * restrict str, uint16_t len,
 	struct JBDim * restrict p, uint32_t rstyle)
 {
@@ -113,7 +99,6 @@ static void draw_text(uint8_t * restrict str, uint16_t len,
 	if (rstyle & JBXVT_RS_CROSSED_OUT)
 		draw_underline(len, *p, -(jbxvt.X.f.size.h>>1));
 }
-
 //  Paint the text using the rendition value at the screen position.
 void paint_rstyle_text(uint8_t * restrict str, uint32_t rstyle,
 	uint16_t len, struct JBDim p, const bool dwl)
@@ -151,4 +136,3 @@ void paint_rstyle_text(uint8_t * restrict str, uint32_t rstyle,
 		bg(jbxvt.X.color.bg);
 	}
 }
-

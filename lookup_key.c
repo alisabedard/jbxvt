@@ -1,24 +1,19 @@
 #include "lookup_key.h"
-
 #include "command.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "sbar.h"
-
 #include <string.h>
 #include <xcb/xcb_keysyms.h>
-
 //#define DEBUG_KEYS
 #ifndef DEBUG_KEYS
 #undef LOG
 #define LOG(...)
 #endif
-
 static struct { // key modes
 	bool cursor, // app mode cursor keys
 	     keypad; // keypad keys
 } self;
-
 // Reference <X11/keysymdef.h>
 #define K_C(n) (0xff00 | n)
 #define K_INS K_C(0x63)
@@ -30,8 +25,6 @@ static struct { // key modes
 #define K_N(n) K_C(0x50 | n)
 #define K_PU K_N(5)
 #define K_PD K_N(6)
-
-
 //  Table of function key mappings
 static struct KeyMaps func_key_table[] = {
 	{K_F(1),	{KS_TYPE_APPKEY,'P'},	{KS_TYPE_XTERM,11}},
@@ -52,8 +45,6 @@ static struct KeyMaps func_key_table[] = {
 	{K_PD,		{KS_TYPE_XTERM,6},  {}},
 	{}
 };
-
-
 //  PC keys and VT100 keypad function keys
 static struct KeyMaps other_key_table[]={
 	// regular:
@@ -76,9 +67,7 @@ static struct KeyMaps other_key_table[]={
 	{ KP_F(4), {KS_TYPE_APPKEY,'S'},{KS_TYPE_APPKEY,'S'}}, // f4
 	{}
 };
-
 #define KP_N(n) K_C(0xb0 | n)
-
 //  VT100 numeric keypad keys
 static struct KeyMaps kp_key_table[]={
 	{ KP_N(0),	{KS_TYPE_CHAR,'0'},	{KS_TYPE_APPKEY,'p'}},
@@ -102,19 +91,15 @@ static struct KeyMaps kp_key_table[]={
 	{ K_C(0x89),{KS_TYPE_CHAR,'\t'},{KS_TYPE_APPKEY,'I'}},
 	{}
 };
-
 // Set key mode for cursor keys if is_cursor, else for keypad keys
 void jbxvt_set_keys(const bool mode_high, const bool is_cursor)
 {
 	*(is_cursor ? &self.cursor : &self.keypad) = mode_high;
 }
-
 struct Format {
 	uint8_t key;
 	const uint8_t * value;
 };
-
-
 static char * get_format(const enum KSType type)
 {
 	switch(type) {
@@ -128,7 +113,6 @@ static char * get_format(const enum KSType type)
 		return "%c";
 	}
 }
-
 //  Look up function key keycode
 static uint8_t * get_keycode_value(struct KeyMaps * restrict keymaptable,
 	xcb_keysym_t keysym, uint8_t * buf, const int use_alternate)
@@ -144,7 +128,6 @@ static uint8_t * get_keycode_value(struct KeyMaps * restrict keymaptable,
 	}
 	return NULL;
 }
-
 static uint8_t * get_s(const xcb_keysym_t keysym, uint8_t * restrict kbuf)
 {
 	if (xcb_is_function_key(keysym) || xcb_is_misc_function_key(keysym)
@@ -157,7 +140,6 @@ static uint8_t * get_s(const xcb_keysym_t keysym, uint8_t * restrict kbuf)
 	return get_keycode_value(kp_key_table, keysym,
 		kbuf, self.keypad);
 }
-
 /* FIXME: Make this portable to non-US keyboards, or write a version
    or table for each type.  Perhaps use libxkbcommon-x11.  */
 static const uint8_t shift_map[][2] = {{'1', '!'}, {'2', '@'}, {'3', '#'},
@@ -165,7 +147,6 @@ static const uint8_t shift_map[][2] = {{'1', '!'}, {'2', '@'}, {'3', '#'},
 	{'9', '('}, {'0', ')'}, {'-', '_'}, {'=', '+'}, {';', ':'},
 	{'\'', '"'}, {'[', '{'}, {']', '}'}, {'\\', '|'}, {'`', '~'},
 	{',', '<'}, {'.', '>'}, {'/', '?'}, {}};
-
 __attribute__((const))
 static uint8_t shift(uint8_t c)
 {
@@ -177,7 +158,6 @@ static uint8_t shift(uint8_t c)
 	}
 	return c;
 }
-
 static void apply_state(const uint16_t state, uint8_t * restrict kbuf)
 {
 	switch (state) {
@@ -196,7 +176,6 @@ static void apply_state(const uint16_t state, uint8_t * restrict kbuf)
 		break;
 	}
 }
-
 static xcb_keysym_t get_keysym(xcb_key_press_event_t * ke)
 {
 	xcb_key_symbols_t *syms = xcb_key_symbols_alloc(jbxvt.X.xcb);
@@ -208,7 +187,6 @@ static xcb_keysym_t get_keysym(xcb_key_press_event_t * ke)
 	xcb_key_symbols_free(syms);
 	return k;
 }
-
 //  Convert the keypress event into a string.
 uint8_t * jbxvt_lookup_key(void * restrict ev, int_fast16_t * restrict pcount)
 {
@@ -254,4 +232,3 @@ do_not_display:
 	*pcount = 1;
 	return (uint8_t *)kbuf;
 }
-

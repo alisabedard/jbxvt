@@ -1,16 +1,12 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-
 #include "edit.h"
-
 #include "cursor.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "sbar.h"
 #include "screen.h"
-
 #include <string.h>
-
 static void copy_area(const int16_t * restrict x, const int16_t y,
 	const uint16_t width)
 {
@@ -19,7 +15,6 @@ static void copy_area(const int16_t * restrict x, const int16_t y,
 			jbxvt.X.gc.tx, x[0], y, x[1], y, width,
 			jbxvt.X.font.size.height);
 }
-
 static void finalize(const int16_t * restrict x, const struct JBDim p,
 	const uint16_t width, const int8_t count)
 {
@@ -29,7 +24,6 @@ static void finalize(const int16_t * restrict x, const struct JBDim p,
 	jbxvt.scr.current->wrap_next = 0;
 	jbxvt_draw_cursor();
 }
-
 static void copy_lines(const int16_t x, const int8_t count)
 {
 	const int16_t y = jbxvt.scr.current->cursor.y;
@@ -40,13 +34,11 @@ static void copy_lines(const int16_t x, const int8_t count)
 		r[i] = r[i - count];
 	}
 }
-
 static uint16_t get_width(const uint8_t count)
 {
 	return (jbxvt.scr.chars.w - count - jbxvt.scr.current->cursor.x)
 		* jbxvt.X.font.size.w;
 }
-
 static uint8_t get_count(int8_t count, const bool insert)
 {
 	count = MAX(count, 0);
@@ -54,7 +46,6 @@ static uint8_t get_count(int8_t count, const bool insert)
 		: jbxvt.scr.chars.w - jbxvt.scr.current->cursor.x);
 	return count;
 }
-
 static void begin(int16_t * x, int8_t * restrict count, const bool insert)
 {
 	*count = get_count(*count, insert);
@@ -68,7 +59,6 @@ static void begin(int16_t * x, int8_t * restrict count, const bool insert)
 		JB_SWAP(int16_t, x[0], x[1]);
 	jbxvt_check_selection(c.y, c.y);
 }
-
 //  Insert count spaces from the current position.
 void jbxvt_insert_characters(int8_t count)
 {
@@ -79,7 +69,6 @@ void jbxvt_insert_characters(int8_t count)
 	copy_lines(c.x, count);
 	finalize(x, jbxvt_get_pixel_size(c), get_width(count), count);
 }
-
 static void copy_data_after_count(const uint8_t count, const struct JBDim c)
 {
 	// copy the data after count
@@ -93,7 +82,6 @@ static void copy_data_after_count(const uint8_t count, const struct JBDim c)
 		memmove(i, i + count, diff << 2);
 	}
 }
-
 static void delete_source_data(const uint8_t count, const int16_t y)
 {
 	// delete the source data copied
@@ -102,7 +90,6 @@ static void delete_source_data(const uint8_t count, const int16_t y)
 	memset(jbxvt.scr.current->rend[y] + jbxvt.scr.chars.w - count,
 		0, count << 2);
 }
-
 //  Delete count characters from the current position.
 void jbxvt_delete_characters(int8_t count)
 {
@@ -117,4 +104,3 @@ void jbxvt_delete_characters(int8_t count)
 	c.x += width;
 	finalize(x, c, width, count);
 }
-

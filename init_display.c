@@ -1,26 +1,21 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-
 #include "init_display.h"
-
 #include "jbxvt.h"
 #include "paint.h"
 #include "screen.h"
 #include "window.h"
-
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 #include <X11/cursorfont.h>
 #include <xcb/xcb_icccm.h>
-
 #define E(n) XCB_EVENT_MASK_##n
 #define EB(n) XCB_EVENT_MASK_BUTTON_##n
 enum EventMasks {
 	MW_EVENTS = E(KEY_PRESS) | E(FOCUS_CHANGE) | E(STRUCTURE_NOTIFY),
 	SUB_EVENTS = E(EXPOSURE) | EB(PRESS) | EB(RELEASE) | EB(MOTION)
 };
-
 static xcb_font_t get_font(const char * name)
 {
 	errno = 0;
@@ -37,7 +32,6 @@ static xcb_font_t get_font(const char * name)
 	}
 	return f;
 }
-
 static void setup_font_metrics(const xcb_query_font_cookie_t c)
 {
 	errno = 0;
@@ -49,7 +43,6 @@ static void setup_font_metrics(const xcb_query_font_cookie_t c)
 	jbxvt.X.f.size.height = r->font_ascent + r->font_descent;
 	free(r);
 }
-
 static void setup_fonts(void)
 {
 	jbxvt.X.f.normal = get_font(jbxvt.opt.font);
@@ -59,7 +52,6 @@ static void setup_fonts(void)
 	jbxvt.X.f.italic = get_font(jbxvt.opt.italic_font);
 	setup_font_metrics(c);
 }
-
 static void create_main_window(xcb_size_hints_t * restrict sh,
 	const xcb_window_t root)
 {
@@ -72,7 +64,6 @@ static void create_main_window(xcb_size_hints_t * restrict sh,
 	jbxvt.scr.pixels.h = sh->height;
 	jbxvt.scr.chars = jbxvt_get_char_size(jbxvt.scr.pixels);
 }
-
 static void open_cursor(const xcb_font_t f)
 {
 	errno = 0;
@@ -81,7 +72,6 @@ static void open_cursor(const xcb_font_t f)
 	jb_assert(!jb_xcb_cookie_has_error(jbxvt.X.xcb, v),
 		"Cannot open cursor font");
 }
-
 static xcb_cursor_t get_cursor(const uint16_t id,
 	const uint16_t fg, const uint16_t bg)
 {
@@ -93,7 +83,6 @@ static xcb_cursor_t get_cursor(const uint16_t id,
 	xcb_close_font(jbxvt.X.xcb, f);
 	return c;
 }
-
 static void create_sb_window(const uint16_t height)
 {
 	xcb_cursor_t c = get_cursor(XC_sb_v_double_arrow, 0, 0xffff);
@@ -105,7 +94,6 @@ static void create_sb_window(const uint16_t height)
 		jbxvt.X.color.fg, SUB_EVENTS, c});
 	xcb_free_cursor(jbxvt.X.xcb, c);
 }
-
 static void create_vt_window(xcb_size_hints_t * restrict sh)
 {
 	xcb_connection_t * xc = jbxvt.X.xcb;
@@ -118,11 +106,9 @@ static void create_vt_window(xcb_size_hints_t * restrict sh)
 		jbxvt.X.color.bg, SUB_EVENTS, c});
 	xcb_free_cursor(xc, c);
 }
-
 static void get_sizehints(xcb_size_hints_t * restrict s)
 {
 	const struct JBDim p = jbxvt_get_pixel_size(jbxvt.opt.size);
-
 	*s = (xcb_size_hints_t) {
 #define SH(n) XCB_ICCCM_SIZE_HINT_##n
 		.flags = SH(US_SIZE) | SH(P_MIN_SIZE) | SH(P_RESIZE_INC)
@@ -138,7 +124,6 @@ static void get_sizehints(xcb_size_hints_t * restrict s)
 	s->min_height = FSZ.h + s->base_height;
 #undef FSZ
 }
-
 //  Open the window.
 static void create_window(uint8_t * restrict name,
 	const xcb_window_t root)
@@ -151,14 +136,12 @@ static void create_window(uint8_t * restrict name,
 	create_sb_window(sh.height);
 	create_vt_window(&sh);
 }
-
 static xcb_gc_t get_gc(const uint32_t vm, const void * vl)
 {
 	xcb_gc_t g = xcb_generate_id(jbxvt.X.xcb);
 	xcb_create_gc(jbxvt.X.xcb, g, jbxvt.X.win.main, vm, vl);
 	return g;
 }
-
 static void setup_gcs(void)
 {
 	const pixel_t f = jbxvt.X.color.fg, b = jbxvt.X.color.bg;
@@ -167,13 +150,11 @@ static void setup_gcs(void)
 	jbxvt.X.gc.cu = get_gc(XCB_GC_FUNCTION | XCB_GC_PLANE_MASK,
 		(uint32_t[]){XCB_GX_INVERT, f ^ b});
 }
-
 static inline void init_jbxvt_colors(void)
 {
 	jbxvt.X.color.fg = jbxvt_set_fg(jbxvt.opt.fg);
 	jbxvt.X.color.bg = jbxvt_set_bg(jbxvt.opt.bg);
 }
-
 void init_display(char * restrict name)
 {
 	int screen = jbxvt.opt.screen;
@@ -185,4 +166,3 @@ void init_display(char * restrict name)
 	setup_gcs();
 	jbxvt.X.clipboard = jb_get_atom(jbxvt.X.xcb, "CLIPBOARD");
 }
-

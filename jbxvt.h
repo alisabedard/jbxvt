@@ -1,21 +1,17 @@
 // Copyright 2016, Jeffrey E. Bedard
 #ifndef JBXVT_H
 #define JBXVT_H
-
 #include "libjb/util.h"
 #include "selection.h"
-
 #include "JBXVTPrivateModes.h"
 #include "JBXVTSavedLine.h"
 #include "JBXVTEvent.h"
 #include "JBXVTScreen.h"
 #include "JBXVTXData.h"
-
 struct JBXVTScreenSavedLines {
 	struct JBXVTSavedLine data[JBXVT_MAX_SCROLL]; // saved lines
 	uint16_t top, max;
 };
-
 struct JBXVTScreenData {
 	struct JBXVTScreen * current, * s;
 	struct JBXVTScreenSavedLines sline;
@@ -24,7 +20,6 @@ struct JBXVTScreenData {
 	uint32_t saved_rstyle; // saved render style
 	int16_t offset; // current vert saved line
 };
-
 struct JBXVTSelectionData {
 	uint8_t * text;
 	enum JBXVTSelectionUnit unit;
@@ -32,11 +27,9 @@ struct JBXVTSelectionData {
 	uint16_t length;
 	bool type;
 };
-
 struct JBXVTCommandContainer {
 	uint8_t *next, *top, *data;
 };
-
 struct JBXVTCommandData {
 	struct JBXVTCommandContainer buf, stack;
 	struct JBXVTEvent xev;
@@ -48,11 +41,9 @@ struct JBXVTCommandData {
 	// type per sysconf(3):
 	uint16_t send_count; // # chars waiting to be sent
 };
-
 enum CharacterSet{
 	CHARSET_GB, CHARSET_ASCII, CHARSET_SG0, CHARSET_SG1, CHARSET_SG2
 };
-
 struct JBXVTOptionData {
 	char *bg, *fg, *font, *bold_font, *italic_font, *display;
 	struct JBDim size;
@@ -61,7 +52,6 @@ struct JBXVTOptionData {
 	bool show_scrollbar;
 	uint8_t cursor_attr;
 };
-
 struct JBXVT {
 	struct JBXVTXData X;
 	struct JBXVTScreenData scr;
@@ -70,7 +60,5 @@ struct JBXVT {
 	struct JBXVTOptionData opt;
 	struct JBXVTPrivateModes mode, saved_mode;
 };
-
 extern struct JBXVT jbxvt; // in jbxvt.c
-
 #endif//!JBXVT_H

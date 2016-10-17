@@ -1,8 +1,6 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-
 #include "scr_erase.h"
-
 #include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"
@@ -12,15 +10,12 @@
 #include "scroll.h"
 #include "scr_reset.h"
 #include "selection.h"
-
 #include <string.h>
-
 //#define DEBUG_ERASE
 #ifndef DEBUG_ERASE
 #undef LOG
 #define LOG(...)
 #endif
-
 static void zero(const uint16_t line, const size_t sz, uint16_t col)
 {
 	//col = MIN(col, jbxvt.scr.chars.width); // restrict bounds
@@ -34,10 +29,8 @@ static void zero(const uint16_t line, const size_t sz, uint16_t col)
 	jbxvt.scr.current->wrap[line] = false;
 	jbxvt.scr.current->dwl[line] = false;
 }
-
 #define CUR jbxvt.scr.current->cursor
 #define FSZ jbxvt.X.font.size
-
 static void erase_range(xcb_rectangle_t * restrict h,
 	const size_t sz, const uint16_t col)
 {
@@ -45,12 +38,10 @@ static void erase_range(xcb_rectangle_t * restrict h,
 	h->width = sz * FSZ.w;
 	zero(CUR.y, sz, col);
 }
-
 static int16_t get_col(const uint8_t mode)
 {
 	return mode == 0 ? CUR.x : 0;
 }
-
 static int16_t get_sz(const uint8_t mode)
 {
 	fix_rc(&CUR);
@@ -67,7 +58,6 @@ static int16_t get_sz(const uint8_t mode)
 			return jbxvt.scr.chars.w - CUR.x;
 	}
 }
-
 //  erase part or the whole of a line
 void jbxvt_erase_line(const int8_t mode)
 {
@@ -83,7 +73,6 @@ void jbxvt_erase_line(const int8_t mode)
 	jbxvt_draw_cursor();
 	xcb_flush(jbxvt.X.xcb);
 }
-
 //  erase part or the whole of the screen
 void jbxvt_erase_screen(const int8_t mode)
 {
@@ -120,4 +109,3 @@ void jbxvt_erase_screen(const int8_t mode)
 	// clear start of, end of, or entire current line, per mode
 	jbxvt_erase_line(mode);
 }
-

@@ -1,8 +1,6 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-
 #include "cmdtok.h"
-
 #include "command.h"
 #include "cursor.h"
 #include "dcs.h"
@@ -14,20 +12,15 @@
 #include "scr_reset.h"
 #include "xevents.h"
 #include "window.h"
-
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
-
 enum {INPUT_BUFFER_EMPTY = 0x100};
-
 //  Flags used to control get_com_char();
 enum ComCharFlags {GET_INPUT_ONLY=1, GET_XEVENTS_ONLY=2};
-
 // Shortcuts
 #define COM jbxvt.com
 #define BUF jbxvt.com.buf
-
 static void handle_focus(xcb_generic_event_t * restrict ge)
 {
 	xcb_focus_in_event_t * e = (xcb_focus_in_event_t *)ge;
@@ -37,7 +30,6 @@ static void handle_focus(xcb_generic_event_t * restrict ge)
 		  return;
 	jbxvt.com.xev.detail = e->detail;
 }
-
 static void handle_sel(xcb_generic_event_t * restrict ge)
 {
 	xcb_selection_request_event_t * e
@@ -47,7 +39,6 @@ static void handle_sel(xcb_generic_event_t * restrict ge)
 		.target = e->target, .property = e->property,
 		.window = e->owner};
 }
-
 static void handle_client_msg(xcb_generic_event_t * restrict ge)
 {
 	xcb_client_message_event_t * e = (xcb_client_message_event_t *)ge;
@@ -55,7 +46,6 @@ static void handle_client_msg(xcb_generic_event_t * restrict ge)
 		== (unsigned long)wm_del_win())
 		  exit(0);
 }
-
 static void handle_expose(xcb_generic_event_t * restrict ge)
 {
 	if (((xcb_expose_event_t *)ge)->window == jbxvt.X.win.sb)
@@ -63,7 +53,6 @@ static void handle_expose(xcb_generic_event_t * restrict ge)
 	else
 		jbxvt_reset();
 }
-
 static void handle_other(xcb_generic_event_t * restrict ge)
 {
 	xcb_key_press_event_t * e = (xcb_key_press_event_t *)ge;
@@ -72,14 +61,12 @@ static void handle_other(xcb_generic_event_t * restrict ge)
 		.box.y = e->event_y, .state = e->state,
 		.time = e->time, .button = e->detail};
 }
-
 static void key_press(xcb_generic_event_t * restrict e)
 {
 	int_fast16_t count = 0;
 	uint8_t * s = jbxvt_lookup_key(e, &count);
 	write(jbxvt.com.fd, s, count);
 }
-
 static bool handle_xev(void)
 {
 	jb_check_x(jbxvt.X.xcb);
@@ -114,7 +101,6 @@ static bool handle_xev(void)
 	free(event);
 	return true;
 }
-
 static int_fast16_t output_to_command(void)
 {
 	struct JBXVTCommandData * c = &jbxvt.com;
@@ -126,7 +112,6 @@ static int_fast16_t output_to_command(void)
 	c->send_nxt += count;
 	return count;
 }
-
 static void timer(void)
 {
 	if (!jbxvt.mode.att610 && jbxvt.opt.cursor_attr % 2) {
@@ -134,7 +119,6 @@ static void timer(void)
 		xcb_flush(jbxvt.X.xcb);
 	}
 }
-
 __attribute__((nonnull))
 static void poll_io(fd_set * restrict in_fdset)
 {
@@ -155,7 +139,6 @@ static void poll_io(fd_set * restrict in_fdset)
 	else
 		jb_check_x(jbxvt.X.xcb);
 }
-
 static bool get_buffered(int_fast16_t * val, const uint8_t flags)
 {
 	if (COM.stack.top > COM.stack.data)
@@ -168,7 +151,6 @@ static bool get_buffered(int_fast16_t * val, const uint8_t flags)
 		return false;
 	return true;
 }
-
 /*  Return the next input character after first passing any keyboard input
     to the command.  If flags & GET_INPUT_ONLY is true then only buffered
     characters are returned and once the buffer is empty the special value
@@ -196,13 +178,11 @@ input:
 	BUF.top = BUF.data + l;
 	return *BUF.next++;
 }
-
 //  Return true if the character is one that can be handled by jbxvt_string()
 static inline bool is_string_char(register int_fast16_t c)
 {
 	return c < 0x7f && (c >= ' ' || c == '\n' || c == '\r' || c == '\t');
 }
-
 static void handle_string_char(int_fast16_t c, struct Token * restrict tk)
 {
 	uint_fast16_t i = 0, nl = 0;
@@ -220,7 +200,6 @@ static void handle_string_char(int_fast16_t c, struct Token * restrict tk)
 	if (c != INPUT_BUFFER_EMPTY)
 		  put_com_char(c);
 }
-
 static void handle_unicode(int_fast16_t c)
 {
 	LOG("handle_unicode(0x%x)", (unsigned int)c);
@@ -252,11 +231,8 @@ static void handle_unicode(int_fast16_t c)
 		put_com_char(c);
 	}
 }
-
-
 static void default_token(struct Token * restrict tk, int_fast16_t c)
 {
-
 	switch(c) { // handle 8-bit controls
 	case TK_CSI: case TK_DCS: case TK_EPA: case TK_HTS:
 	case TK_ID: case TK_IND: case TK_NEL: case TK_OSC: case TK_PM:
@@ -288,7 +264,6 @@ static void default_token(struct Token * restrict tk, int_fast16_t c)
 		}
 	}
 }
-
 //  Return an input token
 void get_token(struct Token * restrict tk)
 {
@@ -319,4 +294,3 @@ void get_token(struct Token * restrict tk)
 		default_token(tk, c);
 	}
 }
-
