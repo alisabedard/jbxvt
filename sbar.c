@@ -54,10 +54,10 @@ void jbxvt_scroll_to(const int16_t y)
 
 void jbxvt_clear_saved_lines(void)
 {
-	jbxvt_set_scroll(0);
 	memset(jbxvt.scr.sline.data, 0,
 		sizeof(struct JBXVTSavedLine) * JBXVT_MAX_SCROLL);
 	jbxvt.scr.sline.top = 0;
+	jbxvt_set_scroll(0);
 }
 
 void jbxvt_toggle_scrollbar(void)
