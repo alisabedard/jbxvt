@@ -6,6 +6,12 @@ jbxvt is a fork of XVT terminal emulator for X11,
 jbxvt is an XCB-based terminal emulator implementing modern
 terminal emulator features and legacy expectations.
 
+## Testing
+jbxvt is developed using vim within jbxvt the latest build of jbxvt.
+This allows runtime testing of frequently used features.  More obscure
+use cases my fail, such as vttest.  However, vttest is used in testing.
+As needed, I will include test scripts to verify certain features.
+
 ## Features
 * Mouse support.
 * 256 indexed color support
