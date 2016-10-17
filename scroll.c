@@ -47,7 +47,8 @@ static void clear(int8_t count, const uint8_t rc,
 
 static void adjust_saved_lines_top(const int_fast16_t n)
 {
-	jbxvt.scr.sline.top = MIN(jbxvt.scr.sline.top + n,
+	jbxvt.scr.sline.top += n;
+	jbxvt.scr.sline.top = MIN(jbxvt.scr.sline.top,
 		jbxvt.scr.sline.max);
 }
 
