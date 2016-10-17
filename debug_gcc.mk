@@ -2,16 +2,18 @@ include debug.mk
 
 CFLAGS+=-ggdb
 
-#CFLAGS+=-fsanitize=leak
-#CFLAGS+=-fsanitize=shift
-#CFLAGS+=-fsanitize=integer-divide-by-zero
+#CFLAGS+=--coverage
+
+CFLAGS+=-fsanitize=leak
+CFLAGS+=-fsanitize=shift
+CFLAGS+=-fsanitize=integer-divide-by-zero
 CFLAGS+=-fsanitize=unreachable
 CFLAGS+=-fsanitize=null
-#CFLAGS+=-fsanitize=alignment
-#CFLAGS+=-fsanitize=object-size
+CFLAGS+=-fsanitize=alignment
+CFLAGS+=-fsanitize=object-size
 CFLAGS+=-fsanitize=nonnull-attribute
-#CFLAGS+=-fsanitize=bool
-#CFLAGS+=-fsanitize=enum
+CFLAGS+=-fsanitize=bool
+CFLAGS+=-fsanitize=enum
 
 CFLAGS+=-fsanitize=undefined
 CFLAGS+=-ftrapv
