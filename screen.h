@@ -2,7 +2,6 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #ifndef SCREEN_H
 #define SCREEN_H
-#include "handle_sgr.h"
 #include "libjb/size.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -17,7 +16,7 @@ struct JBDim jbxvt_get_pixel_size(struct JBDim c)
     and do not lie within empty space.  */
 void fix_rc(struct JBDim * restrict rc);
 //  Change the rendition style.
-void jbxvt_style(const enum RenderFlag style);
+void jbxvt_style(const uint32_t style);
 //  Change between the alternate and the main screens
 //  mode_high is true for screen 2
 void jbxvt_change_screen(const bool mode_high);

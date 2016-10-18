@@ -62,7 +62,7 @@ void jbxvt_change_screen(const bool mode_high)
 	jbxvt_reset();
 }
 //  Change the rendition style.
-void jbxvt_style(const enum RenderFlag style)
+void jbxvt_style(const uint32_t style)
 {
 	// This allows combining styles, 0 resets
 	jbxvt.scr.rstyle = style ? jbxvt.scr.rstyle | style : 0;
