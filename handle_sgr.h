@@ -1,9 +1,9 @@
 #ifndef HANDLE_SGR_H
 #define HANDLE_SGR_H
 #include "Token.h"
-void handle_sgr(struct Token * restrict token)
+void jbxvt_handle_sgr(struct Token * restrict token)
 	__attribute__((hot));
-enum RenderFlag {
+enum JBXVTRenderFlag {
 	JBXVT_RS_NONE = 0,
 	JBXVT_RS_BOLD = 1,
 	JBXVT_RS_UNDERLINE = (1<<1),

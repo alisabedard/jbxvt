@@ -365,7 +365,7 @@ void jbxvt_parse_token(void)
 		dec_reset(&token);
 		break;
 	CASE(TK_SGR)
-		handle_sgr(&token);
+		jbxvt_handle_sgr(&token);
 		break;
 	FIXME(TK_SOS); // start of string
 	CASE(TK_ST)
