@@ -26,8 +26,8 @@ static bool rgb_or_index(int32_t arg, bool * restrict either,
 		return false;
 	*either = false;
 	const bool i = arg != 2;
-	*(likely(i)?index:rgb) = true;
-	jbxvt.scr.rstyle |= likely(i) ? (is_fg ? JBXVT_RS_FG_INDEX
+	*(JB_LIKELY(i)?index:rgb) = true;
+	jbxvt.scr.rstyle |= JB_LIKELY(i) ? (is_fg ? JBXVT_RS_FG_INDEX
 		: JBXVT_RS_BG_INDEX) : (is_fg ? JBXVT_RS_FG_RGB
 		: JBXVT_RS_BG_RGB);
 	return true;
@@ -42,7 +42,7 @@ static bool handle_color_encoding(const int32_t arg, const bool is_fg,
 		// exit mode after handling index
 		*index_mode = false;
 		return true;
-	} else if (unlikely(*rgb_mode)) {
+	} else if (JB_UNLIKELY(*rgb_mode)) {
 		const uint8_t o = is_fg ? 0 : 9;
 		encode_rgb(arg, 12 - rgb_count * 3 + o);
 		// exit mode after 3 colors

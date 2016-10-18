@@ -2,6 +2,7 @@
 #include "scr_move.h"
 #include "cursor.h"
 #include "jbxvt.h"
+#include "libjb/util.h"
 #include "sbar.h"
 // Sanitize cursor position, implement DECOM
 void reset_row_col(void)
@@ -16,7 +17,7 @@ void reset_row_col(void)
 static void set_dimension(int16_t * restrict cursor,
 	const int16_t delta, const bool relative)
 {
-	*cursor = relative ? *cursor + delta : MAX(delta, 0);
+	*cursor = relative ? *cursor + delta : JB_MAX(delta, 0);
 }
 /*  Move the cursor to a new position.  The relative argument is a pair of
  *  flags that specify relative rather than absolute motion.  */

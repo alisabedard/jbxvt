@@ -69,15 +69,15 @@ void jbxvt_reset(void)
 		created = true;
 	}
 	int16_t * y = &jbxvt.scr.current->cursor.y;
-	if (likely(jbxvt.scr.current == &jbxvt.scr.s[0]) && *y >= c.h) {
+	if (JB_LIKELY(jbxvt.scr.current == &jbxvt.scr.s[0]) && *y >= c.h) {
 		scroll1(*y - c.h + 1);
 		*y = c.h - 1;
 	}
 	init_screen_elements(&jbxvt.scr.s[0]);
 	init_screen_elements(&jbxvt.scr.s[1]);
 	// Constrain dimensions:
-	c.w = MIN(c.w, JBXVT_MAX_COLS);
-	c.h = MIN(c.h, JBXVT_MAX_ROWS);
+	c.w = JB_MIN(c.w, JBXVT_MAX_COLS);
+	c.h = JB_MIN(c.h, JBXVT_MAX_ROWS);
 	tty_set_size(c);
 	jbxvt.scr.chars = c;
 	reset_row_col();

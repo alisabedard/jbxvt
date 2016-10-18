@@ -58,7 +58,7 @@ static void handle_new_lines(int8_t nlcount)
 	struct JBDim * m = &jbxvt.scr.current->margin;
 	nlcount = y > m->b ? 0 : nlcount - m->b - y;
 	JB_LIMIT(nlcount, y - m->top, 0);
-	nlcount = MIN(nlcount, JBXVT_MAX_SCROLL);
+	nlcount = JB_MIN(nlcount, JBXVT_MAX_SCROLL);
 	scroll(m->top, m->bottom, nlcount);
 	jbxvt.scr.current->cursor.y -= nlcount;
 }
@@ -128,9 +128,9 @@ static void parse_special_charset(uint8_t * restrict str,
 static void fix_margins(struct JBDim* restrict m,
 	const int16_t cursor_y)
 {
-	m->b = MAX(m->b, cursor_y);
+	m->b = JB_MAX(m->b, cursor_y);
 	const uint8_t h = jbxvt.scr.chars.height - 1;
-	m->b = MIN(m->b, h);
+	m->b = JB_MIN(m->b, h);
 }
 static void fix_cursor(struct JBXVTScreen * restrict c)
 {
@@ -193,7 +193,7 @@ void jbxvt_string(uint8_t * restrict str, uint8_t len, int8_t nlcount)
 		}
 		jbxvt_check_selection(c->y, c->y);
 		p = jbxvt_get_pixel_size(jbxvt.scr.current->cursor);
-		if (unlikely(jbxvt.mode.insert))
+		if (JB_UNLIKELY(jbxvt.mode.insert))
 			handle_insert(1, p);
 		uint8_t * t = jbxvt.scr.current->text[c->y];
 		if (!t) // should never be NULL.

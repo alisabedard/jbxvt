@@ -41,8 +41,8 @@ static uint16_t get_width(const uint8_t count)
 }
 static uint8_t get_count(int8_t count, const bool insert)
 {
-	count = MAX(count, 0);
-	count = MIN(count, insert ? jbxvt.scr.chars.w
+	count = JB_MAX(count, 0);
+	count = JB_MIN(count, insert ? jbxvt.scr.chars.w
 		: jbxvt.scr.chars.w - jbxvt.scr.current->cursor.x);
 	return count;
 }

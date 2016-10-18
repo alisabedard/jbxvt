@@ -17,7 +17,7 @@ void dec_reset(struct Token * restrict token)
 {
 	LOG("handle_reset(%d)", token->arg[0]);
 	const bool is_set = token->type == TK_SET;
-	if (likely(token->private == '?')) {
+	if (JB_LIKELY(token->private == '?')) {
 		static bool allow_deccolm = true;
 		switch (token->arg[0]) {
 		case 1: // DECCKM: cursor key mode

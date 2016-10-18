@@ -3,6 +3,7 @@
    University of Kent at Canterbury. */
 #include "command.h"
 #include "jbxvt.h"
+#include "libjb/file.h"
 #include "libjb/log.h"
 #include "xevents.h"
 #include <fcntl.h>
@@ -96,7 +97,7 @@ static void set_ttymodes(void)
 }
 static void redir(const fd_t target, const fd_t ttyfd)
 {
-	jb_close(target);
+	close(target);
 	fcntl(ttyfd, F_DUPFD, 0);
 }
 static void child(char ** restrict argv, fd_t ttyfd)
@@ -123,7 +124,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	redir(0, ttyfd);
 	redir(1, ttyfd);
 	redir(2, ttyfd);
-	jb_close(ttyfd);
+	close(ttyfd);
 	set_ttymodes();
 	execvp(argv[0],argv); // Only returns on failure
 	exit(1); // prevent hang
