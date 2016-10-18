@@ -112,9 +112,9 @@ static void clear_line(const int16_t y, const int8_t count)
 		jbxvt.scr.pixels.width, count * FH);
 #undef FH
 }
-void scroll1(int16_t n)
+void jbxvt_scroll_primary_screen(int16_t n)
 {
-	LOG("scroll1(%d)", n);
+	LOG("jbxvt_scroll_primary_screen(%d)", n);
 	copy_saved_lines(n);
 	for (int_fast16_t j = n;
 		j < jbxvt.scr.chars.height; ++j)

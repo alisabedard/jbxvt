@@ -70,7 +70,7 @@ void jbxvt_reset(void)
 	}
 	int16_t * y = &jbxvt.scr.current->cursor.y;
 	if (JB_LIKELY(jbxvt.scr.current == &jbxvt.scr.s[0]) && *y >= c.h) {
-		scroll1(*y - c.h + 1);
+		jbxvt_scroll_primary_screen(*y - c.h + 1);
 		*y = c.h - 1;
 	}
 	init_screen_elements(&jbxvt.scr.s[0]);
