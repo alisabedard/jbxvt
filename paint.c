@@ -100,6 +100,14 @@ static void draw_text(uint8_t * restrict str, uint16_t len,
 	if (rstyle & JBXVT_RS_CROSSED_OUT)
 		draw_underline(len, *p, -(jbxvt.X.f.size.h>>1));
 }
+static void set_reverse_video(void)
+{
+	jb_set_fg(jbxvt.X.xcb, jbxvt.X.gc.tx,
+		jbxvt.X.color.current_bg);
+	jb_set_bg(jbxvt.X.xcb, jbxvt.X.gc.tx,
+		jbxvt.X.color.current_fg);
+
+}
 //  Paint the text using the rendition value at the screen position.
 void paint_rstyle_text(uint8_t * restrict str, uint32_t rstyle,
 	uint16_t len, struct JBDim p, const bool dwl)
@@ -112,11 +120,7 @@ void paint_rstyle_text(uint8_t * restrict str, uint32_t rstyle,
 		|| (rstyle & JBXVT_RS_BLINK);
 	bool cmod = set_rstyle_colors(rstyle);
 	if (rvid) { // Reverse looked up colors.
-		LOG("rvid");
-		jb_set_fg(jbxvt.X.xcb, jbxvt.X.gc.tx,
-			jbxvt.X.color.current_bg);
-		jb_set_bg(jbxvt.X.xcb, jbxvt.X.gc.tx,
-			jbxvt.X.color.current_fg);
+		set_reverse_video();
 		cmod = true;
 	}
 	p.y += jbxvt.X.f.ascent;
