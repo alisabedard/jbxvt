@@ -1,8 +1,8 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
-#ifndef SCR_STRING_H
-#define SCR_STRING_H
+#ifndef JBXVT_SCR_STRING_H
+#define JBXVT_SCR_STRING_H
 #include <stdbool.h>
 #include <stdint.h>
 /*  Display the string at the current position.
@@ -15,4 +15,4 @@ void jbxvt_cht(int16_t v);
 // Set tab stops:
 // -1 clears all, -2 sets default
 void jbxvt_set_tab(int16_t i, const bool value);
-#endif//!SCR_STRING_H
+#endif//!JBXVT_SCR_STRING_H
