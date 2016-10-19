@@ -362,7 +362,7 @@ void jbxvt_parse_token(void)
 		break;
 	CASE(TK_SET) // fall through
 	CASE(TK_RESET)
-		dec_reset(&token);
+		jbxvt_dec_reset(&token);
 		break;
 	CASE(TK_SGR)
 		jbxvt_handle_sgr(&token);
