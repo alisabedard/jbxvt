@@ -114,7 +114,7 @@ int main(int argc, char ** argv)
 	mode_init();
 	jbxvt_init();
 	jbxvt_map_window();
-	jb_check(setenv("TERM", TERM_ENV, true) != -1,
+	jb_check(setenv("TERM", JBXVT_ENV_TERM, true) != -1,
 		"Could not set TERM environment variable");
 	jbxvt_init_command_module(com_argv);
 	for (;;) // app loop

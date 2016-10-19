@@ -8,8 +8,7 @@
 #define JBXVT_BOLD_FONT "-*-terminus-bold-r-*-*-14-*-*-*-*-*-iso10646-*"
 //#define JBXVT_ITALIC_FONT "-*-terminus-bold-r-*-*-14-*-*-*-*-*-iso10646-*"
 #define JBXVT_ITALIC_FONT "-*-fixed-*-o-*-*-13-*-*-*-*-*-*-*-*"
-#define TERM_ENV "xterm-256color" // TERM env var to set
-#define COMMAND "/bin/sh" // default command to run
+#define JBXVT_ENV_TERM "xterm-256color" // TERM env var to set
 #define JBXVT_FG "white"
 #define JBXVT_BG "black"
 enum {	JBXVT_SCROLLBAR_WIDTH = 8, // width of scroll bar
