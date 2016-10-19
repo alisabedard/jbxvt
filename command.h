@@ -19,7 +19,7 @@ char * cprintf(char *, ...);
 #endif//!__clang__
 /*  Initialise the command connection.  This should be called after the X
  *  server connection is established.  */
-void init_command(char ** restrict argv);
+void jbxvt_init_command_module(char ** restrict argv);
 //  Push an input character back into the input queue.
 void put_com_char(const uint8_t c);
 #ifdef LINUX
@@ -28,8 +28,8 @@ void put_com_char(const uint8_t c);
 #endif//HAVE_ASM_GENERIC_IOCTLS_H
 #endif//LINUX
 #ifdef TIOCSWINSZ
-void tty_set_size(const struct JBDim sz);
+void jbxvt_set_tty_size(const struct JBDim sz);
 #else//!TIOCSWINSZ
-#define tty_set_size(dim)
+#define jbxvt_set_tty_size(dim)
 #endif//TIOCSWINSZ
 #endif//!COMMAND_H

@@ -78,7 +78,7 @@ void jbxvt_reset(void)
 	// Constrain dimensions:
 	c.w = JB_MIN(c.w, JBXVT_MAX_COLS);
 	c.h = JB_MIN(c.h, JBXVT_MAX_ROWS);
-	tty_set_size(c);
+	jbxvt_set_tty_size(c);
 	jbxvt.scr.chars = c;
 	reset_row_col();
 	--c.h; --c.w;

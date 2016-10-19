@@ -93,7 +93,7 @@ static void set_ttymodes(void)
 		[VSUSP] = 032, [VREPRINT] = 022, [VWERASE] = 027,
 		[VLNEXT] = 026, [VDISCARD] = 017}};
 	tcsetattr(0, TCSANOW, &term);
-	tty_set_size(jbxvt.scr.chars);
+	jbxvt_set_tty_size(jbxvt.scr.chars);
 }
 static void redir(const fd_t target, const fd_t ttyfd)
 {
@@ -133,7 +133,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
  *  the child and after a window size change from the parent.  */
 #if !defined(NETBSD) && !defined(FREEBSD)\
 	&& defined(HAVE_ASM_GENERIC_IOCTLS_H) && defined(TIOCSWINSZ)
-void tty_set_size(const struct JBDim sz)
+void jbxvt_set_tty_size(const struct JBDim sz)
 {
 	jb_check(ioctl(jbxvt.com.fd, TIOCSWINSZ, &(struct winsize){
 		.ws_row = sz.row, .ws_col = sz.col}) != 1,
@@ -213,7 +213,7 @@ static void init_container(struct JBXVTCommandContainer * restrict c,
 }
 /*  Initialize the command connection.  This should
     be called after the X server connection is established.  */
-void init_command(char ** restrict argv)
+void jbxvt_init_command_module(char ** restrict argv)
 {
 	//  Enable the delete window protocol:
 	jbxvt_get_wm_del_win();
