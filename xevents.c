@@ -10,7 +10,7 @@
 #include "selection.h"
 #include "selex.h"
 #include "selreq.h"
-xcb_atom_t wm_del_win(void)
+xcb_atom_t jbxvt_get_wm_del_win(void)
 {
 	static long unsigned int a;
 	if(!a) { // Init on first call:
@@ -139,7 +139,7 @@ static void handle_focus(const bool in)
 		cprintf("\033[%c]", in ? 'I' : 'O');
 }
 // Handle X11 event described by xe
-bool handle_xevents(struct JBXVTEvent * xe)
+bool jbwm_handle_xevents(struct JBXVTEvent * xe)
 {
 	switch (xe->type &~0x80) { // Ordered numerically:
 	case 0: // Unimplemented, undefined, no event

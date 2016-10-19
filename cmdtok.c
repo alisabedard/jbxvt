@@ -43,7 +43,7 @@ static void handle_client_msg(xcb_generic_event_t * restrict ge)
 {
 	xcb_client_message_event_t * e = (xcb_client_message_event_t *)ge;
 	if (e->format == 32 && e->data.data32[0]
-		== (unsigned long)wm_del_win())
+		== (unsigned long)jbxvt_get_wm_del_win())
 		  exit(0);
 }
 static void handle_expose(xcb_generic_event_t * restrict ge)
@@ -269,7 +269,7 @@ void get_token(struct Token * restrict tk)
 {
 	memset(tk, 0, sizeof(struct Token));
 	// set token per event:
-	if(handle_xevents(&jbxvt.com.xev))
+	if(jbwm_handle_xevents(&jbxvt.com.xev))
 		  return;
 	const int_fast16_t c = get_com_char(GET_XEVENTS_ONLY);
 	switch (c) {

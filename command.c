@@ -216,7 +216,7 @@ static void init_container(struct JBXVTCommandContainer * restrict c,
 void init_command(char ** restrict argv)
 {
 	//  Enable the delete window protocol:
-	wm_del_win();
+	jbxvt_get_wm_del_win();
 	jbxvt.com.xfd = xcb_get_file_descriptor(jbxvt.X.xcb);
 	jbxvt.com.fd = run_command(argv);
 	jb_assert(jbxvt.com.fd >= 0, "Could not start session");
