@@ -3,6 +3,7 @@
 #include "paint.h"
 #include "color_index.h"
 #include "double.h"
+#include "handle_sgr.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "libjb/util.h"
