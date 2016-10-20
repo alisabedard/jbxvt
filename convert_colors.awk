@@ -12,7 +12,7 @@ BEGIN {
 	print "#ifndef JBXVT_COLOR_INDEX_H"
 	print "#define JBXVT_COLOR_INDEX_H"
 	print "#include <stdint.h>"
-	print "static uint32_t color_index[256] = {"
+	print "static uint32_t jbxvt_color_index[256] = {"
 	FS=":";
 }
 

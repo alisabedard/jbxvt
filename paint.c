@@ -63,11 +63,11 @@ static bool set_rstyle_colors(const uint32_t rstyle)
 	const bool rgb[] = {rstyle & JBXVT_RS_FG_RGB, rstyle & JBXVT_RS_BG_RGB};
 	const bool ind[] = {rstyle & JBXVT_RS_FG_INDEX, rstyle & JBXVT_RS_BG_INDEX};
 	if (ind[0])
-		fg(color_index[color[0]]);
+		fg(jbxvt_color_index[color[0]]);
 	else if (rgb[0])
 		fg(rgb_pixel(color[0]));
 	if (ind[1])
-		bg(color_index[color[1]]);
+		bg(jbxvt_color_index[color[1]]);
 	else if (rgb[1])
 		bg(rgb_pixel(color[1]));
 	return rgb[0] || rgb[1] || ind[0] || ind[1];
