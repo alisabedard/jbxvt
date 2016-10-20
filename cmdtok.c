@@ -234,10 +234,11 @@ static void handle_unicode(int_fast16_t c)
 static void default_token(struct Token * restrict tk, int_fast16_t c)
 {
 	switch(c) { // handle 8-bit controls
-	case JBXVT_TOKEN_CSI: case JBXVT_TOKEN_DCS: case JBXVT_TOKEN_EPA: case JBXVT_TOKEN_HTS:
-	case JBXVT_TOKEN_ID: case JBXVT_TOKEN_IND: case JBXVT_TOKEN_NEL: case JBXVT_TOKEN_OSC: case JBXVT_TOKEN_PM:
-	case JBXVT_TOKEN_RI: case JBXVT_TOKEN_SOS: case JBXVT_TOKEN_SPA: case JBXVT_TOKEN_SS2: case JBXVT_TOKEN_SS3:
-	case JBXVT_TOKEN_ST:
+	case JBXVT_TOKEN_CSI: case JBXVT_TOKEN_DCS: case JBXVT_TOKEN_EPA:
+	case JBXVT_TOKEN_HTS: case JBXVT_TOKEN_ID: case JBXVT_TOKEN_IND:
+	case JBXVT_TOKEN_NEL: case JBXVT_TOKEN_OSC: case JBXVT_TOKEN_PM:
+	case JBXVT_TOKEN_RI: case JBXVT_TOKEN_SOS: case JBXVT_TOKEN_SPA:
+	case JBXVT_TOKEN_SS2: case JBXVT_TOKEN_SS3: case JBXVT_TOKEN_ST:
 		tk->type = c;
 		break;
 	case JBXVT_TOKEN_APC: // Retrieve and skip sequence

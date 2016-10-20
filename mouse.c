@@ -20,7 +20,8 @@ static bool track_mouse_sgr(uint8_t b, struct JBDim p, const bool rel)
 {
 	if (!MD.mouse_sgr)
 		return false;
-	dprintf(jbxvt.com.fd, "\033[<%c;%c;%c%c", b, p.x, p.y, rel ? 'm' : 'M');
+	dprintf(jbxvt.com.fd, "\033[<%c;%c;%c%c",
+		b, p.x, p.y, rel ? 'm' : 'M');
 	return true;
 }
 static void locator_report(const uint8_t b, struct JBDim p)

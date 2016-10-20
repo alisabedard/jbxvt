@@ -5,17 +5,14 @@
 #include "cmdtok.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
-#include <assert.h>
 static void check_st(struct Token * t)
 {
-	assert(t);
 	int_fast16_t c = jbxvt_pop_char(0);
 	if (c != JBXVT_TOKEN_ST)
 		t->type = JBXVT_TOKEN_NULL;
 }
 void jbxvt_dcs(struct Token * t)
 {
-	assert(t);
 	int_fast16_t c = jbxvt_pop_char(0);
 	switch (c) {
 	case '0':
@@ -32,14 +29,28 @@ void jbxvt_dcs(struct Token * t)
 		case '"':
 			c = jbxvt_pop_char(0); // next
 			switch (c) {
-#define CASE_Q(ch, tk) case ch:t->type=JBXVT_TOKEN_QUERY_##tk;check_st(t);break;
-			CASE_Q('p', SCA);
-			CASE_Q('q', SCL);
+			case 'p':
+				t->type = JBXVT_TOKEN_QUERY_SCA;
+				check_st(t);
+				break;
+			case 'q':
+				t->type = JBXVT_TOKEN_QUERY_SCL;
+				check_st(t);
+				break;
 			}
+		case 'm':
+			t->type = JBXVT_TOKEN_QUERY_SLRM;
+			check_st(t);
 			break;
-		CASE_Q('m', SLRM);
-		CASE_Q('r', STBM);
-		CASE_Q('s', SLRM);
+		case 'r':
+			t->type = JBXVT_TOKEN_QUERY_STBM;
+			check_st(t);
+			break;
+
+		case 's':
+			t->type = JBXVT_TOKEN_QUERY_SLRM;
+			check_st(t);
+			break;
 		case ' ':
 			c = jbxvt_pop_char(0);
 			if (c != 'q')
