@@ -1,10 +1,10 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-#ifndef TOKEN_TYPE_H
-#define TOKEN_TYPE_H
+#ifndef JBXVT_TOKENTYPE_H
+#define JBXVT_TOKENTYPE_H
 // Reference man console_codes(4) and ctlseqs(ms)
 //  struct Token types
-typedef enum {
+enum JBXVTTokenType {
 	JBXVT_TOKEN_NULL = 0, // null token to be ignored
 	// Tokens > 1000 are artificial.
 	// Done this way to prevent clash with CSI sequences.
@@ -121,5 +121,5 @@ typedef enum {
 	JBXVT_TOKEN_OSC = 0x9d,
 	JBXVT_TOKEN_PM = 0x9e,	// Privacy message (ended by ESC \ (ST))
 	JBXVT_TOKEN_APC = 0x9f
-} TokenType;
-#endif//!TOKEN_H
+};
+#endif//!JBXVT_TOKENTYPE_H

@@ -11,9 +11,9 @@ enum TokenLimits {
 /*  Structure used to represent a piece of input from the program
  *  or an interesting X event.  */
 struct Token{
-	int32_t arg[JBXVT_TOKEN_MAX_ARGS];	// first numerical arguments
-	uint8_t string[JBXVT_TOKEN_MAX_LENGTH + 1];	// the text for string tokens
-	TokenType type;			// type of token
+	int32_t arg[JBXVT_TOKEN_MAX_ARGS];		// first numerical arguments
+	uint8_t string[JBXVT_TOKEN_MAX_LENGTH + 1];	// the text for stringtokens
+	enum JBXVTTokenType type;			// type of token
 	union {
 		uint16_t private;	// non zero for priv ctl sequences
 		uint16_t nlcount;	// number of newlines in the string
