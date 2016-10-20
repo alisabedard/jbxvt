@@ -295,3 +295,7 @@ void jbxvt_get_token(struct Token * restrict tk)
 		default_token(tk, c);
 	}
 }
+const char * jbxvt_get_csi(void)
+{
+	return jbxvt.mode.s8c1t ? "\233" : "\033[";
+}
