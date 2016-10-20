@@ -70,14 +70,15 @@ usage:
 static void opt_init(void)
 {
 	// Set some defaults which may be overridden.
-#define O(field, def) jbxvt.opt.field = JBXVT_##def
-	O(fg, FG);
-	O(bg, BG);
-	O(font, FONT);
-	O(bold_font, BOLD_FONT);
-	O(italic_font, ITALIC_FONT);
-	O(size.width, COLUMNS);
-	O(size.height, ROWS);
+#define OPT(field, def) jbxvt.opt.field = JBXVT_##def
+	OPT(fg, FG);
+	OPT(bg, BG);
+	OPT(font, FONT);
+	OPT(bold_font, BOLD_FONT);
+	OPT(italic_font, ITALIC_FONT);
+	OPT(size.width, COLUMNS);
+	OPT(size.height, ROWS);
+#undef OPT
 	// Default to a steady block cursor to conserve CPU
 	jbxvt.opt.cursor_attr = 2;
 	jbxvt.scr.sline.max = JBXVT_MAX_SCROLL;
