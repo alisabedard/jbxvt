@@ -136,7 +136,8 @@ static void handle_dsr(const int16_t arg)
 	case 25: // Test UDK status?
 	case 26: // Test keyboard status
 	default:
-		dprintf(jbxvt.com.fd, "\033[0n");
+		dprintf(jbxvt.com.fd, jbxvt.mode.s8c1t
+			? "\2330n" : "\033[0n");
 	}
 }
 static void reqtparam(const uint8_t t)
