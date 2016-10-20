@@ -1,7 +1,7 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "jbxvt.h"
 #include "command.h"
-#include "init_display.h"
+#include "display.h"
 #include "scr_string.h"
 #include "window.h"
 #include "xvt.h"
@@ -109,8 +109,8 @@ int main(int argc, char ** argv)
 	char ** com_argv = parse_command_line(argc, argv);
 	if (!com_argv)
 		com_argv = (char*[2]){getenv("SHELL")};
-	// init_display must come after parse_command_line
-	init_display(argv[0]);
+	// jbxvt_init_display must come after parse_command_line
+	jbxvt_init_display(argv[0]);
 	mode_init();
 	jbxvt_init();
 	jbxvt_map_window();

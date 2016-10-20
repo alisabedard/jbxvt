@@ -1,6 +1,6 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-#include "init_display.h"
+#include "display.h"
 #include "jbxvt.h"
 #include "paint.h"
 #include "screen.h"
@@ -155,7 +155,7 @@ static inline void init_jbxvt_colors(void)
 	jbxvt.X.color.fg = jbxvt_set_fg(jbxvt.opt.fg);
 	jbxvt.X.color.bg = jbxvt_set_bg(jbxvt.opt.bg);
 }
-void init_display(char * restrict name)
+void jbxvt_init_display(char * restrict name)
 {
 	int screen = jbxvt.opt.screen;
 	jbxvt.X.xcb = jb_get_xcb_connection(jbxvt.opt.display, &screen);

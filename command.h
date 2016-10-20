@@ -21,7 +21,7 @@ char * cprintf(char *, ...);
  *  server connection is established.  */
 void jbxvt_init_command_module(char ** restrict argv);
 //  Push an input character back into the input queue.
-void put_com_char(const uint8_t c);
+void jbxvt_push_char(const uint8_t c);
 #ifdef LINUX
 #ifdef HAVE_ASM_GENERIC_IOCTLS_H
 #include <asm-generic/ioctls.h>

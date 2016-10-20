@@ -16,7 +16,7 @@
 #include <string.h>
 #include <unistd.h>
 enum {INPUT_BUFFER_EMPTY = 0x100};
-//  Flags used to control get_com_char();
+//  Flags used to control jbxvt_pop_char();
 enum ComCharFlags {GET_INPUT_ONLY=1, GET_XEVENTS_ONLY=2};
 // Shortcuts
 #define COM jbxvt.com
@@ -157,7 +157,7 @@ static bool get_buffered(int_fast16_t * val, const uint8_t flags)
     INPUT_BUFFER_EMPTY is returned.  If flags and GET_XEVENTS_ONLY is true,
     then INPUT_BUFFER_EMPTY is returned when an X event arrives.
     This is the most often called function. */
-int_fast16_t get_com_char(const uint8_t flags)
+int_fast16_t jbxvt_pop_char(const uint8_t flags)
 {
 	int_fast16_t ret = 0;
 	if (get_buffered(&ret, flags))
@@ -189,7 +189,7 @@ static void handle_string_char(int_fast16_t c, struct Token * restrict tk)
 	uint8_t * restrict s = tk->string;
 	do {
 		s[i++] = c;
-		c = get_com_char(GET_INPUT_ONLY);
+		c = jbxvt_pop_char(GET_INPUT_ONLY);
 		if (c == '\n')
 			++nl;
 	} while (is_string_char(c) && i < TKS_MAX);
@@ -198,37 +198,37 @@ static void handle_string_char(int_fast16_t c, struct Token * restrict tk)
 	s[i] = 0; // terminating NULL
 	tk->type = JBXVT_TOKEN_STRING;
 	if (c != INPUT_BUFFER_EMPTY)
-		  put_com_char(c);
+		  jbxvt_push_char(c);
 }
 static void handle_unicode(int_fast16_t c)
 {
 	LOG("handle_unicode(0x%x)", (unsigned int)c);
-	c = get_com_char(c);
+	c = jbxvt_pop_char(c);
 	switch (c) {
 	case 0x94:
-		c = get_com_char(c);
+		c = jbxvt_pop_char(c);
 		switch (c) {
 		case 0x80:
-			put_com_char('-');
+			jbxvt_push_char('-');
 			break;
 		case 0x82:
-			put_com_char('|');
+			jbxvt_push_char('|');
 			break;
 		case 0xac:
-			put_com_char('+');
+			jbxvt_push_char('+');
 			break;
 		default:
 			LOG("0x%x", (unsigned int)c);
-			put_com_char(c);
+			jbxvt_push_char(c);
 		}
 		break;
 	case 0x96:
 	case 0x80:
-		put_com_char('-');
+		jbxvt_push_char('-');
 		break;
 	default:
 		LOG("0xe2 0x%x", (unsigned int)c);
-		put_com_char(c);
+		jbxvt_push_char(c);
 	}
 }
 static void default_token(struct Token * restrict tk, int_fast16_t c)
@@ -241,8 +241,8 @@ static void default_token(struct Token * restrict tk, int_fast16_t c)
 		tk->type = c;
 		break;
 	case JBXVT_TOKEN_APC: // Retrieve and skip sequence
-		c = get_com_char(c);
-		c = get_com_char(c);
+		c = jbxvt_pop_char(c);
+		c = jbxvt_pop_char(c);
 		LOG("0x9f0x%x", (unsigned int)c);
 		break;
 	case 0xd0:
@@ -265,13 +265,13 @@ static void default_token(struct Token * restrict tk, int_fast16_t c)
 	}
 }
 //  Return an input token
-void get_token(struct Token * restrict tk)
+void jbxvt_get_token(struct Token * restrict tk)
 {
 	memset(tk, 0, sizeof(struct Token));
 	// set token per event:
 	if(jbxvt_handle_xevents(&jbxvt.com.xev))
 		  return;
-	const int_fast16_t c = get_com_char(GET_XEVENTS_ONLY);
+	const int_fast16_t c = jbxvt_pop_char(GET_XEVENTS_ONLY);
 	switch (c) {
 	case INPUT_BUFFER_EMPTY:
 		tk->type = JBXVT_TOKEN_NULL;

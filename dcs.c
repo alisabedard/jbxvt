@@ -9,28 +9,28 @@
 static void check_st(struct Token * t)
 {
 	assert(t);
-	int_fast16_t c = get_com_char(0);
+	int_fast16_t c = jbxvt_pop_char(0);
 	if (c != JBXVT_TOKEN_ST)
 		t->type = JBXVT_TOKEN_NULL;
 }
 void jbxvt_dcs(struct Token * t)
 {
 	assert(t);
-	int_fast16_t c = get_com_char(0);
+	int_fast16_t c = jbxvt_pop_char(0);
 	switch (c) {
 	case '0':
 	case '1':
 		LOG("FIXME: User defined keys are unimplemented.");
 		return;
 	case '$':
-		c = get_com_char(0);
+		c = jbxvt_pop_char(0);
 		if (c != 'q')
 			return;
 		// RQSS:  Request status string
-		c = get_com_char(0); // next char
+		c = jbxvt_pop_char(0); // next char
 		switch (c) {
 		case '"':
-			c = get_com_char(0); // next
+			c = jbxvt_pop_char(0); // next
 			switch (c) {
 #define CASE_Q(ch, tk) case ch:t->type=JBXVT_TOKEN_QUERY_##tk;check_st(t);break;
 			CASE_Q('p', SCA);
@@ -41,7 +41,7 @@ void jbxvt_dcs(struct Token * t)
 		CASE_Q('r', STBM);
 		CASE_Q('s', SLRM);
 		case ' ':
-			c = get_com_char(0);
+			c = jbxvt_pop_char(0);
 			if (c != 'q')
 				return;
 			t->type = JBXVT_TOKEN_QUERY_SCUSR;
@@ -50,7 +50,7 @@ void jbxvt_dcs(struct Token * t)
 		}
 		break;
 	case '+':
-		c = get_com_char(0);
+		c = jbxvt_pop_char(0);
 		switch (c) {
 		case 'p':
 		case 'q':
@@ -58,12 +58,12 @@ void jbxvt_dcs(struct Token * t)
 		}
 		break;
 	case 0x1b:
-		get_com_char(0);
-		get_com_char(0);
-		put_com_char('-');
+		jbxvt_pop_char(0);
+		jbxvt_pop_char(0);
+		jbxvt_push_char('-');
 		break;
 	case 0xd0:
-		put_com_char('?');
+		jbxvt_push_char('?');
 		break;
 	default:
 		LOG("Unhandled DCS, starting with 0x%x", (int)c);

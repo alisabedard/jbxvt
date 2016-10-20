@@ -157,7 +157,7 @@ static void tbc(const uint8_t t)
 void jbxvt_parse_token(void)
 {
 	struct Token token;
-	get_token(&token);
+	jbxvt_get_token(&token);
 	int32_t * t = token.arg;
 	// n is sanitized for ops with optional args
 	int32_t n = token.nargs ? (t[0] ? t[0] : 1) : 1;

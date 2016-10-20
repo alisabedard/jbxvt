@@ -225,7 +225,7 @@ void jbxvt_init_command_module(char ** restrict argv)
 	init_container(&jbxvt.com.stack, stack);
 }
 //  Push an input character back into the input queue.
-void put_com_char(const uint8_t c)
+void jbxvt_push_char(const uint8_t c)
 {
 	if (jbxvt.com.stack.top < jbxvt.com.stack.data
 		+ COM_PUSH_MAX)
