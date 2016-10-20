@@ -6,6 +6,7 @@
 #include "dcs.h"
 #include "jbxvt.h"
 #include "screen.h"
+#include <stdio.h>
 void jbxvt_csi(int_fast16_t c, struct Token * restrict tk)
 {
 	c = jbxvt_pop_char(0);
@@ -158,7 +159,7 @@ void jbxvt_esc(int_fast16_t c, struct Token * restrict tk)
 		if (jbxvt.mode.decanm) // vt100+ mode
 			tk->type = JBXVT_TOKEN_ID;
 		else // I am a VT52
-			cprintf("\033/Z");
+			dprintf(jbxvt.com.fd, "\033/Z");
 		break;
 	}
 }

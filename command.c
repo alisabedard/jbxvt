@@ -231,16 +231,3 @@ void jbxvt_push_char(const uint8_t c)
 		+ COM_PUSH_MAX)
 		*jbxvt.com.stack.top++ = c;
 }
-/*  Send printf formatted output to the command.
-    Only used for small ammounts of data.  */
-char * cprintf(char *fmt, ...)
-{
-	va_list args;
-	va_start(args,fmt);
-	static char buf[32];
-	// + 1 to include \0 terminator.
-	const int l = vsnprintf(buf, sizeof(buf), fmt, args) + 1;
-	va_end(args);
-	jb_assert(write(jbxvt.com.fd, buf, l), "Cannot write to command");
-	return buf;
-}

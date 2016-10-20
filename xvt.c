@@ -20,6 +20,7 @@
 #include "scroll.h"
 #include "selreq.h"
 #include "window.h"
+#include <stdio.h>
 #include <string.h>
 //#define DEBUG_TOKENS
 #ifdef DEBUG_TOKENS
@@ -48,7 +49,7 @@ static void form_feed(void)
 	const struct JBDim m = jbxvt.scr.current->margin;
 	jbxvt_move(0, m.top, 0);
 	if (jbxvt.mode.decpff)
-		cprintf("FF");
+		dprintf(jbxvt.com.fd, "FF");
 	scroll(m.top, m.bottom, m.bottom - m.top);
 }
 static void handle_tk_char(const uint8_t tk_char)
@@ -74,7 +75,7 @@ static void handle_tk_char(const uint8_t tk_char)
 		jbxvt_tab();
 		break;
 	case 005: // ENQ
-		cprintf("\033[?6c"); // VT102
+		dprintf(jbxvt.com.fd, "\033[?6c"); // VT102
 		break;
 	case '\016': // change to char set G1
 		LOG("charset G1");
@@ -120,12 +121,12 @@ static void handle_dsr(const int16_t arg)
 	switch (arg) {
 	case 6 : {
 		const struct JBDim c = jbxvt.scr.current->cursor;
-		cprintf("\033[%d;%dR", c.y + 1, c.x + 1);
+		dprintf(jbxvt.com.fd, "\033[%d;%dR", c.y + 1, c.x + 1);
 		break;
 	}
 	case 7 :
 		//  Send the name of the display to the command.
-		cprintf("%s\r", getenv("DISPLAY"));
+		dprintf(jbxvt.com.fd, "%s\r", getenv("DISPLAY"));
 		break;
 	case 5: // command from host requesting status
 		// 0 is response for 'Ready, no malfunctions'
@@ -133,7 +134,7 @@ static void handle_dsr(const int16_t arg)
 	case 25: // Test UDK status?
 	case 26: // Test keyboard status
 	default:
-		cprintf("\033[0n");
+		dprintf(jbxvt.com.fd, "\033[0n");
 	}
 }
 static void reqtparam(const uint8_t t)
@@ -142,7 +143,7 @@ static void reqtparam(const uint8_t t)
 	const uint8_t sol = t + 2, par = 1, nbits = 1,
 	      flags = 0, clkmul = 1;
 	const uint16_t xspeed = 88, rspeed = 88;
-	cprintf("\033[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
+	dprintf(jbxvt.com.fd, "\033[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
 		xspeed, rspeed, clkmul, flags);
 	LOG("ESC[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
 		xspeed, rspeed, clkmul, flags);
@@ -206,7 +207,7 @@ void jbxvt_parse_token(void)
 	CASE(JBXVT_TOKEN_DA) // fall through
 	CASE(JBXVT_TOKEN_ID)
 		LOG("JBXVT_TOKEN_ID");
-		cprintf("\033[?6c"); // VT102
+		dprintf(jbxvt.com.fd, "\033[?6c"); // VT102
 		break;
 	CASE(JBXVT_TOKEN_DCH) // fall through
 	CASE(JBXVT_TOKEN_ECH)
@@ -247,7 +248,7 @@ void jbxvt_parse_token(void)
 	CASE(JBXVT_TOKEN_ENTRY) // keyboard focus changed.  fall through:
 	CASE(JBXVT_TOKEN_FOCUS) // mouse focus changed
 		if (jbxvt.mode.mouse_focus_evt)
-			cprintf("\033[%c]", t[0] ? 'I' : 'O');
+			dprintf(jbxvt.com.fd, "\033[%c]", t[0] ? 'I' : 'O');
 		break;
 	CASE(JBXVT_TOKEN_EOF)
 		exit(0);

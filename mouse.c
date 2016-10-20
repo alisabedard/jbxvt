@@ -1,11 +1,8 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "mouse.h"
-#include "command.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "screen.h"
-#include <stdlib.h>
-#include <string.h>
 static uint8_t get_mod(const uint16_t state)
 {
 	// 4=Shift, 8=Meta, 16=Control
@@ -23,7 +20,7 @@ static bool track_mouse_sgr(uint8_t b, struct JBDim p, const bool rel)
 {
 	if (!MD.mouse_sgr)
 		return false;
-	cprintf("\033[<%c;%c;%c%c", b, p.x, p.y, rel ? 'm' : 'M');
+	dprintf(jbxvt.com.fd, "\033[<%c;%c;%c%c", b, p.x, p.y, rel ? 'm' : 'M');
 	return true;
 }
 static void locator_report(const uint8_t b, struct JBDim p)
@@ -35,7 +32,7 @@ static void locator_report(const uint8_t b, struct JBDim p)
 	if (MD.elr_pixels)
 		p = jbxvt_get_pixel_size(p);
 	// DECLRP
-	cprintf("\033[%d;%d;%d;%d;0&w", b * 2, 7, p.y, p.x);
+	dprintf(jbxvt.com.fd, "\033[%d;%d;%d;%d;0&w", b * 2, 7, p.y, p.x);
 }
 void jbxvt_track_mouse(uint8_t b, uint32_t state, struct JBDim p,
 	const uint8_t flags)
@@ -71,17 +68,8 @@ void jbxvt_track_mouse(uint8_t b, uint32_t state, struct JBDim p,
 	b += 32;
 	p.x += 32;
 	p.y += 32;
-	char * format = m->mouse_urxvt ? "\033[%d;%d;%dM" : "\033[M%c%c%c";
-#ifndef DEBUG
-	cprintf(format, b, p.x, p.y);
-#else//DEBUG
-	char * out = strdup(cprintf(format, b, p.x, p.y));
-	for(char * i = out; *i; ++i)
-		if (*i == '\033')
-			*i = 'E';
-	LOG("track_mouse: %s\n", out);
-	free(out);
-#endif//!DEBUG
+	dprintf(jbxvt.com.fd, m->mouse_urxvt ? "\033[%d;%d;%dM"
+		: "\033[M%c%c%c", b, p.x, p.y);
 }
 #define TRK(it) jbxvt.mode.mouse_##it
 bool jbxvt_get_mouse_motion_tracked(void)

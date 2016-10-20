@@ -10,6 +10,7 @@
 #include "selection.h"
 #include "selex.h"
 #include "selreq.h"
+#include <stdio.h>
 xcb_atom_t jbxvt_get_wm_del_win(void)
 {
 	static long unsigned int a;
@@ -136,7 +137,7 @@ static void handle_button_press(struct JBXVTEvent * restrict xe)
 static void handle_focus(const bool in)
 {
 	if (jbxvt.mode.mouse_focus_evt)
-		cprintf("\033[%c]", in ? 'I' : 'O');
+		dprintf(jbxvt.com.fd, "\033[%c]", in ? 'I' : 'O');
 }
 // Handle X11 event described by xe
 bool jbxvt_handle_xevents(struct JBXVTEvent * xe)

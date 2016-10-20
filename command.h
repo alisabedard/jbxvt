@@ -10,13 +10,6 @@ enum CommandLimits {
 	COM_PUSH_MAX =	20,		// max # chars to put back to input queue
 	MP_INTERVAL =	500		// multi-press interval in ms
 };
-//JBXVTEvent * pop_xevent(void);
-#ifndef __clang__
-char * cprintf(char *, ...)
-	__attribute__((format(gnu_printf, 1, 2)));
-#else//__clang__
-char * cprintf(char *, ...);
-#endif//!__clang__
 /*  Initialise the command connection.  This should be called after the X
  *  server connection is established.  */
 void jbxvt_init_command_module(char ** restrict argv);
