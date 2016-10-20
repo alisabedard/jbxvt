@@ -1,5 +1,5 @@
-#ifndef HANDLE_SGR_H
-#define HANDLE_SGR_H
+#ifndef JBXVT_HANDLE_SGR_H
+#define JBXVT_HANDLE_SGR_H
 #include "Token.h"
 void jbxvt_handle_sgr(struct Token * restrict token)
 	__attribute__((hot));
@@ -40,4 +40,4 @@ enum JBXVTRenderFlag {
 	JBXVT_RS_FG_INDEX = (1<<30),
 	JBXVT_RS_BG_INDEX = (1<<31),
 };
-#endif//!HANDLE_SGR_H
+#endif//!JBXVT_HANDLE_SGR_H
