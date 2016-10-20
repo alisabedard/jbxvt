@@ -1,6 +1,6 @@
 // Copyright 2016, Jeffrey E. Bedard
-#ifndef JBXVTEVENT_H
-#define JBXVTEVENT_H
+#ifndef JBXVT_JBXVTEVENT_H
+#define JBXVT_JBXVTEVENT_H
 #include <stdint.h>
 #include <xcb/xproto.h>
 /*  Small X event structure used to queue interesting X events
@@ -23,4 +23,4 @@ struct JBXVTEvent {
 	};
 	uint8_t type;
 };
-#endif//!JBXVTEVENT_H
+#endif//!JBXVT_JBXVTEVENT_H
