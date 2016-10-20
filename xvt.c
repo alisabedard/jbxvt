@@ -75,7 +75,7 @@ static void handle_tk_char(const uint8_t tk_char)
 		jbxvt_tab();
 		break;
 	case 005: // ENQ
-		dprintf(jbxvt.com.fd, "\033[?6c"); // VT102
+		dprintf(jbxvt.com.fd, "%s?6c", jbxvt_get_csi()); // VT102
 		break;
 	case '\016': // change to char set G1
 		LOG("charset G1");
@@ -122,8 +122,8 @@ static void handle_dsr(const int16_t arg)
 	switch (arg) {
 	case 6 : {
 		const struct JBDim c = jbxvt.scr.current->cursor;
-		dprintf(jbxvt.com.fd, jbxvt.mode.s8c1t ? "\233%d;%dR"
-			: "\033[%d;%dR", c.y + 1, c.x + 1);
+		dprintf(jbxvt.com.fd, "%s%d;%dR", jbxvt_get_csi(),
+			c.y + 1, c.x + 1);
 		break;
 	}
 	case 7 :
@@ -136,8 +136,7 @@ static void handle_dsr(const int16_t arg)
 	case 25: // Test UDK status?
 	case 26: // Test keyboard status
 	default:
-		dprintf(jbxvt.com.fd, jbxvt.mode.s8c1t
-			? "\2330n" : "\033[0n");
+		dprintf(jbxvt.com.fd, "%s0n", jbxvt_get_csi());
 	}
 }
 static void reqtparam(const uint8_t t)
@@ -146,9 +145,8 @@ static void reqtparam(const uint8_t t)
 	const uint8_t sol = t + 2, par = 1, nbits = 1,
 	      flags = 0, clkmul = 1;
 	const uint16_t xspeed = 88, rspeed = 88;
-	dprintf(jbxvt.com.fd, "%s[%d;%d;%d;%d;%d;%d;%dx",
-		jbxvt.mode.s8c1t ? "\233" : "\033[", sol, par, nbits,
-		xspeed, rspeed, clkmul, flags);
+	dprintf(jbxvt.com.fd, "%s[%d;%d;%d;%d;%d;%d;%dx", jbxvt_get_csi(),
+		sol, par, nbits, xspeed, rspeed, clkmul, flags);
 	LOG("ESC[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
 		xspeed, rspeed, clkmul, flags);
 }
@@ -211,7 +209,7 @@ void jbxvt_parse_token(void)
 	CASE(JBXVT_TOKEN_DA) // fall through
 	CASE(JBXVT_TOKEN_ID)
 		LOG("JBXVT_TOKEN_ID");
-		dprintf(jbxvt.com.fd, "\033[?6c"); // VT102
+		dprintf(jbxvt.com.fd, "%s?6c", jbxvt_get_csi()); // VT102
 		break;
 	CASE(JBXVT_TOKEN_DCH) // fall through
 	CASE(JBXVT_TOKEN_ECH)
@@ -248,11 +246,6 @@ void jbxvt_parse_token(void)
 			jbxvt.mode.elr_once = false;
 		}
 		jbxvt.mode.elr_pixels = t[1] == 1;
-		break;
-	CASE(JBXVT_TOKEN_ENTRY) // keyboard focus changed.  fall through:
-	CASE(JBXVT_TOKEN_FOCUS) // mouse focus changed
-		if (jbxvt.mode.mouse_focus_evt)
-			dprintf(jbxvt.com.fd, "\033[%c]", t[0] ? 'I' : 'O');
 		break;
 	CASE(JBXVT_TOKEN_EOF)
 		exit(0);
