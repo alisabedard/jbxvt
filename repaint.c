@@ -22,7 +22,7 @@ static void paint_rvec_text(uint8_t * str, uint32_t * rvec,
 		for (i = 0, r = *rvec; i < len && rvec[i] == r; ++i)
 			;
 		// draw
-		paint_rstyle_text(str, r, i, p, dwl);
+		jbxvt_paint(str, r, i, p, dwl);
 		// advance to next block
 		p.x += i * FSZ.width;
 		str += i;
@@ -39,7 +39,7 @@ static int_fast32_t repaint_generic(struct JBDim p, uint_fast16_t len,
 	if (rend)
 		paint_rvec_text(str, rend + 0, len, p, dwl);
 	else
-		paint_rstyle_text(str, 0, len, p, dwl);
+		jbxvt_paint(str, 0, len, p, dwl);
 	p.x += len * FSZ.width;
 	const uint16_t width = (CSZ.width + 1 - len) * FSZ.width;
 	xcb_clear_area(jbxvt.X.xcb, false, jbxvt.X.win.vt, p.x, p.y,

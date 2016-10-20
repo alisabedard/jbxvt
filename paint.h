@@ -12,6 +12,6 @@ pixel_t jbxvt_set_fg(const char * color);
 // NULL value resets colors to stored value
 pixel_t jbxvt_set_bg(const char * color);
 //  Paint the text using the rendition value at the screen position.
-void paint_rstyle_text(uint8_t * restrict str, uint32_t rstyle,
+void jbxvt_paint(uint8_t * restrict str, uint32_t rstyle,
 	uint16_t len, struct JBDim p, const bool dwl);
 #endif//!JBXVT_PAINT_H

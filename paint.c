@@ -109,7 +109,7 @@ static void set_reverse_video(void)
 
 }
 //  Paint the text using the rendition value at the screen position.
-void paint_rstyle_text(uint8_t * restrict str, uint32_t rstyle,
+void jbxvt_paint(uint8_t * restrict str, uint32_t rstyle,
 	uint16_t len, struct JBDim p, const bool dwl)
 {
 	if (!str || len < 1) // prevent segfault
