@@ -107,7 +107,7 @@ static int_fast16_t output_to_command(void)
 	errno = 0;
 	const ssize_t count = write(c->fd, c->send_nxt,
 		c->send_count);
-	jb_assert(count != -1, "Cannot write to command");
+	jb_require(count != -1, "Cannot write to command");
 	c->send_count -= count;
 	c->send_nxt += count;
 	return count;

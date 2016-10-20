@@ -69,12 +69,12 @@ static void write_utmpx(const pid_t comm_pid, char * tty_name)
 static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
 {
 	const fd_t mfd = posix_openpt(O_RDWR);
-	jb_assert(mfd >= 0, "Could not open ptty");
-	jb_assert(grantpt(mfd) != -1,
+	jb_require(mfd >= 0, "Could not open ptty");
+	jb_require(grantpt(mfd) != -1,
 		"Could not change mode and owner of slave ptty");
-	jb_assert(unlockpt(mfd) != -1, "Could not unlock slave ptty");
+	jb_require(unlockpt(mfd) != -1, "Could not unlock slave ptty");
 	char *ttynam = ptsname(mfd);
-	jb_assert(ttynam, "Could not get tty name");
+	jb_require(ttynam, "Could not get tty name");
 	*pslave = jb_open(ttynam, O_RDWR);
 	*pmaster = mfd;
 	return ttynam;
@@ -107,7 +107,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
 #else//NETBSD || OPENBSD
 	const pid_t pgid = getsid(getpid());
 #endif//!NETBSD && !OPENBSD
-	jb_assert(pgid >= 0, "Could not open session");
+	jb_require(pgid >= 0, "Could not open session");
 	/*  Having started a new session, we need to establish
 	 *  a controlling teletype for it.  On some systems
 	 *  this can be done with an ioctl but on others
@@ -195,7 +195,7 @@ static fd_t run_command(char ** argv)
 	// +1 to allow for X fd
 	jbxvt.com.width = ptyfd + 1;
 	attach_signals();
-	jb_assert((jbxvt.com.pid = fork()) >= 0, "Could not start session");
+	jb_require((jbxvt.com.pid = fork()) >= 0, "Could not start session");
 	if (jbxvt.com.pid == 0)
 		child(argv, ttyfd);
 #ifdef POSIX_UTMPX
@@ -219,7 +219,7 @@ void jbxvt_init_command_module(char ** restrict argv)
 	jbxvt_get_wm_del_win();
 	jbxvt.com.xfd = xcb_get_file_descriptor(jbxvt.X.xcb);
 	jbxvt.com.fd = run_command(argv);
-	jb_assert(jbxvt.com.fd >= 0, "Could not start session");
+	jb_require(jbxvt.com.fd >= 0, "Could not start session");
 	static uint8_t buf[COM_BUF_SIZE], stack[COM_PUSH_MAX];
 	init_container(&jbxvt.com.buf, buf);
 	init_container(&jbxvt.com.stack, stack);

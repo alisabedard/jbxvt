@@ -27,7 +27,7 @@ static xcb_font_t get_font(const char * name)
 			return jbxvt.X.f.normal;
 		c = xcb_open_font_checked(jbxvt.X.xcb, f, sizeof(FALLBACK_FONT),
 			FALLBACK_FONT);
-		jb_assert(!jb_xcb_cookie_has_error(jbxvt.X.xcb, c),
+		jb_require(!jb_xcb_cookie_has_error(jbxvt.X.xcb, c),
 			"Could not load any fonts");
 	}
 	return f;
@@ -69,7 +69,7 @@ static void open_cursor(const xcb_font_t f)
 	errno = 0;
 	xcb_void_cookie_t v = xcb_open_font_checked(jbxvt.X.xcb, f, 6,
 		"cursor");
-	jb_assert(!jb_xcb_cookie_has_error(jbxvt.X.xcb, v),
+	jb_require(!jb_xcb_cookie_has_error(jbxvt.X.xcb, v),
 		"Cannot open cursor font");
 }
 static xcb_cursor_t get_cursor(const uint16_t id,
