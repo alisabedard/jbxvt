@@ -32,8 +32,8 @@ static struct JBDim get_geometry(void)
 	ret.h -= ret.h % jbxvt.X.f.size.h;
 	return ret;
 }
-/*  Called after a possible window size change.  If the window size has changed
- *  initiate a redraw by resizing the subwindows. */
+/*  Called after a possible window size change.  If the window size
+    has changed initiate a redraw by resizing the subwindows. */
 void jbxvt_resize_window(void)
 {
 	struct JBDim p = get_geometry();
