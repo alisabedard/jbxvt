@@ -146,7 +146,8 @@ static void reqtparam(const uint8_t t)
 	const uint8_t sol = t + 2, par = 1, nbits = 1,
 	      flags = 0, clkmul = 1;
 	const uint16_t xspeed = 88, rspeed = 88;
-	dprintf(jbxvt.com.fd, "\033[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
+	dprintf(jbxvt.com.fd, "%s[%d;%d;%d;%d;%d;%d;%dx",
+		jbxvt.mode.s8c1t ? "\233" : "\033[", sol, par, nbits,
 		xspeed, rspeed, clkmul, flags);
 	LOG("ESC[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
 		xspeed, rspeed, clkmul, flags);
