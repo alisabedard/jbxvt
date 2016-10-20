@@ -82,7 +82,7 @@ void jbxvt_save_selection(void)
 #undef SE
 	uint16_t total = 1;
 	uint8_t * str = malloc(total);
-	if (jb_check(str != NULL, "Cannot allocate selection buffer"))
+	if (!str) // Cannot perform selection, malloc failed.
 		return;
 	handle_screensel(&str, &total, se);
 	if (!total)
