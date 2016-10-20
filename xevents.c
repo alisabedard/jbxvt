@@ -1,16 +1,15 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "xevents.h"
+#include "cmdtok.h"
 #include "command.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "mouse.h"
 #include "sbar.h"
 #include "scr_move.h"
-#include "selection.h"
 #include "selex.h"
 #include "selreq.h"
-#include <stdio.h>
 xcb_atom_t jbxvt_get_wm_del_win(void)
 {
 	static long unsigned int a;
@@ -137,7 +136,7 @@ static void handle_button_press(struct JBXVTEvent * restrict xe)
 static void handle_focus(const bool in)
 {
 	if (jbxvt.mode.mouse_focus_evt)
-		dprintf(jbxvt.com.fd, "\033[%c]", in ? 'I' : 'O');
+		dprintf(jbxvt.com.fd, "%s%c]", jbxvt_get_csi(), in ? 'I' : 'O');
 }
 // Handle X11 event described by xe
 bool jbxvt_handle_xevents(struct JBXVTEvent * xe)
