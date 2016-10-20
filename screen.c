@@ -26,7 +26,7 @@ struct JBDim jbxvt_get_pixel_size(struct JBDim p)
 #undef FSZ
 /*  Fix the coordinates so that they are within the screen
     and do not lie within empty space.  */
-void fix_rc(struct JBDim * restrict rc)
+void jbxvt_fix_coordinates(struct JBDim * restrict rc)
 {
 #define CSZ jbxvt.scr.chars
 	if(!CSZ.h || !CSZ.w)

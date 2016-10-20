@@ -14,7 +14,7 @@ struct JBDim jbxvt_get_pixel_size(struct JBDim c)
 	__attribute__((pure));
 /*  Fix the coordinates so that they are within the screen
     and do not lie within empty space.  */
-void fix_rc(struct JBDim * restrict rc);
+void jbxvt_fix_coordinates(struct JBDim * restrict rc);
 //  Change the rendition style.
 void jbxvt_style(const uint32_t style);
 //  Change between the alternate and the main screens

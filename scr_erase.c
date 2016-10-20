@@ -44,7 +44,7 @@ static int16_t get_col(const uint8_t mode)
 }
 static int16_t get_sz(const uint8_t mode)
 {
-	fix_rc(&CUR);
+	jbxvt_fix_coordinates(&CUR);
 	switch(mode) {
 	case JBXVT_ERASE_ALL:
 		return jbxvt.scr.chars.w;

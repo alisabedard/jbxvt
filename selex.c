@@ -19,7 +19,7 @@ void jbxvt_extend_selection(const struct JBDim point, const bool drag)
 		return; // no selection
 	// Save current end points:
 	struct JBDim s[] = {SE[0], SE[1], jbxvt_get_char_size(point)};
-	fix_rc(s + 2);
+	jbxvt_fix_coordinates(s + 2);
 	if (drag)
 		  handle_drag(s[2]);
 	jbxvt_change_selection(s, s + 1);
