@@ -139,7 +139,7 @@ static void handle_focus(const bool in)
 		cprintf("\033[%c]", in ? 'I' : 'O');
 }
 // Handle X11 event described by xe
-bool jbwm_handle_xevents(struct JBXVTEvent * xe)
+bool jbxvt_handle_xevents(struct JBXVTEvent * xe)
 {
 	switch (xe->type &~0x80) { // Ordered numerically:
 	case 0: // Unimplemented, undefined, no event
