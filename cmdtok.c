@@ -192,7 +192,7 @@ static void handle_string_char(int_fast16_t c, struct Token * restrict tk)
 		c = jbxvt_pop_char(GET_INPUT_ONLY);
 		if (c == '\n')
 			++nl;
-	} while (is_string_char(c) && i < TKS_MAX);
+	} while (is_string_char(c) && i < JBXVT_TOKEN_MAX_LENGTH);
 	tk->nlcount = nl;
 	tk->length = i;
 	s[i] = 0; // terminating NULL

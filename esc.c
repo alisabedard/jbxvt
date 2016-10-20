@@ -48,7 +48,7 @@ void jbxvt_end_cs(int_fast16_t c, struct Token * restrict tk)
 	tk->nargs = 1;
 	c = jbxvt_pop_char(0);
 	register uint_fast16_t i = 0;
-	while ((c & 0177) >= ' ' && i < TKS_MAX) {
+	while ((c & 0177) >= ' ' && i < JBXVT_TOKEN_MAX_LENGTH) {
 		if (c >= ' ')
 			  tk->string[i++] = c;
 		c = jbxvt_pop_char(0);
