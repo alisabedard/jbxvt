@@ -22,7 +22,7 @@
 #include "window.h"
 #include <stdio.h>
 #include <string.h>
-//#define DEBUG_TOKENS
+#define DEBUG_TOKENS
 #ifdef DEBUG_TOKENS
 #define TLOG(...) LOG(__VA_ARGS__)
 #else
@@ -118,10 +118,12 @@ static void decstbm(struct Token * restrict token)
 }
 static void handle_dsr(const int16_t arg)
 {
+	LOG("handle_dsr(%d)", arg);
 	switch (arg) {
 	case 6 : {
 		const struct JBDim c = jbxvt.scr.current->cursor;
-		dprintf(jbxvt.com.fd, "\033[%d;%dR", c.y + 1, c.x + 1);
+		dprintf(jbxvt.com.fd, jbxvt.mode.s8c1t ? "\233%d;%dR"
+			: "\033[%d;%dR", c.y + 1, c.x + 1);
 		break;
 	}
 	case 7 :
