@@ -8,7 +8,7 @@
 #include "xevents.h"
 #include <fcntl.h>
 #include <signal.h>
-#include <stdarg.h>
+#include <stdlib.h>
 #include <sys/wait.h>
 #include <termios.h>
 #include <unistd.h>
