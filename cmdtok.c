@@ -196,7 +196,7 @@ static void handle_string_char(int_fast16_t c, struct Token * restrict tk)
 	tk->nlcount = nl;
 	tk->length = i;
 	s[i] = 0; // terminating NULL
-	tk->type = TK_STRING;
+	tk->type = JBXVT_TOKEN_STRING;
 	if (c != INPUT_BUFFER_EMPTY)
 		  put_com_char(c);
 }
@@ -234,13 +234,13 @@ static void handle_unicode(int_fast16_t c)
 static void default_token(struct Token * restrict tk, int_fast16_t c)
 {
 	switch(c) { // handle 8-bit controls
-	case TK_CSI: case TK_DCS: case TK_EPA: case TK_HTS:
-	case TK_ID: case TK_IND: case TK_NEL: case TK_OSC: case TK_PM:
-	case TK_RI: case TK_SOS: case TK_SPA: case TK_SS2: case TK_SS3:
-	case TK_ST:
+	case JBXVT_TOKEN_CSI: case JBXVT_TOKEN_DCS: case JBXVT_TOKEN_EPA: case JBXVT_TOKEN_HTS:
+	case JBXVT_TOKEN_ID: case JBXVT_TOKEN_IND: case JBXVT_TOKEN_NEL: case JBXVT_TOKEN_OSC: case JBXVT_TOKEN_PM:
+	case JBXVT_TOKEN_RI: case JBXVT_TOKEN_SOS: case JBXVT_TOKEN_SPA: case JBXVT_TOKEN_SS2: case JBXVT_TOKEN_SS3:
+	case JBXVT_TOKEN_ST:
 		tk->type = c;
 		break;
-	case TK_APC: // Retrieve and skip sequence
+	case JBXVT_TOKEN_APC: // Retrieve and skip sequence
 		c = get_com_char(c);
 		c = get_com_char(c);
 		LOG("0x9f0x%x", (unsigned int)c);
@@ -259,7 +259,7 @@ static void default_token(struct Token * restrict tk, int_fast16_t c)
 #ifdef CHAR_DEBUG
 			LOG("0x%x", (unsigned int)c);
 #endif//CHAR_DEBUG
-			tk->type = TK_CHAR;
+			tk->type = JBXVT_TOKEN_CHAR;
 			tk->tk_char = c;
 		}
 	}
@@ -274,20 +274,20 @@ void get_token(struct Token * restrict tk)
 	const int_fast16_t c = get_com_char(GET_XEVENTS_ONLY);
 	switch (c) {
 	case INPUT_BUFFER_EMPTY:
-		tk->type = TK_NULL;
+		tk->type = JBXVT_TOKEN_NULL;
 		break;
 	case EOF:
-		tk->type = TK_EOF;
+		tk->type = JBXVT_TOKEN_EOF;
 		break;
-	case TK_ESC:
+	case JBXVT_TOKEN_ESC:
 		jbxvt_esc(c, tk);
 		break;
-	case TK_CSI: // 8-bit CSI
+	case JBXVT_TOKEN_CSI: // 8-bit CSI
 		// Catch this here, since 7-bit CSI is parsed above.
 		LOG("CC_CSI");
 		jbxvt_csi(c, tk);
 		break;
-	case TK_DCS: // 8-bit DCS
+	case JBXVT_TOKEN_DCS: // 8-bit DCS
 		jbxvt_dcs(tk);
 		break;
 	default:

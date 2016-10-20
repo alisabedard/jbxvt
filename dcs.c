@@ -10,8 +10,8 @@ static void check_st(struct Token * t)
 {
 	assert(t);
 	int_fast16_t c = get_com_char(0);
-	if (c != TK_ST)
-		t->type = TK_NULL;
+	if (c != JBXVT_TOKEN_ST)
+		t->type = JBXVT_TOKEN_NULL;
 }
 void jbxvt_dcs(struct Token * t)
 {
@@ -32,7 +32,7 @@ void jbxvt_dcs(struct Token * t)
 		case '"':
 			c = get_com_char(0); // next
 			switch (c) {
-#define CASE_Q(ch, tk) case ch:t->type=TK_QUERY_##tk;check_st(t);break;
+#define CASE_Q(ch, tk) case ch:t->type=JBXVT_TOKEN_QUERY_##tk;check_st(t);break;
 			CASE_Q('p', SCA);
 			CASE_Q('q', SCL);
 			}
@@ -44,7 +44,7 @@ void jbxvt_dcs(struct Token * t)
 			c = get_com_char(0);
 			if (c != 'q')
 				return;
-			t->type = TK_QUERY_SCUSR;
+			t->type = JBXVT_TOKEN_QUERY_SCUSR;
 			check_st(t);
 			break;
 		}

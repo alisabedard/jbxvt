@@ -103,9 +103,9 @@ static void select_charset(const char c, const uint8_t i)
 static void decstbm(struct Token * restrict token)
 {
 	int32_t * restrict t = token->arg;
-	LOG("TK_STBM args: %d, 0: %d, 1: %d",
+	LOG("JBXVT_TOKEN_STBM args: %d, 0: %d, 1: %d",
 		(int)token->nargs, t[0], t[1]);
-	if (token->private == TK_RESTOREPM) {
+	if (token->private == JBXVT_TOKEN_RESTOREPM) {
 		// Restore private modes.
 		memcpy(&jbxvt.mode, &jbxvt.saved_mode,
 			sizeof(struct JBXVTPrivateModes));
@@ -166,71 +166,71 @@ void jbxvt_parse_token(void)
 #define CASE(L) case L:TLOG(#L);
 // log unimplemented features
 #define FIXME(L) CASE(L);TLOG("\tFIXME: " #L " Unimplemented");break;
-	CASE(TK_ALN) // screen alignment test
+	CASE(JBXVT_TOKEN_ALN) // screen alignment test
 		jbxvt_efill();
 		break;
-	FIXME(TK_APC);
-	CASE(TK_CHA) // cursor CHaracter Absolute column
+	FIXME(JBXVT_TOKEN_APC);
+	CASE(JBXVT_TOKEN_CHA) // cursor CHaracter Absolute column
 		jbxvt_move(t[0] - 1, 0, ROW_RELATIVE);
 		break;
-	case TK_CHAR: // don't log
+	case JBXVT_TOKEN_CHAR: // don't log
 		handle_tk_char(token.tk_char);
 		break;
-	CASE(TK_CHT);
+	CASE(JBXVT_TOKEN_CHT);
 		jbxvt_cht(n);
 		break;
-	CASE(TK_CPL) // cursor previous line
+	CASE(JBXVT_TOKEN_CPL) // cursor previous line
 		n = -n; // fall through
-	CASE(TK_CNL) // cursor next line
-		LOG("TK_CNL");
+	CASE(JBXVT_TOKEN_CNL) // cursor next line
+		LOG("JBXVT_TOKEN_CNL");
 		jbxvt_move(0, n, 0);
 		break;
-	CASE(TK_CUB); // back
+	CASE(JBXVT_TOKEN_CUB); // back
 		jbxvt_move(-n, 0, ROW_RELATIVE | COL_RELATIVE);
 		break;
-	CASE(TK_CUD); // down
+	CASE(JBXVT_TOKEN_CUD); // down
 		jbxvt_move(0, n, ROW_RELATIVE | COL_RELATIVE);
 		break;
-	CASE(TK_CUF); // forward
+	CASE(JBXVT_TOKEN_CUF); // forward
 		jbxvt_move(n, 0, ROW_RELATIVE | COL_RELATIVE);
 		break;
-	CASE(TK_CUP) // fall through
-	CASE(TK_HVP)
+	CASE(JBXVT_TOKEN_CUP) // fall through
+	CASE(JBXVT_TOKEN_HVP)
 		// subtract 1 for 0-based coordinates
 		jbxvt_move((t[1]?t[1]:1) - 1, n - 1, jbxvt.mode.decom ?
 			ROW_RELATIVE | COL_RELATIVE : 0);
 		break;
-	CASE(TK_CUU); // up
+	CASE(JBXVT_TOKEN_CUU); // up
 		jbxvt_move(0, -n, ROW_RELATIVE | COL_RELATIVE);
 		break;
-	CASE(TK_DA) // fall through
-	CASE(TK_ID)
-		LOG("TK_ID");
+	CASE(JBXVT_TOKEN_DA) // fall through
+	CASE(JBXVT_TOKEN_ID)
+		LOG("JBXVT_TOKEN_ID");
 		cprintf("\033[?6c"); // VT102
 		break;
-	CASE(TK_DCH) // fall through
-	CASE(TK_ECH)
+	CASE(JBXVT_TOKEN_DCH) // fall through
+	CASE(JBXVT_TOKEN_ECH)
 		jbxvt_delete_characters(n);
 		break;
-	FIXME(TK_DHLT); // double height line -- top
-	FIXME(TK_DHLB); // double height line -- bottom
-	CASE(TK_DSR) // request for information
+	FIXME(JBXVT_TOKEN_DHLT); // double height line -- top
+	FIXME(JBXVT_TOKEN_DHLB); // double height line -- bottom
+	CASE(JBXVT_TOKEN_DSR) // request for information
 		handle_dsr(t[0]);
 		break;
-	CASE(TK_DWL) // double width line
+	CASE(JBXVT_TOKEN_DWL) // double width line
 		jbxvt_set_double_width_line(true);
 		break;
-	CASE(TK_ED) // erase display
+	CASE(JBXVT_TOKEN_ED) // erase display
 		jbxvt_erase_screen(t[0]); // don't use n
 		break;
-	CASE(TK_EL) // erase line
+	CASE(JBXVT_TOKEN_EL) // erase line
 		jbxvt_erase_line(t[0]); // don't use n
 		break;
-	CASE(TK_ENTGM52)
+	CASE(JBXVT_TOKEN_ENTGM52)
 		jbxvt.mode.charsel = 1;
 		jbxvt.mode.gm52 = true;
 		break;
-	CASE(TK_ELR)
+	CASE(JBXVT_TOKEN_ELR)
 		switch (t[0]) {
 		case 2:
 			jbxvt.mode.elr_once = true;
@@ -244,39 +244,39 @@ void jbxvt_parse_token(void)
 		}
 		jbxvt.mode.elr_pixels = t[1] == 1;
 		break;
-	CASE(TK_ENTRY) // keyboard focus changed.  fall through:
-	CASE(TK_FOCUS) // mouse focus changed
+	CASE(JBXVT_TOKEN_ENTRY) // keyboard focus changed.  fall through:
+	CASE(JBXVT_TOKEN_FOCUS) // mouse focus changed
 		if (jbxvt.mode.mouse_focus_evt)
 			cprintf("\033[%c]", t[0] ? 'I' : 'O');
 		break;
-	CASE(TK_EOF)
+	CASE(JBXVT_TOKEN_EOF)
 		exit(0);
-	FIXME(TK_EPA);
-	CASE(TK_EXTGM52)
+	FIXME(JBXVT_TOKEN_EPA);
+	CASE(JBXVT_TOKEN_EXTGM52)
 		jbxvt.mode.charsel = 0;
 		jbxvt.mode.gm52 = false;
 		break;
-	CASE(TK_HOME)
+	CASE(JBXVT_TOKEN_HOME)
 		jbxvt_set_scroll(0);
 		jbxvt_move(0, 0, 0);
 		break;
-	CASE(TK_HPA) // horizontal position absolute
+	CASE(JBXVT_TOKEN_HPA) // horizontal position absolute
 		jbxvt_move(t[0] - 1, 0, ROW_RELATIVE);
 		break;
-	CASE(TK_HPR) // horizontal position relative
+	CASE(JBXVT_TOKEN_HPR) // horizontal position relative
 		jbxvt_move(t[0] - 1, 0, COL_RELATIVE | ROW_RELATIVE);
 		break;
-	CASE(TK_HTS) // set tab stop at current position
+	CASE(JBXVT_TOKEN_HTS) // set tab stop at current position
 		jbxvt_set_tab(jbxvt.scr.current->cursor.x, true);
 		break;
-	CASE(TK_ICH)
+	CASE(JBXVT_TOKEN_ICH)
 		jbxvt_insert_characters(n);
 		break;
-	CASE(TK_IL) n = -n; // fall through
-	CASE(TK_DL)
+	CASE(JBXVT_TOKEN_IL) n = -n; // fall through
+	CASE(JBXVT_TOKEN_DL)
 		jbxvt_index_from(n, jbxvt.scr.current->cursor.y);
 		break;
-	CASE(TK_LL)
+	CASE(JBXVT_TOKEN_LL)
 		switch (t[1]) {
 		case ' ': // SCUSR
 			LOG("SCUSR");
@@ -289,106 +289,106 @@ void jbxvt_parse_token(void)
 			LOG("LL -- unimplemented");
 		}
 		break;
-	CASE(TK_NEL) // move to first position on next line down.
+	CASE(JBXVT_TOKEN_NEL) // move to first position on next line down.
 		jbxvt_move(0, jbxvt.scr.current->cursor.y + 1, 0);
 		break;
-	FIXME(TK_OSC);
-	CASE(TK_PAM)
+	FIXME(JBXVT_TOKEN_OSC);
+	CASE(JBXVT_TOKEN_PAM)
 		jbxvt_set_keys(true, false);
 		break;
-	CASE(TK_PM)
+	CASE(JBXVT_TOKEN_PM)
 		jbxvt.scr.current->decpm = true;
 		break;
-	CASE(TK_PNM)
+	CASE(JBXVT_TOKEN_PNM)
 		jbxvt_set_keys(false, false);
 		break;
-	CASE(TK_RC)
+	CASE(JBXVT_TOKEN_RC)
 		jbxvt_restore_cursor();
 		break;
-	CASE(TK_REQTPARAM)
+	CASE(JBXVT_TOKEN_REQTPARAM)
 		reqtparam(t[0]);
 		break;
-	CASE(TK_RI) // Reverse index
+	CASE(JBXVT_TOKEN_RI) // Reverse index
 		n = -n; // fall through
-	CASE(TK_IND) // Index (same as \n)
+	CASE(JBXVT_TOKEN_IND) // Index (same as \n)
 		jbxvt_index_from(n, jbxvt.scr.current->margin.t);
 		break;
-	CASE(TK_S7C1T) // 7-bit controls
+	CASE(JBXVT_TOKEN_S7C1T) // 7-bit controls
 		jbxvt.mode.s8c1t = false;
 		break;
-	CASE(TK_S8C1T) // 8-bit controls
+	CASE(JBXVT_TOKEN_S8C1T) // 8-bit controls
 		jbxvt.mode.s8c1t = true;
 		break;
-	CASE(TK_SAVEPM) // Save private modes
+	CASE(JBXVT_TOKEN_SAVEPM) // Save private modes
 		memcpy(&jbxvt.saved_mode, &jbxvt.mode,
 			sizeof(struct JBXVTPrivateModes));
 		break;
-	CASE(TK_SBSWITCH)
+	CASE(JBXVT_TOKEN_SBSWITCH)
 		jbxvt_toggle_scrollbar();
 		break;
-	CASE(TK_SBGOTO)
+	CASE(JBXVT_TOKEN_SBGOTO)
 		/*  Move the display so that line represented by scrollbar value
 		    is at the top of the screen.  */
 		jbxvt_scroll_to(t[0]);
 		break;
-	CASE(TK_SC)
+	CASE(JBXVT_TOKEN_SC)
 		jbxvt_save_cursor();
 		break;
-	CASE(TK_SCS0) //  SCS G0
+	CASE(JBXVT_TOKEN_SCS0) //  SCS G0
 		select_charset(t[0], 0);
 		break;
-	CASE(TK_SCS1) //  SCS G1
+	CASE(JBXVT_TOKEN_SCS1) //  SCS G1
 		select_charset(t[0], 1);
 		break;
-	CASE(TK_SD) // scroll down n lines
+	CASE(JBXVT_TOKEN_SD) // scroll down n lines
 		t[0] = - t[0]; // fall through
-	CASE(TK_SU) // scroll up n lines;
-		LOG("TK_SU");
+	CASE(JBXVT_TOKEN_SU) // scroll up n lines;
+		LOG("JBXVT_TOKEN_SU");
 		scroll(jbxvt.scr.current->margin.top,
 			jbxvt.scr.current->margin.bot, t[0]);
 		break;
-	CASE(TK_SELINSRT)
+	CASE(JBXVT_TOKEN_SELINSRT)
 		jbxvt_request_selection(t[0]);
 		break;
-	FIXME(TK_SPA);
-	FIXME(TK_SS2);
-	FIXME(TK_SS3);
-	case TK_STRING: // don't log
+	FIXME(JBXVT_TOKEN_SPA);
+	FIXME(JBXVT_TOKEN_SS2);
+	FIXME(JBXVT_TOKEN_SS3);
+	case JBXVT_TOKEN_STRING: // don't log
 		jbxvt_string(token.string, token.length,
 			token.nlcount);
 		break;
-	CASE(TK_TXTPAR)	// change title or icon name
+	CASE(JBXVT_TOKEN_TXTPAR)	// change title or icon name
 		handle_txtpar(&token);
 		break;
-	CASE(TK_SET) // fall through
-	CASE(TK_RESET)
+	CASE(JBXVT_TOKEN_SET) // fall through
+	CASE(JBXVT_TOKEN_RESET)
 		jbxvt_dec_reset(&token);
 		break;
-	CASE(TK_SGR)
+	CASE(JBXVT_TOKEN_SGR)
 		jbxvt_handle_sgr(&token);
 		break;
-	FIXME(TK_SOS); // start of string
-	CASE(TK_ST)
+	FIXME(JBXVT_TOKEN_SOS); // start of string
+	CASE(JBXVT_TOKEN_ST)
 		jbxvt.scr.current->decpm = false;
 		break;
-	CASE(TK_STBM) // set top and bottom margins.
+	CASE(JBXVT_TOKEN_STBM) // set top and bottom margins.
 		decstbm(&token);
 		break;
-	CASE(TK_SWL) // single width line
+	CASE(JBXVT_TOKEN_SWL) // single width line
 		jbxvt_set_double_width_line(false);
 		break;
-	CASE(TK_TBC) // Tabulation clear
+	CASE(JBXVT_TOKEN_TBC) // Tabulation clear
 		tbc(t[0]);
 		break;
-	CASE(TK_VPA) // vertical position absolute
+	CASE(JBXVT_TOKEN_VPA) // vertical position absolute
 		jbxvt_move(0, t[0] - 1, COL_RELATIVE);
 		break;
-	CASE(TK_VPR) // vertical position relative
+	CASE(JBXVT_TOKEN_VPR) // vertical position relative
 		jbxvt_move(0, t[0] - 1, COL_RELATIVE|ROW_RELATIVE);
 		break;
 	default:
 #ifdef DEBUG
-		if(token.type) { // Ignore TK_NULL
+		if(token.type) { // Ignore JBXVT_TOKEN_NULL
 			LOG("Unhandled token: %d (0x%x)",
 				token.type, token.type);
 			// Exit now so we can implement it!
