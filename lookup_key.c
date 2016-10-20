@@ -26,7 +26,7 @@ static struct { // key modes
 #define K_PU K_N(5)
 #define K_PD K_N(6)
 //  Table of function key mappings
-static struct KeyMaps func_key_table[] = {
+static struct JBXVTKeyMaps func_key_table[] = {
 	{K_F(1),	{KS_TYPE_APPKEY,'P'},	{KS_TYPE_XTERM,11}},
 	{K_F(2),	{KS_TYPE_APPKEY,'Q'},	{KS_TYPE_XTERM,12}},
 	{K_F(3),	{KS_TYPE_APPKEY,'R'},	{KS_TYPE_XTERM,13}},
@@ -46,7 +46,7 @@ static struct KeyMaps func_key_table[] = {
 	{}
 };
 //  PC keys and VT100 keypad function keys
-static struct KeyMaps other_key_table[]={
+static struct JBXVTKeyMaps other_key_table[]={
 	// regular:
 	{ K_N(2), {KS_TYPE_NONAPP,'A'},{KS_TYPE_APPKEY,'A'}}, // up
 	{ K_N(4), {KS_TYPE_NONAPP,'B'},{KS_TYPE_APPKEY,'B'}}, // down
@@ -69,7 +69,7 @@ static struct KeyMaps other_key_table[]={
 };
 #define KP_N(n) K_C(0xb0 | n)
 //  VT100 numeric keypad keys
-static struct KeyMaps kp_key_table[]={
+static struct JBXVTKeyMaps kp_key_table[]={
 	{ KP_N(0),	{KS_TYPE_CHAR,'0'},	{KS_TYPE_APPKEY,'p'}},
 	{ KP_N(1),	{KS_TYPE_CHAR,'1'},	{KS_TYPE_APPKEY,'q'}},
 	{ KP_N(2),	{KS_TYPE_CHAR,'2'},	{KS_TYPE_APPKEY,'r'}},
@@ -100,7 +100,7 @@ struct Format {
 	uint8_t key;
 	const uint8_t * value;
 };
-static char * get_format(const enum KSType type)
+static char * get_format(const enum KeySymType type)
 {
 	switch(type) {
 	case KS_TYPE_XTERM:
@@ -114,13 +114,13 @@ static char * get_format(const enum KSType type)
 	}
 }
 //  Look up function key keycode
-static uint8_t * get_keycode_value(struct KeyMaps * restrict keymaptable,
+static uint8_t * get_keycode_value(struct JBXVTKeyMaps * restrict keymaptable,
 	xcb_keysym_t keysym, uint8_t * buf, const int use_alternate)
 {
-	for (struct KeyMaps * km = keymaptable; km->km_keysym; ++km) {
+	for (struct JBXVTKeyMaps * km = keymaptable; km->km_keysym; ++km) {
 		if (km->km_keysym != keysym)
 			  continue;
-		struct KeyStrings * ks = use_alternate
+		struct JBXVTKeyStrings * ks = use_alternate
 			? &km->km_alt : &km->km_normal;
 		snprintf((char *)buf, KBUFSIZE, get_format(ks->ks_type),
 			ks->ks_value);
