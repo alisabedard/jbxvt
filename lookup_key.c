@@ -1,7 +1,4 @@
-/*  Copyright 2016, Jeffrey E. Bedard
-    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "lookup_key.h"
-#include "cmdtok.h"
 #include "command.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
@@ -103,20 +100,15 @@ struct Format {
 	uint8_t key;
 	const uint8_t * value;
 };
-static char * get_format(const enum JBXVTKeySymType type)
+static char * get_format(const enum KeySymType type)
 {
-#define FORMAT_SZ 7
-#define CSI_SZ 2
-	static char buf[FORMAT_SZ]; // static to not loose scope
-	strncpy(buf, jbxvt_get_csi(), CSI_SZ); // CSI, 7 or 8 bit format
 	switch(type) {
 	case KS_TYPE_XTERM:
-		return strncat(buf, "%d~", 3);
-		break;
+		return "\033[%d~";
 	case KS_TYPE_APPKEY:
 		return "\033O%c";
 	case KS_TYPE_NONAPP:
-		return strncat(buf, "%c", 2);
+		return "\033[%c";
 	default:
 		return "%c";
 	}
@@ -212,7 +204,7 @@ uint8_t * jbxvt_lookup_key(void * restrict ev, int_fast16_t * restrict pcount)
 		 for shift-pageup/dn scrolling and future features.  */
 		if (ke->state == XCB_MOD_MASK_SHIFT && *pcount > 2) {
 			LOG("Handling shift combination...");
-			switch (s[jbxvt.mode.s8c1t ? 1 : 2]) {
+			switch (s[2]) {
 			case '5':
 				LOG("KEY scroll down");
 				jbxvt_set_scroll(jbxvt.scr.offset + 10);

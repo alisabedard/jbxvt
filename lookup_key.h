@@ -15,7 +15,7 @@ struct JBXVTKeyStrings {
 };
 /*  Different values for ks_type which determine how the value is used to
  *  generate the string.  */
-enum JBXVTKeySymType {
+enum KeySymType {
 	KS_TYPE_NONE,		// No output
 	KS_TYPE_CHAR,           // as printf("%c",ks_value)
 	KS_TYPE_XTERM,          // as printf("\033[%d",ks_value)
