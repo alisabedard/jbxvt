@@ -1,4 +1,7 @@
+/*  Copyright 2016, Jeffrey E. Bedard
+    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "lookup_key.h"
+#include "cmdtok.h"
 #include "command.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
@@ -102,13 +105,18 @@ struct Format {
 };
 static char * get_format(const enum KeySymType type)
 {
+#define FORMAT_SZ 7
+#define CSI_SZ 2
+	static char buf[FORMAT_SZ]; // static to not loose scope
+	strncpy(buf, jbxvt_get_csi(), CSI_SZ); // CSI, 7 or 8 bit format
 	switch(type) {
 	case KS_TYPE_XTERM:
-		return "\033[%d~";
+		return strncat(buf, "%d~", 3);
+		break;
 	case KS_TYPE_APPKEY:
 		return "\033O%c";
 	case KS_TYPE_NONAPP:
-		return "\033[%c";
+		return strncat(buf, "%c", 2);
 	default:
 		return "%c";
 	}
