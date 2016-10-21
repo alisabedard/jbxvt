@@ -103,7 +103,7 @@ struct Format {
 	uint8_t key;
 	const uint8_t * value;
 };
-static char * get_format(const enum KeySymType type)
+static char * get_format(const enum JBXVTKeySymType type)
 {
 #define FORMAT_SZ 7
 #define CSI_SZ 2
