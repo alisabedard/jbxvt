@@ -4,10 +4,10 @@
 #define JBXVT_CONFIG_H
 #define JBXVT_VERSION "0.6" // Overall release number of the current version
 #define FALLBACK_FONT "fixed"
+
 #define JBXVT_FONT "-*-terminus-medium-r-*-*-14-*-*-*-*-*-iso10646-*"
 #define JBXVT_BOLD_FONT "-*-terminus-bold-r-*-*-14-*-*-*-*-*-iso10646-*"
-//#define JBXVT_ITALIC_FONT "-*-terminus-bold-r-*-*-14-*-*-*-*-*-iso10646-*"
-#define JBXVT_ITALIC_FONT "-*-fixed-*-o-*-*-13-*-*-*-*-*-*-*-*"
+#define JBXVT_ITALIC_FONT "-bitstream-charter-medium-i-*-*-14-*-*-*-*-*-*-*"
 #define JBXVT_ENV_TERM "xterm-256color" // TERM env var to set
 #define JBXVT_FG "white"
 #define JBXVT_BG "black"
