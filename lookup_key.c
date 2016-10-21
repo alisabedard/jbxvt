@@ -212,7 +212,7 @@ uint8_t * jbxvt_lookup_key(void * restrict ev, int_fast16_t * restrict pcount)
 		 for shift-pageup/dn scrolling and future features.  */
 		if (ke->state == XCB_MOD_MASK_SHIFT && *pcount > 2) {
 			LOG("Handling shift combination...");
-			switch (s[2]) {
+			switch (s[jbxvt.mode.s8c1t ? 1 : 2]) {
 			case '5':
 				LOG("KEY scroll down");
 				jbxvt_set_scroll(jbxvt.scr.offset + 10);
