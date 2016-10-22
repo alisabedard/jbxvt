@@ -21,7 +21,7 @@ static int16_t decom(struct JBDim * restrict c)
 }
 // Ensure cursor coordinates are valid per screen and decom mode
 // Returns new cursor y value
-int16_t reset_row_col(void)
+int16_t jbxvt_check_cursor_position(void)
 {
 	struct JBDim * c = &jbxvt.scr.current->cursor;
 	JB_LIMIT(c->x, jbxvt.scr.chars.w - 1, 0);
@@ -44,9 +44,9 @@ void jbxvt_move(const int16_t x, const int16_t y, const uint8_t relative)
 	struct JBDim c = jbxvt.scr.current->cursor;
 	jbxvt.scr.current->cursor = c
 		= (struct JBDim) { .x = dim(c.x, x, relative
-			& COL_RELATIVE),
-		.y = dim(c.y, y, relative & ROW_RELATIVE)};
-	c.y = reset_row_col();
+			& JBXVT_COLUMN_RELATIVE),
+		.y = dim(c.y, y, relative & JBXVT_ROW_RELAATIVE)};
+	c.y = jbxvt_check_cursor_position();
 	jbxvt_check_selection(c.y, c.y);
 	jbxvt_draw_cursor(); // draw
 }

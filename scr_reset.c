@@ -80,7 +80,7 @@ void jbxvt_reset(void)
 	c.h = JB_MIN(c.h, JBXVT_MAX_ROWS);
 	jbxvt_set_tty_size(c);
 	jbxvt.scr.chars = c;
-	reset_row_col();
+	jbxvt_check_cursor_position();
 	--c.h; --c.w;
 	jbxvt_draw_scrollbar();
 	decscnm();

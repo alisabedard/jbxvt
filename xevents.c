@@ -49,7 +49,7 @@ static void sbop(struct JBXVTEvent * restrict xe, const bool up)
 		jbxvt_set_scroll(jbxvt.scr.offset + (up ? -xe->box.y
 			: xe->box.y) / jbxvt.X.font.size.h);
 	else
-		jbxvt_move(0, up ? -1 : 1, ROW_RELATIVE | COL_RELATIVE);
+		jbxvt_move(0, up ? -1 : 1, JBXVT_ROW_RELAATIVE | JBXVT_COLUMN_RELATIVE);
 }
 static void handle_button_release(struct JBXVTEvent * restrict xe)
 {

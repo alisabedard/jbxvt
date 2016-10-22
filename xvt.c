@@ -66,10 +66,10 @@ static void handle_tk_char(const uint8_t tk_char)
 		form_feed();
 		break;
 	case '\r': // handle carriage return
-		jbxvt_move(0,0,ROW_RELATIVE);
+		jbxvt_move(0,0,JBXVT_ROW_RELAATIVE);
 		break;
 	case '\b': // handle a backspace
-		jbxvt_move(-1,0,COL_RELATIVE|ROW_RELATIVE);
+		jbxvt_move(-1,0,JBXVT_COLUMN_RELATIVE|JBXVT_ROW_RELAATIVE);
 		break;
 	case '\t': // handle tab
 		jbxvt_tab();
@@ -174,7 +174,7 @@ void jbxvt_parse_token(void)
 		break;
 	FIXME(JBXVT_TOKEN_APC);
 	CASE(JBXVT_TOKEN_CHA) // cursor CHaracter Absolute column
-		jbxvt_move(t[0] - 1, 0, ROW_RELATIVE);
+		jbxvt_move(t[0] - 1, 0, JBXVT_ROW_RELAATIVE);
 		break;
 	case JBXVT_TOKEN_CHAR: // don't log
 		handle_tk_char(token.tk_char);
@@ -189,22 +189,22 @@ void jbxvt_parse_token(void)
 		jbxvt_move(0, n, 0);
 		break;
 	CASE(JBXVT_TOKEN_CUB); // back
-		jbxvt_move(-n, 0, ROW_RELATIVE | COL_RELATIVE);
+		jbxvt_move(-n, 0, JBXVT_ROW_RELAATIVE | JBXVT_COLUMN_RELATIVE);
 		break;
 	CASE(JBXVT_TOKEN_CUD); // down
-		jbxvt_move(0, n, ROW_RELATIVE | COL_RELATIVE);
+		jbxvt_move(0, n, JBXVT_ROW_RELAATIVE | JBXVT_COLUMN_RELATIVE);
 		break;
 	CASE(JBXVT_TOKEN_CUF); // forward
-		jbxvt_move(n, 0, ROW_RELATIVE | COL_RELATIVE);
+		jbxvt_move(n, 0, JBXVT_ROW_RELAATIVE | JBXVT_COLUMN_RELATIVE);
 		break;
 	CASE(JBXVT_TOKEN_CUP) // fall through
 	CASE(JBXVT_TOKEN_HVP)
 		// subtract 1 for 0-based coordinates
 		jbxvt_move((t[1]?t[1]:1) - 1, n - 1, jbxvt.mode.decom ?
-			ROW_RELATIVE | COL_RELATIVE : 0);
+			JBXVT_ROW_RELAATIVE | JBXVT_COLUMN_RELATIVE : 0);
 		break;
 	CASE(JBXVT_TOKEN_CUU); // up
-		jbxvt_move(0, -n, ROW_RELATIVE | COL_RELATIVE);
+		jbxvt_move(0, -n, JBXVT_ROW_RELAATIVE | JBXVT_COLUMN_RELATIVE);
 		break;
 	CASE(JBXVT_TOKEN_DA) // fall through
 	CASE(JBXVT_TOKEN_ID)
@@ -259,10 +259,10 @@ void jbxvt_parse_token(void)
 		jbxvt_move(0, 0, 0);
 		break;
 	CASE(JBXVT_TOKEN_HPA) // horizontal position absolute
-		jbxvt_move(t[0] - 1, 0, ROW_RELATIVE);
+		jbxvt_move(t[0] - 1, 0, JBXVT_ROW_RELAATIVE);
 		break;
 	CASE(JBXVT_TOKEN_HPR) // horizontal position relative
-		jbxvt_move(t[0] - 1, 0, COL_RELATIVE | ROW_RELATIVE);
+		jbxvt_move(t[0] - 1, 0, JBXVT_COLUMN_RELATIVE | JBXVT_ROW_RELAATIVE);
 		break;
 	CASE(JBXVT_TOKEN_HTS) // set tab stop at current position
 		jbxvt_set_tab(jbxvt.scr.current->cursor.x, true);
@@ -379,10 +379,10 @@ void jbxvt_parse_token(void)
 		tbc(t[0]);
 		break;
 	CASE(JBXVT_TOKEN_VPA) // vertical position absolute
-		jbxvt_move(0, t[0] - 1, COL_RELATIVE);
+		jbxvt_move(0, t[0] - 1, JBXVT_COLUMN_RELATIVE);
 		break;
 	CASE(JBXVT_TOKEN_VPR) // vertical position relative
-		jbxvt_move(0, t[0] - 1, COL_RELATIVE|ROW_RELATIVE);
+		jbxvt_move(0, t[0] - 1, JBXVT_COLUMN_RELATIVE|JBXVT_ROW_RELAATIVE);
 		break;
 	default:
 #ifdef DEBUG
