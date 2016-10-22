@@ -84,11 +84,12 @@ enum JBXVTTokenType {
 	JBXVT_TOKEN_HPA = '`', // horizontal position absolute
 	JBXVT_TOKEN_HVP = 'f', // horizontal and vertical position
 	JBXVT_TOKEN_TBC = 'g', // tab clear
+	JBXVT_TOKEN_SET = 'h', // set mode
+	JBXVT_TOKEN_MC = 'i', // media copy
+	JBXVT_TOKEN_SGR = 'm', // set graphics rendition
 	JBXVT_TOKEN_SU = 'S', // Scroll Up # lines
 	JBXVT_TOKEN_SD = 'T', // Scroll Down # lines
-	JBXVT_TOKEN_SET = 'h', // set mode
 	JBXVT_TOKEN_RESET = 'l', // reset mode
-	JBXVT_TOKEN_SGR = 'm', // set graphics rendition
 	JBXVT_TOKEN_DSR = 'n', // report status or position
 	JBXVT_TOKEN_LL = 'q', /* Load leds, set cursor style,
 			   or select character protection attribute.  */

@@ -130,6 +130,20 @@ void jbxvt_dec_reset(struct Token * restrict token)
 			LOG("Unhandled: %d\n", token->arg[0]);
 #endif//DEBUG
 		}
-	} else if (!token->private && token->arg[0] == 4)
+	} else
+		switch (token->arg[0]) {
+		case 2:
+			LOG("FIXME AM: keyboard action mode");
+			break;
+		case 4: // IRM: insert/replace mode
+			MODE(insert);
+			break;
+		case 12:
+			LOG("SRM: send/receive mode");
+			break;
+		case 20:
+			LOG("LNM linefeed/newline mode");
+			break;
+		}
 		MODE(insert);
 }

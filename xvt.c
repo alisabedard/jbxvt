@@ -300,6 +300,45 @@ void jbxvt_parse_token(void)
 			LOG("LL -- unimplemented");
 		}
 		break;
+	case JBXVT_TOKEN_MC:
+		LOG("JBXVT_TOKEN_MC");
+		if (token.private != '?')
+			switch (t[0]) {
+			case 4:
+				LOG("turn off printer controller mode");
+				break;
+			case 5:
+				LOG("turn on printer controller mode");
+				break;
+			case 10:
+				LOG("html screen dump");
+				break;
+			case 11:
+				LOG("svg screen dump");
+				break;
+			case 0:
+			default:
+				LOG("print screen");
+			}
+		else
+			switch (t[0]) {
+			case 1:
+				LOG("print line containing cursor");
+				break;
+			case 4:
+				LOG("turn off autoprint mode");
+				break;
+			case 5:
+				LOG("turn on autoprint mode");
+				break;
+			case 10:
+				LOG("print composed display");
+				break;
+			case 11:
+				LOG("print all pages");
+				break;
+			}
+		break;
 	case JBXVT_TOKEN_NEL: // next line
 		LOG("JBXVT_TOKEN_NEL");
 		// move to first position on next line down.
