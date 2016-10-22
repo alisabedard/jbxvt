@@ -13,7 +13,7 @@ OBJS+=cursor.o display.o repaint.o save_selection.o scr_move.o
 OBJS+=sbar.o scr_erase.o selex.o edit.o command.o selection.o dcs.o
 OBJS+=selreq.o scr_reset.o scr_string.o screen.o scroll.o selend.o 
 OBJS+=xevents.o window.o xvt.o handle_sgr.o dec_reset.o show_selection.o
-OBJS+=mouse.o double.o
+OBJS+=mouse.o double.o dsr.o
 $(exe): $(OBJS) color_index.h
 	cd libjb && $(MAKE) CC="${CC}" CFLAGS="${CFLAGS}"
 	$(CC) -o $(exe) $(OBJS) $(CFLAGS) $(LIBS)

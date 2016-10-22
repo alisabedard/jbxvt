@@ -6,6 +6,7 @@
 #include "cursor.h"
 #include "dec_reset.h"
 #include "double.h"
+#include "dsr.h"
 #include "handle_sgr.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
@@ -116,29 +117,6 @@ static void decstbm(struct Token * restrict token)
 	jbxvt.scr.current->margin = (struct JBDim){.t = rst ? 0 : t[0] - 1,
 		.b = (rst ? jbxvt.scr.chars.h : t[1]) - 1};
 }
-static void handle_dsr(const int16_t arg)
-{
-	LOG("handle_dsr(%d)", arg);
-	switch (arg) {
-	case 6 : {
-		const struct JBDim c = jbxvt.scr.current->cursor;
-		dprintf(jbxvt.com.fd, "%s%d;%dR", jbxvt_get_csi(),
-			c.y + 1, c.x + 1);
-		break;
-	}
-	case 7 :
-		//  Send the name of the display to the command.
-		dprintf(jbxvt.com.fd, "%s\r", getenv("DISPLAY"));
-		break;
-	case 5: // command from host requesting status
-		// 0 is response for 'Ready, no malfunctions'
-	case 15: // Test printer status
-	case 25: // Test UDK status?
-	case 26: // Test keyboard status
-	default:
-		dprintf(jbxvt.com.fd, "%s0n", jbxvt_get_csi());
-	}
-}
 static void reqtparam(const uint8_t t)
 {
 	// Send REPTPARAM
@@ -218,7 +196,7 @@ void jbxvt_parse_token(void)
 	FIXME(JBXVT_TOKEN_DHLT); // double height line -- top
 	FIXME(JBXVT_TOKEN_DHLB); // double height line -- bottom
 	CASE(JBXVT_TOKEN_DSR) // request for information
-		handle_dsr(t[0]);
+		jbxvt_handle_dsr(t[0]);
 		break;
 	CASE(JBXVT_TOKEN_DWL) // double width line
 		jbxvt_set_double_width_line(true);
