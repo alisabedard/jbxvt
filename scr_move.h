@@ -8,6 +8,7 @@ enum ScrMoveFlags {
 /*  Move the cursor to a new position.  The relative argument is a pair of
  *  flags that specify relative rather than absolute motion.  */
 void jbxvt_move(const int16_t x, const int16_t y, const uint8_t relative);
-// Sanitize cursor position, implement DECOM
-void reset_row_col(void);
+// Ensure cursor coordinates are valid per screen and decom mode
+// Returns new cursor y value
+int16_t reset_row_col(void);
 #endif//!SCR_MOVE_H
