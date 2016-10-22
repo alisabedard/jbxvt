@@ -3,12 +3,13 @@
 #include "dec_reset.h"
 #include "cursor.h"
 #include "jbxvt.h"
+#include "libjb/log.h"
 #include "lookup_key.h"
 #include "sbar.h"
 #include "scr_move.h"
 #include "scr_reset.h"
 #include "screen.h"
-//#define DEBUG_RESET
+#define DEBUG_RESET
 #ifndef DEBUG_RESET
 #undef LOG
 #define LOG(...)
@@ -60,6 +61,10 @@ void jbxvt_dec_reset(struct Token * restrict token)
 		case 18:
 			LOG("DECPFF");
 			MODE(decpff);
+			break;
+		case 20: // line feed / new line mode
+			LOG("DECLNM");
+			MODE(declnm);
 			break;
 		case 25: // DECTCEM -- hide cursor
 			jbxvt_set_scroll(0);
