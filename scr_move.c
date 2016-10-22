@@ -5,14 +5,20 @@
 #include "libjb/util.h"
 #include "sbar.h"
 // Sanitize cursor position, implement DECOM
+static void decom(struct JBDim * restrict c)
+{
+	// Implement DECOM, DEC Origin Mode, limits
+	if (jbxvt.mode.decom) {
+		const struct JBDim m = jbxvt.scr.current->margin;
+		JB_LIMIT(c->y, m.top, m.bottom);
+	}
+}
 void reset_row_col(void)
 {
 	struct JBDim * c = &jbxvt.scr.current->cursor;
 	JB_LIMIT(c->x, jbxvt.scr.chars.w - 1, 0);
 	JB_LIMIT(c->y, jbxvt.scr.chars.h - 1, 0);
-	// Implement DECOM, DEC Origin Mode, limits
-	if (jbxvt.mode.decom)
-		JB_LIMIT(c->y, jbxvt.scr.current->margin.t, jbxvt.scr.current->margin.b);
+	decom(c);
 }
 static void set_dimension(int16_t * restrict cursor,
 	const int16_t delta, const bool relative)
