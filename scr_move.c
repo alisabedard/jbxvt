@@ -47,7 +47,7 @@ void jbxvt_move(const int16_t x, const int16_t y, const uint8_t relative)
 			& JBXVT_COLUMN_RELATIVE),
 		.y = dim(c.y, y, relative & JBXVT_ROW_RELAATIVE)};
 	c.y = jbxvt_check_cursor_position();
-	jbxvt_check_selection(c.y, c.y);
 	jbxvt.scr.current->wrap_next = false;
+	jbxvt_check_selection(c.y, c.y);
 	jbxvt_draw_cursor(); // draw
 }
