@@ -96,7 +96,7 @@ void jbxvt_set_keys(const bool mode_high, const bool is_cursor)
 {
 	*(is_cursor ? &self.cursor : &self.keypad) = mode_high;
 }
-static char * get_format(const enum KeySymType type)
+static char * get_format(const enum JBXVTKeySymType type)
 {
 	switch(type) {
 	case KS_TYPE_XTERM:

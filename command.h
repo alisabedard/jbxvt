@@ -4,7 +4,7 @@
 #define COMMAND_H
 #include "libjb/size.h"
 #include <stdint.h>
-enum CommandLimits {
+enum JBXVTCommandLimits {
 	KBUFSIZE =	8,		// size of keyboard mapping buffer
 	COM_BUF_SIZE =	UINT8_MAX,	// size of command read buffer
 	COM_PUSH_MAX =	20,		// max # chars to put back to input queue
