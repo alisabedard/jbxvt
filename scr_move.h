@@ -1,7 +1,7 @@
 #ifndef JBXVT_SCR_MOVE_H
 #define JBXVT_SCR_MOVE_H
 #include <stdint.h>
-enum ScrMoveFlags {
+enum JBXVTMoveFlags {
 	JBXVT_COLUMN_RELATIVE = 1, // column movement is relative
 	JBXVT_ROW_RELAATIVE = 2  // row movement is relative
 };
