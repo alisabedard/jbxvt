@@ -60,6 +60,8 @@ void jbxvt_change_screen(const bool mode_high)
 	    <scroll up>
 	*/
 	jbxvt_reset();
+	jbxvt_move(0,0,0);
+	jbxvt_erase_screen(JBXVT_ERASE_AFTER);
 }
 //  Change the rendition style.
 void jbxvt_style(const uint32_t style)
