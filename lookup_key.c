@@ -96,10 +96,6 @@ void jbxvt_set_keys(const bool mode_high, const bool is_cursor)
 {
 	*(is_cursor ? &self.cursor : &self.keypad) = mode_high;
 }
-struct Format {
-	uint8_t key;
-	const uint8_t * value;
-};
 static char * get_format(const enum KeySymType type)
 {
 	switch(type) {
