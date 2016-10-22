@@ -63,8 +63,8 @@ void jbxvt_dec_reset(struct Token * restrict token)
 			MODE(decpff);
 			break;
 		case 20: // line feed / new line mode
-			LOG("DECLNM");
-			MODE(declnm);
+			LOG("LNM");
+			MODE(lnm);
 			break;
 		case 25: // DECTCEM -- hide cursor
 			jbxvt_set_scroll(0);

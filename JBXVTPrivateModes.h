@@ -10,7 +10,6 @@ struct JBXVTPrivateModes {
 	bool decanm:1;		// DECANM -- ANSI/VT52
 	bool decawm:1;		// DECAWM auto-wrap flag
 	bool deccolm:1;		// 132 column mode
-	bool declnm:1;		// new line / line feed mode
 	bool decom:1;		// origin mode flag
 	bool decpff:1;		// DECPFF: print form feed
 	bool decsclm:1;		// DECSCLM: slow scroll mode
@@ -18,6 +17,7 @@ struct JBXVTPrivateModes {
 	bool dectcem:1;		// DECTCEM -- hide cursor
 	bool gm52:1;		// VT52 graphics mode
 	bool insert:1;		// insert mode flag
+	bool lnm:1;		// new line / line feed mode
 	bool mouse_x10:1;	// ptr coord on button press
 	bool mouse_vt200:1;	// ptr press+release
 	bool mouse_vt200hl:1;	// highlight tracking
