@@ -140,43 +140,25 @@ void jbxvt_set_tty_size(const struct JBDim sz)
 		"Could not set ioctl TIOCSWINSZ");
 }
 #endif//etc
-static void exit_handler(void)
+static void cleanup(void)
 {
-	raise(SIGHUP);
-}
-// Put all clean-up tasks here:
-static void signal_handler(int sig)
-{
-	LOG("Caught signal %d", sig);
-#if defined(NETBSD) || defined(OPENBSD)
-	if (sig == 20) {
-		static bool caught_stop;
-		if (!caught_stop) {
-			caught_stop = true;
-			return;
-		}
-	}
-#endif
+	LOG("cleanup(), pid: %d, command pid: %d", getpid(), jbxvt.com.pid);
 #ifdef USE_UTEMPTER
-	// Remove utmp entry:
 	utempter_remove_added_record();
 #endif//USE_UTEMPTER
-	// Ensure child process terminates:
-	kill(jbxvt.com.pid, SIGHUP); // hang up on it
-	// Exit without tripping atexit handler:
-	_Exit(sig);
+	// Make sure child process exits
+	kill(jbxvt.com.pid, SIGHUP);
 }
 static void attach_signals(void)
 {
-	// Attach relevant signals:
-	signal(SIGHUP, &signal_handler);
-	signal(SIGINT, &signal_handler);
-	signal(SIGPIPE, &signal_handler);
-	signal(SIGTERM, &signal_handler);
-	signal(SIGCHLD, &signal_handler);
-	/* Catch all other exit calls and convert to a signal
-	   so that cleanup may be done.  */
-	atexit(&exit_handler);
+	// Attach relevant signals to ensure cleanup() executed:
+	signal(SIGHUP, &exit);
+	signal(SIGINT, &exit);
+	signal(SIGPIPE, &exit);
+	signal(SIGTERM, &exit);
+	signal(SIGCHLD, &exit);
+	// Attach exit handler cleanup().
+	atexit(cleanup);
 }
 /*  Run the command in a subprocess and return a file descriptor for the
  *  master end of the pseudo-teletype pair with the command talking to
