@@ -11,67 +11,43 @@
 #include "scr_reset.h"
 #include "selection.h"
 #include <string.h>
-//#define DEBUG_ERASE
+#define DEBUG_ERASE
 #ifndef DEBUG_ERASE
 #undef LOG
 #define LOG(...)
-#endif
-static void zero(const uint16_t line, const size_t sz, uint16_t col)
+#endif//DEBUG_ERASE
+#define FSZ jbxvt.X.f.size
+static void del(uint16_t col, uint16_t width)
 {
-	//col = MIN(col, jbxvt.scr.chars.width); // restrict bounds
-	if (col > jbxvt.scr.chars.width) // outside screen area
-		return; // do nothing
-	if (col + sz > JBXVT_MAX_COLS)
-		return; // don't overflow
-	// check memory
-	memset(jbxvt.scr.current->text[line] + col, 0, sz);
-	memset(jbxvt.scr.current->rend[line] + col, 0, sz << 2);
-	jbxvt.scr.current->wrap[line] = false;
-	jbxvt.scr.current->dwl[line] = false;
-}
-#define CUR jbxvt.scr.current->cursor
-#define FSZ jbxvt.X.font.size
-static void erase_range(xcb_rectangle_t * restrict h,
-	const size_t sz, const uint16_t col)
-{
-	h->x = col * FSZ.w;
-	h->width = sz * FSZ.w;
-	zero(CUR.y, sz, col);
-}
-static int16_t get_col(const uint8_t mode)
-{
-	return mode == 0 ? CUR.x : 0;
-}
-static int16_t get_sz(const uint8_t mode)
-{
-	jbxvt_fix_coordinates(&CUR);
-	switch(mode) {
-	case JBXVT_ERASE_ALL:
-		return jbxvt.scr.chars.w;
-	case JBXVT_ERASE_BEFORE: // from start (col 0 to current cursor column)
-		return CUR.x;
-	default: // JBXVT_ERASE_AFTER
-		if (jbxvt.scr.chars.w < CUR.x) // invalid/negative range
-			return 0; // erase nothing
-		else // valid range
-			// to end (cursor column to screen width)
-			return jbxvt.scr.chars.w - CUR.x;
-	}
+	const uint16_t y = jbxvt.scr.current->cursor.y;
+	struct JBXVTScreen * s = jbxvt.scr.current;
+	if (col + width > jbxvt.scr.chars.width) // keep in screen
+		width = jbxvt.scr.chars.width - col;
+	memset(s->text[y] + col, 0, width);
+	memset(s->rend[y] + col, 0, width << 2);
+	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, col * FSZ.w,
+		y * FSZ.h, width * FSZ.w, FSZ.h);
+	xcb_flush(jbxvt.X.xcb);
+	s->wrap[y] = false;
+	s->dwl[y] = false;
 }
 //  erase part or the whole of a line
 void jbxvt_erase_line(const int8_t mode)
 {
-	LOG("jbxvt_erase_line(%d)", mode);
 	jbxvt_set_scroll(0);
-	struct JBDim c = jbxvt.scr.current->cursor;
-	xcb_rectangle_t g = { .y = c.y * FSZ.h };
-	erase_range(&g, get_sz(mode), get_col(mode));
-	jbxvt_check_selection(c.y, c.y);
-	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt,
-		g.x, g.y, g.width, FSZ.h);
-	jbxvt.scr.current->wrap_next = false;
+	const uint16_t x = jbxvt.scr.current->cursor.x;
+	switch (mode) {
+	case JBXVT_ERASE_ALL:
+		del(0, jbxvt.scr.chars.width);
+		break;
+	case JBXVT_ERASE_BEFORE:
+		del(0, x);
+		break;
+	case JBXVT_ERASE_AFTER:
+	default:
+		del(x, jbxvt.scr.chars.width - x);
+	}
 	jbxvt_draw_cursor();
-	xcb_flush(jbxvt.X.xcb);
 }
 //  erase part or the whole of the screen
 void jbxvt_erase_screen(const int8_t mode)
