@@ -228,10 +228,6 @@ void jbxvt_parse_token(void)
 		LOG("JBXVT_TOKEN_EL");
 		jbxvt_erase_line(t[0]); // don't use n
 		break;
-	case JBXVT_TOKEN_ENTGM52: // vt52 graphics mode
-		LOG("JBXVT_TOKEN_ENTGM52");
-		jbxvt.mode.gm52 = true;
-		break;
 	case JBXVT_TOKEN_ELR: // locator report
 		LOG("JBXVT_TOKEN_ELR");
 		switch (t[0]) {
@@ -246,6 +242,10 @@ void jbxvt_parse_token(void)
 			jbxvt.mode.elr_once = false;
 		}
 		jbxvt.mode.elr_pixels = t[1] == 1;
+		break;
+	case JBXVT_TOKEN_ENTGM52: // vt52 graphics mode
+		LOG("JBXVT_TOKEN_ENTGM52");
+		jbxvt.mode.gm52 = true;
 		break;
 	case JBXVT_TOKEN_EOF:
 		LOG("JBXVT_TOKEN_EOF");
