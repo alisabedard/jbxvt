@@ -145,5 +145,4 @@ void jbxvt_dec_reset(struct Token * restrict token)
 			LOG("LNM linefeed/newline mode");
 			break;
 		}
-		MODE(insert);
 }
