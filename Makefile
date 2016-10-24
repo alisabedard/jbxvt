@@ -24,14 +24,11 @@ color_index.h: color_index.txt
 	$(AWK) -f convert_colors.awk color_index.txt > color_index.h
 bindest=$(DESTDIR)$(PREFIX)/bin
 docdest=$(DESTDIR)$(PREFIX)/share/man/man1
-licensedest=${DESTDIR}${PREFIX}/share/licenses/${exe}
 install:
-	install -d ${bindest}
-	install -d ${docdest}
-	install -d ${licensedest}
-	install ${exe} ${bindest}
-	install ${exe}.1 ${docdest}
-	install -D -m644 LICENSE ${licensedest}
+	install -d $(bindest)
+	install $(exe) $(bindest)
+	install -d $(docdest)
+	install $(exe).1 $(docdest)
 clean:
 	rm -f $(exe) *.o
 	cd libjb && make clean
