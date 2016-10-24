@@ -65,7 +65,8 @@ static void key_press(xcb_generic_event_t * restrict e)
 {
 	int_fast16_t count = 0;
 	uint8_t * s = jbxvt_lookup_key(e, &count);
-	write(jbxvt.com.fd, s, count);
+	jb_require(write(jbxvt.com.fd, s, count) != -1,
+		"Could not write to command");
 }
 static bool handle_xev(void)
 {
