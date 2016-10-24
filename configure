@@ -117,7 +117,7 @@ lib() # 1: name 2: path
 ! lib libjb.so /usr/lib && ! lib libjb.so /usr/local/lib && (
 	echo 'Using bundled libjb'
 	echo 'LDFLAGS+=-Llibjb' >> $CFG
-) 
+)
 cc_err()
 {
 	echo 'Error: Cannot find a suitable compiler.'
