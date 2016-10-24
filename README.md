@@ -39,6 +39,10 @@ Make sure you run the following after checking out jbxvt:
 	git submodule update
 	git config --add --bool fetch.recurseSubmodules true
 
+You may also choose to install libjb on its own before configuring
+and building jbxvt.  In this case, libjb will be loaded
+as a shared library.  Otherwise, the bundled libjb is used statically.
+
 ## Building
 Run ./configure, then make, as usual.  Parallel building on FreeBSD
 and NetBSD requires gmake.  The compiler must support the C11 standard,

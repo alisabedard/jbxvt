@@ -3,7 +3,9 @@
 CFG=config.mk
 DEBUG=false
 UTEMPTER=true
-rm -f "$CFG"
+# reset:
+rm -f "$CFG"; touch "$CFG"
+# parse command line:
 while getopts 'dhu' opt
 do
 	case $opt in
@@ -102,22 +104,6 @@ search() # 1: cmd 2: var
 	echo not found
 	return 0
 }
-lib() # 1: name 2: path
-{
-	path="$2/$1"
-	echo -n "Looking for $1 in $2..."
-	if [ -f "$path" ]; then
-		echo "LDFLAGS+=${path}" >> $CFG
-		echo found
-		return 0
-	fi
-	echo not found
-	return 1
-}
-! lib libjb.so /usr/lib && ! lib libjb.so /usr/local/lib && (
-	echo 'Using bundled libjb'
-	echo 'LDFLAGS+=-Llibjb' >> $CFG
-)
 cc_err()
 {
 	echo 'Error: Cannot find a suitable compiler.'
@@ -157,3 +143,22 @@ if $DEBUG; then
 		fi
 	fi
 fi
+lib() # 1: dir 2: file
+{
+	dir="$1"
+	file="$2"
+	path="$1/${file}"
+	flag=`echo $file | cut -b4- | cut -d. -f1`
+	echo -n "Looking for ${path}... "
+	if [ -f "$path" ]; then
+		echo "LIBS+=-L${dir} -l${flag}" >> $CFG
+		echo found
+		return 0
+	fi
+	echo not found
+	return 1
+}
+! lib /usr/lib libjb.so && ! lib /usr/local/lib libjb.so && (
+	echo 'Using bundled libjb'
+	echo 'include libjb.mk' >> $CFG
+)
