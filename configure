@@ -102,6 +102,22 @@ search() # 1: cmd 2: var
 	echo not found
 	return 0
 }
+lib() # 1: name 2: path
+{
+	path="$2/$1"
+	echo -n "Looking for $1 in $2..."
+	if [ -f "$path" ]; then
+		echo "LDFLAGS+=${path}" >> $CFG
+		echo found
+		return 0
+	fi
+	echo not found
+	return 1
+}
+! lib libjb.so /usr/lib && ! lib libjb.so /usr/local/lib && (
+	echo 'Using bundled libjb'
+	echo 'LDFLAGS+=-Llibjb' >> $CFG
+) 
 cc_err()
 {
 	echo 'Error: Cannot find a suitable compiler.'
