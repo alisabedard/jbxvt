@@ -28,7 +28,7 @@ void jbxvt_show_selection(void)
 	if (jbxvt.sel.type == JBXVT_SEL_NONE
 		|| jbxvt_selcmp(&jbxvt.sel.end[0], &jbxvt.sel.end[1]) == 0)
 		return;
-	struct JBDim p[2];
+	struct JBDim p[2] = {};
 	jbxvt_selend_to_rc(&p->y, &p->x, &jbxvt.sel.end[0]);
 	jbxvt_selend_to_rc(&p[1].y, &p[1].x, &jbxvt.sel.end[1]);
 	struct JBDim r[] = {{}, jbxvt.scr.chars};
