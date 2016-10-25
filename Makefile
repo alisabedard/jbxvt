@@ -30,10 +30,15 @@ install:
 	install -d $(docdest)
 	install $(exe).1 $(docdest)
 clean:
-	rm -f $(exe) *.o
+	rm -f $(exe) *.o *.gcda *.gcno *.gcov
 	cd libjb && make clean
 distclean: clean
-	rm -f config.mk
+	rm -f config.mk gcov.log
+check:
+	tests/rgb
+	tests/sgr
+gcov:
+	gcov -b *.c > gcov.log
 d: # DEBUG build
 	CFLAGS='-DDEBUG -ggdb -O0 -Werror' make -j8
 f: # Optimized build
