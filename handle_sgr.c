@@ -22,7 +22,7 @@ static void sgrc(const uint32_t c, const bool fg)
 static bool rgb_or_index(int32_t arg, bool * restrict either,
 	bool * restrict index, bool * restrict rgb, const bool is_fg)
 {
-	if (!*either)
+	if (JB_LIKELY(!*either))
 		return false;
 	*either = false;
 	const bool i = arg != 2;
