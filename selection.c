@@ -58,6 +58,7 @@ void jbxvt_clear_selection(void)
 void jbxvt_start_selection(struct JBDim p, enum JBXVTSelectionUnit unit)
 {
 	jbxvt_show_selection(); // clear previous
+	jbxvt_clear_selection(); // free previous selection
 	p = jbxvt_get_char_size(p);
 	jbxvt.sel.unit = unit;
 	jbxvt_rc_to_selend(p.y, p.x, &SE[2]);
