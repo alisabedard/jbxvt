@@ -23,7 +23,6 @@ rend BLUE 0 0 $I
 rend GREEN 0 $I 0
 rend RED $I 0 0
 
-exit
 echo 9-bit rgb mode
 echo -n '\23338;2;0;255;0m'
 echo -n '\t'
@@ -32,7 +31,6 @@ echo -n '\23348;2;0;0;255m'
 echo -n 'bg\t'
 echo '\2330m'
 
-exit
 echo rgb mode
 echo -n '\23338;2;225;1;50m'
 echo -n 'fg\t'
@@ -41,7 +39,6 @@ echo -n '\23348;2;1;20;255m'
 echo -n 'bg\t'
 echo '\2330m'
 
-exit
 echo index mode
 echo -n '\23338;5;55m'
 echo -n 'fg\t'

@@ -15,7 +15,7 @@ static void encode_rgb(uint8_t color, uint8_t offset)
 /* c must be uint32_t to allow for shift and OR with rstyle. */
 static void sgrc(const uint32_t c, const bool fg)
 {
-	const uint8_t o = fg ? 7 : 16;
+	const uint8_t o = JB_LIKELY(fg) ? 7 : 16;
 	jbxvt.scr.rstyle &= ~(0777<<o);
 	jbxvt.scr.rstyle |= (fg ? JBXVT_RS_FG_INDEX : JBXVT_RS_BG_INDEX) | c << o;
 }
@@ -26,7 +26,7 @@ static bool rgb_or_index(int32_t arg, bool * restrict either,
 		return false;
 	*either = false;
 	const bool i = arg != 2;
-	*(JB_LIKELY(i)?index:rgb) = true;
+	*(i?index:rgb) = true;
 	jbxvt.scr.rstyle |= JB_LIKELY(i) ? (is_fg ? JBXVT_RS_FG_INDEX
 		: JBXVT_RS_BG_INDEX) : (is_fg ? JBXVT_RS_FG_RGB
 		: JBXVT_RS_BG_RGB);
@@ -56,10 +56,6 @@ static bool handle_color_encoding(const int32_t arg, const bool is_fg,
 #define SGRBG(c) sgrc(c, false)
 void jbxvt_handle_sgr(struct Token * restrict token)
 {
-	if (token->nargs == 0) {
-		jbxvt.scr.rstyle = JBXVT_RS_NONE;
-		return;
-	}
 	bool fg_rgb_or_index = false;
 	bool bg_rgb_or_index = false;
 	bool fg_rgb_mode = false;

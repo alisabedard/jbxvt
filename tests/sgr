@@ -1,4 +1,6 @@
 #!/bin/sh
+echo "\0233m"
+echo "\0233255m"
 chk() {
 	echo "\0233${1}m${1}:${2}\02330m"
 }
@@ -11,5 +13,33 @@ chk 6 unknown
 chk 7 inverse
 chk 8 invisible
 chk 9 crossed_out
-chk 21 doubly-underlined
-
+chk 17 alt_font
+chk 21 doubly_underlined
+chk 23 not_italic
+chk 24 underline_none
+chk 26 reserved
+chk 27 image_positive
+chk 28 not_invisible
+chk 29 not_crossed_out
+chk 30 30
+chk 31 31
+chk 32 32
+chk 33 33
+chk 34 34
+chk 35 35
+chk 36 36
+chk 37 37
+#chk 38 extended_fg
+chk 39 fg_reset
+chk 40 40
+chk 41 41
+chk 42 42
+chk 43 43
+chk 44 44
+chk 45 45
+chk 46 46
+chk 47 47
+#chk 48 extended_bg
+chk 49 bg_reset
+chk 90 90
+chk 100 100
