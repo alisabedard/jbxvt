@@ -10,8 +10,8 @@
 #include "lookup_key.h"
 #include "sbar.h"
 #include "scr_reset.h"
-#include "xevents.h"
 #include "window.h"
+#include "xevents.h"
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
