@@ -118,6 +118,17 @@ static void timer(void)
 		xcb_flush(jbxvt.X.xcb);
 	}
 }
+static void check_fdsets(fd_set * restrict in_fdset,
+	fd_set * restrict out_fdset)
+{
+	if (FD_ISSET(jbxvt.com.fd, out_fdset))
+		output_to_command();
+	else if (!FD_ISSET(jbxvt.com.xfd, in_fdset))
+		timer(); // select timed out
+	else
+		jb_check_x(jbxvt.X.xcb);
+
+}
 __attribute__((nonnull))
 static void poll_io(fd_set * restrict in_fdset)
 {
@@ -131,12 +142,7 @@ static void poll_io(fd_set * restrict in_fdset)
 		&(struct timeval){.tv_usec = 500000}) == -1)
 		exit(1); /* exit is reached in case SHELL or -e
 			    command was not run successfully.  */
-	if (FD_ISSET(jbxvt.com.fd, &out_fdset))
-		output_to_command();
-	else if (!FD_ISSET(jbxvt.com.xfd, in_fdset))
-		timer(); // select timed out
-	else
-		jb_check_x(jbxvt.X.xcb);
+	check_fdsets(in_fdset, &out_fdset);
 }
 static bool get_buffered(int_fast16_t * val, const uint8_t flags)
 {
