@@ -34,6 +34,9 @@ clean:
 	cd libjb && make clean
 distclean: clean
 	rm -f config.mk
+check:
+	tests/rgb
+	tests/sgr
 d: # DEBUG build
 	CFLAGS='-DDEBUG -ggdb -O0 -Werror' make -j8
 f: # Optimized build
