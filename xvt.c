@@ -23,7 +23,7 @@
 #include "window.h"
 #include <stdio.h>
 #include <string.h>
-#define DEBUG_TOKENS
+//#define DEBUG_TOKENS
 #ifdef DEBUG_TOKENS
 #define TLOG(...) LOG(__VA_ARGS__)
 #else
@@ -183,7 +183,7 @@ void jbxvt_parse_token(void)
 		break;
 	case JBXVT_TOKEN_CUP:
 	case JBXVT_TOKEN_HVP:
-		LOG("JBXVT_TOKEN_HVP/JBXVT_TOKEN_CUP");
+		TLOG("JBXVT_TOKEN_HVP/JBXVT_TOKEN_CUP");
 		// subtract 1 for 0-based coordinates
 		jbxvt_move((t[1]?t[1]:1) - 1, n - 1, jbxvt.mode.decom ?
 			JBXVT_ROW_RELAATIVE | JBXVT_COLUMN_RELATIVE : 0);
@@ -369,7 +369,7 @@ void jbxvt_parse_token(void)
 		break;
 	case JBXVT_TOKEN_RESET:
 	case JBXVT_TOKEN_SET:
-		LOG("JBXVT_TOKEN_RESET/JBXVT_TOKEN_SET");
+		TLOG("JBXVT_TOKEN_RESET/JBXVT_TOKEN_SET");
 		jbxvt_dec_reset(&token);
 		break;
 	case JBXVT_TOKEN_RI: // Reverse index
@@ -445,7 +445,7 @@ void jbxvt_parse_token(void)
 		handle_txtpar(&token);
 		break;
 	case JBXVT_TOKEN_SGR:
-		LOG("JBXVT_TOKEN_SGR");
+		TLOG("JBXVT_TOKEN_SGR");
 		jbxvt_handle_sgr(&token);
 		break;
 	case JBXVT_TOKEN_SOS: // start of string
