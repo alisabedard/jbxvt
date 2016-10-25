@@ -19,7 +19,6 @@ enum {INPUT_BUFFER_EMPTY = 0x100};
 //  Flags used to control jbxvt_pop_char();
 enum ComCharFlags {GET_INPUT_ONLY=1, GET_XEVENTS_ONLY=2};
 // Shortcuts
-#define COM jbxvt.com
 #define BUF jbxvt.com.buf
 static void handle_focus(xcb_generic_event_t * restrict ge)
 {
@@ -141,10 +140,10 @@ static void poll_io(fd_set * restrict in_fdset)
 }
 static bool get_buffered(int_fast16_t * val, const uint8_t flags)
 {
-	if (COM.stack.top > COM.stack.data)
-		*val = *--COM.stack.top;
-	else if (COM.buf.next < COM.buf.top)
-		*val = *COM.buf.next++;
+	if (jbxvt.com.stack.top > jbxvt.com.stack.data)
+		*val = *--jbxvt.com.stack.top;
+	else if (jbxvt.com.buf.next < jbxvt.com.buf.top)
+		*val = *jbxvt.com.buf.next++;
 	else if (flags & GET_INPUT_ONLY)
 		*val = INPUT_BUFFER_EMPTY;
 	else
@@ -164,13 +163,12 @@ int_fast16_t jbxvt_pop_char(const uint8_t flags)
 		return ret;
 	xcb_flush(jbxvt.X.xcb);
 	fd_set in;
-input:
-	FD_ZERO(&in);
-	if (handle_xev() && (flags & GET_XEVENTS_ONLY))
-		return INPUT_BUFFER_EMPTY;
-	poll_io(&in);
-	if (!FD_ISSET(jbxvt.com.fd, &in))
-		goto input;
+	do {
+		FD_ZERO(&in);
+		if (handle_xev() && (flags & GET_XEVENTS_ONLY))
+			return INPUT_BUFFER_EMPTY;
+		poll_io(&in);
+	} while (!FD_ISSET(jbxvt.com.fd, &in));
 	const uint8_t l = read(jbxvt.com.fd, BUF.data, COM_BUF_SIZE);
 	if (l < 1)
 		return errno == EWOULDBLOCK ? INPUT_BUFFER_EMPTY : EOF;
