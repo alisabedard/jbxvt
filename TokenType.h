@@ -87,6 +87,7 @@ enum JBXVTTokenType {
 	JBXVT_TOKEN_SET = 'h', // set mode
 	JBXVT_TOKEN_MC = 'i', // media copy
 	JBXVT_TOKEN_SGR = 'm', // set graphics rendition
+	JBXVT_TOKEN_RQM = 'p', // request DEC private mode
 	JBXVT_TOKEN_SU = 'S', // Scroll Up # lines
 	JBXVT_TOKEN_SD = 'T', // Scroll Down # lines
 	JBXVT_TOKEN_RESET = 'l', // reset mode
