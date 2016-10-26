@@ -14,7 +14,7 @@ struct JBXVTPrivateModes {
 	bool decpff:1;		// DECPFF: print form feed
 	bool decsclm:1;		// DECSCLM: slow scroll mode
 	bool decscnm:1;		// DECSCNM: reverse-video mode
-	bool dectcem:1;		// DECTCEM -- hide cursor
+	bool dectcem:1;		// DECTCEM -- show cursor
 	bool gm52:1;		// VT52 graphics mode
 	bool insert:1;		// insert mode flag
 	bool lnm:1;		// new line / line feed mode

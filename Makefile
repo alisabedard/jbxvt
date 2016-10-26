@@ -38,6 +38,7 @@ check:
 	tests/rgb
 	tests/sgr
 	tests/dec_reset
+	reset
 gcov:
 	gcov -b *.c > gcov.log
 d: # DEBUG build

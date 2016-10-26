@@ -379,6 +379,7 @@ void jbxvt_parse_token(void)
 		break;
 	case JBXVT_TOKEN_RIS: // reset to initial state
 		LOG("JBXVT_TOKEN_RIS");
+		jbxvt.mode.dectcem = true;
 		jbxvt_reset();
 		break;
 	case JBXVT_TOKEN_RQM:
