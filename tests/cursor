@@ -3,6 +3,7 @@
 cs()
 {
 	echo "\033[$1 q"
+	echo test
 }
 cs 0
 cs 1
