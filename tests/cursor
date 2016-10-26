@@ -1,0 +1,16 @@
+#!/bin/sh
+# cursor.c tests
+cs()
+{
+	echo "\033[$1 q"
+}
+cs 0
+cs 1
+cs 2
+cs 3
+cs 4
+cs 5
+cs 6
+cs 7
+cs 8
+
