@@ -1,0 +1,14 @@
+#!/bin/sh
+# Unit testing of dec_reset.c
+dec()
+{
+	echo "\033[?$1h"
+	echo "\033[?$1l"
+	echo "\033[$1h"
+	echo "\033[$1l"
+}
+I=0
+while [ $I -lt 3000 ]; do
+	dec $I
+	I=$((I+1))
+done
