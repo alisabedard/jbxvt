@@ -16,6 +16,7 @@
 #include "edit.h"
 #include "scr_erase.h"
 #include "scr_move.h"
+#include "scr_reset.h"
 #include "scr_string.h"
 #include "screen.h"
 #include "scroll.h"
@@ -288,7 +289,9 @@ void jbxvt_parse_token(void)
 		break;
 	case JBXVT_TOKEN_LL:
 		LOG("JBXVT_TOKEN_LL");
+		LOG("t[0]: %d, t[1]: %d", t[0], t[1]);
 		switch (t[1]) {
+		case 0:
 		case ' ': // SCUSR
 			LOG("SCUSR");
 			jbxvt.opt.cursor_attr = t[0];
@@ -375,6 +378,41 @@ void jbxvt_parse_token(void)
 	case JBXVT_TOKEN_RI: // Reverse index
 		LOG("JBXVT_TOKEN_RI");
 		jbxvt_index_from(-n, jbxvt.scr.current->margin.t);
+		break;
+	case JBXVT_TOKEN_RIS: // reset to initial state
+		LOG("JBXVT_TOKEN_RIS");
+		jbxvt.mode.dectcem = true;
+		jbxvt_reset();
+		break;
+	case JBXVT_TOKEN_RQM:
+		LOG("JBXVT_TOKEN_RQM");
+		if (token.private == '?') {
+			LOG("\tRQM Ps: %d", t[0]);
+			dprintf(jbxvt.com.fd, "%s%d;%d$y", jbxvt_get_csi(),
+				t[0], 0); // FIXME:  Return actual valu
+		} else {
+			LOG("\tDECSCL 0: %d, 1: %d", t[0], t[1]);
+			switch (t[0]) {
+			case 62:
+				LOG("\t\tVT200");
+				break;
+			case 63:
+				LOG("\t\tVT300");
+				break;
+			case 0:
+			case 61:
+			default:
+				LOG("\t\tVT100");
+				break;
+			}
+			if (t[1] == 1) {
+				LOG("\t\t7-bit controls");
+				jbxvt.mode.s8c1t = false;
+			} else {
+				LOG("\t\t8-bit controls");
+				jbxvt.mode.s8c1t = true;
+			}
+		}
 		break;
 	case JBXVT_TOKEN_S7C1T: // 7-bit controls
 		LOG("JBXVT_TOKEN_S7C1T");
