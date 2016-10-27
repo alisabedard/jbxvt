@@ -161,7 +161,8 @@ lib() # 1: dir 2: file
 	echo not found
 	return 1
 }
-if $INC_LIBJB || (lib /usr/lib libjb.so && lib /usr/local/lib libjb.so); then
+if $INC_LIBJB || (! lib /usr/lib libjb.so \
+	&& ! lib /usr/local/lib libjb.so); then
 	echo 'Using bundled libjb'
 	echo 'include libjb.mk' >> $CFG
 fi
