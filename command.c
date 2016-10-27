@@ -149,6 +149,14 @@ static void cleanup(void)
 	// Make sure child process exits
 	kill(jbxvt.com.pid, SIGHUP);
 }
+static void sigchld(int sig __attribute__((unused)))
+{
+	static bool called;
+	if (!called)
+		called=true;
+	else
+		exit(0);
+}
 static void attach_signals(void)
 {
 	// Attach relevant signals to ensure cleanup() executed:
@@ -156,7 +164,7 @@ static void attach_signals(void)
 	signal(SIGINT, &exit);
 	signal(SIGPIPE, &exit);
 	signal(SIGTERM, &exit);
-	signal(SIGCHLD, &exit);
+	signal(SIGCHLD, &sigchld);
 	// Attach exit handler cleanup().
 	atexit(cleanup);
 }
