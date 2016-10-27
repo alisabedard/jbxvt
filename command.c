@@ -149,6 +149,7 @@ static void cleanup(void)
 	// Make sure child process exits
 	kill(jbxvt.com.pid, SIGHUP);
 }
+#if defined(NETBSD) || defined(OPENBSD)
 static void sigchld(int sig __attribute__((unused)))
 {
 	static bool called;
@@ -157,6 +158,7 @@ static void sigchld(int sig __attribute__((unused)))
 	else
 		exit(0);
 }
+#endif//NETBSD||OPENBSD
 static void attach_signals(void)
 {
 	// Attach relevant signals to ensure cleanup() executed:
@@ -164,7 +166,11 @@ static void attach_signals(void)
 	signal(SIGINT, &exit);
 	signal(SIGPIPE, &exit);
 	signal(SIGTERM, &exit);
+#if defined(NETBSD) || defined(OPENBSD)
 	signal(SIGCHLD, &sigchld);
+#else//!NETBSD&&!OPENBSD
+	signal(SIGCHLD, &exit);
+#endif//NETBSD||OPENBSD
 	// Attach exit handler cleanup().
 	atexit(cleanup);
 }
