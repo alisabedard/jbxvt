@@ -15,6 +15,10 @@ struct JBDim jbxvt_get_pixel_size(struct JBDim c)
 /*  Fix the coordinates so that they are within the screen
     and do not lie within empty space.  */
 void jbxvt_fix_coordinates(struct JBDim * restrict rc);
+// Get default colormap for the screen
+xcb_colormap_t jbxvt_get_colormap(xcb_connection_t * c);
+// Get the root window of the screen
+xcb_window_t jbxvt_get_root_window(xcb_connection_t * c);
 //  Change the rendition style.
 void jbxvt_style(const uint32_t style);
 //  Change between the alternate and the main screens

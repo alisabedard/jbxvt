@@ -159,9 +159,9 @@ void jbxvt_init_display(char * restrict name)
 {
 	int screen = jbxvt.opt.screen;
 	jbxvt.X.xcb = jb_get_xcb_connection(jbxvt.opt.display, &screen);
-	jbxvt.X.screen = jb_get_xcb_screen(jbxvt.X.xcb);
 	init_jbxvt_colors();
 	setup_fonts();
-	create_window((uint8_t *)name, jbxvt.X.screen->root);
+	create_window((uint8_t *)name,
+		jbxvt_get_root_window(jbxvt.X.xcb));
 	setup_gcs();
 }

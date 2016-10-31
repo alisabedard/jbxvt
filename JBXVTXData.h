@@ -18,7 +18,6 @@ struct JBXVTFontData {
 };
 struct JBXVTXData {
 	xcb_connection_t * xcb;
-	xcb_screen_t * screen;
 	struct JBXVTXWindows win;
 	struct JBXVTXGCs gc;
 	struct JBXVTXPixels color;

@@ -30,7 +30,7 @@ static pixel_t set_x(const char * color, const pixel_t backup,
 	pixel_t (*func)(const pixel_t))
 {
 	return func(color ? jb_get_pixel(jbxvt.X.xcb,
-		jbxvt.X.screen->default_colormap, color) : backup);
+		jbxvt_get_colormap(jbxvt.X.xcb), color) : backup);
 }
 pixel_t jbxvt_set_fg(const char * color)
 {
@@ -50,7 +50,7 @@ static pixel_t rgb_pixel(const uint16_t c)
 	// Convert from 3 bit to 16 bit:
 	r <<= o; g <<= o; b <<= o;
 	const pixel_t p = jb_get_rgb_pixel(jbxvt.X.xcb,
-		jbxvt.X.screen->default_colormap, r, g, b);
+		jbxvt_get_colormap(jbxvt.X.xcb), r, g, b);
 	LOG("byte is 0x%x, r: 0x%x, g: 0x%x, b: 0x%x,"
 		" pixel is 0x%x", c, r, g, b, p);
 	return p;

@@ -14,6 +14,23 @@
 #include <string.h>
 #define FSZ jbxvt.X.font.size
 #define GET_X(op) p.w op##= FSZ.w; p.y op##= FSZ.h; return p;
+static xcb_screen_t * jbxvt_screen;
+static void init(xcb_connection_t * restrict c)
+{
+	jbxvt_screen = jb_get_xcb_screen(c);
+}
+xcb_window_t jbxvt_get_root_window(xcb_connection_t * c)
+{
+	if (!jbxvt_screen)
+		init(c);
+	return jbxvt_screen->root;
+}
+xcb_colormap_t jbxvt_get_colormap(xcb_connection_t * c)
+{
+	if (!jbxvt_screen)
+		init(c);
+	return jbxvt_screen->default_colormap;
+}
 struct JBDim jbxvt_get_char_size(struct JBDim p)
 {
 	GET_X(/);
