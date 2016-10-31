@@ -1,3 +1,4 @@
+// Copyright 2016, Jeffrey E. Bedard
 #include "lookup_key.h"
 #include "command.h"
 #include "jbxvt.h"
@@ -172,9 +173,10 @@ static void apply_state(const uint16_t state, uint8_t * restrict kbuf)
 		break;
 	}
 }
-static xcb_keysym_t get_keysym(xcb_key_press_event_t * ke)
+static xcb_keysym_t get_keysym(xcb_connection_t * restrict c,
+	xcb_key_press_event_t * restrict ke)
 {
-	xcb_key_symbols_t *syms = xcb_key_symbols_alloc(jbxvt.X.xcb);
+	xcb_key_symbols_t *syms = xcb_key_symbols_alloc(c);
 	xcb_keysym_t k = xcb_key_press_lookup_keysym(syms, ke, 2);
 #ifdef KEY_DEBUG
 	LOG("keycode: 0x%x, keysym: 0x%x, state: 0x%x",
@@ -184,11 +186,12 @@ static xcb_keysym_t get_keysym(xcb_key_press_event_t * ke)
 	return k;
 }
 //  Convert the keypress event into a string.
-uint8_t * jbxvt_lookup_key(void * restrict ev, int_fast16_t * restrict pcount)
+uint8_t * jbxvt_lookup_key(xcb_connection_t * restrict xc,
+	void * restrict ev, int_fast16_t * restrict pcount)
 {
 	static uint8_t kbuf[KBUFSIZE];
 	xcb_key_press_event_t * ke = ev;
-	const xcb_keysym_t k = get_keysym(ke);
+	const xcb_keysym_t k = get_keysym(xc, ke);
 	uint8_t * s = get_s(k, (uint8_t *)kbuf);
 	if (s) {
 		*pcount = strlen((const char *)s);

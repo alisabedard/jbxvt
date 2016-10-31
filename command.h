@@ -1,7 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-#ifndef COMMAND_H
-#define COMMAND_H
+#ifndef JBXVT_COMMAND_H
+#define JBXVT_COMMAND_H
 #include "libjb/size.h"
 #include <stdint.h>
 enum JBXVTCommandLimits {
@@ -25,4 +25,4 @@ void jbxvt_set_tty_size(const struct JBDim sz);
 #else//!TIOCSWINSZ
 #define jbxvt_set_tty_size(dim)
 #endif//TIOCSWINSZ
-#endif//!COMMAND_H
+#endif//!JBXVT_COMMAND_H
