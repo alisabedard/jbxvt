@@ -90,7 +90,7 @@ static void draw_text(uint8_t * restrict str, uint16_t len,
 		jbxvt.X.gc.tx, p->x, p->y, (const char *)str);
 	++p->y; // Padding for underline, use underline for italic
 	if (((rstyle & JBXVT_RS_ITALIC)
-		&& (jbxvt.X.f.italic == jbxvt.X.f.normal))
+		&& (jbxvt.X.font.italic == jbxvt.X.font.normal))
 		|| (rstyle & JBXVT_RS_UNDERLINE))
 		draw_underline(len, *p, 0);
 	if (rstyle & JBXVT_RS_DOUBLE_UNDERLINE) {
@@ -98,7 +98,7 @@ static void draw_text(uint8_t * restrict str, uint16_t len,
 		draw_underline(len, *p, 0);
 	}
 	if (rstyle & JBXVT_RS_CROSSED_OUT)
-		draw_underline(len, *p, -(jbxvt.X.f.size.h>>1));
+		draw_underline(len, *p, -(jbxvt.X.font.size.h>>1));
 }
 static void set_reverse_video(void)
 {
@@ -123,11 +123,11 @@ void jbxvt_paint(uint8_t * restrict str, uint32_t rstyle,
 		set_reverse_video();
 		cmod = true;
 	}
-	p.y += jbxvt.X.f.ascent;
+	p.y += jbxvt.X.font.ascent;
 	if (rstyle & JBXVT_RS_BOLD)
-		font(jbxvt.X.f.bold);
+		font(jbxvt.X.font.bold);
 	if (rstyle & JBXVT_RS_ITALIC)
-		font(jbxvt.X.f.italic);
+		font(jbxvt.X.font.italic);
 	// Draw text with background:
 	if (dwl)
 		str = jbxvt_get_double_width_string(str, &len);
@@ -135,7 +135,7 @@ void jbxvt_paint(uint8_t * restrict str, uint32_t rstyle,
 	if (dwl)
 		free(str);
 	if(rstyle & JBXVT_RS_BOLD || rstyle & JBXVT_RS_ITALIC)
-		font(jbxvt.X.f.normal); // restore font
+		font(jbxvt.X.font.normal); // restore font
 	if (cmod) {
 		fg(jbxvt.X.color.fg);
 		bg(jbxvt.X.color.bg);

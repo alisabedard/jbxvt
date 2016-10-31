@@ -19,7 +19,7 @@ static void paint_rvid(struct JBDim start, struct JBDim end,
 			continue;
 		xcb_poly_fill_rectangle(jbxvt.X.xcb, jbxvt.X.win.vt,
 			jbxvt.X.gc.cu, 1, &(xcb_rectangle_t){p1.x, p1.y,
-			p2.x - p1.x, jbxvt.X.f.size.h});
+			p2.x - p1.x, jbxvt.X.font.size.h});
 	}
 }
 // Paint the selection on screen

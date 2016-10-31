@@ -16,7 +16,7 @@
 #undef LOG
 #define LOG(...)
 #endif//DEBUG_ERASE
-#define FSZ jbxvt.X.f.size
+#define FSZ jbxvt.X.font.size
 static void del(uint16_t col, uint16_t width)
 {
 	const uint16_t y = jbxvt.scr.current->cursor.y;

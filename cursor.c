@@ -45,7 +45,7 @@ void jbxvt_draw_cursor(void)
 		jbxvt_repaint(); // prevent stale cursor blocks
 	struct JBDim p = jbxvt_get_pixel_size(s->current->cursor);
 	struct JBXVTXData * X = &jbxvt.X;
-	const struct JBDim f = X->f.size;
+	const struct JBDim f = X->font.size;
 	xcb_rectangle_t r = {p.x, p.y, f.w, f.h};
 	switch (jbxvt.opt.cursor_attr) {
 	case 0: // blinking block

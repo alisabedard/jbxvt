@@ -61,9 +61,9 @@ static void copy_saved_lines(const int_fast16_t n)
 static void get_y(int16_t * restrict y, const uint8_t row1,
 	const int8_t count, const bool up)
 {
-	const int16_t a = row1 * jbxvt.X.f.size.h;
+	const int16_t a = row1 * jbxvt.X.font.size.h;
 	*(up ? y + 1 : y) = a;
-	*(up ? y : y + 1) = a + count * jbxvt.X.f.size.h;
+	*(up ? y : y + 1) = a + count * jbxvt.X.font.size.h;
 }
 static void copy_visible_area(const uint8_t row1, const uint8_t row2,
 	const int8_t count, const bool up)
@@ -71,7 +71,7 @@ static void copy_visible_area(const uint8_t row1, const uint8_t row2,
 	int16_t y[2];
 	get_y(y, row1, count, up);
 	const uint16_t height = (row2 - row1 - count)
-		* jbxvt.X.f.size.h;
+		* jbxvt.X.font.size.h;
 	xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt,
 		jbxvt.X.win.vt, jbxvt.X.gc.tx, 0, y[0],
 		0, y[1], jbxvt.scr.pixels.width, height);

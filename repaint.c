@@ -6,7 +6,7 @@
 #include "paint.h"
 #include "show_selection.h"
 #define CSZ jbxvt.scr.chars
-#define FSZ jbxvt.X.f.size
+#define FSZ jbxvt.X.font.size
 /* Display the string using the rendition vector
    at the screen coordinates.  */
 static void paint_rvec_text(uint8_t * str, uint32_t * rvec,

@@ -28,8 +28,8 @@ static struct JBDim get_geometry(void)
 	struct JBDim ret = {.w = r->width, .height = r->height };
 	free(r);
 	// Resize area to fit characters
-	ret.w -= ret.w % jbxvt.X.f.size.w;
-	ret.h -= ret.h % jbxvt.X.f.size.h;
+	ret.w -= ret.w % jbxvt.X.font.size.w;
+	ret.h -= ret.h % jbxvt.X.font.size.h;
 	return ret;
 }
 /*  Called after a possible window size change.  If the window size

@@ -23,7 +23,6 @@ struct JBXVTXData {
 	struct JBXVTXWindows win;
 	struct JBXVTXGCs gc;
 	struct JBXVTXPixels color;
-	union { struct JBXVTFontData f, font; };
-	int8_t screen_number;
+	struct JBXVTFontData font;
 };
 #endif//!JBXVT_JBXVTXDATA_H

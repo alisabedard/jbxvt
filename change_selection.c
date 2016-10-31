@@ -6,7 +6,7 @@
 #include "screen.h"
 #include "selend.h"
 #include "selection.h"
-#define FSZ jbxvt.X.f.size
+#define FSZ jbxvt.X.font.size
 static void invert(const int16_t rs, const int16_t re, const int16_t cs,
 	const int16_t ce, const uint8_t row1, const uint8_t row2)
 {
