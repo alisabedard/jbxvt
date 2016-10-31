@@ -58,7 +58,7 @@ struct JBXVT {
 	struct JBXVTSelectionData sel;
 	struct JBXVTCommandData com;
 	struct JBXVTOptionData opt;
-	struct JBXVTPrivateModes mode, saved_mode;
+	struct JBXVTPrivateModes mode;
 };
 extern struct JBXVT jbxvt; // in jbxvt.c
 #endif//!JBXVT_H

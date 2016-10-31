@@ -30,6 +30,7 @@
 #else
 #define TLOG(...)
 #endif//DEBUG_TOKENS
+static struct JBXVTPrivateModes jbxvt_saved_mode;
 static void handle_txtpar(struct Token * restrict token)
 {
 	switch (token->arg[0]) {
@@ -110,7 +111,7 @@ static void decstbm(struct Token * restrict token)
 		(int)token->nargs, t[0], t[1]);
 	if (token->private == JBXVT_TOKEN_RESTOREPM) {
 		// Restore private modes.
-		memcpy(&jbxvt.mode, &jbxvt.saved_mode,
+		memcpy(&jbxvt.mode, &jbxvt_saved_mode,
 			sizeof(struct JBXVTPrivateModes));
 		return;
 	}
@@ -424,7 +425,7 @@ void jbxvt_parse_token(void)
 		break;
 	case JBXVT_TOKEN_SAVEPM: // Save private modes
 		LOG("JBXVT_TOKEN_SAVEPM");
-		memcpy(&jbxvt.saved_mode, &jbxvt.mode,
+		memcpy(&jbxvt_saved_mode, &jbxvt.mode,
 			sizeof(struct JBXVTPrivateModes));
 		break;
 	case JBXVT_TOKEN_SBSWITCH:
