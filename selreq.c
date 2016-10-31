@@ -36,7 +36,7 @@ void jbxvt_request_selection(const xcb_timestamp_t t)
 	LOG("jbxvt_request_selection(timestamp: %d)", t);
 	if (paste_from(XCB_ATOM_PRIMARY, t))
 		  return;
-	if (paste_from(jbxvt.X.clipboard, t))
+	if (paste_from(jbxvt_get_clipboard(), t))
 		  return;
 	if (paste_from(XCB_ATOM_SECONDARY, t))
 		  return;

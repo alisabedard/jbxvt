@@ -164,5 +164,4 @@ void jbxvt_init_display(char * restrict name)
 	setup_fonts();
 	create_window((uint8_t *)name, jbxvt.X.screen->root);
 	setup_gcs();
-	jbxvt.X.clipboard = jb_get_atom(jbxvt.X.xcb, "CLIPBOARD");
 }

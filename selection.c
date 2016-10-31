@@ -4,12 +4,21 @@
 #include "config.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "libjb/xcb.h"
 #include "save_selection.h"
 #include "selend.h"
 #include "screen.h"
 #include "show_selection.h"
 #include "window.h"
 #define SE jbxvt.sel.end
+//  Return the atom corresponding to "CLIPBOARD"
+xcb_atom_t jbxvt_get_clipboard(void)
+{
+	static xcb_atom_t a;
+	if (a)
+		return a;
+	return a = jb_get_atom(jbxvt.X.xcb, "CLIPBOARD");
+}
 static inline void prop(const xcb_atom_t a)
 {
 	jbxvt_set_property(a, jbxvt.sel.length, jbxvt.sel.text);
@@ -22,7 +31,7 @@ void jbxvt_make_selection(void)
 	/* Set all properties which may possibly be requested.  */
 	prop(XCB_ATOM_PRIMARY);
 	prop(XCB_ATOM_SECONDARY);
-	prop(jbxvt.X.clipboard);
+	prop(jbxvt_get_clipboard());
 	xcb_set_selection_owner(jbxvt.X.xcb, jbxvt.X.win.main,
 		XCB_ATOM_PRIMARY, XCB_CURRENT_TIME);
 }

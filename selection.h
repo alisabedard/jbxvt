@@ -10,6 +10,8 @@
 void jbxvt_check_selection(const int16_t row1, const int16_t row2);
 // clear the current selection:
 void jbxvt_clear_selection(void);
+//  Return the atom corresponding to "CLIPBOARD"
+xcb_atom_t jbxvt_get_clipboard(void);
 //  Make the selection currently delimited by the selection end markers.
 void jbxvt_make_selection(void);
 //  respond to a request for our current selection.
