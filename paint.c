@@ -2,6 +2,7 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "paint.h"
 #include "color_index.h"
+#include "display.h"
 #include "double.h"
 #include "handle_sgr.h"
 #include "jbxvt.h"
@@ -130,7 +131,7 @@ void jbxvt_paint(xcb_connection_t * xc, uint8_t * restrict str,
 		set_reverse_video(xc);
 		cmod = true;
 	}
-	p.y += jbxvt.X.font.ascent;
+	p.y += jbxvt_get_font_ascent();
 	if (rstyle & JBXVT_RS_BOLD)
 		font(xc, jbxvt.X.font.bold);
 	if (rstyle & JBXVT_RS_ITALIC)

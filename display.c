@@ -18,6 +18,7 @@ enum EventMasks {
 	MW_EVENTS = E(KEY_PRESS) | E(FOCUS_CHANGE) | E(STRUCTURE_NOTIFY),
 	SUB_EVENTS = E(EXPOSURE) | EB(PRESS) | EB(RELEASE) | EB(MOTION)
 };
+static uint8_t font_ascent;
 static xcb_font_t get_font(xcb_connection_t * xc, const char * name)
 {
 	errno = 0;
@@ -41,10 +42,14 @@ static void setup_font_metrics(xcb_connection_t * xc,
 	xcb_query_font_reply_t * r = xcb_query_font_reply(xc,
 		c, NULL);
 	jb_assert(r, "Cannot get font information");
-	jbxvt.X.font.ascent = r->font_ascent;
+	font_ascent = r->font_ascent;
 	jbxvt.X.font.size.width = r->max_bounds.character_width;
 	jbxvt.X.font.size.height = r->font_ascent + r->font_descent;
 	free(r);
+}
+uint8_t jbxvt_get_font_ascent(void)
+{
+	return font_ascent;
 }
 static void setup_fonts(xcb_connection_t * xc)
 {

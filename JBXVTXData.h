@@ -12,7 +12,6 @@ struct JBXVTXPixels {
 struct JBXVTFontData {
 	xcb_font_t normal, bold, italic;
 	struct JBDim size;
-	int8_t ascent;
 };
 struct JBXVTXData {
 	struct JBXVTXWindows win;
