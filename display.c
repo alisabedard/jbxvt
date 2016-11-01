@@ -18,53 +18,6 @@ enum EventMasks {
 	MW_EVENTS = E(KEY_PRESS) | E(FOCUS_CHANGE) | E(STRUCTURE_NOTIFY),
 	SUB_EVENTS = E(EXPOSURE) | EB(PRESS) | EB(RELEASE) | EB(MOTION)
 };
-static uint8_t font_ascent;
-static struct JBDim font_size;
-struct JBDim jbxvt_get_font_size(void)
-{
-	return font_size;
-}
-static xcb_font_t get_font(xcb_connection_t * xc, const char * name)
-{
-	errno = 0;
-	xcb_font_t f = xcb_generate_id(xc);
-	xcb_void_cookie_t c = xcb_open_font_checked(xc, f,
-		strlen(name), name);
-	if (jb_xcb_cookie_has_error(xc, c)) {
-		if (jbxvt.X.font.normal) // Fall back to normal font first
-			return jbxvt.X.font.normal;
-		c = xcb_open_font_checked(xc, f, sizeof(FALLBACK_FONT),
-			FALLBACK_FONT);
-		jb_require(!jb_xcb_cookie_has_error(xc, c),
-			"Could not load any fonts");
-	}
-	return f;
-}
-static void setup_font_metrics(xcb_connection_t * xc,
-	const xcb_query_font_cookie_t c)
-{
-	errno = 0;
-	xcb_query_font_reply_t * r = xcb_query_font_reply(xc,
-		c, NULL);
-	jb_assert(r, "Cannot get font information");
-	font_ascent = r->font_ascent;
-	font_size.width = r->max_bounds.character_width;
-	font_size.height = r->font_ascent + r->font_descent;
-	free(r);
-}
-uint8_t jbxvt_get_font_ascent(void)
-{
-	return font_ascent;
-}
-static void setup_fonts(xcb_connection_t * xc)
-{
-	jbxvt.X.font.normal = get_font(xc, jbxvt.opt.font);
-	const xcb_query_font_cookie_t c = xcb_query_font(xc,
-		jbxvt.X.font.normal);
-	jbxvt.X.font.bold = get_font(xc, jbxvt.opt.bold_font);
-	jbxvt.X.font.italic = get_font(xc, jbxvt.opt.italic_font);
-	setup_font_metrics(xc, c);
-}
 static void create_main_window(xcb_connection_t * xc,
 	xcb_size_hints_t * restrict sh, const xcb_window_t root)
 {
@@ -76,28 +29,9 @@ static void create_main_window(xcb_connection_t * xc,
 	jbxvt.scr.pixels.h = sh->height;
 	jbxvt.scr.chars = jbxvt_get_char_size(jbxvt.scr.pixels);
 }
-static void open_cursor(xcb_connection_t * xc, const xcb_font_t f)
-{
-	errno = 0;
-	xcb_void_cookie_t v = xcb_open_font_checked(xc, f, 6,
-		"cursor");
-	jb_require(!jb_xcb_cookie_has_error(xc, v),
-		"Cannot open cursor font");
-}
-static xcb_cursor_t get_cursor(xcb_connection_t * xc, const uint16_t id,
-	const uint16_t fg, const uint16_t bg)
-{
-	xcb_font_t f = xcb_generate_id(xc);
-	open_cursor(xc, f);
-	xcb_cursor_t c = xcb_generate_id(xc);
-	xcb_create_glyph_cursor(xc, c, f, f,
-		id, id + 1, fg, fg, fg, bg, bg, bg);
-	xcb_close_font(xc, f);
-	return c;
-}
 static void create_sb_window(xcb_connection_t * xc, const uint16_t height)
 {
-	xcb_cursor_t c = get_cursor(xc, XC_sb_v_double_arrow, 0, 0xffff);
+	xcb_cursor_t c = jbxvt_get_cursor(xc, XC_sb_v_double_arrow, 0, 0xffff);
 	xcb_create_window(xc, 0, jbxvt_get_scrollbar(xc),
 		jbxvt_get_main_window(xc), -1, -1, JBXVT_SCROLLBAR_WIDTH - 1,
 		height, 1, 0, 0, XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL
@@ -108,7 +42,7 @@ static void create_sb_window(xcb_connection_t * xc, const uint16_t height)
 static void create_vt_window(xcb_connection_t * xc,
 	xcb_size_hints_t * restrict sh)
 {
-	xcb_cursor_t c = get_cursor(xc, XC_xterm, 0xffff, 0);
+	xcb_cursor_t c = jbxvt_get_cursor(xc, XC_xterm, 0xffff, 0);
 	xcb_create_window(xc, 0, jbxvt_get_vt_window(xc),
 		jbxvt_get_main_window(xc), jbxvt.opt.show_scrollbar
 		? JBXVT_SCROLLBAR_WIDTH : 0, 0, sh->width, sh->height,
@@ -125,13 +59,13 @@ static void get_sizehints(xcb_size_hints_t * restrict s)
 		.flags = SH(US_SIZE) | SH(P_MIN_SIZE) | SH(P_RESIZE_INC)
 			| SH(BASE_SIZE),
 		.width = p.w, .height = p.h,
-		.width_inc = font_size.w,
-		.height_inc = font_size.h,
-		.base_width = font_size.w,
-		.base_height = font_size.h
+		.width_inc = jbxvt_get_font_size().w,
+		.height_inc = jbxvt_get_font_size().h,
+		.base_width = jbxvt_get_font_size().w,
+		.base_height = jbxvt_get_font_size().h
 	};
-	s->min_width = font_size.w + s->base_width;
-	s->min_height = font_size.h + s->base_height;
+	s->min_width = jbxvt_get_font_size().w + s->base_width;
+	s->min_height = jbxvt_get_font_size().h + s->base_height;
 }
 //  Open the window.
 static void create_window(xcb_connection_t * xc, uint8_t * restrict name,
@@ -166,7 +100,7 @@ xcb_connection_t * jbxvt_init_display(char * restrict name)
 	xcb_connection_t * xc = xc
 		= jb_get_xcb_connection(jbxvt.opt.display, &screen);
 	init_jbxvt_colors(xc);
-	setup_fonts(xc);
+	jbxvt_setup_fonts(xc);
 	create_window(xc, (uint8_t *)name,
 		jbxvt_get_root_window(xc));
 	setup_gcs(xc, jbxvt_get_vt_window(xc));

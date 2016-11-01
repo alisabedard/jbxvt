@@ -1,6 +1,7 @@
 // Copyright 2016, Jeffrey E. Bedard
 #ifndef JBXVT_DISPLAY_H
 #define JBXVT_DISPLAY_H
+#include "font.h"
 #include "libjb/size.h"
 #include <stdint.h>
 #include <xcb/xcb.h>
