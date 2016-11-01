@@ -6,6 +6,7 @@
 #include "libjb/log.h"
 #include "paint.h"
 #include "sbar.h"
+#include "window.h"
 #include "screen.h"
 #include <string.h>
 static void copy_area(xcb_connection_t * xc,
@@ -13,7 +14,7 @@ static void copy_area(xcb_connection_t * xc,
 	const uint16_t width)
 {
 	if (width > 0)
-		xcb_copy_area(xc, jbxvt.X.win.vt, jbxvt.X.win.vt,
+		xcb_copy_area(xc, jbxvt_get_vt_window(xc), jbxvt_get_vt_window(xc),
 			jbxvt_get_text_gc(xc), x[0], y, x[1], y, width,
 			jbxvt.X.font.size.height);
 }
@@ -22,7 +23,7 @@ static void finalize(xcb_connection_t * xc,
 	const uint16_t width, const int8_t count)
 {
 	copy_area(xc, x, p.y, width);
-	xcb_clear_area(xc, 0, jbxvt.X.win.vt, p.x, p.y,
+	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), p.x, p.y,
 		count * jbxvt.X.font.size.w, jbxvt.X.font.size.h);
 	jbxvt.scr.current->wrap_next = 0;
 	jbxvt_draw_cursor(xc);

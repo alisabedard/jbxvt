@@ -3,6 +3,7 @@
 #include "selreq.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "window.h"
 #include <stdlib.h>
 #include <unistd.h>
 static inline void paste(const uint8_t * data, const size_t length)
@@ -14,13 +15,13 @@ static bool paste_from(xcb_connection_t * xc,
 	const xcb_atom_t cb, const xcb_timestamp_t t)
 {
 	LOG("paste_from(clipboard: %d, timestamp: %d)", cb, t);
-	xcb_convert_selection(xc, jbxvt.X.win.main, cb,
+	xcb_convert_selection(xc, jbxvt_get_main_window(xc), cb,
 		XCB_ATOM_STRING, cb, t);
 	xcb_flush(xc);
 	// This prevents pasting stale data:
 	free(xcb_wait_for_event(xc)); // discard
 	xcb_get_property_reply_t * r = xcb_get_property_reply(xc,
-		xcb_get_property(xc, false, jbxvt.X.win.main,
+		xcb_get_property(xc, false, jbxvt_get_main_window(xc),
 		cb, XCB_ATOM_ANY, 0, JBXVT_PROP_SIZE), NULL);
 	if (!r)
 		return false;

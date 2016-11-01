@@ -5,6 +5,7 @@
 #include "jbxvt.h"
 #include "paint.h"
 #include "show_selection.h"
+#include "window.h"
 #define CSZ jbxvt.scr.chars
 #define FSZ jbxvt.X.font.size
 /* Display the string using the rendition vector
@@ -44,7 +45,7 @@ static int_fast32_t repaint_generic(xcb_connection_t * xc,
 		jbxvt_paint(xc, str, 0, len, p, dwl);
 	p.x += len * FSZ.width;
 	const uint16_t width = (CSZ.width + 1 - len) * FSZ.width;
-	xcb_clear_area(xc, false, jbxvt.X.win.vt, p.x, p.y,
+	xcb_clear_area(xc, false, jbxvt_get_vt_window(xc), p.x, p.y,
 		width, FSZ.height);
 	return p.y + FSZ.height;
 }

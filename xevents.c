@@ -10,13 +10,14 @@
 #include "scr_move.h"
 #include "selex.h"
 #include "selreq.h"
+#include "window.h"
 xcb_atom_t jbxvt_get_wm_del_win(xcb_connection_t * xc)
 {
 	static long unsigned int a;
 	if(!a) { // Init on first call:
 		a = jb_get_atom(xc, "WM_DELETE_WINDOW");
 		xcb_change_property(xc, XCB_PROP_MODE_REPLACE,
-			jbxvt.X.win.main, jb_get_atom(xc, "WM_PROTOCOLS"),
+			jbxvt_get_main_window(xc), jb_get_atom(xc, "WM_PROTOCOLS"),
 			XCB_ATOM_ATOM, 32, 1, &a);
 	}
 	return a;
@@ -29,10 +30,10 @@ static void handle_motion_notify(xcb_connection_t * xc,
 	if (xe->window == jbxvt_get_scrollbar(xc)
 		&& (xe->state & XCB_KEY_BUT_MASK_BUTTON_2))
 		jbxvt_scroll_to(xc, b.y);
-	else if (xe->window == jbxvt.X.win.vt
+	else if (xe->window == jbxvt_get_vt_window(xc)
 		&& jbxvt_get_mouse_motion_tracked())
 		jbxvt_track_mouse(xe->button, xe->state, b, JBXVT_MOTION);
-	else if (xe->window == jbxvt.X.win.vt
+	else if (xe->window == jbxvt_get_vt_window(xc)
 		&& (xe->state & XCB_KEY_BUT_MASK_BUTTON_1)
 		&& !(xe->state & XCB_KEY_BUT_MASK_CONTROL)) {
 		if (jbxvt_get_mouse_tracked())
@@ -67,14 +68,14 @@ static void handle_button_release(xcb_connection_t * xc,
 			sbop(xc, xe, false);
 			break;
 		}
-	} else if (xe->window == jbxvt.X.win.vt
+	} else if (xe->window == jbxvt_get_vt_window(xc)
 		&& jbxvt_get_mouse_tracked() && xe->button <= 3) {
 		/* check less than or equal to 3, since xterm does not
 		   report mouse wheel release events.  */
 		jbxvt_track_mouse(xe->button, xe->state,
 			(struct JBDim){.x = xe->box.x, .y = xe->box.y},
 			JBXVT_RELEASE);
-	} else if (xe->window == jbxvt.X.win.vt
+	} else if (xe->window == jbxvt_get_vt_window(xc)
 		&& !(xe->state & XCB_KEY_BUT_MASK_CONTROL)) {
 		switch (xe->button) {
 		case 1:
@@ -114,7 +115,7 @@ static void handle_button1_press(xcb_connection_t * xc,
 static void handle_button_press(xcb_connection_t * xc,
 	struct JBXVTEvent * restrict xe)
 {
-	const xcb_window_t v = jbxvt.X.win.vt;
+	const xcb_window_t v = jbxvt_get_vt_window(xc);
 	if (xe->window == v && xe->state == XCB_KEY_BUT_MASK_CONTROL) {
 		jbxvt_toggle_scrollbar(xc);
 		return;

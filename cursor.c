@@ -6,6 +6,7 @@
 #include "libjb/log.h"
 #include "repaint.h"
 #include "screen.h"
+#include "window.h"
 static uint32_t saved_style;
 static struct JBDim saved_cursor;
 xcb_gcontext_t jbxvt_get_cursor_gc(xcb_connection_t * xc)
@@ -73,6 +74,6 @@ void jbxvt_draw_cursor(xcb_connection_t * xc)
 		r.height = 2;
 		break;
 	}
-	xcb_poly_fill_rectangle(xc, X->win.vt,
+	xcb_poly_fill_rectangle(xc, jbxvt_get_vt_window(xc),
 		jbxvt_get_cursor_gc(xc), 1, &r);
 }

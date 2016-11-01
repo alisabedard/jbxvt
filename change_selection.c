@@ -7,6 +7,7 @@
 #include "screen.h"
 #include "selend.h"
 #include "selection.h"
+#include "window.h"
 #define FSZ jbxvt.X.font.size
 static void invert(xcb_connection_t * xc, const int16_t rs,
 	const int16_t re, const int16_t cs, const int16_t ce,
@@ -16,7 +17,7 @@ static void invert(xcb_connection_t * xc, const int16_t rs,
 		const int16_t y = row * FSZ.height;
 		const int16_t x1 = row == rs ? cs * FSZ.w : 0;
 		const int16_t x2 = (row == re ? ce : jbxvt.scr.chars.w) * FSZ.w;
-		xcb_poly_fill_rectangle(xc, jbxvt.X.win.vt,
+		xcb_poly_fill_rectangle(xc, jbxvt_get_vt_window(xc),
 			jbxvt_get_cursor_gc(xc), 1, &(xcb_rectangle_t){
 			.x = x1, .y = y, .width = x2 - x1, .height = FSZ.h});
 	}

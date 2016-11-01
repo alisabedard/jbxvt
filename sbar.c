@@ -7,6 +7,7 @@
 #include "jbxvt.h"
 #include "paint.h"
 #include "repaint.h"
+#include "window.h"
 #include <stdbool.h>
 #include <string.h>
 xcb_window_t jbxvt_get_scrollbar(xcb_connection_t * c)
@@ -60,7 +61,7 @@ void jbxvt_clear_saved_lines(xcb_connection_t * xc)
 }
 void jbxvt_toggle_scrollbar(xcb_connection_t * xc)
 {
-	xcb_configure_window(xc, jbxvt.X.win.vt,
+	xcb_configure_window(xc, jbxvt_get_vt_window(xc),
 		XCB_CONFIG_WINDOW_X, &(uint32_t){(
 		jbxvt.opt.show_scrollbar^=true)
 		? JBXVT_SCROLLBAR_WIDTH : 0});

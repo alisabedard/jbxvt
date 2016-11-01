@@ -63,8 +63,7 @@ static void setup_fonts(xcb_connection_t * xc)
 static void create_main_window(xcb_connection_t * xc,
 	xcb_size_hints_t * restrict sh, const xcb_window_t root)
 {
-	jbxvt.X.win.main = xcb_generate_id(xc);
-	xcb_create_window(xc, 0, jbxvt.X.win.main, root,
+	xcb_create_window(xc, 0, jbxvt_get_main_window(xc), root,
 		sh->x, sh->y, sh->width, sh->height, 0, 0, 0,
 		XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK,
 		(uint32_t[]){jbxvt.X.color.bg, MW_EVENTS});
@@ -95,7 +94,7 @@ static void create_sb_window(xcb_connection_t * xc, const uint16_t height)
 {
 	xcb_cursor_t c = get_cursor(xc, XC_sb_v_double_arrow, 0, 0xffff);
 	xcb_create_window(xc, 0, jbxvt_get_scrollbar(xc),
-		jbxvt.X.win.main, -1, -1, JBXVT_SCROLLBAR_WIDTH - 1,
+		jbxvt_get_main_window(xc), -1, -1, JBXVT_SCROLLBAR_WIDTH - 1,
 		height, 1, 0, 0, XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL
 		| XCB_CW_EVENT_MASK | XCB_CW_CURSOR, (uint32_t[]){
 		jbxvt.X.color.bg, jbxvt.X.color.fg, SUB_EVENTS, c});
@@ -104,13 +103,13 @@ static void create_sb_window(xcb_connection_t * xc, const uint16_t height)
 static void create_vt_window(xcb_connection_t * xc,
 	xcb_size_hints_t * restrict sh)
 {
-	jbxvt.X.win.vt = xcb_generate_id(xc);
 	xcb_cursor_t c = get_cursor(xc, XC_xterm, 0xffff, 0);
-	xcb_create_window(xc, 0, jbxvt.X.win.vt, jbxvt.X.win.main,
-		jbxvt.opt.show_scrollbar ? JBXVT_SCROLLBAR_WIDTH : 0, 0,
-		sh->width, sh->height, 0, 0, 0, XCB_CW_BACK_PIXEL
-		| XCB_CW_EVENT_MASK | XCB_CW_CURSOR, (uint32_t[]){
-		jbxvt.X.color.bg, SUB_EVENTS, c});
+	xcb_create_window(xc, 0, jbxvt_get_vt_window(xc),
+		jbxvt_get_main_window(xc), jbxvt.opt.show_scrollbar
+		? JBXVT_SCROLLBAR_WIDTH : 0, 0, sh->width, sh->height,
+		0, 0, 0, XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK
+		| XCB_CW_CURSOR, (uint32_t[]){ jbxvt.X.color.bg,
+		SUB_EVENTS, c});
 	xcb_free_cursor(xc, c);
 }
 static void get_sizehints(xcb_size_hints_t * restrict s)
@@ -167,6 +166,6 @@ xcb_connection_t * jbxvt_init_display(char * restrict name)
 	setup_fonts(xc);
 	create_window(xc, (uint8_t *)name,
 		jbxvt_get_root_window(xc));
-	setup_gcs(xc, jbxvt.X.win.vt);
+	setup_gcs(xc, jbxvt_get_vt_window(xc));
 	return xc;
 }

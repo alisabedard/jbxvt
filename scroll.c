@@ -6,6 +6,7 @@
 #include "libjb/log.h"
 #include "paint.h"
 #include "sbar.h"
+#include "window.h"
 #include <string.h>
 //#define SCROLL_DEBUG
 #ifndef SCROLL_DEBUG
@@ -74,8 +75,8 @@ static void copy_visible_area(xcb_connection_t * xc,
 	get_y(y, row1, count, up);
 	const uint16_t height = (row2 - row1 - count)
 		* jbxvt.X.font.size.h;
-	xcb_copy_area(xc, jbxvt.X.win.vt,
-		jbxvt.X.win.vt, jbxvt_get_text_gc(xc), 0, y[0],
+	xcb_copy_area(xc, jbxvt_get_vt_window(xc),
+		jbxvt_get_vt_window(xc), jbxvt_get_text_gc(xc), 0, y[0],
 		0, y[1], jbxvt.scr.pixels.width, height);
 	// the above blocks the event queue, flush it
 	xcb_flush(xc);
@@ -111,7 +112,7 @@ static int8_t copy_screen_area(const int8_t i,
 static void clear_line(xcb_connection_t * xc,
 	const int16_t y, const int8_t count)
 {
-	xcb_clear_area(xc, 0, jbxvt.X.win.vt, 0,
+	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), 0,
 		y * jbxvt.X.font.size.height,
 		jbxvt.scr.pixels.width,
 		count * jbxvt.X.font.size.height);

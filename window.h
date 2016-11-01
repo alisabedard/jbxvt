@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <xcb/xproto.h>
+xcb_window_t jbxvt_get_main_window(xcb_connection_t * xc);
+xcb_window_t jbxvt_get_vt_window(xcb_connection_t * xc);
 // Set main window property string
 void jbxvt_set_property(xcb_connection_t * xc,
 	const xcb_atom_t prop, const size_t sz,

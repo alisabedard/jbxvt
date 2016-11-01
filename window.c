@@ -7,11 +7,25 @@
 #include "screen.h"
 #include <stdlib.h>
 #include <string.h>
+xcb_window_t jbxvt_get_main_window(xcb_connection_t * xc)
+{
+	static xcb_window_t w;
+	if (w)
+		return w;
+	return w = xcb_generate_id(xc);
+}
+xcb_window_t jbxvt_get_vt_window(xcb_connection_t * xc)
+{
+	static xcb_window_t w;
+	if (w)
+		return w;
+	return w = xcb_generate_id(xc);
+}
 //  Map the window
 void jbxvt_map_window(xcb_connection_t * xc)
 {
-	xcb_map_window(xc, jbxvt.X.win.main);
-	xcb_map_subwindows(xc, jbxvt.X.win.main);
+	xcb_map_window(xc, jbxvt_get_main_window(xc));
+	xcb_map_subwindows(xc, jbxvt_get_main_window(xc));
 	/*  Setup the window now so that we can add LINES and COLUMNS to
 	 *  the environment.  */
 	jbxvt_resize_window(xc);
@@ -20,7 +34,7 @@ void jbxvt_map_window(xcb_connection_t * xc)
 static struct JBDim get_geometry(xcb_connection_t * xc)
 {
 	xcb_get_geometry_cookie_t c = xcb_get_geometry(xc,
-		jbxvt.X.win.main);
+		jbxvt_get_main_window(xc));
 	xcb_generic_error_t * e;
 	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(xc,
 		c, &e);
@@ -43,7 +57,7 @@ void jbxvt_resize_window(xcb_connection_t * xc)
 		p.width -= JBXVT_SCROLLBAR_WIDTH;
 	xcb_configure_window(xc, jbxvt_get_scrollbar(xc),
 		XCW(HEIGHT), &(uint32_t){p.height});
-	xcb_configure_window(xc, jbxvt.X.win.vt, XCW(WIDTH)
+	xcb_configure_window(xc, jbxvt_get_vt_window(xc), XCW(WIDTH)
 		| XCW(HEIGHT), (uint32_t[]){p.w, p.h});
 #undef XCW
 	jbxvt.scr.chars = jbxvt_get_char_size(jbxvt.scr.pixels = p);
@@ -53,7 +67,7 @@ void jbxvt_set_property(xcb_connection_t * xc, const xcb_atom_t prop,
 	const size_t sz, uint8_t * value)
 {
 	xcb_change_property(xc, XCB_PROP_MODE_REPLACE,
-		jbxvt.X.win.main, prop, XCB_ATOM_STRING, 8, sz, value);
+		jbxvt_get_main_window(xc), prop, XCB_ATOM_STRING, 8, sz, value);
 }
 // Change window or icon name:
 void jbxvt_change_name(xcb_connection_t * xc,

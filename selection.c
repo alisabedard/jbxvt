@@ -32,7 +32,7 @@ void jbxvt_make_selection(xcb_connection_t * xc)
 	prop(xc, XCB_ATOM_PRIMARY);
 	prop(xc, XCB_ATOM_SECONDARY);
 	prop(xc, jbxvt_get_clipboard(xc));
-	xcb_set_selection_owner(xc, jbxvt.X.win.main,
+	xcb_set_selection_owner(xc, jbxvt_get_main_window(xc),
 		XCB_ATOM_PRIMARY, XCB_CURRENT_TIME);
 }
 //  Respond to a request for our current selection.

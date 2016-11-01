@@ -9,6 +9,7 @@
 #include "libjb/log.h"
 #include "libjb/util.h"
 #include "screen.h"
+#include "window.h"
 #include <string.h>
 #define DEBUG_PAINT
 #ifndef DEBUG_PAINT
@@ -88,7 +89,7 @@ static inline void font(xcb_connection_t * xc, const xcb_font_t f)
 static void draw_underline(xcb_connection_t * xc, uint16_t len,
 	struct JBDim p, int8_t offset)
 {
-	xcb_poly_line(xc, XCB_COORD_MODE_ORIGIN, jbxvt.X.win.vt,
+	xcb_poly_line(xc, XCB_COORD_MODE_ORIGIN, jbxvt_get_vt_window(xc),
 		jbxvt_get_text_gc(xc), 2,
 		(struct xcb_point_t[]){{p.x, p.y + offset},
 		{p.x + len * jbxvt.X.font.size.width, p.y + offset}});
@@ -97,7 +98,7 @@ static void draw_text(xcb_connection_t * xc,
 	uint8_t * restrict str, uint16_t len,
 	struct JBDim * restrict p, uint32_t rstyle)
 {
-	xcb_image_text_8(xc, len, jbxvt.X.win.vt,
+	xcb_image_text_8(xc, len, jbxvt_get_vt_window(xc),
 		jbxvt_get_text_gc(xc), p->x, p->y, (const char *)str);
 	++p->y; // Padding for underline, use underline for italic
 	if (((rstyle & JBXVT_RS_ITALIC)

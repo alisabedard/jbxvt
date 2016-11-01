@@ -10,6 +10,7 @@
 #include "scroll.h"
 #include "scr_reset.h"
 #include "selection.h"
+#include "window.h"
 #include <string.h>
 #define DEBUG_ERASE
 #ifndef DEBUG_ERASE
@@ -25,7 +26,7 @@ static void del(xcb_connection_t * xc, uint16_t col, uint16_t width)
 		width = jbxvt.scr.chars.width - col;
 	memset(s->text[y] + col, 0, width);
 	memset(s->rend[y] + col, 0, width << 2);
-	xcb_clear_area(xc, 0, jbxvt.X.win.vt, col * FSZ.w,
+	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), col * FSZ.w,
 		y * FSZ.h, width * FSZ.w, FSZ.h);
 	xcb_flush(xc);
 	s->wrap[y] = false;

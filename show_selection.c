@@ -6,6 +6,7 @@
 #include "jbxvt.h"
 #include "screen.h"
 #include "selend.h"
+#include "window.h"
 static void paint_rvid(xcb_connection_t * xc,
 	struct JBDim start, struct JBDim end,
 	int16_t col1, int16_t col2)
@@ -19,7 +20,7 @@ static void paint_rvid(xcb_connection_t * xc,
 		const struct JBDim p2 = jbxvt_get_pixel_size(c);
 		if (p2.x <= p1.x)
 			continue;
-		xcb_poly_fill_rectangle(xc, jbxvt.X.win.vt,
+		xcb_poly_fill_rectangle(xc, jbxvt_get_vt_window(xc),
 			jbxvt_get_cursor_gc(xc), 1,
 			&(xcb_rectangle_t){p1.x, p1.y,
 			p2.x - p1.x, jbxvt.X.font.size.h});

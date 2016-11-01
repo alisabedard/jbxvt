@@ -15,6 +15,7 @@
 #include "scroll.h"
 #include "scr_move.h"
 #include "selection.h"
+#include "window.h"
 #include <string.h>
 #include <unistd.h>
 //#define STRING_DEBUG
@@ -98,7 +99,7 @@ static void handle_insert(xcb_connection_t * xc,
 	const uint16_t n_width = n * FSZ.width;
 	const uint16_t width = sz * FSZ.width - n_width;
 	const int16_t x = p.x + n_width;
-	xcb_copy_area(xc, jbxvt.X.win.vt, jbxvt.X.win.vt,
+	xcb_copy_area(xc, jbxvt_get_vt_window(xc), jbxvt_get_vt_window(xc),
 		jbxvt_get_text_gc(xc), p.x, p.y, x, p.y, width, FSZ.height);
 #undef FSZ
 }
