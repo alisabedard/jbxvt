@@ -3,6 +3,7 @@
 #include "scr_erase.h"
 #include "config.h"
 #include "cursor.h"
+#include "display.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "sbar.h"
@@ -17,7 +18,6 @@
 #undef LOG
 #define LOG(...)
 #endif//DEBUG_ERASE
-#define FSZ jbxvt.X.font.size
 static void del(xcb_connection_t * xc, uint16_t col, uint16_t width)
 {
 	const uint16_t y = jbxvt.scr.current->cursor.y;
@@ -26,8 +26,9 @@ static void del(xcb_connection_t * xc, uint16_t col, uint16_t width)
 		width = jbxvt.scr.chars.width - col;
 	memset(s->text[y] + col, 0, width);
 	memset(s->rend[y] + col, 0, width << 2);
-	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), col * FSZ.w,
-		y * FSZ.h, width * FSZ.w, FSZ.h);
+	const struct JBDim f = jbxvt_get_font_size();
+	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), col * f.w,
+		y * f.h, width * f.w, f.h);
 	xcb_flush(xc);
 	s->wrap[y] = false;
 	s->dwl[y] = false;

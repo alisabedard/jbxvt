@@ -3,6 +3,7 @@
     University of Kent at Canterbury. */
 #include "show_selection.h"
 #include "cursor.h"
+#include "display.h"
 #include "jbxvt.h"
 #include "screen.h"
 #include "selend.h"
@@ -23,7 +24,7 @@ static void paint_rvid(xcb_connection_t * xc,
 		xcb_poly_fill_rectangle(xc, jbxvt_get_vt_window(xc),
 			jbxvt_get_cursor_gc(xc), 1,
 			&(xcb_rectangle_t){p1.x, p1.y,
-			p2.x - p1.x, jbxvt.X.font.size.h});
+			p2.x - p1.x, jbxvt_get_font_size().h});
 	}
 }
 // Paint the selection on screen

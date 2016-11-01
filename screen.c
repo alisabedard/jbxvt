@@ -3,6 +3,7 @@
     University of Kent at Canterbury.  */
 #include "screen.h"
 #include "cursor.h"
+#include "display.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "repaint.h"
@@ -12,7 +13,7 @@
 #include "scr_reset.h"
 #include "scroll.h"
 #include <string.h>
-#define FSZ jbxvt.X.font.size
+#define FSZ jbxvt_get_font_size()
 #define GET_X(op) p.w op##= FSZ.w; p.y op##= FSZ.h; return p;
 static xcb_screen_t * jbxvt_screen;
 static void init(xcb_connection_t * restrict xc)

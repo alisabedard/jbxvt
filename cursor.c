@@ -2,6 +2,7 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "cursor.h"
 #include "config.h"
+#include "display.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "repaint.h"
@@ -52,8 +53,7 @@ void jbxvt_draw_cursor(xcb_connection_t * xc)
 	if ((current->cursor_visible ^= true) && is_blinking())
 		jbxvt_repaint(xc); // prevent stale cursor blocks
 	struct JBDim p = jbxvt_get_pixel_size(s->current->cursor);
-	struct JBXVTXData * X = &jbxvt.X;
-	const struct JBDim f = X->font.size;
+	const struct JBDim f = jbxvt_get_font_size();
 	xcb_rectangle_t r = {p.x, p.y, f.w, f.h};
 	switch (jbxvt.opt.cursor_attr) {
 	case 0: // blinking block

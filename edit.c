@@ -2,6 +2,7 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "edit.h"
 #include "cursor.h"
+#include "display.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "paint.h"
@@ -16,7 +17,7 @@ static void copy_area(xcb_connection_t * xc,
 	if (width > 0)
 		xcb_copy_area(xc, jbxvt_get_vt_window(xc), jbxvt_get_vt_window(xc),
 			jbxvt_get_text_gc(xc), x[0], y, x[1], y, width,
-			jbxvt.X.font.size.height);
+			jbxvt_get_font_size().height);
 }
 static void finalize(xcb_connection_t * xc,
 	const int16_t * restrict x, const struct JBDim p,
@@ -24,7 +25,7 @@ static void finalize(xcb_connection_t * xc,
 {
 	copy_area(xc, x, p.y, width);
 	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), p.x, p.y,
-		count * jbxvt.X.font.size.w, jbxvt.X.font.size.h);
+		count * jbxvt_get_font_size().w, jbxvt_get_font_size().h);
 	jbxvt.scr.current->wrap_next = 0;
 	jbxvt_draw_cursor(xc);
 }
@@ -41,7 +42,7 @@ static void copy_lines(const int16_t x, const int8_t count)
 static uint16_t get_width(const uint8_t count)
 {
 	return (jbxvt.scr.chars.w - count - jbxvt.scr.current->cursor.x)
-		* jbxvt.X.font.size.w;
+		* jbxvt_get_font_size().w;
 }
 static uint8_t get_count(int8_t count, const bool insert)
 {
@@ -59,7 +60,7 @@ static void begin(xcb_connection_t * xc, int16_t * x,
 	const struct JBDim c = jbxvt.scr.current->cursor;
 	struct JBDim p = jbxvt_get_pixel_size(c);
 	x[0] = p.x;
-	x[1] = p.x + *count * jbxvt.X.font.size.width;
+	x[1] = p.x + *count * jbxvt_get_font_size().width;
 	if (!insert)
 		JB_SWAP(int16_t, x[0], x[1]);
 	jbxvt_check_selection(xc, c.y, c.y);

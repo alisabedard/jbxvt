@@ -3,12 +3,13 @@
 #include "change_selection.h"
 #include "config.h"
 #include "cursor.h"
+#include "display.h"
 #include "jbxvt.h"
 #include "screen.h"
 #include "selend.h"
 #include "selection.h"
 #include "window.h"
-#define FSZ jbxvt.X.font.size
+#define FSZ jbxvt_get_font_size()
 static void invert(xcb_connection_t * xc, const int16_t rs,
 	const int16_t re, const int16_t cs, const int16_t ce,
 	const uint8_t row1, const uint8_t row2)

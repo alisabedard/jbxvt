@@ -1,6 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "window.h"
+#include "display.h"
 #include "jbxvt.h"
 #include "sbar.h"
 #include "scr_reset.h"
@@ -43,8 +44,9 @@ static struct JBDim get_geometry(xcb_connection_t * xc)
 	struct JBDim ret = {.w = r->width, .height = r->height };
 	free(r);
 	// Resize area to fit characters
-	ret.w -= ret.w % jbxvt.X.font.size.w;
-	ret.h -= ret.h % jbxvt.X.font.size.h;
+	const struct JBDim f = jbxvt_get_font_size();
+	ret.w -= ret.w % f.w;
+	ret.h -= ret.h % f.h;
 	return ret;
 }
 /*  Called after a possible window size change.  If the window size

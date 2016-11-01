@@ -3,6 +3,7 @@
 #include "xevents.h"
 #include "cmdtok.h"
 #include "command.h"
+#include "display.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "mouse.h"
@@ -49,7 +50,7 @@ static void sbop(xcb_connection_t * xc,
 	// xterm's behavior if alternate screen in use is to move the cursor
 	if (jbxvt.scr.current == jbxvt.scr.s) // first screen
 		jbxvt_set_scroll(xc, jbxvt.scr.offset
-			+ (up ? -xe->box.y : xe->box.y) / jbxvt.X.font.size.h);
+			+ (up ? -xe->box.y : xe->box.y) / jbxvt_get_font_size().h);
 	else
 		jbxvt_move(xc, 0, up ? -1 : 1, JBXVT_ROW_RELAATIVE
 			| JBXVT_COLUMN_RELATIVE);

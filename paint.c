@@ -92,7 +92,7 @@ static void draw_underline(xcb_connection_t * xc, uint16_t len,
 	xcb_poly_line(xc, XCB_COORD_MODE_ORIGIN, jbxvt_get_vt_window(xc),
 		jbxvt_get_text_gc(xc), 2,
 		(struct xcb_point_t[]){{p.x, p.y + offset},
-		{p.x + len * jbxvt.X.font.size.width, p.y + offset}});
+		{p.x + len * jbxvt_get_font_size().width, p.y + offset}});
 }
 static void draw_text(xcb_connection_t * xc,
 	uint8_t * restrict str, uint16_t len,
@@ -110,7 +110,7 @@ static void draw_text(xcb_connection_t * xc,
 		draw_underline(xc, len, *p, 0);
 	}
 	if (rstyle & JBXVT_RS_CROSSED_OUT)
-		draw_underline(xc, len, *p, -(jbxvt.X.font.size.h>>1));
+		draw_underline(xc, len, *p, -(jbxvt_get_font_size().h>>1));
 }
 static void set_reverse_video(xcb_connection_t * xc)
 {

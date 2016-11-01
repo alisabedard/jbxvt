@@ -2,6 +2,7 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
 #include "scroll.h"
+#include "display.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "paint.h"
@@ -63,9 +64,9 @@ static void copy_saved_lines(const int_fast16_t n)
 static void get_y(int16_t * restrict y, const uint8_t row1,
 	const int8_t count, const bool up)
 {
-	const int16_t a = row1 * jbxvt.X.font.size.h;
+	const int16_t a = row1 * jbxvt_get_font_size().h;
 	*(up ? y + 1 : y) = a;
-	*(up ? y : y + 1) = a + count * jbxvt.X.font.size.h;
+	*(up ? y : y + 1) = a + count * jbxvt_get_font_size().h;
 }
 static void copy_visible_area(xcb_connection_t * xc,
 	const uint8_t row1, const uint8_t row2,
@@ -74,7 +75,7 @@ static void copy_visible_area(xcb_connection_t * xc,
 	int16_t y[2];
 	get_y(y, row1, count, up);
 	const uint16_t height = (row2 - row1 - count)
-		* jbxvt.X.font.size.h;
+		* jbxvt_get_font_size().h;
 	xcb_copy_area(xc, jbxvt_get_vt_window(xc),
 		jbxvt_get_vt_window(xc), jbxvt_get_text_gc(xc), 0, y[0],
 		0, y[1], jbxvt.scr.pixels.width, height);
@@ -113,9 +114,9 @@ static void clear_line(xcb_connection_t * xc,
 	const int16_t y, const int8_t count)
 {
 	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), 0,
-		y * jbxvt.X.font.size.height,
+		y * jbxvt_get_font_size().height,
 		jbxvt.scr.pixels.width,
-		count * jbxvt.X.font.size.height);
+		count * jbxvt_get_font_size().height);
 }
 void jbxvt_scroll_primary_screen(int16_t n)
 {

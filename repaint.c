@@ -2,12 +2,13 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
 #include "repaint.h"
+#include "display.h"
 #include "jbxvt.h"
 #include "paint.h"
 #include "show_selection.h"
 #include "window.h"
 #define CSZ jbxvt.scr.chars
-#define FSZ jbxvt.X.font.size
+#define FSZ jbxvt_get_font_size()
 /* Display the string using the rendition vector
    at the screen coordinates.  */
 static void paint_rvec_text(xcb_connection_t * xc,

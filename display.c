@@ -19,6 +19,11 @@ enum EventMasks {
 	SUB_EVENTS = E(EXPOSURE) | EB(PRESS) | EB(RELEASE) | EB(MOTION)
 };
 static uint8_t font_ascent;
+static struct JBDim font_size;
+struct JBDim jbxvt_get_font_size(void)
+{
+	return font_size;
+}
 static xcb_font_t get_font(xcb_connection_t * xc, const char * name)
 {
 	errno = 0;
@@ -43,8 +48,8 @@ static void setup_font_metrics(xcb_connection_t * xc,
 		c, NULL);
 	jb_assert(r, "Cannot get font information");
 	font_ascent = r->font_ascent;
-	jbxvt.X.font.size.width = r->max_bounds.character_width;
-	jbxvt.X.font.size.height = r->font_ascent + r->font_descent;
+	font_size.width = r->max_bounds.character_width;
+	font_size.height = r->font_ascent + r->font_descent;
 	free(r);
 }
 uint8_t jbxvt_get_font_ascent(void)
@@ -120,15 +125,13 @@ static void get_sizehints(xcb_size_hints_t * restrict s)
 		.flags = SH(US_SIZE) | SH(P_MIN_SIZE) | SH(P_RESIZE_INC)
 			| SH(BASE_SIZE),
 		.width = p.w, .height = p.h,
-#define FSZ jbxvt.X.font.size
-		.width_inc = FSZ.w,
-		.height_inc = FSZ.h,
-		.base_width = FSZ.w,
-		.base_height = FSZ.h
+		.width_inc = font_size.w,
+		.height_inc = font_size.h,
+		.base_width = font_size.w,
+		.base_height = font_size.h
 	};
-	s->min_width = FSZ.w + s->base_width;
-	s->min_height = FSZ.h + s->base_height;
-#undef FSZ
+	s->min_width = font_size.w + s->base_width;
+	s->min_height = font_size.h + s->base_height;
 }
 //  Open the window.
 static void create_window(xcb_connection_t * xc, uint8_t * restrict name,

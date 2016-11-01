@@ -4,6 +4,7 @@
 #include "scr_string.h"
 #include "config.h"
 #include "cursor.h"
+#include "display.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "libjb/time.h"
@@ -95,13 +96,12 @@ static void handle_insert(xcb_connection_t * xc,
 	const uint16_t sz = jbxvt.scr.chars.w - c.x;
 	memmove(s + c.x + n, s + c.x, sz);
 	memmove(r + c.x + n, r + c.x, sz << 2);
-#define FSZ jbxvt.X.font.size
-	const uint16_t n_width = n * FSZ.width;
-	const uint16_t width = sz * FSZ.width - n_width;
+	const struct JBDim f = jbxvt_get_font_size();
+	const uint16_t n_width = n * f.width;
+	const uint16_t width = sz * f.width - n_width;
 	const int16_t x = p.x + n_width;
 	xcb_copy_area(xc, jbxvt_get_vt_window(xc), jbxvt_get_vt_window(xc),
-		jbxvt_get_text_gc(xc), p.x, p.y, x, p.y, width, FSZ.height);
-#undef FSZ
+		jbxvt_get_text_gc(xc), p.x, p.y, x, p.y, width, f.height);
 }
 static void parse_special_charset(uint8_t * restrict str,
 	const uint8_t len)
