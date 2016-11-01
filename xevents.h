@@ -4,7 +4,8 @@
 #define JBXVT_XEVENTS_H
 #include "JBXVTEvent.h"
 #include <stdbool.h>
-xcb_atom_t jbxvt_get_wm_del_win(void);
+#include <xcb/xcb.h>
+xcb_atom_t jbxvt_get_wm_del_win(xcb_connection_t * xc);
 // Handle X11 event described by xe
-bool jbxvt_handle_xevents(struct JBXVTEvent * xe);
+bool jbxvt_handle_xevents(xcb_connection_t * xc, struct JBXVTEvent * xe);
 #endif//!JBXVT_XEVENTS_H

@@ -36,7 +36,7 @@ static inline void fix_margins(const struct JBDim c)
 	if (jbxvt.scr.current->margin.b >= c.h)
 		  jbxvt.scr.current->margin.b = c.h - 1;
 }
-static void decscnm(void)
+static void decscnm(xcb_connection_t * xc)
 {
 	static bool last_was_rv;
 	const bool rv = jbxvt.mode.decscnm;
@@ -48,9 +48,9 @@ static void decscnm(void)
 	struct JBXVTXPixels * p = &jbxvt.X.color;
 	JB_SWAP(pixel_t, p->fg, p->bg);
 	JB_SWAP(pixel_t, p->current_fg, p->current_bg);
-	xcb_change_gc(jbxvt.X.xcb, jbxvt.X.gc.tx, XCB_GC_FOREGROUND
+	xcb_change_gc(xc, jbxvt.X.gc.tx, XCB_GC_FOREGROUND
 		| XCB_GC_BACKGROUND, (uint32_t[]){p->fg, p->bg});
-	xcb_change_window_attributes(jbxvt.X.xcb, jbxvt.X.win.vt,
+	xcb_change_window_attributes(xc, jbxvt.X.win.vt,
 		XCB_CW_BACK_PIXEL, &p->bg);
 	jb_sleep(100);
 }
@@ -59,7 +59,7 @@ static void decscnm(void)
 void jbxvt_reset(xcb_connection_t * xc)
 {
 	LOG("jbxvt_reset()");
-	decscnm();
+	decscnm(xc);
 	struct JBDim c = jbxvt.scr.chars;
 	fix_margins(c);
 	static bool created;
@@ -83,8 +83,8 @@ void jbxvt_reset(xcb_connection_t * xc)
 	jbxvt_check_cursor_position();
 	--c.h; --c.w;
 	jbxvt_draw_scrollbar(xc);
-	decscnm();
-	xcb_flush(jbxvt.X.xcb);
-	jbxvt_repaint();
-	jbxvt_draw_cursor();
+	decscnm(xc);
+	xcb_flush(xc);
+	jbxvt_repaint(xc);
+	jbxvt_draw_cursor(xc);
 }

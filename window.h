@@ -6,10 +6,12 @@
 #include <stdint.h>
 #include <xcb/xproto.h>
 // Set main window property string
-void jbxvt_set_property(const xcb_atom_t prop, const size_t sz,
+void jbxvt_set_property(xcb_connection_t * xc,
+	const xcb_atom_t prop, const size_t sz,
 	uint8_t * value);
 // Change window or icon name:
-void jbxvt_change_name(uint8_t * restrict str, const bool icon);
+void jbxvt_change_name(xcb_connection_t * xc,
+	uint8_t * restrict str, const bool icon);
 void jbxvt_map_window(xcb_connection_t * xc);
-void jbxvt_resize_window(void);
+void jbxvt_resize_window(xcb_connection_t * xc);
 #endif//JBXVT_WINDOW_H

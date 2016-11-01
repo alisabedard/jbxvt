@@ -2,9 +2,11 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
 #include "sbar.h"
+#include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"
 #include "repaint.h"
+#include <stdbool.h>
 #include <string.h>
 xcb_window_t jbxvt_get_scrollbar(xcb_connection_t * c)
 {
@@ -37,8 +39,8 @@ void jbxvt_set_scroll(xcb_connection_t * xc, int16_t n)
 	if (n == jbxvt.scr.offset)
 		return;
 	jbxvt.scr.offset = n;
-	jbxvt_repaint();
-	jbxvt_draw_cursor();
+	jbxvt_repaint(xc);
+	jbxvt_draw_cursor(xc);
 	jbxvt_draw_scrollbar(xc);
 }
 // Scroll to the specified y position (in pixels)

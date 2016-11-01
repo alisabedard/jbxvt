@@ -3,7 +3,11 @@
 #ifndef JBXVT_ESC_H
 #define JBXVT_ESC_H
 #include "Token.h"
-void jbxvt_csi(int_fast16_t c, struct Token * restrict tk);
-void jbxvt_end_cs(int_fast16_t c, struct Token * restrict tk);
-void jbxvt_esc(int_fast16_t c, struct Token * restrict tk);
+#include <xcb/xcb.h>
+void jbxvt_csi(xcb_connection_t * xc,
+	int_fast16_t c, struct Token * restrict tk);
+void jbxvt_end_cs(xcb_connection_t * xc,
+	int_fast16_t c, struct Token * restrict tk);
+void jbxvt_esc(xcb_connection_t * xc,
+	int_fast16_t c, struct Token * restrict tk);
 #endif//!JBXVT_ESC_H

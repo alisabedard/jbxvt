@@ -5,7 +5,8 @@
 #include "jbxvt.h"
 #include "screen.h"
 #include "selend.h"
-static void paint_rvid(struct JBDim start, struct JBDim end,
+static void paint_rvid(xcb_connection_t * xc,
+	struct JBDim start, struct JBDim end,
 	int16_t col1, int16_t col2)
 {
 	//  Paint in the reverse video:
@@ -17,13 +18,13 @@ static void paint_rvid(struct JBDim start, struct JBDim end,
 		const struct JBDim p2 = jbxvt_get_pixel_size(c);
 		if (p2.x <= p1.x)
 			continue;
-		xcb_poly_fill_rectangle(jbxvt.X.xcb, jbxvt.X.win.vt,
+		xcb_poly_fill_rectangle(xc, jbxvt.X.win.vt,
 			jbxvt.X.gc.cu, 1, &(xcb_rectangle_t){p1.x, p1.y,
 			p2.x - p1.x, jbxvt.X.font.size.h});
 	}
 }
 // Paint the selection on screen
-void jbxvt_show_selection(void)
+void jbxvt_show_selection(xcb_connection_t * xc)
 {
 	if (jbxvt.sel.type == JBXVT_SEL_NONE
 		|| jbxvt_selcmp(&jbxvt.sel.end[0], &jbxvt.sel.end[1]) == 0)
@@ -34,5 +35,5 @@ void jbxvt_show_selection(void)
 	struct JBDim r[] = {{}, jbxvt.scr.chars};
 	//  Obtain initial and final endpoints for the selection.
 	const bool fwd = p->y < p[1].y || (p->y == p[1].y && p->x <= p[1].x);
-	paint_rvid(p[fwd?0:1], p[fwd?1:0], r[0].x, r[1].x);
+	paint_rvid(xc, p[fwd?0:1], p[fwd?1:0], r[0].x, r[1].x);
 }

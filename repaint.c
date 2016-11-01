@@ -9,7 +9,8 @@
 #define FSZ jbxvt.X.font.size
 /* Display the string using the rendition vector
    at the screen coordinates.  */
-static void paint_rvec_text(uint8_t * str, uint32_t * rvec,
+static void paint_rvec_text(xcb_connection_t * xc,
+	uint8_t * str, uint32_t * rvec,
 	int16_t len, struct JBDim p, const bool dwl)
 {
 	if (!rvec || !str)
@@ -22,7 +23,7 @@ static void paint_rvec_text(uint8_t * str, uint32_t * rvec,
 		for (i = 0, r = *rvec; i < len && rvec[i] == r; ++i)
 			;
 		// draw
-		jbxvt_paint(str, r, i, p, dwl);
+		jbxvt_paint(xc, str, r, i, p, dwl);
 		// advance to next block
 		p.x += i * FSZ.width;
 		str += i;
@@ -30,31 +31,34 @@ static void paint_rvec_text(uint8_t * str, uint32_t * rvec,
 		len -= i;
 	}
 }
-static int_fast32_t repaint_generic(struct JBDim p, uint_fast16_t len,
+static int_fast32_t repaint_generic(xcb_connection_t * xc,
+	struct JBDim p, uint_fast16_t len,
 	uint8_t * restrict str, uint32_t * rend, const bool dwl)
 {
 	// check inputs:
 	if (!str || !len)
 		return p.y + FSZ.height;
 	if (rend)
-		paint_rvec_text(str, rend + 0, len, p, dwl);
+		paint_rvec_text(xc, str, rend + 0, len, p, dwl);
 	else
-		jbxvt_paint(str, 0, len, p, dwl);
+		jbxvt_paint(xc, str, 0, len, p, dwl);
 	p.x += len * FSZ.width;
 	const uint16_t width = (CSZ.width + 1 - len) * FSZ.width;
-	xcb_clear_area(jbxvt.X.xcb, false, jbxvt.X.win.vt, p.x, p.y,
+	xcb_clear_area(xc, false, jbxvt.X.win.vt, p.x, p.y,
 		width, FSZ.height);
 	return p.y + FSZ.height;
 }
 __attribute__((nonnull(1)))
-static int_fast16_t show_scroll_history(struct JBDim * restrict p,
-	const int_fast16_t line, const int_fast16_t i)
+static int_fast16_t show_scroll_history(xcb_connection_t * xc,
+	struct JBDim * restrict p, const int_fast16_t line,
+	const int_fast16_t i)
 {
 	if (line > CSZ.h || i < 0)
 		return line;
 	struct JBXVTSavedLine * sl = &jbxvt.scr.sline.data[i];
-	p->y = repaint_generic(*p, sl->size, sl->text, sl->rend, sl->dwl);
-	return show_scroll_history(p, line + 1, i - 1);
+	p->y = repaint_generic(xc, *p, sl->size, sl->text,
+		sl->rend, sl->dwl);
+	return show_scroll_history(xc, p, line + 1, i - 1);
 }
 __attribute__((nonnull(1)))
 static uint_fast16_t filter_string(uint8_t * restrict buf,
@@ -68,18 +72,20 @@ static uint_fast16_t filter_string(uint8_t * restrict buf,
 	return x;
 }
 // Repaint the screen
-void jbxvt_repaint(void)
+void jbxvt_repaint(xcb_connection_t * xc)
 {
 	//  First do any 'scrolled off' lines that are visible.
 	struct JBDim p = {};
-	int_fast32_t line = show_scroll_history(&p, 0, jbxvt.scr.offset - 1);
+	int_fast32_t line = show_scroll_history(xc,
+		&p, 0, jbxvt.scr.offset - 1);
 	// Do the remainder from the current screen:
 	for (uint_fast16_t i = 0; line < CSZ.height; ++line, ++i) {
 		// Allocate enough space to process each column
 		uint8_t str[CSZ.width];
-		p.y = repaint_generic(p, filter_string(str,
+		p.y = repaint_generic(xc, p, filter_string(str,
 			jbxvt.scr.current->text[i]), str,
-			jbxvt.scr.current->rend[i], jbxvt.scr.current->dwl[i]);
+			jbxvt.scr.current->rend[i],
+			jbxvt.scr.current->dwl[i]);
 	}
-	jbxvt_show_selection();
+	jbxvt_show_selection(xc);
 }

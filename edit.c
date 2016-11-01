@@ -7,22 +7,24 @@
 #include "sbar.h"
 #include "screen.h"
 #include <string.h>
-static void copy_area(const int16_t * restrict x, const int16_t y,
+static void copy_area(xcb_connection_t * xc,
+	const int16_t * restrict x, const int16_t y,
 	const uint16_t width)
 {
 	if (width > 0)
-		xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt, jbxvt.X.win.vt,
+		xcb_copy_area(xc, jbxvt.X.win.vt, jbxvt.X.win.vt,
 			jbxvt.X.gc.tx, x[0], y, x[1], y, width,
 			jbxvt.X.font.size.height);
 }
-static void finalize(const int16_t * restrict x, const struct JBDim p,
+static void finalize(xcb_connection_t * xc,
+	const int16_t * restrict x, const struct JBDim p,
 	const uint16_t width, const int8_t count)
 {
-	copy_area(x, p.y, width);
-	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, p.x, p.y,
+	copy_area(xc, x, p.y, width);
+	xcb_clear_area(xc, 0, jbxvt.X.win.vt, p.x, p.y,
 		count * jbxvt.X.font.size.w, jbxvt.X.font.size.h);
 	jbxvt.scr.current->wrap_next = 0;
-	jbxvt_draw_cursor();
+	jbxvt_draw_cursor(xc);
 }
 static void copy_lines(const int16_t x, const int8_t count)
 {
@@ -51,14 +53,14 @@ static void begin(xcb_connection_t * xc, int16_t * x,
 {
 	*count = get_count(*count, insert);
 	jbxvt_set_scroll(xc, 0);
-	jbxvt_draw_cursor();
+	jbxvt_draw_cursor(xc);
 	const struct JBDim c = jbxvt.scr.current->cursor;
 	struct JBDim p = jbxvt_get_pixel_size(c);
 	x[0] = p.x;
 	x[1] = p.x + *count * jbxvt.X.font.size.width;
 	if (!insert)
 		JB_SWAP(int16_t, x[0], x[1]);
-	jbxvt_check_selection(c.y, c.y);
+	jbxvt_check_selection(xc, c.y, c.y);
 }
 //  Insert count spaces from the current position.
 void jbxvt_insert_characters(xcb_connection_t * xc, int8_t count)
@@ -68,7 +70,7 @@ void jbxvt_insert_characters(xcb_connection_t * xc, int8_t count)
 	begin(xc, x, &count, true);
 	const struct JBDim c = jbxvt.scr.current->cursor;
 	copy_lines(c.x, count);
-	finalize(x, jbxvt_get_pixel_size(c), get_width(count), count);
+	finalize(xc, x, jbxvt_get_pixel_size(c), get_width(count), count);
 }
 static void copy_data_after_count(const uint8_t count, const struct JBDim c)
 {
@@ -103,5 +105,5 @@ void jbxvt_delete_characters(xcb_connection_t * xc, int8_t count)
 	c = jbxvt_get_pixel_size(c);
 	const uint16_t width = get_width(count);
 	c.x += width;
-	finalize(x, c, width, count);
+	finalize(xc, x, c, width, count);
 }

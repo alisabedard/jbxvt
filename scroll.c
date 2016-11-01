@@ -65,20 +65,22 @@ static void get_y(int16_t * restrict y, const uint8_t row1,
 	*(up ? y + 1 : y) = a;
 	*(up ? y : y + 1) = a + count * jbxvt.X.font.size.h;
 }
-static void copy_visible_area(const uint8_t row1, const uint8_t row2,
+static void copy_visible_area(xcb_connection_t * xc,
+	const uint8_t row1, const uint8_t row2,
 	const int8_t count, const bool up)
 {
 	int16_t y[2];
 	get_y(y, row1, count, up);
 	const uint16_t height = (row2 - row1 - count)
 		* jbxvt.X.font.size.h;
-	xcb_copy_area(jbxvt.X.xcb, jbxvt.X.win.vt,
+	xcb_copy_area(xc, jbxvt.X.win.vt,
 		jbxvt.X.win.vt, jbxvt.X.gc.tx, 0, y[0],
 		0, y[1], jbxvt.scr.pixels.width, height);
 	// the above blocks the event queue, flush it
-	xcb_flush(jbxvt.X.xcb);
+	xcb_flush(xc);
 }
-static void add_scroll_history(const int8_t count)
+static void add_scroll_history(xcb_connection_t * xc,
+	const int8_t count)
 {
 	if (count < 1) // nothing to do
 		return;
@@ -91,7 +93,7 @@ static void add_scroll_history(const int8_t count)
 	for (; y >= 0; --y, --i, --j)
 		memcpy(j, i, sizeof(struct JBXVTSavedLine));
 	copy_saved_lines(count);
-	jbxvt_draw_scrollbar(jbxvt.X.xcb);
+	jbxvt_draw_scrollbar(xc);
 }
 static int8_t copy_screen_area(const int8_t i,
 	const int8_t j, const int8_t mod, const int8_t count,
@@ -105,12 +107,13 @@ static int8_t copy_screen_area(const int8_t i,
 	return copy_screen_area(i + 1, j + mod, mod,
 		count, save, rend);
 }
-static void clear_line(const int16_t y, const int8_t count)
+static void clear_line(xcb_connection_t * xc,
+	const int16_t y, const int8_t count)
 {
-#define FH jbxvt.X.font.size.height
-	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, 0, y * FH,
-		jbxvt.scr.pixels.width, count * FH);
-#undef FH
+	xcb_clear_area(xc, 0, jbxvt.X.win.vt, 0,
+		y * jbxvt.X.font.size.height,
+		jbxvt.scr.pixels.width,
+		count * jbxvt.X.font.size.height);
 }
 void jbxvt_scroll_primary_screen(int16_t n)
 {
@@ -120,38 +123,41 @@ void jbxvt_scroll_primary_screen(int16_t n)
 		j < jbxvt.scr.chars.height; ++j)
 		  move_line(j, -n, &jbxvt.scr.s[0]);
 }
-static void sc_common(const uint8_t r1, const uint8_t r2,
+static void sc_common(xcb_connection_t * xc,
+	const uint8_t r1, const uint8_t r2,
 	const int16_t count, const bool up,
 	uint8_t ** save, uint32_t ** rend)
 {
 	clear(count, up ? r2 : r1, save, rend, up);
-	copy_visible_area(r1, r2, count, up);
-	clear_line(up ? (r2 - count) : r1, count);
+	copy_visible_area(xc, r1, r2, count, up);
+	clear_line(xc, up ? (r2 - count) : r1, count);
 }
-static void sc_dn(const uint8_t row1, const uint8_t row2,
+static void sc_dn(xcb_connection_t * xc,
+	const uint8_t row1, const uint8_t row2,
 	const int16_t count, uint8_t ** save, uint32_t ** rend)
 {
 	for(int8_t j = copy_screen_area(0, row2, -1,
 		count, save, rend); j >= row1; --j)
 		  move_line(j, count, jbxvt.scr.current);
-	sc_common(row1, row2, count, false, save, rend);
+	sc_common(xc, row1, row2, count, false, save, rend);
 }
-static void sc_up(const uint8_t row1, const uint8_t row2,
+static void sc_up(xcb_connection_t * xc,
+	const uint8_t row1, const uint8_t row2,
 	const int16_t count, uint8_t ** save, uint32_t ** rend)
 {
 	if (jbxvt.scr.current == &jbxvt.scr.s[0] && row1 == 0)
-		add_scroll_history(count);
+		add_scroll_history(xc, count);
 	for(int8_t j = copy_screen_area(0, row1,
 		1, count, save, rend); j < row2; ++j)
 		move_line(j, -count, jbxvt.scr.current);
-	sc_common(row1, row2, count, true, save, rend);
+	sc_common(xc, row1, row2, count, true, save, rend);
 }
 /*  Scroll count lines from row1 to row2 inclusive.
     row1 should be <= row2.  Scrolling is up for
     a positive count and down for a negative count.
     count is limited to a maximum of SCROLL lines.  */
-void scroll(const uint8_t row1, const uint8_t row2,
-	const int16_t count)
+void scroll(xcb_connection_t * xc, const uint8_t row1,
+	const uint8_t row2, const int16_t count)
 {
 	LOG("scroll(%d, %d, %d)", row1, row2, count);
 	if (!count)
@@ -159,6 +165,7 @@ void scroll(const uint8_t row1, const uint8_t row2,
 	const uint16_t abs_count = abs(count);
 	uint8_t *save[abs_count];
 	uint32_t *rend[abs_count];
-	(count > 0 ? sc_up : sc_dn)(row1, row2 + 1, abs_count, save, rend);
-	jbxvt_set_scroll(jbxvt.X.xcb, 0);
+	(count > 0 ? sc_up : sc_dn)(xc, row1, row2 + 1,
+		abs_count, save, rend);
+	jbxvt_set_scroll(xc, 0);
 }

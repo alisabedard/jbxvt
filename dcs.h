@@ -3,5 +3,6 @@
 #ifndef JBXVT_DCS_H
 #define JBXVT_DCS_H
 #include "Token.h"
-void jbxvt_dcs(struct Token * t);
+#include <xcb/xcb.h>
+void jbxvt_dcs(xcb_connection_t * xc, struct Token * t);
 #endif//!JBXVT_DCS_H

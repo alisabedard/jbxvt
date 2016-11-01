@@ -16,16 +16,17 @@ struct JBDim jbxvt_get_pixel_size(struct JBDim c)
     and do not lie within empty space.  */
 void jbxvt_fix_coordinates(struct JBDim * restrict rc);
 // Get default colormap for the screen
-xcb_colormap_t jbxvt_get_colormap(xcb_connection_t * c);
+xcb_colormap_t jbxvt_get_colormap(xcb_connection_t * xc);
 // Get the root window of the screen
-xcb_window_t jbxvt_get_root_window(xcb_connection_t * c);
+xcb_window_t jbxvt_get_root_window(xcb_connection_t * xc);
 //  Change the rendition style.
 void jbxvt_style(const uint32_t style);
 //  Change between the alternate and the main screens
 //  mode_high is true for screen 2
-void jbxvt_change_screen(const bool mode_high);
+void jbxvt_change_screen(xcb_connection_t * xc, const bool mode_high);
 // Set all chars to 'E'
-void jbxvt_efill(void);
+void jbxvt_efill(xcb_connection_t * xc);
 // Scroll from top to current bottom margin count lines, moving cursor
-void jbxvt_index_from(const int8_t count, const int16_t top);
+void jbxvt_index_from(xcb_connection_t * xc,
+	const int8_t count, const int16_t top);
 #endif//!JBXVT_SCREEN_H

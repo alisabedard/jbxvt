@@ -7,12 +7,13 @@
 #include "jbxvt.h"
 #include "screen.h"
 #include <stdio.h>
-void jbxvt_csi(int_fast16_t c, struct Token * restrict tk)
+void jbxvt_csi(xcb_connection_t * xc,
+	int_fast16_t c, struct Token * restrict tk)
 {
-	c = jbxvt_pop_char(0);
+	c = jbxvt_pop_char(xc, 0);
 	if (c >= '<' && c <= '?') {
 		tk->private = c;
-		c = jbxvt_pop_char(0);
+		c = jbxvt_pop_char(xc, 0);
 	}
 	//  read any numerical arguments
 	uint_fast16_t i = 0;
@@ -21,7 +22,7 @@ void jbxvt_csi(int_fast16_t c, struct Token * restrict tk)
 		while (c >= '0' && c <= '9') { // is a number
 			// Advance position and convert
 			n = n * 10 + c - '0';
-			c = jbxvt_pop_char(0); // next digit
+			c = jbxvt_pop_char(xc, 0); // next digit
 		}
 		if (i < JBXVT_TOKEN_MAX_ARGS)
 			  tk->arg[i++] = n;
@@ -30,46 +31,48 @@ void jbxvt_csi(int_fast16_t c, struct Token * restrict tk)
 		if (c < ' ')
 			  return;
 		if (c < '@')
-			  c = jbxvt_pop_char(0);
+			  c = jbxvt_pop_char(xc, 0);
 	} while (c < '@' && c >= ' ');
 	if (c == JBXVT_TOKEN_ESC)
 		  jbxvt_push_char(c);
 	tk->nargs = i;
 	tk->type = c;
 }
-void jbxvt_end_cs(int_fast16_t c, struct Token * restrict tk)
+void jbxvt_end_cs(xcb_connection_t * xc,
+	int_fast16_t c, struct Token * restrict tk)
 {
-	c = jbxvt_pop_char(0);
+	c = jbxvt_pop_char(xc, 0);
 	uint_fast16_t n = 0;
 	while (c >= '0' && c <= '9') {
 		n = n * 10 + c - '0';
-		c = jbxvt_pop_char(0);
+		c = jbxvt_pop_char(xc, 0);
 	}
 	tk->arg[0] = n;
 	tk->nargs = 1;
-	c = jbxvt_pop_char(0);
+	c = jbxvt_pop_char(xc, 0);
 	register uint_fast16_t i = 0;
 	while ((c & 0177) >= ' ' && i < JBXVT_TOKEN_MAX_LENGTH) {
 		if (c >= ' ')
 			  tk->string[i++] = c;
-		c = jbxvt_pop_char(0);
+		c = jbxvt_pop_char(xc, 0);
 	}
 	tk->length = i;
 	tk->string[i] = 0;
 	tk->type = JBXVT_TOKEN_TXTPAR;
 }
-void jbxvt_esc(int_fast16_t c, struct Token * restrict tk)
+void jbxvt_esc(xcb_connection_t * xc,
+	int_fast16_t c, struct Token * restrict tk)
 {
-	c = jbxvt_pop_char(0);
+	c = jbxvt_pop_char(xc, 0);
 	switch(c) {
 	case '[': // CSI
-		jbxvt_csi(c, tk);
+		jbxvt_csi(xc, c, tk);
 		break;
 	case ']': // OSC
-		jbxvt_end_cs(c, tk);
+		jbxvt_end_cs(xc, c, tk);
 		break;
 	case ' ':
-		c = jbxvt_pop_char(0);
+		c = jbxvt_pop_char(xc, 0);
 		switch (c) {
 #define CASE_A(ch, tok, a) case ch: tk->type = tok, tk->arg[0] = a;\
 			tk->nargs=1; break;
@@ -83,7 +86,7 @@ void jbxvt_esc(int_fast16_t c, struct Token * restrict tk)
 		}
 		break;
 	case '#':
-		c = jbxvt_pop_char(0);
+		c = jbxvt_pop_char(xc, 0);
 		switch(c) {
 		CASE_T('3', JBXVT_TOKEN_DHLT);
 		CASE_T('4', JBXVT_TOKEN_DHLB);
@@ -93,9 +96,9 @@ void jbxvt_esc(int_fast16_t c, struct Token * restrict tk)
 		}
 		break;
 	case '(': // G0 charset
-	CASE_A(')', c, jbxvt_pop_char(0));
+	CASE_A(')', c, jbxvt_pop_char(xc, 0));
 	case '%': // UTF charset switch
-		c = jbxvt_pop_char(0);
+		c = jbxvt_pop_char(xc, 0);
 		switch (c) {
 		CASE_T('@', JBXVT_TOKEN_CS_DEF);
 		CASE_T('G', JBXVT_TOKEN_CS_UTF8);
@@ -127,7 +130,7 @@ void jbxvt_esc(int_fast16_t c, struct Token * restrict tk)
 	CASE_T('H', jbxvt.mode.decanm ? JBXVT_TOKEN_HTS : JBXVT_TOKEN_HOME);
 	CASE_A('l', jbxvt.mode.decanm ? JBXVT_TOKEN_MEMLOCK : JBXVT_TOKEN_EL, 2);
 	case 'I':
-		jbxvt_index_from(-1, jbxvt.scr.current->cursor.y);
+		jbxvt_index_from(xc, -1, jbxvt.scr.current->cursor.y);
 		tk->type = JBXVT_TOKEN_CUU;
 		break;
 	CASE_A('J', JBXVT_TOKEN_EL, 1); // vt52 erase to end of line
@@ -140,7 +143,7 @@ void jbxvt_esc(int_fast16_t c, struct Token * restrict tk)
 	CASE_T('O', JBXVT_TOKEN_SS3);
 	CASE_A('o', JBXVT_TOKEN_EL, 1); // clear to start of line (vt52g)
 	case 'P':
-		jbxvt_dcs(tk);
+		jbxvt_dcs(xc, tk);
 		break;
 	CASE_M('p', decscnm, true); // reverse video mode (vt52g)
 	CASE_M('q', decscnm, false); // normal video (vt52g)
@@ -152,8 +155,8 @@ void jbxvt_esc(int_fast16_t c, struct Token * restrict tk)
 	case 'Y':
 		tk->type = JBXVT_TOKEN_CUP;
 		// -32 to decode, + 1 to be vt100 compatible
-		tk->arg[1] = jbxvt_pop_char(0) - 31;
-		tk->arg[0] = jbxvt_pop_char(0) - 31;
+		tk->arg[1] = jbxvt_pop_char(xc, 0) - 31;
+		tk->arg[0] = jbxvt_pop_char(xc, 0) - 31;
 		tk->nargs = 2;
 	case 'Z':
 		if (jbxvt.mode.decanm) // vt100+ mode

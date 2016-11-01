@@ -15,20 +15,20 @@
 #define FSZ jbxvt.X.font.size
 #define GET_X(op) p.w op##= FSZ.w; p.y op##= FSZ.h; return p;
 static xcb_screen_t * jbxvt_screen;
-static void init(xcb_connection_t * restrict c)
+static void init(xcb_connection_t * restrict xc)
 {
-	jbxvt_screen = jb_get_xcb_screen(c);
+	jbxvt_screen = jb_get_xcb_screen(xc);
 }
-xcb_window_t jbxvt_get_root_window(xcb_connection_t * c)
+xcb_window_t jbxvt_get_root_window(xcb_connection_t * xc)
 {
 	if (!jbxvt_screen)
-		init(c);
+		init(xc);
 	return jbxvt_screen->root;
 }
-xcb_colormap_t jbxvt_get_colormap(xcb_connection_t * c)
+xcb_colormap_t jbxvt_get_colormap(xcb_connection_t * xc)
 {
 	if (!jbxvt_screen)
-		init(c);
+		init(xc);
 	return jbxvt_screen->default_colormap;
 }
 struct JBDim jbxvt_get_char_size(struct JBDim p)
@@ -53,19 +53,19 @@ void jbxvt_fix_coordinates(struct JBDim * restrict rc)
 #undef CSZ
 }
 // Set all chars to 'E'
-void jbxvt_efill(void)
+void jbxvt_efill(xcb_connection_t * xc)
 {
 	LOG("jbxvt_efill");
 	// Move to cursor home in order for all characters to appear.
-	jbxvt_move(0, 0, 0);
+	jbxvt_move(xc, 0, 0, 0);
 	for (uint8_t y = 0; y < jbxvt.scr.chars.h; ++y) {
 		memset(jbxvt.scr.current->text[y], 'E', jbxvt.scr.chars.w);
 		memset(jbxvt.scr.current->rend[y], 0, jbxvt.scr.chars.w << 2);
 	}
-	jbxvt_repaint();
+	jbxvt_repaint(xc);
 }
 //  Change between the alternate and the main screens
-void jbxvt_change_screen(const bool mode_high)
+void jbxvt_change_screen(xcb_connection_t * xc, const bool mode_high)
 {
 	jbxvt.scr.current = &jbxvt.scr.s[mode_high];
 	jbxvt.mode.charsel = 0;
@@ -76,9 +76,9 @@ void jbxvt_change_screen(const bool mode_high)
 	    ls
 	    <scroll up>
 	*/
-	jbxvt_reset(jbxvt.X.xcb);
-	jbxvt_move(0,0,0);
-	jbxvt_erase_screen(jbxvt.X.xcb, JBXVT_ERASE_AFTER);
+	jbxvt_reset(xc);
+	jbxvt_move(xc, 0, 0, 0);
+	jbxvt_erase_screen(xc, JBXVT_ERASE_AFTER);
 }
 //  Change the rendition style.
 void jbxvt_style(const uint32_t style)
@@ -87,10 +87,11 @@ void jbxvt_style(const uint32_t style)
 	jbxvt.scr.rstyle = style ? jbxvt.scr.rstyle | style : 0;
 }
 // Scroll from top to current bottom margin count lines, moving cursor
-void jbxvt_index_from(const int8_t count, const int16_t top)
+void jbxvt_index_from(xcb_connection_t * xc,
+	const int8_t count, const int16_t top)
 {
-	jbxvt_set_scroll(jbxvt.X.xcb, 0);
-	jbxvt_draw_cursor();
-	scroll(top, jbxvt.scr.current->margin.b, count);
-	jbxvt_draw_cursor();
+	jbxvt_set_scroll(xc, 0);
+	jbxvt_draw_cursor(xc);
+	scroll(xc, top, jbxvt.scr.current->margin.b, count);
+	jbxvt_draw_cursor(xc);
 }

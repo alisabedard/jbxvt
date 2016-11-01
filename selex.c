@@ -4,6 +4,7 @@
 #include "change_selection.h"
 #include "jbxvt.h"
 #include "screen.h"
+#include "selend.h"
 #define SE jbxvt.sel.end
 static void handle_drag(const struct JBDim rc)
 {
@@ -13,7 +14,8 @@ static void handle_drag(const struct JBDim rc)
 	jbxvt_adjust_selection(&SE[1]);
 }
 //  Extend the selection.
-void jbxvt_extend_selection(const struct JBDim point, const bool drag)
+void jbxvt_extend_selection(xcb_connection_t * xc,
+	const struct JBDim point, const bool drag)
 {
 	if (jbxvt.sel.type == JBXVT_SEL_NONE)
 		return; // no selection
@@ -22,5 +24,5 @@ void jbxvt_extend_selection(const struct JBDim point, const bool drag)
 	jbxvt_fix_coordinates(s + 2);
 	if (drag)
 		  handle_drag(s[2]);
-	jbxvt_change_selection(s, s + 1);
+	jbxvt_change_selection(xc, s, s + 1);
 }

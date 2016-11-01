@@ -5,5 +5,7 @@
 #define JBXVT_SELEX_H
 #include "libjb/size.h"
 #include <stdbool.h>
-void jbxvt_extend_selection(const struct JBDim p, const bool drag);
+#include <xcb/xcb.h>
+void jbxvt_extend_selection(xcb_connection_t * xc,
+	const struct JBDim p, const bool drag);
 #endif//!JBXVT_SELEX_H

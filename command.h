@@ -4,6 +4,7 @@
 #define JBXVT_COMMAND_H
 #include "libjb/size.h"
 #include <stdint.h>
+#include <xcb/xcb.h>
 enum JBXVTCommandLimits {
 	KBUFSIZE =	8,		// size of keyboard mapping buffer
 	COM_BUF_SIZE =	UINT8_MAX,	// size of command read buffer
@@ -12,7 +13,8 @@ enum JBXVTCommandLimits {
 };
 /*  Initialise the command connection.  This should be called after the X
  *  server connection is established.  */
-void jbxvt_init_command_module(char ** restrict argv);
+void jbxvt_init_command_module(xcb_connection_t * xc,
+	char ** restrict argv);
 //  Push an input character back into the input queue.
 void jbxvt_push_char(const uint8_t c);
 #ifdef LINUX

@@ -15,7 +15,7 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
-//  Flags used to control jbxvt_pop_char();
+//  Flags used to control jbxvt_pop_char
 enum ComCharFlags {INPUT_BUFFER_EMPTY = 0x100,
 	GET_INPUT_ONLY=1, GET_XEVENTS_ONLY=2};
 // Shortcuts
@@ -38,17 +38,18 @@ static void handle_sel(xcb_generic_event_t * restrict ge)
 		.target = e->target, .property = e->property,
 		.window = e->owner};
 }
-static void handle_client_msg(xcb_generic_event_t * restrict ge)
+static void handle_client_msg(xcb_connection_t * xc,
+	xcb_generic_event_t * restrict ge)
 {
 	xcb_client_message_event_t * e = (xcb_client_message_event_t *)ge;
 	if (e->format == 32 && e->data.data32[0]
-		== (unsigned long)jbxvt_get_wm_del_win())
+		== (unsigned long)jbxvt_get_wm_del_win(xc))
 		  exit(0);
 }
 static void handle_expose(xcb_connection_t * xc,
 	xcb_generic_event_t * restrict ge)
 {
-	if (((xcb_expose_event_t *)ge)->window == jbxvt_get_scrollbar(jbxvt.X.xcb))
+	if (((xcb_expose_event_t *)ge)->window == jbxvt_get_scrollbar(xc))
 		jbxvt_draw_scrollbar(xc);
 	else
 		jbxvt_reset(xc);
@@ -61,10 +62,11 @@ static void handle_other(xcb_generic_event_t * restrict ge)
 		.box.y = e->event_y, .state = e->state,
 		.time = e->time, .button = e->detail};
 }
-static void key_press(xcb_generic_event_t * restrict e)
+static void key_press(xcb_connection_t * xc,
+	xcb_generic_event_t * restrict e)
 {
 	int_fast16_t count = 0;
-	uint8_t * s = jbxvt_lookup_key(jbxvt.X.xcb, e, &count);
+	uint8_t * s = jbxvt_lookup_key(xc, e, &count);
 	jb_require(write(jbxvt.com.fd, s, count) != -1,
 		"Could not write to command");
 }
@@ -76,10 +78,10 @@ static bool handle_xev(xcb_connection_t * xc)
 		return false;
 	switch (event->response_type & ~0x80) {
 	case XCB_CONFIGURE_NOTIFY:
-		jbxvt_resize_window();
+		jbxvt_resize_window(xc);
 		break;
 	case XCB_KEY_PRESS:
-		key_press(event);
+		key_press(xc, event);
 		break;
 	case XCB_FOCUS_IN:
 	case XCB_FOCUS_OUT:
@@ -90,7 +92,7 @@ static bool handle_xev(xcb_connection_t * xc)
 		handle_sel(event);
 		break;
 	case XCB_CLIENT_MESSAGE:
-		handle_client_msg(event);
+		handle_client_msg(xc, event);
 		break;
 	case XCB_EXPOSE:
 	case XCB_GRAPHICS_EXPOSURE:
@@ -113,26 +115,28 @@ static int_fast16_t output_to_command(void)
 	c->send_nxt += count;
 	return count;
 }
-static void timer(void)
+static void timer(xcb_connection_t * xc)
 {
 	if (!jbxvt.mode.att610 && jbxvt.opt.cursor_attr % 2) {
-		jbxvt_draw_cursor(); // blinking cursor
-		xcb_flush(jbxvt.X.xcb);
+		jbxvt_draw_cursor(xc); // blinking cursor
+		xcb_flush(xc);
 	}
 }
-static void check_fdsets(fd_set * restrict in_fdset,
+static void check_fdsets(xcb_connection_t * xc,
+	fd_set * restrict in_fdset,
 	fd_set * restrict out_fdset)
 {
 	if (FD_ISSET(jbxvt.com.fd, out_fdset))
 		output_to_command();
 	else if (!FD_ISSET(jbxvt.com.xfd, in_fdset))
-		timer(); // select timed out
+		timer(xc); // select timed out
 	else
-		jb_check_x(jbxvt.X.xcb);
+		jb_check_x(xc);
 
 }
 __attribute__((nonnull))
-static void poll_io(fd_set * restrict in_fdset)
+static void poll_io(xcb_connection_t * xc,
+	fd_set * restrict in_fdset)
 {
 	FD_SET(jbxvt.com.fd, in_fdset);
 	FD_SET(jbxvt.com.xfd, in_fdset);
@@ -144,7 +148,7 @@ static void poll_io(fd_set * restrict in_fdset)
 		&(struct timeval){.tv_usec = 500000}) == -1)
 		exit(1); /* exit is reached in case SHELL or -e
 			    command was not run successfully.  */
-	check_fdsets(in_fdset, &out_fdset);
+	check_fdsets(xc, in_fdset, &out_fdset);
 }
 static bool get_buffered(int_fast16_t * val, const uint8_t flags)
 {
@@ -164,18 +168,18 @@ static bool get_buffered(int_fast16_t * val, const uint8_t flags)
     INPUT_BUFFER_EMPTY is returned.  If flags and GET_XEVENTS_ONLY is true,
     then INPUT_BUFFER_EMPTY is returned when an X event arrives.
     This is the most often called function. */
-int_fast16_t jbxvt_pop_char(const uint8_t flags)
+int_fast16_t jbxvt_pop_char(xcb_connection_t * xc, const uint8_t flags)
 {
 	int_fast16_t ret = 0;
 	if (get_buffered(&ret, flags))
 		return ret;
-	xcb_flush(jbxvt.X.xcb);
+	xcb_flush(xc);
 	fd_set in;
 	do {
 		FD_ZERO(&in);
-		if (handle_xev(jbxvt.X.xcb) && (flags & GET_XEVENTS_ONLY))
+		if (handle_xev(xc) && (flags & GET_XEVENTS_ONLY))
 			return INPUT_BUFFER_EMPTY;
-		poll_io(&in);
+		poll_io(xc, &in);
 	} while (!FD_ISSET(jbxvt.com.fd, &in));
 	const uint8_t l = read(jbxvt.com.fd, BUF.data, COM_BUF_SIZE);
 	if (l < 1)
@@ -189,13 +193,14 @@ static inline bool is_string_char(register int_fast16_t c)
 {
 	return c < 0x7f && (c >= ' ' || c == '\n' || c == '\r' || c == '\t');
 }
-static void handle_string_char(int_fast16_t c, struct Token * restrict tk)
+static void handle_string_char(xcb_connection_t * xc,
+	int_fast16_t c, struct Token * restrict tk)
 {
 	uint_fast16_t i = 0, nl = 0;
 	uint8_t * restrict s = tk->string;
 	do {
 		s[i++] = c;
-		c = jbxvt_pop_char(GET_INPUT_ONLY);
+		c = jbxvt_pop_char(xc, GET_INPUT_ONLY);
 		if (c == '\n')
 			++nl;
 	} while (is_string_char(c) && i < JBXVT_TOKEN_MAX_LENGTH);
@@ -217,24 +222,26 @@ static uint8_t get_utf_bytes(uint8_t c)
 		return 1;
 	return 0;
 }
-static void utf8_3(struct Token * restrict tk, int_fast16_t c) // 1
+static void utf8_3(xcb_connection_t * xc,
+	struct Token * restrict tk, int_fast16_t c) // 1
 {
 	LOG("utf8_3()");
 	LOG("\t0x%x\n", (unsigned int)c);
-	c = jbxvt_pop_char(c); // 2
+	c = jbxvt_pop_char(xc, c); // 2
 	LOG("\t0x%x\n", (unsigned int)c);
-	c = jbxvt_pop_char(c); // 3
+	c = jbxvt_pop_char(xc, c); // 3
 	LOG("\t0x%x\n", (unsigned int)c);
 	switch (c) {
 	default:
 		tk->type = JBXVT_TOKEN_NULL;
 	}
 }
-static void utf8_2(struct Token * restrict tk, int_fast16_t c) // 1
+static void utf8_2(xcb_connection_t * xc,
+	struct Token * restrict tk, int_fast16_t c) // 1
 {
 	LOG("utf8_2()");
 	LOG("\t0x%x\n", (unsigned int)c);
-	int_fast16_t c2 = jbxvt_pop_char(c); // take next byte
+	int_fast16_t c2 = jbxvt_pop_char(xc, c); // take next byte
 	LOG("\t0x%x\n", (unsigned int)c2);
 	switch (c) {
 	case 0x80:
@@ -288,7 +295,8 @@ static void utf8_0(struct Token * restrict tk, int_fast16_t c)
 	tk->type = JBXVT_TOKEN_CHAR;
 	tk->tk_char = c;
 }
-static void default_token(struct Token * restrict tk, int_fast16_t c)
+static void default_token(xcb_connection_t * xc,
+	struct Token * restrict tk, int_fast16_t c)
 {
 	switch(c) { // handle 8-bit controls
 	case JBXVT_TOKEN_CSI: case JBXVT_TOKEN_DCS: case JBXVT_TOKEN_EPA:
@@ -299,13 +307,13 @@ static void default_token(struct Token * restrict tk, int_fast16_t c)
 		tk->type = c;
 		return;
 	case JBXVT_TOKEN_APC: // Retrieve and skip sequence
-		c = jbxvt_pop_char(c);
-		c = jbxvt_pop_char(c);
+		c = jbxvt_pop_char(xc, c);
+		c = jbxvt_pop_char(xc, c);
 		LOG("0x9f0x%x", (unsigned int)c);
 		return;
 	}
 	if (is_string_char(c)) {
-		handle_string_char(c, tk);
+		handle_string_char(xc, c, tk);
 		return;
 	}
 	// Process individual characters and unicode:
@@ -313,15 +321,15 @@ static void default_token(struct Token * restrict tk, int_fast16_t c)
 	switch (bytes) {
 	case 3:
 		LOG("UTF8, 3 additional bytes: \t0x%x\n", (unsigned int)c);
-		utf8_3(tk, jbxvt_pop_char(c));
+		utf8_3(xc, tk, jbxvt_pop_char(xc, c));
 		break;
 	case 2:
 		LOG("UTF8, 2 additional bytes: \t0x%x\n", (unsigned int)c);
-		utf8_2(tk, jbxvt_pop_char(c));
+		utf8_2(xc, tk, jbxvt_pop_char(xc, c));
 		break;
 	case 1:
 		LOG("UTF8, 1 additional byte: \t0x%x\n", (unsigned int)c);
-		utf8_1(tk, jbxvt_pop_char(c));
+		utf8_1(tk, jbxvt_pop_char(xc, c));
 		break;
 	case 0:
 		utf8_0(tk, c);
@@ -330,13 +338,13 @@ static void default_token(struct Token * restrict tk, int_fast16_t c)
 	}
 }
 //  Return an input token
-void jbxvt_get_token(struct Token * restrict tk)
+void jbxvt_get_token(xcb_connection_t * xc, struct Token * restrict tk)
 {
 	memset(tk, 0, sizeof(struct Token));
 	// set token per event:
-	if(jbxvt_handle_xevents(&jbxvt.com.xev))
+	if(jbxvt_handle_xevents(xc, &jbxvt.com.xev))
 		  return;
-	const int_fast16_t c = jbxvt_pop_char(GET_XEVENTS_ONLY);
+	const int_fast16_t c = jbxvt_pop_char(xc, GET_XEVENTS_ONLY);
 	switch (c) {
 	case INPUT_BUFFER_EMPTY:
 		tk->type = JBXVT_TOKEN_NULL;
@@ -345,18 +353,18 @@ void jbxvt_get_token(struct Token * restrict tk)
 		tk->type = JBXVT_TOKEN_EOF;
 		break;
 	case JBXVT_TOKEN_ESC:
-		jbxvt_esc(c, tk);
+		jbxvt_esc(xc, c, tk);
 		break;
 	case JBXVT_TOKEN_CSI: // 8-bit CSI
 		// Catch this here, since 7-bit CSI is parsed above.
 		LOG("CC_CSI");
-		jbxvt_csi(c, tk);
+		jbxvt_csi(xc, c, tk);
 		break;
 	case JBXVT_TOKEN_DCS: // 8-bit DCS
-		jbxvt_dcs(tk);
+		jbxvt_dcs(xc, tk);
 		break;
 	default:
-		default_token(tk, c);
+		default_token(xc, tk, c);
 	}
 }
 const char * jbxvt_get_csi(void)

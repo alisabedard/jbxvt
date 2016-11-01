@@ -5,63 +5,63 @@
 #include "cmdtok.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
-static void check_st(struct Token * t)
+static void check_st(xcb_connection_t * xc, struct Token * t)
 {
-	int_fast16_t c = jbxvt_pop_char(0);
+	int_fast16_t c = jbxvt_pop_char(xc, 0);
 	if (c != JBXVT_TOKEN_ST)
 		t->type = JBXVT_TOKEN_NULL;
 }
-void jbxvt_dcs(struct Token * t)
+void jbxvt_dcs(xcb_connection_t * xc, struct Token * t)
 {
-	int_fast16_t c = jbxvt_pop_char(0);
+	int_fast16_t c = jbxvt_pop_char(xc, 0);
 	switch (c) {
 	case '0':
 	case '1':
 		LOG("FIXME: User defined keys are unimplemented.");
 		return;
 	case '$':
-		c = jbxvt_pop_char(0);
+		c = jbxvt_pop_char(xc, 0);
 		if (c != 'q')
 			return;
 		// RQSS:  Request status string
-		c = jbxvt_pop_char(0); // next char
+		c = jbxvt_pop_char(xc, 0); // next char
 		switch (c) {
 		case '"':
-			c = jbxvt_pop_char(0); // next
+			c = jbxvt_pop_char(xc, 0); // next
 			switch (c) {
 			case 'p':
 				t->type = JBXVT_TOKEN_QUERY_SCA;
-				check_st(t);
+				check_st(xc, t);
 				break;
 			case 'q':
 				t->type = JBXVT_TOKEN_QUERY_SCL;
-				check_st(t);
+				check_st(xc, t);
 				break;
 			}
 		case 'm':
 			t->type = JBXVT_TOKEN_QUERY_SLRM;
-			check_st(t);
+			check_st(xc, t);
 			break;
 		case 'r':
 			t->type = JBXVT_TOKEN_QUERY_STBM;
-			check_st(t);
+			check_st(xc, t);
 			break;
 
 		case 's':
 			t->type = JBXVT_TOKEN_QUERY_SLRM;
-			check_st(t);
+			check_st(xc, t);
 			break;
 		case ' ':
-			c = jbxvt_pop_char(0);
+			c = jbxvt_pop_char(xc, 0);
 			if (c != 'q')
 				return;
 			t->type = JBXVT_TOKEN_QUERY_SCUSR;
-			check_st(t);
+			check_st(xc, t);
 			break;
 		}
 		break;
 	case '+':
-		c = jbxvt_pop_char(0);
+		c = jbxvt_pop_char(xc, 0);
 		switch (c) {
 		case 'p':
 		case 'q':
@@ -69,8 +69,8 @@ void jbxvt_dcs(struct Token * t)
 		}
 		break;
 	case 0x1b:
-		jbxvt_pop_char(0);
-		jbxvt_pop_char(0);
+		jbxvt_pop_char(xc, 0);
+		jbxvt_pop_char(xc, 0);
 		jbxvt_push_char('-');
 		break;
 	case 0xd0:

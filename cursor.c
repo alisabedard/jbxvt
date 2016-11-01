@@ -14,13 +14,13 @@ void jbxvt_save_cursor(void)
 	saved_cursor = s->current->cursor;
 	saved_style = s->rstyle;
 }
-void jbxvt_restore_cursor(void)
+void jbxvt_restore_cursor(xcb_connection_t * xc)
 {
-	jbxvt_draw_cursor();
+	jbxvt_draw_cursor(xc);
 	struct JBXVTScreenData * s = &jbxvt.scr;
 	s->current->cursor = saved_cursor;
 	s->rstyle = saved_style;
-	jbxvt_draw_cursor();
+	jbxvt_draw_cursor(xc);
 }
 static bool is_blinking(void)
 {
@@ -34,7 +34,7 @@ static bool is_blinking(void)
 	}
 	return false;
 }
-void jbxvt_draw_cursor(void)
+void jbxvt_draw_cursor(xcb_connection_t * xc)
 {
 	struct JBXVTScreenData * s = &jbxvt.scr;
 	// Don't draw if scrolled, non-existent, or hidden
@@ -42,7 +42,7 @@ void jbxvt_draw_cursor(void)
 	if (s->offset || !(current = s->current) || !jbxvt.mode.dectcem)
 		return;
 	if ((current->cursor_visible ^= true) && is_blinking())
-		jbxvt_repaint(); // prevent stale cursor blocks
+		jbxvt_repaint(xc); // prevent stale cursor blocks
 	struct JBDim p = jbxvt_get_pixel_size(s->current->cursor);
 	struct JBXVTXData * X = &jbxvt.X;
 	const struct JBDim f = X->font.size;
@@ -66,5 +66,5 @@ void jbxvt_draw_cursor(void)
 		r.height = 2;
 		break;
 	}
-	xcb_poly_fill_rectangle(X->xcb, X->win.vt, X->gc.cu, 1, &r);
+	xcb_poly_fill_rectangle(xc, X->win.vt, X->gc.cu, 1, &r);
 }

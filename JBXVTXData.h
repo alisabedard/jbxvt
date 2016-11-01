@@ -4,7 +4,6 @@
 #include "libjb/xcb.h"
 struct JBXVTXWindows {
 	xcb_window_t vt;
-	xcb_window_t sb __attribute__((deprecated));
 	xcb_window_t main;
 };
 struct JBXVTXGCs {
@@ -19,8 +18,6 @@ struct JBXVTFontData {
 	int8_t ascent;
 };
 struct JBXVTXData {
-	//xcb_connection_t * xcb __attribute__((deprecated));
-	xcb_connection_t * xcb;
 	struct JBXVTXWindows win;
 	struct JBXVTXGCs gc;
 	struct JBXVTXPixels color;

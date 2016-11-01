@@ -1,7 +1,9 @@
 #ifndef JBXVT_HANDLE_SGR_H
 #define JBXVT_HANDLE_SGR_H
 #include "Token.h"
-void jbxvt_handle_sgr(struct Token * restrict token)
+#include <xcb/xcb.h>
+void jbxvt_handle_sgr(xcb_connection_t * xc,
+	struct Token * restrict token)
 	__attribute__((hot));
 enum JBXVTRenderFlag {
 	JBXVT_RS_NONE = 0,

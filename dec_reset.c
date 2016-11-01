@@ -43,7 +43,7 @@ void jbxvt_dec_reset(xcb_connection_t * xc, struct Token * restrict token)
 			/* According to the spec, the cursor is reset to
 			   the home position when this is changed.  */
 			MODE(decom);
-			jbxvt_move(jbxvt.scr.current->margin.top, 0, 0);
+			jbxvt_move(xc, jbxvt.scr.current->margin.top, 0, 0);
 			break;
 		case 7: // DECAWM
 		case 45: // reverse wrap-around mode?
@@ -68,9 +68,9 @@ void jbxvt_dec_reset(xcb_connection_t * xc, struct Token * restrict token)
 			break;
 		case 25: // DECTCEM -- hide cursor
 			jbxvt_set_scroll(xc, 0);
-			jbxvt_draw_cursor(); // clear
+			jbxvt_draw_cursor(xc); // clear
 			jbxvt.mode.dectcem = is_set;
-			jbxvt_draw_cursor(); // draw
+			jbxvt_draw_cursor(xc); // draw
 			break;
 		case 30: // toggle scrollbar -- per rxvt
 			jbxvt_toggle_scrollbar(xc);
@@ -118,8 +118,11 @@ void jbxvt_dec_reset(xcb_connection_t * xc, struct Token * restrict token)
 		case 1047:
 		case 1048:
 		case 1049: // cursor restore and screen change
-			(is_set ? jbxvt_save_cursor : jbxvt_restore_cursor)();
-			jbxvt_change_screen(is_set);
+			if (is_set)
+				jbxvt_save_cursor();
+			else
+				jbxvt_restore_cursor(xc);
+			jbxvt_change_screen(xc, is_set);
 			break;
 		case 2004: // bracketed paste mode
 			LOG("bracketed paste mode");

@@ -209,11 +209,12 @@ static void init_container(struct JBXVTCommandContainer * restrict c,
 }
 /*  Initialize the command connection.  This should
     be called after the X server connection is established.  */
-void jbxvt_init_command_module(char ** restrict argv)
+void jbxvt_init_command_module(xcb_connection_t * xc,
+	char ** restrict argv)
 {
 	//  Enable the delete window protocol:
-	jbxvt_get_wm_del_win();
-	jbxvt.com.xfd = xcb_get_file_descriptor(jbxvt.X.xcb);
+	jbxvt_get_wm_del_win(xc);
+	jbxvt.com.xfd = xcb_get_file_descriptor(xc);
 	jbxvt.com.fd = run_command(argv);
 	jb_require(jbxvt.com.fd >= 0, "Could not start session");
 	static uint8_t buf[COM_BUF_SIZE], stack[COM_PUSH_MAX];

@@ -17,26 +17,27 @@ enum EventMasks {
 	MW_EVENTS = E(KEY_PRESS) | E(FOCUS_CHANGE) | E(STRUCTURE_NOTIFY),
 	SUB_EVENTS = E(EXPOSURE) | EB(PRESS) | EB(RELEASE) | EB(MOTION)
 };
-static xcb_font_t get_font(const char * name)
+static xcb_font_t get_font(xcb_connection_t * xc, const char * name)
 {
 	errno = 0;
-	xcb_font_t f = xcb_generate_id(jbxvt.X.xcb);
-	xcb_void_cookie_t c = xcb_open_font_checked(jbxvt.X.xcb, f,
+	xcb_font_t f = xcb_generate_id(xc);
+	xcb_void_cookie_t c = xcb_open_font_checked(xc, f,
 		strlen(name), name);
-	if (jb_xcb_cookie_has_error(jbxvt.X.xcb, c)) {
+	if (jb_xcb_cookie_has_error(xc, c)) {
 		if (jbxvt.X.font.normal) // Fall back to normal font first
 			return jbxvt.X.font.normal;
-		c = xcb_open_font_checked(jbxvt.X.xcb, f, sizeof(FALLBACK_FONT),
+		c = xcb_open_font_checked(xc, f, sizeof(FALLBACK_FONT),
 			FALLBACK_FONT);
-		jb_require(!jb_xcb_cookie_has_error(jbxvt.X.xcb, c),
+		jb_require(!jb_xcb_cookie_has_error(xc, c),
 			"Could not load any fonts");
 	}
 	return f;
 }
-static void setup_font_metrics(const xcb_query_font_cookie_t c)
+static void setup_font_metrics(xcb_connection_t * xc,
+	const xcb_query_font_cookie_t c)
 {
 	errno = 0;
-	xcb_query_font_reply_t * r = xcb_query_font_reply(jbxvt.X.xcb,
+	xcb_query_font_reply_t * r = xcb_query_font_reply(xc,
 		c, NULL);
 	jb_assert(r, "Cannot get font information");
 	jbxvt.X.font.ascent = r->font_ascent;
@@ -44,20 +45,20 @@ static void setup_font_metrics(const xcb_query_font_cookie_t c)
 	jbxvt.X.font.size.height = r->font_ascent + r->font_descent;
 	free(r);
 }
-static void setup_fonts(void)
+static void setup_fonts(xcb_connection_t * xc)
 {
-	jbxvt.X.font.normal = get_font(jbxvt.opt.font);
-	const xcb_query_font_cookie_t c = xcb_query_font(jbxvt.X.xcb,
+	jbxvt.X.font.normal = get_font(xc, jbxvt.opt.font);
+	const xcb_query_font_cookie_t c = xcb_query_font(xc,
 		jbxvt.X.font.normal);
-	jbxvt.X.font.bold = get_font(jbxvt.opt.bold_font);
-	jbxvt.X.font.italic = get_font(jbxvt.opt.italic_font);
-	setup_font_metrics(c);
+	jbxvt.X.font.bold = get_font(xc, jbxvt.opt.bold_font);
+	jbxvt.X.font.italic = get_font(xc, jbxvt.opt.italic_font);
+	setup_font_metrics(xc, c);
 }
-static void create_main_window(xcb_size_hints_t * restrict sh,
-	const xcb_window_t root)
+static void create_main_window(xcb_connection_t * xc,
+	xcb_size_hints_t * restrict sh, const xcb_window_t root)
 {
-	jbxvt.X.win.main = xcb_generate_id(jbxvt.X.xcb);
-	xcb_create_window(jbxvt.X.xcb, 0, jbxvt.X.win.main, root,
+	jbxvt.X.win.main = xcb_generate_id(xc);
+	xcb_create_window(xc, 0, jbxvt.X.win.main, root,
 		sh->x, sh->y, sh->width, sh->height, 0, 0, 0,
 		XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK,
 		(uint32_t[]){jbxvt.X.color.bg, MW_EVENTS});
@@ -65,40 +66,40 @@ static void create_main_window(xcb_size_hints_t * restrict sh,
 	jbxvt.scr.pixels.h = sh->height;
 	jbxvt.scr.chars = jbxvt_get_char_size(jbxvt.scr.pixels);
 }
-static void open_cursor(const xcb_font_t f)
+static void open_cursor(xcb_connection_t * xc, const xcb_font_t f)
 {
 	errno = 0;
-	xcb_void_cookie_t v = xcb_open_font_checked(jbxvt.X.xcb, f, 6,
+	xcb_void_cookie_t v = xcb_open_font_checked(xc, f, 6,
 		"cursor");
-	jb_require(!jb_xcb_cookie_has_error(jbxvt.X.xcb, v),
+	jb_require(!jb_xcb_cookie_has_error(xc, v),
 		"Cannot open cursor font");
 }
-static xcb_cursor_t get_cursor(const uint16_t id,
+static xcb_cursor_t get_cursor(xcb_connection_t * xc, const uint16_t id,
 	const uint16_t fg, const uint16_t bg)
 {
-	xcb_font_t f = xcb_generate_id(jbxvt.X.xcb);
-	open_cursor(f);
-	xcb_cursor_t c = xcb_generate_id(jbxvt.X.xcb);
-	xcb_create_glyph_cursor(jbxvt.X.xcb, c, f, f,
+	xcb_font_t f = xcb_generate_id(xc);
+	open_cursor(xc, f);
+	xcb_cursor_t c = xcb_generate_id(xc);
+	xcb_create_glyph_cursor(xc, c, f, f,
 		id, id + 1, fg, fg, fg, bg, bg, bg);
-	xcb_close_font(jbxvt.X.xcb, f);
+	xcb_close_font(xc, f);
 	return c;
 }
 static void create_sb_window(xcb_connection_t * xc, const uint16_t height)
 {
-	xcb_cursor_t c = get_cursor(XC_sb_v_double_arrow, 0, 0xffff);
-	xcb_create_window(jbxvt.X.xcb, 0, jbxvt_get_scrollbar(xc),
+	xcb_cursor_t c = get_cursor(xc, XC_sb_v_double_arrow, 0, 0xffff);
+	xcb_create_window(xc, 0, jbxvt_get_scrollbar(xc),
 		jbxvt.X.win.main, -1, -1, JBXVT_SCROLLBAR_WIDTH - 1,
 		height, 1, 0, 0, XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL
 		| XCB_CW_EVENT_MASK | XCB_CW_CURSOR, (uint32_t[]){
 		jbxvt.X.color.bg, jbxvt.X.color.fg, SUB_EVENTS, c});
-	xcb_free_cursor(jbxvt.X.xcb, c);
+	xcb_free_cursor(xc, c);
 }
-static void create_vt_window(xcb_size_hints_t * restrict sh)
+static void create_vt_window(xcb_connection_t * xc,
+	xcb_size_hints_t * restrict sh)
 {
-	xcb_connection_t * xc = jbxvt.X.xcb;
 	jbxvt.X.win.vt = xcb_generate_id(xc);
-	xcb_cursor_t c = get_cursor(XC_xterm, 0xffff, 0);
+	xcb_cursor_t c = get_cursor(xc, XC_xterm, 0xffff, 0);
 	xcb_create_window(xc, 0, jbxvt.X.win.vt, jbxvt.X.win.main,
 		jbxvt.opt.show_scrollbar ? JBXVT_SCROLLBAR_WIDTH : 0, 0,
 		sh->width, sh->height, 0, 0, 0, XCB_CW_BACK_PIXEL
@@ -130,40 +131,41 @@ static void create_window(xcb_connection_t * xc, uint8_t * restrict name,
 {
 	xcb_size_hints_t sh;
 	get_sizehints(&sh);
-	create_main_window(&sh, root);
-	jbxvt_change_name(name, true);
-	jbxvt_change_name(name, false);
+	create_main_window(xc, &sh, root);
+	jbxvt_change_name(xc, name, true);
+	jbxvt_change_name(xc, name, false);
 	create_sb_window(xc, sh.height);
-	create_vt_window(&sh);
+	create_vt_window(xc, &sh);
 }
-static xcb_gc_t get_gc(const uint32_t vm, const void * vl)
+static xcb_gc_t get_gc(xcb_connection_t * xc,
+	const uint32_t vm, const void * vl)
 {
-	xcb_gc_t g = xcb_generate_id(jbxvt.X.xcb);
-	xcb_create_gc(jbxvt.X.xcb, g, jbxvt.X.win.main, vm, vl);
+	xcb_gc_t g = xcb_generate_id(xc);
+	xcb_create_gc(xc, g, jbxvt.X.win.main, vm, vl);
 	return g;
 }
-static void setup_gcs(void)
+static void setup_gcs(xcb_connection_t * xc)
 {
 	const pixel_t f = jbxvt.X.color.fg, b = jbxvt.X.color.bg;
-	jbxvt.X.gc.tx = get_gc(XCB_GC_FOREGROUND | XCB_GC_BACKGROUND
+	jbxvt.X.gc.tx = get_gc(xc, XCB_GC_FOREGROUND | XCB_GC_BACKGROUND
 		| XCB_GC_FONT, (uint32_t[]){f, b, jbxvt.X.font.normal});
-	jbxvt.X.gc.cu = get_gc(XCB_GC_FUNCTION | XCB_GC_PLANE_MASK,
+	jbxvt.X.gc.cu = get_gc(xc, XCB_GC_FUNCTION | XCB_GC_PLANE_MASK,
 		(uint32_t[]){XCB_GX_INVERT, f ^ b});
 }
-static inline void init_jbxvt_colors(void)
+static inline void init_jbxvt_colors(xcb_connection_t * xc)
 {
-	jbxvt.X.color.fg = jbxvt_set_fg(jbxvt.opt.fg);
-	jbxvt.X.color.bg = jbxvt_set_bg(jbxvt.opt.bg);
+	jbxvt.X.color.fg = jbxvt_set_fg(xc, jbxvt.opt.fg);
+	jbxvt.X.color.bg = jbxvt_set_bg(xc, jbxvt.opt.bg);
 }
 xcb_connection_t * jbxvt_init_display(char * restrict name)
 {
 	int screen = jbxvt.opt.screen;
-	xcb_connection_t * xc = jbxvt.X.xcb
+	xcb_connection_t * xc = xc
 		= jb_get_xcb_connection(jbxvt.opt.display, &screen);
-	init_jbxvt_colors();
-	setup_fonts();
+	init_jbxvt_colors(xc);
+	setup_fonts(xc);
 	create_window(xc, (uint8_t *)name,
-		jbxvt_get_root_window(jbxvt.X.xcb));
-	setup_gcs();
+		jbxvt_get_root_window(xc));
+	setup_gcs(xc);
 	return xc;
 }

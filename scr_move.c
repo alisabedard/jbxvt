@@ -36,11 +36,12 @@ static inline int16_t dim(const int16_t cursor,
 }
 /*  Move the cursor to a new position.  The relative argument is a pair of
  *  flags that specify relative rather than absolute motion.  */
-void jbxvt_move(const int16_t x, const int16_t y, const uint8_t relative)
+void jbxvt_move(xcb_connection_t * xc,
+	const int16_t x, const int16_t y, const uint8_t relative)
 {
 	LOG("jbxvt_move(x:%d, y:%d, relative:%d)", x, y, relative);
-	jbxvt_set_scroll(jbxvt.X.xcb, 0);
-	jbxvt_draw_cursor(); // clear
+	jbxvt_set_scroll(xc, 0);
+	jbxvt_draw_cursor(xc); // clear
 	struct JBDim c = jbxvt.scr.current->cursor;
 	jbxvt.scr.current->cursor = c
 		= (struct JBDim) { .x = dim(c.x, x, relative
@@ -48,6 +49,6 @@ void jbxvt_move(const int16_t x, const int16_t y, const uint8_t relative)
 		.y = dim(c.y, y, relative & JBXVT_ROW_RELAATIVE)};
 	c.y = jbxvt_check_cursor_position();
 	jbxvt.scr.current->wrap_next = false;
-	jbxvt_check_selection(c.y, c.y);
-	jbxvt_draw_cursor(); // draw
+	jbxvt_check_selection(xc, c.y, c.y);
+	jbxvt_draw_cursor(xc); // draw
 }

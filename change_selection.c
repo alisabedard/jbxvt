@@ -7,19 +7,21 @@
 #include "selend.h"
 #include "selection.h"
 #define FSZ jbxvt.X.font.size
-static void invert(const int16_t rs, const int16_t re, const int16_t cs,
-	const int16_t ce, const uint8_t row1, const uint8_t row2)
+static void invert(xcb_connection_t * xc, const int16_t rs,
+	const int16_t re, const int16_t cs, const int16_t ce,
+	const uint8_t row1, const uint8_t row2)
 {
 	for (uint8_t row = row1; row <= row2; row++) {
 		const int16_t y = row * FSZ.height;
 		const int16_t x1 = row == rs ? cs * FSZ.w : 0;
 		const int16_t x2 = (row == re ? ce : jbxvt.scr.chars.w) * FSZ.w;
-		xcb_poly_fill_rectangle(jbxvt.X.xcb, jbxvt.X.win.vt,
+		xcb_poly_fill_rectangle(xc, jbxvt.X.win.vt,
 			jbxvt.X.gc.cu, 1, &(xcb_rectangle_t){ .x = x1,
 			.y = y, .width = x2 - x1, .height = FSZ.h});
 	}
 }
-static void change(struct JBDim * se, struct JBDim * ose)
+static void change(xcb_connection_t * xc, struct JBDim * se,
+	struct JBDim * ose)
 {
 	int16_t rs = 0, cs = 0, re = 0, ce = 0, n;
 	n = jbxvt_selcmp(se, ose);
@@ -31,12 +33,12 @@ static void change(struct JBDim * se, struct JBDim * ose)
 	uint8_t row1 = rs < 0 ? 0 : rs;
 	uint8_t row2 = re >= jbxvt.scr.chars.h ? jbxvt.scr.chars.h - 1 : re;
 	//  Invert the changed area
-	invert(rs, re, cs, ce, row1, row2);
+	invert(xc, rs, re, cs, ce, row1, row2);
 }
 /*  Repaint the displayed selection to reflect the new value.  ose1 and ose2
  *  are assumed to represent the currently displayed selection endpoints.  */
-void jbxvt_change_selection(struct JBDim * restrict ose0,
-	struct JBDim * restrict ose1)
+void jbxvt_change_selection(xcb_connection_t * xc,
+	struct JBDim * restrict ose0, struct JBDim * restrict ose1)
 {
 	if (jbxvt_selcmp(ose0, ose1) > 0) {
 		struct JBDim * se = ose0;
@@ -44,6 +46,6 @@ void jbxvt_change_selection(struct JBDim * restrict ose0,
 		ose1 = se;
 	}
 	jbxvt_order_selection_ends();
-	change(jbxvt.sel.end, ose0);
-	change(jbxvt.sel.end + 1, ose1);
+	change(xc, jbxvt.sel.end, ose0);
+	change(xc, jbxvt.sel.end + 1, ose1);
 }

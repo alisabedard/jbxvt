@@ -14,15 +14,15 @@ void jbxvt_map_window(xcb_connection_t * xc)
 	xcb_map_subwindows(xc, jbxvt.X.win.main);
 	/*  Setup the window now so that we can add LINES and COLUMNS to
 	 *  the environment.  */
-	jbxvt_resize_window();
+	jbxvt_resize_window(xc);
 	jbxvt_reset(xc); // update size
 }
-static struct JBDim get_geometry(void)
+static struct JBDim get_geometry(xcb_connection_t * xc)
 {
-	xcb_get_geometry_cookie_t c = xcb_get_geometry(jbxvt.X.xcb,
+	xcb_get_geometry_cookie_t c = xcb_get_geometry(xc,
 		jbxvt.X.win.main);
 	xcb_generic_error_t * e;
-	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(jbxvt.X.xcb,
+	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(xc,
 		c, &e);
 	if (e)
 		abort();
@@ -35,29 +35,30 @@ static struct JBDim get_geometry(void)
 }
 /*  Called after a possible window size change.  If the window size
     has changed initiate a redraw by resizing the subwindows. */
-void jbxvt_resize_window(void)
+void jbxvt_resize_window(xcb_connection_t * xc)
 {
-	struct JBDim p = get_geometry();
+	struct JBDim p = get_geometry(xc);
 #define XCW(i) XCB_CONFIG_WINDOW_##i
 	if (jbxvt.opt.show_scrollbar)
 		p.width -= JBXVT_SCROLLBAR_WIDTH;
-	xcb_configure_window(jbxvt.X.xcb, jbxvt_get_scrollbar(jbxvt.X.xcb),
+	xcb_configure_window(xc, jbxvt_get_scrollbar(xc),
 		XCW(HEIGHT), &(uint32_t){p.height});
-	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt, XCW(WIDTH)
+	xcb_configure_window(xc, jbxvt.X.win.vt, XCW(WIDTH)
 		| XCW(HEIGHT), (uint32_t[]){p.w, p.h});
 #undef XCW
 	jbxvt.scr.chars = jbxvt_get_char_size(jbxvt.scr.pixels = p);
 }
 // Set main window property string
-void jbxvt_set_property(const xcb_atom_t prop, const size_t sz,
-	uint8_t * value)
+void jbxvt_set_property(xcb_connection_t * xc, const xcb_atom_t prop,
+	const size_t sz, uint8_t * value)
 {
-	xcb_change_property(jbxvt.X.xcb, XCB_PROP_MODE_REPLACE,
+	xcb_change_property(xc, XCB_PROP_MODE_REPLACE,
 		jbxvt.X.win.main, prop, XCB_ATOM_STRING, 8, sz, value);
 }
 // Change window or icon name:
-void jbxvt_change_name(uint8_t * restrict str, const bool icon)
+void jbxvt_change_name(xcb_connection_t * xc,
+	uint8_t * restrict str, const bool icon)
 {
-	jbxvt_set_property(icon ? XCB_ATOM_WM_ICON_NAME
+	jbxvt_set_property(xc, icon ? XCB_ATOM_WM_ICON_NAME
 		: XCB_ATOM_WM_NAME, strlen((const char *)str), str);
 }
