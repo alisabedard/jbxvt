@@ -4,6 +4,7 @@
 #include "cursor.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "paint.h"
 #include "sbar.h"
 #include "screen.h"
 #include <string.h>
@@ -13,7 +14,7 @@ static void copy_area(xcb_connection_t * xc,
 {
 	if (width > 0)
 		xcb_copy_area(xc, jbxvt.X.win.vt, jbxvt.X.win.vt,
-			jbxvt.X.gc.tx, x[0], y, x[1], y, width,
+			jbxvt_get_text_gc(xc), x[0], y, x[1], y, width,
 			jbxvt.X.font.size.height);
 }
 static void finalize(xcb_connection_t * xc,

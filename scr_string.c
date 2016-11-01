@@ -99,7 +99,7 @@ static void handle_insert(xcb_connection_t * xc,
 	const uint16_t width = sz * FSZ.width - n_width;
 	const int16_t x = p.x + n_width;
 	xcb_copy_area(xc, jbxvt.X.win.vt, jbxvt.X.win.vt,
-		jbxvt.X.gc.tx, p.x, p.y, x, p.y, width, FSZ.height);
+		jbxvt_get_text_gc(xc), p.x, p.y, x, p.y, width, FSZ.height);
 #undef FSZ
 }
 static void parse_special_charset(uint8_t * restrict str,

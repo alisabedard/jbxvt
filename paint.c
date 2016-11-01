@@ -14,17 +14,24 @@
 #undef LOG
 #define LOG(...)
 #endif//!DEBUG_PAINT
+xcb_gcontext_t jbxvt_get_text_gc(xcb_connection_t * xc)
+{
+	static xcb_gcontext_t gc;
+	if (gc)
+		return gc;
+	return gc = xcb_generate_id(xc);
+}
 // not pure, has side-effects
 static pixel_t fg(xcb_connection_t * xc, const pixel_t p)
 {
 	return jbxvt.X.color.current_fg
-		= jb_set_fg(xc, jbxvt.X.gc.tx, p);
+		= jb_set_fg(xc, jbxvt_get_text_gc(xc), p);
 }
 // not pure, has side-effects
 static pixel_t bg(xcb_connection_t * xc, const pixel_t p)
 {
 	return jbxvt.X.color.current_bg
-		= jb_set_bg(xc, jbxvt.X.gc.tx, p);
+		= jb_set_bg(xc, jbxvt_get_text_gc(xc), p);
 }
 static pixel_t set_x(xcb_connection_t * xc, const char * color,
 	const pixel_t backup, pixel_t (*func)(xcb_connection_t *,
@@ -75,13 +82,13 @@ static bool set_rstyle_colors(xcb_connection_t * xc, const uint32_t rstyle)
 }
 static inline void font(xcb_connection_t * xc, const xcb_font_t f)
 {
-	xcb_change_gc(xc, jbxvt.X.gc.tx, XCB_GC_FONT, &f);
+	xcb_change_gc(xc, jbxvt_get_text_gc(xc), XCB_GC_FONT, &f);
 }
 static void draw_underline(xcb_connection_t * xc, uint16_t len,
 	struct JBDim p, int8_t offset)
 {
 	xcb_poly_line(xc, XCB_COORD_MODE_ORIGIN, jbxvt.X.win.vt,
-		jbxvt.X.gc.tx, 2,
+		jbxvt_get_text_gc(xc), 2,
 		(struct xcb_point_t[]){{p.x, p.y + offset},
 		{p.x + len * jbxvt.X.font.size.width, p.y + offset}});
 }
@@ -90,7 +97,7 @@ static void draw_text(xcb_connection_t * xc,
 	struct JBDim * restrict p, uint32_t rstyle)
 {
 	xcb_image_text_8(xc, len, jbxvt.X.win.vt,
-		jbxvt.X.gc.tx, p->x, p->y, (const char *)str);
+		jbxvt_get_text_gc(xc), p->x, p->y, (const char *)str);
 	++p->y; // Padding for underline, use underline for italic
 	if (((rstyle & JBXVT_RS_ITALIC)
 		&& (jbxvt.X.font.italic == jbxvt.X.font.normal))
@@ -105,8 +112,8 @@ static void draw_text(xcb_connection_t * xc,
 }
 static void set_reverse_video(xcb_connection_t * xc)
 {
-	jb_set_fg(xc, jbxvt.X.gc.tx, jbxvt.X.color.current_bg);
-	jb_set_bg(xc, jbxvt.X.gc.tx, jbxvt.X.color.current_fg);
+	jb_set_fg(xc, jbxvt_get_text_gc(xc), jbxvt.X.color.current_bg);
+	jb_set_bg(xc, jbxvt_get_text_gc(xc), jbxvt.X.color.current_fg);
 }
 //  Paint the text using the rendition value at the screen position.
 void jbxvt_paint(xcb_connection_t * xc, uint8_t * restrict str,

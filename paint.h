@@ -7,6 +7,7 @@
 #include <xcb/xproto.h>
 #include "libjb/size.h"
 #include "libjb/xcb.h"
+xcb_gcontext_t jbxvt_get_text_gc(xcb_connection_t * xc);
 // NULL value resets colors to stored value
 pixel_t jbxvt_set_fg(xcb_connection_t * xc, const char * color);
 // NULL value resets colors to stored value

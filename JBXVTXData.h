@@ -6,9 +6,6 @@ struct JBXVTXWindows {
 	xcb_window_t vt;
 	xcb_window_t main;
 };
-struct JBXVTXGCs {
-	xcb_gcontext_t tx;
-};
 struct JBXVTXPixels {
 	pixel_t bg, fg, current_fg, current_bg;
 };
@@ -19,7 +16,6 @@ struct JBXVTFontData {
 };
 struct JBXVTXData {
 	struct JBXVTXWindows win;
-	struct JBXVTXGCs gc;
 	struct JBXVTXPixels color;
 	struct JBXVTFontData font;
 };

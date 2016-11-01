@@ -138,19 +138,13 @@ static void create_window(xcb_connection_t * xc, uint8_t * restrict name,
 	create_sb_window(xc, sh.height);
 	create_vt_window(xc, &sh);
 }
-static xcb_gc_t get_gc(xcb_connection_t * xc,
-	const uint32_t vm, const void * vl)
-{
-	xcb_gc_t g = xcb_generate_id(xc);
-	xcb_create_gc(xc, g, jbxvt.X.win.main, vm, vl);
-	return g;
-}
-static void setup_gcs(xcb_connection_t * xc)
+static void setup_gcs(xcb_connection_t * xc, xcb_window_t w)
 {
 	const pixel_t f = jbxvt.X.color.fg, b = jbxvt.X.color.bg;
-	jbxvt.X.gc.tx = get_gc(xc, XCB_GC_FOREGROUND | XCB_GC_BACKGROUND
+	xcb_create_gc(xc, jbxvt_get_text_gc(xc), w,
+		XCB_GC_FOREGROUND | XCB_GC_BACKGROUND
 		| XCB_GC_FONT, (uint32_t[]){f, b, jbxvt.X.font.normal});
-	xcb_create_gc(xc, jbxvt_get_cursor_gc(xc), jbxvt.X.win.main,
+	xcb_create_gc(xc, jbxvt_get_cursor_gc(xc), w,
 		XCB_GC_FUNCTION | XCB_GC_PLANE_MASK, (uint32_t[]){
 		XCB_GX_INVERT, f ^ b});
 }
@@ -168,6 +162,6 @@ xcb_connection_t * jbxvt_init_display(char * restrict name)
 	setup_fonts(xc);
 	create_window(xc, (uint8_t *)name,
 		jbxvt_get_root_window(xc));
-	setup_gcs(xc);
+	setup_gcs(xc, jbxvt.X.win.vt);
 	return xc;
 }

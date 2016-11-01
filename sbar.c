@@ -5,6 +5,7 @@
 #include "config.h"
 #include "cursor.h"
 #include "jbxvt.h"
+#include "paint.h"
 #include "repaint.h"
 #include <stdbool.h>
 #include <string.h>
@@ -29,7 +30,7 @@ void jbxvt_draw_scrollbar(xcb_connection_t * xc)
 		JBXVT_SCROLLBAR_WIDTH, jbxvt.scr.pixels.h);
 	const int16_t top = get_sz(jbxvt.scr.chars.h);
 	xcb_poly_fill_rectangle(xc, jbxvt_get_scrollbar(xc),
-		jbxvt.X.gc.tx, 1, &(xcb_rectangle_t){0, top,
+		jbxvt_get_text_gc(xc), 1, &(xcb_rectangle_t){0, top,
 		JBXVT_SCROLLBAR_WIDTH, get_sz(0) - top});
 }
 //  Change the value of the scrolled screen offset and repaint the screen

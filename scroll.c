@@ -4,6 +4,7 @@
 #include "scroll.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "paint.h"
 #include "sbar.h"
 #include <string.h>
 //#define SCROLL_DEBUG
@@ -74,7 +75,7 @@ static void copy_visible_area(xcb_connection_t * xc,
 	const uint16_t height = (row2 - row1 - count)
 		* jbxvt.X.font.size.h;
 	xcb_copy_area(xc, jbxvt.X.win.vt,
-		jbxvt.X.win.vt, jbxvt.X.gc.tx, 0, y[0],
+		jbxvt.X.win.vt, jbxvt_get_text_gc(xc), 0, y[0],
 		0, y[1], jbxvt.scr.pixels.width, height);
 	// the above blocks the event queue, flush it
 	xcb_flush(xc);
