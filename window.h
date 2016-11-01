@@ -10,6 +10,6 @@ void jbxvt_set_property(const xcb_atom_t prop, const size_t sz,
 	uint8_t * value);
 // Change window or icon name:
 void jbxvt_change_name(uint8_t * restrict str, const bool icon);
-void jbxvt_map_window(void);
+void jbxvt_map_window(xcb_connection_t * xc);
 void jbxvt_resize_window(void);
 #endif//JBXVT_WINDOW_H

@@ -2,5 +2,6 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #ifndef SCR_RESET_H
 #define SCR_RESET_H
-void jbxvt_reset(void);
+#include <xcb/xcb.h>
+void jbxvt_reset(xcb_connection_t * xc);
 #endif//!SCR_RESET_H

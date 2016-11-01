@@ -39,7 +39,7 @@ static inline int16_t dim(const int16_t cursor,
 void jbxvt_move(const int16_t x, const int16_t y, const uint8_t relative)
 {
 	LOG("jbxvt_move(x:%d, y:%d, relative:%d)", x, y, relative);
-	jbxvt_set_scroll(0);
+	jbxvt_set_scroll(jbxvt.X.xcb, 0);
 	jbxvt_draw_cursor(); // clear
 	struct JBDim c = jbxvt.scr.current->cursor;
 	jbxvt.scr.current->cursor = c

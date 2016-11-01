@@ -3,7 +3,9 @@
 #define JBXVT_JBXVTXDATA_H
 #include "libjb/xcb.h"
 struct JBXVTXWindows {
-	xcb_window_t vt, sb, main;
+	xcb_window_t vt;
+	xcb_window_t sb __attribute__((deprecated));
+	xcb_window_t main;
 };
 struct JBXVTXGCs {
 	xcb_gcontext_t tx, cu;
@@ -17,6 +19,7 @@ struct JBXVTFontData {
 	int8_t ascent;
 };
 struct JBXVTXData {
+	//xcb_connection_t * xcb __attribute__((deprecated));
 	xcb_connection_t * xcb;
 	struct JBXVTXWindows win;
 	struct JBXVTXGCs gc;

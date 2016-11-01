@@ -137,7 +137,7 @@ static void tbc(const uint8_t t)
 	else if (!t)
 		jbxvt_set_tab(jbxvt.scr.current->cursor.x, false);
 }
-void jbxvt_parse_token(void)
+void jbxvt_parse_token(xcb_connection_t * xc)
 {
 	struct Token token;
 	jbxvt_get_token(&token);
@@ -202,7 +202,7 @@ void jbxvt_parse_token(void)
 	case JBXVT_TOKEN_DCH:
 	case JBXVT_TOKEN_ECH:
 		LOG("JBXVT_TOKEN_ECH/JBXVT_TOKEN_DCH");
-		jbxvt_delete_characters(n);
+		jbxvt_delete_characters(xc, n);
 		break;
 	case JBXVT_TOKEN_DHLT: // double height line -- top
 		LOG("FIXME JBXVT_TOKEN_DHLT");
@@ -224,11 +224,11 @@ void jbxvt_parse_token(void)
 		break;
 	case JBXVT_TOKEN_ED: // erase display
 		LOG("JBXVT_TOKEN_ED");
-		jbxvt_erase_screen(t[0]); // don't use n
+		jbxvt_erase_screen(xc, t[0]); // don't use n
 		break;
 	case JBXVT_TOKEN_EL: // erase line
 		LOG("JBXVT_TOKEN_EL");
-		jbxvt_erase_line(t[0]); // don't use n
+		jbxvt_erase_line(xc, t[0]); // don't use n
 		break;
 	case JBXVT_TOKEN_ELR: // locator report
 		LOG("JBXVT_TOKEN_ELR");
@@ -262,7 +262,7 @@ void jbxvt_parse_token(void)
 		break;
 	case JBXVT_TOKEN_HOME:
 		LOG("JBXVT_TOKEN_HOME");
-		jbxvt_set_scroll(0);
+		jbxvt_set_scroll(xc, 0);
 		jbxvt_move(0, 0, 0);
 		break;
 	case JBXVT_TOKEN_HPA: // horizontal position absolute
@@ -279,7 +279,7 @@ void jbxvt_parse_token(void)
 		break;
 	case JBXVT_TOKEN_ICH: // Insert blank characters
 		LOG("JBXVT_TOKEN_ICH");
-		jbxvt_insert_characters(n);
+		jbxvt_insert_characters(xc, n);
 		break;
 	case JBXVT_TOKEN_IL: // insert line
 		LOG("JBXVT_TOKEN_IL");
@@ -374,7 +374,7 @@ void jbxvt_parse_token(void)
 	case JBXVT_TOKEN_RESET:
 	case JBXVT_TOKEN_SET:
 		TLOG("JBXVT_TOKEN_RESET/JBXVT_TOKEN_SET");
-		jbxvt_dec_reset(&token);
+		jbxvt_dec_reset(xc, &token);
 		break;
 	case JBXVT_TOKEN_RI: // Reverse index
 		LOG("JBXVT_TOKEN_RI");
@@ -383,7 +383,7 @@ void jbxvt_parse_token(void)
 	case JBXVT_TOKEN_RIS: // reset to initial state
 		LOG("JBXVT_TOKEN_RIS");
 		jbxvt.mode.dectcem = true;
-		jbxvt_reset();
+		jbxvt_reset(xc);
 		break;
 	case JBXVT_TOKEN_RQM:
 		LOG("JBXVT_TOKEN_RQM");
@@ -430,13 +430,13 @@ void jbxvt_parse_token(void)
 		break;
 	case JBXVT_TOKEN_SBSWITCH:
 		LOG("JBXVT_TOKEN_SBSWITCH");
-		jbxvt_toggle_scrollbar();
+		jbxvt_toggle_scrollbar(xc);
 		break;
 	case JBXVT_TOKEN_SBGOTO:
 		LOG("JBXVT_TOKEN_SBGOTO");
 		/*  Move the display so that line represented by scrollbar value
 		    is at the top of the screen.  */
-		jbxvt_scroll_to(t[0]);
+		jbxvt_scroll_to(xc, t[0]);
 		break;
 	case JBXVT_TOKEN_SC:
 		LOG("JBXVT_TOKEN_SC");

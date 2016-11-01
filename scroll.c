@@ -91,7 +91,7 @@ static void add_scroll_history(const int8_t count)
 	for (; y >= 0; --y, --i, --j)
 		memcpy(j, i, sizeof(struct JBXVTSavedLine));
 	copy_saved_lines(count);
-	jbxvt_draw_scrollbar();
+	jbxvt_draw_scrollbar(jbxvt.X.xcb);
 }
 static int8_t copy_screen_area(const int8_t i,
 	const int8_t j, const int8_t mod, const int8_t count,
@@ -160,5 +160,5 @@ void scroll(const uint8_t row1, const uint8_t row2,
 	uint8_t *save[abs_count];
 	uint32_t *rend[abs_count];
 	(count > 0 ? sc_up : sc_dn)(row1, row2 + 1, abs_count, save, rend);
-	jbxvt_set_scroll(0);
+	jbxvt_set_scroll(jbxvt.X.xcb, 0);
 }

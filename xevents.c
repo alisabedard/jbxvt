@@ -26,9 +26,9 @@ static void handle_motion_notify(struct JBXVTEvent * restrict xe)
 {
 	const xcb_rectangle_t r = xe->box;
 	const struct JBDim b = {.x = r.x, .y = r.y};
-	if (xe->window == jbxvt.X.win.sb
+	if (xe->window == jbxvt_get_scrollbar(jbxvt.X.xcb)
 		&& (xe->state & XCB_KEY_BUT_MASK_BUTTON_2))
-		jbxvt_scroll_to(b.y);
+		jbxvt_scroll_to(jbxvt.X.xcb, b.y);
 	else if (xe->window == jbxvt.X.win.vt
 		&& jbxvt_get_mouse_motion_tracked())
 		jbxvt_track_mouse(xe->button, xe->state, b, JBXVT_MOTION);
@@ -46,14 +46,15 @@ static void sbop(struct JBXVTEvent * restrict xe, const bool up)
 		return;
 	// xterm's behavior if alternate screen in use is to move the cursor
 	if (jbxvt.scr.current == jbxvt.scr.s) // first screen
-		jbxvt_set_scroll(jbxvt.scr.offset + (up ? -xe->box.y
-			: xe->box.y) / jbxvt.X.font.size.h);
+		jbxvt_set_scroll(jbxvt.X.xcb, jbxvt.scr.offset
+			+ (up ? -xe->box.y : xe->box.y) / jbxvt.X.font.size.h);
 	else
-		jbxvt_move(0, up ? -1 : 1, JBXVT_ROW_RELAATIVE | JBXVT_COLUMN_RELATIVE);
+		jbxvt_move(0, up ? -1 : 1, JBXVT_ROW_RELAATIVE
+			| JBXVT_COLUMN_RELATIVE);
 }
 static void handle_button_release(struct JBXVTEvent * restrict xe)
 {
-	if (xe->window == jbxvt.X.win.sb) {
+	if (xe->window == jbxvt_get_scrollbar(jbxvt.X.xcb)) {
 		switch (xe->button) {
 		case 1:
 		case 5:
@@ -112,7 +113,7 @@ static void handle_button_press(struct JBXVTEvent * restrict xe)
 {
 	const xcb_window_t v = jbxvt.X.win.vt;
 	if (xe->window == v && xe->state == XCB_KEY_BUT_MASK_CONTROL) {
-		jbxvt_toggle_scrollbar();
+		jbxvt_toggle_scrollbar(jbxvt.X.xcb);
 		return;
 	}
 	const struct JBDim b = {.x = xe->box.x, .y = xe->box.y};
@@ -130,8 +131,8 @@ static void handle_button_press(struct JBXVTEvent * restrict xe)
 		}
 		return;
 	}
-	if (xe->window == jbxvt.X.win.sb && xe->button == 2)
-		jbxvt_scroll_to(xe->box.y);
+	if (xe->window == jbxvt_get_scrollbar(jbxvt.X.xcb) && xe->button == 2)
+		jbxvt_scroll_to(jbxvt.X.xcb, xe->box.y);
 }
 static void handle_focus(const bool in)
 {

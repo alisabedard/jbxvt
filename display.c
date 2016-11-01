@@ -3,6 +3,7 @@
 #include "display.h"
 #include "jbxvt.h"
 #include "paint.h"
+#include "sbar.h"
 #include "screen.h"
 #include "window.h"
 #include <errno.h>
@@ -83,15 +84,14 @@ static xcb_cursor_t get_cursor(const uint16_t id,
 	xcb_close_font(jbxvt.X.xcb, f);
 	return c;
 }
-static void create_sb_window(const uint16_t height)
+static void create_sb_window(xcb_connection_t * xc, const uint16_t height)
 {
 	xcb_cursor_t c = get_cursor(XC_sb_v_double_arrow, 0, 0xffff);
-	xcb_create_window(jbxvt.X.xcb, 0, jbxvt.X.win.sb
-		= xcb_generate_id(jbxvt.X.xcb), jbxvt.X.win.main, -1, -1,
-		JBXVT_SCROLLBAR_WIDTH - 1, height, 1, 0, 0, XCB_CW_BACK_PIXEL
-		| XCB_CW_BORDER_PIXEL | XCB_CW_EVENT_MASK
-		| XCB_CW_CURSOR, (uint32_t[]){ jbxvt.X.color.bg,
-		jbxvt.X.color.fg, SUB_EVENTS, c});
+	xcb_create_window(jbxvt.X.xcb, 0, jbxvt_get_scrollbar(xc),
+		jbxvt.X.win.main, -1, -1, JBXVT_SCROLLBAR_WIDTH - 1,
+		height, 1, 0, 0, XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL
+		| XCB_CW_EVENT_MASK | XCB_CW_CURSOR, (uint32_t[]){
+		jbxvt.X.color.bg, jbxvt.X.color.fg, SUB_EVENTS, c});
 	xcb_free_cursor(jbxvt.X.xcb, c);
 }
 static void create_vt_window(xcb_size_hints_t * restrict sh)
@@ -125,7 +125,7 @@ static void get_sizehints(xcb_size_hints_t * restrict s)
 #undef FSZ
 }
 //  Open the window.
-static void create_window(uint8_t * restrict name,
+static void create_window(xcb_connection_t * xc, uint8_t * restrict name,
 	const xcb_window_t root)
 {
 	xcb_size_hints_t sh;
@@ -133,7 +133,7 @@ static void create_window(uint8_t * restrict name,
 	create_main_window(&sh, root);
 	jbxvt_change_name(name, true);
 	jbxvt_change_name(name, false);
-	create_sb_window(sh.height);
+	create_sb_window(xc, sh.height);
 	create_vt_window(&sh);
 }
 static xcb_gc_t get_gc(const uint32_t vm, const void * vl)
@@ -155,13 +155,15 @@ static inline void init_jbxvt_colors(void)
 	jbxvt.X.color.fg = jbxvt_set_fg(jbxvt.opt.fg);
 	jbxvt.X.color.bg = jbxvt_set_bg(jbxvt.opt.bg);
 }
-void jbxvt_init_display(char * restrict name)
+xcb_connection_t * jbxvt_init_display(char * restrict name)
 {
 	int screen = jbxvt.opt.screen;
-	jbxvt.X.xcb = jb_get_xcb_connection(jbxvt.opt.display, &screen);
+	xcb_connection_t * xc = jbxvt.X.xcb
+		= jb_get_xcb_connection(jbxvt.opt.display, &screen);
 	init_jbxvt_colors();
 	setup_fonts();
-	create_window((uint8_t *)name,
+	create_window(xc, (uint8_t *)name,
 		jbxvt_get_root_window(jbxvt.X.xcb));
 	setup_gcs();
+	return xc;
 }

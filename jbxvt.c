@@ -111,14 +111,14 @@ int main(int argc, char ** argv)
 	if (!com_argv)
 		com_argv = (char*[2]){getenv("SHELL")};
 	// jbxvt_init_display must come after parse_command_line
-	jbxvt_init_display(argv[0]);
+	xcb_connection_t * xc = jbxvt_init_display(argv[0]);
 	mode_init();
 	jbxvt_init();
-	jbxvt_map_window();
+	jbxvt_map_window(xc);
 	jb_check(setenv("TERM", JBXVT_ENV_TERM, true) != -1,
 		"Could not set TERM environment variable");
 	jbxvt_init_command_module(com_argv);
 	for (;;) // app loop
-		jbxvt_parse_token();
+		jbxvt_parse_token(xc);
 	return 0;
 }

@@ -45,12 +45,13 @@ static void handle_client_msg(xcb_generic_event_t * restrict ge)
 		== (unsigned long)jbxvt_get_wm_del_win())
 		  exit(0);
 }
-static void handle_expose(xcb_generic_event_t * restrict ge)
+static void handle_expose(xcb_connection_t * xc,
+	xcb_generic_event_t * restrict ge)
 {
-	if (((xcb_expose_event_t *)ge)->window == jbxvt.X.win.sb)
-		jbxvt_draw_scrollbar();
+	if (((xcb_expose_event_t *)ge)->window == jbxvt_get_scrollbar(jbxvt.X.xcb))
+		jbxvt_draw_scrollbar(xc);
 	else
-		jbxvt_reset();
+		jbxvt_reset(xc);
 }
 static void handle_other(xcb_generic_event_t * restrict ge)
 {
@@ -67,10 +68,10 @@ static void key_press(xcb_generic_event_t * restrict e)
 	jb_require(write(jbxvt.com.fd, s, count) != -1,
 		"Could not write to command");
 }
-static bool handle_xev(void)
+static bool handle_xev(xcb_connection_t * xc)
 {
-	jb_check_x(jbxvt.X.xcb);
-	xcb_generic_event_t * event = xcb_poll_for_event(jbxvt.X.xcb);
+	jb_check_x(xc);
+	xcb_generic_event_t * event = xcb_poll_for_event(xc);
 	if (!event)
 		return false;
 	switch (event->response_type & ~0x80) {
@@ -93,7 +94,7 @@ static bool handle_xev(void)
 		break;
 	case XCB_EXPOSE:
 	case XCB_GRAPHICS_EXPOSURE:
-		handle_expose(event);
+		handle_expose(xc, event);
 		break;
 	default:
 		handle_other(event);
@@ -172,7 +173,7 @@ int_fast16_t jbxvt_pop_char(const uint8_t flags)
 	fd_set in;
 	do {
 		FD_ZERO(&in);
-		if (handle_xev() && (flags & GET_XEVENTS_ONLY))
+		if (handle_xev(jbxvt.X.xcb) && (flags & GET_XEVENTS_ONLY))
 			return INPUT_BUFFER_EMPTY;
 		poll_io(&in);
 	} while (!FD_ISSET(jbxvt.com.fd, &in));

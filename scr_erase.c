@@ -17,7 +17,7 @@
 #define LOG(...)
 #endif//DEBUG_ERASE
 #define FSZ jbxvt.X.font.size
-static void del(uint16_t col, uint16_t width)
+static void del(xcb_connection_t * xc, uint16_t col, uint16_t width)
 {
 	const uint16_t y = jbxvt.scr.current->cursor.y;
 	struct JBXVTScreen * s = jbxvt.scr.current;
@@ -25,32 +25,32 @@ static void del(uint16_t col, uint16_t width)
 		width = jbxvt.scr.chars.width - col;
 	memset(s->text[y] + col, 0, width);
 	memset(s->rend[y] + col, 0, width << 2);
-	xcb_clear_area(jbxvt.X.xcb, 0, jbxvt.X.win.vt, col * FSZ.w,
+	xcb_clear_area(xc, 0, jbxvt.X.win.vt, col * FSZ.w,
 		y * FSZ.h, width * FSZ.w, FSZ.h);
-	xcb_flush(jbxvt.X.xcb);
+	xcb_flush(xc);
 	s->wrap[y] = false;
 	s->dwl[y] = false;
 }
 //  erase part or the whole of a line
-void jbxvt_erase_line(const int8_t mode)
+void jbxvt_erase_line(xcb_connection_t * xc, const int8_t mode)
 {
-	jbxvt_set_scroll(0);
+	jbxvt_set_scroll(xc, 0);
 	const uint16_t x = jbxvt.scr.current->cursor.x;
 	switch (mode) {
 	case JBXVT_ERASE_ALL:
-		del(0, jbxvt.scr.chars.width);
+		del(xc, 0, jbxvt.scr.chars.width);
 		break;
 	case JBXVT_ERASE_BEFORE:
-		del(0, x);
+		del(xc, 0, x);
 		break;
 	case JBXVT_ERASE_AFTER:
 	default:
-		del(x, jbxvt.scr.chars.width - x);
+		del(xc, x, jbxvt.scr.chars.width - x);
 	}
 	jbxvt_draw_cursor();
 }
 //  erase part or the whole of the screen
-void jbxvt_erase_screen(const int8_t mode)
+void jbxvt_erase_screen(xcb_connection_t * xc, const int8_t mode)
 {
 	LOG("jbxvt_erase_screen(mode=%d)", mode);
 	uint16_t start, end;
@@ -65,7 +65,7 @@ void jbxvt_erase_screen(const int8_t mode)
 		end = jbxvt.scr.current->cursor.y - 1;
 		break;
 	case JBXVT_ERASE_SAVED:
-		jbxvt_clear_saved_lines();
+		jbxvt_clear_saved_lines(xc);
 		return;
 	default: // JBXVT_ERASE_ALL
 		start = 0;
@@ -78,10 +78,10 @@ void jbxvt_erase_screen(const int8_t mode)
 	const uint16_t old_y = jbxvt.scr.current->cursor.y;
 	for (uint_fast16_t l = start; l <= end; ++l) {
 		jbxvt.scr.current->cursor.y = l;
-		jbxvt_erase_line(JBXVT_ERASE_ALL); // entire
+		jbxvt_erase_line(xc, JBXVT_ERASE_ALL); // entire
 		jbxvt_draw_cursor();
 	}
 	jbxvt.scr.current->cursor.y = old_y;
 	// clear start of, end of, or entire current line, per mode
-	jbxvt_erase_line(mode);
+	jbxvt_erase_line(xc, mode);
 }

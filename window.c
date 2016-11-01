@@ -2,19 +2,20 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "window.h"
 #include "jbxvt.h"
+#include "sbar.h"
 #include "scr_reset.h"
 #include "screen.h"
 #include <stdlib.h>
 #include <string.h>
 //  Map the window
-void jbxvt_map_window(void)
+void jbxvt_map_window(xcb_connection_t * xc)
 {
-	xcb_map_window(jbxvt.X.xcb, jbxvt.X.win.main);
-	xcb_map_subwindows(jbxvt.X.xcb, jbxvt.X.win.main);
+	xcb_map_window(xc, jbxvt.X.win.main);
+	xcb_map_subwindows(xc, jbxvt.X.win.main);
 	/*  Setup the window now so that we can add LINES and COLUMNS to
 	 *  the environment.  */
 	jbxvt_resize_window();
-	jbxvt_reset(); // update size
+	jbxvt_reset(xc); // update size
 }
 static struct JBDim get_geometry(void)
 {
@@ -40,8 +41,8 @@ void jbxvt_resize_window(void)
 #define XCW(i) XCB_CONFIG_WINDOW_##i
 	if (jbxvt.opt.show_scrollbar)
 		p.width -= JBXVT_SCROLLBAR_WIDTH;
-	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.sb, XCW(HEIGHT),
-		&(uint32_t){p.height});
+	xcb_configure_window(jbxvt.X.xcb, jbxvt_get_scrollbar(jbxvt.X.xcb),
+		XCW(HEIGHT), &(uint32_t){p.height});
 	xcb_configure_window(jbxvt.X.xcb, jbxvt.X.win.vt, XCW(WIDTH)
 		| XCW(HEIGHT), (uint32_t[]){p.w, p.h});
 #undef XCW

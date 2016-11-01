@@ -14,7 +14,7 @@
 #undef LOG
 #define LOG(...)
 #endif
-void jbxvt_dec_reset(struct Token * restrict token)
+void jbxvt_dec_reset(xcb_connection_t * xc, struct Token * restrict token)
 {
 	LOG("handle_reset(%d)", token->arg[0]);
 	const bool is_set = token->type == JBXVT_TOKEN_SET;
@@ -37,7 +37,7 @@ void jbxvt_dec_reset(struct Token * restrict token)
 			break;
 		case 5: // DECSCNM: set reverse-video mode
 			MODE(decscnm);
-			jbxvt_reset();
+			jbxvt_reset(xc);
 			break;
 		case 6 : // DECOM normal cursor mode
 			/* According to the spec, the cursor is reset to
@@ -67,13 +67,13 @@ void jbxvt_dec_reset(struct Token * restrict token)
 			MODE(lnm);
 			break;
 		case 25: // DECTCEM -- hide cursor
-			jbxvt_set_scroll(0);
+			jbxvt_set_scroll(xc, 0);
 			jbxvt_draw_cursor(); // clear
 			jbxvt.mode.dectcem = is_set;
 			jbxvt_draw_cursor(); // draw
 			break;
 		case 30: // toggle scrollbar -- per rxvt
-			jbxvt_toggle_scrollbar();
+			jbxvt_toggle_scrollbar(xc);
 			break;
 		case 40: // allow deccolm
 			allow_deccolm = is_set;

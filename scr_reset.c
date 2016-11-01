@@ -56,7 +56,7 @@ static void decscnm(void)
 }
 /*  Reset the screen - called whenever the screen
     needs to be repaired completely.  */
-void jbxvt_reset(void)
+void jbxvt_reset(xcb_connection_t * xc)
 {
 	LOG("jbxvt_reset()");
 	decscnm();
@@ -82,7 +82,7 @@ void jbxvt_reset(void)
 	jbxvt.scr.chars = c;
 	jbxvt_check_cursor_position();
 	--c.h; --c.w;
-	jbxvt_draw_scrollbar();
+	jbxvt_draw_scrollbar(xc);
 	decscnm();
 	xcb_flush(jbxvt.X.xcb);
 	jbxvt_repaint();
