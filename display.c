@@ -2,6 +2,7 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "display.h"
 #include "cursor.h"
+#include "font.h"
 #include "jbxvt.h"
 #include "paint.h"
 #include "sbar.h"

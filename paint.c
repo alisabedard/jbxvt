@@ -2,7 +2,7 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "paint.h"
 #include "color_index.h"
-#include "display.h"
+#include "font.h"
 #include "double.h"
 #include "handle_sgr.h"
 #include "jbxvt.h"

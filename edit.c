@@ -2,7 +2,7 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "edit.h"
 #include "cursor.h"
-#include "display.h"
+#include "font.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "paint.h"

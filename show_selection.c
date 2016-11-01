@@ -3,7 +3,7 @@
     University of Kent at Canterbury. */
 #include "show_selection.h"
 #include "cursor.h"
-#include "display.h"
+#include "font.h"
 #include "jbxvt.h"
 #include "screen.h"
 #include "selend.h"

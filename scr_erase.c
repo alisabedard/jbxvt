@@ -3,7 +3,7 @@
 #include "scr_erase.h"
 #include "config.h"
 #include "cursor.h"
-#include "display.h"
+#include "font.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "sbar.h"

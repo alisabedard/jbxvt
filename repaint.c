@@ -2,7 +2,7 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
 #include "repaint.h"
-#include "display.h"
+#include "font.h"
 #include "jbxvt.h"
 #include "paint.h"
 #include "show_selection.h"

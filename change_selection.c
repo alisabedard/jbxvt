@@ -3,7 +3,7 @@
 #include "change_selection.h"
 #include "config.h"
 #include "cursor.h"
-#include "display.h"
+#include "font.h"
 #include "jbxvt.h"
 #include "screen.h"
 #include "selend.h"

@@ -3,7 +3,7 @@
     University of Kent at Canterbury.  */
 #include "screen.h"
 #include "cursor.h"
-#include "display.h"
+#include "font.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "repaint.h"

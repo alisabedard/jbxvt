@@ -3,7 +3,7 @@
 #include "xevents.h"
 #include "cmdtok.h"
 #include "command.h"
-#include "display.h"
+#include "font.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "mouse.h"
