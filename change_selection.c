@@ -2,6 +2,7 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "change_selection.h"
 #include "config.h"
+#include "cursor.h"
 #include "jbxvt.h"
 #include "screen.h"
 #include "selend.h"
@@ -16,8 +17,8 @@ static void invert(xcb_connection_t * xc, const int16_t rs,
 		const int16_t x1 = row == rs ? cs * FSZ.w : 0;
 		const int16_t x2 = (row == re ? ce : jbxvt.scr.chars.w) * FSZ.w;
 		xcb_poly_fill_rectangle(xc, jbxvt.X.win.vt,
-			jbxvt.X.gc.cu, 1, &(xcb_rectangle_t){ .x = x1,
-			.y = y, .width = x2 - x1, .height = FSZ.h});
+			jbxvt_get_cursor_gc(xc), 1, &(xcb_rectangle_t){
+			.x = x1, .y = y, .width = x2 - x1, .height = FSZ.h});
 	}
 }
 static void change(xcb_connection_t * xc, struct JBDim * se,

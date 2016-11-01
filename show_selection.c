@@ -2,6 +2,7 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury. */
 #include "show_selection.h"
+#include "cursor.h"
 #include "jbxvt.h"
 #include "screen.h"
 #include "selend.h"
@@ -19,7 +20,8 @@ static void paint_rvid(xcb_connection_t * xc,
 		if (p2.x <= p1.x)
 			continue;
 		xcb_poly_fill_rectangle(xc, jbxvt.X.win.vt,
-			jbxvt.X.gc.cu, 1, &(xcb_rectangle_t){p1.x, p1.y,
+			jbxvt_get_cursor_gc(xc), 1,
+			&(xcb_rectangle_t){p1.x, p1.y,
 			p2.x - p1.x, jbxvt.X.font.size.h});
 	}
 }

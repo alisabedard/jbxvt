@@ -7,7 +7,7 @@ struct JBXVTXWindows {
 	xcb_window_t main;
 };
 struct JBXVTXGCs {
-	xcb_gcontext_t tx, cu;
+	xcb_gcontext_t tx;
 };
 struct JBXVTXPixels {
 	pixel_t bg, fg, current_fg, current_bg;

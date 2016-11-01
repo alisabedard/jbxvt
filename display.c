@@ -1,6 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "display.h"
+#include "cursor.h"
 #include "jbxvt.h"
 #include "paint.h"
 #include "sbar.h"
@@ -149,8 +150,9 @@ static void setup_gcs(xcb_connection_t * xc)
 	const pixel_t f = jbxvt.X.color.fg, b = jbxvt.X.color.bg;
 	jbxvt.X.gc.tx = get_gc(xc, XCB_GC_FOREGROUND | XCB_GC_BACKGROUND
 		| XCB_GC_FONT, (uint32_t[]){f, b, jbxvt.X.font.normal});
-	jbxvt.X.gc.cu = get_gc(xc, XCB_GC_FUNCTION | XCB_GC_PLANE_MASK,
-		(uint32_t[]){XCB_GX_INVERT, f ^ b});
+	xcb_create_gc(xc, jbxvt_get_cursor_gc(xc), jbxvt.X.win.main,
+		XCB_GC_FUNCTION | XCB_GC_PLANE_MASK, (uint32_t[]){
+		XCB_GX_INVERT, f ^ b});
 }
 static inline void init_jbxvt_colors(xcb_connection_t * xc)
 {
