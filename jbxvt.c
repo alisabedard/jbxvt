@@ -2,15 +2,15 @@
 #include "jbxvt.h"
 #include "command.h"
 #include "display.h"
-#include "scr_string.h"
+#include "tab.h"
 #include "window.h"
 #include "xvt.h"
-#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 struct JBXVT jbxvt;
-static char ** parse_command_line(const int argc, char ** argv)
+static char ** parse_command_line(const int argc, char ** argv,
+	struct JBDim * size)
 {
 	static const char * optstr = "B:b:C:c:D:d:eF:f:hI:R:S:sv";
 	int8_t opt;
@@ -24,7 +24,7 @@ static char ** parse_command_line(const int argc, char ** argv)
 			o->bg = optarg;
 			break;
 		case 'C': // columns
-			o->size.cols = atoi(optarg);
+			size->cols = atoi(optarg);
 			break;
 		case 'c': // cursor style
 			jbxvt.opt.cursor_attr = atoi(optarg);
@@ -44,7 +44,7 @@ static char ** parse_command_line(const int argc, char ** argv)
 			o->fg = optarg;
 			break;
 		case 'R': // rows
-			o->size.rows = atoi(optarg);
+			size->rows = atoi(optarg);
 			break;
 		case 's': // use scrollbar
 			o->show_scrollbar=true;
@@ -76,8 +76,6 @@ static void opt_init(void)
 	OPT(font, FONT);
 	OPT(bold_font, BOLD_FONT);
 	OPT(italic_font, ITALIC_FONT);
-	OPT(size.width, COLUMNS);
-	OPT(size.height, ROWS);
 #undef OPT
 	// Default to a steady block cursor to conserve CPU
 	jbxvt.opt.cursor_attr = 2;
@@ -105,13 +103,14 @@ static void mode_init(void)
  *  the slave.  */
 int main(int argc, char ** argv)
 {
-	errno = 0;
 	opt_init();
-	char ** com_argv = parse_command_line(argc, argv);
+	xcb_connection_t * xc;
+	struct JBDim size = {.cols = JBXVT_COLUMNS, .rows = JBXVT_ROWS};
+	char ** com_argv = parse_command_line(argc, argv, &size);
 	if (!com_argv)
 		com_argv = (char*[2]){getenv("SHELL")};
 	// jbxvt_init_display must come after parse_command_line
-	xcb_connection_t * xc = jbxvt_init_display(argv[0]);
+	xc = jbxvt_init_display(argv[0], size);
 	mode_init();
 	jbxvt_init();
 	jbxvt_map_window(xc);

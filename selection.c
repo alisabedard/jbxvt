@@ -40,8 +40,8 @@ void jbxvt_send_selection(xcb_connection_t * xc,
 	const xcb_time_t time, const uint32_t requestor,
 	const uint32_t target, const uint32_t property)
 {
-	LOG("jbxvt_send_selection, %d, %d, %d, %d", (int)time, requestor,
-		target, property);
+	LOG("jbxvt_send_selection, %d, %d, %d, %d", (int)time,
+		requestor, target, property);
 	xcb_selection_notify_event_t e = {
 		.response_type = XCB_SELECTION_NOTIFY,
 		.selection = XCB_ATOM_PRIMARY, .target = target,
@@ -49,8 +49,7 @@ void jbxvt_send_selection(xcb_connection_t * xc,
 			= property == XCB_NONE
 			? target : property}; // per ICCCM
 	xcb_change_property(xc, XCB_PROP_MODE_REPLACE, requestor,
-		property, target, 8, jbxvt.sel.length,
-		jbxvt.sel.text);
+		property, target, 8, jbxvt.sel.length, jbxvt.sel.text);
 	xcb_flush(xc);
 	xcb_send_event(xc, true, requestor,
 		XCB_SELECTION_NOTIFY, (char *)&e);

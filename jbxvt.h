@@ -14,7 +14,8 @@ struct JBXVTScreenSavedLines {
 struct JBXVTScreenData {
 	struct JBXVTScreen * current, * s;
 	struct JBXVTScreenSavedLines sline;
-	struct JBDim chars, pixels;
+	struct JBDim chars;
+	struct JBDim pixels;
 	uint32_t rstyle; // render style
 	uint32_t saved_rstyle; // saved render style
 	int16_t offset; // current vert saved line
@@ -45,7 +46,6 @@ enum CharacterSet{
 };
 struct JBXVTOptionData {
 	char *bg, *fg, *font, *bold_font, *italic_font, *display;
-	struct JBDim size;
 	int8_t screen;
 	uint8_t elr; // DECELR
 	bool show_scrollbar;

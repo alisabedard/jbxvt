@@ -21,6 +21,7 @@
 #include "screen.h"
 #include "scroll.h"
 #include "selreq.h"
+#include "tab.h"
 #include "window.h"
 #include <stdio.h>
 #include <string.h>
