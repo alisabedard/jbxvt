@@ -31,7 +31,6 @@ struct JBXVTCommandContainer {
 };
 struct JBXVTCommandData {
 	struct JBXVTCommandContainer buf, stack;
-	struct JBXVTEvent xev;
 	uint8_t * send_nxt; // next char to be sent
 	long width; // # file descriptors being used
 	// type per sysconf(3):

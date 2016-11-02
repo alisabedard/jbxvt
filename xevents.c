@@ -189,7 +189,5 @@ bool jbxvt_handle_xevents(xcb_connection_t * xc, struct JBXVTEvent * xe)
 	default:
 		LOG("Unhandled event %d", xe->type);
 	}
-	// Zero out event structure for next event:
-	jbxvt.com.xev = (struct JBXVTEvent){};
 	return true;
 }

@@ -19,22 +19,23 @@
 //  Flags used to control jbxvt_pop_char
 enum ComCharFlags {INPUT_BUFFER_EMPTY = 0x100,
 	GET_INPUT_ONLY=1, GET_XEVENTS_ONLY=2};
+static struct JBXVTEvent cmdtok_xev;
 // Shortcuts
 #define BUF jbxvt.com.buf
 static void handle_focus(xcb_generic_event_t * restrict ge)
 {
 	xcb_focus_in_event_t * e = (xcb_focus_in_event_t *)ge;
-	jbxvt.com.xev = (struct JBXVTEvent) {.type = e->response_type,
+	cmdtok_xev = (struct JBXVTEvent) {.type = e->response_type,
 		.detail = e->detail};
 	if (e->mode)
 		  return;
-	jbxvt.com.xev.detail = e->detail;
+	cmdtok_xev.detail = e->detail;
 }
 static void handle_sel(xcb_generic_event_t * restrict ge)
 {
 	xcb_selection_request_event_t * e
 		= (xcb_selection_request_event_t *)ge;
-	jbxvt.com.xev = (struct JBXVTEvent) {.type = e->response_type,
+	cmdtok_xev = (struct JBXVTEvent) {.type = e->response_type,
 		.time = e->time, .requestor = e->requestor,
 		.target = e->target, .property = e->property,
 		.window = e->owner};
@@ -58,7 +59,7 @@ static void handle_expose(xcb_connection_t * xc,
 static void handle_other(xcb_generic_event_t * restrict ge)
 {
 	xcb_key_press_event_t * e = (xcb_key_press_event_t *)ge;
-	jbxvt.com.xev = (struct JBXVTEvent) {.type = e->response_type,
+	cmdtok_xev = (struct JBXVTEvent) {.type = e->response_type,
 		.window = e->event, .box.x = e->event_x,
 		.box.y = e->event_y, .state = e->state,
 		.time = e->time, .button = e->detail};
@@ -347,8 +348,11 @@ void jbxvt_get_token(xcb_connection_t * xc, struct Token * restrict tk)
 {
 	memset(tk, 0, sizeof(struct Token));
 	// set token per event:
-	if(jbxvt_handle_xevents(xc, &jbxvt.com.xev))
-		  return;
+	if(jbxvt_handle_xevents(xc, &cmdtok_xev)) {
+		// Zero out event structure for next event:
+		cmdtok_xev = (struct JBXVTEvent){};
+		return;
+	}
 	const int_fast16_t c = jbxvt_pop_char(xc, GET_XEVENTS_ONLY);
 	switch (c) {
 	case INPUT_BUFFER_EMPTY:
