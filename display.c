@@ -1,6 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "display.h"
+#include "color.h"
 #include "cursor.h"
 #include "font.h"
 #include "jbxvt.h"

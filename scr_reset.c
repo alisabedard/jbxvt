@@ -1,6 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "scr_reset.h"
+#include "color.h"
 #include "command.h"
 #include "config.h"
 #include "cursor.h"
@@ -47,7 +48,7 @@ static void decscnm(xcb_connection_t * xc)
 	else
 		last_was_rv = rv;
 	LOG("decscnm()");
-	jbxvt_reverse_colors(xc);
+	jbxvt_reverse_screen_colors(xc);
 	jb_sleep(100);
 }
 /*  Reset the screen - called whenever the screen

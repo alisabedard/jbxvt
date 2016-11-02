@@ -1,6 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "handle_sgr.h"
+#include "color.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "paint.h"
