@@ -7,7 +7,6 @@
 #include "JBXVTSavedLine.h"
 #include "JBXVTEvent.h"
 #include "JBXVTScreen.h"
-#include "JBXVTXData.h"
 struct JBXVTScreenSavedLines {
 	struct JBXVTSavedLine data[JBXVT_MAX_SCROLL]; // saved lines
 	uint16_t top, max;
@@ -53,7 +52,6 @@ struct JBXVTOptionData {
 	uint8_t cursor_attr;
 };
 struct JBXVT {
-	struct JBXVTXData X;
 	struct JBXVTScreenData scr;
 	struct JBXVTSelectionData sel;
 	struct JBXVTCommandData com;

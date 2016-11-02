@@ -16,6 +16,24 @@
 #undef LOG
 #define LOG(...)
 #endif//!DEBUG_PAINT
+static struct {
+	pixel_t bg, fg, current_fg, current_bg;
+} paint_data;
+void jbxvt_init_colors(xcb_connection_t * xc)
+{
+	paint_data.fg = jbxvt_set_fg(xc, jbxvt.opt.fg);
+	paint_data.bg = jbxvt_set_fg(xc, jbxvt.opt.bg);
+}
+void jbxvt_reverse_colors(xcb_connection_t * xc)
+{
+	JB_SWAP(pixel_t, paint_data.fg, paint_data.bg);
+	JB_SWAP(pixel_t, paint_data.current_fg, paint_data.current_bg);
+	xcb_change_gc(xc, jbxvt_get_text_gc(xc), XCB_GC_FOREGROUND
+		| XCB_GC_BACKGROUND, (uint32_t[]){
+		paint_data.fg, paint_data.bg});
+	xcb_change_window_attributes(xc, jbxvt_get_vt_window(xc),
+		XCB_CW_BACK_PIXEL, &paint_data.bg);
+}
 xcb_gcontext_t jbxvt_get_text_gc(xcb_connection_t * xc)
 {
 	static xcb_gcontext_t gc;
@@ -26,13 +44,13 @@ xcb_gcontext_t jbxvt_get_text_gc(xcb_connection_t * xc)
 // not pure, has side-effects
 static pixel_t fg(xcb_connection_t * xc, const pixel_t p)
 {
-	return jbxvt.X.color.current_fg
+	return paint_data.current_fg
 		= jb_set_fg(xc, jbxvt_get_text_gc(xc), p);
 }
 // not pure, has side-effects
 static pixel_t bg(xcb_connection_t * xc, const pixel_t p)
 {
-	return jbxvt.X.color.current_bg
+	return paint_data.current_bg
 		= jb_set_bg(xc, jbxvt_get_text_gc(xc), p);
 }
 static pixel_t set_x(xcb_connection_t * xc, const char * color,
@@ -42,13 +60,21 @@ static pixel_t set_x(xcb_connection_t * xc, const char * color,
 	return func(xc, color ? jb_get_pixel(xc,
 		jbxvt_get_colormap(xc), color) : backup);
 }
+pixel_t jbxvt_get_fg(void)
+{
+	return paint_data.fg;
+}
+pixel_t jbxvt_get_bg(void)
+{
+	return paint_data.bg;
+}
 pixel_t jbxvt_set_fg(xcb_connection_t * xc, const char * color)
 {
-	return set_x(xc, color, jbxvt.X.color.fg, &fg);
+	return set_x(xc, color, paint_data.fg, &fg);
 }
 pixel_t jbxvt_set_bg(xcb_connection_t * xc, const char * color)
 {
-	return set_x(xc, color, jbxvt.X.color.bg, &bg);
+	return set_x(xc, color, paint_data.bg, &bg);
 }
 // 9-bit color
 static pixel_t rgb_pixel(xcb_connection_t * xc, const uint16_t c)
@@ -114,8 +140,8 @@ static void draw_text(xcb_connection_t * xc,
 }
 static void set_reverse_video(xcb_connection_t * xc)
 {
-	jb_set_fg(xc, jbxvt_get_text_gc(xc), jbxvt.X.color.current_bg);
-	jb_set_bg(xc, jbxvt_get_text_gc(xc), jbxvt.X.color.current_fg);
+	jb_set_fg(xc, jbxvt_get_text_gc(xc), paint_data.current_bg);
+	jb_set_bg(xc, jbxvt_get_text_gc(xc), paint_data.current_fg);
 }
 //  Paint the text using the rendition value at the screen position.
 void jbxvt_paint(xcb_connection_t * xc, uint8_t * restrict str,
@@ -146,7 +172,7 @@ void jbxvt_paint(xcb_connection_t * xc, uint8_t * restrict str,
 	if(rstyle & JBXVT_RS_BOLD || rstyle & JBXVT_RS_ITALIC)
 		font(xc, jbxvt_get_normal_font(xc)); // restore font
 	if (cmod) {
-		fg(xc, jbxvt.X.color.fg);
-		bg(xc, jbxvt.X.color.bg);
+		fg(xc, paint_data.fg);
+		bg(xc, paint_data.bg);
 	}
 }

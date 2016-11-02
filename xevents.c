@@ -6,6 +6,7 @@
 #include "font.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "libjb/xcb.h"
 #include "mouse.h"
 #include "sbar.h"
 #include "scr_move.h"

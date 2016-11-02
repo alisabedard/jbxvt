@@ -25,7 +25,7 @@ static void create_main_window(xcb_connection_t * xc,
 	xcb_create_window(xc, 0, jbxvt_get_main_window(xc), root,
 		sh->x, sh->y, sh->width, sh->height, 0, 0, 0,
 		XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK,
-		(uint32_t[]){jbxvt.X.color.bg, MW_EVENTS});
+		(uint32_t[]){jbxvt_get_bg(), MW_EVENTS});
 	jbxvt.scr.pixels.w = sh->width;
 	jbxvt.scr.pixels.h = sh->height;
 	jbxvt.scr.chars = jbxvt_get_char_size(jbxvt.scr.pixels);
@@ -37,7 +37,7 @@ static void create_sb_window(xcb_connection_t * xc, const uint16_t height)
 		jbxvt_get_main_window(xc), -1, -1, JBXVT_SCROLLBAR_WIDTH - 1,
 		height, 1, 0, 0, XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL
 		| XCB_CW_EVENT_MASK | XCB_CW_CURSOR, (uint32_t[]){
-		jbxvt.X.color.bg, jbxvt.X.color.fg, SUB_EVENTS, c});
+		jbxvt_get_bg(), jbxvt_get_fg(), SUB_EVENTS, c});
 	xcb_free_cursor(xc, c);
 }
 static void create_vt_window(xcb_connection_t * xc,
@@ -48,7 +48,7 @@ static void create_vt_window(xcb_connection_t * xc,
 		jbxvt_get_main_window(xc), jbxvt.opt.show_scrollbar
 		? JBXVT_SCROLLBAR_WIDTH : 0, 0, sh->width, sh->height,
 		0, 0, 0, XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK
-		| XCB_CW_CURSOR, (uint32_t[]){ jbxvt.X.color.bg,
+		| XCB_CW_CURSOR, (uint32_t[]){ jbxvt_get_bg(),
 		SUB_EVENTS, c});
 	xcb_free_cursor(xc, c);
 }
@@ -82,7 +82,7 @@ static void create_window(xcb_connection_t * xc, uint8_t * restrict name,
 }
 static void setup_gcs(xcb_connection_t * xc, xcb_window_t w)
 {
-	const pixel_t f = jbxvt.X.color.fg, b = jbxvt.X.color.bg;
+	const pixel_t f = jbxvt_get_fg(), b = jbxvt_get_bg();
 	xcb_create_gc(xc, jbxvt_get_text_gc(xc), w,
 		XCB_GC_FOREGROUND | XCB_GC_BACKGROUND
 		| XCB_GC_FONT, (uint32_t[]){f, b, jbxvt_get_normal_font(xc)});
@@ -90,17 +90,12 @@ static void setup_gcs(xcb_connection_t * xc, xcb_window_t w)
 		XCB_GC_FUNCTION | XCB_GC_PLANE_MASK, (uint32_t[]){
 		XCB_GX_INVERT, f ^ b});
 }
-static inline void init_jbxvt_colors(xcb_connection_t * xc)
-{
-	jbxvt.X.color.fg = jbxvt_set_fg(xc, jbxvt.opt.fg);
-	jbxvt.X.color.bg = jbxvt_set_bg(xc, jbxvt.opt.bg);
-}
 xcb_connection_t * jbxvt_init_display(char * restrict name)
 {
 	int screen = jbxvt.opt.screen;
 	xcb_connection_t * xc = xc
 		= jb_get_xcb_connection(jbxvt.opt.display, &screen);
-	init_jbxvt_colors(xc);
+	jbxvt_init_colors(xc);
 	jbxvt_setup_fonts(xc);
 	create_window(xc, (uint8_t *)name,
 		jbxvt_get_root_window(xc));

@@ -4,6 +4,7 @@
 #include "cursor.h"
 #include "jbxvt.h"
 #include "libjb/util.h"
+#include "libjb/xcb.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

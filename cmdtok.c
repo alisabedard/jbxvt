@@ -7,6 +7,7 @@
 #include "esc.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "libjb/xcb.h"
 #include "lookup_key.h"
 #include "sbar.h"
 #include "scr_reset.h"

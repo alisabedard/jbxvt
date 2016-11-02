@@ -47,13 +47,7 @@ static void decscnm(xcb_connection_t * xc)
 	else
 		last_was_rv = rv;
 	LOG("decscnm()");
-	struct JBXVTXPixels * p = &jbxvt.X.color;
-	JB_SWAP(pixel_t, p->fg, p->bg);
-	JB_SWAP(pixel_t, p->current_fg, p->current_bg);
-	xcb_change_gc(xc, jbxvt_get_text_gc(xc), XCB_GC_FOREGROUND
-		| XCB_GC_BACKGROUND, (uint32_t[]){p->fg, p->bg});
-	xcb_change_window_attributes(xc, jbxvt_get_vt_window(xc),
-		XCB_CW_BACK_PIXEL, &p->bg);
+	jbxvt_reverse_colors(xc);
 	jb_sleep(100);
 }
 /*  Reset the screen - called whenever the screen
