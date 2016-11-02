@@ -4,7 +4,7 @@
 #include "cursor.h"
 #include "jbxvt.h"
 #include "libjb/util.h"
-#include <errno.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 static uint8_t font_ascent;
@@ -13,35 +13,25 @@ struct JBDim jbxvt_get_font_size(void)
 {
 	return font_size;
 }
-static xcb_font_t get_font(xcb_connection_t * xc, const char * name)
+/* Try to open the named font.  Return true if successful.  Print
+   an error message and return false if not successful.  */
+static bool open_font(xcb_connection_t * xc, const xcb_font_t f,
+	char * name)
 {
-	errno = 0;
-	xcb_font_t f = xcb_generate_id(xc);
-	xcb_void_cookie_t c = xcb_open_font_checked(xc, f,
-		strlen(name), name);
+	xcb_void_cookie_t c = xcb_open_font_checked(xc, f, strlen(name),
+		name);
 	if (jb_xcb_cookie_has_error(xc, c)) {
-		if (jbxvt.X.font.normal) // Fall back to normal font first
-			return jbxvt.X.font.normal;
-		c = xcb_open_font_checked(xc, f, sizeof(FALLBACK_FONT),
-			FALLBACK_FONT);
-		jb_require(!jb_xcb_cookie_has_error(xc, c),
-			"Could not load any fonts");
+		fprintf(stderr, "Cannot open font %s\n", name);
+		return false;
 	}
-	return f;
-}
-static void open_cursor(xcb_connection_t * xc, const xcb_font_t f)
-{
-	errno = 0;
-	xcb_void_cookie_t v = xcb_open_font_checked(xc, f, 6,
-		"cursor");
-	jb_require(!jb_xcb_cookie_has_error(xc, v),
-		"Cannot open cursor font");
+	return true;
 }
 xcb_cursor_t jbxvt_get_cursor(xcb_connection_t * xc, const uint16_t id,
 	const uint16_t fg, const uint16_t bg)
 {
 	xcb_font_t f = xcb_generate_id(xc);
-	open_cursor(xc, f);
+	if (!open_font(xc, f, "cursor"))
+		return 0;
 	xcb_cursor_t c = xcb_generate_id(xc);
 	xcb_create_glyph_cursor(xc, c, f, f,
 		id, id + 1, fg, fg, fg, bg, bg, bg);
@@ -52,7 +42,6 @@ xcb_cursor_t jbxvt_get_cursor(xcb_connection_t * xc, const uint16_t id,
 static void setup_font_metrics(xcb_connection_t * xc,
 	const xcb_query_font_cookie_t c)
 {
-	errno = 0;
 	xcb_query_font_reply_t * r = xcb_query_font_reply(xc,
 		c, NULL);
 	jb_assert(r, "Cannot get font information");
@@ -65,13 +54,38 @@ uint8_t jbxvt_get_font_ascent(void)
 {
 	return font_ascent;
 }
+xcb_font_t jbxvt_get_normal_font(xcb_connection_t * xc)
+{
+	static xcb_font_t f;
+	if (f)
+		return f;
+	return f = xcb_generate_id(xc);
+}
+xcb_font_t jbxvt_get_bold_font(xcb_connection_t * xc)
+{
+	static xcb_font_t f;
+	if (f)
+		return f;
+	return f = xcb_generate_id(xc);
+}
+xcb_font_t jbxvt_get_italic_font(xcb_connection_t * xc)
+{
+	static xcb_font_t f;
+	if (f)
+		return f;
+	return f = xcb_generate_id(xc);
+}
 void jbxvt_setup_fonts(xcb_connection_t * xc)
 {
-	jbxvt.X.font.normal = get_font(xc, jbxvt.opt.font);
-	const xcb_query_font_cookie_t c = xcb_query_font(xc,
-		jbxvt.X.font.normal);
-	jbxvt.X.font.bold = get_font(xc, jbxvt.opt.bold_font);
-	jbxvt.X.font.italic = get_font(xc, jbxvt.opt.italic_font);
-	setup_font_metrics(xc, c);
+	xcb_font_t f = jbxvt_get_normal_font(xc);
+	jb_require(open_font(xc, f, jbxvt.opt.font),
+		"Could not load the primary font");
+	xcb_query_font_cookie_t q = xcb_query_font(xc, f);
+	f = jbxvt_get_bold_font(xc);
+	if (!open_font(xc, f, jbxvt.opt.bold_font))
+		open_font(xc, f, jbxvt.opt.font);
+	f = jbxvt_get_italic_font(xc);
+	if (!open_font(xc, f, jbxvt.opt.italic_font))
+		open_font(xc, f, jbxvt.opt.font);
+	setup_font_metrics(xc, q);
 }
-

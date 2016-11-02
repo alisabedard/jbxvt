@@ -85,7 +85,7 @@ static void setup_gcs(xcb_connection_t * xc, xcb_window_t w)
 	const pixel_t f = jbxvt.X.color.fg, b = jbxvt.X.color.bg;
 	xcb_create_gc(xc, jbxvt_get_text_gc(xc), w,
 		XCB_GC_FOREGROUND | XCB_GC_BACKGROUND
-		| XCB_GC_FONT, (uint32_t[]){f, b, jbxvt.X.font.normal});
+		| XCB_GC_FONT, (uint32_t[]){f, b, jbxvt_get_normal_font(xc)});
 	xcb_create_gc(xc, jbxvt_get_cursor_gc(xc), w,
 		XCB_GC_FUNCTION | XCB_GC_PLANE_MASK, (uint32_t[]){
 		XCB_GX_INVERT, f ^ b});

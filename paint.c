@@ -102,7 +102,7 @@ static void draw_text(xcb_connection_t * xc,
 		jbxvt_get_text_gc(xc), p->x, p->y, (const char *)str);
 	++p->y; // Padding for underline, use underline for italic
 	if (((rstyle & JBXVT_RS_ITALIC)
-		&& (jbxvt.X.font.italic == jbxvt.X.font.normal))
+		&& (jbxvt_get_italic_font(xc) == jbxvt_get_normal_font(xc)))
 		|| (rstyle & JBXVT_RS_UNDERLINE))
 		draw_underline(xc, len, *p, 0);
 	if (rstyle & JBXVT_RS_DOUBLE_UNDERLINE) {
@@ -134,9 +134,9 @@ void jbxvt_paint(xcb_connection_t * xc, uint8_t * restrict str,
 	}
 	p.y += jbxvt_get_font_ascent();
 	if (rstyle & JBXVT_RS_BOLD)
-		font(xc, jbxvt.X.font.bold);
+		font(xc, jbxvt_get_bold_font(xc));
 	if (rstyle & JBXVT_RS_ITALIC)
-		font(xc, jbxvt.X.font.italic);
+		font(xc, jbxvt_get_italic_font(xc));
 	// Draw text with background:
 	if (dwl)
 		str = jbxvt_get_double_width_string(str, &len);
@@ -144,7 +144,7 @@ void jbxvt_paint(xcb_connection_t * xc, uint8_t * restrict str,
 	if (dwl)
 		free(str);
 	if(rstyle & JBXVT_RS_BOLD || rstyle & JBXVT_RS_ITALIC)
-		font(xc, jbxvt.X.font.normal); // restore font
+		font(xc, jbxvt_get_normal_font(xc)); // restore font
 	if (cmod) {
 		fg(xc, jbxvt.X.color.fg);
 		bg(xc, jbxvt.X.color.bg);

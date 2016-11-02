@@ -5,11 +5,7 @@
 struct JBXVTXPixels {
 	pixel_t bg, fg, current_fg, current_bg;
 };
-struct JBXVTFontData {
-	xcb_font_t normal, bold, italic;
-};
 struct JBXVTXData {
 	struct JBXVTXPixels color;
-	struct JBXVTFontData font;
 };
 #endif//!JBXVT_JBXVTXDATA_H
