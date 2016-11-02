@@ -18,7 +18,6 @@ struct JBXVTScreenData {
 	struct JBDim pixels;
 	uint32_t rstyle; // render style
 	uint32_t saved_rstyle; // saved render style
-	int16_t offset; // current vert saved line
 };
 struct JBXVTSelectionData {
 	uint8_t * text;

@@ -6,6 +6,8 @@
 #include <xcb/xcb.h>
 // Draw the scrollbar.
 void jbxvt_draw_scrollbar(xcb_connection_t * xc);
+// Get the current scroll position.
+int16_t jbxvt_get_scroll(void);
 // Get the scrollbar window id
 xcb_window_t jbxvt_get_scrollbar(xcb_connection_t * c)
 	__attribute__((nonnull));

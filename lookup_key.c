@@ -206,12 +206,12 @@ uint8_t * jbxvt_lookup_key(xcb_connection_t * restrict xc,
 			switch (s[2]) {
 			case '5':
 				LOG("KEY scroll down");
-				jbxvt_set_scroll(xc, jbxvt.scr.offset + 10);
+				jbxvt_set_scroll(xc, jbxvt_get_scroll() + 10);
 				goto do_not_display;
 				break;
 			case '6':
 				LOG("KEY scroll up");
-				jbxvt_set_scroll(xc, jbxvt.scr.offset - 10);
+				jbxvt_set_scroll(xc, jbxvt_get_scroll() - 10);
 				goto do_not_display;
 				break;
 			}

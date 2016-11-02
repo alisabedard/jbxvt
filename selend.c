@@ -3,6 +3,7 @@
     University of Kent at Canterbury.*/
 #include "selend.h"
 #include "jbxvt.h"
+#include "sbar.h"
 static int8_t cmp(const int8_t mod, struct JBDim * restrict se1,
 	struct JBDim * restrict se2)
 {
@@ -24,7 +25,7 @@ void jbxvt_rc_to_selend(const int16_t row, const int16_t col,
 	struct JBDim * se)
 {
 	jbxvt.sel.type = JBXVT_SEL_ON_SCREEN;
-	se->index = row - jbxvt.scr.offset;
+	se->index = row - jbxvt_get_scroll();
 	se->col = col;
 }
 //  Convert the selection into a row and column.
@@ -34,7 +35,7 @@ void jbxvt_selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
 	if (jbxvt.sel.type == JBXVT_SEL_NONE)
 		return;
 	*colp = se->col;
-	*rowp = se->row + jbxvt.scr.offset;
+	*rowp = se->row + jbxvt_get_scroll();
 }
 static uint16_t sel_s(struct JBDim * restrict se2, uint8_t ** s)
 {

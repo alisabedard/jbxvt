@@ -10,6 +10,11 @@
 #include "window.h"
 #include <stdbool.h>
 #include <string.h>
+static int16_t sbar_offset;
+int16_t jbxvt_get_scroll(void)
+{
+	return sbar_offset;
+}
 xcb_window_t jbxvt_get_scrollbar(xcb_connection_t * c)
 {
 	static xcb_window_t sb;
@@ -21,7 +26,7 @@ __attribute__((pure))
 static int16_t get_sz(const int16_t margin)
 {
 	return jbxvt.scr.pixels.h - jbxvt.scr.pixels.h
-		* (jbxvt.scr.offset + margin)
+		* (sbar_offset + margin)
 		/ (jbxvt.scr.sline.top + jbxvt.scr.chars.h);
 }
 // Draw the scrollbar.
@@ -38,9 +43,9 @@ void jbxvt_draw_scrollbar(xcb_connection_t * xc)
 void jbxvt_set_scroll(xcb_connection_t * xc, int16_t n)
 {
 	JB_LIMIT(n, jbxvt.scr.sline.top, 0);
-	if (n == jbxvt.scr.offset)
+	if (n == sbar_offset)
 		return;
-	jbxvt.scr.offset = n;
+	sbar_offset = n;
 	jbxvt_repaint(xc);
 	jbxvt_draw_cursor(xc);
 	jbxvt_draw_scrollbar(xc);

@@ -6,6 +6,7 @@
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "repaint.h"
+#include "sbar.h"
 #include "screen.h"
 #include "window.h"
 static uint32_t saved_style;
@@ -48,7 +49,8 @@ void jbxvt_draw_cursor(xcb_connection_t * xc)
 	struct JBXVTScreenData * s = &jbxvt.scr;
 	// Don't draw if scrolled, non-existent, or hidden
 	struct JBXVTScreen * current;
-	if (s->offset || !(current = s->current) || !jbxvt.mode.dectcem)
+	if (jbxvt_get_scroll() || !(current = s->current)
+		|| !jbxvt.mode.dectcem)
 		return;
 	if ((current->cursor_visible ^= true) && is_blinking())
 		jbxvt_repaint(xc); // prevent stale cursor blocks

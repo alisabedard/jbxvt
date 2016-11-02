@@ -5,6 +5,7 @@
 #include "font.h"
 #include "jbxvt.h"
 #include "paint.h"
+#include "sbar.h"
 #include "show_selection.h"
 #include "window.h"
 #define CSZ jbxvt.scr.chars
@@ -79,7 +80,7 @@ void jbxvt_repaint(xcb_connection_t * xc)
 	//  First do any 'scrolled off' lines that are visible.
 	struct JBDim p = {};
 	int_fast32_t line = show_scroll_history(xc,
-		&p, 0, jbxvt.scr.offset - 1);
+		&p, 0, jbxvt_get_scroll() - 1);
 	// Do the remainder from the current screen:
 	for (uint_fast16_t i = 0; line < CSZ.height; ++line, ++i) {
 		// Allocate enough space to process each column
