@@ -53,7 +53,7 @@ static void form_feed(xcb_connection_t * xc)
 	const struct JBDim m = jbxvt.scr.current->margin;
 	jbxvt_move(xc, 0, m.top, 0);
 	if (jbxvt.mode.decpff)
-		dprintf(jbxvt.com.fd, "FF");
+		dprintf(jbxvt_get_fd(), "FF");
 	scroll(xc, m.top, m.bottom, m.bottom - m.top);
 }
 static void handle_tk_char(xcb_connection_t * xc, const uint8_t tk_char)
@@ -80,7 +80,7 @@ static void handle_tk_char(xcb_connection_t * xc, const uint8_t tk_char)
 		jbxvt_tab(xc);
 		break;
 	case 005: // ENQ
-		dprintf(jbxvt.com.fd, "%s?6c", jbxvt_get_csi()); // VT102
+		dprintf(jbxvt_get_fd(), "%s?6c", jbxvt_get_csi()); // VT102
 		break;
 	case '\016': // change to char set G1
 		LOG("charset G1");
@@ -127,7 +127,7 @@ static void reqtparam(const uint8_t t)
 	const uint8_t sol = t + 2, par = 1, nbits = 1,
 	      flags = 0, clkmul = 1;
 	const uint16_t xspeed = 88, rspeed = 88;
-	dprintf(jbxvt.com.fd, "%s[%d;%d;%d;%d;%d;%d;%dx", jbxvt_get_csi(),
+	dprintf(jbxvt_get_fd(), "%s[%d;%d;%d;%d;%d;%d;%dx", jbxvt_get_csi(),
 		sol, par, nbits, xspeed, rspeed, clkmul, flags);
 	LOG("ESC[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
 		xspeed, rspeed, clkmul, flags);
@@ -201,7 +201,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 	case JBXVT_TOKEN_DA:
 	case JBXVT_TOKEN_ID:
 		LOG("JBXVT_TOKEN_ID/DA");
-		dprintf(jbxvt.com.fd, "%s?6c", jbxvt_get_csi()); // VT102
+		dprintf(jbxvt_get_fd(), "%s?6c", jbxvt_get_csi()); // VT102
 		break;
 	case JBXVT_TOKEN_DCH:
 	case JBXVT_TOKEN_ECH:
@@ -394,7 +394,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		LOG("JBXVT_TOKEN_RQM");
 		if (token.private == '?') {
 			LOG("\tRQM Ps: %d", t[0]);
-			dprintf(jbxvt.com.fd, "%s%d;%d$y", jbxvt_get_csi(),
+			dprintf(jbxvt_get_fd(), "%s%d;%d$y", jbxvt_get_csi(),
 				t[0], 0); // FIXME:  Return actual valu
 		} else {
 			LOG("\tDECSCL 0: %d, 1: %d", t[0], t[1]);

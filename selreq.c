@@ -1,6 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "selreq.h"
+#include "command.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "window.h"
@@ -8,7 +9,7 @@
 #include <unistd.h>
 static inline void paste(const uint8_t * data, const size_t length)
 {
-	jb_check(write(jbxvt.com.fd, data, length) != -1,
+	jb_check(write(jbxvt_get_fd(), data, length) != -1,
 		"Cannot paste");
 }
 static bool paste_from(xcb_connection_t * xc,

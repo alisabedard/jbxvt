@@ -34,9 +34,6 @@ struct JBXVTCommandData {
 	struct JBXVTEvent xev;
 	uint8_t * send_nxt; // next char to be sent
 	long width; // # file descriptors being used
-	fd_t fd; // file descriptor connected to the command
-	fd_t xfd; // X connection file descriptor
-	pid_t pid; // command PID
 	// type per sysconf(3):
 	uint16_t send_count; // # chars waiting to be sent
 };

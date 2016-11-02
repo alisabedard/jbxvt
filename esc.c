@@ -162,7 +162,7 @@ void jbxvt_esc(xcb_connection_t * xc,
 		if (jbxvt.mode.decanm) // vt100+ mode
 			tk->type = JBXVT_TOKEN_ID;
 		else // I am a VT52
-			dprintf(jbxvt.com.fd, "\033/Z");
+			dprintf(jbxvt_get_fd(), "\033/Z");
 		break;
 	}
 }

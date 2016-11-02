@@ -39,6 +39,12 @@
 #include <string.h>
 #include <utmpx.h>
 #endif//POSIX_UTMP
+static fd_t command_fd;
+static pid_t command_pid;
+fd_t jbxvt_get_fd(void)
+{
+	return command_fd;
+}
 //  Attempt to create and write an entry to the utmp file
 #ifdef POSIX_UTMPX
 static void write_utmpx(const pid_t comm_pid, char * tty_name)
@@ -135,19 +141,19 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	&& defined(HAVE_ASM_GENERIC_IOCTLS_H) && defined(TIOCSWINSZ)
 void jbxvt_set_tty_size(const struct JBDim sz)
 {
-	jb_check(ioctl(jbxvt.com.fd, TIOCSWINSZ, &(struct winsize){
+	jb_check(ioctl(jbxvt_get_fd(), TIOCSWINSZ, &(struct winsize){
 		.ws_row = sz.row, .ws_col = sz.col}) != 1,
 		"Could not set ioctl TIOCSWINSZ");
 }
 #endif//etc
 static void cleanup(void)
 {
-	LOG("cleanup(), pid: %d, command pid: %d", getpid(), jbxvt.com.pid);
+	LOG("cleanup(), pid: %d, command pid: %d", getpid(), command_pid);
 #ifdef USE_UTEMPTER
 	utempter_remove_added_record();
 #endif//USE_UTEMPTER
 	// Make sure child process exits
-	kill(jbxvt.com.pid, SIGHUP);
+	kill(command_pid, SIGHUP);
 }
 #if defined(NETBSD) || defined(OPENBSD)
 static void sigchld(int sig __attribute__((unused)))
@@ -191,11 +197,11 @@ static fd_t run_command(char ** argv)
 	// +1 to allow for X fd
 	jbxvt.com.width = ptyfd + 1;
 	attach_signals();
-	jb_require((jbxvt.com.pid = fork()) >= 0, "Could not start session");
-	if (jbxvt.com.pid == 0)
+	jb_require((command_pid = fork()) >= 0, "Could not start session");
+	if (command_pid == 0)
 		child(argv, ttyfd);
 #ifdef POSIX_UTMPX
-	write_utmpx(jbxvt.com.pid, tty_name);
+	write_utmpx(command_pid, tty_name);
 #endif//POSIX_UTMPX
 #ifdef USE_UTEMPTER
 	utempter_add_record(ptyfd, getenv("DISPLAY"));
@@ -214,9 +220,8 @@ void jbxvt_init_command_module(xcb_connection_t * xc,
 {
 	//  Enable the delete window protocol:
 	jbxvt_get_wm_del_win(xc);
-	jbxvt.com.xfd = xcb_get_file_descriptor(xc);
-	jbxvt.com.fd = run_command(argv);
-	jb_require(jbxvt.com.fd >= 0, "Could not start session");
+	command_fd = run_command(argv);
+	jb_require(jbxvt_get_fd() >= 0, "Could not start session");
 	static uint8_t buf[COM_BUF_SIZE], stack[COM_PUSH_MAX];
 	init_container(&jbxvt.com.buf, buf);
 	init_container(&jbxvt.com.stack, stack);

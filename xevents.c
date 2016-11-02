@@ -143,7 +143,8 @@ static void handle_button_press(xcb_connection_t * xc,
 static void handle_focus(const bool in)
 {
 	if (jbxvt.mode.mouse_focus_evt)
-		dprintf(jbxvt.com.fd, "%s%c]", jbxvt_get_csi(), in ? 'I' : 'O');
+		dprintf(jbxvt_get_fd(), "%s%c]",
+			jbxvt_get_csi(), in ? 'I' : 'O');
 }
 // Handle X11 event described by xe
 bool jbxvt_handle_xevents(xcb_connection_t * xc, struct JBXVTEvent * xe)

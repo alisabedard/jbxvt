@@ -1,6 +1,7 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "mouse.h"
 #include "cmdtok.h"
+#include "command.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "screen.h"
@@ -21,7 +22,7 @@ static bool track_mouse_sgr(uint8_t b, struct JBDim p, const bool rel)
 {
 	if (!MD.mouse_sgr)
 		return false;
-	dprintf(jbxvt.com.fd, "%s<%c;%c;%c%c", jbxvt_get_csi(),
+	dprintf(jbxvt_get_fd(), "%s<%c;%c;%c%c", jbxvt_get_csi(),
 		b, p.x, p.y, rel ? 'm' : 'M');
 	LOG("(SGR): <%c;%c;%c%c", b, p.x, p.y, rel ? 'm' : 'M');
 	return true;
@@ -35,7 +36,7 @@ static void locator_report(const uint8_t b, struct JBDim p)
 	if (MD.elr_pixels)
 		p = jbxvt_get_pixel_size(p);
 	// DECLRP
-	dprintf(jbxvt.com.fd, "%s%d;%d;%d;%d;0&w", jbxvt_get_csi(),
+	dprintf(jbxvt_get_fd(), "%s%d;%d;%d;%d;0&w", jbxvt_get_csi(),
 		b * 2, 7, p.y, p.x);
 }
 static uint8_t get_b(uint8_t b, const uint32_t state)
@@ -51,7 +52,7 @@ static void track_mouse_x10(uint8_t b, struct JBDim p)
 	b += 32;
 	p.x += 32;
 	p.y += 32;
-	dprintf(jbxvt.com.fd, jbxvt.mode.mouse_urxvt ? "%s%d;%d;%dM"
+	dprintf(jbxvt_get_fd(), jbxvt.mode.mouse_urxvt ? "%s%d;%d;%dM"
 		: "%sM%c%c%c", jbxvt_get_csi(), b, p.x, p.y);
 	LOG(jbxvt.mode.mouse_urxvt ? "%d;%d;%dM" : "M%c%c%c", b, p.x, p.y);
 }

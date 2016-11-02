@@ -3,6 +3,7 @@
 #ifndef JBXVT_COMMAND_H
 #define JBXVT_COMMAND_H
 #include "libjb/size.h"
+#include "libjb/util.h"
 #include <stdint.h>
 #include <xcb/xcb.h>
 enum JBXVTCommandLimits {
@@ -11,6 +12,7 @@ enum JBXVTCommandLimits {
 	COM_PUSH_MAX =	20,		// max # chars to put back to input queue
 	MP_INTERVAL =	500		// multi-press interval in ms
 };
+fd_t jbxvt_get_fd(void);
 /*  Initialise the command connection.  This should be called after the X
  *  server connection is established.  */
 void jbxvt_init_command_module(xcb_connection_t * xc,

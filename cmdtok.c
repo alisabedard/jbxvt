@@ -68,7 +68,7 @@ static void key_press(xcb_connection_t * xc,
 {
 	int_fast16_t count = 0;
 	uint8_t * s = jbxvt_lookup_key(xc, e, &count);
-	jb_require(write(jbxvt.com.fd, s, count) != -1,
+	jb_require(write(jbxvt_get_fd(), s, count) != -1,
 		"Could not write to command");
 }
 static bool handle_xev(xcb_connection_t * xc)
@@ -109,7 +109,7 @@ static int_fast16_t output_to_command(void)
 {
 	struct JBXVTCommandData * c = &jbxvt.com;
 	errno = 0;
-	const ssize_t count = write(c->fd, c->send_nxt,
+	const ssize_t count = write(jbxvt_get_fd(), c->send_nxt,
 		c->send_count);
 	jb_require(count != -1, "Cannot write to command");
 	c->send_count -= count;
@@ -125,11 +125,12 @@ static void timer(xcb_connection_t * xc)
 }
 static void check_fdsets(xcb_connection_t * xc,
 	fd_set * restrict in_fdset,
-	fd_set * restrict out_fdset)
+	fd_set * restrict out_fdset,
+	const fd_t xfd)
 {
-	if (FD_ISSET(jbxvt.com.fd, out_fdset))
+	if (FD_ISSET(jbxvt_get_fd(), out_fdset))
 		output_to_command();
-	else if (!FD_ISSET(jbxvt.com.xfd, in_fdset))
+	else if (!FD_ISSET(xfd, in_fdset))
 		timer(xc); // select timed out
 	else
 		jb_check_x(xc);
@@ -139,17 +140,20 @@ __attribute__((nonnull))
 static void poll_io(xcb_connection_t * xc,
 	fd_set * restrict in_fdset)
 {
-	FD_SET(jbxvt.com.fd, in_fdset);
-	FD_SET(jbxvt.com.xfd, in_fdset);
+	static fd_t xfd;
+	if (!xfd)
+		xfd = xcb_get_file_descriptor(xc);
+	FD_SET(jbxvt_get_fd(), in_fdset);
+	FD_SET(xfd, in_fdset);
 	fd_set out_fdset;
 	FD_ZERO(&out_fdset);
 	if (jbxvt.com.send_count > 0)
-		FD_SET(jbxvt.com.fd, &out_fdset);
+		FD_SET(jbxvt_get_fd(), &out_fdset);
 	if (select(jbxvt.com.width, in_fdset, &out_fdset, NULL,
 		&(struct timeval){.tv_usec = 500000}) == -1)
 		exit(1); /* exit is reached in case SHELL or -e
 			    command was not run successfully.  */
-	check_fdsets(xc, in_fdset, &out_fdset);
+	check_fdsets(xc, in_fdset, &out_fdset, xfd);
 }
 static bool get_buffered(int_fast16_t * val, const uint8_t flags)
 {
@@ -181,8 +185,8 @@ int_fast16_t jbxvt_pop_char(xcb_connection_t * xc, const uint8_t flags)
 		if (handle_xev(xc) && (flags & GET_XEVENTS_ONLY))
 			return INPUT_BUFFER_EMPTY;
 		poll_io(xc, &in);
-	} while (!FD_ISSET(jbxvt.com.fd, &in));
-	const uint8_t l = read(jbxvt.com.fd, BUF.data, COM_BUF_SIZE);
+	} while (!FD_ISSET(jbxvt_get_fd(), &in));
+	const uint8_t l = read(jbxvt_get_fd(), BUF.data, COM_BUF_SIZE);
 	if (l < 1)
 		return errno == EWOULDBLOCK ? INPUT_BUFFER_EMPTY : EOF;
 	BUF.next = BUF.data;
