@@ -1,6 +1,7 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "jbxvt.h"
 #include "command.h"
+#include "cursor.h"
 #include "display.h"
 #include "tab.h"
 #include "window.h"
@@ -28,7 +29,7 @@ static char ** parse_command_line(const int argc, char ** argv,
 			size->cols = atoi(optarg);
 			break;
 		case 'c': // cursor style
-			jbxvt.opt.cursor_attr = atoi(optarg);
+			jbxvt_set_cursor_attr(atoi(optarg));
 			break;
 		case 'D': // DISPLAY
 			o->display = optarg;
@@ -79,7 +80,6 @@ static void opt_init(void)
 	OPT(italic_font, ITALIC_FONT);
 #undef OPT
 	// Default to a steady block cursor to conserve CPU
-	jbxvt.opt.cursor_attr = 2;
 	jbxvt.scr.sline.max = JBXVT_MAX_SCROLL;
 }
 /*  Perform any initialization on the screen data structures.

@@ -56,7 +56,7 @@ void jbxvt_dec_reset(xcb_connection_t * xc, struct Token * restrict token)
 		case 12:
 			LOG("att610 (re)set blinking cursor");
 			MODE(att610);
-			//jbxvt.opt.cursor_attr = jbxvt.mode.att610 ? 1 : 2;
+			jbxvt_set_cursor_attr(jbxvt.mode.att610 ? 2 : 1);
 			break;
 		case 18:
 			LOG("DECPFF");

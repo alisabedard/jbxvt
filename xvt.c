@@ -300,7 +300,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		case 0:
 		case ' ': // SCUSR
 			LOG("SCUSR");
-			jbxvt.opt.cursor_attr = t[0];
+			jbxvt_set_cursor_attr(t[0]);
 			break;
 		case '"': // SCA
 			LOG("SCA -- unimplemented");

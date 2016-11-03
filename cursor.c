@@ -11,6 +11,18 @@
 #include "window.h"
 static uint32_t saved_style;
 static struct JBDim saved_cursor;
+static uint8_t cursor_attr = 1;
+void jbxvt_blink_cursor(xcb_connection_t * xc)
+{
+	if (!jbxvt.mode.att610 && cursor_attr % 2) {
+		jbxvt_draw_cursor(xc); // blinking cursor
+		xcb_flush(xc);
+	}
+}
+void jbxvt_set_cursor_attr(const uint8_t val)
+{
+	cursor_attr = val;
+}
 xcb_gcontext_t jbxvt_get_cursor_gc(xcb_connection_t * xc)
 {
 	static xcb_gcontext_t gc;
@@ -34,7 +46,7 @@ void jbxvt_restore_cursor(xcb_connection_t * xc)
 }
 static bool is_blinking(void)
 {
-	switch (jbxvt.opt.cursor_attr) {
+	switch (cursor_attr) {
 	case 0: // blinking block
 	case 1: // blinking block
 	case 3: // blinking underline
@@ -57,7 +69,7 @@ void jbxvt_draw_cursor(xcb_connection_t * xc)
 	struct JBDim p = jbxvt_get_pixel_size(s->current->cursor);
 	const struct JBDim f = jbxvt_get_font_size();
 	xcb_rectangle_t r = {p.x, p.y, f.w, f.h};
-	switch (jbxvt.opt.cursor_attr) {
+	switch (cursor_attr) {
 	case 0: // blinking block
 	case 1: // blinking block
 	case 2: // steady block (default)

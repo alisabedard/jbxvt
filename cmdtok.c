@@ -119,10 +119,7 @@ static int_fast16_t output_to_command(void)
 }
 static void timer(xcb_connection_t * xc)
 {
-	if (!jbxvt.mode.att610 && jbxvt.opt.cursor_attr % 2) {
-		jbxvt_draw_cursor(xc); // blinking cursor
-		xcb_flush(xc);
-	}
+	jbxvt_blink_cursor(xc);
 }
 static void check_fdsets(xcb_connection_t * xc,
 	fd_set * restrict in_fdset,
