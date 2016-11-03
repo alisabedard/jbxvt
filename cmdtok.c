@@ -110,8 +110,8 @@ static int_fast16_t output_to_command(void)
 {
 	struct JBXVTCommandData * c = &jbxvt.com;
 	errno = 0;
-	const ssize_t count = write(jbxvt_get_fd(), c->send_nxt,
-		c->send_count);
+	const ssize_t count = write(jbxvt_get_fd(),
+		c->send_nxt, c->send_count);
 	jb_require(count != -1, "Cannot write to command");
 	c->send_count -= count;
 	c->send_nxt += count;

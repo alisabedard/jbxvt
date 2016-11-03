@@ -4,6 +4,7 @@
 #include "display.h"
 #include "tab.h"
 #include "window.h"
+#include "xevents.h"
 #include "xvt.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -116,7 +117,8 @@ int main(int argc, char ** argv)
 	jbxvt_map_window(xc);
 	jb_check(setenv("TERM", JBXVT_ENV_TERM, true) != -1,
 		"Could not set TERM environment variable");
-	jbxvt_init_command_module(xc, com_argv);
+	jbxvt_init_command_module(com_argv);
+	jbxvt_get_wm_del_win(xc); // initialize property
 	for (;;) // app loop
 		jbxvt_parse_token(xc);
 	return 0;

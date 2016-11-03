@@ -15,8 +15,7 @@ enum JBXVTCommandLimits {
 fd_t jbxvt_get_fd(void);
 /*  Initialise the command connection.  This should be called after the X
  *  server connection is established.  */
-void jbxvt_init_command_module(xcb_connection_t * xc,
-	char ** restrict argv);
+void jbxvt_init_command_module(char ** restrict argv);
 //  Push an input character back into the input queue.
 void jbxvt_push_char(const uint8_t c);
 #ifdef LINUX
