@@ -66,21 +66,6 @@ usage:
 	return NULL;
 #endif//OPENBSD
 }
-#if 0
-static void opt_init(void)
-{
-	// Set some defaults which may be overridden.
-#define OPT(field, def) jbxvt.opt.field = JBXVT_##def
-	OPT(fg, FG);
-	OPT(bg, BG);
-	OPT(font, FONT);
-	OPT(bold_font, BOLD_FONT);
-	OPT(italic_font, ITALIC_FONT);
-#undef OPT
-	// Default to a steady block cursor to conserve CPU
-	jbxvt.scr.sline.max = JBXVT_MAX_SCROLL;
-}
-#endif
 /*  Perform any initialization on the screen data structures.
     Called just once at startup. */
 static void jbxvt_init(void)
@@ -105,12 +90,15 @@ int main(int argc, char ** argv)
 {
 	xcb_connection_t * xc;
 	char ** com_argv;
+	// Set defaults
+	jbxvt.scr.sline.max = JBXVT_MAX_SCROLL;
 	{
 		struct JBXVTOptions opt = {.font.normal = JBXVT_FONT,
 			.font.bold = JBXVT_BOLD_FONT, .font.italic
 			= JBXVT_ITALIC_FONT, .color.fg = JBXVT_FG,
 			.color.bg = JBXVT_BG, .size.cols = JBXVT_COLUMNS,
 			.size.rows = JBXVT_ROWS};
+		// Override defaults
 		com_argv = parse_command_line(argc, argv, &opt);
 		if (!com_argv)
 			com_argv = (char*[2]){getenv("SHELL")};
