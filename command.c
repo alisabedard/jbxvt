@@ -194,8 +194,6 @@ static fd_t run_command(char ** argv)
 #endif//POSIX_UTMPX
 	jb_check(fcntl(ptyfd, F_SETFL, O_NONBLOCK) != 1,
 		"Could not set file status flags on pty file descriptor");
-	// +1 to allow for X fd
-	jbxvt.com.width = ptyfd + 1;
 	attach_signals();
 	jb_require((command_pid = fork()) >= 0, "Could not start session");
 	if (command_pid == 0)

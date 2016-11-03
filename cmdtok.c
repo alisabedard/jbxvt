@@ -106,14 +106,14 @@ static bool handle_xev(xcb_connection_t * xc)
 	free(event);
 	return true;
 }
-static int_fast16_t output_to_command(void)
+static int_fast16_t output_to_command(uint16_t * restrict send_count)
 {
 	struct JBXVTCommandData * c = &jbxvt.com;
 	errno = 0;
 	const ssize_t count = write(jbxvt_get_fd(),
-		c->send_nxt, c->send_count);
+		c->send_nxt, *send_count);
 	jb_require(count != -1, "Cannot write to command");
-	c->send_count -= count;
+	*send_count -= count;
 	c->send_nxt += count;
 	return count;
 }
@@ -124,10 +124,11 @@ static void timer(xcb_connection_t * xc)
 static void check_fdsets(xcb_connection_t * xc,
 	fd_set * restrict in_fdset,
 	fd_set * restrict out_fdset,
+	uint16_t * restrict send_count,
 	const fd_t xfd)
 {
 	if (FD_ISSET(jbxvt_get_fd(), out_fdset))
-		output_to_command();
+		output_to_command(send_count);
 	else if (!FD_ISSET(xfd, in_fdset))
 		timer(xc); // select timed out
 	else
@@ -138,20 +139,30 @@ __attribute__((nonnull))
 static void poll_io(xcb_connection_t * xc,
 	fd_set * restrict in_fdset)
 {
-	static fd_t xfd;
+	static fd_t fd, xfd;
+	static uint16_t send_count;
+	static int nfds; // per man select(2)
+	if (!fd)
+		fd = jbxvt_get_fd();
 	if (!xfd)
 		xfd = xcb_get_file_descriptor(xc);
-	FD_SET(jbxvt_get_fd(), in_fdset);
+	if (!nfds)
+		nfds = fd + 1;
+#ifdef DEBUG_FDS
+	// nfds should be highest plus one
+	LOG("fd: %d, %d, %d\n", fd, xfd, nfds);
+#endif//DEBUG_FDS
+	FD_SET(fd, in_fdset);
 	FD_SET(xfd, in_fdset);
 	fd_set out_fdset;
 	FD_ZERO(&out_fdset);
-	if (jbxvt.com.send_count > 0)
-		FD_SET(jbxvt_get_fd(), &out_fdset);
-	if (select(jbxvt.com.width, in_fdset, &out_fdset, NULL,
+	if (send_count > 0)
+		FD_SET(fd, &out_fdset);
+	if (select(nfds, in_fdset, &out_fdset, NULL,
 		&(struct timeval){.tv_usec = 500000}) == -1)
 		exit(1); /* exit is reached in case SHELL or -e
 			    command was not run successfully.  */
-	check_fdsets(xc, in_fdset, &out_fdset, xfd);
+	check_fdsets(xc, in_fdset, &out_fdset, &send_count, xfd);
 }
 static bool get_buffered(int_fast16_t * val, const uint8_t flags)
 {

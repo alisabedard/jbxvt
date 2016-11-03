@@ -17,7 +17,6 @@ struct JBXVTScreenData {
 	struct JBDim chars;
 	struct JBDim pixels;
 	uint32_t rstyle; // render style
-	uint32_t saved_rstyle; // saved render style
 };
 struct JBXVTSelectionData {
 	uint8_t * text;
@@ -32,9 +31,6 @@ struct JBXVTCommandContainer {
 struct JBXVTCommandData {
 	struct JBXVTCommandContainer buf, stack;
 	uint8_t * send_nxt; // next char to be sent
-	long width; // # file descriptors being used
-	// type per sysconf(3):
-	uint16_t send_count; // # chars waiting to be sent
 };
 struct JBXVT {
 	struct JBXVTScreenData scr;
