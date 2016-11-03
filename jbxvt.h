@@ -36,9 +36,6 @@ struct JBXVTCommandData {
 	// type per sysconf(3):
 	uint16_t send_count; // # chars waiting to be sent
 };
-enum CharacterSet{
-	CHARSET_GB, CHARSET_ASCII, CHARSET_SG0, CHARSET_SG1, CHARSET_SG2
-};
 struct JBXVT {
 	struct JBXVTScreenData scr;
 	struct JBXVTSelectionData sel;

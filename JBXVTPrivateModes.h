@@ -3,6 +3,9 @@
 #define JBXVT_JBXVTPRIVATEMODES_H
 #include <stdbool.h>
 #include <stdint.h>
+enum JBXVTCharacterSet{
+	CHARSET_GB, CHARSET_ASCII, CHARSET_SG0, CHARSET_SG1, CHARSET_SG2
+};
 struct JBXVTPrivateModes {
 	uint8_t charset[2];     // graphics mode char set
 	uint8_t charsel:1;	// charset index
