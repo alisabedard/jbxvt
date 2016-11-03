@@ -9,7 +9,6 @@
 #include "JBXVTScreen.h"
 struct JBXVTScreenSavedLines {
 	struct JBXVTSavedLine data[JBXVT_MAX_SCROLL]; // saved lines
-	uint16_t top, max;
 };
 struct JBXVTScreenData {
 	struct JBXVTScreen * current, * s;

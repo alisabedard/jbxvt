@@ -14,6 +14,19 @@
 #undef LOG
 #define LOG(...)
 #endif//!SCROLL_DEBUG
+static uint16_t scroll_top, scroll_max = JBXVT_MAX_SCROLL;
+void jbxvt_set_scroll_max(const uint16_t val)
+{
+	scroll_max = val;
+}
+void jbxvt_zero_scroll_top(void)
+{
+	scroll_top = 0;
+}
+uint16_t jbxvt_get_scroll_top(void)
+{
+	return scroll_top;
+}
 static void clear_selection_at(const int16_t j)
 {
 	struct JBDim * e = jbxvt_get_selection_end_points();
@@ -42,9 +55,9 @@ static void clear(int8_t count, const uint8_t rc,
 }
 static void adjust_saved_lines_top(const int_fast16_t n)
 {
-	jbxvt.scr.sline.top += n;
-	jbxvt.scr.sline.top = JB_MIN(jbxvt.scr.sline.top,
-		jbxvt.scr.sline.max);
+	scroll_top += n;
+	scroll_top = JB_MIN(scroll_top,
+		scroll_max);
 }
 static void copy_saved_lines(const int_fast16_t n)
 {
@@ -90,7 +103,7 @@ static void add_scroll_history(xcb_connection_t * xc,
 	// Handle lines that scroll off the top of the screen.
 	memcpy(jbxvt.scr.sline.data + count, jbxvt.scr.sline.data,
 		count - 1); // -1 to avoid going over array bounds
-	int_fast16_t y = jbxvt.scr.sline.max - count - 1;
+	int_fast16_t y = scroll_max - count - 1;
 	struct JBXVTSavedLine * i = &jbxvt.scr.sline.data[y],
 		* j = &jbxvt.scr.sline.data[y + count];
 	for (; y >= 0; --y, --i, --j)

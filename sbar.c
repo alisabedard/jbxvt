@@ -7,6 +7,7 @@
 #include "jbxvt.h"
 #include "paint.h"
 #include "repaint.h"
+#include "scroll.h"
 #include "window.h"
 #include <stdbool.h>
 #include <string.h>
@@ -31,7 +32,7 @@ __attribute__((pure))
 static int16_t get_sz(const int16_t margin)
 {
 	return jbxvt.scr.pixels.h - jbxvt.scr.pixels.h * (sbar_offset
-		+ margin) / (jbxvt.scr.sline.top + jbxvt.scr.chars.h);
+		+ margin) / (jbxvt_get_scroll_top() + jbxvt.scr.chars.h);
 }
 // Draw the scrollbar.
 void jbxvt_draw_scrollbar(xcb_connection_t * xc)
@@ -46,7 +47,7 @@ void jbxvt_draw_scrollbar(xcb_connection_t * xc)
 //  Change the value of the scrolled screen offset and repaint the screen
 void jbxvt_set_scroll(xcb_connection_t * xc, int16_t n)
 {
-	JB_LIMIT(n, jbxvt.scr.sline.top, 0);
+	JB_LIMIT(n, jbxvt_get_scroll_top(), 0);
 	if (n == sbar_offset)
 		return;
 	sbar_offset = n;
@@ -57,7 +58,7 @@ void jbxvt_set_scroll(xcb_connection_t * xc, int16_t n)
 // Scroll to the specified y position (in pixels)
 void jbxvt_scroll_to(xcb_connection_t * xc, const int16_t y)
 {
-	jbxvt_set_scroll(xc, (jbxvt.scr.chars.h + jbxvt.scr.sline.top)
+	jbxvt_set_scroll(xc, (jbxvt.scr.chars.h + jbxvt_get_scroll_top())
 			* (jbxvt.scr.pixels.h - y) / jbxvt.scr.pixels.h
 			- jbxvt.scr.chars.h);
 }
@@ -65,7 +66,7 @@ void jbxvt_clear_saved_lines(xcb_connection_t * xc)
 {
 	memset(jbxvt.scr.sline.data, 0, sizeof(struct JBXVTSavedLine)
 		* JBXVT_MAX_SCROLL);
-	jbxvt.scr.sline.top = 0;
+	jbxvt_zero_scroll_top();
 	jbxvt_set_scroll(xc, 0);
 }
 void jbxvt_toggle_scrollbar(xcb_connection_t * xc)

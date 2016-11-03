@@ -91,7 +91,6 @@ int main(int argc, char ** argv)
 	xcb_connection_t * xc;
 	char ** com_argv;
 	// Set defaults
-	jbxvt.scr.sline.max = JBXVT_MAX_SCROLL;
 	{
 		struct JBXVTOptions opt = {.font.normal = JBXVT_FONT,
 			.font.bold = JBXVT_BOLD_FONT, .font.italic
