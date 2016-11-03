@@ -2,6 +2,7 @@
    Copyright 1992-94, 1997 John Bovey,
    University of Kent at Canterbury. */
 #include "command.h"
+#include "cmdtok.h"
 #include "jbxvt.h"
 #include "libjb/file.h"
 #include "libjb/log.h"
@@ -206,11 +207,6 @@ static fd_t run_command(char ** argv)
 #endif//USE_UTEMPTER
 	return ptyfd;
 }
-static void init_container(struct JBXVTCommandContainer * restrict c,
-	uint8_t * restrict buf)
-{
-	c->data = c->next = c->top = buf;
-}
 /*  Initialize the command connection.  This should
     be called after the X server connection is established.  */
 void jbxvt_init_command_module(char ** restrict argv)
@@ -218,14 +214,6 @@ void jbxvt_init_command_module(char ** restrict argv)
 	//  Enable the delete window protocol:
 	command_fd = run_command(argv);
 	jb_require(jbxvt_get_fd() >= 0, "Could not start session");
-	static uint8_t buf[COM_BUF_SIZE], stack[COM_PUSH_MAX];
-	init_container(&jbxvt.com.buf, buf);
-	init_container(&jbxvt.com.stack, stack);
+	jbxvt_init_cmdtok();
 }
-//  Push an input character back into the input queue.
-void jbxvt_push_char(const uint8_t c)
-{
-	if (jbxvt.com.stack.top < jbxvt.com.stack.data
-		+ COM_PUSH_MAX)
-		*jbxvt.com.stack.top++ = c;
-}
+

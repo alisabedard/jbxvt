@@ -25,17 +25,9 @@ struct JBXVTSelectionData {
 	uint16_t length;
 	bool type;
 };
-struct JBXVTCommandContainer {
-	uint8_t *next, *top, *data;
-};
-struct JBXVTCommandData {
-	struct JBXVTCommandContainer buf, stack;
-	uint8_t * send_nxt; // next char to be sent
-};
 struct JBXVT {
 	struct JBXVTScreenData scr;
 	struct JBXVTSelectionData sel;
-	struct JBXVTCommandData com;
 	struct JBXVTPrivateModes mode;
 };
 extern struct JBXVT jbxvt; // in jbxvt.c

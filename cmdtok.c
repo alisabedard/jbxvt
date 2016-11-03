@@ -19,9 +19,14 @@
 //  Flags used to control jbxvt_pop_char
 enum ComCharFlags {INPUT_BUFFER_EMPTY = 0x100,
 	GET_INPUT_ONLY=1, GET_XEVENTS_ONLY=2};
+struct JBXVTCommandContainer {
+	uint8_t *next, *top, *data;
+};
 static struct JBXVTEvent cmdtok_xev;
+static struct JBXVTCommandContainer cmdtok_buffer;
+static struct JBXVTCommandContainer cmdtok_stack;
 // Shortcuts
-#define BUF jbxvt.com.buf
+//#define BUF cmdtok_buffer
 static void handle_focus(xcb_generic_event_t * restrict ge)
 {
 	xcb_focus_in_event_t * e = (xcb_focus_in_event_t *)ge;
@@ -106,30 +111,14 @@ static bool handle_xev(xcb_connection_t * xc)
 	free(event);
 	return true;
 }
-static int_fast16_t output_to_command(uint16_t * restrict send_count)
-{
-	struct JBXVTCommandData * c = &jbxvt.com;
-	errno = 0;
-	const ssize_t count = write(jbxvt_get_fd(),
-		c->send_nxt, *send_count);
-	jb_require(count != -1, "Cannot write to command");
-	*send_count -= count;
-	c->send_nxt += count;
-	return count;
-}
 static void timer(xcb_connection_t * xc)
 {
 	jbxvt_blink_cursor(xc);
 }
 static void check_fdsets(xcb_connection_t * xc,
-	fd_set * restrict in_fdset,
-	fd_set * restrict out_fdset,
-	uint16_t * restrict send_count,
-	const fd_t xfd)
+	fd_set * restrict in_fdset, const fd_t xfd)
 {
-	if (FD_ISSET(jbxvt_get_fd(), out_fdset))
-		output_to_command(send_count);
-	else if (!FD_ISSET(xfd, in_fdset))
+	if (!FD_ISSET(xfd, in_fdset))
 		timer(xc); // select timed out
 	else
 		jb_check_x(xc);
@@ -140,7 +129,6 @@ static void poll_io(xcb_connection_t * xc,
 	fd_set * restrict in_fdset)
 {
 	static fd_t fd, xfd;
-	static uint16_t send_count;
 	static int nfds; // per man select(2)
 	if (!fd)
 		fd = jbxvt_get_fd();
@@ -156,20 +144,18 @@ static void poll_io(xcb_connection_t * xc,
 	FD_SET(xfd, in_fdset);
 	fd_set out_fdset;
 	FD_ZERO(&out_fdset);
-	if (send_count > 0)
-		FD_SET(fd, &out_fdset);
 	if (select(nfds, in_fdset, &out_fdset, NULL,
 		&(struct timeval){.tv_usec = 500000}) == -1)
 		exit(1); /* exit is reached in case SHELL or -e
 			    command was not run successfully.  */
-	check_fdsets(xc, in_fdset, &out_fdset, &send_count, xfd);
+	check_fdsets(xc, in_fdset, xfd);
 }
 static bool get_buffered(int_fast16_t * val, const uint8_t flags)
 {
-	if (jbxvt.com.stack.top > jbxvt.com.stack.data)
-		*val = *--jbxvt.com.stack.top;
-	else if (jbxvt.com.buf.next < jbxvt.com.buf.top)
-		*val = *jbxvt.com.buf.next++;
+	if (cmdtok_stack.top > cmdtok_stack.data)
+		*val = *--cmdtok_stack.top;
+	else if (cmdtok_buffer.next < cmdtok_buffer.top)
+		*val = *cmdtok_buffer.next++;
 	else if (flags & GET_INPUT_ONLY)
 		*val = INPUT_BUFFER_EMPTY;
 	else
@@ -195,12 +181,13 @@ int_fast16_t jbxvt_pop_char(xcb_connection_t * xc, const uint8_t flags)
 			return INPUT_BUFFER_EMPTY;
 		poll_io(xc, &in);
 	} while (!FD_ISSET(jbxvt_get_fd(), &in));
-	const uint8_t l = read(jbxvt_get_fd(), BUF.data, COM_BUF_SIZE);
+	const uint8_t l = read(jbxvt_get_fd(),
+		cmdtok_buffer.data, COM_BUF_SIZE);
 	if (l < 1)
 		return errno == EWOULDBLOCK ? INPUT_BUFFER_EMPTY : EOF;
-	BUF.next = BUF.data;
-	BUF.top = BUF.data + l;
-	return *BUF.next++;
+	cmdtok_buffer.next = cmdtok_buffer.data;
+	cmdtok_buffer.top = cmdtok_buffer.data + l;
+	return *cmdtok_buffer.next++;
 }
 //  Return true if the character is one that can be handled by jbxvt_string()
 static inline bool is_string_char(register int_fast16_t c)
@@ -387,4 +374,21 @@ void jbxvt_get_token(xcb_connection_t * xc, struct Token * restrict tk)
 const char * jbxvt_get_csi(void)
 {
 	return jbxvt.mode.s8c1t ? "\233" : "\033[";
+}
+static void init_container(struct JBXVTCommandContainer * restrict c,
+	uint8_t * restrict buf)
+{
+	c->data = c->next = c->top = buf;
+}
+void jbxvt_init_cmdtok(void)
+{
+	static uint8_t buf[COM_BUF_SIZE], stack[COM_PUSH_MAX];
+	init_container(&cmdtok_buffer, buf);
+	init_container(&cmdtok_stack, stack);
+}
+//  Push an input character back into the input queue.
+void jbxvt_push_char(const uint8_t c)
+{
+	if (cmdtok_stack.top < cmdtok_stack.data + COM_PUSH_MAX)
+		*cmdtok_stack.top++ = c;
 }
