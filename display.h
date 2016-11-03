@@ -4,5 +4,5 @@
 #include "libjb/size.h"
 #include <xcb/xcb.h>
 xcb_connection_t * jbxvt_init_display(char * restrict name,
-	struct JBDim size);
+	struct JBDim size, int * screen);
 #endif//!JBXVT_DISPLAY_H

@@ -94,11 +94,9 @@ static void setup_gcs(xcb_connection_t * xc, xcb_window_t w)
 		XCB_GX_INVERT, f ^ b});
 }
 xcb_connection_t * jbxvt_init_display(char * restrict name,
-	const struct JBDim size)
+	const struct JBDim size, int * screen)
 {
-	int screen = jbxvt.opt.screen;
-	xcb_connection_t * xc = jb_get_xcb_connection(jbxvt.opt.display,
-		&screen);
+	xcb_connection_t * xc = jb_get_xcb_connection(NULL, screen);
 	jbxvt_init_colors(xc);
 	jbxvt_setup_fonts(xc);
 	create_window(xc, (uint8_t *)name,

@@ -12,7 +12,7 @@
 #include <unistd.h>
 struct JBXVT jbxvt;
 static char ** parse_command_line(const int argc, char ** argv,
-	struct JBDim * size)
+	struct JBDim * size, int * screen)
 {
 	static const char * optstr = "B:b:C:c:D:d:eF:f:hI:R:S:sv";
 	int8_t opt;
@@ -31,11 +31,8 @@ static char ** parse_command_line(const int argc, char ** argv,
 		case 'c': // cursor style
 			jbxvt_set_cursor_attr(atoi(optarg));
 			break;
-		case 'D': // DISPLAY
-			o->display = optarg;
-			break;
 		case 'd': // screen number
-			o->screen = atoi(optarg);
+			*screen = atoi(optarg);
 			break;
 		case 'e': // exec
 			return argv + optind;
@@ -106,12 +103,16 @@ int main(int argc, char ** argv)
 {
 	opt_init();
 	xcb_connection_t * xc;
-	struct JBDim size = {.cols = JBXVT_COLUMNS, .rows = JBXVT_ROWS};
-	char ** com_argv = parse_command_line(argc, argv, &size);
-	if (!com_argv)
-		com_argv = (char*[2]){getenv("SHELL")};
-	// jbxvt_init_display must come after parse_command_line
-	xc = jbxvt_init_display(argv[0], size);
+	char ** com_argv;
+	{
+		struct JBDim size = {.cols = JBXVT_COLUMNS, .rows = JBXVT_ROWS};
+		int screen = 0;
+		com_argv = parse_command_line(argc, argv, &size, &screen);
+		if (!com_argv)
+			com_argv = (char*[2]){getenv("SHELL")};
+		// jbxvt_init_display must come after parse_command_line
+		xc = jbxvt_init_display(argv[0], size, &screen);
+	}
 	mode_init();
 	jbxvt_init();
 	jbxvt_map_window(xc);

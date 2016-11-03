@@ -40,8 +40,7 @@ enum CharacterSet{
 	CHARSET_GB, CHARSET_ASCII, CHARSET_SG0, CHARSET_SG1, CHARSET_SG2
 };
 struct JBXVTOptionData {
-	char *bg, *fg, *font, *bold_font, *italic_font, *display;
-	int8_t screen;
+	char *bg, *fg, *font, *bold_font, *italic_font;
 	bool show_scrollbar;
 };
 struct JBXVT {
