@@ -48,7 +48,8 @@ void jbxvt_change_selection(xcb_connection_t * xc,
 		ose0 = ose1;
 		ose1 = se;
 	}
-	jbxvt_order_selection_ends();
-	change(xc, jbxvt.sel.end, ose0);
-	change(xc, jbxvt.sel.end + 1, ose1);
+	struct JBDim * e = jbxvt_order_selection_ends(
+		jbxvt_get_selection_end_points());
+	change(xc, e, ose0);
+	change(xc, e + 1, ose1);
 }

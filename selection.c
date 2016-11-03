@@ -10,7 +10,21 @@
 #include "screen.h"
 #include "show_selection.h"
 #include "window.h"
-#define SE jbxvt.sel.end
+static struct JBXVTSelectionData selection_data;
+#define SE selection_data.end
+// Return selection end points: first, second, and anchor
+struct JBDim * jbxvt_get_selection_end_points(void)
+{
+	return selection_data.end;
+}
+enum JBXVTSelectionUnit jbxvt_get_selection_unit(void)
+{
+	return selection_data.unit;
+}
+bool jbxvt_is_selected(void)
+{
+	return selection_data.on_screen;
+}
 //  Return the atom corresponding to "CLIPBOARD"
 xcb_atom_t jbxvt_get_clipboard(xcb_connection_t * xc)
 {
@@ -21,13 +35,13 @@ xcb_atom_t jbxvt_get_clipboard(xcb_connection_t * xc)
 }
 static inline void prop(xcb_connection_t * xc, const xcb_atom_t a)
 {
-	jbxvt_set_property(xc, a, jbxvt.sel.length, jbxvt.sel.text);
+	jbxvt_set_property(xc, a, selection_data.length, selection_data.text);
 }
 //  Make the selection currently delimited by the selection end markers.
 void jbxvt_make_selection(xcb_connection_t * xc)
 {
 	LOG("jbxvt_make_selection");
-	jbxvt_save_selection();
+	jbxvt_save_selection(&selection_data);
 	/* Set all properties which may possibly be requested.  */
 	prop(xc, XCB_ATOM_PRIMARY);
 	prop(xc, XCB_ATOM_SECONDARY);
@@ -49,7 +63,7 @@ void jbxvt_send_selection(xcb_connection_t * xc,
 			= property == XCB_NONE
 			? target : property}; // per ICCCM
 	xcb_change_property(xc, XCB_PROP_MODE_REPLACE, requestor,
-		property, target, 8, jbxvt.sel.length, jbxvt.sel.text);
+		property, target, 8, selection_data.length, selection_data.text);
 	xcb_flush(xc);
 	xcb_send_event(xc, true, requestor,
 		XCB_SELECTION_NOTIFY, (char *)&e);
@@ -58,10 +72,10 @@ void jbxvt_send_selection(xcb_connection_t * xc,
 //  Clear the current selection.
 void jbxvt_clear_selection(void)
 {
-	if (jbxvt.sel.text)
-		free(jbxvt.sel.text);
-	jbxvt.sel.text = NULL;
-	jbxvt.sel.type = JBXVT_SEL_NONE;
+	if (selection_data.text)
+		free(selection_data.text);
+	selection_data.text = NULL;
+	selection_data.on_screen = false;
 }
 //  start a selection using the specified unit.
 void jbxvt_start_selection(xcb_connection_t * xc,
@@ -70,8 +84,9 @@ void jbxvt_start_selection(xcb_connection_t * xc,
 	jbxvt_show_selection(xc); // clear previous
 	jbxvt_clear_selection(); // free previous selection
 	p = jbxvt_get_char_size(p);
-	jbxvt.sel.unit = unit;
 	jbxvt_rc_to_selend(p.y, p.x, &SE[2]);
+	selection_data.unit = unit;
+	selection_data.on_screen = true;
 	SE[0] = SE[1] = SE[2];
 	jbxvt_adjust_selection(&SE[1]);
 	jbxvt_show_selection(xc);
@@ -81,7 +96,7 @@ void jbxvt_start_selection(xcb_connection_t * xc,
 void jbxvt_check_selection(xcb_connection_t * xc,
 	const int16_t row1, const int16_t row2)
 {
-	if (jbxvt.sel.type != JBXVT_SEL_ON_SCREEN)
+	if (!selection_data.on_screen)
 		return;
 	int16_t r1 = SE[0].index, r2 = SE[1].index;
 	if (r1 > r2)
@@ -89,5 +104,5 @@ void jbxvt_check_selection(xcb_connection_t * xc,
 	if (row2 < r1 || row1 > r2)
 		return;
 	jbxvt_show_selection(xc);
-	jbxvt.sel.type = JBXVT_SEL_NONE;
+	selection_data.on_screen = false;
 }

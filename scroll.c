@@ -16,8 +16,8 @@
 #endif//!SCROLL_DEBUG
 static void clear_selection_at(const int16_t j)
 {
-	if (jbxvt.sel.end[0].index == j
-		|| jbxvt.sel.end[1].index == j)
+	struct JBDim * e = jbxvt_get_selection_end_points();
+	if (e[0].index == j || e[1].index == j)
 		jbxvt_clear_selection();
 }
 static void move_line(const int16_t j,

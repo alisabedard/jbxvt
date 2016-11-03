@@ -4,7 +4,15 @@
 #define JBXVT_SELECTION_H
 #include "JBXVTSelectionUnit.h"
 #include "libjb/size.h"
+#include <stdbool.h>
 #include <xcb/xcb.h>
+struct JBXVTSelectionData {
+	uint8_t * text;
+	enum JBXVTSelectionUnit unit;
+	struct JBDim end[3]; // end0, end1, anchor
+	uint16_t length:15;
+	bool on_screen:1;
+};
 /*  Determine if the current selection overlaps row1-row2.
     If it does, then remove it from the screen.  */
 void jbxvt_check_selection(xcb_connection_t * xc,
@@ -13,6 +21,10 @@ void jbxvt_check_selection(xcb_connection_t * xc,
 void jbxvt_clear_selection(void);
 //  Return the atom corresponding to "CLIPBOARD"
 xcb_atom_t jbxvt_get_clipboard(xcb_connection_t * xc);
+// Return selection end points: first, second, and anchor
+struct JBDim * jbxvt_get_selection_end_points(void);
+enum JBXVTSelectionUnit jbxvt_get_selection_unit(void);
+bool jbxvt_is_selected(void);
 //  Make the selection currently delimited by the selection end markers.
 void jbxvt_make_selection(xcb_connection_t * xc);
 //  respond to a request for our current selection.

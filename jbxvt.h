@@ -18,16 +18,8 @@ struct JBXVTScreenData {
 	struct JBDim pixels;
 	uint32_t rstyle; // render style
 };
-struct JBXVTSelectionData {
-	uint8_t * text;
-	enum JBXVTSelectionUnit unit;
-	struct JBDim end[3]; // end0, end1, anchor
-	uint16_t length;
-	bool type;
-};
 struct JBXVT {
 	struct JBXVTScreenData scr;
-	struct JBXVTSelectionData sel;
 	struct JBXVTPrivateModes mode;
 };
 extern struct JBXVT jbxvt; // in jbxvt.c

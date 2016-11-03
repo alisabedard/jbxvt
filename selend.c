@@ -16,7 +16,7 @@ static int8_t cmp(const int8_t mod, struct JBDim * restrict se1,
     equal to or before se1.  */
 int8_t jbxvt_selcmp(struct JBDim * restrict se1, struct JBDim * restrict se2)
 {
-	if (jbxvt.sel.type == JBXVT_SEL_ON_SCREEN)
+	if (jbxvt_is_selected())
 		  return cmp(-1, se1, se2);
 	return 1;
 }
@@ -24,7 +24,6 @@ int8_t jbxvt_selcmp(struct JBDim * restrict se1, struct JBDim * restrict se2)
 void jbxvt_rc_to_selend(const int16_t row, const int16_t col,
 	struct JBDim * se)
 {
-	jbxvt.sel.type = JBXVT_SEL_ON_SCREEN;
 	se->index = row - jbxvt_get_scroll();
 	se->col = col;
 }
@@ -32,10 +31,10 @@ void jbxvt_rc_to_selend(const int16_t row, const int16_t col,
 void jbxvt_selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
 	struct JBDim * restrict se)
 {
-	if (jbxvt.sel.type == JBXVT_SEL_NONE)
-		return;
-	*colp = se->col;
-	*rowp = se->row + jbxvt_get_scroll();
+	if (jbxvt_is_selected()) {
+		*colp = se->col;
+		*rowp = se->row + jbxvt_get_scroll();
+	}
 }
 static uint16_t sel_s(struct JBDim * restrict se2, uint8_t ** s)
 {
@@ -57,7 +56,8 @@ static void adj_sel_to_word(struct JBDim * include,
 	int16_t i = get_start_of_word(s, se1->col);
 	se1->col = i?i+1:0;
 	i = se2->col;
-	if (se2 == include || !jbxvt_selcmp(se2, &jbxvt.sel.end[2]))
+	if (se2 == include || !jbxvt_selcmp(se2,
+		&jbxvt_get_selection_end_points()[2]))
 		  ++i;
 	const uint16_t len = sel_s(se2, &s);
 	while (i < len && s[i] && s[i] != ' ' && s[i] != '\n')
@@ -65,27 +65,30 @@ static void adj_sel_to_word(struct JBDim * include,
 	se2->col = i;
 }
 // Make sure selection end point 0 comes before end point 1
-void jbxvt_order_selection_ends(void)
+struct JBDim * jbxvt_order_selection_ends(struct JBDim * e)
 {
-	if (jbxvt_selcmp(jbxvt.sel.end, jbxvt.sel.end + 1) <= 0) {
+	if (jbxvt_selcmp(e, e + 1) <= 0) {
 		// copy data, not addresses, here
-		const struct JBDim tmp = jbxvt.sel.end[0];
-		jbxvt.sel.end[0] = jbxvt.sel.end[1];
-		jbxvt.sel.end[1] = tmp;
+		const struct JBDim tmp = e[0];
+		e[0] = e[1];
+		e[1] = tmp;
 	}
+	return e;
 }
 /*  Adjust the selection to a word or line boundary.
     If the include endpoint is non NULL then the selection
     is forced to be large enough to include it.  */
 void jbxvt_adjust_selection(struct JBDim * restrict include)
 {
-	if (jbxvt.sel.unit == JBXVT_SEL_UNIT_CHAR)
+	const enum JBXVTSelectionUnit u = jbxvt_get_selection_unit();
+	if (u == JBXVT_SEL_UNIT_CHAR)
 		return;
-	jbxvt_order_selection_ends();
-	if (jbxvt.sel.unit == JBXVT_SEL_UNIT_WORD)
-		  adj_sel_to_word(include, jbxvt.sel.end, jbxvt.sel.end + 1);
-	else if (jbxvt.sel.unit == JBXVT_SEL_UNIT_LINE) {
-		jbxvt.sel.end[0].col = 0;
-		jbxvt.sel.end[1].col = jbxvt.scr.chars.width - 1;
+	struct JBDim * e = jbxvt_order_selection_ends(
+		jbxvt_get_selection_end_points());
+	if (u == JBXVT_SEL_UNIT_WORD)
+		  adj_sel_to_word(include, e, e + 1);
+	else if (u == JBXVT_SEL_UNIT_LINE) {
+		e[0].col = 0;
+		e[1].col = jbxvt.scr.chars.width - 1;
 	}
 }

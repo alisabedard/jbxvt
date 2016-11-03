@@ -73,13 +73,12 @@ static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 }
 /*  Convert the currently marked screen selection as a text string
     and save it as the current saved selection. */
-void jbxvt_save_selection(void)
+void jbxvt_save_selection(struct JBXVTSelectionData * sel)
 {
-#define SE jbxvt.sel.end
-	const bool fwd = jbxvt_selcmp(SE, SE + 1) <= 0;
+	const bool fwd = jbxvt_selcmp(sel->end, sel->end + 1) <= 0;
 	// properly order start and end points:
-	struct JBDim se[] = {SE[fwd ? 0 : 1], SE[fwd ? 1 : 0]};
-#undef SE
+	struct JBDim se[] = {sel->end[fwd ? 0 : 1],
+		sel->end[fwd ? 1 : 0]};
 	uint16_t total = 1;
 	uint8_t * str = malloc(total);
 	if (!str) // Cannot perform selection, malloc failed.
@@ -87,6 +86,6 @@ void jbxvt_save_selection(void)
 	handle_screensel(&str, &total, se);
 	if (!total)
 		return;
-	str[jbxvt.sel.length = --total] = 0; // null termination
-	jbxvt.sel.text = str;
+	str[sel->length = --total] = 0; // null termination
+	sel->text = str;
 }
