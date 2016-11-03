@@ -42,7 +42,6 @@ enum CharacterSet{
 struct JBXVTOptionData {
 	char *bg, *fg, *font, *bold_font, *italic_font, *display;
 	int8_t screen;
-	uint8_t elr; // DECELR
 	bool show_scrollbar;
 };
 struct JBXVT {
