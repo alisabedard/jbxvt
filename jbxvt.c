@@ -3,6 +3,7 @@
 #include "command.h"
 #include "cursor.h"
 #include "display.h"
+#include "sbar.h"
 #include "tab.h"
 #include "window.h"
 #include "xevents.h"
@@ -12,38 +13,37 @@
 #include <unistd.h>
 struct JBXVT jbxvt;
 static char ** parse_command_line(const int argc, char ** argv,
-	struct JBDim * size, int * screen)
+	struct JBXVTOptions * o)
 {
 	static const char * optstr = "B:b:C:c:D:d:eF:f:hI:R:S:sv";
 	int8_t opt;
-	struct JBXVTOptionData * o = &jbxvt.opt;
 	while((opt=getopt(argc, argv, optstr)) != -1) {
 		switch (opt) {
 		case 'B': // bold font
-			o->bold_font = optarg;
+			o->font.bold = optarg;
 			break;
 		case 'b': // background color
-			o->bg = optarg;
+			o->color.bg = optarg;
 			break;
 		case 'C': // columns
-			size->cols = atoi(optarg);
+			o->size.cols = atoi(optarg);
 			break;
 		case 'c': // cursor style
 			jbxvt_set_cursor_attr(atoi(optarg));
 			break;
 		case 'd': // screen number
-			*screen = atoi(optarg);
+			o->screen = atoi(optarg);
 			break;
 		case 'e': // exec
 			return argv + optind;
 		case 'F': // font
-			o->font = optarg;
+			o->font.normal = optarg;
 			break;
 		case 'f': // foreground color
-			o->fg = optarg;
+			o->color.fg = optarg;
 			break;
 		case 'R': // rows
-			size->rows = atoi(optarg);
+			o->size.rows = atoi(optarg);
 			break;
 		case 's': // use scrollbar
 			o->show_scrollbar=true;
@@ -66,6 +66,7 @@ usage:
 	return NULL;
 #endif//OPENBSD
 }
+#if 0
 static void opt_init(void)
 {
 	// Set some defaults which may be overridden.
@@ -79,6 +80,7 @@ static void opt_init(void)
 	// Default to a steady block cursor to conserve CPU
 	jbxvt.scr.sline.max = JBXVT_MAX_SCROLL;
 }
+#endif
 /*  Perform any initialization on the screen data structures.
     Called just once at startup. */
 static void jbxvt_init(void)
@@ -101,17 +103,19 @@ static void mode_init(void)
  *  the slave.  */
 int main(int argc, char ** argv)
 {
-	opt_init();
 	xcb_connection_t * xc;
 	char ** com_argv;
 	{
-		struct JBDim size = {.cols = JBXVT_COLUMNS, .rows = JBXVT_ROWS};
-		int screen = 0;
-		com_argv = parse_command_line(argc, argv, &size, &screen);
+		struct JBXVTOptions opt = {.font.normal = JBXVT_FONT,
+			.font.bold = JBXVT_BOLD_FONT, .font.italic
+			= JBXVT_ITALIC_FONT, .color.fg = JBXVT_FG,
+			.color.bg = JBXVT_BG, .size.cols = JBXVT_COLUMNS,
+			.size.rows = JBXVT_ROWS};
+		com_argv = parse_command_line(argc, argv, &opt);
 		if (!com_argv)
 			com_argv = (char*[2]){getenv("SHELL")};
 		// jbxvt_init_display must come after parse_command_line
-		xc = jbxvt_init_display(argv[0], size, &screen);
+		xc = jbxvt_init_display(argv[0], &opt);
 	}
 	mode_init();
 	jbxvt_init();

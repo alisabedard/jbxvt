@@ -3,8 +3,13 @@
 #define JBXVT_COLOR_H
 #include "libjb/xcb.h"
 #include <xcb/xcb.h>
+struct JBXVTColorOptions {
+	char * fg;
+	char * bg;
+};
 // Set up initial color values for foreground and background pixels.
-void jbxvt_init_colors(xcb_connection_t * xc);
+void jbxvt_init_colors(xcb_connection_t * xc,
+	struct JBXVTColorOptions * opt);
 pixel_t jbxvt_get_bg(void);
 pixel_t jbxvt_get_fg(void);
 void jbxvt_reverse_screen_colors(xcb_connection_t * xc);

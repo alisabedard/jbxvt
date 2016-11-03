@@ -76,17 +76,17 @@ xcb_font_t jbxvt_get_italic_font(xcb_connection_t * xc)
 		return f;
 	return f = xcb_generate_id(xc);
 }
-void jbxvt_setup_fonts(xcb_connection_t * xc)
+void jbxvt_init_fonts(xcb_connection_t * xc, struct JBXVTFontOptions * opt)
 {
 	xcb_font_t f = jbxvt_get_normal_font(xc);
-	jb_require(open_font(xc, f, jbxvt.opt.font),
+	jb_require(open_font(xc, f, opt->normal),
 		"Could not load the primary font");
 	xcb_query_font_cookie_t q = xcb_query_font(xc, f);
 	f = jbxvt_get_bold_font(xc);
-	if (!open_font(xc, f, jbxvt.opt.bold_font))
-		open_font(xc, f, jbxvt.opt.font);
+	if (!open_font(xc, f, opt->bold))
+		open_font(xc, f, opt->normal);
 	f = jbxvt_get_italic_font(xc);
-	if (!open_font(xc, f, jbxvt.opt.italic_font))
-		open_font(xc, f, jbxvt.opt.font);
+	if (!open_font(xc, f, opt->italic))
+		open_font(xc, f, opt->normal);
 	setup_font_metrics(xc, q);
 }

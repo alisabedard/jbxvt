@@ -8,10 +8,10 @@
 static struct {
 	pixel_t bg, fg, current_fg, current_bg;
 } color_data;
-void jbxvt_init_colors(xcb_connection_t * xc)
+void jbxvt_init_colors(xcb_connection_t * xc, struct JBXVTColorOptions * opt)
 {
-	color_data.fg = jbxvt_set_fg(xc, jbxvt.opt.fg);
-	color_data.bg = jbxvt_set_fg(xc, jbxvt.opt.bg);
+	color_data.fg = jbxvt_set_fg(xc, opt->fg);
+	color_data.bg = jbxvt_set_fg(xc, opt->bg);
 }
 void jbxvt_set_reverse_video(xcb_connection_t * xc)
 {

@@ -11,9 +11,14 @@
 #include <stdbool.h>
 #include <string.h>
 static int16_t sbar_offset;
+static bool sbar_visible;
 int16_t jbxvt_get_scroll(void)
 {
 	return sbar_offset;
+}
+bool jbxvt_get_scrollbar_visible(void)
+{
+	return sbar_visible;
 }
 xcb_window_t jbxvt_get_scrollbar(xcb_connection_t * c)
 {
@@ -25,9 +30,8 @@ xcb_window_t jbxvt_get_scrollbar(xcb_connection_t * c)
 __attribute__((pure))
 static int16_t get_sz(const int16_t margin)
 {
-	return jbxvt.scr.pixels.h - jbxvt.scr.pixels.h
-		* (sbar_offset + margin)
-		/ (jbxvt.scr.sline.top + jbxvt.scr.chars.h);
+	return jbxvt.scr.pixels.h - jbxvt.scr.pixels.h * (sbar_offset
+		+ margin) / (jbxvt.scr.sline.top + jbxvt.scr.chars.h);
 }
 // Draw the scrollbar.
 void jbxvt_draw_scrollbar(xcb_connection_t * xc)
@@ -59,15 +63,14 @@ void jbxvt_scroll_to(xcb_connection_t * xc, const int16_t y)
 }
 void jbxvt_clear_saved_lines(xcb_connection_t * xc)
 {
-	memset(jbxvt.scr.sline.data, 0,
-		sizeof(struct JBXVTSavedLine) * JBXVT_MAX_SCROLL);
+	memset(jbxvt.scr.sline.data, 0, sizeof(struct JBXVTSavedLine)
+		* JBXVT_MAX_SCROLL);
 	jbxvt.scr.sline.top = 0;
 	jbxvt_set_scroll(xc, 0);
 }
 void jbxvt_toggle_scrollbar(xcb_connection_t * xc)
 {
 	xcb_configure_window(xc, jbxvt_get_vt_window(xc),
-		XCB_CONFIG_WINDOW_X, &(uint32_t){(
-		jbxvt.opt.show_scrollbar^=true)
+		XCB_CONFIG_WINDOW_X, &(uint32_t){(sbar_visible^=true)
 		? JBXVT_SCROLLBAR_WIDTH : 0});
 }

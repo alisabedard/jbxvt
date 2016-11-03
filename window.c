@@ -55,7 +55,7 @@ void jbxvt_resize_window(xcb_connection_t * xc)
 {
 	struct JBDim p = get_geometry(xc);
 #define XCW(i) XCB_CONFIG_WINDOW_##i
-	if (jbxvt.opt.show_scrollbar)
+	if (jbxvt_get_scrollbar_visible())
 		p.width -= JBXVT_SCROLLBAR_WIDTH;
 	xcb_configure_window(xc, jbxvt_get_scrollbar(xc),
 		XCW(HEIGHT), &(uint32_t){p.height});

@@ -43,11 +43,11 @@ static void create_sb_window(xcb_connection_t * xc, const uint16_t height)
 	xcb_free_cursor(xc, c);
 }
 static void create_vt_window(xcb_connection_t * xc,
-	xcb_size_hints_t * restrict sh)
+	xcb_size_hints_t * restrict sh, const bool sb)
 {
 	xcb_cursor_t c = jbxvt_get_cursor(xc, XC_xterm, 0xffff, 0);
 	xcb_create_window(xc, 0, jbxvt_get_vt_window(xc),
-		jbxvt_get_main_window(xc), jbxvt.opt.show_scrollbar
+		jbxvt_get_main_window(xc), sb
 		? JBXVT_SCROLLBAR_WIDTH : 0, 0, sh->width, sh->height,
 		0, 0, 0, XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK
 		| XCB_CW_CURSOR, (uint32_t[]){ jbxvt_get_bg(),
@@ -72,7 +72,7 @@ static void get_sizehints(xcb_size_hints_t * restrict s, struct JBDim p)
 }
 //  Open the window.
 static void create_window(xcb_connection_t * xc, uint8_t * restrict name,
-	const xcb_window_t root, struct JBDim size)
+	const xcb_window_t root, struct JBDim size, const bool sb)
 {
 	xcb_size_hints_t sh;
 	get_sizehints(&sh, size);
@@ -80,7 +80,7 @@ static void create_window(xcb_connection_t * xc, uint8_t * restrict name,
 	jbxvt_change_name(xc, name, true);
 	jbxvt_change_name(xc, name, false);
 	create_sb_window(xc, sh.height);
-	create_vt_window(xc, &sh);
+	create_vt_window(xc, &sh, sb);
 }
 static void setup_gcs(xcb_connection_t * xc, xcb_window_t w)
 {
@@ -94,13 +94,13 @@ static void setup_gcs(xcb_connection_t * xc, xcb_window_t w)
 		XCB_GX_INVERT, f ^ b});
 }
 xcb_connection_t * jbxvt_init_display(char * restrict name,
-	const struct JBDim size, int * screen)
+	struct JBXVTOptions * restrict opt)
 {
-	xcb_connection_t * xc = jb_get_xcb_connection(NULL, screen);
-	jbxvt_init_colors(xc);
-	jbxvt_setup_fonts(xc);
+	xcb_connection_t * xc = jb_get_xcb_connection(NULL, &opt->screen);
+	jbxvt_init_colors(xc, &opt->color);
+	jbxvt_init_fonts(xc, &opt->font);
 	create_window(xc, (uint8_t *)name,
-		jbxvt_get_root_window(xc), size);
+		jbxvt_get_root_window(xc), opt->size, opt->show_scrollbar);
 	setup_gcs(xc, jbxvt_get_vt_window(xc));
 	return xc;
 }

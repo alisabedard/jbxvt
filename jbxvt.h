@@ -39,15 +39,10 @@ struct JBXVTCommandData {
 enum CharacterSet{
 	CHARSET_GB, CHARSET_ASCII, CHARSET_SG0, CHARSET_SG1, CHARSET_SG2
 };
-struct JBXVTOptionData {
-	char *bg, *fg, *font, *bold_font, *italic_font;
-	bool show_scrollbar;
-};
 struct JBXVT {
 	struct JBXVTScreenData scr;
 	struct JBXVTSelectionData sel;
 	struct JBXVTCommandData com;
-	struct JBXVTOptionData opt;
 	struct JBXVTPrivateModes mode;
 };
 extern struct JBXVT jbxvt; // in jbxvt.c
