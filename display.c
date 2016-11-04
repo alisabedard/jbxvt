@@ -17,6 +17,8 @@ enum EventMasks {
 	MW_EVENTS = E(KEY_PRESS) | E(FOCUS_CHANGE) | E(STRUCTURE_NOTIFY),
 	SUB_EVENTS = E(EXPOSURE) | EB(PRESS) | EB(RELEASE) | EB(MOTION)
 };
+#undef E
+#undef EB
 static void create_main_window(xcb_connection_t * xc,
 	xcb_size_hints_t * restrict sh, const xcb_window_t root)
 {
