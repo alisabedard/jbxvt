@@ -5,20 +5,22 @@
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "paint.h"
+#include "rstyle.h"
 // Convert 3 bit color to 9 bit color, store at offset
 __attribute__((cold))
 static void encode_rgb(uint8_t color, uint8_t offset)
 {
 	color >>= 5;
 	color <<= 1;
-	jbxvt.scr.rstyle |= color << offset;
+	jbxvt_add_rstyle(color << offset);
 }
 /* c must be uint32_t to allow for shift and OR with rstyle. */
 static void sgrc(const uint32_t c, const bool fg)
 {
 	const uint8_t o = JB_LIKELY(fg) ? 7 : 16;
-	jbxvt.scr.rstyle &= ~(0777<<o);
-	jbxvt.scr.rstyle |= (fg ? JBXVT_RS_FG_INDEX : JBXVT_RS_BG_INDEX) | c << o;
+	jbxvt_del_rstyle(0777 << o);
+	jbxvt_add_rstyle((fg ? JBXVT_RS_FG_INDEX
+		: JBXVT_RS_BG_INDEX) | c << o);
 }
 static bool rgb_or_index(int32_t arg, bool * restrict either,
 	bool * restrict index, bool * restrict rgb, const bool is_fg)
@@ -28,9 +30,9 @@ static bool rgb_or_index(int32_t arg, bool * restrict either,
 	*either = false;
 	const bool i = arg != 2;
 	*(i?index:rgb) = true;
-	jbxvt.scr.rstyle |= JB_LIKELY(i) ? (is_fg ? JBXVT_RS_FG_INDEX
+	jbxvt_add_rstyle(JB_LIKELY(i) ? (is_fg ? JBXVT_RS_FG_INDEX
 		: JBXVT_RS_BG_INDEX) : (is_fg ? JBXVT_RS_FG_RGB
-		: JBXVT_RS_BG_RGB);
+		: JBXVT_RS_BG_RGB));
 	return true;
 }
 // continue if true
@@ -82,56 +84,56 @@ void jbxvt_handle_sgr(xcb_connection_t * xc,
 			  continue;
 		switch (token->arg[i]) {
 		case 0 : // reset
-			jbxvt.scr.rstyle = JBXVT_RS_NONE;
+			jbxvt_zero_rstyle();
 			jbxvt_set_fg(xc, NULL);
 			jbxvt_set_bg(xc, NULL);
 			break;
 		case 1 :
-			jbxvt.scr.rstyle |= JBXVT_RS_BOLD;
+			jbxvt_add_rstyle(JBXVT_RS_BOLD);
 			break;
 		case 2: // faint
 			SGRFG(250);
 			break;
 		case 3:
-			jbxvt.scr.rstyle |= JBXVT_RS_ITALIC;
+			jbxvt_add_rstyle(JBXVT_RS_ITALIC);
 			break;
 		case 4 :
-			jbxvt.scr.rstyle |= JBXVT_RS_UNDERLINE;
+			jbxvt_add_rstyle(JBXVT_RS_UNDERLINE);
 			break;
 		case 5 :
 		case 6: // sub for rapidly blinking
-			jbxvt.scr.rstyle |= JBXVT_RS_BLINK;
+			jbxvt_add_rstyle(JBXVT_RS_BLINK);
 			break;
 		case 7: // Image negative
-			jbxvt.scr.rstyle |= JBXVT_RS_RVID;
+			jbxvt_add_rstyle(JBXVT_RS_RVID);
 			break;
 		case 8: // Invisible text
-			jbxvt.scr.rstyle |= JBXVT_RS_INVISIBLE;
+			jbxvt_add_rstyle(JBXVT_RS_INVISIBLE);
 			break;
 		case 9: // crossed out
-			jbxvt.scr.rstyle |= JBXVT_RS_CROSSED_OUT;
+			jbxvt_add_rstyle(JBXVT_RS_CROSSED_OUT);
 			break;
 		case 17: // Alt font
-			jbxvt.scr.rstyle |= JBXVT_RS_BOLD;
+			jbxvt_add_rstyle(JBXVT_RS_BOLD);
 			break;
 		case 21: // doubly underlined
-			jbxvt.scr.rstyle |= JBXVT_RS_DOUBLE_UNDERLINE;
+			jbxvt_add_rstyle(JBXVT_RS_DOUBLE_UNDERLINE);
 			break;
 		case 23: // Not italic
-			jbxvt.scr.rstyle &= ~JBXVT_RS_ITALIC;
+			jbxvt_del_rstyle(JBXVT_RS_ITALIC);
 			break;
 		case 24: // Underline none
-			jbxvt.scr.rstyle &= ~JBXVT_RS_UNDERLINE;
-			jbxvt.scr.rstyle &= ~JBXVT_RS_DOUBLE_UNDERLINE;
+			jbxvt_del_rstyle(JBXVT_RS_UNDERLINE);
+			jbxvt_del_rstyle(JBXVT_RS_DOUBLE_UNDERLINE);
 			break;
 		case 27: // Image positive ( rvid off)
-			jbxvt.scr.rstyle &= ~JBXVT_RS_RVID;
+			jbxvt_del_rstyle(JBXVT_RS_RVID);
 			break;
 		case 28: // not invisible
-			jbxvt.scr.rstyle &= ~JBXVT_RS_INVISIBLE;
+			jbxvt_del_rstyle(JBXVT_RS_INVISIBLE);
 			break;
 		case 29: // Not crossed out
-			jbxvt.scr.rstyle &= ~JBXVT_RS_CROSSED_OUT;
+			jbxvt_del_rstyle(JBXVT_RS_CROSSED_OUT);
 			break;
 		case 26: // reserved
 			break;

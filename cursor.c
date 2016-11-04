@@ -6,6 +6,7 @@
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "repaint.h"
+#include "rstyle.h"
 #include "sbar.h"
 #include "screen.h"
 #include "window.h"
@@ -34,14 +35,15 @@ void jbxvt_save_cursor(void)
 {
 	struct JBXVTScreenData * s = &jbxvt.scr;
 	saved_cursor = s->current->cursor;
-	saved_style = s->rstyle;
+	saved_style = jbxvt_get_rstyle();
 }
 void jbxvt_restore_cursor(xcb_connection_t * xc)
 {
 	jbxvt_draw_cursor(xc);
 	struct JBXVTScreenData * s = &jbxvt.scr;
 	s->current->cursor = saved_cursor;
-	s->rstyle = saved_style;
+	jbxvt_zero_rstyle();
+	jbxvt_add_rstyle(saved_style);
 	jbxvt_draw_cursor(xc);
 }
 static bool is_blinking(void)

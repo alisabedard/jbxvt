@@ -82,12 +82,6 @@ void jbxvt_change_screen(xcb_connection_t * xc, const bool mode_high)
 	jbxvt_move(xc, 0, 0, 0);
 	jbxvt_erase_screen(xc, JBXVT_ERASE_AFTER);
 }
-//  Change the rendition style.
-void jbxvt_style(const uint32_t style)
-{
-	// This allows combining styles, 0 resets
-	jbxvt.scr.rstyle = style ? jbxvt.scr.rstyle | style : 0;
-}
 // Scroll from top to current bottom margin count lines, moving cursor
 void jbxvt_index_from(xcb_connection_t * xc,
 	const int8_t count, const int16_t top)

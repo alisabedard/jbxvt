@@ -19,8 +19,6 @@ void jbxvt_fix_coordinates(struct JBDim * restrict rc);
 xcb_colormap_t jbxvt_get_colormap(xcb_connection_t * xc);
 // Get the root window of the screen
 xcb_window_t jbxvt_get_root_window(xcb_connection_t * xc);
-//  Change the rendition style.
-void jbxvt_style(const uint32_t style);
 //  Change between the alternate and the main screens
 //  mode_high is true for screen 2
 void jbxvt_change_screen(xcb_connection_t * xc, const bool mode_high);

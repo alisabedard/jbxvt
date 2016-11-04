@@ -11,6 +11,7 @@
 #include "libjb/util.h"
 #include "paint.h"
 #include "repaint.h"
+#include "rstyle.h"
 #include "sbar.h"
 #include "screen.h"
 #include "scroll.h"
@@ -132,8 +133,9 @@ static void save_render_style(const int_fast16_t n,
 	struct JBXVTScreen * restrict s)
 {
 	const struct JBDim c = s->cursor;
+	const uint32_t r = jbxvt_get_rstyle();
 	for (int_fast16_t i = n - 1; i >= 0; --i)
-		  s->rend[c.y][c.x + i] = jbxvt.scr.rstyle;
+		  s->rend[c.y][c.x + i] = r;
 }
 static void check_wrap(struct JBXVTScreen * restrict s)
 {
@@ -177,7 +179,7 @@ void jbxvt_string(xcb_connection_t * xc,
 			parse_special_charset(str, len);
 		// Render the string:
 		if (!jbxvt.scr.current->decpm) {
-			jbxvt_paint(xc, str, jbxvt.scr.rstyle, 1, p,
+			jbxvt_paint(xc, str, jbxvt_get_rstyle(), 1, p,
 				jbxvt.scr.current->dwl[c->y]);
 			// Save scroll history:
 			*t = *str;
