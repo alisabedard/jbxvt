@@ -33,7 +33,6 @@ static void handle_new_lines(xcb_connection_t * xc, int8_t nlcount)
 	struct JBDim * m = &jbxvt.scr.current->margin;
 	nlcount = y > m->b ? 0 : nlcount - m->b - y;
 	JB_LIMIT(nlcount, y - m->top, 0);
-	nlcount = JB_MIN(nlcount, JBXVT_MAX_SCROLL);
 	scroll(xc, m->top, m->bottom, nlcount);
 	jbxvt.scr.current->cursor.y -= nlcount;
 }
