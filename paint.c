@@ -5,10 +5,10 @@
 #include "color_index.h"
 #include "font.h"
 #include "double.h"
-#include "handle_sgr.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "libjb/util.h"
+#include "rstyle.h"
 #include "screen.h"
 #include "window.h"
 #include <string.h>
