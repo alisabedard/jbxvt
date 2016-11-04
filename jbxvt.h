@@ -15,7 +15,6 @@ struct JBXVTScreenData {
 	struct JBXVTScreenSavedLines sline;
 	struct JBDim chars;
 	struct JBDim pixels;
-//	uint32_t rstyle; // render style
 };
 struct JBXVT {
 	struct JBXVTScreenData scr;
