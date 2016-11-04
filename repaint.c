@@ -6,6 +6,7 @@
 #include "jbxvt.h"
 #include "paint.h"
 #include "sbar.h"
+#include "screen.h"
 #include "scroll.h"
 #include "show_selection.h"
 #include "size.h"
@@ -46,7 +47,8 @@ static int_fast32_t repaint_generic(xcb_connection_t * xc,
 	else
 		jbxvt_paint(xc, str, 0, len, p, dwl);
 	p.x += len * jbxvt_get_font_size().width;
-	const uint16_t width = (jbxvt_get_char_size().width + 1 - len) * jbxvt_get_font_size().width;
+	const uint16_t width = (jbxvt_get_char_size().width + 1 - len)
+		* jbxvt_get_font_size().width;
 	xcb_clear_area(xc, false, jbxvt_get_vt_window(xc), p.x, p.y,
 		width, jbxvt_get_font_size().height);
 	return p.y + jbxvt_get_font_size().height;
@@ -82,13 +84,13 @@ void jbxvt_repaint(xcb_connection_t * xc)
 	int_fast32_t line = show_scroll_history(xc,
 		&p, 0, jbxvt_get_scroll() - 1);
 	// Do the remainder from the current screen:
-	for (uint_fast16_t i = 0; line < jbxvt_get_char_size().height; ++line, ++i) {
+	for (uint_fast16_t i = 0; line < jbxvt_get_char_size().height;
+		++line, ++i) {
 		// Allocate enough space to process each column
 		uint8_t str[jbxvt_get_char_size().width];
-		p.y = repaint_generic(xc, p, filter_string(str,
-			jbxvt.scr.current->text[i]), str,
-			jbxvt.scr.current->rend[i],
-			jbxvt.scr.current->dwl[i]);
+		struct JBXVTScreen * s = jbxvt_get_screen();
+		p.y = repaint_generic(xc, p, filter_string(str, s->text[i]),
+			str, s->rend[i], s->dwl[i]);
 	}
 	jbxvt_show_selection(xc);
 }

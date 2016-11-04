@@ -29,12 +29,12 @@
 #endif//!STRING_DEBUG
 static void handle_new_lines(xcb_connection_t * xc, int8_t nlcount)
 {
-	const int16_t y = jbxvt.scr.current->cursor.y;
-	struct JBDim * m = &jbxvt.scr.current->margin;
+	const int16_t y = jbxvt_get_screen()->cursor.y;
+	struct JBDim * m = &jbxvt_get_screen()->margin;
 	nlcount = y > m->b ? 0 : nlcount - m->b - y;
 	JB_LIMIT(nlcount, y - m->top, 0);
 	scroll(xc, m->top, m->bottom, nlcount);
-	jbxvt.scr.current->cursor.y -= nlcount;
+	jbxvt_get_screen()->cursor.y -= nlcount;
 }
 static void decsclm(void)
 {
@@ -45,15 +45,15 @@ static void decsclm(void)
 }
 static void wrap(xcb_connection_t * xc)
 {
-	jbxvt.scr.current->wrap_next = false;
-	const struct JBDim m = jbxvt.scr.current->margin;
-	const int16_t y = jbxvt.scr.current->cursor.y;
-	jbxvt.scr.current->wrap[y] = true;
+	jbxvt_get_screen()->wrap_next = false;
+	const struct JBDim m = jbxvt_get_screen()->margin;
+	const int16_t y = jbxvt_get_screen()->cursor.y;
+	jbxvt_get_screen()->wrap[y] = true;
 	if (y >= m.b) {
 		decsclm();
 		scroll(xc, m.top, m.bottom, 1);
 	} else
-		++jbxvt.scr.current->cursor.y;
+		++jbxvt_get_screen()->cursor.y;
 }
 #if defined(__i386__) || defined(__amd64__)
        __attribute__((regparm(2)))
@@ -62,9 +62,9 @@ static void handle_insert(xcb_connection_t * xc,
 	const uint8_t n, const struct JBDim p)
 {
 	LOG("handle_insert(n=%d, p={%d, %d})", n, p.x, p.y);
-	const struct JBDim c = jbxvt.scr.current->cursor;
-	uint8_t * restrict s = jbxvt.scr.current->text[c.y];
-	uint32_t * restrict r = jbxvt.scr.current->rend[c.y];
+	const struct JBDim c = jbxvt_get_screen()->cursor;
+	uint8_t * restrict s = jbxvt_get_screen()->text[c.y];
+	uint32_t * restrict r = jbxvt_get_screen()->rend[c.y];
 	const uint16_t sz = jbxvt_get_char_size().w - c.x;
 	memmove(s + c.x + n, s + c.x, sz);
 	memmove(r + c.x + n, r + c.x, sz << 2);
@@ -154,41 +154,41 @@ void jbxvt_string(xcb_connection_t * xc,
 	if (nlcount > 0)
 		  handle_new_lines(xc, nlcount);
 	struct JBDim p;
-	fix_cursor(&jbxvt.scr.s[0]);
-	fix_cursor(&jbxvt.scr.s[1]);
+	fix_cursor(jbxvt_get_screen_at(0));
+	fix_cursor(jbxvt_get_screen_at(1));
 	while (len) {
-		if (test_action_char(xc, *str, jbxvt.scr.current)) {
+		if (test_action_char(xc, *str, jbxvt_get_screen())) {
 			--len;
 			++str;
 			continue;
 		}
-		struct JBDim * c = &jbxvt.scr.current->cursor;
-		if (jbxvt.scr.current->wrap_next) {
+		struct JBDim * c = &jbxvt_get_screen()->cursor;
+		if (jbxvt_get_screen()->wrap_next) {
 			wrap(xc);
 			c->x = 0;
 		}
 		jbxvt_check_selection(xc, c->y, c->y);
-		p = jbxvt_chars_to_pixels(jbxvt.scr.current->cursor);
+		p = jbxvt_chars_to_pixels(jbxvt_get_screen()->cursor);
 		if (JB_UNLIKELY(jbxvt.mode.insert))
 			handle_insert(xc, 1, p);
-		uint8_t * t = jbxvt.scr.current->text[c->y];
+		uint8_t * t = jbxvt_get_screen()->text[c->y];
 		if (!t) // should never be NULL.
 			abort();
 		t += c->x;
 		if (jbxvt.mode.charset[jbxvt.mode.charsel] > CHARSET_ASCII)
 			parse_special_charset(str, len);
 		// Render the string:
-		if (!jbxvt.scr.current->decpm) {
+		if (!jbxvt_get_screen()->decpm) {
 			jbxvt_paint(xc, str, jbxvt_get_rstyle(), 1, p,
-				jbxvt.scr.current->dwl[c->y]);
+				jbxvt_get_screen()->dwl[c->y]);
 			// Save scroll history:
 			*t = *str;
 		}
-		save_render_style(1, jbxvt.scr.current);
+		save_render_style(1, jbxvt_get_screen());
 		--len;
 		++str;
 		++c->x;
-		check_wrap(jbxvt.scr.current);
+		check_wrap(jbxvt_get_screen());
 	}
 	jbxvt_draw_cursor(xc);
 }

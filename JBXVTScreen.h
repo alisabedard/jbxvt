@@ -4,6 +4,7 @@
 #define SCREENST_H
 #include "config.h"
 #include "libjb/size.h"
+#include <stdbool.h>
 /*  Structure describing the current state of the screen.  */
 struct JBXVTScreen {
 	uint8_t *text[JBXVT_MAX_ROWS];	// text

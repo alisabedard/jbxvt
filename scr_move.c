@@ -5,6 +5,7 @@
 #include "libjb/log.h"
 #include "libjb/util.h"
 #include "sbar.h"
+#include "screen.h"
 #include "selection.h"
 #include "size.h"
 #ifndef JBXVT_SCR_MOVE_DEBUG
@@ -16,7 +17,7 @@ static int16_t decom(struct JBDim * restrict c)
 {
 	// Implement DECOM, DEC Origin Mode, limits
 	if (jbxvt.mode.decom) {
-		const struct JBDim m = jbxvt.scr.current->margin;
+		const struct JBDim m = jbxvt_get_screen()->margin;
 		JB_LIMIT(c->y, m.top, m.bottom);
 	}
 	return c->y;
@@ -25,7 +26,7 @@ static int16_t decom(struct JBDim * restrict c)
 // Returns new cursor y value
 int16_t jbxvt_check_cursor_position(void)
 {
-	struct JBDim * c = &jbxvt.scr.current->cursor;
+	struct JBDim * c = &jbxvt_get_screen()->cursor;
 	JB_LIMIT(c->x, jbxvt_get_char_size().w - 1, 0);
 	JB_LIMIT(c->y, jbxvt_get_char_size().h - 1, 0);
 	return decom(c);
@@ -44,13 +45,13 @@ void jbxvt_move(xcb_connection_t * xc,
 	LOG("jbxvt_move(x:%d, y:%d, relative:%d)", x, y, relative);
 	jbxvt_set_scroll(xc, 0);
 	jbxvt_draw_cursor(xc); // clear
-	struct JBDim c = jbxvt.scr.current->cursor;
-	jbxvt.scr.current->cursor = c
+	struct JBDim c = jbxvt_get_screen()->cursor;
+	jbxvt_get_screen()->cursor = c
 		= (struct JBDim) { .x = dim(c.x, x, relative
 			& JBXVT_COLUMN_RELATIVE),
 		.y = dim(c.y, y, relative & JBXVT_ROW_RELAATIVE)};
 	c.y = jbxvt_check_cursor_position();
-	jbxvt.scr.current->wrap_next = false;
+	jbxvt_get_screen()->wrap_next = false;
 	jbxvt_check_selection(xc, c.y, c.y);
 	jbxvt_draw_cursor(xc); // draw
 }

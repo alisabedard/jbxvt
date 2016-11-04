@@ -8,6 +8,7 @@
 #include "libjb/util.h"
 #include "paint.h"
 #include "sbar.h"
+#include "screen.h"
 #include "selection.h"
 #include "size.h"
 #include "window.h"
@@ -57,8 +58,8 @@ static void clear(int8_t count, const uint8_t rc,
 	memset(text[count], 0, jbxvt_get_char_size().w);
 	memset(rend[count], 0, jbxvt_get_char_size().w << 2);
 	const uint8_t j = rc + (up ? - count - 1 : count);
-	jbxvt.scr.current->text[j] = text[count];
-	jbxvt.scr.current->rend[j] = rend[count];
+	jbxvt_get_screen()->text[j] = text[count];
+	jbxvt_get_screen()->rend[j] = rend[count];
 	clear(count, rc, text, rend, up);
 }
 static void adjust_saved_lines_top(const int_fast16_t n)
@@ -70,15 +71,15 @@ static void adjust_saved_lines_top(const int_fast16_t n)
 static void copy_saved_lines(const int_fast16_t n)
 {
 	for (int_fast16_t i = n - 1; i >= 0; --i) {
-		uint8_t * t = jbxvt.scr.current->text[i];
+		uint8_t * t = jbxvt_get_screen()->text[i];
 		struct JBXVTSavedLine * sl = saved_lines + n - i - 1;
-		sl->wrap = jbxvt.scr.current->wrap[i];
-		sl->dwl = jbxvt.scr.current->dwl[i];
+		sl->wrap = jbxvt_get_screen()->wrap[i];
+		sl->dwl = jbxvt_get_screen()->dwl[i];
 		adjust_saved_lines_top(n);
 		clear_selection_at(i);
 		const size_t len = strlen((const char *)t);
 		memcpy(sl->text, t, len);
-		memcpy(sl->rend, jbxvt.scr.current->rend[i], len << 2);
+		memcpy(sl->rend, jbxvt_get_screen()->rend[i], len << 2);
 		sl->size = len;
 	}
 }
@@ -125,8 +126,8 @@ static int8_t copy_screen_area(const int8_t i,
 {
 	if(i >= count)
 		  return j;
-	save[i] = jbxvt.scr.current->text[j];
-	rend[i] = jbxvt.scr.current->rend[j];
+	save[i] = jbxvt_get_screen()->text[j];
+	rend[i] = jbxvt_get_screen()->rend[j];
 	clear_selection_at(j);
 	return copy_screen_area(i + 1, j + mod, mod,
 		count, save, rend);
@@ -145,7 +146,7 @@ void jbxvt_scroll_primary_screen(int16_t n)
 	copy_saved_lines(n);
 	for (int_fast16_t j = n;
 		j < jbxvt_get_char_size().height; ++j)
-		  move_line(j, -n, &jbxvt.scr.s[0]);
+		  move_line(j, -n, jbxvt_get_screen_at(0));
 }
 static void sc_common(xcb_connection_t * xc,
 	const uint8_t r1, const uint8_t r2,
@@ -162,18 +163,18 @@ static void sc_dn(xcb_connection_t * xc,
 {
 	for(int8_t j = copy_screen_area(0, row2, -1,
 		count, save, rend); j >= row1; --j)
-		  move_line(j, count, jbxvt.scr.current);
+		  move_line(j, count, jbxvt_get_screen());
 	sc_common(xc, row1, row2, count, false, save, rend);
 }
 static void sc_up(xcb_connection_t * xc,
 	const uint8_t row1, const uint8_t row2,
 	const int16_t count, uint8_t ** save, uint32_t ** rend)
 {
-	if (jbxvt.scr.current == &jbxvt.scr.s[0] && row1 == 0)
+	if (jbxvt_get_screen() == jbxvt_get_screen_at(0) && row1 == 0)
 		add_scroll_history(xc, count);
 	for(int8_t j = copy_screen_area(0, row1,
 		1, count, save, rend); j < row2; ++j)
-		move_line(j, -count, jbxvt.scr.current);
+		move_line(j, -count, jbxvt_get_screen());
 	sc_common(xc, row1, row2, count, true, save, rend);
 }
 /*  Scroll count lines from row1 to row2 inclusive.

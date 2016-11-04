@@ -21,8 +21,8 @@
 #endif//DEBUG_ERASE
 static void del(xcb_connection_t * xc, uint16_t col, uint16_t width)
 {
-	const uint16_t y = jbxvt.scr.current->cursor.y;
-	struct JBXVTScreen * s = jbxvt.scr.current;
+	const uint16_t y = jbxvt_get_screen()->cursor.y;
+	struct JBXVTScreen * s = jbxvt_get_screen();
 	if (col + width > jbxvt_get_char_size().width) // keep in screen
 		width = jbxvt_get_char_size().width - col;
 	memset(s->text[y] + col, 0, width);
@@ -38,7 +38,7 @@ static void del(xcb_connection_t * xc, uint16_t col, uint16_t width)
 void jbxvt_erase_line(xcb_connection_t * xc, const int8_t mode)
 {
 	jbxvt_set_scroll(xc, 0);
-	const uint16_t x = jbxvt.scr.current->cursor.x;
+	const uint16_t x = jbxvt_get_screen()->cursor.x;
 	switch (mode) {
 	case JBXVT_ERASE_ALL:
 		del(xc, 0, jbxvt_get_char_size().width);
@@ -60,12 +60,12 @@ void jbxvt_erase_screen(xcb_connection_t * xc, const int8_t mode)
 	switch (mode) {
 		// offset by 1 to not include current line, handled later
 	case JBXVT_ERASE_AFTER:
-		start = jbxvt.scr.current->cursor.y + 1;
+		start = jbxvt_get_screen()->cursor.y + 1;
 		end = jbxvt_get_char_size().h;
 		break;
 	case JBXVT_ERASE_BEFORE:
 		start = 0;
-		end = jbxvt.scr.current->cursor.y - 1;
+		end = jbxvt_get_screen()->cursor.y - 1;
 		break;
 	case JBXVT_ERASE_SAVED:
 		jbxvt_clear_saved_lines(xc);
@@ -78,13 +78,13 @@ void jbxvt_erase_screen(xcb_connection_t * xc, const int8_t mode)
 	/* Save cursor y locally instead of using save/restore cursor
 	   functions in order to avoid side-effects on applications
 	   using a saved cursor position.  */
-	const uint16_t old_y = jbxvt.scr.current->cursor.y;
+	const uint16_t old_y = jbxvt_get_screen()->cursor.y;
 	for (uint_fast16_t l = start; l <= end; ++l) {
-		jbxvt.scr.current->cursor.y = l;
+		jbxvt_get_screen()->cursor.y = l;
 		jbxvt_erase_line(xc, JBXVT_ERASE_ALL); // entire
 		jbxvt_draw_cursor(xc);
 	}
-	jbxvt.scr.current->cursor.y = old_y;
+	jbxvt_get_screen()->cursor.y = old_y;
 	// clear start of, end of, or entire current line, per mode
 	jbxvt_erase_line(xc, mode);
 }

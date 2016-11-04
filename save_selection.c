@@ -4,6 +4,7 @@
 #include "config.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "screen.h"
 #include "selend.h"
 #include "size.h"
 #include <stdlib.h>
@@ -66,7 +67,7 @@ static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 		const uint16_t len = end - start + 1;
 		*str = realloc(*str, *total + len);
 		strncpy((char*)*str + *total,
-			(char*)jbxvt.scr.current->text[i] + start, len);
+			(char*)jbxvt_get_screen()->text[i] + start, len);
 		*total += len;
 	}
 	*total = sanitize(*str, *total) + 1;

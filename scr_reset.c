@@ -37,8 +37,8 @@ static inline void fix_margins(const struct JBDim c)
 	   If so, set the bottom margin to the new bottom line.  */
 	if (c.height == jbxvt_get_char_size().height)
 		  return;
-	if (jbxvt.scr.current->margin.b >= c.h)
-		  jbxvt.scr.current->margin.b = c.h - 1;
+	if (jbxvt_get_screen()->margin.b >= c.h)
+		  jbxvt_get_screen()->margin.b = c.h - 1;
 }
 static void decscnm(xcb_connection_t * xc)
 {
@@ -62,17 +62,18 @@ void jbxvt_reset(xcb_connection_t * xc)
 	fix_margins(c);
 	static bool created;
 	if (!created) {
-		init(&jbxvt.scr.s[0]);
-		init(&jbxvt.scr.s[1]);
+		init(jbxvt_get_screen_at(0));
+		init(jbxvt_get_screen_at(1));
 		created = true;
 	}
-	int16_t * y = &jbxvt.scr.current->cursor.y;
-	if (JB_LIKELY(jbxvt.scr.current == &jbxvt.scr.s[0]) && *y >= c.h) {
+	int16_t * y = &jbxvt_get_screen()->cursor.y;
+	if (JB_LIKELY(jbxvt_get_screen() == jbxvt_get_screen_at(0))
+		&& *y >= c.h) {
 		jbxvt_scroll_primary_screen(*y - c.h + 1);
 		*y = c.h - 1;
 	}
-	init_screen_elements(&jbxvt.scr.s[0]);
-	init_screen_elements(&jbxvt.scr.s[1]);
+	init_screen_elements(jbxvt_get_screen_at(0));
+	init_screen_elements(jbxvt_get_screen_at(1));
 	// Constrain dimensions:
 	c.w = JB_MIN(c.w, JBXVT_MAX_COLS);
 	c.h = JB_MIN(c.h, JBXVT_MAX_ROWS);

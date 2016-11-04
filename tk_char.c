@@ -11,7 +11,7 @@
 #include <stdio.h>
 static void form_feed(xcb_connection_t * xc)
 {
-	const struct JBDim m = jbxvt.scr.current->margin;
+	const struct JBDim m = jbxvt_get_screen()->margin;
 	jbxvt_move(xc, 0, m.top, 0);
 	if (jbxvt.mode.decpff)
 		dprintf(jbxvt_get_fd(), "FF");
@@ -21,11 +21,11 @@ void jbxvt_handle_tk_char(xcb_connection_t * xc, const uint8_t tk_char)
 {
 	switch (tk_char) {
 	case '\n': // handle line feed
-		jbxvt_index_from(xc, 1, jbxvt.scr.current->margin.t);
+		jbxvt_index_from(xc, 1, jbxvt_get_screen()->margin.t);
 		break;
 	case 013: // vertical tab
-		for (uint8_t i = jbxvt.scr.current->cursor.y; i % 8; ++i)
-			  jbxvt_index_from(xc, 1, jbxvt.scr.current->margin.t);
+		for (uint8_t i = jbxvt_get_screen()->cursor.y; i % 8; ++i)
+			  jbxvt_index_from(xc, 1, jbxvt_get_screen()->margin.t);
 		break;
 	case '\f': // form feed
 		form_feed(xc);

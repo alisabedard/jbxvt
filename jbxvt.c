@@ -71,9 +71,9 @@ usage:
 static void jbxvt_init(void)
 {
 	// Initialise the array of lines that have scrolled off the top.
-	struct JBXVTScreenData * s = &jbxvt.scr;
-	static struct JBXVTScreen screens[2];
-	s->current = s->s = screens;
+//	struct JBXVTScreenData * s = &jbxvt.scr;
+//	static struct JBXVTScreen screens[2];
+//	s->current = s->s = screens;
 	jbxvt_set_tab(-2, false);
 }
 // Set default values for private modes

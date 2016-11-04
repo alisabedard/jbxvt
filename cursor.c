@@ -34,15 +34,13 @@ xcb_gcontext_t jbxvt_get_cursor_gc(xcb_connection_t * xc)
 }
 void jbxvt_save_cursor(void)
 {
-	struct JBXVTScreenData * s = &jbxvt.scr;
-	saved_cursor = s->current->cursor;
+	saved_cursor = jbxvt_get_screen()->cursor;
 	saved_style = jbxvt_get_rstyle();
 }
 void jbxvt_restore_cursor(xcb_connection_t * xc)
 {
 	jbxvt_draw_cursor(xc);
-	struct JBXVTScreenData * s = &jbxvt.scr;
-	s->current->cursor = saved_cursor;
+	jbxvt_get_screen()->cursor = saved_cursor;
 	jbxvt_zero_rstyle();
 	jbxvt_add_rstyle(saved_style);
 	jbxvt_draw_cursor(xc);
@@ -61,15 +59,14 @@ static bool is_blinking(void)
 }
 void jbxvt_draw_cursor(xcb_connection_t * xc)
 {
-	struct JBXVTScreenData * s = &jbxvt.scr;
 	// Don't draw if scrolled, non-existent, or hidden
 	struct JBXVTScreen * current;
-	if (jbxvt_get_scroll() || !(current = s->current)
+	if (jbxvt_get_scroll() || !(current = jbxvt_get_screen())
 		|| !jbxvt.mode.dectcem)
 		return;
 	if ((current->cursor_visible ^= true) && is_blinking())
 		jbxvt_repaint(xc); // prevent stale cursor blocks
-	struct JBDim p = jbxvt_chars_to_pixels(s->current->cursor);
+	struct JBDim p = jbxvt_chars_to_pixels(current->cursor);
 	const struct JBDim f = jbxvt_get_font_size();
 	xcb_rectangle_t r = {p.x, p.y, f.w, f.h};
 	switch (cursor_attr) {

@@ -2,6 +2,7 @@
 #include "tab.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "screen.h"
 #include "sbar.h"
 #include "size.h"
 #include <string.h>
@@ -23,12 +24,12 @@ void jbxvt_tab(xcb_connection_t * xc)
 {
 	LOG("jbxvt_tab()");
 	jbxvt_set_scroll(xc, 0);
-	struct JBDim c = jbxvt.scr.current->cursor;
-	uint8_t * restrict s = jbxvt.scr.current->text[c.y];
+	struct JBDim c = jbxvt_get_screen()->cursor;
+	uint8_t * restrict s = jbxvt_get_screen()->text[c.y];
 	s[c.x] = ' ';
 	while (!tab_stops[++c.x] && c.x < jbxvt_get_char_size().w)
 		s[c.x] = ' ';
-	jbxvt.scr.current->cursor.x = c.x;
+	jbxvt_get_screen()->cursor.x = c.x;
 }
 void jbxvt_cht(xcb_connection_t * xc, int16_t v)
 {

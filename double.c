@@ -3,11 +3,12 @@
 #include "cursor.h"
 #include "jbxvt.h"
 #include "repaint.h"
+#include "screen.h"
 #include <stdlib.h>
 void jbxvt_set_double_width_line(xcb_connection_t * xc,
 	const bool is_dwl)
 {
-	jbxvt.scr.current->dwl[jbxvt.scr.current->cursor.y] = is_dwl;
+	jbxvt_get_screen()->dwl[jbxvt_get_screen()->cursor.y] = is_dwl;
 	jbxvt_repaint(xc); // in case set mid-line
 	jbxvt_draw_cursor(xc); // clear stale cursor block
 }

@@ -4,6 +4,7 @@
 #include "selend.h"
 #include "jbxvt.h"
 #include "sbar.h"
+#include "screen.h"
 #include "selection.h"
 #include "size.h"
 static int8_t cmp(const int8_t mod, struct JBDim * restrict se1,
@@ -40,7 +41,7 @@ void jbxvt_selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
 }
 static uint16_t sel_s(struct JBDim * restrict se2, uint8_t ** s)
 {
-	*s = jbxvt.scr.current->text[se2->index];
+	*s = jbxvt_get_screen()->text[se2->index];
 	return jbxvt_get_char_size().width;
 }
 static int16_t get_start_of_word(uint8_t * restrict s, int16_t i)
@@ -54,7 +55,7 @@ static void adj_sel_to_word(struct JBDim * include,
 {
 	if (se1->index < 0)
 		return; // protect against segfault if ends invalid
-	uint8_t * s = jbxvt.scr.current->text[se1->index];
+	uint8_t * s = jbxvt_get_screen()->text[se1->index];
 	int16_t i = get_start_of_word(s, se1->col);
 	se1->col = i?i+1:0;
 	i = se2->col;

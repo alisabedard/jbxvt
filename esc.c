@@ -130,7 +130,7 @@ void jbxvt_esc(xcb_connection_t * xc,
 	CASE_T('H', jbxvt.mode.decanm ? JBXVT_TOKEN_HTS : JBXVT_TOKEN_HOME);
 	CASE_A('l', jbxvt.mode.decanm ? JBXVT_TOKEN_MEMLOCK : JBXVT_TOKEN_EL, 2);
 	case 'I':
-		jbxvt_index_from(xc, -1, jbxvt.scr.current->cursor.y);
+		jbxvt_index_from(xc, -1, jbxvt_get_screen()->cursor.y);
 		tk->type = JBXVT_TOKEN_CUU;
 		break;
 	CASE_A('J', JBXVT_TOKEN_EL, 1); // vt52 erase to end of line
