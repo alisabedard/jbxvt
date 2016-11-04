@@ -56,12 +56,13 @@ static void get_sizehints(xcb_size_hints_t * restrict s, struct JBDim p)
 {
 	p = jbxvt_chars_to_pixels(p);
 	const struct JBDim f = jbxvt_get_font_size();
-	*s = (xcb_size_hints_t) {
 #define SH(n) XCB_ICCCM_SIZE_HINT_##n
+	*s = (xcb_size_hints_t) {
 		.flags = SH(US_SIZE) | SH(P_MIN_SIZE) | SH(P_RESIZE_INC)
 			| SH(BASE_SIZE), .width = p.w, .height = p.h,
 		.width_inc = f.w, .height_inc = f.h, .base_width = f.w,
 		.base_height = f.h };
+#undef SH
 	s->min_width = jbxvt_get_font_size().w + s->base_width;
 	s->min_height = jbxvt_get_font_size().h + s->base_height;
 }
