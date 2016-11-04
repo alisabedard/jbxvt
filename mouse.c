@@ -4,7 +4,7 @@
 #include "command.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
-#include "screen.h"
+#include "size.h"
 static uint8_t get_mod(const uint16_t state)
 {
 	// 4=Shift, 8=Meta, 16=Control

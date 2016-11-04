@@ -8,7 +8,7 @@ CFLAGS+=-D_XOPEN_SOURCE=700 --std=c11
 CFLAGS+=-Wall -Wextra
 LIBS+=-lxcb -lxcb-keysyms
 OBJS=jbxvt.o lookup_key.o paint.o change_selection.o cmdtok.o esc.o
-OBJS+=cursor.o display.o repaint.o save_selection.o scr_move.o
+OBJS+=cursor.o display.o repaint.o save_selection.o scr_move.o size.o
 OBJS+=sbar.o scr_erase.o selex.o edit.o command.o selection.o dcs.o
 OBJS+=selreq.o scr_reset.o scr_string.o screen.o scroll.o selend.o 
 OBJS+=xevents.o window.o xvt.o handle_sgr.o dec_reset.o show_selection.o

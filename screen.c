@@ -14,8 +14,6 @@
 #include "scr_reset.h"
 #include "scroll.h"
 #include <string.h>
-#define FSZ jbxvt_get_font_size()
-#define GET_X(op) p.w op##= FSZ.w; p.y op##= FSZ.h; return p;
 static xcb_screen_t * jbxvt_screen;
 static void init(xcb_connection_t * restrict xc)
 {
@@ -32,27 +30,6 @@ xcb_colormap_t jbxvt_get_colormap(xcb_connection_t * xc)
 	if (!jbxvt_screen)
 		init(xc);
 	return jbxvt_screen->default_colormap;
-}
-struct JBDim jbxvt_get_char_size(struct JBDim p)
-{
-	GET_X(/);
-}
-struct JBDim jbxvt_get_pixel_size(struct JBDim p)
-{
-	GET_X(*);
-}
-#undef GET_X
-#undef FSZ
-/*  Fix the coordinates so that they are within the screen
-    and do not lie within empty space.  */
-void jbxvt_fix_coordinates(struct JBDim * restrict rc)
-{
-#define CSZ jbxvt.scr.chars
-	if(!CSZ.h || !CSZ.w)
-		  return; // prevent segfault on bad window size.
-	JB_LIMIT(rc->x, CSZ.w - 1, 0);
-	JB_LIMIT(rc->y, CSZ.h - 1, 0);
-#undef CSZ
 }
 // Set all chars to 'E'
 void jbxvt_efill(xcb_connection_t * xc)

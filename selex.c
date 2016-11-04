@@ -6,6 +6,7 @@
 #include "screen.h"
 #include "selection.h"
 #include "selend.h"
+#include "size.h"
 #define SE jbxvt.sel.end
 static void handle_drag(const struct JBDim rc)
 {

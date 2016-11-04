@@ -9,6 +9,7 @@
 #include "sbar.h"
 #include "window.h"
 #include "screen.h"
+#include "size.h"
 #include <string.h>
 static void copy_area(xcb_connection_t * xc,
 	const int16_t * restrict x, const int16_t y,

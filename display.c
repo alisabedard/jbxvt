@@ -8,6 +8,7 @@
 #include "paint.h"
 #include "sbar.h"
 #include "screen.h"
+#include "size.h"
 #include "window.h"
 #include <errno.h>
 #include <stdlib.h>

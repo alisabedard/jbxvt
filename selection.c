@@ -9,6 +9,7 @@
 #include "selend.h"
 #include "screen.h"
 #include "show_selection.h"
+#include "size.h"
 #include "window.h"
 static struct JBXVTSelectionData selection_data;
 #define SE selection_data.end

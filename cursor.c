@@ -9,6 +9,7 @@
 #include "rstyle.h"
 #include "sbar.h"
 #include "screen.h"
+#include "size.h"
 #include "window.h"
 static uint32_t saved_style;
 static struct JBDim saved_cursor;

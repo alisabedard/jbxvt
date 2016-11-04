@@ -17,6 +17,7 @@
 #include "scroll.h"
 #include "scr_move.h"
 #include "selection.h"
+#include "size.h"
 #include "tab.h"
 #include "window.h"
 #include <string.h>

@@ -5,8 +5,8 @@
 #include "cursor.h"
 #include "font.h"
 #include "jbxvt.h"
-#include "screen.h"
 #include "selend.h"
+#include "size.h"
 #include "window.h"
 static void paint_rvid(xcb_connection_t * xc,
 	struct JBDim start, struct JBDim end,

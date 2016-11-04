@@ -6,6 +6,7 @@
 #include "sbar.h"
 #include "scr_reset.h"
 #include "screen.h"
+#include "size.h"
 #include <stdlib.h>
 #include <string.h>
 xcb_window_t jbxvt_get_main_window(xcb_connection_t * xc)
