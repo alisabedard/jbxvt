@@ -21,6 +21,7 @@
 #include "screen.h"
 #include "scroll.h"
 #include "selreq.h"
+#include "size.h"
 #include "tab.h"
 #include "window.h"
 #include <stdio.h>
@@ -119,7 +120,7 @@ static void decstbm(struct Token * restrict token)
 	}
 	const bool rst = token->nargs < 2 || t[0] >= t[1];
 	jbxvt.scr.current->margin = (struct JBDim){.t = rst ? 0 : t[0] - 1,
-		.b = (rst ? jbxvt.scr.chars.h : t[1]) - 1};
+		.b = (rst ? jbxvt_get_char_size().h : t[1]) - 1};
 }
 static void reqtparam(const uint8_t t)
 {

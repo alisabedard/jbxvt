@@ -5,6 +5,7 @@
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "selend.h"
+#include "size.h"
 #include <stdlib.h>
 #include <string.h>
 static uint8_t get_next_char(uint8_t c)
@@ -61,7 +62,7 @@ static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 		   end point.  */
 		const int16_t start = i == e->index ? e->col : 0;
 		const int16_t end = i == j ? (e+1)->col
-			: jbxvt.scr.chars.width - 1;
+			: jbxvt_get_char_size().width - 1;
 		const uint16_t len = end - start + 1;
 		*str = realloc(*str, *total + len);
 		strncpy((char*)*str + *total,

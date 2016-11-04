@@ -63,7 +63,7 @@ void jbxvt_resize_window(xcb_connection_t * xc)
 	xcb_configure_window(xc, jbxvt_get_vt_window(xc), XCW(WIDTH)
 		| XCW(HEIGHT), (uint32_t[]){p.w, p.h});
 #undef XCW
-	jbxvt.scr.chars = jbxvt_get_char_size(jbxvt.scr.pixels = p);
+	jbxvt_set_pixel_size(p);
 }
 // Set main window property string
 void jbxvt_set_property(xcb_connection_t * xc, const xcb_atom_t prop,

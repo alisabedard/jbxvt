@@ -7,9 +7,8 @@
 #include "paint.h"
 #include "sbar.h"
 #include "show_selection.h"
+#include "size.h"
 #include "window.h"
-#define CSZ jbxvt.scr.chars
-#define FSZ jbxvt_get_font_size()
 /* Display the string using the rendition vector
    at the screen coordinates.  */
 static void paint_rvec_text(xcb_connection_t * xc,
@@ -28,7 +27,7 @@ static void paint_rvec_text(xcb_connection_t * xc,
 		// draw
 		jbxvt_paint(xc, str, r, i, p, dwl);
 		// advance to next block
-		p.x += i * FSZ.width;
+		p.x += i * jbxvt_get_font_size().width;
 		str += i;
 		rvec += i;
 		len -= i;
@@ -40,23 +39,23 @@ static int_fast32_t repaint_generic(xcb_connection_t * xc,
 {
 	// check inputs:
 	if (!str || !len)
-		return p.y + FSZ.height;
+		return p.y + jbxvt_get_font_size().height;
 	if (rend)
 		paint_rvec_text(xc, str, rend + 0, len, p, dwl);
 	else
 		jbxvt_paint(xc, str, 0, len, p, dwl);
-	p.x += len * FSZ.width;
-	const uint16_t width = (CSZ.width + 1 - len) * FSZ.width;
+	p.x += len * jbxvt_get_font_size().width;
+	const uint16_t width = (jbxvt_get_char_size().width + 1 - len) * jbxvt_get_font_size().width;
 	xcb_clear_area(xc, false, jbxvt_get_vt_window(xc), p.x, p.y,
-		width, FSZ.height);
-	return p.y + FSZ.height;
+		width, jbxvt_get_font_size().height);
+	return p.y + jbxvt_get_font_size().height;
 }
 __attribute__((nonnull(1)))
 static int_fast16_t show_scroll_history(xcb_connection_t * xc,
 	struct JBDim * restrict p, const int_fast16_t line,
 	const int_fast16_t i)
 {
-	if (line > CSZ.h || i < 0)
+	if (line > jbxvt_get_char_size().h || i < 0)
 		return line;
 	struct JBXVTSavedLine * sl = &jbxvt.scr.sline.data[i];
 	p->y = repaint_generic(xc, *p, sl->size, sl->text,
@@ -70,7 +69,7 @@ static uint_fast16_t filter_string(uint8_t * restrict buf,
 	if (!input)
 		return 0;
 	uint_fast16_t x;
-	for (x = 0; x < CSZ.width; ++x)
+	for (x = 0; x < jbxvt_get_char_size().width; ++x)
 		buf[x] = input[x] < ' ' ? ' ' : input[x];
 	return x;
 }
@@ -82,9 +81,9 @@ void jbxvt_repaint(xcb_connection_t * xc)
 	int_fast32_t line = show_scroll_history(xc,
 		&p, 0, jbxvt_get_scroll() - 1);
 	// Do the remainder from the current screen:
-	for (uint_fast16_t i = 0; line < CSZ.height; ++line, ++i) {
+	for (uint_fast16_t i = 0; line < jbxvt_get_char_size().height; ++line, ++i) {
 		// Allocate enough space to process each column
-		uint8_t str[CSZ.width];
+		uint8_t str[jbxvt_get_char_size().width];
 		p.y = repaint_generic(xc, p, filter_string(str,
 			jbxvt.scr.current->text[i]), str,
 			jbxvt.scr.current->rend[i],

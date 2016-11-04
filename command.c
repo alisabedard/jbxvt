@@ -6,6 +6,7 @@
 #include "jbxvt.h"
 #include "libjb/file.h"
 #include "libjb/log.h"
+#include "size.h"
 #include "xevents.h"
 #include <fcntl.h>
 #include <signal.h>
@@ -100,7 +101,7 @@ static void set_ttymodes(void)
 		[VSUSP] = 032, [VREPRINT] = 022, [VWERASE] = 027,
 		[VLNEXT] = 026, [VDISCARD] = 017}};
 	tcsetattr(0, TCSANOW, &term);
-	jbxvt_set_tty_size(jbxvt.scr.chars);
+	jbxvt_set_tty_size(jbxvt_get_char_size());
 }
 static void redir(const fd_t target, const fd_t ttyfd)
 {

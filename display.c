@@ -28,9 +28,8 @@ static void create_main_window(xcb_connection_t * xc,
 		sh->x, sh->y, sh->width, sh->height, 0, 0, 0,
 		XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK,
 		(uint32_t[]){jbxvt_get_bg(), MW_EVENTS});
-	jbxvt.scr.pixels.w = sh->width;
-	jbxvt.scr.pixels.h = sh->height;
-	jbxvt.scr.chars = jbxvt_get_char_size(jbxvt.scr.pixels);
+	jbxvt_set_pixel_size((struct JBDim){.width = sh->width,
+		.height = sh->height});
 }
 static void create_sb_window(xcb_connection_t * xc, const uint16_t height)
 {
@@ -57,17 +56,14 @@ static void create_vt_window(xcb_connection_t * xc,
 }
 static void get_sizehints(xcb_size_hints_t * restrict s, struct JBDim p)
 {
-	p = jbxvt_get_pixel_size(p);
+	p = jbxvt_chars_to_pixels(p);
+	const struct JBDim f = jbxvt_get_font_size();
 	*s = (xcb_size_hints_t) {
 #define SH(n) XCB_ICCCM_SIZE_HINT_##n
 		.flags = SH(US_SIZE) | SH(P_MIN_SIZE) | SH(P_RESIZE_INC)
-			| SH(BASE_SIZE),
-		.width = p.w, .height = p.h,
-		.width_inc = jbxvt_get_font_size().w,
-		.height_inc = jbxvt_get_font_size().h,
-		.base_width = jbxvt_get_font_size().w,
-		.base_height = jbxvt_get_font_size().h
-	};
+			| SH(BASE_SIZE), .width = p.w, .height = p.h,
+		.width_inc = f.w, .height_inc = f.h, .base_width = f.w,
+		.base_height = f.h };
 	s->min_width = jbxvt_get_font_size().w + s->base_width;
 	s->min_height = jbxvt_get_font_size().h + s->base_height;
 }

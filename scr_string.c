@@ -66,7 +66,7 @@ static void handle_insert(xcb_connection_t * xc,
 	const struct JBDim c = jbxvt.scr.current->cursor;
 	uint8_t * restrict s = jbxvt.scr.current->text[c.y];
 	uint32_t * restrict r = jbxvt.scr.current->rend[c.y];
-	const uint16_t sz = jbxvt.scr.chars.w - c.x;
+	const uint16_t sz = jbxvt_get_char_size().w - c.x;
 	memmove(s + c.x + n, s + c.x, sz);
 	memmove(r + c.x + n, r + c.x, sz << 2);
 	const struct JBDim f = jbxvt_get_font_size();
@@ -104,13 +104,13 @@ static void fix_margins(struct JBDim* restrict m,
 	const int16_t cursor_y)
 {
 	m->b = JB_MAX(m->b, cursor_y);
-	const uint8_t h = jbxvt.scr.chars.height - 1;
+	const uint8_t h = jbxvt_get_char_size().height - 1;
 	m->b = JB_MIN(m->b, h);
 }
 static void fix_cursor(struct JBXVTScreen * restrict c)
 {
-	JB_LIMIT(c->cursor.y, jbxvt.scr.chars.height - 1, 0);
-	JB_LIMIT(c->cursor.x, jbxvt.scr.chars.width - 1, 0);
+	JB_LIMIT(c->cursor.y, jbxvt_get_char_size().height - 1, 0);
+	JB_LIMIT(c->cursor.x, jbxvt_get_char_size().width - 1, 0);
 	fix_margins(&c->margin, c->cursor.y);
 }
 static bool test_action_char(xcb_connection_t * xc, const uint8_t c,
@@ -140,7 +140,7 @@ static void save_render_style(const int_fast16_t n,
 }
 static void check_wrap(struct JBXVTScreen * restrict s)
 {
-	const uint16_t w = jbxvt.scr.chars.w;
+	const uint16_t w = jbxvt_get_char_size().w;
 	if (s->cursor.x >= w)
 		s->wrap_next = !jbxvt.mode.decawm;
 }
@@ -169,7 +169,7 @@ void jbxvt_string(xcb_connection_t * xc,
 			c->x = 0;
 		}
 		jbxvt_check_selection(xc, c->y, c->y);
-		p = jbxvt_get_pixel_size(jbxvt.scr.current->cursor);
+		p = jbxvt_chars_to_pixels(jbxvt.scr.current->cursor);
 		if (JB_UNLIKELY(jbxvt.mode.insert))
 			handle_insert(xc, 1, p);
 		uint8_t * t = jbxvt.scr.current->text[c->y];

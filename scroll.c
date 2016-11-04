@@ -7,6 +7,7 @@
 #include "libjb/log.h"
 #include "paint.h"
 #include "sbar.h"
+#include "size.h"
 #include "window.h"
 #include <string.h>
 //#define SCROLL_DEBUG
@@ -46,8 +47,8 @@ static void clear(int8_t count, const uint8_t rc,
 {
 	if(--count < 0)
 		  return;
-	memset(text[count], 0, jbxvt.scr.chars.w);
-	memset(rend[count], 0, jbxvt.scr.chars.w << 2);
+	memset(text[count], 0, jbxvt_get_char_size().w);
+	memset(rend[count], 0, jbxvt_get_char_size().w << 2);
 	const uint8_t j = rc + (up ? - count - 1 : count);
 	jbxvt.scr.current->text[j] = text[count];
 	jbxvt.scr.current->rend[j] = rend[count];
@@ -91,7 +92,7 @@ static void copy_visible_area(xcb_connection_t * xc,
 		* jbxvt_get_font_size().h;
 	xcb_copy_area(xc, jbxvt_get_vt_window(xc),
 		jbxvt_get_vt_window(xc), jbxvt_get_text_gc(xc), 0, y[0],
-		0, y[1], jbxvt.scr.pixels.width, height);
+		0, y[1], jbxvt_get_pixel_size().width, height);
 	// the above blocks the event queue, flush it
 	xcb_flush(xc);
 }
@@ -128,7 +129,7 @@ static void clear_line(xcb_connection_t * xc,
 {
 	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), 0,
 		y * jbxvt_get_font_size().height,
-		jbxvt.scr.pixels.width,
+		jbxvt_get_pixel_size().width,
 		count * jbxvt_get_font_size().height);
 }
 void jbxvt_scroll_primary_screen(int16_t n)
@@ -136,7 +137,7 @@ void jbxvt_scroll_primary_screen(int16_t n)
 	LOG("jbxvt_scroll_primary_screen(%d)", n);
 	copy_saved_lines(n);
 	for (int_fast16_t j = n;
-		j < jbxvt.scr.chars.height; ++j)
+		j < jbxvt_get_char_size().height; ++j)
 		  move_line(j, -n, &jbxvt.scr.s[0]);
 }
 static void sc_common(xcb_connection_t * xc,

@@ -8,6 +8,7 @@
 #include "paint.h"
 #include "repaint.h"
 #include "scroll.h"
+#include "size.h"
 #include "window.h"
 #include <stdbool.h>
 #include <string.h>
@@ -31,15 +32,15 @@ xcb_window_t jbxvt_get_scrollbar(xcb_connection_t * c)
 __attribute__((pure))
 static int16_t get_sz(const int16_t margin)
 {
-	return jbxvt.scr.pixels.h - jbxvt.scr.pixels.h * (sbar_offset
-		+ margin) / (jbxvt_get_scroll_top() + jbxvt.scr.chars.h);
+	return jbxvt_get_pixel_size().h - jbxvt_get_pixel_size().h * (sbar_offset
+		+ margin) / (jbxvt_get_scroll_top() + jbxvt_get_char_size().h);
 }
 // Draw the scrollbar.
 void jbxvt_draw_scrollbar(xcb_connection_t * xc)
 {
 	xcb_clear_area(xc, 0, jbxvt_get_scrollbar(xc), 0, 0,
-		JBXVT_SCROLLBAR_WIDTH, jbxvt.scr.pixels.h);
-	const int16_t top = get_sz(jbxvt.scr.chars.h);
+		JBXVT_SCROLLBAR_WIDTH, jbxvt_get_pixel_size().h);
+	const int16_t top = get_sz(jbxvt_get_char_size().h);
 	xcb_poly_fill_rectangle(xc, jbxvt_get_scrollbar(xc),
 		jbxvt_get_text_gc(xc), 1, &(xcb_rectangle_t){0, top,
 		JBXVT_SCROLLBAR_WIDTH, get_sz(0) - top});
@@ -58,9 +59,9 @@ void jbxvt_set_scroll(xcb_connection_t * xc, int16_t n)
 // Scroll to the specified y position (in pixels)
 void jbxvt_scroll_to(xcb_connection_t * xc, const int16_t y)
 {
-	jbxvt_set_scroll(xc, (jbxvt.scr.chars.h + jbxvt_get_scroll_top())
-			* (jbxvt.scr.pixels.h - y) / jbxvt.scr.pixels.h
-			- jbxvt.scr.chars.h);
+	jbxvt_set_scroll(xc, (jbxvt_get_char_size().h + jbxvt_get_scroll_top())
+			* (jbxvt_get_pixel_size().h - y) / jbxvt_get_pixel_size().h
+			- jbxvt_get_char_size().h);
 }
 void jbxvt_clear_saved_lines(xcb_connection_t * xc)
 {

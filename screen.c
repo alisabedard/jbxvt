@@ -13,6 +13,7 @@
 #include "scr_move.h"
 #include "scr_reset.h"
 #include "scroll.h"
+#include "size.h"
 #include <string.h>
 static xcb_screen_t * jbxvt_screen;
 static void init(xcb_connection_t * restrict xc)
@@ -37,9 +38,9 @@ void jbxvt_efill(xcb_connection_t * xc)
 	LOG("jbxvt_efill");
 	// Move to cursor home in order for all characters to appear.
 	jbxvt_move(xc, 0, 0, 0);
-	for (uint8_t y = 0; y < jbxvt.scr.chars.h; ++y) {
-		memset(jbxvt.scr.current->text[y], 'E', jbxvt.scr.chars.w);
-		memset(jbxvt.scr.current->rend[y], 0, jbxvt.scr.chars.w << 2);
+	for (uint8_t y = 0; y < jbxvt_get_char_size().h; ++y) {
+		memset(jbxvt.scr.current->text[y], 'E', jbxvt_get_char_size().w);
+		memset(jbxvt.scr.current->rend[y], 0, jbxvt_get_char_size().w << 2);
 	}
 	jbxvt_repaint(xc);
 }

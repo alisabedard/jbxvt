@@ -11,6 +11,7 @@
 #include "scroll.h"
 #include "scr_reset.h"
 #include "selection.h"
+#include "size.h"
 #include "window.h"
 #include <string.h>
 #define DEBUG_ERASE
@@ -22,8 +23,8 @@ static void del(xcb_connection_t * xc, uint16_t col, uint16_t width)
 {
 	const uint16_t y = jbxvt.scr.current->cursor.y;
 	struct JBXVTScreen * s = jbxvt.scr.current;
-	if (col + width > jbxvt.scr.chars.width) // keep in screen
-		width = jbxvt.scr.chars.width - col;
+	if (col + width > jbxvt_get_char_size().width) // keep in screen
+		width = jbxvt_get_char_size().width - col;
 	memset(s->text[y] + col, 0, width);
 	memset(s->rend[y] + col, 0, width << 2);
 	const struct JBDim f = jbxvt_get_font_size();
@@ -40,14 +41,14 @@ void jbxvt_erase_line(xcb_connection_t * xc, const int8_t mode)
 	const uint16_t x = jbxvt.scr.current->cursor.x;
 	switch (mode) {
 	case JBXVT_ERASE_ALL:
-		del(xc, 0, jbxvt.scr.chars.width);
+		del(xc, 0, jbxvt_get_char_size().width);
 		break;
 	case JBXVT_ERASE_BEFORE:
 		del(xc, 0, x);
 		break;
 	case JBXVT_ERASE_AFTER:
 	default:
-		del(xc, x, jbxvt.scr.chars.width - x);
+		del(xc, x, jbxvt_get_char_size().width - x);
 	}
 	jbxvt_draw_cursor(xc);
 }
@@ -60,7 +61,7 @@ void jbxvt_erase_screen(xcb_connection_t * xc, const int8_t mode)
 		// offset by 1 to not include current line, handled later
 	case JBXVT_ERASE_AFTER:
 		start = jbxvt.scr.current->cursor.y + 1;
-		end = jbxvt.scr.chars.h;
+		end = jbxvt_get_char_size().h;
 		break;
 	case JBXVT_ERASE_BEFORE:
 		start = 0;
@@ -71,7 +72,7 @@ void jbxvt_erase_screen(xcb_connection_t * xc, const int8_t mode)
 		return;
 	default: // JBXVT_ERASE_ALL
 		start = 0;
-		end = jbxvt.scr.chars.h - 1;
+		end = jbxvt_get_char_size().h - 1;
 		break;
 	}
 	/* Save cursor y locally instead of using save/restore cursor

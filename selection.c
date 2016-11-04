@@ -84,7 +84,7 @@ void jbxvt_start_selection(xcb_connection_t * xc,
 {
 	jbxvt_show_selection(xc); // clear previous
 	jbxvt_clear_selection(); // free previous selection
-	p = jbxvt_get_char_size(p);
+	p = jbxvt_pixels_to_chars(p);
 	jbxvt_rc_to_selend(p.y, p.x, &SE[2]);
 	selection_data.unit = unit;
 	selection_data.on_screen = true;

@@ -4,6 +4,7 @@
 #include "selend.h"
 #include "jbxvt.h"
 #include "sbar.h"
+#include "size.h"
 static int8_t cmp(const int8_t mod, struct JBDim * restrict se1,
 	struct JBDim * restrict se2)
 {
@@ -39,7 +40,7 @@ void jbxvt_selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
 static uint16_t sel_s(struct JBDim * restrict se2, uint8_t ** s)
 {
 	*s = jbxvt.scr.current->text[se2->index];
-	return jbxvt.scr.chars.width;
+	return jbxvt_get_char_size().width;
 }
 static int16_t get_start_of_word(uint8_t * restrict s, int16_t i)
 {
@@ -89,6 +90,6 @@ void jbxvt_adjust_selection(struct JBDim * restrict include)
 		  adj_sel_to_word(include, e, e + 1);
 	else if (u == JBXVT_SEL_UNIT_LINE) {
 		e[0].col = 0;
-		e[1].col = jbxvt.scr.chars.width - 1;
+		e[1].col = jbxvt_get_char_size().width - 1;
 	}
 }

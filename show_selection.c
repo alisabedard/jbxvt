@@ -16,9 +16,9 @@ static void paint_rvid(xcb_connection_t * xc,
 	for (int_fast16_t row = start.y; row <= end.y; ++row) {
 		struct JBDim c = {.row = row, .col = row == start.y
 			? start.x : col1};
-		const struct JBDim p1 = jbxvt_get_pixel_size(c);
+		const struct JBDim p1 = jbxvt_chars_to_pixels(c);
 		c.col = row == end.y ? end.x : col2;
-		const struct JBDim p2 = jbxvt_get_pixel_size(c);
+		const struct JBDim p2 = jbxvt_chars_to_pixels(c);
 		if (p2.x <= p1.x)
 			continue;
 		xcb_poly_fill_rectangle(xc, jbxvt_get_vt_window(xc),
@@ -36,7 +36,7 @@ void jbxvt_show_selection(xcb_connection_t * xc)
 	struct JBDim p[2] = {};
 	jbxvt_selend_to_rc(&p->y, &p->x, &e[0]);
 	jbxvt_selend_to_rc(&p[1].y, &p[1].x, &e[1]);
-	struct JBDim r[] = {{}, jbxvt.scr.chars};
+	struct JBDim r[] = {{}, jbxvt_get_char_size()};
 	//  Obtain initial and final endpoints for the selection.
 	const bool fwd = p->y < p[1].y || (p->y == p[1].y && p->x <= p[1].x);
 	paint_rvid(xc, p[fwd?0:1], p[fwd?1:0], r[0].x, r[1].x);

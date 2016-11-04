@@ -3,6 +3,7 @@
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "sbar.h"
+#include "size.h"
 #include <string.h>
 static bool tab_stops[JBXVT_MAX_COLS];
 // Set tab stops:
@@ -25,7 +26,7 @@ void jbxvt_tab(xcb_connection_t * xc)
 	struct JBDim c = jbxvt.scr.current->cursor;
 	uint8_t * restrict s = jbxvt.scr.current->text[c.y];
 	s[c.x] = ' ';
-	while (!tab_stops[++c.x] && c.x < jbxvt.scr.chars.w)
+	while (!tab_stops[++c.x] && c.x < jbxvt_get_char_size().w)
 		s[c.x] = ' ';
 	jbxvt.scr.current->cursor.x = c.x;
 }

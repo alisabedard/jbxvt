@@ -14,12 +14,13 @@
 #include "scr_move.h"
 #include "screen.h"
 #include "scroll.h"
+#include "size.h"
 #include "window.h"
 #include <string.h>
 #include <unistd.h>
 static void init_screen_elements(struct JBXVTScreen * restrict scr)
 {
-	scr->margin.bottom = jbxvt.scr.chars.height - 1;
+	scr->margin.bottom = jbxvt_get_char_size().height - 1;
 	scr->wrap_next = false;
 	scr->margin.top = 0;
 }
@@ -34,7 +35,7 @@ static inline void fix_margins(const struct JBDim c)
 {
 	/* On screen resize, check if old margin was on the bottom line.
 	   If so, set the bottom margin to the new bottom line.  */
-	if (c.height == jbxvt.scr.chars.height)
+	if (c.height == jbxvt_get_char_size().height)
 		  return;
 	if (jbxvt.scr.current->margin.b >= c.h)
 		  jbxvt.scr.current->margin.b = c.h - 1;
@@ -57,7 +58,7 @@ void jbxvt_reset(xcb_connection_t * xc)
 {
 	LOG("jbxvt_reset()");
 	decscnm(xc);
-	struct JBDim c = jbxvt.scr.chars;
+	struct JBDim c = jbxvt_get_char_size();
 	fix_margins(c);
 	static bool created;
 	if (!created) {
@@ -76,9 +77,8 @@ void jbxvt_reset(xcb_connection_t * xc)
 	c.w = JB_MIN(c.w, JBXVT_MAX_COLS);
 	c.h = JB_MIN(c.h, JBXVT_MAX_ROWS);
 	jbxvt_set_tty_size(c);
-	jbxvt.scr.chars = c;
+	jbxvt_set_pixel_size(jbxvt_chars_to_pixels(c));
 	jbxvt_check_cursor_position();
-	--c.h; --c.w;
 	jbxvt_draw_scrollbar(xc);
 	decscnm(xc);
 	xcb_flush(xc);

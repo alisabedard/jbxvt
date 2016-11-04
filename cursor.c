@@ -69,7 +69,7 @@ void jbxvt_draw_cursor(xcb_connection_t * xc)
 		return;
 	if ((current->cursor_visible ^= true) && is_blinking())
 		jbxvt_repaint(xc); // prevent stale cursor blocks
-	struct JBDim p = jbxvt_get_pixel_size(s->current->cursor);
+	struct JBDim p = jbxvt_chars_to_pixels(s->current->cursor);
 	const struct JBDim f = jbxvt_get_font_size();
 	xcb_rectangle_t r = {p.x, p.y, f.w, f.h};
 	switch (cursor_attr) {

@@ -13,8 +13,6 @@ struct JBXVTScreenSavedLines {
 struct JBXVTScreenData {
 	struct JBXVTScreen * current, * s;
 	struct JBXVTScreenSavedLines sline;
-	struct JBDim chars;
-	struct JBDim pixels;
 };
 struct JBXVT {
 	struct JBXVTScreenData scr;

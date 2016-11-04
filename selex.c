@@ -24,7 +24,7 @@ void jbxvt_extend_selection(xcb_connection_t * xc,
 		return; // no selection
 	// Save current end points:
 	struct JBDim * e = jbxvt_get_selection_end_points();
-	struct JBDim s[] = {e[0], e[1], jbxvt_get_char_size(point)};
+	struct JBDim s[] = {e[0], e[1], jbxvt_pixels_to_chars(point)};
 	jbxvt_fix_coordinates(s + 2);
 	if (drag)
 		  handle_drag(s[2]);

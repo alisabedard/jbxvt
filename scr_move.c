@@ -5,6 +5,7 @@
 #include "libjb/log.h"
 #include "libjb/util.h"
 #include "sbar.h"
+#include "size.h"
 #ifndef JBXVT_SCR_MOVE_DEBUG
 #undef LOG
 #define LOG(...)
@@ -24,8 +25,8 @@ static int16_t decom(struct JBDim * restrict c)
 int16_t jbxvt_check_cursor_position(void)
 {
 	struct JBDim * c = &jbxvt.scr.current->cursor;
-	JB_LIMIT(c->x, jbxvt.scr.chars.w - 1, 0);
-	JB_LIMIT(c->y, jbxvt.scr.chars.h - 1, 0);
+	JB_LIMIT(c->x, jbxvt_get_char_size().w - 1, 0);
+	JB_LIMIT(c->y, jbxvt_get_char_size().h - 1, 0);
 	return decom(c);
 }
 static inline int16_t dim(const int16_t cursor,
