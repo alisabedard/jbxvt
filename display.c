@@ -8,6 +8,7 @@
 #include "sbar.h"
 #include "screen.h"
 #include "size.h"
+#include "xcb_screen.h"
 #include "window.h"
 #include <X11/cursorfont.h>
 #include <xcb/xcb_icccm.h>

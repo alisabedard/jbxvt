@@ -3,7 +3,7 @@
 #include "jbxvt.h"
 #include "libjb/util.h"
 #include "paint.h"
-#include "screen.h"
+#include "xcb_screen.h"
 #include "window.h"
 static struct {
 	pixel_t bg, fg, current_fg, current_bg;

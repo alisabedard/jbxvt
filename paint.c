@@ -9,7 +9,7 @@
 #include "libjb/log.h"
 #include "libjb/util.h"
 #include "rstyle.h"
-#include "screen.h"
+#include "xcb_screen.h"
 #include "window.h"
 #include <string.h>
 #define DEBUG_PAINT

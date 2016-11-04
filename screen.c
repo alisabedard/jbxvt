@@ -15,23 +15,6 @@
 #include "scroll.h"
 #include "size.h"
 #include <string.h>
-static xcb_screen_t * jbxvt_screen;
-static void init(xcb_connection_t * restrict xc)
-{
-	jbxvt_screen = jb_get_xcb_screen(xc);
-}
-xcb_window_t jbxvt_get_root_window(xcb_connection_t * xc)
-{
-	if (!jbxvt_screen)
-		init(xc);
-	return jbxvt_screen->root;
-}
-xcb_colormap_t jbxvt_get_colormap(xcb_connection_t * xc)
-{
-	if (!jbxvt_screen)
-		init(xc);
-	return jbxvt_screen->default_colormap;
-}
 // Set all chars to 'E'
 void jbxvt_efill(xcb_connection_t * xc)
 {
