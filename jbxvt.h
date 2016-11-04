@@ -7,12 +7,9 @@
 #include "JBXVTSavedLine.h"
 #include "JBXVTEvent.h"
 #include "JBXVTScreen.h"
-struct JBXVTScreenSavedLines {
-	struct JBXVTSavedLine data[JBXVT_MAX_SCROLL]; // saved lines
-};
 struct JBXVTScreenData {
 	struct JBXVTScreen * current, * s;
-	struct JBXVTScreenSavedLines sline;
+	struct JBXVTSavedLine saved_lines[JBXVT_MAX_SCROLL];
 };
 struct JBXVT {
 	struct JBXVTScreenData scr;

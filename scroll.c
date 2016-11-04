@@ -64,7 +64,7 @@ static void copy_saved_lines(const int_fast16_t n)
 {
 	for (int_fast16_t i = n - 1; i >= 0; --i) {
 		uint8_t * t = jbxvt.scr.current->text[i];
-		struct JBXVTSavedLine * sl = jbxvt.scr.sline.data + n - i - 1;
+		struct JBXVTSavedLine * sl = jbxvt.scr.saved_lines + n - i - 1;
 		sl->wrap = jbxvt.scr.current->wrap[i];
 		sl->dwl = jbxvt.scr.current->dwl[i];
 		adjust_saved_lines_top(n);
@@ -102,11 +102,11 @@ static void add_scroll_history(xcb_connection_t * xc,
 	if (count < 1) // nothing to do
 		return;
 	// Handle lines that scroll off the top of the screen.
-	memcpy(jbxvt.scr.sline.data + count, jbxvt.scr.sline.data,
+	memcpy(jbxvt.scr.saved_lines + count, jbxvt.scr.saved_lines,
 		count - 1); // -1 to avoid going over array bounds
 	int_fast16_t y = scroll_max - count - 1;
-	struct JBXVTSavedLine * i = &jbxvt.scr.sline.data[y],
-		* j = &jbxvt.scr.sline.data[y + count];
+	struct JBXVTSavedLine * i = &jbxvt.scr.saved_lines[y],
+		* j = &jbxvt.scr.saved_lines[y + count];
 	for (; y >= 0; --y, --i, --j)
 		memcpy(j, i, sizeof(struct JBXVTSavedLine));
 	copy_saved_lines(count);

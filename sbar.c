@@ -65,7 +65,7 @@ void jbxvt_scroll_to(xcb_connection_t * xc, const int16_t y)
 }
 void jbxvt_clear_saved_lines(xcb_connection_t * xc)
 {
-	memset(jbxvt.scr.sline.data, 0, sizeof(struct JBXVTSavedLine)
+	memset(jbxvt.scr.saved_lines, 0, sizeof(struct JBXVTSavedLine)
 		* JBXVT_MAX_SCROLL);
 	jbxvt_zero_scroll_top();
 	jbxvt_set_scroll(xc, 0);
