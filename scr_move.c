@@ -4,6 +4,7 @@
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "libjb/util.h"
+#include "mode.h"
 #include "sbar.h"
 #include "screen.h"
 #include "selection.h"
@@ -16,7 +17,7 @@
 static int16_t decom(struct JBDim * restrict c)
 {
 	// Implement DECOM, DEC Origin Mode, limits
-	if (jbxvt.mode.decom) {
+	if (jbxvt_get_modes()->decom) {
 		const struct JBDim m = jbxvt_get_screen()->margin;
 		JB_LIMIT(c->y, m.top, m.bottom);
 	}

@@ -9,6 +9,7 @@
 #include "libjb/log.h"
 #include "libjb/xcb.h"
 #include "lookup_key.h"
+#include "mode.h"
 #include "sbar.h"
 #include "scr_reset.h"
 #include "window.h"
@@ -376,7 +377,7 @@ void jbxvt_get_token(xcb_connection_t * xc, struct Token * restrict tk)
 }
 const char * jbxvt_get_csi(void)
 {
-	return jbxvt.mode.s8c1t ? "\233" : "\033[";
+	return jbxvt_get_modes()->s8c1t ? "\233" : "\033[";
 }
 static void init_container(struct JBXVTCommandContainer * restrict c,
 	uint8_t * restrict buf)

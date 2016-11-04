@@ -66,13 +66,6 @@ usage:
 	return NULL;
 #endif//OPENBSD
 }
-// Set default values for private modes
-static void mode_init(void)
-{
-	jbxvt.mode = (struct JBXVTPrivateModes) { .decanm = true,
-		.decawm = false, .dectcem = true,
-		.charset = {CHARSET_ASCII, CHARSET_ASCII}};
-}
 /*  Run the command in a subprocess and return a file descriptor for the
  *  master end of the pseudo-teletype pair with the command talking to
  *  the slave.  */
@@ -94,7 +87,6 @@ int main(int argc, char ** argv)
 		// jbxvt_init_display must come after parse_command_line
 		xc = jbxvt_init_display(argv[0], &opt);
 	}
-	mode_init();
 	jbxvt_set_tab(-2, false); // Set up the tab stops
 	jbxvt_map_window(xc);
 	jb_check(setenv("TERM", JBXVT_ENV_TERM, true) != -1,

@@ -4,16 +4,18 @@
 #include "command.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "mode.h"
 #include "scr_move.h"
 #include "screen.h"
 #include "scroll.h"
 #include "tab.h"
+#include "tk_char.h"
 #include <stdio.h>
 static void form_feed(xcb_connection_t * xc)
 {
 	const struct JBDim m = jbxvt_get_screen()->margin;
 	jbxvt_move(xc, 0, m.top, 0);
-	if (jbxvt.mode.decpff)
+	if (jbxvt_get_modes()->decpff)
 		dprintf(jbxvt_get_fd(), "FF");
 	scroll(xc, m.top, m.bottom, m.bottom - m.top);
 }
@@ -45,11 +47,11 @@ void jbxvt_handle_tk_char(xcb_connection_t * xc, const uint8_t tk_char)
 		break;
 	case '\016': // change to char set G1
 		LOG("charset G1");
-		jbxvt.mode.charsel = 1;
+		jbxvt_get_modes()->charsel = 1;
 		break;
 	case '\017': // change to char set G0
 		LOG("charset G0");
-		jbxvt.mode.charsel = 0;
+		jbxvt_get_modes()->charsel = 0;
 		break;
 	}
 }

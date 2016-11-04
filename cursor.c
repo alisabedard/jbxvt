@@ -5,6 +5,7 @@
 #include "font.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "mode.h"
 #include "repaint.h"
 #include "rstyle.h"
 #include "sbar.h"
@@ -16,7 +17,7 @@ static struct JBDim saved_cursor;
 static uint8_t cursor_attr = 1;
 void jbxvt_blink_cursor(xcb_connection_t * xc)
 {
-	if (!jbxvt.mode.att610 && cursor_attr % 2) {
+	if (!jbxvt_get_modes()->att610 && cursor_attr % 2) {
 		jbxvt_draw_cursor(xc); // blinking cursor
 		xcb_flush(xc);
 	}
@@ -62,7 +63,7 @@ void jbxvt_draw_cursor(xcb_connection_t * xc)
 	// Don't draw if scrolled, non-existent, or hidden
 	struct JBXVTScreen * current;
 	if (jbxvt_get_scroll() || !(current = jbxvt_get_screen())
-		|| !jbxvt.mode.dectcem)
+		|| !jbxvt_get_modes()->dectcem)
 		return;
 	if ((current->cursor_visible ^= true) && is_blinking())
 		jbxvt_repaint(xc); // prevent stale cursor blocks

@@ -5,6 +5,7 @@
 #include "cursor.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "mode.h"
 #include "repaint.h"
 #include "sbar.h"
 #include "scr_erase.h"
@@ -41,7 +42,7 @@ void jbxvt_efill(xcb_connection_t * xc)
 void jbxvt_change_screen(xcb_connection_t * xc, const bool mode_high)
 {
 	current = (screens + mode_high);
-	jbxvt.mode.charsel = 0;
+	jbxvt_get_modes()->charsel = 0;
 	/*  Do not call jbxvt_erase_screen(JBXVT_ERASE_ALL) here--It causes
 	    corruption of the saved line data in this context.  Test case:
 	    $ ls; vi

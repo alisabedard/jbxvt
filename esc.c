@@ -5,6 +5,7 @@
 #include "cmdtok.h"
 #include "dcs.h"
 #include "jbxvt.h"
+#include "mode.h"
 #include "screen.h"
 #include <stdio.h>
 void jbxvt_csi(xcb_connection_t * xc,
@@ -77,7 +78,7 @@ void jbxvt_esc(xcb_connection_t * xc,
 #define CASE_A(ch, tok, a) case ch: tk->type = tok, tk->arg[0] = a;\
 			tk->nargs=1; break;
 #define CASE_T(ch, tok) case ch: tk->type = tok; break;
-#define CASE_M(ch, mod, v) case ch: jbxvt.mode.mod = v; break;
+#define CASE_M(ch, mod, v) case ch: jbxvt_get_modes()->mod = v; break;
 		CASE_T('F', JBXVT_TOKEN_S7C1T);
 		CASE_T('G', JBXVT_TOKEN_S8C1T);
 		CASE_T('L', JBXVT_TOKEN_ANSI1);
@@ -120,15 +121,15 @@ void jbxvt_esc(xcb_connection_t * xc,
 	case 'C': // vt52 cursor left
 		tk->type = c;
 		break;
-	CASE_T('D', jbxvt.mode.decanm ? JBXVT_TOKEN_IND : JBXVT_TOKEN_CUF);
+	CASE_T('D', jbxvt_get_modes()->decanm ? JBXVT_TOKEN_IND : JBXVT_TOKEN_CUF);
 	CASE_T('c', JBXVT_TOKEN_RIS); // Reset to Initial State
 	CASE_M('e', dectcem, true); // enable cursor (vt52 GEMDOS)
 	CASE_M('f', dectcem, false); // disable cursor (vt52 GEMDOS)
 	CASE_T('E', JBXVT_TOKEN_NEL);
 	CASE_T('F', JBXVT_TOKEN_ENTGM52); // Enter VT52 graphics mode
 	CASE_T('G', JBXVT_TOKEN_EXTGM52); // Leave VT52 graphics mode
-	CASE_T('H', jbxvt.mode.decanm ? JBXVT_TOKEN_HTS : JBXVT_TOKEN_HOME);
-	CASE_A('l', jbxvt.mode.decanm ? JBXVT_TOKEN_MEMLOCK : JBXVT_TOKEN_EL, 2);
+	CASE_T('H', jbxvt_get_modes()->decanm ? JBXVT_TOKEN_HTS : JBXVT_TOKEN_HOME);
+	CASE_A('l', jbxvt_get_modes()->decanm ? JBXVT_TOKEN_MEMLOCK : JBXVT_TOKEN_EL, 2);
 	case 'I':
 		jbxvt_index_from(xc, -1, jbxvt_get_screen()->cursor.y);
 		tk->type = JBXVT_TOKEN_CUU;
@@ -138,7 +139,7 @@ void jbxvt_esc(xcb_connection_t * xc,
 	CASE_T('K', JBXVT_TOKEN_ED); // vt42 erase to end of screen
 	CASE_T('k', JBXVT_TOKEN_RC); // restore cursor (vt52g)
 	CASE_T('L', JBXVT_TOKEN_IL); // insert line (vt52)
-	CASE_T('M', jbxvt.mode.decanm ? JBXVT_TOKEN_RI : JBXVT_TOKEN_DL);
+	CASE_T('M', jbxvt_get_modes()->decanm ? JBXVT_TOKEN_RI : JBXVT_TOKEN_DL);
 	CASE_T('N', JBXVT_TOKEN_SS2);
 	CASE_T('O', JBXVT_TOKEN_SS3);
 	CASE_A('o', JBXVT_TOKEN_EL, 1); // clear to start of line (vt52g)
@@ -159,7 +160,7 @@ void jbxvt_esc(xcb_connection_t * xc,
 		tk->arg[0] = jbxvt_pop_char(xc, 0) - 31;
 		tk->nargs = 2;
 	case 'Z':
-		if (jbxvt.mode.decanm) // vt100+ mode
+		if (jbxvt_get_modes()->decanm) // vt100+ mode
 			tk->type = JBXVT_TOKEN_ID;
 		else // I am a VT52
 			dprintf(jbxvt_get_fd(), "\033/Z");

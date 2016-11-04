@@ -8,6 +8,7 @@
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "libjb/time.h"
+#include "mode.h"
 #include "paint.h"
 #include "repaint.h"
 #include "sbar.h"
@@ -43,7 +44,7 @@ static inline void fix_margins(const struct JBDim c)
 static void decscnm(xcb_connection_t * xc)
 {
 	static bool last_was_rv;
-	const bool rv = jbxvt.mode.decscnm;
+	const bool rv = jbxvt_get_modes()->decscnm;
 	if (last_was_rv == rv) // Already has either mode set
 		return;
 	else

@@ -6,6 +6,7 @@
 #include "libjb/log.h"
 #include "libjb/util.h"
 #include "lookup_key.h"
+#include "mode.h"
 #include "sbar.h"
 #include "scr_move.h"
 #include "scr_reset.h"
@@ -16,19 +17,6 @@
 #undef LOG
 #define LOG(...)
 #endif
-static struct JBXVTPrivateModes jbxvt_saved_mode;
-// Restore private modes.
-void jbxvt_restore_mode(void)
-{
-	memcpy(&jbxvt.mode, &jbxvt_saved_mode,
-		sizeof(struct JBXVTPrivateModes));
-}
-// Save private modes.
-void jbxvt_save_mode(void)
-{
-	memcpy(&jbxvt_saved_mode, &jbxvt.mode,
-		sizeof(struct JBXVTPrivateModes));
-}
 void jbxvt_dec_reset(xcb_connection_t * xc, struct Token * restrict token)
 {
 	LOG("handle_reset(%d)", token->arg[0]);
@@ -39,7 +27,7 @@ void jbxvt_dec_reset(xcb_connection_t * xc, struct Token * restrict token)
 		case 1: // DECCKM: cursor key mode
 			jbxvt_set_keys(is_set, true);
 			break;
-#define MODE(field) jbxvt.mode.field = is_set
+#define MODE(field) jbxvt_get_modes()->field = is_set
 		case 2: // DECANM: VT52/ANSI mode
 			MODE(decanm);
 			break;
@@ -71,7 +59,7 @@ void jbxvt_dec_reset(xcb_connection_t * xc, struct Token * restrict token)
 		case 12:
 			LOG("att610 (re)set blinking cursor");
 			MODE(att610);
-			jbxvt_set_cursor_attr(jbxvt.mode.att610 ? 2 : 1);
+			jbxvt_set_cursor_attr(jbxvt_get_modes()->att610 ? 2 : 1);
 			break;
 		case 18:
 			LOG("DECPFF");
@@ -84,7 +72,7 @@ void jbxvt_dec_reset(xcb_connection_t * xc, struct Token * restrict token)
 		case 25: // DECTCEM -- hide cursor
 			jbxvt_set_scroll(xc, 0);
 			jbxvt_draw_cursor(xc); // clear
-			jbxvt.mode.dectcem = is_set;
+			jbxvt_get_modes()->dectcem = is_set;
 			jbxvt_draw_cursor(xc); // draw
 			break;
 		case 30: // toggle scrollbar -- per rxvt

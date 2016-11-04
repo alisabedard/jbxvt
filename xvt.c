@@ -11,6 +11,7 @@
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "lookup_key.h"
+#include "mode.h"
 #include "repaint.h"
 #include "sbar.h"
 #include "edit.h"
@@ -53,7 +54,7 @@ static void select_charset(const char c, const uint8_t i)
 {
 	switch(c) {
 #define CS(l, cs, d) case l:LOG(d);\
-		jbxvt.mode.charset[i]=CHARSET_##cs;break;
+		jbxvt_get_modes()->charset[i]=CHARSET_##cs;break;
 	CS('A', GB, "UK ASCII");
 	CS('0', SG0, "SG0: special graphics");
 	CS('1', SG1, "SG1: alt char ROM standard graphics");
@@ -70,7 +71,7 @@ static void decstbm(struct Token * restrict token)
 	LOG("JBXVT_TOKEN_STBM args: %d, 0: %d, 1: %d",
 		(int)token->nargs, t[0], t[1]);
 	if (token->private == JBXVT_TOKEN_RESTOREPM) {
-		jbxvt_restore_mode();
+		jbxvt_restore_modes();
 		return;
 	}
 	const bool rst = token->nargs < 2 || t[0] >= t[1];
@@ -146,7 +147,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 	case JBXVT_TOKEN_HVP:
 		TLOG("JBXVT_TOKEN_HVP/JBXVT_TOKEN_CUP");
 		// subtract 1 for 0-based coordinates
-		jbxvt_move(xc, (t[1]?t[1]:1) - 1, n - 1, jbxvt.mode.decom ?
+		jbxvt_move(xc, (t[1]?t[1]:1) - 1, n - 1, jbxvt_get_modes()->decom ?
 			JBXVT_ROW_RELAATIVE | JBXVT_COLUMN_RELATIVE : 0);
 		break;
 	case JBXVT_TOKEN_CUU: // up
@@ -194,20 +195,20 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		LOG("JBXVT_TOKEN_ELR");
 		switch (t[0]) {
 		case 2:
-			jbxvt.mode.elr_once = true;
+			jbxvt_get_modes()->elr_once = true;
 		case 1:
-			jbxvt.mode.elr = true;
+			jbxvt_get_modes()->elr = true;
 			break;
 		case 0:
 		default:
-			jbxvt.mode.elr = false;
-			jbxvt.mode.elr_once = false;
+			jbxvt_get_modes()->elr = false;
+			jbxvt_get_modes()->elr_once = false;
 		}
-		jbxvt.mode.elr_pixels = t[1] == 1;
+		jbxvt_get_modes()->elr_pixels = t[1] == 1;
 		break;
 	case JBXVT_TOKEN_ENTGM52: // vt52 graphics mode
 		LOG("JBXVT_TOKEN_ENTGM52");
-		jbxvt.mode.gm52 = true;
+		jbxvt_get_modes()->gm52 = true;
 		break;
 	case JBXVT_TOKEN_EOF:
 		LOG("JBXVT_TOKEN_EOF");
@@ -217,8 +218,8 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_EXTGM52: // exit vt52 graphics mode
 		LOG("JBXVT_TOKEN_EXTGM52");
-		jbxvt.mode.charsel = 0;
-		jbxvt.mode.gm52 = false;
+		jbxvt_get_modes()->charsel = 0;
+		jbxvt_get_modes()->gm52 = false;
 		break;
 	case JBXVT_TOKEN_HOME:
 		LOG("JBXVT_TOKEN_HOME");
@@ -343,7 +344,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_RIS: // reset to initial state
 		LOG("JBXVT_TOKEN_RIS");
-		jbxvt.mode.dectcem = true;
+		jbxvt_get_modes()->dectcem = true;
 		jbxvt_reset(xc);
 		break;
 	case JBXVT_TOKEN_RQM:
@@ -369,24 +370,24 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 			}
 			if (t[1] == 1) {
 				LOG("\t\t7-bit controls");
-				jbxvt.mode.s8c1t = false;
+				jbxvt_get_modes()->s8c1t = false;
 			} else {
 				LOG("\t\t8-bit controls");
-				jbxvt.mode.s8c1t = true;
+				jbxvt_get_modes()->s8c1t = true;
 			}
 		}
 		break;
 	case JBXVT_TOKEN_S7C1T: // 7-bit controls
 		LOG("JBXVT_TOKEN_S7C1T");
-		jbxvt.mode.s8c1t = false;
+		jbxvt_get_modes()->s8c1t = false;
 		break;
 	case JBXVT_TOKEN_S8C1T: // 8-bit controls
 		LOG("JBXVT_TOKEN_S8C1T");
-		jbxvt.mode.s8c1t = true;
+		jbxvt_get_modes()->s8c1t = true;
 		break;
 	case JBXVT_TOKEN_SAVEPM: // Save private modes
 		LOG("JBXVT_TOKEN_SAVEPM");
-		jbxvt_save_mode();
+		jbxvt_save_modes();
 		break;
 	case JBXVT_TOKEN_SBSWITCH:
 		LOG("JBXVT_TOKEN_SBSWITCH");

@@ -7,6 +7,7 @@
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "libjb/xcb.h"
+#include "mode.h"
 #include "mouse.h"
 #include "sbar.h"
 #include "scr_move.h"
@@ -144,7 +145,7 @@ static void handle_button_press(xcb_connection_t * xc,
 }
 static void handle_focus(const bool in)
 {
-	if (jbxvt.mode.mouse_focus_evt)
+	if (jbxvt_get_modes()->mouse_focus_evt)
 		dprintf(jbxvt_get_fd(), "%s%c]",
 			jbxvt_get_csi(), in ? 'I' : 'O');
 }

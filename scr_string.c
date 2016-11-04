@@ -9,6 +9,7 @@
 #include "libjb/log.h"
 #include "libjb/time.h"
 #include "libjb/util.h"
+#include "mode.h"
 #include "paint.h"
 #include "repaint.h"
 #include "rstyle.h"
@@ -40,7 +41,7 @@ static void decsclm(void)
 {
 	// Time value per the following:
 	// http://www.vt100.net/docs/vt100-ug/chapter3.html166666
-	if (jbxvt.mode.decsclm)
+	if (jbxvt_get_modes()->decsclm)
 		jb_sleep(166);
 }
 static void wrap(xcb_connection_t * xc)
@@ -141,7 +142,7 @@ static void check_wrap(struct JBXVTScreen * restrict s)
 {
 	const uint16_t w = jbxvt_get_char_size().w;
 	if (s->cursor.x >= w)
-		s->wrap_next = !jbxvt.mode.decawm;
+		s->wrap_next = !jbxvt_get_modes()->decawm;
 }
 /*  Display the string at the current position.
     nlcount is the number of new lines in the string.  */
@@ -169,13 +170,14 @@ void jbxvt_string(xcb_connection_t * xc,
 		}
 		jbxvt_check_selection(xc, c->y, c->y);
 		p = jbxvt_chars_to_pixels(jbxvt_get_screen()->cursor);
-		if (JB_UNLIKELY(jbxvt.mode.insert))
+		if (JB_UNLIKELY(jbxvt_get_modes()->insert))
 			handle_insert(xc, 1, p);
 		uint8_t * t = jbxvt_get_screen()->text[c->y];
 		if (!t) // should never be NULL.
 			abort();
 		t += c->x;
-		if (jbxvt.mode.charset[jbxvt.mode.charsel] > CHARSET_ASCII)
+		if (jbxvt_get_modes()->charset[jbxvt_get_modes()
+			->charsel] > CHARSET_ASCII)
 			parse_special_charset(str, len);
 		// Render the string:
 		if (!jbxvt_get_screen()->decpm) {

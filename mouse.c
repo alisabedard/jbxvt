@@ -4,6 +4,7 @@
 #include "command.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "mode.h"
 #include "size.h"
 static uint8_t get_mod(const uint16_t state)
 {
@@ -17,10 +18,9 @@ static uint8_t get_mod(const uint16_t state)
 		mod += 16;
 	return mod;
 }
-#define MD jbxvt.mode
 static bool track_mouse_sgr(uint8_t b, struct JBDim p, const bool rel)
 {
-	if (!MD.mouse_sgr)
+	if (!jbxvt_get_modes()->mouse_sgr)
 		return false;
 	dprintf(jbxvt_get_fd(), "%s<%c;%c;%c%c", jbxvt_get_csi(),
 		b, p.x, p.y, rel ? 'm' : 'M');
@@ -29,11 +29,11 @@ static bool track_mouse_sgr(uint8_t b, struct JBDim p, const bool rel)
 }
 static void locator_report(const uint8_t b, struct JBDim p)
 {
-	if (!MD.elr)
+	if (!jbxvt_get_modes()->elr)
 		return;
-	if (MD.elr_once)
-		MD.elr_once = MD.elr = false;
-	if (MD.elr_pixels)
+	if (jbxvt_get_modes()->elr_once)
+		jbxvt_get_modes()->elr_once = jbxvt_get_modes()->elr = false;
+	if (jbxvt_get_modes()->elr_pixels)
 		p = jbxvt_chars_to_pixels(p);
 	// DECLRP
 	dprintf(jbxvt_get_fd(), "%s%d;%d;%d;%d;0&w", jbxvt_get_csi(),
@@ -52,9 +52,9 @@ static void track_mouse_x10(uint8_t b, struct JBDim p)
 	b += 32;
 	p.x += 32;
 	p.y += 32;
-	dprintf(jbxvt_get_fd(), jbxvt.mode.mouse_urxvt ? "%s%d;%d;%dM"
+	dprintf(jbxvt_get_fd(), jbxvt_get_modes()->mouse_urxvt ? "%s%d;%d;%dM"
 		: "%sM%c%c%c", jbxvt_get_csi(), b, p.x, p.y);
-	LOG(jbxvt.mode.mouse_urxvt ? "%d;%d;%dM" : "M%c%c%c", b, p.x, p.y);
+	LOG(jbxvt_get_modes()->mouse_urxvt ? "%d;%d;%dM" : "M%c%c%c", b, p.x, p.y);
 }
 void jbxvt_track_mouse(uint8_t b, uint32_t state, struct JBDim p,
 	const uint8_t flags)
@@ -68,10 +68,10 @@ void jbxvt_track_mouse(uint8_t b, uint32_t state, struct JBDim p,
 	locator_report(b, p);
 	// Release handling:
 	if (flags & JBXVT_RELEASE) {
-		if (jbxvt.mode.mouse_x10 || wheel) // wheel release untracked
+		if (jbxvt_get_modes()->mouse_x10 || wheel) // wheel release untracked
 			return; // release untracked in x10 mode
 		LOG("TRACK_RELEASE");
-		if (!jbxvt.mode.mouse_sgr) // sgr reports which button was released
+		if (!jbxvt_get_modes()->mouse_sgr) // sgr reports which button was released
 			b = 3; // release code
 	} else if (wheel) { // wheel release untracked
 		b += 60; // Wheel mouse handling
@@ -81,7 +81,7 @@ void jbxvt_track_mouse(uint8_t b, uint32_t state, struct JBDim p,
 	if (!track_mouse_sgr(b, p, flags & JBXVT_RELEASE))
 		track_mouse_x10(b, p);
 }
-#define TRK(it) jbxvt.mode.mouse_##it
+#define TRK(it) jbxvt_get_modes()->mouse_##it
 bool jbxvt_get_mouse_motion_tracked(void)
 {
 	return TRK(btn_evt) || TRK(any_evt);
