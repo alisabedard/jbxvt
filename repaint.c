@@ -3,7 +3,6 @@
     University of Kent at Canterbury.*/
 #include "repaint.h"
 #include "font.h"
-#include "jbxvt.h"
 #include "paint.h"
 #include "sbar.h"
 #include "screen.h"

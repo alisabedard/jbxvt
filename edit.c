@@ -3,7 +3,6 @@
 #include "edit.h"
 #include "cursor.h"
 #include "font.h"
-#include "jbxvt.h"
 #include "libjb/log.h"
 #include "libjb/util.h"
 #include "paint.h"

@@ -1,7 +1,6 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "double.h"
 #include "cursor.h"
-#include "jbxvt.h"
 #include "repaint.h"
 #include "screen.h"
 #include <stdlib.h>

@@ -4,7 +4,6 @@
 #include "command.h"
 #include "cmdtok.h"
 #include "dcs.h"
-#include "jbxvt.h"
 #include "mode.h"
 #include "screen.h"
 #include <stdio.h>

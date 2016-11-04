@@ -3,7 +3,6 @@
 #include "dcs.h"
 #include "command.h"
 #include "cmdtok.h"
-#include "jbxvt.h"
 #include "libjb/log.h"
 static void check_st(xcb_connection_t * xc, struct Token * t)
 {
@@ -46,7 +45,6 @@ void jbxvt_dcs(xcb_connection_t * xc, struct Token * t)
 			t->type = JBXVT_TOKEN_QUERY_STBM;
 			check_st(xc, t);
 			break;
-
 		case 's':
 			t->type = JBXVT_TOKEN_QUERY_SLRM;
 			check_st(xc, t);

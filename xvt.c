@@ -8,7 +8,6 @@
 #include "double.h"
 #include "dsr.h"
 #include "handle_sgr.h"
-#include "jbxvt.h"
 #include "libjb/log.h"
 #include "lookup_key.h"
 #include "mode.h"

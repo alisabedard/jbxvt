@@ -1,7 +1,6 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "scr_move.h"
 #include "cursor.h"
-#include "jbxvt.h"
 #include "libjb/log.h"
 #include "libjb/util.h"
 #include "mode.h"

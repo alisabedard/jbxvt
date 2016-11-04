@@ -2,7 +2,6 @@
 #include "mouse.h"
 #include "cmdtok.h"
 #include "command.h"
-#include "jbxvt.h"
 #include "libjb/log.h"
 #include "mode.h"
 #include "size.h"

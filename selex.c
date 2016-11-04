@@ -2,7 +2,6 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "selex.h"
 #include "change_selection.h"
-#include "jbxvt.h"
 #include "screen.h"
 #include "selection.h"
 #include "selend.h"

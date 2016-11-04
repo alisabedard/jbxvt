@@ -1,6 +1,5 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "color.h"
-#include "jbxvt.h"
 #include "libjb/util.h"
 #include "paint.h"
 #include "xcb_screen.h"

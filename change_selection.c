@@ -4,7 +4,6 @@
 #include "config.h"
 #include "cursor.h"
 #include "font.h"
-#include "jbxvt.h"
 #include "screen.h"
 #include "selend.h"
 #include "selection.h"

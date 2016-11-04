@@ -2,7 +2,6 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "window.h"
 #include "font.h"
-#include "jbxvt.h"
 #include "sbar.h"
 #include "scr_reset.h"
 #include "screen.h"

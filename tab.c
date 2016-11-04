@@ -1,6 +1,5 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "tab.h"
-#include "jbxvt.h"
 #include "libjb/log.h"
 #include "screen.h"
 #include "sbar.h"
@@ -36,4 +35,3 @@ void jbxvt_cht(xcb_connection_t * xc, int16_t v)
 	while (v-- > 0)
 		jbxvt_tab(xc);
 }
-

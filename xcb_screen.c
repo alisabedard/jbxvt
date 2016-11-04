@@ -18,4 +18,3 @@ xcb_colormap_t jbxvt_get_colormap(xcb_connection_t * xc)
 		init(xc);
 	return jbxvt_xcb_screen->default_colormap;
 }
-

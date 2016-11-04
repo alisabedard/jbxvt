@@ -2,7 +2,6 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "dec_reset.h"
 #include "cursor.h"
-#include "jbxvt.h"
 #include "libjb/log.h"
 #include "libjb/util.h"
 #include "lookup_key.h"

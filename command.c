@@ -3,7 +3,6 @@
    University of Kent at Canterbury. */
 #include "command.h"
 #include "cmdtok.h"
-#include "jbxvt.h"
 #include "libjb/file.h"
 #include "libjb/log.h"
 #include "size.h"
@@ -219,4 +218,3 @@ void jbxvt_init_command_module(char ** restrict argv)
 	jb_require(jbxvt_get_fd() >= 0, "Could not start session");
 	jbxvt_init_cmdtok();
 }
-

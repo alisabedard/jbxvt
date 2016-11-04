@@ -2,7 +2,7 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "selreq.h"
 #include "command.h"
-#include "jbxvt.h"
+#include "config.h"
 #include "libjb/log.h"
 #include "selection.h"
 #include "window.h"

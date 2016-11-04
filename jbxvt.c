@@ -1,6 +1,6 @@
 // Copyright 2016, Jeffrey E. Bedard
-#include "jbxvt.h"
 #include "command.h"
+#include "config.h"
 #include "cursor.h"
 #include "display.h"
 #include "sbar.h"
@@ -11,7 +11,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-struct JBXVT jbxvt;
 static char ** parse_command_line(const int argc, char ** argv,
 	struct JBXVTOptions * o)
 {

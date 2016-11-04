@@ -4,7 +4,6 @@
 #include "sbar.h"
 #include "config.h"
 #include "cursor.h"
-#include "jbxvt.h"
 #include "libjb/util.h"
 #include "paint.h"
 #include "repaint.h"

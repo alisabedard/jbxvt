@@ -2,7 +2,6 @@
 #include "tk_char.h"
 #include "cmdtok.h"
 #include "command.h"
-#include "jbxvt.h"
 #include "libjb/log.h"
 #include "mode.h"
 #include "scr_move.h"
@@ -55,4 +54,3 @@ void jbxvt_handle_tk_char(xcb_connection_t * xc, const uint8_t tk_char)
 		break;
 	}
 }
-

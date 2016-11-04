@@ -2,7 +2,6 @@
 #include "font.h"
 #include "config.h"
 #include "cursor.h"
-#include "jbxvt.h"
 #include "libjb/util.h"
 #include "libjb/xcb.h"
 #include <stdio.h>
@@ -39,7 +38,6 @@ xcb_cursor_t jbxvt_get_cursor(xcb_connection_t * xc, const uint16_t id,
 	xcb_close_font(xc, f);
 	return c;
 }
-
 static void setup_font_metrics(xcb_connection_t * xc,
 	const xcb_query_font_cookie_t c)
 {

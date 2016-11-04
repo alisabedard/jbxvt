@@ -2,7 +2,6 @@
 #include "dsr.h"
 #include "cmdtok.h"
 #include "command.h"
-#include "jbxvt.h"
 #include "libjb/log.h"
 #include "screen.h"
 #include <stdio.h>
@@ -41,4 +40,3 @@ void jbxvt_handle_dsr(const int16_t arg)
 		dprintf(jbxvt_get_fd(), "%s0n", jbxvt_get_csi());
 	}
 }
-

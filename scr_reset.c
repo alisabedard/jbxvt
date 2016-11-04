@@ -5,7 +5,6 @@
 #include "command.h"
 #include "config.h"
 #include "cursor.h"
-#include "jbxvt.h"
 #include "libjb/log.h"
 #include "libjb/time.h"
 #include "mode.h"

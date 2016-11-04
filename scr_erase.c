@@ -4,7 +4,6 @@
 #include "config.h"
 #include "cursor.h"
 #include "font.h"
-#include "jbxvt.h"
 #include "libjb/log.h"
 #include "sbar.h"
 #include "screen.h"

@@ -3,7 +3,6 @@
 #include "cursor.h"
 #include "config.h"
 #include "font.h"
-#include "jbxvt.h"
 #include "libjb/log.h"
 #include "mode.h"
 #include "repaint.h"

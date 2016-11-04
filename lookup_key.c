@@ -1,7 +1,6 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "lookup_key.h"
 #include "command.h"
-#include "jbxvt.h"
 #include "libjb/log.h"
 #include "sbar.h"
 #include <string.h>

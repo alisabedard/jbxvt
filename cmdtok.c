@@ -5,7 +5,6 @@
 #include "cursor.h"
 #include "dcs.h"
 #include "esc.h"
-#include "jbxvt.h"
 #include "libjb/log.h"
 #include "libjb/xcb.h"
 #include "lookup_key.h"
@@ -123,7 +122,6 @@ static void check_fdsets(xcb_connection_t * xc,
 		timer(xc); // select timed out
 	else
 		jb_check_x(xc);
-
 }
 __attribute__((nonnull))
 static void poll_io(xcb_connection_t * xc,
@@ -339,7 +337,6 @@ static void default_token(xcb_connection_t * xc,
 	case 0:
 		utf8_0(tk, c);
 		break;
-
 	}
 }
 //  Return an input token

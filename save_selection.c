@@ -2,7 +2,6 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "save_selection.h"
 #include "config.h"
-#include "jbxvt.h"
 #include "libjb/log.h"
 #include "screen.h"
 #include "selend.h"
