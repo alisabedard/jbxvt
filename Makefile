@@ -20,6 +20,7 @@ $(exe): $(OBJS) ${extra}
 	ls -l $(exe).tmp >> sz.log
 	rm -f $(exe).tmp
 	tail -n 5 sz.log
+include depend.mk
 color_index.h: color_index.txt
 	$(AWK) -f convert_colors.awk color_index.txt > color_index.h
 bindest=$(DESTDIR)$(PREFIX)/bin
@@ -29,11 +30,13 @@ install:
 	install $(exe) $(bindest)
 	install -d $(docdest)
 	install $(exe).1 $(docdest)
+depend:
+	cc -E -MM *.c > depend.mk
 clean:
 	rm -f $(exe) *.o *.gcda *.gcno *.gcov
 	cd libjb && make clean
 distclean: clean
-	rm -f config.mk gcov.log
+	rm -f config.mk gcov.log depend.mk
 check:
 	tests/rgb
 	tests/sgr
