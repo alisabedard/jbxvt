@@ -24,5 +24,6 @@ enum {	JBXVT_SCROLLBAR_WIDTH = 8, // width of scroll bar
 	JBXVT_MAX_ROWS = 60, // max rows on screen
 	JBXVT_PROP_SIZE = 1024, // selection property chunk size
 	JBXVT_SEL_KEY_DEL = 2000, // ms for kb input before selection
+	JBXVT_DEFAULT_CURSOR_ATTR = 2, // cursor style (solid block)
 };
 #endif//!JBXVT_CONFIG_H

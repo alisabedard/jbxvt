@@ -13,7 +13,7 @@
 #include "window.h"
 static uint32_t saved_style;
 static struct JBDim saved_cursor;
-static uint8_t cursor_attr = 1;
+static uint8_t cursor_attr = JBXVT_DEFAULT_CURSOR_ATTR;
 void jbxvt_blink_cursor(xcb_connection_t * xc)
 {
 	if (!jbxvt_get_modes()->att610 && cursor_attr % 2) {
