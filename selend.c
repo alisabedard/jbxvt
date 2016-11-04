@@ -4,6 +4,7 @@
 #include "selend.h"
 #include "jbxvt.h"
 #include "sbar.h"
+#include "selection.h"
 #include "size.h"
 static int8_t cmp(const int8_t mod, struct JBDim * restrict se1,
 	struct JBDim * restrict se2)

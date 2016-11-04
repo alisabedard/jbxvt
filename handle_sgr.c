@@ -4,6 +4,7 @@
 #include "color.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "libjb/util.h"
 #include "paint.h"
 #include "rstyle.h"
 // Convert 3 bit color to 9 bit color, store at offset

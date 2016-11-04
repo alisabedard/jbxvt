@@ -4,6 +4,7 @@
 #include "command.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "selection.h"
 #include "window.h"
 #include <stdlib.h>
 #include <unistd.h>

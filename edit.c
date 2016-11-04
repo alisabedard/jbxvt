@@ -5,10 +5,12 @@
 #include "font.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "libjb/util.h"
 #include "paint.h"
 #include "sbar.h"
 #include "window.h"
 #include "screen.h"
+#include "selection.h"
 #include "size.h"
 #include <string.h>
 static void copy_area(xcb_connection_t * xc,

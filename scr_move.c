@@ -5,6 +5,7 @@
 #include "libjb/log.h"
 #include "libjb/util.h"
 #include "sbar.h"
+#include "selection.h"
 #include "size.h"
 #ifndef JBXVT_SCR_MOVE_DEBUG
 #undef LOG

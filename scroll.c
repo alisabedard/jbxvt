@@ -5,8 +5,10 @@
 #include "font.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "libjb/util.h"
 #include "paint.h"
 #include "sbar.h"
+#include "selection.h"
 #include "size.h"
 #include "window.h"
 #include <string.h>
@@ -16,6 +18,11 @@
 #define LOG(...)
 #endif//!SCROLL_DEBUG
 static uint16_t scroll_top, scroll_max = JBXVT_MAX_SCROLL;
+static struct JBXVTSavedLine saved_lines[JBXVT_MAX_SCROLL];
+struct JBXVTSavedLine * jbxvt_get_saved_lines(void)
+{
+	return saved_lines;
+}
 void jbxvt_set_scroll_max(const uint16_t val)
 {
 	scroll_max = val;
@@ -64,7 +71,7 @@ static void copy_saved_lines(const int_fast16_t n)
 {
 	for (int_fast16_t i = n - 1; i >= 0; --i) {
 		uint8_t * t = jbxvt.scr.current->text[i];
-		struct JBXVTSavedLine * sl = jbxvt.scr.saved_lines + n - i - 1;
+		struct JBXVTSavedLine * sl = saved_lines + n - i - 1;
 		sl->wrap = jbxvt.scr.current->wrap[i];
 		sl->dwl = jbxvt.scr.current->dwl[i];
 		adjust_saved_lines_top(n);
@@ -102,11 +109,11 @@ static void add_scroll_history(xcb_connection_t * xc,
 	if (count < 1) // nothing to do
 		return;
 	// Handle lines that scroll off the top of the screen.
-	memcpy(jbxvt.scr.saved_lines + count, jbxvt.scr.saved_lines,
+	memcpy(saved_lines + count, saved_lines,
 		count - 1); // -1 to avoid going over array bounds
 	int_fast16_t y = scroll_max - count - 1;
-	struct JBXVTSavedLine * i = &jbxvt.scr.saved_lines[y],
-		* j = &jbxvt.scr.saved_lines[y + count];
+	struct JBXVTSavedLine * i = &saved_lines[y],
+		* j = &saved_lines[y + count];
 	for (; y >= 0; --y, --i, --j)
 		memcpy(j, i, sizeof(struct JBXVTSavedLine));
 	copy_saved_lines(count);

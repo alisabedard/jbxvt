@@ -2,6 +2,7 @@
 #include "size.h"
 #include "font.h"
 #include "jbxvt.h"
+#include "libjb/util.h"
 static struct JBDim size_in_pixels;
 /*  Fix the coordinates so that they are within the screen
     and do not lie within empty space.  */

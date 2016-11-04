@@ -2,10 +2,8 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #ifndef SCREENST_H
 #define SCREENST_H
+#include "config.h"
 #include "libjb/size.h"
-#include <stdbool.h>
-#include <stdint.h>
-#include <xcb/xproto.h>
 /*  Structure describing the current state of the screen.  */
 struct JBXVTScreen {
 	uint8_t *text[JBXVT_MAX_ROWS];	// text

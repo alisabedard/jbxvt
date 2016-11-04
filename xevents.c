@@ -10,6 +10,7 @@
 #include "mouse.h"
 #include "sbar.h"
 #include "scr_move.h"
+#include "selection.h"
 #include "selex.h"
 #include "selreq.h"
 #include "window.h"

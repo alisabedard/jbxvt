@@ -5,6 +5,7 @@
 #include "cursor.h"
 #include "font.h"
 #include "jbxvt.h"
+#include "selection.h"
 #include "selend.h"
 #include "size.h"
 #include "window.h"

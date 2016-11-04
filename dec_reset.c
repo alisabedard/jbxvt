@@ -4,6 +4,7 @@
 #include "cursor.h"
 #include "jbxvt.h"
 #include "libjb/log.h"
+#include "libjb/util.h"
 #include "lookup_key.h"
 #include "sbar.h"
 #include "scr_move.h"

@@ -5,6 +5,7 @@
 #include "jbxvt.h"
 #include "libjb/log.h"
 #include "libjb/xcb.h"
+#include "libjb/util.h"
 #include "save_selection.h"
 #include "selend.h"
 #include "screen.h"
