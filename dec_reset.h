@@ -7,4 +7,8 @@
 void jbxvt_dec_reset(xcb_connection_t * xc,
 	struct Token * restrict token)
 	__attribute__((nonnull));
+// Restore private modes.
+void jbxvt_restore_mode(void);
+// Save private modes.
+void jbxvt_save_mode(void);
 #endif//!JBXVT_DEC_RESET_H

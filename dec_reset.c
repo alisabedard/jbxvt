@@ -9,11 +9,25 @@
 #include "scr_move.h"
 #include "scr_reset.h"
 #include "screen.h"
+#include <string.h>
 #define DEBUG_RESET
 #ifndef DEBUG_RESET
 #undef LOG
 #define LOG(...)
 #endif
+static struct JBXVTPrivateModes jbxvt_saved_mode;
+// Restore private modes.
+void jbxvt_restore_mode(void)
+{
+	memcpy(&jbxvt.mode, &jbxvt_saved_mode,
+		sizeof(struct JBXVTPrivateModes));
+}
+// Save private modes.
+void jbxvt_save_mode(void)
+{
+	memcpy(&jbxvt_saved_mode, &jbxvt.mode,
+		sizeof(struct JBXVTPrivateModes));
+}
 void jbxvt_dec_reset(xcb_connection_t * xc, struct Token * restrict token)
 {
 	LOG("handle_reset(%d)", token->arg[0]);
