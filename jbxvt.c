@@ -66,16 +66,6 @@ usage:
 	return NULL;
 #endif//OPENBSD
 }
-/*  Perform any initialization on the screen data structures.
-    Called just once at startup. */
-static void jbxvt_init(void)
-{
-	// Initialise the array of lines that have scrolled off the top.
-//	struct JBXVTScreenData * s = &jbxvt.scr;
-//	static struct JBXVTScreen screens[2];
-//	s->current = s->s = screens;
-	jbxvt_set_tab(-2, false);
-}
 // Set default values for private modes
 static void mode_init(void)
 {
@@ -105,7 +95,7 @@ int main(int argc, char ** argv)
 		xc = jbxvt_init_display(argv[0], &opt);
 	}
 	mode_init();
-	jbxvt_init();
+	jbxvt_set_tab(-2, false); // Set up the tab stops
 	jbxvt_map_window(xc);
 	jb_check(setenv("TERM", JBXVT_ENV_TERM, true) != -1,
 		"Could not set TERM environment variable");

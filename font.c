@@ -76,7 +76,8 @@ xcb_font_t jbxvt_get_italic_font(xcb_connection_t * xc)
 		return f;
 	return f = xcb_generate_id(xc);
 }
-void jbxvt_init_fonts(xcb_connection_t * xc, struct JBXVTFontOptions * opt)
+void jbxvt_init_fonts(xcb_connection_t * xc,
+	struct JBXVTFontOptions * opt)
 {
 	xcb_font_t f = jbxvt_get_normal_font(xc);
 	jb_require(open_font(xc, f, opt->normal),

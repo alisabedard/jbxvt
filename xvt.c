@@ -52,7 +52,8 @@ static void handle_txtpar(xcb_connection_t * xc,
 static void select_charset(const char c, const uint8_t i)
 {
 	switch(c) {
-#define CS(l, cs, d) case l:LOG(d);jbxvt.mode.charset[i]=CHARSET_##cs;break;
+#define CS(l, cs, d) case l:LOG(d);\
+		jbxvt.mode.charset[i]=CHARSET_##cs;break;
 	CS('A', GB, "UK ASCII");
 	CS('0', SG0, "SG0: special graphics");
 	CS('1', SG1, "SG1: alt char ROM standard graphics");

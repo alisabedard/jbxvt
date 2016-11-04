@@ -93,8 +93,8 @@ void jbxvt_start_selection(xcb_connection_t * xc,
 	jbxvt_adjust_selection(&SE[1]);
 	jbxvt_show_selection(xc);
 }
-/*  Determine if the current selection overlaps row1-row2 and if it does then
- *  remove it from the screen.  */
+/*  Determine if the current selection overlaps row1 through row2.
+    If it does then remove it from the screen.  */
 void jbxvt_check_selection(xcb_connection_t * xc,
 	const int16_t row1, const int16_t row2)
 {

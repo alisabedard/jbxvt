@@ -162,11 +162,12 @@ static bool get_buffered(int_fast16_t * val, const uint8_t flags)
 		return false;
 	return true;
 }
-/*  Return the next input character after first passing any keyboard input
-    to the command.  If flags & GET_INPUT_ONLY is true then only buffered
-    characters are returned and once the buffer is empty the special value
-    INPUT_BUFFER_EMPTY is returned.  If flags and GET_XEVENTS_ONLY is true,
-    then INPUT_BUFFER_EMPTY is returned when an X event arrives.
+/*  Return the next input character after first passing any
+    keyboard input to the command.  If flags & GET_INPUT_ONLY
+    is true then only buffered characters are returned and once
+    the buffer is empty the special value INPUT_BUFFER_EMPTY
+    is returned.  If flags and GET_XEVENTS_ONLY is true, then
+    INPUT_BUFFER_EMPTY is returned when an X event arrives.
     This is the most often called function. */
 int_fast16_t jbxvt_pop_char(xcb_connection_t * xc, const uint8_t flags)
 {
@@ -189,10 +190,12 @@ int_fast16_t jbxvt_pop_char(xcb_connection_t * xc, const uint8_t flags)
 	cmdtok_buffer.top = cmdtok_buffer.data + l;
 	return *cmdtok_buffer.next++;
 }
-//  Return true if the character is one that can be handled by jbxvt_string()
+/*  Return true if the character is one
+    that can be handled by jbxvt_string() */
 static inline bool is_string_char(register int_fast16_t c)
 {
-	return c < 0x7f && (c >= ' ' || c == '\n' || c == '\r' || c == '\t');
+	return c < 0x7f && (c >= ' ' || c == '\n'
+		|| c == '\r' || c == '\t');
 }
 static void handle_string_char(xcb_connection_t * xc,
 	int_fast16_t c, struct Token * restrict tk)

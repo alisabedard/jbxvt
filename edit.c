@@ -78,7 +78,8 @@ void jbxvt_insert_characters(xcb_connection_t * xc, int8_t count)
 	copy_lines(c.x, count);
 	finalize(xc, x, jbxvt_chars_to_pixels(c), get_width(count), count);
 }
-static void copy_data_after_count(const uint8_t count, const struct JBDim c)
+static void copy_data_after_count(const uint8_t count,
+	const struct JBDim c)
 {
 	// copy the data after count
 	const uint16_t diff = jbxvt_get_char_size().width - count;

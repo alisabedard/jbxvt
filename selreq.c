@@ -31,11 +31,13 @@ static bool paste_from(xcb_connection_t * xc,
 		free(r);
 		return false;
 	}
-	paste(xcb_get_property_value(r), xcb_get_property_value_length(r));
+	paste(xcb_get_property_value(r),
+		xcb_get_property_value_length(r));
 	free(r);
 	return true;
 }
-void jbxvt_request_selection(xcb_connection_t * xc, const xcb_timestamp_t t)
+void jbxvt_request_selection(xcb_connection_t * xc,
+	const xcb_timestamp_t t)
 {
 	LOG("jbxvt_request_selection(timestamp: %d)", t);
 	if (paste_from(xc, XCB_ATOM_PRIMARY, t))

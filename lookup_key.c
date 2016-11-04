@@ -111,8 +111,9 @@ static char * get_format(const enum JBXVTKeySymType type)
 	}
 }
 //  Look up function key keycode
-static uint8_t * get_keycode_value(struct JBXVTKeyMaps * restrict keymaptable,
-	xcb_keysym_t keysym, uint8_t * buf, const int use_alternate)
+static uint8_t * get_keycode_value(struct JBXVTKeyMaps * restrict
+	keymaptable, xcb_keysym_t keysym,
+	uint8_t* buf, const int use_alternate)
 {
 	for (struct JBXVTKeyMaps * km = keymaptable; km->km_keysym; ++km) {
 		if (km->km_keysym != keysym)

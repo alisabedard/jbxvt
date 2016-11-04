@@ -52,7 +52,8 @@ static void draw_text(xcb_connection_t * xc,
 		draw_underline(xc, len, *p, 0);
 	}
 	if (rstyle & JBXVT_RS_CROSSED_OUT)
-		draw_underline(xc, len, *p, -(jbxvt_get_font_size().h>>1));
+		draw_underline(xc, len, *p,
+			-(jbxvt_get_font_size().h>>1));
 }
 // 9-bit color
 static pixel_t rgb_pixel(xcb_connection_t * xc, const uint16_t c)
@@ -69,13 +70,16 @@ static pixel_t rgb_pixel(xcb_connection_t * xc, const uint16_t c)
 		" pixel is 0x%x", c, r, g, b, p);
 	return p;
 }
-static bool set_rstyle_colors(xcb_connection_t * xc, const uint32_t rstyle)
+static bool set_rstyle_colors(xcb_connection_t * xc,
+	const uint32_t rstyle)
 {
 	// Mask foreground colors, 9 bits offset by 6 bits
 	// Mask background colors, 9 bits offset by 15 bits
 	const uint8_t color[] = {rstyle >> 7, rstyle >> 16};
-	const bool rgb[] = {rstyle & JBXVT_RS_FG_RGB, rstyle & JBXVT_RS_BG_RGB};
-	const bool ind[] = {rstyle & JBXVT_RS_FG_INDEX, rstyle & JBXVT_RS_BG_INDEX};
+	const bool rgb[] = {rstyle & JBXVT_RS_FG_RGB,
+		rstyle & JBXVT_RS_BG_RGB};
+	const bool ind[] = {rstyle & JBXVT_RS_FG_INDEX,
+		rstyle & JBXVT_RS_BG_INDEX};
 	if (ind[0])
 		jbxvt_set_fg_pixel(xc, jbxvt_color_index[color[0]]);
 	else if (rgb[0])

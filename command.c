@@ -74,7 +74,8 @@ static void write_utmpx(const pid_t comm_pid, char * tty_name)
  *  successful then the master and slave file descriptors are returned
  *  via the arguments.
  */
-static char * get_pseudo_tty(int * restrict pmaster, int * restrict pslave)
+static char * get_pseudo_tty(int * restrict pmaster,
+	int * restrict pslave)
 {
 	const fd_t mfd = posix_openpt(O_RDWR);
 	jb_require(mfd >= 0, "Could not open ptty");
@@ -137,8 +138,9 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	execvp(argv[0],argv); // Only returns on failure
 	exit(1); // prevent hang
 }
-/*  Tell the teletype handler what size the window is.  Called initially from
- *  the child and after a window size change from the parent.  */
+/*  Tell the teletype handler what size the window is.
+    Called initially from the child and after a window
+    size change from the parent.  */
 #if !defined(NETBSD) && !defined(FREEBSD)\
 	&& defined(HAVE_ASM_GENERIC_IOCTLS_H) && defined(TIOCSWINSZ)
 void jbxvt_set_tty_size(const struct JBDim sz)

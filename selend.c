@@ -17,7 +17,8 @@ static int8_t cmp(const int8_t mod, struct JBDim * restrict se1,
 /*  Compare the two selections and return negtive,
     0 or positive depending on whether se2 is after,
     equal to or before se1.  */
-int8_t jbxvt_selcmp(struct JBDim * restrict se1, struct JBDim * restrict se2)
+int8_t jbxvt_selcmp(struct JBDim * restrict se1,
+	struct JBDim * restrict se2)
 {
 	if (jbxvt_is_selected())
 		  return cmp(-1, se1, se2);
