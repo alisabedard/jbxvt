@@ -85,22 +85,23 @@ static void copy_data_after_count(const uint8_t count,
 {
 	// copy the data after count
 	const uint16_t diff = jbxvt_get_char_size().width - count;
+	struct JBXVTScreen * restrict s = jbxvt_get_screen();
 	{
-		uint8_t * i = jbxvt_get_screen()->text[c.y] + c.x;
+		uint8_t * i = s->text[c.y] + c.x;
 		memmove(i, i + count, diff);
 	}
 	{
-		uint32_t * i = jbxvt_get_screen()->rend[c.y] + c.x;
+		uint32_t * i = s->rend[c.y] + c.x;
 		memmove(i, i + count, diff << 2);
 	}
 }
 static void delete_source_data(const uint8_t count, const int16_t y)
 {
 	// delete the source data copied
-	memset(jbxvt_get_screen()->text[y] + jbxvt_get_char_size().w - count,
-		0, count);
-	memset(jbxvt_get_screen()->rend[y] + jbxvt_get_char_size().w - count,
-		0, count << 2);
+	const uint16_t w = jbxvt_get_char_size().w;
+	struct JBXVTScreen * restrict s = jbxvt_get_screen();
+	memset(s->text[y] + w - count, 0, count);
+	memset(s->rend[y] + w - count, 0, count << 2);
 }
 //  Delete count characters from the current position.
 void jbxvt_delete_characters(xcb_connection_t * xc, int8_t count)
