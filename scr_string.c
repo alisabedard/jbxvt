@@ -64,9 +64,10 @@ static void handle_insert(xcb_connection_t * xc,
 	const uint8_t n, const struct JBDim p)
 {
 	LOG("handle_insert(n=%d, p={%d, %d})", n, p.x, p.y);
-	const struct JBDim c = jbxvt_get_screen()->cursor;
-	uint8_t * restrict s = jbxvt_get_screen()->text[c.y];
-	uint32_t * restrict r = jbxvt_get_screen()->rend[c.y];
+	struct JBXVTScreen * restrict screen = jbxvt_get_screen();
+	const struct JBDim c = screen->cursor;
+	uint8_t * restrict s = screen->text[c.y];
+	uint32_t * restrict r = screen->rend[c.y];
 	const uint16_t sz = jbxvt_get_char_size().w - c.x;
 	memmove(s + c.x + n, s + c.x, sz);
 	memmove(r + c.x + n, r + c.x, sz << 2);
@@ -74,8 +75,9 @@ static void handle_insert(xcb_connection_t * xc,
 	const uint16_t n_width = n * f.width;
 	const uint16_t width = sz * f.width - n_width;
 	const int16_t x = p.x + n_width;
-	xcb_copy_area(xc, jbxvt_get_vt_window(xc), jbxvt_get_vt_window(xc),
-		jbxvt_get_text_gc(xc), p.x, p.y, x, p.y, width, f.height);
+	const xcb_window_t vt = jbxvt_get_vt_window(xc);
+	xcb_copy_area(xc, vt, vt, jbxvt_get_text_gc(xc), p.x, p.y,
+		x, p.y, width, f.height);
 }
 static void parse_special_charset(uint8_t * restrict str,
 	const uint8_t len)
