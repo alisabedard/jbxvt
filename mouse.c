@@ -28,15 +28,16 @@ static bool track_mouse_sgr(uint8_t b, struct JBDim p, const bool rel)
 }
 static void locator_report(const uint8_t b, struct JBDim p)
 {
-	if (!jbxvt_get_modes()->elr)
+	struct JBXVTPrivateModes * m = jbxvt_get_modes();
+	if (!m->elr)
 		return;
-	if (jbxvt_get_modes()->elr_once)
-		jbxvt_get_modes()->elr_once = jbxvt_get_modes()->elr = false;
-	if (jbxvt_get_modes()->elr_pixels)
+	if (m->elr_once)
+		m->elr_once = m->elr = false;
+	if (m->elr_pixels)
 		p = jbxvt_chars_to_pixels(p);
 	// DECLRP
-	dprintf(jbxvt_get_fd(), "%s%d;%d;%d;%d;0&w", jbxvt_get_csi(),
-		b * 2, 7, p.y, p.x);
+	dprintf(jbxvt_get_fd(), "%s%d;%d;%d;%d;0&w",
+		jbxvt_get_csi(), b * 2, 7, p.y, p.x);
 }
 static uint8_t get_b(uint8_t b, const uint32_t state)
 {
@@ -51,9 +52,11 @@ static void track_mouse_x10(uint8_t b, struct JBDim p)
 	b += 32;
 	p.x += 32;
 	p.y += 32;
-	dprintf(jbxvt_get_fd(), jbxvt_get_modes()->mouse_urxvt ? "%s%d;%d;%dM"
-		: "%sM%c%c%c", jbxvt_get_csi(), b, p.x, p.y);
-	LOG(jbxvt_get_modes()->mouse_urxvt ? "%d;%d;%dM" : "M%c%c%c", b, p.x, p.y);
+	dprintf(jbxvt_get_fd(), jbxvt_get_modes()->mouse_urxvt
+		? "%s%d;%d;%dM" : "%sM%c%c%c", jbxvt_get_csi(),
+		b, p.x, p.y);
+	LOG(jbxvt_get_modes()->mouse_urxvt
+		? "%d;%d;%dM" : "M%c%c%c", b, p.x, p.y);
 }
 void jbxvt_track_mouse(uint8_t b, uint32_t state, struct JBDim p,
 	const uint8_t flags)
@@ -67,10 +70,12 @@ void jbxvt_track_mouse(uint8_t b, uint32_t state, struct JBDim p,
 	locator_report(b, p);
 	// Release handling:
 	if (flags & JBXVT_RELEASE) {
-		if (jbxvt_get_modes()->mouse_x10 || wheel) // wheel release untracked
-			return; // release untracked in x10 mode
+		if (jbxvt_get_modes()->mouse_x10 || wheel)
+			// wheel and x10 release untracked
+			return;
 		LOG("TRACK_RELEASE");
-		if (!jbxvt_get_modes()->mouse_sgr) // sgr reports which button was released
+		if (!jbxvt_get_modes()->mouse_sgr)
+			// sgr reports which button was released
 			b = 3; // release code
 	} else if (wheel) { // wheel release untracked
 		b += 60; // Wheel mouse handling
@@ -80,13 +85,15 @@ void jbxvt_track_mouse(uint8_t b, uint32_t state, struct JBDim p,
 	if (!track_mouse_sgr(b, p, flags & JBXVT_RELEASE))
 		track_mouse_x10(b, p);
 }
-#define TRK(it) jbxvt_get_modes()->mouse_##it
 bool jbxvt_get_mouse_motion_tracked(void)
 {
-	return TRK(btn_evt) || TRK(any_evt);
+	struct JBXVTPrivateModes * restrict m = jbxvt_get_modes();
+	return m->mouse_btn_evt || m->mouse_any_evt;
 }
 bool jbxvt_get_mouse_tracked(void)
 {
-	return TRK(x10) || TRK(vt200) || TRK(vt200hl) || TRK(ext)
-		|| TRK(sgr) || TRK(urxvt) || jbxvt_get_mouse_motion_tracked();
+	struct JBXVTPrivateModes * restrict m = jbxvt_get_modes();
+	return m->mouse_x10 || m->mouse_vt200 || m->mouse_vt200hl
+		|| m->mouse_ext || m->mouse_sgr || m->mouse_urxvt
+		|| jbxvt_get_mouse_motion_tracked();
 }
