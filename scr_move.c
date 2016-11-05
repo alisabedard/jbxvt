@@ -12,35 +12,22 @@
 #undef LOG
 #define LOG(...)
 #endif//!JBXVT_SCR_MOVE_DEBUG
-// Sanitize cursor position, implement DECOM
-static int16_t decom(struct JBDim * restrict c)
-{
-	// Implement DECOM, DEC Origin Mode, limits
-	if (jbxvt_get_modes()->decom) {
-		const struct JBDim m = jbxvt_get_screen()->margin;
-		JB_LIMIT(c->y, m.top, m.bottom);
-	}
-	return c->y;
-}
-static void fix_margins(struct JBDim* restrict m,
-	const int16_t cursor_y)
-{
-	m->b = JB_MAX(m->b, cursor_y);
-	const uint8_t h = jbxvt_get_char_size().height - 1;
-	m->b = JB_MIN(m->b, h);
-}
 // Ensure cursor coordinates are valid per screen and decom mode
 // Returns new cursor y value
 int16_t jbxvt_check_cursor_position(void)
 {
 	struct JBXVTScreen * restrict s = jbxvt_get_screen();
-	struct JBDim * c = &s->cursor;
+	struct JBDim * restrict c = &s->cursor;
+	struct JBDim * restrict m = &s->margin;
 	struct JBDim sz = jbxvt_get_char_size();
 	--sz.w; --sz.h;
+	m->top = JB_MAX(m->top, 0); // Sanitize margins
+	m->bottom = JB_MIN(m->bottom, sz.h);
+	if (jbxvt_get_modes()->decom) // Implement DECOM
+		JB_LIMIT(c->y, m->top, m->bottom);
 	JB_LIMIT(c->x, sz.w, 0);
 	JB_LIMIT(c->y, sz.h, 0);
-	fix_margins(&s->margin, c->y);
-	return decom(c);
+	return c->y;
 }
 static inline int16_t dim(const int16_t cursor,
 	const int16_t delta, const bool relative)
