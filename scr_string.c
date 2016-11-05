@@ -173,20 +173,23 @@ void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str,
 			c->x = 0;
 		}
 		jbxvt_check_selection(xc, c->y, c->y);
-		struct JBDim p = jbxvt_chars_to_pixels(screen->cursor);
-		struct JBXVTPrivateModes * restrict mode
-			= jbxvt_get_modes();
-		if (JB_UNLIKELY(mode->insert))
-			handle_insert(xc, 1, p);
-		uint8_t * t = screen->text[c->y] + c->x;
-		if (mode->charset[mode->charsel] > CHARSET_ASCII)
-			parse_special_charset(str, len);
-		// Render the string:
-		if (!screen->decpm) {
-			jbxvt_paint(xc, str, jbxvt_get_rstyle(), 1, p,
-				screen->dwl[c->y]);
-			// Save scroll history:
-			*t = *str;
+		{
+			struct JBDim p
+				= jbxvt_chars_to_pixels(screen->cursor);
+			struct JBXVTPrivateModes * restrict mode
+				= jbxvt_get_modes();
+			if (JB_UNLIKELY(mode->insert))
+				handle_insert(xc, 1, p);
+			uint8_t * t = screen->text[c->y] + c->x;
+			if (mode->charset[mode->charsel] > CHARSET_ASCII)
+				parse_special_charset(str, len);
+			// Render the string:
+			if (!screen->decpm) {
+				jbxvt_paint(xc, str, jbxvt_get_rstyle(),
+					1, p, screen->dwl[c->y]);
+				// Save scroll history:
+				*t = *str;
+			}
 		}
 		save_render_style(1, screen);
 		--len;
