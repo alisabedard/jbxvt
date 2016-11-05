@@ -18,24 +18,22 @@
 #include "selreq.h"
 #include "window.h"
 #include <unistd.h>
-static void handle_client_msg(xcb_connection_t * xc,
-	xcb_generic_event_t * restrict ge)
+static void handle_client_message(xcb_connection_t * xc,
+	xcb_client_message_event_t * e)
 {
-	xcb_client_message_event_t * e = (xcb_client_message_event_t *)ge;
 	if (e->format == 32 && e->data.data32[0]
 		== (unsigned long)jbxvt_get_wm_del_win(xc))
 		  exit(0);
 }
 static void handle_expose(xcb_connection_t * xc,
-	xcb_generic_event_t * restrict ge)
+	xcb_expose_event_t * e)
 {
-	if (((xcb_expose_event_t *)ge)->window == jbxvt_get_scrollbar(xc))
+	if (e->window == jbxvt_get_scrollbar(xc))
 		jbxvt_draw_scrollbar(xc);
 	else
 		jbxvt_reset(xc);
 }
-static void key_press(xcb_connection_t * xc,
-	xcb_generic_event_t * restrict e)
+static void key_press(xcb_connection_t * xc, void * e)
 {
 	int_fast16_t count = 0;
 	uint8_t * s = jbxvt_lookup_key(xc, e, &count);
@@ -202,11 +200,12 @@ bool jbxvt_handle_xevents(xcb_connection_t * xc)
 		key_press(xc, event);
 		break;
 	case XCB_CLIENT_MESSAGE:
-		handle_client_msg(xc, event);
+		handle_client_message(xc,
+			(xcb_client_message_event_t *)event);
 		break;
 	case XCB_EXPOSE:
 	case XCB_GRAPHICS_EXPOSURE:
-		handle_expose(xc, event);
+		handle_expose(xc, (xcb_expose_event_t *)event);
 		break;
 	case XCB_ENTER_NOTIFY:
 	case XCB_FOCUS_IN:
