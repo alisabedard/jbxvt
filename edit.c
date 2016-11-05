@@ -16,26 +16,29 @@ static void copy_area(xcb_connection_t * xc,
 	const int16_t * restrict x, const int16_t y,
 	const uint16_t width)
 {
-	if (width > 0)
-		xcb_copy_area(xc, jbxvt_get_vt_window(xc), jbxvt_get_vt_window(xc),
-			jbxvt_get_text_gc(xc), x[0], y, x[1], y, width,
-			jbxvt_get_font_size().height);
+	if (width > 0) {
+		const xcb_window_t v = jbxvt_get_vt_window(xc);
+		xcb_copy_area(xc, v, v, jbxvt_get_text_gc(xc), x[0], y,
+			x[1], y, width, jbxvt_get_font_size().height);
+	}
 }
 static void finalize(xcb_connection_t * xc,
 	const int16_t * restrict x, const struct JBDim p,
 	const uint16_t width, const int8_t count)
 {
 	copy_area(xc, x, p.y, width);
-	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), p.x, p.y,
-		count * jbxvt_get_font_size().w, jbxvt_get_font_size().h);
+	const struct JBDim f = jbxvt_get_font_size();
+	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc),
+		p.x, p.y, count * f.w, f.h);
 	jbxvt_get_screen()->wrap_next = 0;
 	jbxvt_draw_cursor(xc);
 }
 static void copy_lines(const int16_t x, const int8_t count)
 {
-	const int16_t y = jbxvt_get_screen()->cursor.y;
-	uint8_t * s = jbxvt_get_screen()->text[y];
-	uint32_t * r = jbxvt_get_screen()->rend[y];
+	struct JBXVTScreen * restrict screen = jbxvt_get_screen();
+	const int16_t y = screen->cursor.y;
+	uint8_t * s = screen->text[y];
+	uint32_t * r = screen->rend[y];
 	for (int_fast16_t i = x + count; i < jbxvt_get_char_size().w; ++i) {
 		s[i] = s[i - count];
 		r[i] = r[i - count];
