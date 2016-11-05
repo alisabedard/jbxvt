@@ -151,51 +151,48 @@ static void check_wrap(struct JBXVTScreen * restrict s)
 }
 /*  Display the string at the current position.
     nlcount is the number of new lines in the string.  */
-void jbxvt_string(xcb_connection_t * xc,
-	uint8_t * restrict str, uint8_t len, int8_t nlcount)
+void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str,
+	uint8_t len, int8_t nlcount)
 {
 	LOG("jbxvt_string(%s, len: %d, nlcount: %d)", str, len, nlcount);
 	jbxvt_set_scroll(xc, 0);
 	jbxvt_draw_cursor(xc);
 	if (nlcount > 0)
 		  handle_new_lines(xc, nlcount);
-	struct JBDim p;
-	fix_cursor(jbxvt_get_screen_at(0));
-	fix_cursor(jbxvt_get_screen_at(1));
+	struct JBXVTScreen * restrict screen = jbxvt_get_screen();
+	fix_cursor(screen);
 	while (len) {
-		if (test_action_char(xc, *str, jbxvt_get_screen())) {
+		if (test_action_char(xc, *str, screen)) {
 			--len;
 			++str;
 			continue;
 		}
-		struct JBDim * c = &jbxvt_get_screen()->cursor;
-		if (jbxvt_get_screen()->wrap_next) {
+		struct JBDim * c = &screen->cursor;
+		if (screen->wrap_next) {
 			wrap(xc);
 			c->x = 0;
 		}
 		jbxvt_check_selection(xc, c->y, c->y);
-		p = jbxvt_chars_to_pixels(jbxvt_get_screen()->cursor);
-		if (JB_UNLIKELY(jbxvt_get_modes()->insert))
+		struct JBDim p = jbxvt_chars_to_pixels(screen->cursor);
+		struct JBXVTPrivateModes * restrict mode
+			= jbxvt_get_modes();
+		if (JB_UNLIKELY(mode->insert))
 			handle_insert(xc, 1, p);
-		uint8_t * t = jbxvt_get_screen()->text[c->y];
-		if (!t) // should never be NULL.
-			abort();
-		t += c->x;
-		if (jbxvt_get_modes()->charset[jbxvt_get_modes()
-			->charsel] > CHARSET_ASCII)
+		uint8_t * t = screen->text[c->y] + c->x;
+		if (mode->charset[mode->charsel] > CHARSET_ASCII)
 			parse_special_charset(str, len);
 		// Render the string:
-		if (!jbxvt_get_screen()->decpm) {
+		if (!screen->decpm) {
 			jbxvt_paint(xc, str, jbxvt_get_rstyle(), 1, p,
-				jbxvt_get_screen()->dwl[c->y]);
+				screen->dwl[c->y]);
 			// Save scroll history:
 			*t = *str;
 		}
-		save_render_style(1, jbxvt_get_screen());
+		save_render_style(1, screen);
 		--len;
 		++str;
 		++c->x;
-		check_wrap(jbxvt_get_screen());
+		check_wrap(screen);
 	}
 	jbxvt_draw_cursor(xc);
 }
