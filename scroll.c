@@ -69,25 +69,27 @@ static void adjust_saved_lines_top(const int_fast16_t n)
 }
 static void copy_saved_lines(const int_fast16_t n)
 {
+	struct JBXVTScreen * restrict s = jbxvt_get_screen();
 	for (int_fast16_t i = n - 1; i >= 0; --i) {
-		uint8_t * t = jbxvt_get_screen()->text[i];
+		uint8_t * t = s->text[i];
 		struct JBXVTSavedLine * sl = saved_lines + n - i - 1;
-		sl->wrap = jbxvt_get_screen()->wrap[i];
-		sl->dwl = jbxvt_get_screen()->dwl[i];
+		sl->wrap = s->wrap[i];
+		sl->dwl = s->dwl[i];
 		adjust_saved_lines_top(n);
 		clear_selection_at(i);
 		const size_t len = strlen((const char *)t);
 		memcpy(sl->text, t, len);
-		memcpy(sl->rend, jbxvt_get_screen()->rend[i], len << 2);
+		memcpy(sl->rend, s->rend[i], len << 2);
 		sl->size = len;
 	}
 }
 static void get_y(int16_t * restrict y, const uint8_t row1,
 	const int8_t count, const bool up)
 {
-	const int16_t a = row1 * jbxvt_get_font_size().h;
+	const uint8_t fh = jbxvt_get_font_size().h;
+	const int16_t a = row1 * fh;
 	*(up ? y + 1 : y) = a;
-	*(up ? y : y + 1) = a + count * jbxvt_get_font_size().h;
+	*(up ? y : y + 1) = a + count * fh;
 }
 static void copy_visible_area(xcb_connection_t * xc,
 	const uint8_t row1, const uint8_t row2,
@@ -97,8 +99,8 @@ static void copy_visible_area(xcb_connection_t * xc,
 	get_y(y, row1, count, up);
 	const uint16_t height = (row2 - row1 - count)
 		* jbxvt_get_font_size().h;
-	xcb_copy_area(xc, jbxvt_get_vt_window(xc),
-		jbxvt_get_vt_window(xc), jbxvt_get_text_gc(xc), 0, y[0],
+	const xcb_window_t vt = jbxvt_get_vt_window(xc);
+	xcb_copy_area(xc, vt, vt, jbxvt_get_text_gc(xc), 0, y[0],
 		0, y[1], jbxvt_get_pixel_size().width, height);
 	// the above blocks the event queue, flush it
 	xcb_flush(xc);
@@ -125,27 +127,27 @@ static int8_t copy_screen_area(const int8_t i,
 {
 	if(i >= count)
 		  return j;
-	save[i] = jbxvt_get_screen()->text[j];
-	rend[i] = jbxvt_get_screen()->rend[j];
+	struct JBXVTScreen * restrict s = jbxvt_get_screen();
+	save[i] = s->text[j];
+	rend[i] = s->rend[j];
 	clear_selection_at(j);
-	return copy_screen_area(i + 1, j + mod, mod,
-		count, save, rend);
+	return copy_screen_area(i + 1, j + mod, mod, count, save, rend);
 }
 static void clear_line(xcb_connection_t * xc,
 	const int16_t y, const int8_t count)
 {
-	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), 0,
-		y * jbxvt_get_font_size().height,
-		jbxvt_get_pixel_size().width,
-		count * jbxvt_get_font_size().height);
+	const uint8_t fh = jbxvt_get_font_size().height;
+	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), 0, y * fh,
+		jbxvt_get_pixel_size().width, count * fh);
 }
 void jbxvt_scroll_primary_screen(int16_t n)
 {
 	LOG("jbxvt_scroll_primary_screen(%d)", n);
 	copy_saved_lines(n);
-	for (int_fast16_t j = n;
-		j < jbxvt_get_char_size().height; ++j)
-		  move_line(j, -n, jbxvt_get_screen_at(0));
+	struct JBXVTScreen * s = jbxvt_get_screen_at(0);
+	const uint16_t h = jbxvt_get_char_size().height;
+	for (int_fast16_t j = n; j < h; ++j)
+		move_line(j, -n, s);
 }
 static void sc_common(xcb_connection_t * xc,
 	const uint8_t r1, const uint8_t r2,
@@ -160,20 +162,22 @@ static void sc_dn(xcb_connection_t * xc,
 	const uint8_t row1, const uint8_t row2,
 	const int16_t count, uint8_t ** save, uint32_t ** rend)
 {
+	struct JBXVTScreen * s = jbxvt_get_screen();
 	for(int8_t j = copy_screen_area(0, row2, -1,
 		count, save, rend); j >= row1; --j)
-		  move_line(j, count, jbxvt_get_screen());
+		  move_line(j, count, s);
 	sc_common(xc, row1, row2, count, false, save, rend);
 }
 static void sc_up(xcb_connection_t * xc,
 	const uint8_t row1, const uint8_t row2,
 	const int16_t count, uint8_t ** save, uint32_t ** rend)
 {
-	if (jbxvt_get_screen() == jbxvt_get_screen_at(0) && row1 == 0)
+	struct JBXVTScreen * s = jbxvt_get_screen();
+	if (s == jbxvt_get_screen_at(0) && row1 == 0)
 		add_scroll_history(xc, count);
 	for(int8_t j = copy_screen_area(0, row1,
 		1, count, save, rend); j < row2; ++j)
-		move_line(j, -count, jbxvt_get_screen());
+		move_line(j, -count, s);
 	sc_common(xc, row1, row2, count, true, save, rend);
 }
 /*  Scroll count lines from row1 to row2 inclusive.
