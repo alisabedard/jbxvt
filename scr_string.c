@@ -112,8 +112,10 @@ static void fix_margins(struct JBDim* restrict m,
 }
 static void fix_cursor(struct JBXVTScreen * restrict c)
 {
-	JB_LIMIT(c->cursor.y, jbxvt_get_char_size().height - 1, 0);
-	JB_LIMIT(c->cursor.x, jbxvt_get_char_size().width - 1, 0);
+	struct JBDim sz = jbxvt_get_char_size();
+	--sz.h; --sz.w;
+	JB_LIMIT(c->cursor.y, sz.h, 0);
+	JB_LIMIT(c->cursor.x, sz.w, 0);
 	fix_margins(&c->margin, c->cursor.y);
 }
 static bool test_action_char(xcb_connection_t * xc, const uint8_t c,
