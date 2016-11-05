@@ -1,6 +1,6 @@
 // Copyright 2016, Jeffrey E. Bedard
-#ifndef JBXVT_FONT_H
-#define JBXVT_FONT_H
+#ifndef JBXVT_NORMAL_FONT_H
+#define JBXVT_NORMAL_FONT_H
 #include "libjb/size.h"
 #include <xcb/xcb.h>
 struct JBXVTFontOptions {
@@ -18,4 +18,4 @@ xcb_font_t jbxvt_get_bold_font(xcb_connection_t * xc);
 xcb_font_t jbxvt_get_italic_font(xcb_connection_t * xc);
 void jbxvt_init_fonts(xcb_connection_t * xc,
 	struct JBXVTFontOptions * opt);
-#endif//!JBXVT_FONT_H
+#endif//!JBXVT_NORMAL_FONT_H

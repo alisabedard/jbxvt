@@ -27,8 +27,8 @@ static void init_screen_elements(struct JBXVTScreen * restrict scr)
 static void init(struct JBXVTScreen * s)
 {
 	for (size_t y = 0; y < JBXVT_MAX_ROWS; ++y) {
-		s->text[y] = calloc(1, JBXVT_MAX_COLS);
-		s->rend[y] = calloc(4, JBXVT_MAX_COLS);
+		s->text[y] = calloc(1, JBXVT_MAX_COLUMNS);
+		s->rend[y] = calloc(4, JBXVT_MAX_COLUMNS);
 	}
 }
 static inline void fix_margins(const struct JBDim c)
@@ -75,7 +75,7 @@ void jbxvt_reset(xcb_connection_t * xc)
 	init_screen_elements(jbxvt_get_screen_at(0));
 	init_screen_elements(jbxvt_get_screen_at(1));
 	// Constrain dimensions:
-	c.w = JB_MIN(c.w, JBXVT_MAX_COLS);
+	c.w = JB_MIN(c.w, JBXVT_MAX_COLUMNS);
 	c.h = JB_MIN(c.h, JBXVT_MAX_ROWS);
 	jbxvt_set_tty_size(c);
 	jbxvt_set_pixel_size(jbxvt_chars_to_pixels(c));

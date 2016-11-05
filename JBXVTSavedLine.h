@@ -8,8 +8,8 @@
 #include <stdint.h>
 //  structure describing a saved line
 struct JBXVTSavedLine {
-	uint8_t text[JBXVT_MAX_COLS];
-	uint32_t rend[JBXVT_MAX_COLS];
+	uint8_t text[JBXVT_MAX_COLUMNS];
+	uint32_t rend[JBXVT_MAX_COLUMNS];
 	uint16_t size:14;	// line length
 	bool wrap:1;		// wrap flag
 	bool dwl:1;		// double-width line
