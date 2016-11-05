@@ -52,6 +52,15 @@ static void decscnm(xcb_connection_t * xc)
 	jbxvt_reverse_screen_colors(xc);
 	jb_sleep(100);
 }
+static void init_screens(void)
+{
+	static bool created;
+	if (!created) {
+		init(jbxvt_get_screen_at(0));
+		init(jbxvt_get_screen_at(1));
+		created = true;
+	}
+}
 /*  Reset the screen - called whenever the screen
     needs to be repaired completely.  */
 void jbxvt_reset(xcb_connection_t * xc)
@@ -60,12 +69,7 @@ void jbxvt_reset(xcb_connection_t * xc)
 	decscnm(xc);
 	struct JBDim c = jbxvt_get_char_size();
 	fix_margins(c);
-	static bool created;
-	if (!created) {
-		init(jbxvt_get_screen_at(0));
-		init(jbxvt_get_screen_at(1));
-		created = true;
-	}
+	init_screens();
 	int16_t * y = &jbxvt_get_screen()->cursor.y;
 	if (JB_LIKELY(jbxvt_get_screen() == jbxvt_get_screen_at(0))
 		&& *y >= c.h) {
