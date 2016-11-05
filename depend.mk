@@ -35,8 +35,8 @@ font.o: font.c font.h libjb/size.h config.h cursor.h libjb/util.h \
 handle_sgr.o: handle_sgr.c handle_sgr.h Token.h TokenType.h color.h \
  libjb/xcb.h libjb/log.h libjb/util.h paint.h libjb/size.h rstyle.h
 jbxvt.o: jbxvt.c command.h libjb/size.h libjb/util.h config.h cursor.h \
- display.h JBXVTOptions.h color.h libjb/xcb.h font.h sbar.h tab.h \
- window.h xevents.h JBXVTEvent.h xvt.h
+ display.h JBXVTOptions.h color.h libjb/xcb.h font.h sbar.h scroll.h \
+ JBXVTSavedLine.h tab.h window.h xevents.h JBXVTEvent.h xvt.h
 lookup_key.o: lookup_key.c lookup_key.h command.h libjb/size.h \
  libjb/util.h libjb/log.h sbar.h
 mode.o: mode.c mode.h JBXVTPrivateModes.h
