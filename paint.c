@@ -43,7 +43,8 @@ static void draw_text(xcb_connection_t * xc,
 		jbxvt_get_text_gc(xc), p->x, p->y, (const char *)str);
 	++p->y; // Padding for underline, use underline for italic
 	if (((rstyle & JBXVT_RS_ITALIC)
-		&& (jbxvt_get_italic_font(xc) == jbxvt_get_normal_font(xc)))
+		&& (jbxvt_get_italic_font(xc)
+		== jbxvt_get_normal_font(xc)))
 		|| (rstyle & JBXVT_RS_UNDERLINE))
 		draw_underline(xc, len, *p, 0);
 	if (rstyle & JBXVT_RS_DOUBLE_UNDERLINE) {
