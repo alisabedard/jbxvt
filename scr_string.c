@@ -103,21 +103,6 @@ static void parse_special_charset(uint8_t * restrict str,
 		}
 	}
 }
-static void fix_margins(struct JBDim* restrict m,
-	const int16_t cursor_y)
-{
-	m->b = JB_MAX(m->b, cursor_y);
-	const uint8_t h = jbxvt_get_char_size().height - 1;
-	m->b = JB_MIN(m->b, h);
-}
-static void fix_cursor(struct JBXVTScreen * restrict c)
-{
-	struct JBDim sz = jbxvt_get_char_size();
-	--sz.h; --sz.w;
-	JB_LIMIT(c->cursor.y, sz.h, 0);
-	JB_LIMIT(c->cursor.x, sz.w, 0);
-	fix_margins(&c->margin, c->cursor.y);
-}
 static bool test_action_char(xcb_connection_t * xc, const uint8_t c,
 	struct JBXVTScreen * restrict s)
 {
@@ -160,7 +145,7 @@ void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str,
 	if (nlcount > 0)
 		  handle_new_lines(xc, nlcount);
 	struct JBXVTScreen * restrict screen = jbxvt_get_screen();
-	fix_cursor(screen);
+	jbxvt_check_cursor_position();
 	while (len) {
 		if (test_action_char(xc, *str, screen)) {
 			--len;
