@@ -29,12 +29,13 @@
 #endif//!STRING_DEBUG
 static void handle_new_lines(xcb_connection_t * xc, int8_t nlcount)
 {
-	const int16_t y = jbxvt_get_screen()->cursor.y;
-	struct JBDim * m = &jbxvt_get_screen()->margin;
+	struct JBXVTScreen * restrict s = jbxvt_get_screen();
+	const int16_t y = s->cursor.y;
+	struct JBDim * m = &s->margin;
 	nlcount = y > m->b ? 0 : nlcount - m->b - y;
 	JB_LIMIT(nlcount, y - m->top, 0);
 	scroll(xc, m->top, m->bottom, nlcount);
-	jbxvt_get_screen()->cursor.y -= nlcount;
+	s->cursor.y -= nlcount;
 }
 static void decsclm(void)
 {
@@ -45,15 +46,16 @@ static void decsclm(void)
 }
 static void wrap(xcb_connection_t * xc)
 {
-	jbxvt_get_screen()->wrap_next = false;
-	const struct JBDim m = jbxvt_get_screen()->margin;
-	const int16_t y = jbxvt_get_screen()->cursor.y;
-	jbxvt_get_screen()->wrap[y] = true;
+	struct JBXVTScreen * restrict s = jbxvt_get_screen();
+	s->wrap_next = false;
+	const struct JBDim m = s->margin;
+	const int16_t y = s->cursor.y;
+	s->wrap[y] = true;
 	if (y >= m.b) {
 		decsclm();
 		scroll(xc, m.top, m.bottom, 1);
 	} else
-		++jbxvt_get_screen()->cursor.y;
+		++s->cursor.y;
 }
 #if defined(__i386__) || defined(__amd64__)
        __attribute__((regparm(2)))
