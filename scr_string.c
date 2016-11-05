@@ -64,7 +64,7 @@ static void handle_insert(xcb_connection_t * xc,
 	const uint8_t n, const struct JBDim p)
 {
 	LOG("handle_insert(n=%d, p={%d, %d})", n, p.x, p.y);
-	struct JBXVTScreen * restrict screen = jbxvt_get_screen();
+	const struct JBXVTScreen * restrict screen = jbxvt_get_screen();
 	const struct JBDim c = screen->cursor;
 	uint8_t * restrict s = screen->text[c.y];
 	uint32_t * restrict r = screen->rend[c.y];
