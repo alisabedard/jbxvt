@@ -22,95 +22,8 @@ enum ComCharFlags {INPUT_BUFFER_EMPTY = 0x100,
 struct JBXVTCommandContainer {
 	uint8_t *next, *top, *data;
 };
-static struct JBXVTEvent cmdtok_xev;
 static struct JBXVTCommandContainer cmdtok_buffer;
 static struct JBXVTCommandContainer cmdtok_stack;
-// Shortcuts
-//#define BUF cmdtok_buffer
-static void handle_focus(xcb_generic_event_t * restrict ge)
-{
-	xcb_focus_in_event_t * e = (xcb_focus_in_event_t *)ge;
-	cmdtok_xev = (struct JBXVTEvent) {.type = e->response_type,
-		.detail = e->detail};
-	if (e->mode)
-		  return;
-	cmdtok_xev.detail = e->detail;
-}
-static void handle_sel(xcb_generic_event_t * restrict ge)
-{
-	xcb_selection_request_event_t * e
-		= (xcb_selection_request_event_t *)ge;
-	cmdtok_xev = (struct JBXVTEvent) {.type = e->response_type,
-		.time = e->time, .requestor = e->requestor,
-		.target = e->target, .property = e->property,
-		.window = e->owner};
-}
-static void handle_client_msg(xcb_connection_t * xc,
-	xcb_generic_event_t * restrict ge)
-{
-	xcb_client_message_event_t * e = (xcb_client_message_event_t *)ge;
-	if (e->format == 32 && e->data.data32[0]
-		== (unsigned long)jbxvt_get_wm_del_win(xc))
-		  exit(0);
-}
-static void handle_expose(xcb_connection_t * xc,
-	xcb_generic_event_t * restrict ge)
-{
-	if (((xcb_expose_event_t *)ge)->window == jbxvt_get_scrollbar(xc))
-		jbxvt_draw_scrollbar(xc);
-	else
-		jbxvt_reset(xc);
-}
-static void handle_other(xcb_generic_event_t * restrict ge)
-{
-	xcb_key_press_event_t * e = (xcb_key_press_event_t *)ge;
-	cmdtok_xev = (struct JBXVTEvent) {.type = e->response_type,
-		.window = e->event, .box.x = e->event_x,
-		.box.y = e->event_y, .state = e->state,
-		.time = e->time, .button = e->detail};
-}
-static void key_press(xcb_connection_t * xc,
-	xcb_generic_event_t * restrict e)
-{
-	int_fast16_t count = 0;
-	uint8_t * s = jbxvt_lookup_key(xc, e, &count);
-	jb_require(write(jbxvt_get_fd(), s, count) != -1,
-		"Could not write to command");
-}
-static bool handle_xev(xcb_connection_t * xc)
-{
-	jb_check_x(xc);
-	xcb_generic_event_t * event = xcb_poll_for_event(xc);
-	if (!event)
-		return false;
-	switch (event->response_type & ~0x80) {
-	case XCB_CONFIGURE_NOTIFY:
-		jbxvt_resize_window(xc);
-		break;
-	case XCB_KEY_PRESS:
-		key_press(xc, event);
-		break;
-	case XCB_FOCUS_IN:
-	case XCB_FOCUS_OUT:
-		handle_focus(event);
-		break;
-	case XCB_SELECTION_REQUEST:
-	case XCB_SELECTION_NOTIFY:
-		handle_sel(event);
-		break;
-	case XCB_CLIENT_MESSAGE:
-		handle_client_msg(xc, event);
-		break;
-	case XCB_EXPOSE:
-	case XCB_GRAPHICS_EXPOSURE:
-		handle_expose(xc, event);
-		break;
-	default:
-		handle_other(event);
-	}
-	free(event);
-	return true;
-}
 static void timer(xcb_connection_t * xc)
 {
 	jbxvt_blink_cursor(xc);
@@ -177,7 +90,7 @@ int_fast16_t jbxvt_pop_char(xcb_connection_t * xc, const uint8_t flags)
 	fd_set in;
 	do {
 		FD_ZERO(&in);
-		if (handle_xev(xc) && (flags & GET_XEVENTS_ONLY))
+		if (jbxvt_handle_xevents(xc) && (flags & GET_XEVENTS_ONLY))
 			return INPUT_BUFFER_EMPTY;
 		poll_io(xc, &in);
 	} while (!FD_ISSET(jbxvt_get_fd(), &in));
@@ -343,12 +256,6 @@ static void default_token(xcb_connection_t * xc,
 void jbxvt_get_token(xcb_connection_t * xc, struct Token * restrict tk)
 {
 	memset(tk, 0, sizeof(struct Token));
-	// set token per event:
-	if(jbxvt_handle_xevents(xc, &cmdtok_xev)) {
-		// Zero out event structure for next event:
-		cmdtok_xev = (struct JBXVTEvent){};
-		return;
-	}
 	const int_fast16_t c = jbxvt_pop_char(xc, GET_XEVENTS_ONLY);
 	switch (c) {
 	case INPUT_BUFFER_EMPTY:

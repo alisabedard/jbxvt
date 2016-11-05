@@ -3,12 +3,11 @@ change_selection.o: change_selection.c change_selection.h libjb/size.h \
  JBXVTSelectionUnit.h size.h window.h
 cmdtok.o: cmdtok.c cmdtok.h Token.h TokenType.h command.h libjb/size.h \
  libjb/util.h cursor.h dcs.h esc.h libjb/log.h libjb/xcb.h lookup_key.h \
- mode.h JBXVTPrivateModes.h sbar.h scr_reset.h window.h xevents.h \
- JBXVTEvent.h
+ mode.h JBXVTPrivateModes.h sbar.h scr_reset.h window.h xevents.h
 color.o: color.c color.h libjb/xcb.h libjb/util.h paint.h libjb/size.h \
  xcb_screen.h window.h
 command.o: command.c command.h libjb/size.h libjb/util.h cmdtok.h Token.h \
- TokenType.h libjb/file.h libjb/log.h size.h xevents.h JBXVTEvent.h
+ TokenType.h libjb/file.h libjb/log.h size.h xevents.h
 cursor.o: cursor.c cursor.h config.h font.h libjb/size.h libjb/log.h \
  mode.h JBXVTPrivateModes.h repaint.h rstyle.h sbar.h screen.h \
  JBXVTScreen.h size.h window.h
@@ -36,7 +35,7 @@ handle_sgr.o: handle_sgr.c handle_sgr.h Token.h TokenType.h color.h \
  libjb/xcb.h libjb/log.h libjb/util.h paint.h libjb/size.h rstyle.h
 jbxvt.o: jbxvt.c command.h libjb/size.h libjb/util.h config.h cursor.h \
  display.h JBXVTOptions.h color.h libjb/xcb.h font.h sbar.h scroll.h \
- JBXVTSavedLine.h tab.h window.h xevents.h JBXVTEvent.h xvt.h
+ JBXVTSavedLine.h tab.h window.h xevents.h xvt.h
 lookup_key.o: lookup_key.c lookup_key.h command.h libjb/size.h \
  libjb/util.h libjb/log.h sbar.h
 mode.o: mode.c mode.h JBXVTPrivateModes.h
@@ -96,11 +95,11 @@ tk_char.o: tk_char.c tk_char.h cmdtok.h Token.h TokenType.h command.h \
 window.o: window.c window.h font.h libjb/size.h sbar.h scr_reset.h \
  screen.h JBXVTScreen.h config.h size.h
 xcb_screen.o: xcb_screen.c xcb_screen.h libjb/xcb.h
-xevents.o: xevents.c xevents.h JBXVTEvent.h cmdtok.h Token.h TokenType.h \
- command.h libjb/size.h libjb/util.h font.h libjb/log.h libjb/xcb.h \
- mode.h JBXVTPrivateModes.h mouse.h sbar.h scr_move.h screen.h \
- JBXVTScreen.h config.h selection.h JBXVTSelectionUnit.h selex.h selreq.h \
- window.h
+xevents.o: xevents.c xevents.h cmdtok.h Token.h TokenType.h command.h \
+ libjb/size.h libjb/util.h font.h libjb/log.h libjb/xcb.h lookup_key.h \
+ mode.h JBXVTPrivateModes.h mouse.h sbar.h scr_move.h scr_reset.h \
+ screen.h JBXVTScreen.h config.h selection.h JBXVTSelectionUnit.h selex.h \
+ selreq.h window.h
 xvt.o: xvt.c xvt.h cmdtok.h Token.h TokenType.h command.h libjb/size.h \
  libjb/util.h cursor.h dec_reset.h double.h dsr.h handle_sgr.h \
  libjb/log.h lookup_key.h mode.h JBXVTPrivateModes.h repaint.h sbar.h \

@@ -6,141 +6,159 @@
 #include "font.h"
 #include "libjb/log.h"
 #include "libjb/xcb.h"
+#include "lookup_key.h"
 #include "mode.h"
 #include "mouse.h"
 #include "sbar.h"
 #include "scr_move.h"
+#include "scr_reset.h"
 #include "screen.h"
 #include "selection.h"
 #include "selex.h"
 #include "selreq.h"
 #include "window.h"
+#include <unistd.h>
+static void handle_client_msg(xcb_connection_t * xc,
+	xcb_generic_event_t * restrict ge)
+{
+	xcb_client_message_event_t * e = (xcb_client_message_event_t *)ge;
+	if (e->format == 32 && e->data.data32[0]
+		== (unsigned long)jbxvt_get_wm_del_win(xc))
+		  exit(0);
+}
+static void handle_expose(xcb_connection_t * xc,
+	xcb_generic_event_t * restrict ge)
+{
+	if (((xcb_expose_event_t *)ge)->window == jbxvt_get_scrollbar(xc))
+		jbxvt_draw_scrollbar(xc);
+	else
+		jbxvt_reset(xc);
+}
+static void key_press(xcb_connection_t * xc,
+	xcb_generic_event_t * restrict e)
+{
+	int_fast16_t count = 0;
+	uint8_t * s = jbxvt_lookup_key(xc, e, &count);
+	jb_require(write(jbxvt_get_fd(), s, count) != -1,
+		"Could not write to command");
+}
 xcb_atom_t jbxvt_get_wm_del_win(xcb_connection_t * xc)
 {
 	static long unsigned int a;
 	if(!a) { // Init on first call:
 		a = jb_get_atom(xc, "WM_DELETE_WINDOW");
 		xcb_change_property(xc, XCB_PROP_MODE_REPLACE,
-			jbxvt_get_main_window(xc), jb_get_atom(xc, "WM_PROTOCOLS"),
+			jbxvt_get_main_window(xc),
+			jb_get_atom(xc, "WM_PROTOCOLS"),
 			XCB_ATOM_ATOM, 32, 1, &a);
 	}
 	return a;
 }
 static void handle_motion_notify(xcb_connection_t * xc,
-	struct JBXVTEvent * restrict xe)
+	xcb_motion_notify_event_t * e)
 {
-	const xcb_rectangle_t r = xe->box;
-	const struct JBDim b = {.x = r.x, .y = r.y};
-	if (xe->window == jbxvt_get_scrollbar(xc)
-		&& (xe->state & XCB_KEY_BUT_MASK_BUTTON_2))
+	const xcb_window_t w = e->event;
+	const struct JBDim b = {.x = e->event_x, .y = e->event_y};
+	if (w == jbxvt_get_scrollbar(xc)
+		&& (e->state & XCB_KEY_BUT_MASK_BUTTON_2))
 		jbxvt_scroll_to(xc, b.y);
-	else if (xe->window == jbxvt_get_vt_window(xc)
-		&& jbxvt_get_mouse_motion_tracked())
-		jbxvt_track_mouse(xe->button, xe->state, b, JBXVT_MOTION);
-	else if (xe->window == jbxvt_get_vt_window(xc)
-		&& (xe->state & XCB_KEY_BUT_MASK_BUTTON_1)
-		&& !(xe->state & XCB_KEY_BUT_MASK_CONTROL)) {
-		if (jbxvt_get_mouse_tracked())
-			  return;
+	else if (jbxvt_get_mouse_motion_tracked())
+		jbxvt_track_mouse(e->detail, e->state, b, JBXVT_MOTION);
+	else if ((e->state & XCB_KEY_BUT_MASK_BUTTON_1)
+		&& !(e->state & XCB_KEY_BUT_MASK_CONTROL)
+		&& !jbxvt_get_mouse_tracked())
 		jbxvt_extend_selection(xc, b, true);
-	}
 }
-static void sbop(xcb_connection_t * xc,
-	struct JBXVTEvent * restrict xe, const bool up)
+static void sbop(xcb_connection_t * xc, const int16_t y, const bool up)
 {
 	if (jbxvt_get_mouse_tracked()) // let the application handle scrolling
 		return;
 	// xterm's behavior if alternate screen in use is to move the cursor
 	if (jbxvt_get_screen() == jbxvt_get_screen_at(0)) // first screen
 		jbxvt_set_scroll(xc, jbxvt_get_scroll()
-			+ (up ? -xe->box.y : xe->box.y) / jbxvt_get_font_size().h);
+			+ (up ? -y : y) / jbxvt_get_font_size().h);
 	else
 		jbxvt_move(xc, 0, up ? -1 : 1, JBXVT_ROW_RELAATIVE
 			| JBXVT_COLUMN_RELATIVE);
 }
 static void handle_button_release(xcb_connection_t * xc,
-	struct JBXVTEvent * restrict xe)
+	xcb_button_release_event_t * e)
 {
-	if (xe->window == jbxvt_get_scrollbar(xc)) {
-		switch (xe->button) {
+	const xcb_window_t w = e->event;
+	const struct JBDim b = {.x = e->event_x, .y = e->event_y};
+	const xcb_button_t d = e->detail;
+	if (w == jbxvt_get_scrollbar(xc))
+		switch (d) {
 		case 1:
 		case 5:
-			sbop(xc, xe, true);
+			sbop(xc, b.y, true);
 			break;
 		case 3:
 		case 4:
-			sbop(xc, xe, false);
+			sbop(xc, b.y, false);
 			break;
 		}
-	} else if (xe->window == jbxvt_get_vt_window(xc)
-		&& jbxvt_get_mouse_tracked() && xe->button <= 3) {
+	else if (jbxvt_get_mouse_tracked() && d <= 3)
 		/* check less than or equal to 3, since xterm does not
 		   report mouse wheel release events.  */
-		jbxvt_track_mouse(xe->button, xe->state,
-			(struct JBDim){.x = xe->box.x, .y = xe->box.y},
-			JBXVT_RELEASE);
-	} else if (xe->window == jbxvt_get_vt_window(xc)
-		&& !(xe->state & XCB_KEY_BUT_MASK_CONTROL)) {
-		switch (xe->button) {
+		jbxvt_track_mouse(d, e->state, b, JBXVT_RELEASE);
+	else if (!(e->state & XCB_KEY_BUT_MASK_CONTROL)) {
+		switch (d) {
 		case 1:
 		case 3:
 			jbxvt_make_selection(xc);
 			break;
 		case 2:
-			jbxvt_request_selection(xc, xe->time);
+			jbxvt_request_selection(xc, e->time);
 			break;
 		case 4:
-			sbop(xc, xe, false);
+			sbop(xc, b.y, false);
 			break;
 		case 5:
-			sbop(xc, xe, true);
+			sbop(xc, b.y, true);
 			break;
 		}
 	}
 }
 static void handle_button1_press(xcb_connection_t * xc,
-	struct JBXVTEvent * restrict xe, const struct JBDim b)
+	xcb_button_press_event_t * e, const struct JBDim b)
 {
 	static unsigned int time1, time2;
-	if (xe->time - time2
-		< MP_INTERVAL) {
+	if (e->time - time2 < MP_INTERVAL) {
 		time1 = 0;
 		time2 = 0;
 		jbxvt_start_selection(xc, b, JBXVT_SEL_UNIT_LINE);
-	} else if (xe->time - time1
-		< MP_INTERVAL) {
-		time2 = xe->time;
+	} else if (e->time - time1 < MP_INTERVAL) {
+		time2 = e->time;
 		jbxvt_start_selection(xc, b, JBXVT_SEL_UNIT_WORD);
 	} else {
-		time1 = xe->time;
+		time1 = e->time;
 		jbxvt_start_selection(xc, b, JBXVT_SEL_UNIT_CHAR);
 	}
 }
 static void handle_button_press(xcb_connection_t * xc,
-	struct JBXVTEvent * restrict xe)
+	xcb_button_press_event_t * e)
 {
+	const xcb_window_t w = e->event;
 	const xcb_window_t v = jbxvt_get_vt_window(xc);
-	if (xe->window == v && xe->state == XCB_KEY_BUT_MASK_CONTROL) {
+	if (w == v && e->state == XCB_KEY_BUT_MASK_CONTROL) {
 		jbxvt_toggle_scrollbar(xc);
 		return;
 	}
-	const struct JBDim b = {.x = xe->box.x, .y = xe->box.y};
-	if (xe->window == v && jbxvt_get_mouse_tracked())
-		jbxvt_track_mouse(xe->button, xe->state,
-			(struct JBDim){.x = xe->box.x, .y = xe->box.y}, 0);
-	else if (xe->window == v && !(xe->state & XCB_KEY_BUT_MASK_CONTROL)) {
-		switch (xe->button) {
+	const struct JBDim b = {.x = e->event_x, .y = e->event_y};
+	if (w == v && jbxvt_get_mouse_tracked())
+		jbxvt_track_mouse(e->detail, e->state, b, 0);
+	else if (w == v && !(e->state & XCB_KEY_BUT_MASK_CONTROL)) {
+		switch (e->detail) {
 		case 1:
-			handle_button1_press(xc, xe, b);
-			return;
+			handle_button1_press(xc, e, b);
+			break;
 		case 3:
 			jbxvt_extend_selection(xc, b, false);
-			return;
+			break;
 		}
-		return;
-	}
-	if (xe->window == jbxvt_get_scrollbar(xc) && xe->button == 2)
-		jbxvt_scroll_to(xc, xe->box.y);
+	} else if (w == jbxvt_get_scrollbar(xc) && e->detail == 2)
+		jbxvt_scroll_to(xc, b.y);
 }
 static void handle_focus(const bool in)
 {
@@ -148,18 +166,47 @@ static void handle_focus(const bool in)
 		dprintf(jbxvt_get_fd(), "%s%c]",
 			jbxvt_get_csi(), in ? 'I' : 'O');
 }
-// Handle X11 event described by xe
-bool jbxvt_handle_xevents(xcb_connection_t * xc, struct JBXVTEvent * xe)
+static void handle_selection_notify(xcb_connection_t * xc,
+	xcb_selection_notify_event_t * e)
 {
-	switch (xe->type &~0x80) { // Ordered numerically:
-	case 0: // Unimplemented, undefined, no event
+	jbxvt_paste_primary(xc, e->time, e->requestor, e->property);
+}
+static void handle_selection_request(xcb_connection_t * xc,
+	xcb_selection_request_event_t * e)
+{
+	jbxvt_send_selection(xc, e->time, e->requestor, e->target,
+		e->property);
+}
+// Handle X event on queue.  Return true if event was handled.
+bool jbxvt_handle_xevents(xcb_connection_t * xc)
+{
+	jb_check_x(xc);
+	xcb_generic_event_t * event = xcb_poll_for_event(xc);
+	if (!event) // nothing to process
 		return false;
+	bool ret = true;
+	switch (event->response_type & ~0x80) {
 	// Put things to ignore here:
+	case 0: // Unimplemented, undefined, no event
 	case 150: // Undefined
 	case XCB_KEY_RELEASE: // Unimplemented
 	case XCB_NO_EXPOSURE: // Unimplemented
 	case XCB_REPARENT_NOTIFY: // handle here to ensure cursor filled.
 	case XCB_MAP_NOTIFY: // handle here to ensure cursor filled.
+		ret = false;
+		break;
+	case XCB_CONFIGURE_NOTIFY:
+		jbxvt_resize_window(xc);
+		break;
+	case XCB_KEY_PRESS:
+		key_press(xc, event);
+		break;
+	case XCB_CLIENT_MESSAGE:
+		handle_client_msg(xc, event);
+		break;
+	case XCB_EXPOSE:
+	case XCB_GRAPHICS_EXPOSURE:
+		handle_expose(xc, event);
 		break;
 	case XCB_ENTER_NOTIFY:
 	case XCB_FOCUS_IN:
@@ -173,23 +220,28 @@ bool jbxvt_handle_xevents(xcb_connection_t * xc, struct JBXVTEvent * xe)
 		jbxvt_clear_selection();
 		break;
 	case XCB_SELECTION_NOTIFY:
-		jbxvt_paste_primary(xc, xe->time, xe->requestor, xe->property);
+		handle_selection_notify(xc,
+			(xcb_selection_notify_event_t *)event);
 		break;
 	case XCB_SELECTION_REQUEST:
-		jbxvt_send_selection(xc, xe->time, xe->requestor, xe->target,
-			xe->property);
+		handle_selection_request(xc,
+			(xcb_selection_request_event_t *)event);
 		break;
 	case XCB_BUTTON_PRESS:
-		handle_button_press(xc, xe);
+		handle_button_press(xc,
+			(xcb_button_press_event_t *)event);
 		break;
 	case XCB_BUTTON_RELEASE:
-		handle_button_release(xc, xe);
+		handle_button_release(xc,
+			(xcb_button_release_event_t *)event);
 		break;
 	case XCB_MOTION_NOTIFY:
-		handle_motion_notify(xc, xe);
+		handle_motion_notify(xc,
+			(xcb_motion_notify_event_t *)event);
 		break;
 	default:
-		LOG("Unhandled event %d", xe->type);
+		LOG("Unhandled event %d", event->type);
 	}
-	return true;
+	free(event);
+	return ret;
 }
