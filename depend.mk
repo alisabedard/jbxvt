@@ -2,8 +2,8 @@ change_selection.o: change_selection.c change_selection.h libjb/size.h \
  config.h cursor.h font.h screen.h JBXVTScreen.h selend.h selection.h \
  JBXVTSelectionUnit.h size.h window.h
 cmdtok.o: cmdtok.c cmdtok.h Token.h TokenType.h command.h libjb/size.h \
- libjb/util.h cursor.h dcs.h esc.h libjb/log.h libjb/xcb.h lookup_key.h \
- mode.h JBXVTPrivateModes.h sbar.h scr_reset.h window.h xevents.h
+ libjb/util.h cursor.h dcs.h esc.h libjb/log.h libjb/xcb.h mode.h \
+ JBXVTPrivateModes.h xevents.h
 color.o: color.c color.h libjb/xcb.h libjb/util.h paint.h libjb/size.h \
  xcb_screen.h window.h
 command.o: command.c command.h libjb/size.h libjb/util.h cmdtok.h Token.h \

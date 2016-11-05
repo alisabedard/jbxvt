@@ -7,11 +7,7 @@
 #include "esc.h"
 #include "libjb/log.h"
 #include "libjb/xcb.h"
-#include "lookup_key.h"
 #include "mode.h"
-#include "sbar.h"
-#include "scr_reset.h"
-#include "window.h"
 #include "xevents.h"
 #include <errno.h>
 #include <string.h>
