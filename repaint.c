@@ -38,19 +38,20 @@ static int_fast32_t repaint_generic(xcb_connection_t * xc,
 	struct JBDim p, uint_fast16_t len,
 	uint8_t * restrict str, uint32_t * rend, const bool dwl)
 {
+	const struct JBDim f = jbxvt_get_font_size();
 	// check inputs:
 	if (!str || !len)
-		return p.y + jbxvt_get_font_size().height;
+		return p.y + f.height;
 	if (rend)
 		paint_rvec_text(xc, str, rend + 0, len, p, dwl);
 	else
 		jbxvt_paint(xc, str, 0, len, p, dwl);
-	p.x += len * jbxvt_get_font_size().width;
+	p.x += len * f.width;
 	const uint16_t width = (jbxvt_get_char_size().width + 1 - len)
-		* jbxvt_get_font_size().width;
+		* f.width;
 	xcb_clear_area(xc, false, jbxvt_get_vt_window(xc), p.x, p.y,
-		width, jbxvt_get_font_size().height);
-	return p.y + jbxvt_get_font_size().height;
+		width, f.height);
+	return p.y + f.height;
 }
 __attribute__((nonnull(1)))
 static int_fast16_t show_scroll_history(xcb_connection_t * xc,
