@@ -120,15 +120,18 @@ void jbxvt_esc(xcb_connection_t * xc,
 	case 'C': // vt52 cursor left
 		tk->type = c;
 		break;
-	CASE_T('D', jbxvt_get_modes()->decanm ? JBXVT_TOKEN_IND : JBXVT_TOKEN_CUF);
+	CASE_T('D', jbxvt_get_modes()->decanm ? JBXVT_TOKEN_IND
+		: JBXVT_TOKEN_CUF);
 	CASE_T('c', JBXVT_TOKEN_RIS); // Reset to Initial State
 	CASE_M('e', dectcem, true); // enable cursor (vt52 GEMDOS)
 	CASE_M('f', dectcem, false); // disable cursor (vt52 GEMDOS)
 	CASE_T('E', JBXVT_TOKEN_NEL);
 	CASE_T('F', JBXVT_TOKEN_ENTGM52); // Enter VT52 graphics mode
 	CASE_T('G', JBXVT_TOKEN_EXTGM52); // Leave VT52 graphics mode
-	CASE_T('H', jbxvt_get_modes()->decanm ? JBXVT_TOKEN_HTS : JBXVT_TOKEN_HOME);
-	CASE_A('l', jbxvt_get_modes()->decanm ? JBXVT_TOKEN_MEMLOCK : JBXVT_TOKEN_EL, 2);
+	CASE_T('H', jbxvt_get_modes()->decanm ? JBXVT_TOKEN_HTS
+		: JBXVT_TOKEN_HOME);
+	CASE_A('l', jbxvt_get_modes()->decanm
+		? JBXVT_TOKEN_MEMLOCK : JBXVT_TOKEN_EL, 2);
 	case 'I':
 		jbxvt_index_from(xc, -1, jbxvt_get_screen()->cursor.y);
 		tk->type = JBXVT_TOKEN_CUU;
