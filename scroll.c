@@ -54,11 +54,13 @@ static void clear(int8_t count, const uint8_t rc,
 {
 	if(--count < 0)
 		  return;
-	memset(text[count], 0, jbxvt_get_char_size().w);
-	memset(rend[count], 0, jbxvt_get_char_size().w << 2);
+	const uint16_t sz = jbxvt_get_char_size().w;
+	memset(text[count], 0, sz);
+	memset(rend[count], 0, sz << 2);
 	const uint8_t j = rc + (up ? - count - 1 : count);
-	jbxvt_get_screen()->text[j] = text[count];
-	jbxvt_get_screen()->rend[j] = rend[count];
+	struct JBXVTScreen * restrict s = jbxvt_get_screen();
+	s->text[j] = text[count];
+	s->rend[j] = rend[count];
 	clear(count, rc, text, rend, up);
 }
 static void adjust_saved_lines_top(const int_fast16_t n)
