@@ -53,26 +53,25 @@ uint8_t jbxvt_get_font_ascent(void)
 {
 	return font_ascent;
 }
+static xcb_font_t get_f(xcb_connection_t * restrict xc,
+	xcb_font_t * restrict f)
+{
+	return *f ? *f : (*f = xcb_generate_id(xc));
+}
 xcb_font_t jbxvt_get_normal_font(xcb_connection_t * xc)
 {
 	static xcb_font_t f;
-	if (f)
-		return f;
-	return f = xcb_generate_id(xc);
+	return get_f(xc, &f);
 }
 xcb_font_t jbxvt_get_bold_font(xcb_connection_t * xc)
 {
 	static xcb_font_t f;
-	if (f)
-		return f;
-	return f = xcb_generate_id(xc);
+	return get_f(xc, &f);
 }
 xcb_font_t jbxvt_get_italic_font(xcb_connection_t * xc)
 {
 	static xcb_font_t f;
-	if (f)
-		return f;
-	return f = xcb_generate_id(xc);
+	return get_f(xc, &f);
 }
 void jbxvt_init_fonts(xcb_connection_t * xc,
 	struct JBXVTFontOptions * opt)
