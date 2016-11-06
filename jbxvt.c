@@ -97,7 +97,8 @@ int main(int argc, char ** argv)
 			com_argv = parse_command_line(argc, argv, opt);
 			if (!com_argv)
 				com_argv = (char*[2]){getenv("SHELL")};
-			// jbxvt_init_display must come after parse_command_line
+			/* jbxvt_init_display must come
+			   after parse_command_line */
 			xc = jbxvt_init_display(argv[0], opt);
 			free(opt);
 		}
