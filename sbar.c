@@ -32,8 +32,9 @@ xcb_window_t jbxvt_get_scrollbar(xcb_connection_t * c)
 __attribute__((pure))
 static int16_t get_sz(const int16_t margin)
 {
-	return jbxvt_get_pixel_size().h - jbxvt_get_pixel_size().h * (sbar_offset
-		+ margin) / (jbxvt_get_scroll_top() + jbxvt_get_char_size().h);
+	const uint16_t ph = jbxvt_get_pixel_size().h;
+	return ph - ph * (sbar_offset + margin)
+		/ (jbxvt_get_scroll_top() + jbxvt_get_char_size().h);
 }
 // Draw the scrollbar.
 void jbxvt_draw_scrollbar(xcb_connection_t * xc)
@@ -59,9 +60,10 @@ void jbxvt_set_scroll(xcb_connection_t * xc, int16_t n)
 // Scroll to the specified y position (in pixels)
 void jbxvt_scroll_to(xcb_connection_t * xc, const int16_t y)
 {
-	jbxvt_set_scroll(xc, (jbxvt_get_char_size().h + jbxvt_get_scroll_top())
-			* (jbxvt_get_pixel_size().h - y) / jbxvt_get_pixel_size().h
-			- jbxvt_get_char_size().h);
+	const uint8_t ch = jbxvt_get_char_size().h;
+	const uint16_t ph = jbxvt_get_pixel_size().h;
+	jbxvt_set_scroll(xc, (ch + jbxvt_get_scroll_top())
+		* (ph - y) / ph - ch);
 }
 void jbxvt_clear_saved_lines(xcb_connection_t * xc)
 {

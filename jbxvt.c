@@ -75,10 +75,13 @@ int main(int argc, char ** argv)
 	char ** com_argv;
 	// Set defaults
 	{
-		struct JBXVTOptions opt = {.font.normal = JBXVT_NORMAL_FONT,
-			.font.bold = JBXVT_BOLD_FONT, .font.italic
-			= JBXVT_ITALIC_FONT, .color.fg = JBXVT_FOREGROUND_COLOR,
-			.color.bg = JBXVT_BACKGROUND_COLOR, .size.cols = JBXVT_COLUMNS,
+		struct JBXVTOptions opt = {
+			.font.normal = JBXVT_NORMAL_FONT,
+			.font.bold = JBXVT_BOLD_FONT,
+			.font.italic = JBXVT_ITALIC_FONT,
+			.color.fg = JBXVT_FOREGROUND_COLOR,
+			.color.bg = JBXVT_BACKGROUND_COLOR,
+			.size.cols = JBXVT_COLUMNS,
 			.size.rows = JBXVT_ROWS};
 		// Override defaults
 		com_argv = parse_command_line(argc, argv, &opt);

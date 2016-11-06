@@ -64,7 +64,8 @@ void jbxvt_send_selection(xcb_connection_t * xc,
 			= property == XCB_NONE
 			? target : property}; // per ICCCM
 	xcb_change_property(xc, XCB_PROP_MODE_REPLACE, requestor,
-		property, target, 8, selection_data.length, selection_data.text);
+		property, target, 8, selection_data.length,
+		selection_data.text);
 	xcb_flush(xc);
 	xcb_send_event(xc, true, requestor,
 		XCB_SELECTION_NOTIFY, (char *)&e);

@@ -131,11 +131,13 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_CUB: // left
 		LOG("JBXVT_TOKEN_CUB");
-		jbxvt_move(xc, -n, 0, JBXVT_ROW_RELAATIVE | JBXVT_COLUMN_RELATIVE);
+		jbxvt_move(xc, -n, 0, JBXVT_ROW_RELAATIVE
+			| JBXVT_COLUMN_RELATIVE);
 		break;
 	case JBXVT_TOKEN_CUD: // down
 		LOG("JBXVT_TOKEN_CUD");
-		jbxvt_move(xc, 0, n, JBXVT_ROW_RELAATIVE | JBXVT_COLUMN_RELATIVE);
+		jbxvt_move(xc, 0, n, JBXVT_ROW_RELAATIVE
+			| JBXVT_COLUMN_RELATIVE);
 		break;
 	case JBXVT_TOKEN_CUF: // right
 		LOG("JBXVT_TOKEN_CUF");
@@ -146,8 +148,9 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 	case JBXVT_TOKEN_HVP:
 		TLOG("JBXVT_TOKEN_HVP/JBXVT_TOKEN_CUP");
 		// subtract 1 for 0-based coordinates
-		jbxvt_move(xc, (t[1]?t[1]:1) - 1, n - 1, jbxvt_get_modes()->decom ?
-			JBXVT_ROW_RELAATIVE | JBXVT_COLUMN_RELATIVE : 0);
+		jbxvt_move(xc, (t[1]?t[1]:1) - 1, n - 1,
+			jbxvt_get_modes()->decom ?  JBXVT_ROW_RELAATIVE
+			| JBXVT_COLUMN_RELATIVE : 0);
 		break;
 	case JBXVT_TOKEN_CUU: // up
 		LOG("JBXVT_TOKEN_CUU");
@@ -394,8 +397,8 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_SBGOTO:
 		LOG("JBXVT_TOKEN_SBGOTO");
-		/*  Move the display so that line represented by scrollbar value
-		    is at the top of the screen.  */
+		/*  Move the display so that line represented
+		    by scrollbar value is at the top of the screen.  */
 		jbxvt_scroll_to(xc, t[0]);
 		break;
 	case JBXVT_TOKEN_SC:

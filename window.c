@@ -69,7 +69,8 @@ void jbxvt_set_property(xcb_connection_t * xc, const xcb_atom_t prop,
 	const size_t sz, uint8_t * value)
 {
 	xcb_change_property(xc, XCB_PROP_MODE_REPLACE,
-		jbxvt_get_main_window(xc), prop, XCB_ATOM_STRING, 8, sz, value);
+		jbxvt_get_main_window(xc), prop,
+		XCB_ATOM_STRING, 8, sz, value);
 }
 // Change window or icon name:
 void jbxvt_change_name(xcb_connection_t * xc,

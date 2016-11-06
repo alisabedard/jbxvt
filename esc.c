@@ -141,7 +141,8 @@ void jbxvt_esc(xcb_connection_t * xc,
 	CASE_T('K', JBXVT_TOKEN_ED); // vt42 erase to end of screen
 	CASE_T('k', JBXVT_TOKEN_RC); // restore cursor (vt52g)
 	CASE_T('L', JBXVT_TOKEN_IL); // insert line (vt52)
-	CASE_T('M', jbxvt_get_modes()->decanm ? JBXVT_TOKEN_RI : JBXVT_TOKEN_DL);
+	CASE_T('M', jbxvt_get_modes()->decanm
+		? JBXVT_TOKEN_RI : JBXVT_TOKEN_DL);
 	CASE_T('N', JBXVT_TOKEN_SS2);
 	CASE_T('O', JBXVT_TOKEN_SS3);
 	CASE_A('o', JBXVT_TOKEN_EL, 1); // clear to start of line (vt52g)
