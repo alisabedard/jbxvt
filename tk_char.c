@@ -24,9 +24,12 @@ void jbxvt_handle_tk_char(xcb_connection_t * xc, const uint8_t tk_char)
 	case '\n': // handle line feed
 		jbxvt_index_from(xc, 1, jbxvt_get_screen()->margin.t);
 		break;
-	case 013: // vertical tab
-		for (uint8_t i = jbxvt_get_screen()->cursor.y; i % 8; ++i)
-			  jbxvt_index_from(xc, 1, jbxvt_get_screen()->margin.t);
+	case 013: { // vertical tab
+		struct JBXVTScreen * restrict s = jbxvt_get_screen();
+		const uint8_t mt = s->margin.t;
+		for (uint8_t i = s->cursor.y; i % 8; ++i)
+			  jbxvt_index_from(xc, 1, mt);
+	}
 		break;
 	case '\f': // form feed
 		form_feed(xc);
