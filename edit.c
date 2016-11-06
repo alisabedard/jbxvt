@@ -1,5 +1,6 @@
 /*  Copyright 2016, Jeffrey E. Bedard
-    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+    Copyright 1992, 1997 John Bovey,
+    University of Kent at Canterbury.*/
 #include "edit.h"
 #include "cursor.h"
 #include "font.h"
@@ -45,14 +46,15 @@ static void copy_lines(const int16_t x, const int8_t count)
 }
 static uint16_t get_width(const uint8_t count)
 {
-	return (jbxvt_get_char_size().w - count - jbxvt_get_screen()->cursor.x)
-		* jbxvt_get_font_size().w;
+	const uint16_t w = jbxvt_get_char_size().w;
+	return (w - count - jbxvt_get_screen()->cursor.x) * w;
 }
 static uint8_t get_count(int8_t count, const bool insert)
 {
 	count = JB_MAX(count, 0);
 	count = JB_MIN(count, insert ? jbxvt_get_char_size().w
-		: jbxvt_get_char_size().w - jbxvt_get_screen()->cursor.x);
+		: jbxvt_get_char_size().w
+		- jbxvt_get_screen()->cursor.x);
 	return count;
 }
 static void begin(xcb_connection_t * xc, int16_t * x,
@@ -77,7 +79,8 @@ void jbxvt_insert_characters(xcb_connection_t * xc, int8_t count)
 	begin(xc, x, &count, true);
 	const struct JBDim c = jbxvt_get_screen()->cursor;
 	copy_lines(c.x, count);
-	finalize(xc, x, jbxvt_chars_to_pixels(c), get_width(count), count);
+	finalize(xc, x, jbxvt_chars_to_pixels(c),
+		get_width(count), count);
 }
 static void copy_data_after_count(const uint8_t count,
 	const struct JBDim c)
