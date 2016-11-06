@@ -7,7 +7,6 @@
 #include "JBXVTSavedLine.h"
 struct JBXVTSavedLine * jbxvt_get_saved_lines(void);
 uint16_t jbxvt_get_scroll_top(void);
-void jbxvt_set_scroll_max(const uint16_t val);
 void jbxvt_zero_scroll_top(void);
 void scroll(xcb_connection_t * xc, const uint8_t row1,
 	const uint8_t row2, const int16_t count);

@@ -23,10 +23,6 @@ struct JBXVTSavedLine * jbxvt_get_saved_lines(void)
 {
 	return saved_lines;
 }
-void jbxvt_set_scroll_max(const uint16_t val)
-{
-	scroll_max = val;
-}
 void jbxvt_zero_scroll_top(void)
 {
 	scroll_top = 0;
@@ -66,8 +62,7 @@ static void clear(int8_t count, const uint8_t rc,
 static void adjust_saved_lines_top(const int_fast16_t n)
 {
 	scroll_top += n;
-	scroll_top = JB_MIN(scroll_top,
-		scroll_max);
+	scroll_top = JB_MIN(scroll_top, scroll_max);
 }
 static void copy_saved_lines(const int_fast16_t n)
 {
@@ -80,6 +75,8 @@ static void copy_saved_lines(const int_fast16_t n)
 		adjust_saved_lines_top(n);
 		clear_selection_at(i);
 		const size_t len = strlen((const char *)t);
+		/* These are two distinct memory pools, so
+		   use of memcpy here is valid.  */
 		memcpy(sl->text, t, len);
 		memcpy(sl->rend, s->rend[i], len << 2);
 		sl->size = len;
@@ -107,22 +104,15 @@ static void copy_visible_area(xcb_connection_t * xc,
 	// the above blocks the event queue, flush it
 	xcb_flush(xc);
 }
-static void add_scroll_history(xcb_connection_t * xc,
-	const int8_t count)
+static void add_scroll_history(void)
 {
-	if (count < 1) // nothing to do
-		return;
-	// Handle lines that scroll off the top of the screen.
-	memmove(saved_lines + count, saved_lines,
-		count - 1); // -1 to avoid going over array bounds
-	int_fast16_t y = scroll_max - count - 1;
-	struct JBXVTSavedLine * i = &saved_lines[y],
-		* j = &saved_lines[y + count];
-	for (; y >= 0; --y, --i, --j)
-		memmove(j, i, sizeof(struct JBXVTSavedLine));
-	copy_saved_lines(count);
-	jbxvt_draw_scrollbar(xc);
-
+	int_fast16_t y = scroll_max - 2; // 2: 1 for i, 1 for j
+	fprintf(stderr, "y: %d, 1: %d\n", (int)y, (int)1);
+	// i and j do not overlap since they are offset by 1
+	for (struct JBXVTSavedLine * i = saved_lines + y,
+		* j = i + 1; y >= 0; --y, --i, --j)
+		memcpy(j, i, sizeof(struct JBXVTSavedLine));
+	copy_saved_lines(1);
 }
 static int8_t copy_screen_area(const int8_t i,
 	const int8_t j, const int8_t mod, const int8_t count,
@@ -160,6 +150,7 @@ static void sc_common(xcb_connection_t * xc,
 	clear(count, up ? r2 : r1, save, rend, up);
 	copy_visible_area(xc, r1, r2, count, up);
 	clear_line(xc, up ? (r2 - count) : r1, count);
+	jbxvt_draw_scrollbar(xc);
 }
 static void sc_dn(xcb_connection_t * xc,
 	const uint8_t row1, const uint8_t row2,
@@ -177,7 +168,7 @@ static void sc_up(xcb_connection_t * xc,
 {
 	struct JBXVTScreen * s = jbxvt_get_screen();
 	if (s == jbxvt_get_screen_at(0) && row1 == 0)
-		add_scroll_history(xc, count);
+		add_scroll_history();
 	for(int8_t j = copy_screen_area(0, row1,
 		1, count, save, rend); j < row2; ++j)
 		move_line(j, -count, s);
