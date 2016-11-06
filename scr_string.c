@@ -57,20 +57,20 @@ static void wrap(xcb_connection_t * xc)
 	} else
 		++s->cursor.y;
 }
-#if defined(__i386__) || defined(__amd64__)
-       __attribute__((regparm(2)))
-#endif//x86
+static void move_data_in_memory(uint8_t * s, uint32_t * r,
+	const uint8_t n, const int16_t x, const uint16_t sz)
+{
+	memmove(s + x + n, s + x, sz);
+	memmove(r + x + n, r + x, sz << 2);
+}
 static void handle_insert(xcb_connection_t * xc,
 	const uint8_t n, const struct JBDim p)
 {
 	LOG("handle_insert(n=%d, p={%d, %d})", n, p.x, p.y);
 	const struct JBXVTScreen * restrict screen = jbxvt_get_screen();
 	const struct JBDim c = screen->cursor;
-	uint8_t * restrict s = screen->text[c.y];
-	uint32_t * restrict r = screen->rend[c.y];
 	const uint16_t sz = jbxvt_get_char_size().w - c.x;
-	memmove(s + c.x + n, s + c.x, sz);
-	memmove(r + c.x + n, r + c.x, sz << 2);
+	move_data_in_memory(screen->text[c.y], screen->rend[c.y], n, c.x, sz);
 	const struct JBDim f = jbxvt_get_font_size();
 	const uint16_t n_width = n * f.width;
 	const uint16_t width = sz * f.width - n_width;
