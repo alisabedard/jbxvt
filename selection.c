@@ -57,6 +57,8 @@ void jbxvt_send_selection(xcb_connection_t * xc,
 {
 	LOG("jbxvt_send_selection, %d, %d, %d, %d", (int)time,
 		requestor, target, property);
+	if (selection_data.text == NULL)
+		return; // nothing to send, prevent crash
 	xcb_selection_notify_event_t e = {
 		.response_type = XCB_SELECTION_NOTIFY,
 		.selection = XCB_ATOM_PRIMARY, .target = target,
@@ -66,10 +68,8 @@ void jbxvt_send_selection(xcb_connection_t * xc,
 	xcb_change_property(xc, XCB_PROP_MODE_REPLACE, requestor,
 		property, target, 8, selection_data.length,
 		selection_data.text);
-	xcb_flush(xc);
 	xcb_send_event(xc, true, requestor,
 		XCB_SELECTION_NOTIFY, (char *)&e);
-	xcb_flush(xc);
 }
 //  Clear the current selection.
 void jbxvt_clear_selection(void)
