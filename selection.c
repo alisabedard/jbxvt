@@ -1,13 +1,11 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "selection.h"
-#include "config.h"
 #include "libjb/log.h"
-#include "libjb/xcb.h"
 #include "libjb/util.h"
+#include "libjb/xcb.h"
 #include "save_selection.h"
 #include "selend.h"
-#include "screen.h"
 #include "show_selection.h"
 #include "size.h"
 #include "window.h"
@@ -30,9 +28,7 @@ bool jbxvt_is_selected(void)
 xcb_atom_t jbxvt_get_clipboard(xcb_connection_t * xc)
 {
 	static xcb_atom_t a;
-	if (a)
-		return a;
-	return a = jb_get_atom(xc, "CLIPBOARD");
+	return a ? a : (a = jb_get_atom(xc, "CLIPBOARD"));
 }
 static inline void prop(xcb_connection_t * xc, const xcb_atom_t a)
 {
