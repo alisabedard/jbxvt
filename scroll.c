@@ -113,15 +113,16 @@ static void add_scroll_history(xcb_connection_t * xc,
 	if (count < 1) // nothing to do
 		return;
 	// Handle lines that scroll off the top of the screen.
-	memcpy(saved_lines + count, saved_lines,
+	memmove(saved_lines + count, saved_lines,
 		count - 1); // -1 to avoid going over array bounds
 	int_fast16_t y = scroll_max - count - 1;
 	struct JBXVTSavedLine * i = &saved_lines[y],
 		* j = &saved_lines[y + count];
 	for (; y >= 0; --y, --i, --j)
-		memcpy(j, i, sizeof(struct JBXVTSavedLine));
+		memmove(j, i, sizeof(struct JBXVTSavedLine));
 	copy_saved_lines(count);
 	jbxvt_draw_scrollbar(xc);
+
 }
 static int8_t copy_screen_area(const int8_t i,
 	const int8_t j, const int8_t mod, const int8_t count,
