@@ -16,9 +16,7 @@
 static struct JBXVTScreen screens[2], * current;
 struct JBXVTScreen * jbxvt_get_screen(void)
 {
-	if (current)
-		return current;
-	return current = screens;
+	return current ? current : (current = screens);
 }
 struct JBXVTScreen * jbxvt_get_screen_at(const uint8_t i)
 {
