@@ -76,6 +76,19 @@ static void set_default_options(struct JBXVTOptions * restrict o)
 	o->screen = 0;
 	o->show_scrollbar = false;
 }
+
+static xcb_connection_t * handle_options(const int argc, char ** argv,
+	char *** com_argv)
+{
+	struct JBXVTOptions o;
+	set_default_options(&o);
+	// Override defaults
+	*com_argv = parse_command_line(argc, argv, &o);
+	/* jbxvt_init_display must come
+	   after parse_command_line */
+	return jbxvt_init_display(argv[0], &o);
+}
+
 /*  Run the command in a subprocess and return a file descriptor for the
  *  master end of the pseudo-teletype pair with the command talking to
  *  the slave.  */
@@ -84,21 +97,13 @@ int main(int argc, char ** argv)
 	xcb_connection_t * xc;
 	{ // com_argv scope
 		char ** com_argv;
-		{ // opt scope
-			struct JBXVTOptions o;
-			set_default_options(&o);
-			// Override defaults
-			com_argv = parse_command_line(argc, argv, &o);
-			if (!com_argv)
-				com_argv = (char*[2]){getenv("SHELL")};
-			/* jbxvt_init_display must come
-			   after parse_command_line */
-			xc = jbxvt_init_display(argv[0], &o);
-		}
+		xc = handle_options(argc, argv, &com_argv);
 		jbxvt_set_tab(-2, false); // Set up the tab stops
 		jbxvt_map_window(xc);
 		jb_check(setenv("TERM", JBXVT_ENV_TERM, true) != -1,
 			"Could not set TERM environment variable");
+		if (!com_argv)
+			com_argv = (char*[2]){getenv("SHELL")};
 		jbxvt_init_command_module(com_argv);
 	}
 	jbxvt_get_wm_del_win(xc); // initialize property
