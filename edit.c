@@ -16,11 +16,9 @@ static void copy_area(xcb_connection_t * xc,
 	const int16_t * restrict x, const int16_t y,
 	const uint16_t width)
 {
-	if (width > 0) {
-		const xcb_window_t v = jbxvt_get_vt_window(xc);
-		xcb_copy_area(xc, v, v, jbxvt_get_text_gc(xc), x[0], y,
-			x[1], y, width, jbxvt_get_font_size().height);
-	}
+	const xcb_window_t v = jbxvt_get_vt_window(xc);
+	xcb_copy_area(xc, v, v, jbxvt_get_text_gc(xc), x[0], y,
+		x[1], y, width, jbxvt_get_font_size().height);
 }
 static void finalize(xcb_connection_t * xc,
 	const int16_t * restrict x, const struct JBDim p,
