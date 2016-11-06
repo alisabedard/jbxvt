@@ -24,8 +24,8 @@ double.o: double.c double.h cursor.h repaint.h screen.h JBXVTScreen.h \
 dsr.o: dsr.c dsr.h cmdtok.h Token.h TokenType.h command.h libjb/size.h \
  libjb/util.h libjb/log.h screen.h JBXVTScreen.h config.h
 edit.o: edit.c edit.h cursor.h font.h libjb/size.h libjb/log.h \
- libjb/util.h paint.h libjb/xcb.h sbar.h window.h screen.h JBXVTScreen.h \
- config.h selection.h JBXVTSelectionUnit.h size.h
+ libjb/util.h paint.h libjb/xcb.h sbar.h screen.h JBXVTScreen.h config.h \
+ selection.h JBXVTSelectionUnit.h size.h window.h
 esc.o: esc.c esc.h Token.h TokenType.h command.h libjb/size.h \
  libjb/util.h cmdtok.h dcs.h mode.h JBXVTPrivateModes.h screen.h \
  JBXVTScreen.h config.h
@@ -34,8 +34,8 @@ font.o: font.c font.h libjb/size.h config.h cursor.h libjb/util.h \
 handle_sgr.o: handle_sgr.c handle_sgr.h Token.h TokenType.h color.h \
  libjb/xcb.h libjb/log.h libjb/util.h paint.h libjb/size.h rstyle.h
 jbxvt.o: jbxvt.c command.h libjb/size.h libjb/util.h config.h cursor.h \
- display.h JBXVTOptions.h color.h libjb/xcb.h font.h sbar.h scroll.h \
- JBXVTSavedLine.h tab.h window.h xevents.h xvt.h
+ display.h JBXVTOptions.h color.h libjb/xcb.h font.h tab.h window.h \
+ xevents.h xvt.h
 lookup_key.o: lookup_key.c lookup_key.h command.h libjb/size.h \
  libjb/util.h libjb/log.h sbar.h
 mode.o: mode.c mode.h JBXVTPrivateModes.h
