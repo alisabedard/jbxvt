@@ -76,13 +76,6 @@ static void set_default_options(struct JBXVTOptions * restrict o)
 	o->screen = 0;
 	o->show_scrollbar = false;
 }
-// free when done
-struct JBXVTOptions * get_default_options(void)
-{
-	struct JBXVTOptions * opt = malloc(sizeof(struct JBXVTOptions));
-	set_default_options(opt);
-	return opt;
-}
 /*  Run the command in a subprocess and return a file descriptor for the
  *  master end of the pseudo-teletype pair with the command talking to
  *  the slave.  */
@@ -92,15 +85,15 @@ int main(int argc, char ** argv)
 	{ // com_argv scope
 		char ** com_argv;
 		{ // opt scope
-			struct JBXVTOptions * opt = get_default_options();
+			struct JBXVTOptions o;
+			set_default_options(&o);
 			// Override defaults
-			com_argv = parse_command_line(argc, argv, opt);
+			com_argv = parse_command_line(argc, argv, &o);
 			if (!com_argv)
 				com_argv = (char*[2]){getenv("SHELL")};
 			/* jbxvt_init_display must come
 			   after parse_command_line */
-			xc = jbxvt_init_display(argv[0], opt);
-			free(opt);
+			xc = jbxvt_init_display(argv[0], &o);
 		}
 		jbxvt_set_tab(-2, false); // Set up the tab stops
 		jbxvt_map_window(xc);
