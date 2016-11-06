@@ -27,7 +27,7 @@
 #undef LOG
 #define LOG(...)
 #endif//!STRING_DEBUG
-static void handle_new_lines(xcb_connection_t * xc, int8_t nlcount)
+static void handle_new_lines(xcb_connection_t * restrict xc, int8_t nlcount)
 {
 	struct JBXVTScreen * restrict s = jbxvt_get_screen();
 	const int16_t y = s->cursor.y;
@@ -44,7 +44,7 @@ static void decsclm(void)
 	if (jbxvt_get_modes()->decsclm)
 		jb_sleep(166);
 }
-static void wrap(xcb_connection_t * xc)
+static void wrap(xcb_connection_t * restrict xc)
 {
 	struct JBXVTScreen * restrict s = jbxvt_get_screen();
 	s->wrap_next = false;
@@ -57,10 +57,11 @@ static void wrap(xcb_connection_t * xc)
 	} else
 		++s->cursor.y;
 }
-static void move_data_in_memory(uint8_t * s, uint32_t * r,
-	const uint8_t n, const int16_t x, const uint16_t sz)
+static void move_data_in_memory(uint8_t * restrict t,
+	uint32_t * restrict r, const uint8_t n, const int16_t x,
+	const uint16_t sz)
 {
-	memmove(s + x + n, s + x, sz);
+	memmove(t + x + n, t + x, sz);
 	memmove(r + x + n, r + x, sz << 2);
 }
 static void move_data_on_screen(xcb_connection_t * xc,
@@ -73,14 +74,14 @@ static void move_data_on_screen(xcb_connection_t * xc,
 		p.x + n_width, p.y, sz * f.width - n_width, f.height);
 
 }
-static void handle_insert(xcb_connection_t * xc,
+static void handle_insert(xcb_connection_t * restrict xc,
 	const uint8_t n, const struct JBDim p)
 {
 	LOG("handle_insert(n=%d, p={%d, %d})", n, p.x, p.y);
-	const struct JBXVTScreen * restrict screen = jbxvt_get_screen();
-	const struct JBDim c = screen->cursor;
+	const struct JBXVTScreen * restrict s = jbxvt_get_screen();
+	const struct JBDim c = s->cursor;
 	const uint16_t sz = jbxvt_get_char_size().w - c.x;
-	move_data_in_memory(screen->text[c.y], screen->rend[c.y], n, c.x, sz);
+	move_data_in_memory(s->text[c.y], s->rend[c.y], n, c.x, sz);
 	move_data_on_screen(xc, n, sz, p);
 }
 static void parse_special_charset(uint8_t * restrict str,
