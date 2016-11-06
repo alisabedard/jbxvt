@@ -3,8 +3,6 @@
 #include "config.h"
 #include "cursor.h"
 #include "display.h"
-#include "sbar.h"
-#include "scroll.h"
 #include "tab.h"
 #include "window.h"
 #include "xevents.h"
