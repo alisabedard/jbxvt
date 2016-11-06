@@ -63,6 +63,16 @@ static void move_data_in_memory(uint8_t * s, uint32_t * r,
 	memmove(s + x + n, s + x, sz);
 	memmove(r + x + n, r + x, sz << 2);
 }
+static void move_data_on_screen(xcb_connection_t * xc,
+	const uint8_t n, const uint16_t sz, const struct JBDim p)
+{
+	const struct JBDim f = jbxvt_get_font_size();
+	const uint16_t n_width = n * f.width;
+	const xcb_window_t vt = jbxvt_get_vt_window(xc);
+	xcb_copy_area(xc, vt, vt, jbxvt_get_text_gc(xc), p.x, p.y,
+		p.x + n_width, p.y, sz * f.width - n_width, f.height);
+
+}
 static void handle_insert(xcb_connection_t * xc,
 	const uint8_t n, const struct JBDim p)
 {
@@ -71,13 +81,7 @@ static void handle_insert(xcb_connection_t * xc,
 	const struct JBDim c = screen->cursor;
 	const uint16_t sz = jbxvt_get_char_size().w - c.x;
 	move_data_in_memory(screen->text[c.y], screen->rend[c.y], n, c.x, sz);
-	const struct JBDim f = jbxvt_get_font_size();
-	const uint16_t n_width = n * f.width;
-	const uint16_t width = sz * f.width - n_width;
-	const int16_t x = p.x + n_width;
-	const xcb_window_t vt = jbxvt_get_vt_window(xc);
-	xcb_copy_area(xc, vt, vt, jbxvt_get_text_gc(xc), p.x, p.y,
-		x, p.y, width, f.height);
+	move_data_on_screen(xc, n, sz, p);
 }
 static void parse_special_charset(uint8_t * restrict str,
 	const uint8_t len)
