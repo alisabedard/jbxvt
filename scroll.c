@@ -107,7 +107,6 @@ static void copy_visible_area(xcb_connection_t * xc,
 static void add_scroll_history(void)
 {
 	int_fast16_t y = scroll_max - 2; // 2: 1 for i, 1 for j
-	fprintf(stderr, "y: %d, 1: %d\n", (int)y, (int)1);
 	// i and j do not overlap since they are offset by 1
 	for (struct JBXVTSavedLine * i = saved_lines + y,
 		* j = i + 1; y >= 0; --y, --i, --j)
