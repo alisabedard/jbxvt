@@ -88,24 +88,26 @@ static xcb_connection_t * handle_options(const int argc, char ** argv,
 	   after parse_command_line */
 	return jbxvt_init_display(argv[0], &o);
 }
-
+static xcb_connection_t * handle_command(const int argc, char ** argv)
+{
+	char ** com_argv;
+	xcb_connection_t * xc = handle_options(argc,
+		argv, &com_argv);
+	jbxvt_set_tab(-2, false); // Set up the tab stops
+	jbxvt_map_window(xc);
+	jb_check(setenv("TERM", JBXVT_ENV_TERM, true) != -1,
+		"Could not set TERM environment variable");
+	if (!com_argv)
+		com_argv = (char*[2]){getenv("SHELL")};
+	jbxvt_init_command_module(com_argv);
+	return xc;
+}
 /*  Run the command in a subprocess and return a file descriptor for the
  *  master end of the pseudo-teletype pair with the command talking to
  *  the slave.  */
 int main(int argc, char ** argv)
 {
-	xcb_connection_t * xc;
-	{ // com_argv scope
-		char ** com_argv;
-		xc = handle_options(argc, argv, &com_argv);
-		jbxvt_set_tab(-2, false); // Set up the tab stops
-		jbxvt_map_window(xc);
-		jb_check(setenv("TERM", JBXVT_ENV_TERM, true) != -1,
-			"Could not set TERM environment variable");
-		if (!com_argv)
-			com_argv = (char*[2]){getenv("SHELL")};
-		jbxvt_init_command_module(com_argv);
-	}
+	xcb_connection_t * xc = handle_command(argc, argv);
 	jbxvt_get_wm_del_win(xc); // initialize property
 	for (;;) // app loop
 		jbxvt_parse_token(xc);
