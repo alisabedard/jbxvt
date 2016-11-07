@@ -12,7 +12,6 @@
 #include "window.h"
 #include <stdlib.h>
 #include <X11/cursorfont.h>
-#include <xcb/xcb_icccm.h>
 #define E(n) XCB_EVENT_MASK_##n
 #define EB(n) XCB_EVENT_MASK_BUTTON_##n
 enum EventMasks {
@@ -21,34 +20,15 @@ enum EventMasks {
 };
 #undef E
 #undef EB
-static void set_hints(xcb_connection_t * xc, const xcb_window_t win,
-	const struct JBDim position, const struct JBDim size)
-{
-	const struct JBDim f = jbxvt_get_font_size();
-	xcb_size_hints_t s = {
-		.flags = XCB_ICCCM_SIZE_HINT_US_SIZE
-		| XCB_ICCCM_SIZE_HINT_BASE_SIZE
-		| XCB_ICCCM_SIZE_HINT_P_MIN_SIZE
-		| XCB_ICCCM_SIZE_HINT_P_RESIZE_INC,
-		.x = position.x, .y = position.y,
-		.width = size.w, .base_width = size.w,
-		.height = size.h, .base_height = size.h,
-		.width_inc = f.w, .min_width = f.w,
-		.height_inc = f.h, .min_height = f.h };
-	xcb_icccm_set_wm_normal_hints_checked(xc, win, &s);
-	xcb_flush(xc); // flush before scope is lost
-}
 static void create_main_window(xcb_connection_t * xc,
 	const xcb_window_t root, const struct JBDim position,
 	const struct JBDim size)
 {
-	const xcb_window_t w = jbxvt_get_main_window(xc);
-	xcb_create_window(xc, 0, w, root, position.x, position.y,
-		size.width, size.height, 0, 0, 0, XCB_CW_BACK_PIXEL
-		| XCB_CW_EVENT_MASK, (uint32_t[]){jbxvt_get_bg(),
-		MW_EVENTS});
+	xcb_create_window(xc, 0, jbxvt_get_main_window(xc), root, position.x,
+		position.y, size.width, size.height, 0, 0, 0,
+		XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK, (uint32_t[]){
+		jbxvt_get_bg(), MW_EVENTS});
 	jbxvt_set_pixel_size(size);
-	set_hints(xc, w, position, size);
 }
 static void create_sb_window(xcb_connection_t * xc, const uint16_t height)
 {
