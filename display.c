@@ -64,8 +64,14 @@ static void get_sizehints(xcb_size_hints_t * restrict s, struct JBDim p)
 		.width_inc = f.w, .height_inc = f.h, .base_width = f.w,
 		.base_height = f.h };
 #undef SH
-	s->min_width = jbxvt_get_font_size().w + s->base_width;
-	s->min_height = jbxvt_get_font_size().h + s->base_height;
+	s->min_width = f.w + s->base_width;
+	s->min_height = f.h + s->base_height;
+}
+static void set_name(xcb_connection_t * restrict xc,
+	uint8_t * restrict name)
+{
+	jbxvt_change_name(xc, name, true);
+	jbxvt_change_name(xc, name, false);
 }
 //  Open the window.
 static void create_window(xcb_connection_t * xc, uint8_t * restrict name,
@@ -74,8 +80,7 @@ static void create_window(xcb_connection_t * xc, uint8_t * restrict name,
 	xcb_size_hints_t sh;
 	get_sizehints(&sh, size);
 	create_main_window(xc, &sh, root);
-	jbxvt_change_name(xc, name, true);
-	jbxvt_change_name(xc, name, false);
+	set_name(xc, name);
 	create_sb_window(xc, sh.height);
 	create_vt_window(xc, &sh, sb);
 }
