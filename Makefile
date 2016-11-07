@@ -6,7 +6,7 @@ AWK=/usr/bin/gawk
 CFLAGS+=-DUSE_LIKELY
 CFLAGS+=-D_XOPEN_SOURCE=700 --std=c11
 CFLAGS+=-Wall -Wextra
-LIBS+=-lxcb -lxcb-keysyms
+LIBS+=-lxcb -lxcb-icccm -lxcb-keysyms
 OBJS=jbxvt.o lookup_key.o paint.o change_selection.o cmdtok.o esc.o
 OBJS+=cursor.o display.o repaint.o save_selection.o scr_move.o size.o
 OBJS+=sbar.o scr_erase.o selex.o edit.o command.o selection.o dcs.o

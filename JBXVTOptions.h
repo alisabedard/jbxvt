@@ -8,6 +8,7 @@ struct JBXVTOptions {
 	struct JBXVTColorOptions color;
 	struct JBXVTFontOptions font;
 	struct JBDim size;
+	struct JBDim position;
 	int screen;
 	bool show_scrollbar;
 };

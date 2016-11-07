@@ -21,15 +21,34 @@ enum EventMasks {
 };
 #undef E
 #undef EB
-static void create_main_window(xcb_connection_t * xc,
-	xcb_size_hints_t * restrict sh, const xcb_window_t root)
+static void set_hints(xcb_connection_t * xc, const xcb_window_t win,
+	const struct JBDim position, const struct JBDim size)
 {
-	xcb_create_window(xc, 0, jbxvt_get_main_window(xc), root,
-		sh->x, sh->y, sh->width, sh->height, 0, 0, 0,
-		XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK,
-		(uint32_t[]){jbxvt_get_bg(), MW_EVENTS});
-	jbxvt_set_pixel_size((struct JBDim){.width = sh->width,
-		.height = sh->height});
+	const struct JBDim f = jbxvt_get_font_size();
+	xcb_size_hints_t s = {
+		.flags = XCB_ICCCM_SIZE_HINT_US_SIZE
+		| XCB_ICCCM_SIZE_HINT_BASE_SIZE
+		| XCB_ICCCM_SIZE_HINT_P_MIN_SIZE
+		| XCB_ICCCM_SIZE_HINT_P_RESIZE_INC,
+		.x = position.x, .y = position.y,
+		.width = size.w, .base_width = size.w,
+		.height = size.h, .base_height = size.h,
+		.width_inc = f.w, .min_width = f.w,
+		.height_inc = f.h, .min_height = f.h };
+	xcb_icccm_set_wm_normal_hints_checked(xc, win, &s);
+	xcb_flush(xc); // flush before scope is lost
+}
+static void create_main_window(xcb_connection_t * xc,
+	const xcb_window_t root, const struct JBDim position,
+	const struct JBDim size)
+{
+	const xcb_window_t w = jbxvt_get_main_window(xc);
+	xcb_create_window(xc, 0, w, root, position.x, position.y,
+		size.width, size.height, 0, 0, 0, XCB_CW_BACK_PIXEL
+		| XCB_CW_EVENT_MASK, (uint32_t[]){jbxvt_get_bg(),
+		MW_EVENTS});
+	jbxvt_set_pixel_size(size);
+	set_hints(xc, w, position, size);
 }
 static void create_sb_window(xcb_connection_t * xc, const uint16_t height)
 {
@@ -42,37 +61,15 @@ static void create_sb_window(xcb_connection_t * xc, const uint16_t height)
 		jbxvt_get_bg(), jbxvt_get_fg(), SUB_EVENTS, c});
 	xcb_free_cursor(xc, c);
 }
-static void create_vt_window(xcb_connection_t * xc,
-	xcb_size_hints_t * restrict sh, const bool sb)
+static void create_vt_window(xcb_connection_t * xc, const struct JBDim sz,
+	const bool sb)
 {
 	const xcb_cursor_t c = jbxvt_get_cursor(xc, XC_xterm, 0xffff, 0);
 	xcb_create_window(xc, 0, jbxvt_get_vt_window(xc),
-		jbxvt_get_main_window(xc), sb
-		? JBXVT_SCROLLBAR_WIDTH : 0, 0, sh->width, sh->height,
-		0, 0, 0, XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK
-		| XCB_CW_CURSOR, (uint32_t[]){ jbxvt_get_bg(),
-		SUB_EVENTS, c});
+		jbxvt_get_main_window(xc), sb ? JBXVT_SCROLLBAR_WIDTH : 0, 0,
+		sz.w, sz.h, 0, 0, 0, XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK
+		| XCB_CW_CURSOR, (uint32_t[]){ jbxvt_get_bg(), SUB_EVENTS, c});
 	xcb_free_cursor(xc, c);
-}
-static void set_sizehints(xcb_size_hints_t * restrict s, struct JBDim p)
-{
-	p = jbxvt_chars_to_pixels(p);
-	const struct JBDim f = jbxvt_get_font_size();
-	s->flags = XCB_ICCCM_SIZE_HINT_US_SIZE
-		| XCB_ICCCM_SIZE_HINT_BASE_SIZE
-		| XCB_ICCCM_SIZE_HINT_P_MIN_SIZE
-		| XCB_ICCCM_SIZE_HINT_P_RESIZE_INC;
-	s->width = s->base_width = p.width;
-	s->height = s->base_height = p.height;
-	s->width_inc = s->min_width = f.width;
-	s->height_inc = s->min_height = f.height;
-}
-// free the returned memory
-static xcb_size_hints_t * get_sizehints(struct JBDim p)
-{
-	xcb_size_hints_t * s = malloc(sizeof(xcb_size_hints_t));
-	set_sizehints(s, p);
-	return s;
 }
 static void set_name(xcb_connection_t * restrict xc,
 	uint8_t * restrict name)
@@ -80,16 +77,14 @@ static void set_name(xcb_connection_t * restrict xc,
 	jbxvt_change_name(xc, name, true);
 	jbxvt_change_name(xc, name, false);
 }
-#include <stdio.h>
 //  Open the window.
-static void create_window(xcb_connection_t * xc, uint8_t * restrict name,
-	const xcb_window_t root, struct JBDim size, const bool sb)
+static void create_window(xcb_connection_t * xc, const xcb_window_t root,
+	struct JBXVTOptions * restrict opt, uint8_t * restrict name)
 {
-	xcb_size_hints_t * sh = get_sizehints(size);
-	create_main_window(xc, sh, root);
-	create_sb_window(xc, sh->height);
-	create_vt_window(xc, sh, sb);
-	free(sh);
+	struct JBDim sz = jbxvt_chars_to_pixels(opt->size);
+	create_main_window(xc, root, opt->position, sz);
+	create_sb_window(xc, sz.height);
+	create_vt_window(xc, sz, opt->show_scrollbar);
 	set_name(xc, name);
 }
 static void setup_gcs(xcb_connection_t * xc, xcb_window_t w)
@@ -109,8 +104,7 @@ xcb_connection_t * jbxvt_init_display(char * restrict name,
 	xcb_connection_t * xc = jb_get_xcb_connection(NULL, &opt->screen);
 	jbxvt_init_colors(xc, &opt->color);
 	jbxvt_init_fonts(xc, &opt->font);
-	create_window(xc, (uint8_t *)name,
-		jbxvt_get_root_window(xc), opt->size, opt->show_scrollbar);
+	create_window(xc, jbxvt_get_root_window(xc), opt, (uint8_t *)name);
 	setup_gcs(xc, jbxvt_get_vt_window(xc));
 	return xc;
 }

@@ -13,7 +13,7 @@
 static char ** parse_command_line(const int argc, char ** argv,
 	struct JBXVTOptions * o)
 {
-	static const char * optstr = "B:b:C:c:D:d:eF:f:hI:R:S:sv";
+	static const char * optstr = "B:b:C:c:D:d:eF:f:hI:R:S:svx:y:";
 	int8_t opt;
 	while((opt=getopt(argc, argv, optstr)) != -1) {
 		switch (opt) {
@@ -48,6 +48,12 @@ static char ** parse_command_line(const int argc, char ** argv,
 			break;
 		case 'v': // version
 			goto version;
+		case 'x': // x position
+			o->position.x = atoi(optarg);
+			break;
+		case 'y': // y position
+			o->position.y = atoi(optarg);
+			break;
 		case 'h': // help
 		default:
 			goto usage;
@@ -73,6 +79,7 @@ static void set_default_options(struct JBXVTOptions * restrict o)
 	o->color.fg = JBXVT_FOREGROUND_COLOR;
 	o->size.cols = JBXVT_COLUMNS;
 	o->size.rows = JBXVT_ROWS;
+	o->position = (struct JBDim){};
 	o->screen = 0;
 	o->show_scrollbar = false;
 }
