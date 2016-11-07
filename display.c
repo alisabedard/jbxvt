@@ -10,6 +10,7 @@
 #include "size.h"
 #include "xcb_screen.h"
 #include "window.h"
+#include <stdlib.h>
 #include <X11/cursorfont.h>
 #include <xcb/xcb_icccm.h>
 #define E(n) XCB_EVENT_MASK_##n
@@ -32,7 +33,7 @@ static void create_main_window(xcb_connection_t * xc,
 }
 static void create_sb_window(xcb_connection_t * xc, const uint16_t height)
 {
-	xcb_cursor_t c = jbxvt_get_cursor(xc,
+	const xcb_cursor_t c = jbxvt_get_cursor(xc,
 		XC_sb_v_double_arrow, 0, 0xffff);
 	xcb_create_window(xc, 0, jbxvt_get_scrollbar(xc),
 		jbxvt_get_main_window(xc), -1, -1, JBXVT_SCROLLBAR_WIDTH - 1,
@@ -44,7 +45,7 @@ static void create_sb_window(xcb_connection_t * xc, const uint16_t height)
 static void create_vt_window(xcb_connection_t * xc,
 	xcb_size_hints_t * restrict sh, const bool sb)
 {
-	xcb_cursor_t c = jbxvt_get_cursor(xc, XC_xterm, 0xffff, 0);
+	const xcb_cursor_t c = jbxvt_get_cursor(xc, XC_xterm, 0xffff, 0);
 	xcb_create_window(xc, 0, jbxvt_get_vt_window(xc),
 		jbxvt_get_main_window(xc), sb
 		? JBXVT_SCROLLBAR_WIDTH : 0, 0, sh->width, sh->height,
@@ -53,19 +54,25 @@ static void create_vt_window(xcb_connection_t * xc,
 		SUB_EVENTS, c});
 	xcb_free_cursor(xc, c);
 }
-static void get_sizehints(xcb_size_hints_t * restrict s, struct JBDim p)
+static void set_sizehints(xcb_size_hints_t * restrict s, struct JBDim p)
 {
 	p = jbxvt_chars_to_pixels(p);
 	const struct JBDim f = jbxvt_get_font_size();
-#define SH(n) XCB_ICCCM_SIZE_HINT_##n
-	*s = (xcb_size_hints_t) {
-		.flags = SH(US_SIZE) | SH(P_MIN_SIZE) | SH(P_RESIZE_INC)
-			| SH(BASE_SIZE), .width = p.w, .height = p.h,
-		.width_inc = f.w, .height_inc = f.h, .base_width = f.w,
-		.base_height = f.h };
-#undef SH
-	s->min_width = f.w + s->base_width;
-	s->min_height = f.h + s->base_height;
+	s->flags = XCB_ICCCM_SIZE_HINT_US_SIZE
+		| XCB_ICCCM_SIZE_HINT_BASE_SIZE
+		| XCB_ICCCM_SIZE_HINT_P_MIN_SIZE
+		| XCB_ICCCM_SIZE_HINT_P_RESIZE_INC;
+	s->width = s->base_width = p.width;
+	s->height = s->base_height = p.height;
+	s->width_inc = s->min_width = f.width;
+	s->height_inc = s->min_height = f.height;
+}
+// free the returned memory
+static xcb_size_hints_t * get_sizehints(struct JBDim p)
+{
+	xcb_size_hints_t * s = malloc(sizeof(xcb_size_hints_t));
+	set_sizehints(s, p);
+	return s;
 }
 static void set_name(xcb_connection_t * restrict xc,
 	uint8_t * restrict name)
@@ -73,16 +80,17 @@ static void set_name(xcb_connection_t * restrict xc,
 	jbxvt_change_name(xc, name, true);
 	jbxvt_change_name(xc, name, false);
 }
+#include <stdio.h>
 //  Open the window.
 static void create_window(xcb_connection_t * xc, uint8_t * restrict name,
 	const xcb_window_t root, struct JBDim size, const bool sb)
 {
-	xcb_size_hints_t sh;
-	get_sizehints(&sh, size);
-	create_main_window(xc, &sh, root);
+	xcb_size_hints_t * sh = get_sizehints(size);
+	create_main_window(xc, sh, root);
+	create_sb_window(xc, sh->height);
+	create_vt_window(xc, sh, sb);
+	free(sh);
 	set_name(xc, name);
-	create_sb_window(xc, sh.height);
-	create_vt_window(xc, &sh, sb);
 }
 static void setup_gcs(xcb_connection_t * xc, xcb_window_t w)
 {
