@@ -100,10 +100,10 @@ static void copy_data_after_count(const uint8_t count,
 static void delete_source_data(const uint8_t count, const int16_t y)
 {
 	// delete the source data copied
-	const uint16_t w = jbxvt_get_char_size().w;
+	const uint16_t c = jbxvt_get_char_size().w - count;
 	struct JBXVTScreen * restrict s = jbxvt_get_screen();
-	memset(s->text[y] + w - count, 0, count);
-	memset(s->rend[y] + w - count, 0, count << 2);
+	memset(s->text[y] + c, 0, count);
+	memset(s->rend[y] + c, 0, count << 2);
 }
 //  Delete count characters from the current position.
 void jbxvt_delete_characters(xcb_connection_t * xc, int8_t count)
