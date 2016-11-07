@@ -40,8 +40,9 @@ static void copy_lines(const int16_t x, const int8_t count)
 	uint32_t * r = screen->rend[y];
 	const int_fast16_t w = jbxvt_get_char_size().w;
 	for (int_fast16_t i = x + count; i < w; ++i) {
-		s[i] = s[i - count];
-		r[i] = r[i - count];
+		const int_fast16_t j = i - count;
+		s[i] = s[j];
+		r[i] = r[j];
 	}
 }
 static uint16_t get_width(const uint8_t count)
