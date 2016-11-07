@@ -7,13 +7,12 @@
 #include "dec_reset.h"
 #include "double.h"
 #include "dsr.h"
+#include "edit.h"
 #include "handle_sgr.h"
 #include "libjb/log.h"
 #include "lookup_key.h"
 #include "mode.h"
-#include "repaint.h"
 #include "sbar.h"
-#include "edit.h"
 #include "scr_erase.h"
 #include "scr_move.h"
 #include "scr_reset.h"
@@ -25,8 +24,6 @@
 #include "tab.h"
 #include "tk_char.h"
 #include "window.h"
-#include <stdio.h>
-#include <string.h>
 //#define DEBUG_TOKENS
 #ifdef DEBUG_TOKENS
 #define TLOG(...) LOG(__VA_ARGS__)
