@@ -3,7 +3,7 @@
 CFG=config.mk
 DEBUG=false
 UTEMPTER=true
-OPT_STATIC_LIBJB=false
+OPT_STATIC_LIBJB=true
 # reset:
 rm -f "$CFG"; touch "$CFG"
 # parse command line:
@@ -16,7 +16,7 @@ do
 	h|?)
 		for line in '-d enable debugging' \
 			'-h help' \
-			'-J use static libjb' \
+			'-J use shared libjb' \
 			'-u disable libutempter'; do
 			echo $line
 		done

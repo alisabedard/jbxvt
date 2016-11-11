@@ -27,7 +27,7 @@ color_index.h: color_index.txt
 bindest=${DESTDIR}${PREFIX}/bin
 docdest=${DESTDIR}${PREFIX}/share/man/man1
 install:
-	cd libjb && ${MAKE} install
+#	cd libjb && ${MAKE} install
 	install -d ${bindest}
 	install ${exe} ${bindest}
 	install -d ${docdest}
@@ -35,8 +35,8 @@ install:
 depend:
 	./mkdepend
 clean:
-	rm -f ${exe} *.o *.gcda *.gcno *.gcov
 	cd libjb && make clean
+	rm -f ${exe} *.o *.gcda *.gcno *.gcov
 distclean: clean
 	rm -f config.mk gcov.log depend.mk
 check:
