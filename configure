@@ -3,7 +3,7 @@
 CFG=config.mk
 DEBUG=false
 UTEMPTER=true
-INC_LIBJB=false
+OPT_STATIC_LIBJB=false
 # reset:
 rm -f "$CFG"; touch "$CFG"
 # parse command line:
@@ -11,12 +11,12 @@ while getopts 'dhJu' opt
 do
 	case $opt in
 	d) DEBUG=true ;;
+	J) OPT_STATIC_LIBJB=true ;;
 	u) UTEMPTER=false ;;	
-	J) INC_LIBJB=true ;;
 	h|?)
 		for line in '-d enable debugging' \
 			'-h help' \
-			'-J use bundled libjb' \
+			'-J use static libjb' \
 			'-u disable libutempter'; do
 			echo $line
 		done
@@ -39,8 +39,8 @@ case $ARCH in
 		cat >> $CFG <<- EOF
 		CC=clang
 		PREFIX=/usr/local
-		LIBS+=-L/usr/X11R6/lib
-		LIBS+=-L/usr/local/lib
+		ldflags+=-L/usr/X11R6/lib
+		ldflags+=-L/usr/local/lib
 		CFLAGS+=-D_BSD_SOURCE
 		CFLAGS+=-I/usr/X11R6/include 
 		CFLAGS+=-I/usr/local/include 
@@ -58,9 +58,9 @@ case $ARCH in
 		CFLAGS+=-I/usr/pkg/include
 		CFLAGS+=-I/usr/X11R7/include 
 		CFLAGS+=-I/usr/X11R6/include
-		LIBS+=-L/usr/pkg/lib -Wl,-R/usr/pkg/lib
-		LIBS+=-L/usr/X11R7/lib -Wl,-R/usr/X11R7/lib
-		LIBS+=-L/usr/X11R6/lib -Wl,-R/usr/X11R6/lib
+		ldflags+=-L/usr/pkg/lib -Wl,-R/usr/pkg/lib
+		ldflags+=-L/usr/X11R7/lib -Wl,-R/usr/X11R7/lib
+		ldflags+=-L/usr/X11R6/lib -Wl,-R/usr/X11R6/lib
 		PREFIX=/usr/local
 		EOF
 		;;
@@ -68,7 +68,7 @@ case $ARCH in
 		cat >> $CFG <<- EOF
 		CFLAGS+=-DFREEBSD -D_BSD_SOURCE -D__BSD_VISIBLE
 		CFLAGS+=-I/usr/local/include
-		LIBS+=-L/usr/local/lib
+		ldflags+=-L/usr/local/lib
 		PREFIX=/usr/local
 		EOF
 		;;
@@ -78,7 +78,7 @@ if $UTEMPTER && [ -f /usr/lib/libutempter.so ]; then
 	echo found
 	cat >> $CFG <<- EOF
 	CFLAGS+=-DUSE_UTEMPTER
-	LIBS+=-lutempter
+	ldflags+=-lutempter
 	EOF
 else
 	if $UTEMPTER; then
@@ -146,23 +146,10 @@ if $DEBUG; then
 		fi
 	fi
 fi
-lib() # 1: dir 2: file
-{
-	dir="$1"
-	file="$2"
-	path="$1/${file}"
-	flag=`echo $file | cut -b4- | cut -d. -f1`
-	echo -n "Looking for ${path}... "
-	if [ -f "$path" ]; then
-		echo "LIBS+=-L${dir} -l${flag}" >> $CFG
-		echo found
-		return 0
-	fi
-	echo not found
-	return 1
-}
-if $INC_LIBJB || (! lib /usr/lib libjb.so \
-	&& ! lib /usr/local/lib libjb.so); then
-	echo 'Using bundled libjb'
-	echo 'include libjb.mk' >> $CFG
+if $OPT_STATIC_LIBJB; then
+	echo Using static libjb...
+	echo "static=libjb/libjb.a" >> ${CFG}
+else
+	echo Using shared libjb...
+	echo "ldflags+=-Llibjb libjb/libjb.so.1.0.0" >> ${CFG}
 fi

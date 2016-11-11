@@ -1,2 +1,2 @@
-LIBS+=libjb/libjb.a
+ldflags+=libjb/libjb.a
 extra+=libjb/libjb.a
