@@ -25,23 +25,10 @@ As needed, I will include test scripts to verify certain features.
 * uses smallest appropriate stdint types
 
 ## TODO
-* Unicode support
+* better unicode support
 * yacc token parser
 * sixel graphics support
 * more accurate terminal emulation where possible
-
-## Note on Submodule
-jbxvt uses the submodule libjb.  If you are not familiar with submodules,
-please read https://git-scm.com/book/en/v2/Git-Tools-Submodules.
-Make sure you run the following after checking out jbxvt:
-
-	git submodule init
-	git submodule update
-	git config --add --bool fetch.recurseSubmodules true
-
-You may also choose to install libjb on its own before configuring
-and building jbxvt.  In this case, libjb will be loaded
-as a shared library.  Otherwise, the bundled libjb is used statically.
 
 ## Building
 Run ./configure, then make, as usual.  Parallel building on FreeBSD
