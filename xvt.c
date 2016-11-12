@@ -34,16 +34,16 @@ static void handle_token_elr(struct JBXVTToken * restrict token)
 {
 	int32_t * restrict t = token->arg;
 	struct JBXVTPrivateModes * restrict m = jbxvt_get_modes();
-		switch (t[0]) {
-		case 2:
-			m->elr_once = true;
-		case 1:
-			m->elr = true;
-			break;
-		default:
-			m->elr = m->elr_once = false;
-		}
-		m->elr_pixels = t[1] == 1;
+	switch (t[0]) {
+	case 2:
+		m->elr_once = true;
+	case 1:
+		m->elr = true;
+		break;
+	default:
+		m->elr = m->elr_once = false;
+	}
+	m->elr_pixels = t[1] == 1;
 }
 static void handle_token_ll(struct JBXVTToken * restrict token)
 {
@@ -93,45 +93,53 @@ static void handle_token_rqm(struct JBXVTToken * restrict token)
 		jbxvt_get_modes()->s8c1t = true;
 	}
 }
+static void handle_token_mc_private(int32_t * restrict t)
+{
+	switch (t[0]) {
+	case 4:
+		LOG("turn off printer controller mode");
+		break;
+	case 5:
+		LOG("turn on printer controller mode");
+		break;
+	case 10:
+		LOG("html screen dump");
+		break;
+	case 11:
+		LOG("svg screen dump");
+		break;
+	case 0:
+	default:
+		LOG("print screen");
+	}
+}
+static void handle_token_mc_public(int32_t * restrict t)
+{
+	switch (t[0]) {
+	case 1:
+		LOG("print line containing cursor");
+		break;
+	case 4:
+		LOG("turn off autoprint mode");
+		break;
+	case 5:
+		LOG("turn on autoprint mode");
+		break;
+	case 10:
+		LOG("print composed display");
+		break;
+	case 11:
+		LOG("print all pages");
+		break;
+	}
+}
 static void handle_token_mc(struct JBXVTToken * restrict token)
 {
 	int32_t * restrict t = token->arg;
 	if (token->private != '?')
-		switch (t[0]) {
-		case 4:
-			LOG("turn off printer controller mode");
-			break;
-		case 5:
-			LOG("turn on printer controller mode");
-			break;
-		case 10:
-			LOG("html screen dump");
-			break;
-		case 11:
-			LOG("svg screen dump");
-			break;
-		case 0:
-		default:
-			LOG("print screen");
-		}
+		handle_token_mc_private(t);
 	else
-		switch (t[0]) {
-		case 1:
-			LOG("print line containing cursor");
-			break;
-		case 4:
-			LOG("turn off autoprint mode");
-			break;
-		case 5:
-			LOG("turn on autoprint mode");
-			break;
-		case 10:
-			LOG("print composed display");
-			break;
-		case 11:
-			LOG("print all pages");
-			break;
-		}
+		handle_token_mc_public(t);
 
 }
 static void handle_txtpar(xcb_connection_t * xc,
@@ -155,14 +163,14 @@ static void select_charset(const char c, const uint8_t i)
 	switch(c) {
 #define CS(l, cs, d) case l:LOG(d);\
 		jbxvt_get_modes()->charset[i]=CHARSET_##cs;break;
-	CS('A', GB, "UK ASCII");
-	CS('0', SG0, "SG0: special graphics");
-	CS('1', SG1, "SG1: alt char ROM standard graphics");
-	CS('2', SG2, "SG2: alt char ROM special graphics");
+		CS('A', GB, "UK ASCII");
+		CS('0', SG0, "SG0: special graphics");
+		CS('1', SG1, "SG1: alt char ROM standard graphics");
+		CS('2', SG2, "SG2: alt char ROM special graphics");
 	default: // reset
 		LOG("Unknown character set");
 		// fall through
-	CS('B', ASCII, "US ASCII");
+		CS('B', ASCII, "US ASCII");
 	}
 }
 static void decstbm(struct JBXVTToken * restrict token)
