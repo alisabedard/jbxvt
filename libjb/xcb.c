@@ -1,13 +1,12 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "xcb.h"
 #include "log.h"
-#include "util.h"
-// Include this just to check syntax
+// Include here to check syntax:
 #include "size.h"
+#include "util.h"
 #include <errno.h>
 #include <string.h>
 #include <sys/select.h>
-#include <unistd.h>
 bool jb_xcb_cookie_has_error(xcb_connection_t * x, const xcb_void_cookie_t c)
 {
 	xcb_generic_error_t * e = xcb_request_check(x, c);
@@ -18,7 +17,7 @@ bool jb_xcb_cookie_has_error(xcb_connection_t * x, const xcb_void_cookie_t c)
 }
 static void xerr(xcb_connection_t * x, const char * msg)
 {
-        xcb_disconnect(x);
+	xcb_disconnect(x);
 	if (errno)
 		perror(msg);
 	else
@@ -27,40 +26,41 @@ static void xerr(xcb_connection_t * x, const char * msg)
 }
 void jb_check_x(xcb_connection_t * x)
 {
-       switch(xcb_connection_has_error(x)) {
-        case 0: // Success
-                break;
-        case XCB_CONN_ERROR:
-                xerr(x, "X transport error, DISPLAY unavailable");
-        case XCB_CONN_CLOSED_EXT_NOTSUPPORTED:
-                xerr(x, "Extension not supported");
-        case XCB_CONN_CLOSED_MEM_INSUFFICIENT:
-                xerr(x, "Insufficient memory");
-        case XCB_CONN_CLOSED_REQ_LEN_EXCEED:
-                xerr(x, "Request length exceeded");
-        case XCB_CONN_CLOSED_PARSE_ERR:
-                xerr(x, "Invalid DISPLAY string");
-        case XCB_CONN_CLOSED_INVALID_SCREEN:
-                xerr(x, "Invalid screen");
-        }
+	switch(xcb_connection_has_error(x)) {
+	case 0: // Success
+		break;
+	case XCB_CONN_ERROR:
+		xerr(x, "X transport error, DISPLAY unavailable");
+	case XCB_CONN_CLOSED_EXT_NOTSUPPORTED:
+		xerr(x, "Extension not supported");
+	case XCB_CONN_CLOSED_MEM_INSUFFICIENT:
+		xerr(x, "Insufficient memory");
+	case XCB_CONN_CLOSED_REQ_LEN_EXCEED:
+		xerr(x, "Request length exceeded");
+	case XCB_CONN_CLOSED_PARSE_ERR:
+		xerr(x, "Invalid DISPLAY string");
+	case XCB_CONN_CLOSED_INVALID_SCREEN:
+		xerr(x, "Invalid screen");
+	}
 }
 xcb_connection_t * jb_get_xcb_connection(const char * display, int * screen)
 {
-        xcb_connection_t * x = xcb_connect(display, screen);
+	errno = 0;
+	xcb_connection_t * x = xcb_connect(display, screen);
 	jb_check_x(x);
 	return x;
 }
 xcb_screen_t * jb_get_xcb_screen(xcb_connection_t * x)
 {
-        return xcb_setup_roots_iterator(xcb_get_setup(x)).data;
+	return xcb_setup_roots_iterator(xcb_get_setup(x)).data;
 }
 pixel_t jb_get_pixel(xcb_connection_t * x, const xcb_colormap_t cmap,
 	const char * color)
 {
-	xcb_alloc_named_color_cookie_t c
-	= xcb_alloc_named_color(x, cmap, strlen(color), color);
+	xcb_alloc_named_color_cookie_t c = xcb_alloc_named_color(x,
+		cmap, strlen(color), color);
 	xcb_alloc_named_color_reply_t * r
-	= xcb_alloc_named_color_reply(x, c, NULL);
+		= xcb_alloc_named_color_reply(x, c, NULL);
 	if (jb_check(r, "Could not allocate color"))
 		return 0;
 	pixel_t p = r->pixel;
@@ -95,6 +95,34 @@ xcb_atom_t jb_get_atom(xcb_connection_t * x, const char * name)
 	const xcb_atom_t a = r->atom;
 	free(r);
 	return a;
+}
+/* Create a gc with foreground and background as specified.
+   If gc is passed as 0, a new gc value is generated and returned.  */
+xcb_gc_t jb_create_gc(xcb_connection_t * xc, xcb_gc_t gc,
+	const xcb_window_t win, const char * restrict fg,
+	const char * restrict bg)
+{
+	const xcb_get_window_attributes_cookie_t wac
+		= xcb_get_window_attributes(xc, win);
+	if (!gc)
+		gc = xcb_generate_id(xc);
+	{
+		xcb_void_cookie_t c
+			= xcb_create_gc_checked(xc, gc, win, 0, NULL);
+		xcb_generic_error_t * e = xcb_request_check (xc, c);
+		if (jb_check(!e, "Could not create gc"))
+			free(e);
+	}
+	xcb_get_window_attributes_reply_t * r
+		= xcb_get_window_attributes_reply(xc, wac, NULL);
+	jb_require(r, "Could not get colormap information.");
+	const xcb_colormap_t cm = r->colormap;
+	free(r);
+	const pixel_t fgpx = jb_get_pixel(xc, cm, fg);
+	const pixel_t bgpx = jb_get_pixel(xc, cm, bg);
+	xcb_change_gc(xc, gc, XCB_GC_FOREGROUND | XCB_GC_BACKGROUND,
+		(uint32_t[]){fgpx, bgpx});
+	return gc;
 }
 bool jb_next_event_timed(xcb_connection_t * x,
 	xcb_generic_event_t ** e, const uint32_t delay)

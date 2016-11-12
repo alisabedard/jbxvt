@@ -1,4 +1,5 @@
-version=0.2
+# Copyright 2016, Jeffrey E. Bedard
+version=0.3
 libjb_cflags+=-Wall -Wextra
 libjb_cflags+=-D_XOPEN_SOURCE=700
 libjb_cflags+=-DJB_VERSION=${version}
@@ -23,8 +24,8 @@ objs=util.o xcb.o time.o file.o
 installdir=${DESTDIR}${PREFIX}
 libjb_so=libjb.so.1.0.0
 libjb_soname=libjb.so.1
-libjb: libjb.so libjb.a
-libjb.so: ${objs}
+libjb: libjb.so.1.0.0 libjb.a
+libjb.so.1.0.0: ${objs}
 	${CC} -shared -Wl,-soname,${libjb_soname} \
 		-o ${libjb_so} ${objs} \
 		${LDFLAGS} ${libjb_ldflags}
@@ -38,7 +39,7 @@ clean:
 libdir=${DESTDIR}${PREFIX}/lib
 incdir=${DESTDIR}${PREFIX}/include/libjb
 INSTALL=install
-install:
+install: libjb
 	${INSTALL} -d ${libdir} ${incdir}
 	install ${libjb_so} ${libdir}
 	install libjb.a ${libdir}
