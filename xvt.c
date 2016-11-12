@@ -30,8 +30,38 @@
 #else
 #define TLOG(...)
 #endif//DEBUG_TOKENS
-static void handle_token_mc(xcb_connection_t * xc __attribute__((unused)),
-	struct Token * restrict token)
+static void handle_token_rqm(struct Token * restrict token)
+{
+	int32_t * restrict t = token->arg;
+	if (token->private == '?') {
+		LOG("\tRQM Ps: %d", t[0]);
+		dprintf(jbxvt_get_fd(), "%s%d;%d$y", jbxvt_get_csi(),
+			t[0], 0); // FIXME:  Return actual value
+		return;
+	}
+	LOG("\tDECSCL 0: %d, 1: %d", t[0], t[1]);
+	switch (t[0]) {
+	case 62:
+		LOG("\t\tVT200");
+		break;
+	case 63:
+		LOG("\t\tVT300");
+		break;
+	case 0:
+	case 61:
+	default:
+		LOG("\t\tVT100");
+		break;
+	}
+	if (t[1] == 1) {
+		LOG("\t\t7-bit controls");
+		jbxvt_get_modes()->s8c1t = false;
+	} else {
+		LOG("\t\t8-bit controls");
+		jbxvt_get_modes()->s8c1t = true;
+	}
+}
+static void handle_token_mc(struct Token * restrict token)
 {
 	int32_t * restrict t = token->arg;
 	if (token->private != '?')
@@ -309,7 +339,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_MC:
 		LOG("JBXVT_TOKEN_MC");
-		handle_token_mc(xc, &token);
+		handle_token_mc(&token);
 		break;
 	case JBXVT_TOKEN_NEL: // next line
 		LOG("JBXVT_TOKEN_NEL");
@@ -355,33 +385,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_RQM:
 		LOG("JBXVT_TOKEN_RQM");
-		if (token.private == '?') {
-			LOG("\tRQM Ps: %d", t[0]);
-			dprintf(jbxvt_get_fd(), "%s%d;%d$y", jbxvt_get_csi(),
-				t[0], 0); // FIXME:  Return actual valu
-		} else {
-			LOG("\tDECSCL 0: %d, 1: %d", t[0], t[1]);
-			switch (t[0]) {
-			case 62:
-				LOG("\t\tVT200");
-				break;
-			case 63:
-				LOG("\t\tVT300");
-				break;
-			case 0:
-			case 61:
-			default:
-				LOG("\t\tVT100");
-				break;
-			}
-			if (t[1] == 1) {
-				LOG("\t\t7-bit controls");
-				jbxvt_get_modes()->s8c1t = false;
-			} else {
-				LOG("\t\t8-bit controls");
-				jbxvt_get_modes()->s8c1t = true;
-			}
-		}
+		handle_token_rqm(&token);
 		break;
 	case JBXVT_TOKEN_S7C1T: // 7-bit controls
 		LOG("JBXVT_TOKEN_S7C1T");
