@@ -106,7 +106,7 @@ static inline bool is_string_char(register int_fast16_t c)
 		|| c == '\r' || c == '\t');
 }
 static void handle_string_char(xcb_connection_t * xc,
-	int_fast16_t c, struct Token * restrict tk)
+	int_fast16_t c, struct JBXVTToken * restrict tk)
 {
 	uint_fast16_t i = 0, nl = 0;
 	uint8_t * restrict s = tk->string;
@@ -135,7 +135,7 @@ static uint8_t get_utf_bytes(uint8_t c)
 	return 0;
 }
 static void utf8_3(xcb_connection_t * xc,
-	struct Token * restrict tk, int_fast16_t c) // 1
+	struct JBXVTToken * restrict tk, int_fast16_t c) // 1
 {
 	LOG("utf8_3()");
 	LOG("\t0x%x\n", (unsigned int)c);
@@ -149,7 +149,7 @@ static void utf8_3(xcb_connection_t * xc,
 	}
 }
 static void utf8_2(xcb_connection_t * xc,
-	struct Token * restrict tk, int_fast16_t c) // 1
+	struct JBXVTToken * restrict tk, int_fast16_t c) // 1
 {
 	LOG("utf8_2()");
 	LOG("\t0x%x\n", (unsigned int)c);
@@ -193,7 +193,7 @@ tk_null:
 		tk->type = JBXVT_TOKEN_NULL;
 	}
 }
-static void utf8_1(struct Token * restrict tk, int_fast16_t c) // 1
+static void utf8_1(struct JBXVTToken * restrict tk, int_fast16_t c) // 1
 {
 	LOG("utf8_1()");
 	LOG("\t0x%x\n", (unsigned int)c);
@@ -202,13 +202,13 @@ static void utf8_1(struct Token * restrict tk, int_fast16_t c) // 1
 		tk->type = JBXVT_TOKEN_NULL;
 	}
 }
-static void utf8_0(struct Token * restrict tk, int_fast16_t c)
+static void utf8_0(struct JBXVTToken * restrict tk, int_fast16_t c)
 {
 	tk->type = JBXVT_TOKEN_CHAR;
 	tk->tk_char = c;
 }
 static void default_token(xcb_connection_t * xc,
-	struct Token * restrict tk, int_fast16_t c)
+	struct JBXVTToken * restrict tk, int_fast16_t c)
 {
 	switch(c) { // handle 8-bit controls
 	case JBXVT_TOKEN_CSI: case JBXVT_TOKEN_DCS: case JBXVT_TOKEN_EPA:
@@ -249,9 +249,9 @@ static void default_token(xcb_connection_t * xc,
 	}
 }
 //  Return an input token
-void jbxvt_get_token(xcb_connection_t * xc, struct Token * restrict tk)
+void jbxvt_get_token(xcb_connection_t * xc, struct JBXVTToken * restrict tk)
 {
-	memset(tk, 0, sizeof(struct Token));
+	memset(tk, 0, sizeof(struct JBXVTToken));
 	const int_fast16_t c = jbxvt_pop_char(xc, GET_XEVENTS_ONLY);
 	switch (c) {
 	case INPUT_BUFFER_EMPTY:

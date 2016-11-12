@@ -30,7 +30,7 @@
 #else
 #define TLOG(...)
 #endif//DEBUG_TOKENS
-static void handle_token_ll(struct Token * restrict token)
+static void handle_token_ll(struct JBXVTToken * restrict token)
 {
 	int32_t * restrict t = token->arg;
 	LOG("t[0]: %d, t[1]: %d", t[0], t[1]);
@@ -47,7 +47,7 @@ static void handle_token_ll(struct Token * restrict token)
 		LOG("LL -- unimplemented");
 	}
 }
-static void handle_token_rqm(struct Token * restrict token)
+static void handle_token_rqm(struct JBXVTToken * restrict token)
 {
 	int32_t * restrict t = token->arg;
 	if (token->private == '?') {
@@ -78,7 +78,7 @@ static void handle_token_rqm(struct Token * restrict token)
 		jbxvt_get_modes()->s8c1t = true;
 	}
 }
-static void handle_token_mc(struct Token * restrict token)
+static void handle_token_mc(struct JBXVTToken * restrict token)
 {
 	int32_t * restrict t = token->arg;
 	if (token->private != '?')
@@ -120,7 +120,7 @@ static void handle_token_mc(struct Token * restrict token)
 
 }
 static void handle_txtpar(xcb_connection_t * xc,
-	struct Token * restrict token)
+	struct JBXVTToken * restrict token)
 {
 	switch (token->arg[0]) {
 	case 0 :
@@ -150,7 +150,7 @@ static void select_charset(const char c, const uint8_t i)
 	CS('B', ASCII, "US ASCII");
 	}
 }
-static void decstbm(struct Token * restrict token)
+static void decstbm(struct JBXVTToken * restrict token)
 {
 	int32_t * restrict t = token->arg;
 	LOG("JBXVT_TOKEN_STBM args: %d, 0: %d, 1: %d",
@@ -183,7 +183,7 @@ static void tbc(const uint8_t t)
 }
 void jbxvt_parse_token(xcb_connection_t * xc)
 {
-	struct Token token;
+	struct JBXVTToken token;
 	jbxvt_get_token(xc, &token);
 	int32_t * t = token.arg;
 	// n is sanitized for ops with optional args

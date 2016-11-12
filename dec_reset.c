@@ -16,7 +16,7 @@
 #undef LOG
 #define LOG(...)
 #endif
-void jbxvt_dec_reset(xcb_connection_t * xc, struct Token * restrict token)
+void jbxvt_dec_reset(xcb_connection_t * xc, struct JBXVTToken * restrict token)
 {
 	LOG("handle_reset(%d)", token->arg[0]);
 	const bool is_set = token->type == JBXVT_TOKEN_SET;

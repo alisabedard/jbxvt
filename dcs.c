@@ -4,13 +4,13 @@
 #include "command.h"
 #include "cmdtok.h"
 #include "libjb/log.h"
-static void check_st(xcb_connection_t * xc, struct Token * t)
+static void check_st(xcb_connection_t * xc, struct JBXVTToken * t)
 {
 	int_fast16_t c = jbxvt_pop_char(xc, 0);
 	if (c != JBXVT_TOKEN_ST)
 		t->type = JBXVT_TOKEN_NULL;
 }
-void jbxvt_dcs(xcb_connection_t * xc, struct Token * t)
+void jbxvt_dcs(xcb_connection_t * xc, struct JBXVTToken * t)
 {
 	int_fast16_t c = jbxvt_pop_char(xc, 0);
 	switch (c) {

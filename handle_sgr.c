@@ -58,7 +58,7 @@ static bool handle_color_encoding(const int32_t arg, const bool is_fg,
 #define SGRFG(c) sgrc(c, true)
 #define SGRBG(c) sgrc(c, false)
 void jbxvt_handle_sgr(xcb_connection_t * xc,
-	struct Token * restrict token)
+	struct JBXVTToken * restrict token)
 {
 	bool fg_rgb_or_index = false;
 	bool bg_rgb_or_index = false;

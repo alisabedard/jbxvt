@@ -9,7 +9,7 @@
 #include "screen.h"
 #include <stdio.h>
 void jbxvt_csi(xcb_connection_t * xc,
-	int_fast16_t c, struct Token * restrict tk)
+	int_fast16_t c, struct JBXVTToken * restrict tk)
 {
 	c = jbxvt_pop_char(xc, 0);
 	if (c >= '<' && c <= '?') {
@@ -40,7 +40,7 @@ void jbxvt_csi(xcb_connection_t * xc,
 	tk->type = c;
 }
 void jbxvt_end_cs(xcb_connection_t * xc,
-	int_fast16_t c, struct Token * restrict tk)
+	int_fast16_t c, struct JBXVTToken * restrict tk)
 {
 	c = jbxvt_pop_char(xc, 0);
 	uint_fast16_t n = 0;
@@ -62,7 +62,7 @@ void jbxvt_end_cs(xcb_connection_t * xc,
 	tk->type = JBXVT_TOKEN_TXTPAR;
 }
 void jbxvt_esc(xcb_connection_t * xc,
-	int_fast16_t c, struct Token * restrict tk)
+	int_fast16_t c, struct JBXVTToken * restrict tk)
 {
 	c = jbxvt_pop_char(xc, 0);
 	switch(c) {

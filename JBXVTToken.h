@@ -1,8 +1,8 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-#ifndef JBXVT_TOKEN_H
-#define JBXVT_TOKEN_H
-#include "TokenType.h"
+#ifndef JBXVT_JBXVTTOKEN_H
+#define JBXVT_JBXVTTOKEN_H
+#include "JBXVTTokenType.h"
 #include <stdint.h>
 enum JBXVTTokenLimits {
 	JBXVT_TOKEN_MAX_LENGTH =	63,	// max length of a string token
@@ -10,7 +10,7 @@ enum JBXVTTokenLimits {
 };
 /*  Structure used to represent a piece of input from the program
  *  or an interesting X event.  */
-struct Token{
+struct JBXVTToken{
 	int32_t arg[JBXVT_TOKEN_MAX_ARGS];		// first numerical arguments
 	uint8_t string[JBXVT_TOKEN_MAX_LENGTH + 1];	// the text for stringtokens
 	enum JBXVTTokenType type;			// type of token
@@ -22,4 +22,4 @@ struct Token{
 	uint8_t nargs:4;		// number of arguments passed
 	uint8_t tk_char;		// single (unprintable) character
 };
-#endif//!JBXVT_TOKEN_H
+#endif//!JBXVT_JBXVTTOKEN_H

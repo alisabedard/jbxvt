@@ -3,7 +3,7 @@
 #ifndef JBXVT_TOKENTYPE_H
 #define JBXVT_TOKENTYPE_H
 // Reference man console_codes(4) and ctlseqs(ms)
-//  struct Token types
+//  struct JBXVTToken types
 enum JBXVTTokenType {
 	JBXVT_TOKEN_NULL = 0, // null token to be ignored
 	// Tokens > 1000 are artificial.
