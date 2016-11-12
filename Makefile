@@ -26,8 +26,7 @@ color_index.h: color_index.txt
 	${AWK} -f convert_colors.awk color_index.txt > color_index.h
 bindest=${DESTDIR}${PREFIX}/bin
 docdest=${DESTDIR}${PREFIX}/share/man/man1
-install:
-#	cd libjb && ${MAKE} install
+install: ${exe}
 	install -d ${bindest}
 	install ${exe} ${bindest}
 	install -d ${docdest}
@@ -62,5 +61,5 @@ cppcheck:
 	echo 'Results written to cppcheck.log'
 libjb: libjb/libjb.a
 libjb/libjb.a:
-	cd libjb && ${MAKE}
+	cd libjb && ${MAKE} libjb.a
 #EOF
