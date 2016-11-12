@@ -30,6 +30,23 @@
 #else
 #define TLOG(...)
 #endif//DEBUG_TOKENS
+static void handle_token_ll(struct Token * restrict token)
+{
+	int32_t * restrict t = token->arg;
+	LOG("t[0]: %d, t[1]: %d", t[0], t[1]);
+	switch (t[1]) {
+	case 0:
+	case ' ': // SCUSR
+		LOG("SCUSR");
+		jbxvt_set_cursor_attr(t[0]);
+		break;
+	case '"': // SCA
+		LOG("SCA -- unimplemented");
+		break;
+	default: // LL
+		LOG("LL -- unimplemented");
+	}
+}
 static void handle_token_rqm(struct Token * restrict token)
 {
 	int32_t * restrict t = token->arg;
@@ -323,19 +340,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_LL:
 		LOG("JBXVT_TOKEN_LL");
-		LOG("t[0]: %d, t[1]: %d", t[0], t[1]);
-		switch (t[1]) {
-		case 0:
-		case ' ': // SCUSR
-			LOG("SCUSR");
-			jbxvt_set_cursor_attr(t[0]);
-			break;
-		case '"': // SCA
-			LOG("SCA -- unimplemented");
-			break;
-		default: // LL
-			LOG("LL -- unimplemented");
-		}
+		handle_token_ll(&token);
 		break;
 	case JBXVT_TOKEN_MC:
 		LOG("JBXVT_TOKEN_MC");
