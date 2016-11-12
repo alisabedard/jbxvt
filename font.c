@@ -13,24 +13,11 @@ struct JBDim jbxvt_get_font_size(void)
 {
 	return font_size;
 }
-/* Try to open the named font.  Return true if successful.  Print
-   an error message and return false if not successful.  */
-static bool open_font(xcb_connection_t * xc, const xcb_font_t f,
-	char * name)
-{
-	xcb_void_cookie_t c = xcb_open_font_checked(xc, f, strlen(name),
-		name);
-	if (jb_xcb_cookie_has_error(xc, c)) {
-		fprintf(stderr, "Cannot open font %s\n", name);
-		return false;
-	}
-	return true;
-}
 xcb_cursor_t jbxvt_get_cursor(xcb_connection_t * xc, const uint16_t id,
 	const uint16_t fg, const uint16_t bg)
 {
 	xcb_font_t f = xcb_generate_id(xc);
-	if (!open_font(xc, f, "cursor"))
+	if (!jb_open_font(xc, f, "cursor"))
 		return 0;
 	xcb_cursor_t c = xcb_generate_id(xc);
 	xcb_create_glyph_cursor(xc, c, f, f,
@@ -77,14 +64,14 @@ void jbxvt_init_fonts(xcb_connection_t * xc,
 	struct JBXVTFontOptions * opt)
 {
 	xcb_font_t f = jbxvt_get_normal_font(xc);
-	jb_require(open_font(xc, f, opt->normal),
+	jb_require(jb_open_font(xc, f, opt->normal),
 		"Could not load the primary font");
 	xcb_query_font_cookie_t q = xcb_query_font(xc, f);
 	f = jbxvt_get_bold_font(xc);
-	if (!open_font(xc, f, opt->bold))
-		open_font(xc, f, opt->normal);
+	if (!jb_open_font(xc, f, opt->bold))
+		jb_open_font(xc, f, opt->normal);
 	f = jbxvt_get_italic_font(xc);
-	if (!open_font(xc, f, opt->italic))
-		open_font(xc, f, opt->normal);
+	if (!jb_open_font(xc, f, opt->italic))
+		jb_open_font(xc, f, opt->normal);
 	setup_font_metrics(xc, q);
 }
