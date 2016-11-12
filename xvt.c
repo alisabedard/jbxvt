@@ -30,6 +30,21 @@
 #else
 #define TLOG(...)
 #endif//DEBUG_TOKENS
+static void handle_token_elr(struct JBXVTToken * restrict token)
+{
+	int32_t * restrict t = token->arg;
+	struct JBXVTPrivateModes * restrict m = jbxvt_get_modes();
+		switch (t[0]) {
+		case 2:
+			m->elr_once = true;
+		case 1:
+			m->elr = true;
+			break;
+		default:
+			m->elr = m->elr_once = false;
+		}
+		m->elr_pixels = t[1] == 1;
+}
 static void handle_token_ll(struct JBXVTToken * restrict token)
 {
 	int32_t * restrict t = token->arg;
@@ -281,18 +296,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_ELR: // locator report
 		LOG("JBXVT_TOKEN_ELR");
-		switch (t[0]) {
-		case 2:
-			jbxvt_get_modes()->elr_once = true;
-		case 1:
-			jbxvt_get_modes()->elr = true;
-			break;
-		case 0:
-		default:
-			jbxvt_get_modes()->elr = false;
-			jbxvt_get_modes()->elr_once = false;
-		}
-		jbxvt_get_modes()->elr_pixels = t[1] == 1;
+		handle_token_elr(&token);
 		break;
 	case JBXVT_TOKEN_ENTGM52: // vt52 graphics mode
 		LOG("JBXVT_TOKEN_ENTGM52");
