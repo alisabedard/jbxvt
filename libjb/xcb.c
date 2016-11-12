@@ -88,6 +88,22 @@ pixel_t jb_set_bg(xcb_connection_t * x, const xcb_gc_t gc, const pixel_t p)
 	xcb_change_gc(x, gc, XCB_GC_BACKGROUND, &(uint32_t){p});
 	return p;
 }
+static pixel_t jb_set_named_color(xcb_connection_t * xc, const xcb_gc_t gc,
+	const char * color, const bool is_fg)
+{
+	return (is_fg ? jb_set_fg : jb_set_bg)(xc, gc,
+		jb_get_pixel(xc, jb_get_default_colormap(xc), color));
+}
+pixel_t jb_set_named_fg(xcb_connection_t * xc, const xcb_gc_t gc,
+	const char * color)
+{
+	return jb_set_named_color(xc, gc, color, true);
+}
+pixel_t jb_set_named_bg(xcb_connection_t * xc, const xcb_gc_t gc,
+	const char * color)
+{
+	return jb_set_named_color(xc, gc, color, false);
+}
 xcb_atom_t jb_get_atom(xcb_connection_t * x, const char * name)
 {
 	xcb_intern_atom_reply_t * r = xcb_intern_atom_reply(x,
@@ -96,12 +112,33 @@ xcb_atom_t jb_get_atom(xcb_connection_t * x, const char * name)
 	free(r);
 	return a;
 }
+static xcb_colormap_t get_cmap_from_winattr(xcb_connection_t * xc,
+	xcb_get_window_attributes_cookie_t wac)
+{
+	xcb_get_window_attributes_reply_t * r
+		= xcb_get_window_attributes_reply(xc, wac, NULL);
+	jb_require(r, "Could not get colormap information.");
+	const xcb_colormap_t cm = r->colormap;
+	free(r);
+	return cm;
+}
+xcb_colormap_t jb_get_colormap(xcb_connection_t * xc,
+	const xcb_window_t win)
+{
+	return get_cmap_from_winattr(xc,
+		xcb_get_window_attributes(xc, win));
+}
+xcb_colormap_t jb_get_default_colormap(xcb_connection_t * xc)
+{
+	return jb_get_xcb_screen(xc)->default_colormap;
+}
 /* Create a gc with foreground and background as specified.
    If gc is passed as 0, a new gc value is generated and returned.  */
 xcb_gc_t jb_create_gc(xcb_connection_t * xc, xcb_gc_t gc,
 	const xcb_window_t win, const char * restrict fg,
 	const char * restrict bg)
 {
+	// defer processing reply
 	const xcb_get_window_attributes_cookie_t wac
 		= xcb_get_window_attributes(xc, win);
 	if (!gc)
@@ -113,11 +150,7 @@ xcb_gc_t jb_create_gc(xcb_connection_t * xc, xcb_gc_t gc,
 		if (jb_check(!e, "Could not create gc"))
 			free(e);
 	}
-	xcb_get_window_attributes_reply_t * r
-		= xcb_get_window_attributes_reply(xc, wac, NULL);
-	jb_require(r, "Could not get colormap information.");
-	const xcb_colormap_t cm = r->colormap;
-	free(r);
+	const xcb_colormap_t cm = get_cmap_from_winattr(xc, wac);
 	const pixel_t fgpx = jb_get_pixel(xc, cm, fg);
 	const pixel_t bgpx = jb_get_pixel(xc, cm, bg);
 	xcb_change_gc(xc, gc, XCB_GC_FOREGROUND | XCB_GC_BACKGROUND,
@@ -139,5 +172,17 @@ bool jb_next_event_timed(xcb_connection_t * x,
 		return false; // timeout
 	// event occurred before timeout:
 	*e = xcb_poll_for_event(x);
+	return true;
+}
+// Open font specified by name.  initialized fid must be supplied
+bool jb_open_font(xcb_connection_t * xc, xcb_font_t fid,
+	const char * name)
+{
+	xcb_void_cookie_t c = xcb_open_font_checked(xc, fid,
+		strlen(name), name);
+	if (jb_xcb_cookie_has_error(xc, c)) {
+		LIBJB_WARN("Failed to load font: %s", name);
+		return false;
+	}
 	return true;
 }
