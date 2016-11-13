@@ -159,8 +159,8 @@ void jbxvt_handle_sgr(xcb_connection_t * xc,
 		case 35: case 95: sgrc(015, true); break;
 		case 36: case 96: sgrc(016, true); break;
 		case 37: case 97: sgrc(017, true); break;
-		case 40: sgrc(0, true); break;
-		case 100: sgrc(010, true); break;
+		case 40: sgrc(0, false); break;
+		case 100: sgrc(010, false); break;
 		case 41: case 101: sgrc(011, false); break;
 		case 42: case 102: sgrc(012, false); break;
 		case 43: case 103: sgrc(013, false); break;
