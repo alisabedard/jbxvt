@@ -22,14 +22,18 @@ static void del(xcb_connection_t * xc, uint16_t col, uint16_t width)
 {
 	struct JBXVTScreen * restrict s = jbxvt_get_screen();
 	const int16_t y = s->cursor.y;
-	const uint16_t cw = jbxvt_get_char_size().width;
-	if (col + width > cw) // keep in screen
-		width = cw - col;
+	{ // cw scope
+		const uint16_t cw = jbxvt_get_char_size().width;
+		if (col + width > cw) // keep in screen
+			width = cw - col;
+	}
 	memset(s->text[y] + col, 0, width);
 	memset(s->rend[y] + col, 0, width << 2);
-	const struct JBDim f = jbxvt_get_font_size();
-	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), col * f.w,
-		y * f.h, width * f.w, f.h);
+	{ // f scope
+		const struct JBDim f = jbxvt_get_font_size();
+		xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), col * f.w,
+			y * f.h, width * f.w, f.h);
+	}
 	xcb_flush(xc);
 	s->wrap[y] = false;
 	s->dwl[y] = false;
