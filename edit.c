@@ -26,9 +26,11 @@ static void finalize(xcb_connection_t * xc,
 	const uint16_t width, const int8_t count)
 {
 	copy_area(xc, x, p.y, width);
-	const struct JBDim f = jbxvt_get_font_size();
-	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc),
-		p.x, p.y, count * f.w, f.h);
+	{ // f scope
+		const struct JBDim f = jbxvt_get_font_size();
+		xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc),
+			p.x, p.y, count * f.w, f.h);
+	}
 	jbxvt_get_screen()->wrap_next = 0;
 	jbxvt_draw_cursor(xc);
 }
