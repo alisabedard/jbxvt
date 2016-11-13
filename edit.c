@@ -67,9 +67,11 @@ static void begin(xcb_connection_t * xc, int16_t * x,
 	jbxvt_set_scroll(xc, 0);
 	jbxvt_draw_cursor(xc);
 	const struct JBDim c = jbxvt_get_screen()->cursor;
-	struct JBDim p = jbxvt_chars_to_pixels(c);
-	x[0] = p.x;
-	x[1] = p.x + *count * jbxvt_get_font_size().width;
+	{ // p scope
+		struct JBDim p = jbxvt_chars_to_pixels(c);
+		x[0] = p.x;
+		x[1] = p.x + *count * jbxvt_get_font_size().width;
+	}
 	if (!insert)
 		JB_SWAP(int16_t, x[0], x[1]);
 	jbxvt_check_selection(xc, c.y, c.y);
