@@ -1,12 +1,8 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "font.h"
-#include "config.h"
-#include "cursor.h"
 #include "libjb/util.h"
 #include "libjb/xcb.h"
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 static uint8_t font_ascent;
 static struct JBDim font_size;
 struct JBDim jbxvt_get_font_size(void)
