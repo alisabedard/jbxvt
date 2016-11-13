@@ -19,14 +19,16 @@ void jbxvt_csi(xcb_connection_t * xc,
 	//  read any numerical arguments
 	uint_fast16_t i = 0;
 	do {
-		uint_fast16_t n = 0;
-		while (c >= '0' && c <= '9') { // is a number
-			// Advance position and convert
-			n = n * 10 + c - '0';
-			c = jbxvt_pop_char(xc, 0); // next digit
+		{ // n scope
+			uint_fast16_t n = 0;
+			while (c >= '0' && c <= '9') { // is a number
+				// Advance position and convert
+				n = n * 10 + c - '0';
+				c = jbxvt_pop_char(xc, 0); // next digit
+			}
+			if (i < JBXVT_TOKEN_MAX_ARGS)
+				  tk->arg[i++] = n;
 		}
-		if (i < JBXVT_TOKEN_MAX_ARGS)
-			  tk->arg[i++] = n;
 		if (c == JBXVT_TOKEN_ESC)
 			  jbxvt_push_char(c);
 		if (c < ' ')
