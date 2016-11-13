@@ -93,11 +93,11 @@ static void copy_data_after_count(const uint8_t count,
 	// copy the data after count
 	const uint16_t diff = jbxvt_get_char_size().width - count;
 	struct JBXVTScreen * restrict s = jbxvt_get_screen();
-	{
+	{ // * i scope
 		uint8_t * i = s->text[c.y] + c.x;
 		memmove(i, i + count, diff);
 	}
-	{
+	{ // * i scope
 		uint32_t * i = s->rend[c.y] + c.x;
 		memmove(i, i + count, diff << 2);
 	}
