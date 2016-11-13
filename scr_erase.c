@@ -54,7 +54,7 @@ static void del(xcb_connection_t * xc, uint16_t col, uint16_t width)
 	s->wrap[y] = false;
 	s->dwl[y] = false;
 }
-//  erase part or the whole of a line
+// Erase the specified portion of a line.
 void jbxvt_erase_line(xcb_connection_t * xc, const int8_t mode)
 {
 	jbxvt_set_scroll(xc, 0);
@@ -99,7 +99,7 @@ static bool assign_range(xcb_connection_t * restrict xc,
 	}
 	return true;
 }
-//  erase part or the whole of the screen
+// Erase the specified portion of the screen.
 void jbxvt_erase_screen(xcb_connection_t * xc, const int8_t mode)
 {
 	LOG("jbxvt_erase_screen(mode=%d)", mode);

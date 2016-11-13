@@ -10,8 +10,8 @@ enum {
 	JBXVT_ERASE_ALL = 2,
 	JBXVT_ERASE_SAVED = 3
 };
-//  erase part or the whole of a line
+// Erase the specified portion of a line.
 void jbxvt_erase_line(xcb_connection_t * xc, const int8_t mode);
-//  erase part or the whole of the screen
+// Erase the specified portion of the screen.
 void jbxvt_erase_screen(xcb_connection_t * xc, const int8_t mode);
 #endif//!JBXVT_SCR_ERASE_H
