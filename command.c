@@ -76,15 +76,14 @@ static void write_utmpx(const pid_t comm_pid, char * tty_name)
 static char * get_pseudo_tty(int * restrict pmaster,
 	int * restrict pslave)
 {
-	const fd_t mfd = posix_openpt(O_RDWR);
+	const fd_t mfd = *pmaster = posix_openpt(O_RDWR);
 	jb_require(mfd >= 0, "Could not open ptty");
 	jb_require(grantpt(mfd) != -1,
 		"Could not change mode and owner of slave ptty");
 	jb_require(unlockpt(mfd) != -1, "Could not unlock slave ptty");
-	char *ttynam = ptsname(mfd);
-	jb_require(ttynam, "Could not get tty name");
+	char *ttynam;
+	jb_require((ttynam = ptsname(mfd)), "Could not get tty name");
 	*pslave = jb_open(ttynam, O_RDWR);
-	*pmaster = mfd;
 	return ttynam;
 }
 //  Initialise the terminal attributes.
