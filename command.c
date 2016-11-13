@@ -158,11 +158,11 @@ static void cleanup(void)
 	kill(command_pid, SIGHUP);
 }
 #if defined(NETBSD) || defined(OPENBSD)
-static void sigchld(int sig __attribute__((unused)))
+static void bsd_sigchld(int sig __attribute__((unused)))
 {
 	static bool called;
 	if (!called)
-		called=true;
+		called = true;
 	else
 		exit(0);
 }
@@ -175,7 +175,7 @@ static void attach_signals(void)
 	signal(SIGPIPE, &exit);
 	signal(SIGTERM, &exit);
 #if defined(NETBSD) || defined(OPENBSD)
-	signal(SIGCHLD, &sigchld);
+	signal(SIGCHLD, &bsd_sigchld);
 #else//!NETBSD&&!OPENBSD
 	signal(SIGCHLD, &exit);
 #endif//NETBSD||OPENBSD
