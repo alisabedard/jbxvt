@@ -2,8 +2,8 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
 #include "esc.h"
-#include "command.h"
 #include "cmdtok.h"
+#include "command.h"
 #include "dcs.h"
 #include "mode.h"
 #include "screen.h"
