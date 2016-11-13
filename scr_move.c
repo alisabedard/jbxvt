@@ -18,15 +18,19 @@ int16_t jbxvt_check_cursor_position(void)
 {
 	struct JBXVTScreen * restrict s = jbxvt_get_screen();
 	struct JBDim * restrict c = &s->cursor;
-	struct JBDim * restrict m = &s->margin;
-	struct JBDim sz = jbxvt_get_char_size();
-	--sz.w; --sz.h;
-	m->top = JB_MAX(m->top, 0); // Sanitize margins
-	m->bottom = JB_MIN(m->bottom, sz.h);
-	if (jbxvt_get_modes()->decom) // Implement DECOM
-		JB_LIMIT(c->y, m->top, m->bottom);
-	JB_LIMIT(c->x, sz.w, 0);
-	JB_LIMIT(c->y, sz.h, 0);
+	{ // sz scope
+		struct JBDim sz = jbxvt_get_char_size();
+		--sz.w; --sz.h;
+		{ // m scope
+			struct JBDim * restrict m = &s->margin;
+			m->top = JB_MAX(m->top, 0); // Sanitize margins
+			m->bottom = JB_MIN(m->bottom, sz.h);
+			if (jbxvt_get_modes()->decom) // Implement DECOM
+				JB_LIMIT(c->y, m->top, m->bottom);
+		}
+		JB_LIMIT(c->x, sz.w, 0);
+		JB_LIMIT(c->y, sz.h, 0);
+	}
 	return c->y;
 }
 static inline int16_t dim(const int16_t cursor,
