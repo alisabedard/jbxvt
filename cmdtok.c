@@ -103,17 +103,23 @@ static inline bool is_string_char(register int_fast16_t c)
 static void handle_string_char(xcb_connection_t * xc,
 	int_fast16_t c, struct JBXVTToken * restrict tk)
 {
-	uint_fast16_t i = 0, nl = 0;
 	uint8_t * restrict s = tk->string;
-	do {
-		s[i++] = c;
-		c = jbxvt_pop_char(xc, GET_INPUT_ONLY);
-		if (c == '\n')
-			++nl;
-	} while (is_string_char(c) && i < JBXVT_TOKEN_MAX_LENGTH);
-	tk->nlcount = nl;
-	tk->length = i;
-	s[i] = 0; // terminating NULL
+	{ // i scope
+		uint_fast16_t i = 0;
+		{ // nl scope
+			uint_fast16_t nl = 0;
+			do {
+				s[i++] = c;
+				c = jbxvt_pop_char(xc, GET_INPUT_ONLY);
+				if (c == '\n')
+					++nl;
+			} while (is_string_char(c)
+				&& i < JBXVT_TOKEN_MAX_LENGTH);
+			tk->nlcount = nl;
+		}
+		tk->length = i;
+		s[i] = 0; // terminating NULL
+	}
 	tk->type = JBXVT_TOKEN_STRING;
 	if (c != INPUT_BUFFER_EMPTY)
 		  jbxvt_push_char(c);
