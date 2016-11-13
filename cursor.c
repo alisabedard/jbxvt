@@ -23,14 +23,13 @@ void jbxvt_blink_cursor(xcb_connection_t * xc)
 }
 void jbxvt_set_cursor_attr(const uint8_t val)
 {
-	cursor_attr = val;
+	if (val <= 8) // sanitize max (see below)
+		cursor_attr = val;
 }
 xcb_gcontext_t jbxvt_get_cursor_gc(xcb_connection_t * xc)
 {
 	static xcb_gcontext_t gc;
-	if (gc)
-		return gc;
-	return gc = xcb_generate_id(xc);
+	return gc ? gc : (gc = xcb_generate_id(xc));
 }
 void jbxvt_save_cursor(void)
 {
