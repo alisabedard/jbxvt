@@ -62,16 +62,15 @@ struct ErasureRange {
 static bool assign_range(xcb_connection_t * restrict xc,
 	const int8_t mode, struct ErasureRange * restrict range)
 {
-	struct JBXVTScreen * restrict s = jbxvt_get_screen();
 	switch (mode) {
 		// offset by 1 to not include current line, handled later
 	case JBXVT_ERASE_AFTER:
-		range->start = s->cursor.y + 1;
+		range->start = jbxvt_get_screen()->cursor.y + 1;
 		range->end = jbxvt_get_char_size().h;
 		break;
 	case JBXVT_ERASE_BEFORE:
 		range->start = 0;
-		range->end = s->cursor.y - 1;
+		range->end = jbxvt_get_screen()->cursor.y - 1;
 		break;
 	case JBXVT_ERASE_SAVED:
 		jbxvt_clear_saved_lines(xc);
@@ -93,7 +92,7 @@ void jbxvt_erase_screen(xcb_connection_t * xc, const int8_t mode)
 	/* Save cursor y locally instead of using save/restore cursor
 	   functions in order to avoid side-effects on applications
 	   using a saved cursor position.  */
-	{ // old_y scope
+	{ // *y scope, old_y scope
 		int16_t * y = &jbxvt_get_screen()->cursor.y;
 		const int16_t old_y = *y;
 		for (int16_t l = range.start; l <= range.end; ++l) {
