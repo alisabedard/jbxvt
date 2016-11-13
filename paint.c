@@ -92,10 +92,9 @@ static bool set_rstyle_colors(xcb_connection_t * xc,
 void jbxvt_paint(xcb_connection_t * xc, uint8_t * restrict str,
 	uint32_t rstyle, uint16_t len, struct JBDim p, const bool dwl)
 {
-	if (!str || len < 1) // prevent segfault
+	// Check if there is nothing to render:
+	if (!str || len < 1 || rstyle & JBXVT_RS_INVISIBLE)
 		  return;
-	if (rstyle & JBXVT_RS_INVISIBLE)
-		  return; // nothing to do
 	const bool rvid = (rstyle & JBXVT_RS_RVID)
 		|| (rstyle & JBXVT_RS_BLINK);
 	bool cmod = set_rstyle_colors(xc, rstyle);
