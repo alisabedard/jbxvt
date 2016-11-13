@@ -1,17 +1,15 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "paint.h"
-#include "color.h"
 #include "color_index.h"
-#include "font.h"
+#include "color.h"
 #include "double.h"
+#include "font.h"
 #include "libjb/log.h"
-#include "libjb/util.h"
 #include "rstyle.h"
-#include "xcb_screen.h"
 #include "window.h"
-#include <string.h>
-#define DEBUG_PAINT
+#include "xcb_screen.h"
+//#define DEBUG_PAINT
 #ifndef DEBUG_PAINT
 #undef LOG
 #define LOG(...)
