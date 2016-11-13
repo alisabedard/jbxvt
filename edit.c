@@ -68,7 +68,7 @@ static void begin(xcb_connection_t * xc, int16_t * x,
 	jbxvt_draw_cursor(xc);
 	const struct JBDim c = jbxvt_get_screen()->cursor;
 	{ // p scope
-		struct JBDim p = jbxvt_chars_to_pixels(c);
+		const struct JBDim p = jbxvt_chars_to_pixels(c);
 		x[0] = p.x;
 		x[1] = p.x + *count * jbxvt_get_font_size().width;
 	}
