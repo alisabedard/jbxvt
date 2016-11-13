@@ -6,6 +6,11 @@
 #include "libjb/util.h"
 #include "paint.h"
 #include "rstyle.h"
+//#define DEBUG_SGR
+#ifndef DEBUG_SGR
+#undef LOG
+#define LOG(...)
+#endif//!DEBUG_SGR
 // Convert 3 bit color to 9 bit color, store at offset
 __attribute__((cold))
 static void encode_rgb(uint8_t color, uint8_t offset)
@@ -55,8 +60,6 @@ static bool handle_color_encoding(const int32_t arg, const bool is_fg,
 	}
 	return false;
 }
-#define SGRFG(c) sgrc(c, true)
-#define SGRBG(c) sgrc(c, false)
 void jbxvt_handle_sgr(xcb_connection_t * xc,
 	struct JBXVTToken * restrict token)
 {
@@ -67,9 +70,7 @@ void jbxvt_handle_sgr(xcb_connection_t * xc,
 	bool bg_rgb_mode = false;
 	bool bg_index_mode = false;
 	for (uint_fast8_t i = 0; i < token->nargs; ++i) {
-#ifdef DEBUG_SGR
 		LOG("jbxvt_handle_sgr: arg[%d]: %d", i, token->arg[i]);
-#endif//DEBUG_SGR
 		if (rgb_or_index(token->arg[i], &fg_rgb_or_index,
 			&fg_index_mode, &fg_rgb_mode, true))
 			  continue;
@@ -91,8 +92,8 @@ void jbxvt_handle_sgr(xcb_connection_t * xc,
 		case 1 :
 			jbxvt_add_rstyle(JBXVT_RS_BOLD);
 			break;
-		case 2: // faint
-			SGRFG(250);
+		case 2: // faint foreground
+			sgrc(250, true);
 			break;
 		case 3:
 			jbxvt_add_rstyle(JBXVT_RS_ITALIC);
@@ -141,32 +142,32 @@ void jbxvt_handle_sgr(xcb_connection_t * xc,
 			fg_rgb_or_index = true;
 			break;
 		case 39: // foreground reset, white
-			SGRFG(017);
+			sgrc(017, true);
 			break;
 		case 48: // extended bg colors
 			bg_rgb_or_index = true;
 			break;
 		case 49: // background reset, black
-			SGRBG(0);
+			sgrc(0, false);
 			break;
-		case 30: SGRFG(0); break; // black
-		case 90: SGRFG(010); break; // grey
-		case 31: case 91: SGRFG(011); break;
-		case 32: case 92: SGRFG(012); break;
-		case 33: case 93: SGRFG(013); break;
-		case 34: case 94: SGRFG(014); break;
-		case 35: case 95: SGRFG(015); break;
-		case 36: case 96: SGRFG(016); break;
-		case 37: case 97: SGRFG(017); break;
-		case 40: SGRBG(0); break;
-		case 100: SGRBG(010); break;
-		case 41: case 101: SGRBG(011); break;
-		case 42: case 102: SGRBG(012); break;
-		case 43: case 103: SGRBG(013); break;
-		case 44: case 104: SGRBG(014); break;
-		case 45: case 105: SGRBG(015); break;
-		case 46: case 106: SGRBG(016); break;
-		case 47: case 107: SGRBG(017); break;
+		case 30: sgrc(0, true); break; // black
+		case 90: sgrc(010, true); break; // grey
+		case 31: case 91: sgrc(011, true); break;
+		case 32: case 92: sgrc(012, true); break;
+		case 33: case 93: sgrc(013, true); break;
+		case 34: case 94: sgrc(014, true); break;
+		case 35: case 95: sgrc(015, true); break;
+		case 36: case 96: sgrc(016, true); break;
+		case 37: case 97: sgrc(017, true); break;
+		case 40: sgrc(0, true); break;
+		case 100: sgrc(010, true); break;
+		case 41: case 101: sgrc(011, false); break;
+		case 42: case 102: sgrc(012, false); break;
+		case 43: case 103: sgrc(013, false); break;
+		case 44: case 104: sgrc(014, false); break;
+		case 45: case 105: sgrc(015, false); break;
+		case 46: case 106: sgrc(016, false); break;
+		case 47: case 107: sgrc(017, false); break;
 		default:
 			LOG("unhandled style %d", token->arg[i]);
 		}
