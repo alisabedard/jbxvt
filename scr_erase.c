@@ -18,15 +18,31 @@
 #undef LOG
 #define LOG(...)
 #endif//DEBUG_ERASE
+static inline int16_t get_x(void)
+{
+	return jbxvt_get_screen()->cursor.x;
+}
+static inline int16_t get_y(void)
+{
+	return jbxvt_get_screen()->cursor.y;
+}
+static inline uint16_t get_width(void)
+{
+	return jbxvt_get_char_size().width;
+}
+static inline uint16_t get_height(void)
+{
+	return jbxvt_get_char_size().height;
+}
 static void del(xcb_connection_t * xc, uint16_t col, uint16_t width)
 {
 	struct JBXVTScreen * restrict s = jbxvt_get_screen();
-	const int16_t y = s->cursor.y;
 	{ // cw scope
-		const uint16_t cw = jbxvt_get_char_size().width;
+		const uint16_t cw = get_width();
 		if (col + width > cw) // keep in screen
 			width = cw - col;
 	}
+	const int16_t y = s->cursor.y;
 	memset(s->text[y] + col, 0, width);
 	memset(s->rend[y] + col, 0, width << 2);
 	{ // f scope
@@ -42,17 +58,18 @@ static void del(xcb_connection_t * xc, uint16_t col, uint16_t width)
 void jbxvt_erase_line(xcb_connection_t * xc, const int8_t mode)
 {
 	jbxvt_set_scroll(xc, 0);
-	const uint16_t x = jbxvt_get_screen()->cursor.x;
 	switch (mode) {
 	case JBXVT_ERASE_ALL:
-		del(xc, 0, jbxvt_get_char_size().width);
+		del(xc, 0, get_width());
 		break;
 	case JBXVT_ERASE_BEFORE:
-		del(xc, 0, x);
+		del(xc, 0, get_x());
 		break;
 	case JBXVT_ERASE_AFTER:
-	default:
-		del(xc, x, jbxvt_get_char_size().width - x);
+	default: {
+		const int16_t x = get_x();
+		del(xc, x, get_width() - x);
+	}
 	}
 	jbxvt_draw_cursor(xc);
 }
@@ -65,19 +82,19 @@ static bool assign_range(xcb_connection_t * restrict xc,
 	switch (mode) {
 		// offset by 1 to not include current line, handled later
 	case JBXVT_ERASE_AFTER:
-		range->start = jbxvt_get_screen()->cursor.y + 1;
+		range->start = get_y() + 1;
 		range->end = jbxvt_get_char_size().h;
 		break;
 	case JBXVT_ERASE_BEFORE:
 		range->start = 0;
-		range->end = jbxvt_get_screen()->cursor.y - 1;
+		range->end = get_y() - 1;
 		break;
 	case JBXVT_ERASE_SAVED:
 		jbxvt_clear_saved_lines(xc);
 		return false;
 	default: // JBXVT_ERASE_ALL
 		range->start = 0;
-		range->end = jbxvt_get_char_size().h - 1;
+		range->end = get_height() - 1;
 		break;
 	}
 	return true;
