@@ -18,26 +18,14 @@ enum ComCharFlags {INPUT_BUFFER_EMPTY = 0x100,
 struct JBXVTCommandContainer {
 	uint8_t *next, *top, *data;
 };
-static struct JBXVTCommandContainer cmdtok_buffer;
-static struct JBXVTCommandContainer cmdtok_stack;
-static void timer(xcb_connection_t * xc)
-{
-	jbxvt_blink_cursor(xc);
-}
-static void check_fdsets(xcb_connection_t * xc,
-	fd_set * restrict in_fdset, const fd_t xfd)
-{
-	if (!FD_ISSET(xfd, in_fdset))
-		timer(xc); // select timed out
-	else
-		jb_check_x(xc);
-}
+static struct JBXVTCommandContainer cmdtok_buffer, cmdtok_stack;
 __attribute__((nonnull))
 static void poll_io(xcb_connection_t * xc,
 	fd_set * restrict in_fdset)
 {
 	static fd_t fd, xfd;
 	static int nfds; // per man select(2)
+	/* Cache values here to reduce function call overhead.  */
 	if (!fd)
 		fd = jbxvt_get_fd();
 	if (!xfd)
@@ -56,7 +44,14 @@ static void poll_io(xcb_connection_t * xc,
 		&(struct timeval){.tv_usec = 500000}) == -1)
 		exit(1); /* exit is reached in case SHELL or -e
 			    command was not run successfully.  */
-	check_fdsets(xc, in_fdset, xfd);
+	/* If xfd has input, verify connection status.  Otherwise,
+	   call timer function.  In this case, hook into the
+	   cursor blink functionality.  FIXME:  Implement SGR blinking
+	   text.  */
+	if (FD_ISSET(xfd, in_fdset))
+		jb_check_x(xc);
+	else
+		jbxvt_blink_cursor(xc);
 }
 static bool get_buffered(int_fast16_t * val, const uint8_t flags)
 {
@@ -137,8 +132,7 @@ static uint8_t get_utf_bytes(uint8_t c)
 static void utf8_3(xcb_connection_t * xc,
 	struct JBXVTToken * restrict tk, int_fast16_t c) // 1
 {
-	LOG("utf8_3()");
-	LOG("\t0x%x\n", (unsigned int)c);
+	LOG("utf8_3()\t0x%x\n", (unsigned int)c);
 	c = jbxvt_pop_char(xc, c); // 2
 	LOG("\t0x%x\n", (unsigned int)c);
 	c = jbxvt_pop_char(xc, c); // 3
@@ -151,8 +145,7 @@ static void utf8_3(xcb_connection_t * xc,
 static void utf8_2(xcb_connection_t * xc,
 	struct JBXVTToken * restrict tk, int_fast16_t c) // 1
 {
-	LOG("utf8_2()");
-	LOG("\t0x%x\n", (unsigned int)c);
+	LOG("utf8_t()\t0x%x\n", (unsigned int)c);
 	int_fast16_t c2 = jbxvt_pop_char(xc, c); // take next byte
 	LOG("\t0x%x\n", (unsigned int)c2);
 	switch (c) {
@@ -195,8 +188,7 @@ tk_null:
 }
 static void utf8_1(struct JBXVTToken * restrict tk, int_fast16_t c) // 1
 {
-	LOG("utf8_1()");
-	LOG("\t0x%x\n", (unsigned int)c);
+	LOG("utf8_1()\t0x%x\n", (unsigned int)c);
 	switch (c) {
 	default:
 		tk->type = JBXVT_TOKEN_NULL;
