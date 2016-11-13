@@ -103,9 +103,9 @@ static inline bool is_string_char(register int_fast16_t c)
 static void handle_string_char(xcb_connection_t * xc,
 	int_fast16_t c, struct JBXVTToken * restrict tk)
 {
-	uint8_t * restrict s = tk->string;
-	{ // i scope
+	{ // i scope, s scope
 		uint_fast16_t i = 0;
+		uint8_t * restrict s = tk->string;
 		{ // nl scope
 			uint_fast16_t nl = 0;
 			do {
