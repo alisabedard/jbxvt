@@ -93,12 +93,13 @@ static void set_ttymodes(void)
 	static struct termios term = {
 		.c_iflag = BRKINT | IGNPAR | ICRNL | IXON,
 		.c_oflag = OPOST | ONLCR, .c_cflag = B38400 | CREAD
-		| CLOCAL | CS8, .c_lflag = ISIG | IEXTEN | ICANON | ECHO
-		| ECHOE | ECHOK | ECHONL, .c_cc = {[VINTR] = 003,
-		[VQUIT] = 034, [VERASE] = 0177, [VKILL] = 025,
-		[VEOF] = 04, [VEOL] = 013, [VSTART] = 021, [VSTOP] = 023,
-		[VSUSP] = 032, [VREPRINT] = 022, [VWERASE] = 027,
-		[VLNEXT] = 026, [VDISCARD] = 017}};
+			| CLOCAL | CS8, .c_lflag = ISIG | IEXTEN
+			| ICANON | ECHO | ECHOE | ECHOK | ECHONL,
+		.c_cc = {[VINTR] = 003, [VQUIT] = 034, [VERASE] = 0177,
+			[VKILL] = 025, [VEOF] = 04, [VEOL] = 013,
+			[VSTART] = 021, [VSTOP] = 023, [VSUSP] = 032,
+			[VREPRINT] = 022, [VWERASE] = 027, [VLNEXT] = 026,
+			[VDISCARD] = 017}};
 	tcsetattr(0, TCSANOW, &term);
 	jbxvt_set_tty_size(jbxvt_get_char_size());
 }
@@ -140,7 +141,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
     Called initially from the child and after a window
     size change from the parent.  */
 #if !defined(NETBSD) && !defined(FREEBSD)\
-	&& defined(HAVE_ASM_GENERIC_IOCTLS_H) && defined(TIOCSWINSZ)
+&& defined(HAVE_ASM_GENERIC_IOCTLS_H) && defined(TIOCSWINSZ)
 void jbxvt_set_tty_size(const struct JBDim sz)
 {
 	jb_check(ioctl(jbxvt_get_fd(), TIOCSWINSZ, &(struct winsize){

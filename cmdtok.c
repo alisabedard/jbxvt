@@ -122,7 +122,7 @@ static void handle_string_char(xcb_connection_t * xc,
 		s[i] = 0; // terminating NULL
 	}
 	if (c != INPUT_BUFFER_EMPTY)
-		  jbxvt_push_char(c);
+		jbxvt_push_char(c);
 }
 __attribute__((const))
 static uint8_t get_utf_bytes(uint8_t c)
