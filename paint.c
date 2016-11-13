@@ -19,9 +19,7 @@
 xcb_gcontext_t jbxvt_get_text_gc(xcb_connection_t * xc)
 {
 	static xcb_gcontext_t gc;
-	if (gc)
-		return gc;
-	return gc = xcb_generate_id(xc);
+	return gc ? gc : (gc = xcb_generate_id(xc));
 }
 static inline void font(xcb_connection_t * xc, const xcb_font_t f)
 {
