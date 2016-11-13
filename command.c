@@ -81,8 +81,8 @@ static char * get_pseudo_tty(int * restrict pmaster,
 	jb_require(grantpt(mfd) != -1,
 		"Could not change mode and owner of slave ptty");
 	jb_require(unlockpt(mfd) != -1, "Could not unlock slave ptty");
-	char *ttynam;
-	jb_require((ttynam = ptsname(mfd)), "Could not get tty name");
+	char *ttynam = ptsname(mfd);
+	jb_require(ttynam, "Could not get tty name");
 	*pslave = jb_open(ttynam, O_RDWR);
 	return ttynam;
 }

@@ -4,8 +4,6 @@
 #include "command.h"
 #include "libjb/log.h"
 #include "screen.h"
-#include <stdio.h>
-#include <stdlib.h>
 void jbxvt_handle_dsr(const int16_t arg)
 {
 	LOG("handle_dsr(%d)", arg);
@@ -19,8 +17,6 @@ void jbxvt_handle_dsr(const int16_t arg)
 	case 7 :
 		//  Send the name of the display to the command.
 		dprintf(jbxvt_get_fd(), "%s\r", getenv("DISPLAY"));
-		break;
-		dprintf(jbxvt_get_fd(), "%s0n", jbxvt_get_csi());
 		break;
 	case 15: // Test printer status
 		// no printer
