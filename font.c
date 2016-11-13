@@ -70,8 +70,10 @@ void jbxvt_init_fonts(xcb_connection_t * xc,
 	struct JBXVTFontOptions * opt)
 {
 	xcb_font_t f = jbxvt_get_normal_font(xc);
-	jb_require(jb_open_font(xc, f, opt->normal),
-		"Could not load the primary font");
+	if (!jb_open_font(xc, f, opt->normal))
+		jb_require(jb_open_font(xc, f,
+			opt->normal = "fixed"), // fallback
+			"Could not load the primary font");
 	xcb_query_font_cookie_t q = xcb_query_font(xc, f);
 	f = jbxvt_get_bold_font(xc);
 	if (!jb_open_font(xc, f, opt->bold))
