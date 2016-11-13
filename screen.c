@@ -28,10 +28,12 @@ void jbxvt_efill(xcb_connection_t * xc)
 	LOG("jbxvt_efill");
 	// Move to cursor home in order for all characters to appear.
 	jbxvt_move(xc, 0, 0, 0);
-	const struct JBDim c = jbxvt_get_char_size();
-	for (uint8_t y = 0; y < c.h; ++y) {
-		memset(current->text[y], 'E', c.w);
-		memset(current->rend[y], 0, c.w << 2);
+	{ // c scope
+		const struct JBDim c = jbxvt_get_char_size();
+		for (uint8_t y = 0; y < c.h; ++y) {
+			memset(current->text[y], 'E', c.w);
+			memset(current->rend[y], 0, c.w << 2);
+		}
 	}
 	jbxvt_repaint(xc);
 }
@@ -46,7 +48,7 @@ void jbxvt_change_screen(xcb_connection_t * xc, const bool mode_high)
 	    q
 	    ls
 	    <scroll up>
-	*/
+	 */
 	jbxvt_reset(xc);
 	jbxvt_move(xc, 0, 0, 0);
 	jbxvt_erase_screen(xc, JBXVT_ERASE_AFTER);
