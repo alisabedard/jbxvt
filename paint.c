@@ -103,17 +103,22 @@ void jbxvt_paint(xcb_connection_t * xc, uint8_t * restrict str,
 		cmod = true;
 	}
 	p.y += jbxvt_get_font_ascent();
-	if (rstyle & JBXVT_RS_BOLD)
+	bool font_mod = false;
+	if (rstyle & JBXVT_RS_BOLD) {
 		font(xc, jbxvt_get_bold_font(xc));
-	if (rstyle & JBXVT_RS_ITALIC)
+		font_mod = true;
+	}
+	if (rstyle & JBXVT_RS_ITALIC) {
 		font(xc, jbxvt_get_italic_font(xc));
+		font_mod = true;
+	}
 	// Draw text with background:
 	if (dwl)
 		str = jbxvt_get_double_width_string(str, &len);
 	draw_text(xc, str, len, &p, rstyle);
 	if (dwl)
 		free(str);
-	if(rstyle & JBXVT_RS_BOLD || rstyle & JBXVT_RS_ITALIC)
+	if (font_mod)
 		font(xc, jbxvt_get_normal_font(xc)); // restore font
 	if (cmod) {
 		jbxvt_set_fg_pixel(xc, jbxvt_get_fg());
