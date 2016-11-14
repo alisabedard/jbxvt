@@ -48,12 +48,14 @@ void jbxvt_move(xcb_connection_t * xc,
 	jbxvt_set_scroll(xc, 0);
 	jbxvt_draw_cursor(xc); // clear
 	struct JBXVTScreen * restrict s = jbxvt_get_screen();
-	struct JBDim c = s->cursor;
-	s->cursor = c = (struct JBDim) { .x = dim(c.x, x,
-		relative & JBXVT_COLUMN_RELATIVE), .y = dim(c.y, y,
-			relative & JBXVT_ROW_RELAATIVE)};
-	c.y = jbxvt_check_cursor_position();
+	{ // c scope
+		struct JBDim c = s->cursor;
+		s->cursor = c = (struct JBDim) { .x = dim(c.x, x,
+			relative & JBXVT_COLUMN_RELATIVE), .y = dim(c.y, y,
+				relative & JBXVT_ROW_RELAATIVE)};
+		c.y = jbxvt_check_cursor_position();
+		jbxvt_check_selection(xc, c.y, c.y);
+	}
 	s->wrap_next = false;
-	jbxvt_check_selection(xc, c.y, c.y);
 	jbxvt_draw_cursor(xc); // draw
 }
