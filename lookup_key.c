@@ -203,15 +203,13 @@ uint8_t * jbxvt_lookup_key(xcb_connection_t * restrict xc,
 		 for shift-pageup/dn scrolling and future features.  */
 		if (ke->state == XCB_MOD_MASK_SHIFT && *pcount > 2) {
 			LOG("Handling shift combination...");
+			int8_t mod = -10;
 			switch (s[2]) {
 			case '5':
-				LOG("KEY scroll down");
-				jbxvt_set_scroll(xc, jbxvt_get_scroll() + 10);
-				goto do_not_display;
-				break;
+				mod = - mod;
 			case '6':
-				LOG("KEY scroll up");
-				jbxvt_set_scroll(xc, jbxvt_get_scroll() - 10);
+				LOG("KEY scroll");
+				jbxvt_set_scroll(xc, jbxvt_get_scroll() + mod);
 				goto do_not_display;
 				break;
 			}
