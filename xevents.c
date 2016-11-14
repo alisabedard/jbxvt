@@ -239,7 +239,7 @@ bool jbxvt_handle_xevents(xcb_connection_t * xc)
 			(xcb_motion_notify_event_t *)event);
 		break;
 	default:
-		LOG("Unhandled event %d", event->type);
+		LOG("Unhandled event %d", event->response_type);
 	}
 	free(event);
 	return ret;
