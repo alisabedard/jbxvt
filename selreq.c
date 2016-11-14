@@ -72,8 +72,12 @@ void jbxvt_paste_primary(xcb_connection_t * xc,
 			JBXVT_PROP_SIZE);
 		xcb_get_property_reply_t * r
 			= xcb_get_property_reply(xc, c, NULL);
-		if (!r || r->type == XCB_ATOM_NONE)
-			  return;
+		if (!r)
+			return;
+		if (r->type == XCB_ATOM_NONE) {
+			free(r);
+			return;
+		}
 		data = xcb_get_property_value(r);
 		const int l = xcb_get_property_value_length(r);
 		nread += l;
