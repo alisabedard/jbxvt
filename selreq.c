@@ -8,11 +8,13 @@
 #include "window.h"
 #include <stdlib.h>
 #include <unistd.h>
-static inline void paste(const uint8_t * data, const size_t length)
+// Returns the length pasted
+static size_t paste(const uint8_t * data, const size_t length)
 {
 	if (data && length)
 		jb_check(write(jbxvt_get_fd(), data, length) != -1,
 			"Cannot paste");
+	return length;
 }
 static bool reply_is_invalid(xcb_get_property_reply_t * restrict r)
 {
@@ -24,6 +26,13 @@ static bool reply_is_invalid(xcb_get_property_reply_t * restrict r)
 	}
 	return false; // reply is valid
 }
+static xcb_get_property_cookie_t get_prop(xcb_connection_t * xc,
+	const xcb_atom_t clipboard, const uint32_t already_read)
+{
+	// divide by 4 to convert 32 bit words to bytes
+	return xcb_get_property(xc, false, jbxvt_get_main_window(xc),
+		clipboard, XCB_ATOM_ANY, already_read / 4, JBXVT_PROP_SIZE);
+}
 static bool paste_from(xcb_connection_t * xc,
 	const xcb_atom_t cb, const xcb_timestamp_t t)
 {
@@ -34,8 +43,7 @@ static bool paste_from(xcb_connection_t * xc,
 	// This prevents pasting stale data:
 	free(xcb_wait_for_event(xc)); // discard
 	xcb_get_property_reply_t * r = xcb_get_property_reply(xc,
-		xcb_get_property(xc, false, jbxvt_get_main_window(xc),
-		cb, XCB_ATOM_ANY, 0, JBXVT_PROP_SIZE), NULL);
+		get_prop(xc, cb, 0), NULL);
 	if (reply_is_invalid(r))
 		return false;
 	paste(xcb_get_property_value(r),
@@ -66,18 +74,13 @@ void jbxvt_paste_primary(xcb_connection_t * xc,
 	xcb_convert_selection(xc, window, property,
 		XCB_ATOM_STRING, property, t);
 	do {
-		// divide by 4 to convert 32 bit words to bytes
-		xcb_get_property_cookie_t c = xcb_get_property(xc,
-			false, window, property, XCB_ATOM_ANY, nread / 4,
-			JBXVT_PROP_SIZE);
-		xcb_get_property_reply_t * r
-			= xcb_get_property_reply(xc, c, NULL);
+		xcb_get_property_reply_t * r = xcb_get_property_reply(xc,
+			get_prop(xc, property, nread), NULL);
 		if (reply_is_invalid(r))
 			return;
-		const int l = xcb_get_property_value_length(r);
-		nread += l;
 		bytes_after = r->bytes_after;
-		paste(xcb_get_property_value(r), l);
+		nread += paste(xcb_get_property_value(r),
+			xcb_get_property_value_length(r));
 		free(r);
 	} while (bytes_after > 0);
 }
