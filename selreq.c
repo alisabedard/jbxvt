@@ -13,6 +13,16 @@ static inline void paste(const uint8_t * data, const size_t length)
 	jb_check(write(jbxvt_get_fd(), data, length) != -1,
 		"Cannot paste");
 }
+static bool reply_is_invalid(xcb_get_property_reply_t * restrict r)
+{
+	if (!r) // no reply received, invalid
+		return true;
+	if (r->type == XCB_ATOM_NONE) {
+		free(r);
+		return true; // no data in reply, invalid
+	}
+	return false; // reply is valid
+}
 static bool paste_from(xcb_connection_t * xc,
 	const xcb_atom_t cb, const xcb_timestamp_t t)
 {
@@ -25,12 +35,8 @@ static bool paste_from(xcb_connection_t * xc,
 	xcb_get_property_reply_t * r = xcb_get_property_reply(xc,
 		xcb_get_property(xc, false, jbxvt_get_main_window(xc),
 		cb, XCB_ATOM_ANY, 0, JBXVT_PROP_SIZE), NULL);
-	if (!r)
+	if (reply_is_invalid(r))
 		return false;
-	if (r->type == XCB_ATOM_NONE) {
-		free(r);
-		return false;
-	}
 	paste(xcb_get_property_value(r),
 		xcb_get_property_value_length(r));
 	free(r);
