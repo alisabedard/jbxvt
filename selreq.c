@@ -72,9 +72,8 @@ void jbxvt_paste_primary(xcb_connection_t * xc,
 	const xcb_timestamp_t t, const xcb_window_t window,
 	const xcb_atom_t property)
 {
-	LOG("paste_primary()");
-	if (property == XCB_NONE)
-		return;
+	LOG("paste_primary(time: %d, win: %d, prop: %d)",
+		(int)t, (int)window, (int)property);
 	uint32_t nread = 0, bytes_after;
 	xcb_convert_selection(xc, window, property,
 		XCB_ATOM_STRING, property, t);
