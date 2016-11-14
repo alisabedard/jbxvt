@@ -35,9 +35,10 @@ depend:
 	./mkdepend
 clean:
 	cd libjb && make clean
-	rm -f ${exe} *.o *.gcda *.gcno *.gcov
+	rm -f ${exe} *.o *.gcda *.gcno *.gcov libjb/*.gcda \
+		libjb/*.gcno
 distclean: clean
-	rm -f config.mk gcov.log depend.mk
+	rm -f config.mk gcov.log
 check:
 	tests/rgb
 	tests/sgr
