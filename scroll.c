@@ -50,9 +50,11 @@ static void clear(int8_t count, const uint8_t rc,
 {
 	if(--count < 0)
 		  return;
-	const uint16_t sz = jbxvt_get_char_size().w;
-	memset(text[count], 0, sz);
-	memset(rend[count], 0, sz << 2);
+	{ // sz scope
+		const uint16_t sz = jbxvt_get_char_size().w;
+		memset(text[count], 0, sz);
+		memset(rend[count], 0, sz << 2);
+	}
 	const uint8_t j = rc + (up ? - count - 1 : count);
 	struct JBXVTScreen * restrict s = jbxvt_get_screen();
 	s->text[j] = text[count];
