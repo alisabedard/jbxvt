@@ -72,12 +72,12 @@ static void copy_saved_lines(const int_fast16_t n)
 {
 	struct JBXVTScreen * restrict s = jbxvt_get_screen();
 	for (int_fast16_t i = n - 1; i >= 0; --i) {
-		uint8_t * t = s->text[i];
 		struct JBXVTSavedLine * sl = saved_lines + n - i - 1;
 		sl->wrap = s->wrap[i];
 		sl->dwl = s->dwl[i];
 		adjust_saved_lines_top(n);
 		clear_selection_at(i);
+		uint8_t * t = s->text[i];
 		const size_t len = strlen((const char *)t);
 		/* These are two distinct memory pools, so
 		   use of memcpy here is valid.  */
@@ -100,11 +100,12 @@ static void copy_visible_area(xcb_connection_t * xc,
 {
 	int16_t y[2];
 	get_y(y, row1, count, up);
-	const uint16_t height = (row2 - row1 - count)
-		* jbxvt_get_font_size().h;
-	const xcb_window_t vt = jbxvt_get_vt_window(xc);
-	xcb_copy_area(xc, vt, vt, jbxvt_get_text_gc(xc), 0, y[0],
-		0, y[1], jbxvt_get_pixel_size().width, height);
+	{ // vt scope
+		const xcb_window_t vt = jbxvt_get_vt_window(xc);
+		xcb_copy_area(xc, vt, vt, jbxvt_get_text_gc(xc), 0, y[0],
+			0, y[1], jbxvt_get_pixel_size().width,
+			(row2 - row1 - count) * jbxvt_get_font_size().h);
+	}
 	// the above blocks the event queue, flush it
 	xcb_flush(xc);
 }
@@ -123,7 +124,7 @@ static int8_t copy_screen_area(const int8_t i,
 {
 	if(i >= count)
 		  return j;
-	{ // s scope
+	{ // * s scope
 		struct JBXVTScreen * restrict s = jbxvt_get_screen();
 		save[i] = s->text[j];
 		rend[i] = s->rend[j];
@@ -161,22 +162,26 @@ static void sc_dn(xcb_connection_t * xc,
 	const uint8_t row1, const uint8_t row2,
 	const int16_t count, uint8_t ** save, uint32_t ** rend)
 {
-	struct JBXVTScreen * s = jbxvt_get_screen();
-	for(int8_t j = copy_screen_area(0, row2, -1,
-		count, save, rend); j >= row1; --j)
-		  move_line(j, count, s);
+	{ // * s scope
+		struct JBXVTScreen * s = jbxvt_get_screen();
+		for(int8_t j = copy_screen_area(0, row2, -1,
+			count, save, rend); j >= row1; --j)
+			  move_line(j, count, s);
+	}
 	sc_common(xc, row1, row2, count, false, save, rend);
 }
 static void sc_up(xcb_connection_t * xc,
 	const uint8_t row1, const uint8_t row2,
 	const int16_t count, uint8_t ** save, uint32_t ** rend)
 {
-	struct JBXVTScreen * s = jbxvt_get_screen();
-	if (s == jbxvt_get_screen_at(0) && row1 == 0)
-		add_scroll_history();
-	for(int8_t j = copy_screen_area(0, row1,
-		1, count, save, rend); j < row2; ++j)
-		move_line(j, -count, s);
+	{ // * s scope
+		struct JBXVTScreen * s = jbxvt_get_screen();
+		if (s == jbxvt_get_screen_at(0) && row1 == 0)
+			add_scroll_history();
+		for(int8_t j = copy_screen_area(0, row1,
+			1, count, save, rend); j < row2; ++j)
+			move_line(j, -count, s);
+	}
 	sc_common(xc, row1, row2, count, true, save, rend);
 }
 /*  Scroll count lines from row1 to row2 inclusive.
