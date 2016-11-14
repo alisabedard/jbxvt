@@ -1,4 +1,3 @@
-#!/bin/sh
 # cursor.c tests
 cs()
 {
@@ -14,4 +13,5 @@ cs 5
 cs 6
 cs 7
 cs 8
-
+# Restore:
+cs 2
