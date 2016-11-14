@@ -24,6 +24,15 @@ static void invert(xcb_connection_t * xc, const int16_t rs,
 			.x = x1, .y = y, .width = x2 - x1, .height = fsz.h});
 	}
 }
+static uint8_t get_row1(const int16_t rs)
+{
+	return rs < 0 ? 0 : rs;
+}
+static uint8_t get_row2(const int16_t re)
+{
+	const uint16_t h = jbxvt_get_char_size().h;
+	return re >= h ? h - 1 : re;
+}
 static void change(xcb_connection_t * xc, struct JBDim * se,
 	struct JBDim * ose)
 {
@@ -34,11 +43,8 @@ static void change(xcb_connection_t * xc, struct JBDim * se,
 	const bool nn = n < 0;
 	jbxvt_selend_to_rc(&rs, &cs, nn ? se : ose);
 	jbxvt_selend_to_rc(&re, &ce, nn ? ose : se);
-	uint8_t row1 = rs < 0 ? 0 : rs;
-	const uint16_t h = jbxvt_get_char_size().h;
-	uint8_t row2 = re >= h ? h - 1 : re;
-	//  Invert the changed area
-	invert(xc, rs, re, cs, ce, row1, row2);
+	// Invert the changed area
+	invert(xc, rs, re, cs, ce, get_row1(rs), get_row2(re));
 }
 /*  Repaint the displayed selection to reflect the new value.
     ose1 and ose2 are assumed to represent the currently
