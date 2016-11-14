@@ -187,10 +187,12 @@ void scroll(xcb_connection_t * xc, const uint8_t row1,
 	LOG("scroll(%d, %d, %d)", row1, row2, count);
 	if (!count)
 		return;
-	const uint16_t abs_count = abs(count);
-	uint8_t *save[abs_count];
-	uint32_t *rend[abs_count];
-	(count > 0 ? sc_up : sc_dn)(xc, row1, row2 + 1,
-		abs_count, save, rend);
+	{ // abs_count scope
+		const uint16_t abs_count = abs(count);
+		uint8_t *save[abs_count];
+		uint32_t *rend[abs_count];
+		(count > 0 ? sc_up : sc_dn)(xc, row1, row2 + 1,
+			abs_count, save, rend);
+	}
 	jbxvt_set_scroll(xc, 0);
 }
