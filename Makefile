@@ -43,6 +43,7 @@ check:
 	tests/sgr
 	tests/dec_reset
 	tests/cursor
+	tests/screen
 	reset
 gcov:
 	gcov -b *.c > gcov.log
