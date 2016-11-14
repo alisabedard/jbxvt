@@ -66,7 +66,6 @@ void jbxvt_paste_primary(xcb_connection_t * xc,
 	xcb_convert_selection(xc, window, property,
 		XCB_ATOM_STRING, property, t);
 	do {
-		uint8_t * data;
 		// divide by 4 to convert 32 bit words to bytes
 		xcb_get_property_cookie_t c = xcb_get_property(xc,
 			false, window, property, XCB_ATOM_ANY, nread / 4,
@@ -75,11 +74,10 @@ void jbxvt_paste_primary(xcb_connection_t * xc,
 			= xcb_get_property_reply(xc, c, NULL);
 		if (reply_is_invalid(r))
 			return;
-		data = xcb_get_property_value(r);
 		const int l = xcb_get_property_value_length(r);
 		nread += l;
 		bytes_after = r->bytes_after;
-		paste(data, l);
+		paste(xcb_get_property_value(r), l);
 		free(r);
 	} while (bytes_after > 0);
 }
