@@ -23,12 +23,18 @@ void jbxvt_tab(xcb_connection_t * xc)
 {
 	LOG("jbxvt_tab()");
 	jbxvt_set_scroll(xc, 0);
-	struct JBDim c = jbxvt_get_screen()->cursor;
-	uint8_t * restrict s = jbxvt_get_screen()->text[c.y];
-	s[c.x] = ' ';
-	while (!tab_stops[++c.x] && c.x < jbxvt_get_char_size().w)
-		s[c.x] = ' ';
-	jbxvt_get_screen()->cursor.x = c.x;
+	struct JBXVTScreen * restrict scr = jbxvt_get_screen();
+	struct JBDim c = scr->cursor;
+	{ // text scope
+		uint8_t * restrict text = scr->text[c.y];
+		text[c.x] = ' ';
+		{ // cw scope
+			const uint16_t cw = jbxvt_get_char_size().w;
+			while (!tab_stops[++c.x] && c.x < cw)
+				text[c.x] = ' ';
+		}
+	}
+	scr->cursor.x = c.x;
 }
 void jbxvt_cht(xcb_connection_t * xc, int16_t v)
 {
