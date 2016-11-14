@@ -4,11 +4,12 @@
 #include "repaint.h"
 #include "screen.h"
 #include <stdlib.h>
-void jbxvt_set_double_width_line(xcb_connection_t * xc,
-	const bool is_dwl)
+void jbxvt_set_double_width_line(xcb_connection_t * xc, const bool is_dwl)
 {
-	struct JBXVTScreen * restrict s = jbxvt_get_screen();
-	s->dwl[s->cursor.y] = is_dwl;
+	{ // s scope
+		struct JBXVTScreen * restrict s = jbxvt_get_screen();
+		s->dwl[s->cursor.y] = is_dwl;
+	}
 	jbxvt_repaint(xc); // in case set mid-line
 	jbxvt_draw_cursor(xc); // clear stale cursor block
 }
