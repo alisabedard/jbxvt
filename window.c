@@ -2,6 +2,8 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "window.h"
 #include "font.h"
+#include "libjb/util.h"
+#include "libjb/xcb.h"
 #include "sbar.h"
 #include "scr_reset.h"
 #include "screen.h"
@@ -32,22 +34,24 @@ void jbxvt_map_window(xcb_connection_t * xc)
 	jbxvt_resize_window(xc);
 	jbxvt_reset(xc); // update size
 }
-static struct JBDim get_geometry(xcb_connection_t * xc)
+static struct JBDim get_geometry_reply(xcb_connection_t * restrict xc,
+	const xcb_get_geometry_cookie_t c)
 {
-	xcb_get_geometry_cookie_t c = xcb_get_geometry(xc,
-		jbxvt_get_main_window(xc));
-	xcb_generic_error_t * e;
-	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(xc,
-		c, &e);
-	if (e)
-		abort();
-	struct JBDim ret = {.w = r->width, .height = r->height };
+	xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(xc, c, NULL);
+	jb_require(r, "Could not get geometry");
+	struct JBDim geo = {.w = r->width, .height = r->height };
 	free(r);
+	return geo;
+}
+static struct JBDim get_geometry(xcb_connection_t * restrict xc)
+{
+	struct JBDim geo = get_geometry_reply(xc,
+		xcb_get_geometry(xc, jbxvt_get_main_window(xc)));
 	// Resize area to fit characters
 	const struct JBDim f = jbxvt_get_font_size();
-	ret.w -= ret.w % f.w;
-	ret.h -= ret.h % f.h;
-	return ret;
+	geo.w -= geo.w % f.w;
+	geo.h -= geo.h % f.h;
+	return geo;
 }
 /*  Called after a possible window size change.  If the window size
     has changed initiate a redraw by resizing the subwindows. */
@@ -76,6 +80,8 @@ void jbxvt_set_property(xcb_connection_t * xc, const xcb_atom_t prop,
 void jbxvt_change_name(xcb_connection_t * xc,
 	uint8_t * restrict str, const bool icon)
 {
-	jbxvt_set_property(xc, icon ? XCB_ATOM_WM_ICON_NAME
-		: XCB_ATOM_WM_NAME, strlen((const char *)str), str);
+	if (icon)
+		jb_set_icon_name(xc, jbxvt_get_main_window(xc), (char *)str);
+	else
+		jb_set_window_name(xc, jbxvt_get_main_window(xc), (char *)str);
 }
