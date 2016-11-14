@@ -58,6 +58,19 @@ static void track_mouse_x10(uint8_t b, struct JBDim p)
 	LOG(jbxvt_get_modes()->mouse_urxvt
 		? "%d;%d;%dM" : "M%c%c%c", b, p.x, p.y);
 }
+// return true if the parent should return
+static bool handle_release(uint8_t * b, const bool wheel)
+{
+	struct JBXVTPrivateModes * restrict m = jbxvt_get_modes();
+	if (m->mouse_x10 || wheel)
+		// wheel and x10 release untracked
+		return true;
+	LOG("TRACK_RELEASE");
+	if (!m->mouse_sgr)
+		// sgr reports which button was released
+		*b = 3; // x10 does not -- 3 is release code
+	return false;
+}
 void jbxvt_track_mouse(uint8_t b, uint32_t state, struct JBDim p,
 	const uint8_t flags)
 {
@@ -70,13 +83,8 @@ void jbxvt_track_mouse(uint8_t b, uint32_t state, struct JBDim p,
 	locator_report(b, p);
 	// Release handling:
 	if (flags & JBXVT_RELEASE) {
-		if (jbxvt_get_modes()->mouse_x10 || wheel)
-			// wheel and x10 release untracked
+		if (handle_release(&b, wheel))
 			return;
-		LOG("TRACK_RELEASE");
-		if (!jbxvt_get_modes()->mouse_sgr)
-			// sgr reports which button was released
-			b = 3; // release code
 	} else if (wheel) { // wheel release untracked
 		b += 60; // Wheel mouse handling
 		LOG("wheel b: %d", b);
