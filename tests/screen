@@ -1,0 +1,9 @@
+#!/bin/sh
+# test E-fill
+echo '\033#8'
+clear
+# back index
+echo '\0336'
+# forward index
+echo '\0339'
+
