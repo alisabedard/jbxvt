@@ -33,15 +33,20 @@ static xcb_get_property_cookie_t get_prop(xcb_connection_t * xc,
 	return xcb_get_property(xc, false, jbxvt_get_main_window(xc),
 		clipboard, XCB_ATOM_ANY, already_read / 4, JBXVT_PROP_SIZE);
 }
-static bool paste_from(xcb_connection_t * xc,
+static void request_conversion(xcb_connection_t * restrict xc,
 	const xcb_atom_t cb, const xcb_timestamp_t t)
 {
-	LOG("paste_from(clipboard: %d, timestamp: %d)", cb, t);
 	xcb_convert_selection(xc, jbxvt_get_main_window(xc), cb,
 		XCB_ATOM_STRING, cb, t);
 	xcb_flush(xc);
 	// This prevents pasting stale data:
 	free(xcb_wait_for_event(xc)); // discard
+}
+static bool paste_from(xcb_connection_t * xc,
+	const xcb_atom_t cb, const xcb_timestamp_t t)
+{
+	LOG("paste_from(clipboard: %d, timestamp: %d)", cb, t);
+	request_conversion(xc, cb, t);
 	xcb_get_property_reply_t * r = xcb_get_property_reply(xc,
 		get_prop(xc, cb, 0), NULL);
 	if (reply_is_invalid(r))
