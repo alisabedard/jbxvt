@@ -37,7 +37,7 @@ static void change(xcb_connection_t * restrict xc, struct JBDim * se,
 	struct JBDim * ose)
 {
 	int16_t rs = 0, cs = 0, re = 0, ce = 0, n = jbxvt_selcmp(se, ose);
-	if (!n)
+	if (!n) // nothing selected
 		return;
 	// repaint the start.
 	{ // nn scope
