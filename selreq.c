@@ -10,8 +10,9 @@
 #include <unistd.h>
 static inline void paste(const uint8_t * data, const size_t length)
 {
-	jb_check(write(jbxvt_get_fd(), data, length) != -1,
-		"Cannot paste");
+	if (data && length)
+		jb_check(write(jbxvt_get_fd(), data, length) != -1,
+			"Cannot paste");
 }
 static bool reply_is_invalid(xcb_get_property_reply_t * restrict r)
 {
