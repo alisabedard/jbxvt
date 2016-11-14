@@ -55,16 +55,20 @@ static void adj_sel_to_word(struct JBDim * include,
 {
 	if (se1->index < 0)
 		return; // protect against segfault if ends invalid
-	uint8_t * s = jbxvt_get_screen()->text[se1->index];
-	int16_t i = get_start_of_word(s, se1->col);
-	se1->col = i?i+1:0;
-	i = se2->col;
-	if (se2 == include || !jbxvt_selcmp(se2,
-		&jbxvt_get_selection_end_points()[2]))
-		  ++i;
-	const uint16_t len = sel_s(se2, &s);
-	while (i < len && s[i] && s[i] != ' ' && s[i] != '\n')
-		  ++i;
+	int16_t i;
+	{ // text scope
+		uint8_t * text = jbxvt_get_screen()->text[se1->index];
+		i = get_start_of_word(text, se1->col);
+		se1->col = i?i+1:0;
+		i = se2->col;
+		if (se2 == include || !jbxvt_selcmp(se2,
+			&jbxvt_get_selection_end_points()[2]))
+			  ++i;
+		for (const uint16_t len = sel_s(se2, &text);
+			i < len && text[i] && text[i] != ' '
+			&& text[i] != '\n'; ++i)
+			;
+	}
 	se2->col = i;
 }
 // Make sure selection end point 0 comes before end point 1
