@@ -190,39 +190,42 @@ uint8_t * jbxvt_lookup_key(xcb_connection_t * restrict xc,
 	void * restrict ev, int_fast16_t * restrict pcount)
 {
 	static uint8_t kbuf[KBUFSIZE];
-	xcb_key_press_event_t * ke = ev;
-	const xcb_keysym_t k = get_keysym(xc, ke);
-	uint8_t * s = get_s(k, (uint8_t *)kbuf);
-	if (s) {
-		*pcount = strlen((const char *)s);
+	{ // * ke scope
+		xcb_key_press_event_t * ke = ev;
+		const xcb_keysym_t k = get_keysym(xc, ke);
+		uint8_t * s = get_s(k, (uint8_t *)kbuf);
+		if (s) {
+			*pcount = strlen((const char *)s);
 #ifdef KEY_DEBUG
-		for (int_fast16_t i = *pcount; i >= 0; --i)
-			LOG("s[%d]: 0x%x", i, s[i]);
+			for (int_fast16_t i = *pcount; i >= 0; --i)
+				LOG("s[%d]: 0x%x", i, s[i]);
 #endif//KEY_DEBUG
-		/* The following implements a hook into keyboard input
-		 for shift-pageup/dn scrolling and future features.  */
-		if (ke->state == XCB_MOD_MASK_SHIFT && *pcount > 2) {
-			LOG("Handling shift combination...");
-			int8_t mod = -10;
-			switch (s[2]) {
-			case '5':
-				mod = - mod;
-			case '6':
-				LOG("KEY scroll");
-				jbxvt_set_scroll(xc, jbxvt_get_scroll() + mod);
-				goto do_not_display;
-				break;
+			/* The following implements a hook into keyboard input
+			 for shift-pageup/dn scrolling and future features.  */
+			if (ke->state == XCB_MOD_MASK_SHIFT && *pcount > 2) {
+				LOG("Handling shift combination...");
+				int8_t mod = -10;
+				switch (s[2]) {
+				case '5':
+					mod = - mod;
+				case '6':
+					LOG("KEY scroll");
+					jbxvt_set_scroll(xc,
+						jbxvt_get_scroll() + mod);
+					goto do_not_display;
+					break;
+				}
 			}
+			return s;
 		}
-		return s;
+		if (k >= 0xffe0) { // Don't display non-printable chars
+	do_not_display:
+			*pcount = 0;
+			return NULL;
+		}
+		kbuf[0] = k;
+		apply_state(ke->state, kbuf);
 	}
-	if (k >= 0xffe0) { // Don't display non-printable chars
-do_not_display:
-		*pcount = 0;
-		return NULL;
-	}
-	kbuf[0] = k;
-	apply_state(ke->state, kbuf);
 #ifdef KEY_DEBUG
 	LOG("kbuf: 0x%hhx", kbuf[0]);
 #endif//KEY_DEBUG
