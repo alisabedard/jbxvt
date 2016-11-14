@@ -13,16 +13,12 @@
 xcb_window_t jbxvt_get_main_window(xcb_connection_t * xc)
 {
 	static xcb_window_t w;
-	if (w)
-		return w;
-	return w = xcb_generate_id(xc);
+	return w ? w : (w = xcb_generate_id(xc));
 }
 xcb_window_t jbxvt_get_vt_window(xcb_connection_t * xc)
 {
 	static xcb_window_t w;
-	if (w)
-		return w;
-	return w = xcb_generate_id(xc);
+	return w ? w : (w = xcb_generate_id(xc));
 }
 //  Map the window
 void jbxvt_map_window(xcb_connection_t * xc)
