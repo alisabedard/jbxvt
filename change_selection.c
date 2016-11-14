@@ -33,16 +33,18 @@ static uint8_t get_row2(const int16_t re)
 	const uint16_t h = jbxvt_get_char_size().h;
 	return re >= h ? h - 1 : re;
 }
-static void change(xcb_connection_t * xc, struct JBDim * se,
+static void change(xcb_connection_t * restrict xc, struct JBDim * se,
 	struct JBDim * ose)
 {
-	int16_t rs = 0, cs = 0, re = 0, ce = 0, n;
-	n = jbxvt_selcmp(se, ose);
-	if (!n) return;
+	int16_t rs = 0, cs = 0, re = 0, ce = 0, n = jbxvt_selcmp(se, ose);
+	if (!n)
+		return;
 	// repaint the start.
-	const bool nn = n < 0;
-	jbxvt_selend_to_rc(&rs, &cs, nn ? se : ose);
-	jbxvt_selend_to_rc(&re, &ce, nn ? ose : se);
+	{ // nn scope
+		const bool nn = n < 0;
+		jbxvt_selend_to_rc(&rs, &cs, nn ? se : ose);
+		jbxvt_selend_to_rc(&re, &ce, nn ? ose : se);
+	}
 	// Invert the changed area
 	invert(xc, rs, re, cs, ce, get_row1(rs), get_row2(re));
 }
