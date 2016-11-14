@@ -123,9 +123,11 @@ static int8_t copy_screen_area(const int8_t i,
 {
 	if(i >= count)
 		  return j;
-	struct JBXVTScreen * restrict s = jbxvt_get_screen();
-	save[i] = s->text[j];
-	rend[i] = s->rend[j];
+	{ // s scope
+		struct JBXVTScreen * restrict s = jbxvt_get_screen();
+		save[i] = s->text[j];
+		rend[i] = s->rend[j];
+	}
 	clear_selection_at(j);
 	return copy_screen_area(i + 1, j + mod, mod, count, save, rend);
 }
