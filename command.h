@@ -2,7 +2,7 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #ifndef JBXVT_COMMAND_H
 #define JBXVT_COMMAND_H
-#include "libjb/size.h"
+#include "libjb/JBDim.h"
 #include "libjb/util.h"
 #include <stdint.h>
 #include <xcb/xcb.h>

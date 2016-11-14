@@ -1,7 +1,7 @@
 // Copyright 2016, Jeffrey E. Bedard
 #ifndef JBXVT_NORMAL_FONT_H
 #define JBXVT_NORMAL_FONT_H
-#include "libjb/size.h"
+#include "libjb/JBDim.h"
 #include <xcb/xcb.h>
 struct JBXVTFontOptions {
 	char * normal;

@@ -3,7 +3,7 @@
 #ifndef SCREENST_H
 #define SCREENST_H
 #include "config.h"
-#include "libjb/size.h"
+#include "libjb/JBDim.h"
 #include <stdbool.h>
 /*  Structure describing the current state of the screen.  */
 struct JBXVTScreen {

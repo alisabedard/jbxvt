@@ -1,7 +1,7 @@
 // Copyright 2016, Jeffrey E. Bedard
 #ifndef JBXVT_MOUSE_H
 #define JBXVT_MOUSE_H
-#include "libjb/size.h"
+#include "libjb/JBDim.h"
 #include <stdbool.h>
 enum { JBXVT_RELEASE = 1, JBXVT_MOTION = 2};
 bool jbxvt_get_mouse_tracked(void);

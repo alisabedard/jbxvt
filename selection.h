@@ -3,7 +3,7 @@
 #ifndef JBXVT_SELECTION_H
 #define JBXVT_SELECTION_H
 #include "JBXVTSelectionUnit.h"
-#include "libjb/size.h"
+#include "libjb/JBDim.h"
 #include <stdbool.h>
 #include <xcb/xcb.h>
 struct JBXVTSelectionData {

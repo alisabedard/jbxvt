@@ -3,7 +3,7 @@
     University of Kent at Canterbury.*/
 #ifndef JBXVT_SELEX_H
 #define JBXVT_SELEX_H
-#include "libjb/size.h"
+#include "libjb/JBDim.h"
 #include <stdbool.h>
 #include <xcb/xcb.h>
 void jbxvt_extend_selection(xcb_connection_t * xc,

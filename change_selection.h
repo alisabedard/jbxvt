@@ -1,6 +1,6 @@
 #ifndef JBXVT_CHANGE_SELECTION_H
 #define JBXVT_CHANGE_SELECTION_H
-#include "libjb/size.h"
+#include "libjb/JBDim.h"
 #include <xcb/xcb.h>
 /*  Repaint the displayed selection to reflect
     the new value.  ose1 and ose2 are assumed
