@@ -34,9 +34,9 @@ static xcb_get_property_cookie_t get_prop(xcb_connection_t * xc,
 		clipboard, XCB_ATOM_ANY, already_read / 4, JBXVT_PROP_SIZE);
 }
 static void request_conversion(xcb_connection_t * restrict xc,
-	const xcb_atom_t cb, const xcb_timestamp_t t)
+	const xcb_window_t win, const xcb_atom_t cb, const xcb_timestamp_t t)
 {
-	xcb_convert_selection(xc, jbxvt_get_main_window(xc), cb,
+	xcb_convert_selection(xc, win, cb,
 		XCB_ATOM_STRING, cb, t);
 	xcb_flush(xc);
 	// This prevents pasting stale data:
@@ -46,7 +46,7 @@ static bool paste_from(xcb_connection_t * xc,
 	const xcb_atom_t cb, const xcb_timestamp_t t)
 {
 	LOG("paste_from(clipboard: %d, timestamp: %d)", cb, t);
-	request_conversion(xc, cb, t);
+	request_conversion(xc, jbxvt_get_main_window(xc), cb, t);
 	xcb_get_property_reply_t * r = xcb_get_property_reply(xc,
 		get_prop(xc, cb, 0), NULL);
 	if (reply_is_invalid(r))
@@ -74,9 +74,8 @@ void jbxvt_paste_primary(xcb_connection_t * xc,
 {
 	LOG("paste_primary(time: %d, win: %d, prop: %d)",
 		(int)t, (int)window, (int)property);
+	request_conversion(xc, window, property, t);
 	uint32_t nread = 0, bytes_after;
-	xcb_convert_selection(xc, window, property,
-		XCB_ATOM_STRING, property, t);
 	do {
 		xcb_get_property_reply_t * r = xcb_get_property_reply(xc,
 			get_prop(xc, property, nread), NULL);
