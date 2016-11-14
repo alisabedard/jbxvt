@@ -26,10 +26,12 @@ static void invert(xcb_connection_t * xc, const int16_t rs,
 }
 static uint8_t get_row1(const int16_t rs)
 {
+	// Make sure the first row is not before the beginning of the screen.
 	return rs < 0 ? 0 : rs;
 }
 static uint8_t get_row2(const int16_t re)
 {
+	// Make sure last row is not past the end of the screen.
 	const uint16_t h = jbxvt_get_char_size().h;
 	return re >= h ? h - 1 : re;
 }
