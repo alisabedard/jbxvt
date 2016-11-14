@@ -15,12 +15,16 @@ void jbxvt_set_double_width_line(xcb_connection_t * xc,
 // Generate a double-width string.  Free the result!
 uint8_t * jbxvt_get_double_width_string(uint8_t * in_str, uint16_t * len)
 {
+	// save current length
 	const uint16_t l = *len;
+	// double it and allocate buffer to match
 	uint8_t * o = malloc(*len <<= 1);
-	uint8_t * j = o;
-	for (uint_fast16_t i = 0; i < l; ++i, j += 2) {
-		j[0] = in_str[i];
-		j[1] = ' ';
+	{ // * j scope
+		uint8_t * j = o;
+		for (uint_fast16_t i = 0; i < l; ++i, j += 2) {
+			j[0] = in_str[i];
+			j[1] = ' ';
+		}
 	}
 	return o;
 }
