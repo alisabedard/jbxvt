@@ -15,15 +15,22 @@ static void handle_drag(const struct JBDim rc)
 	jbxvt_rc_to_selend(rc.row, rc.col, &e[1]);
 	jbxvt_adjust_selection(&e[1]);
 }
+static void save_current_end_points(struct JBDim * restrict s,
+	const struct JBDim point)
+{
+	struct JBDim * e = jbxvt_get_selection_end_points();
+	s[0] = e[0];
+	s[1] = e[1];
+	s[2] = jbxvt_pixels_to_chars(point);
+}
 //  Extend the selection.
 void jbxvt_extend_selection(xcb_connection_t * xc,
 	const struct JBDim point, const bool drag)
 {
 	if (!jbxvt_is_selected())
 		return; // no selection
-	// Save current end points:
-	struct JBDim * e = jbxvt_get_selection_end_points();
-	struct JBDim s[] = {e[0], e[1], jbxvt_pixels_to_chars(point)};
+	struct JBDim s[3];
+	save_current_end_points(s, point);
 	jbxvt_fix_coordinates(s + 2);
 	if (drag)
 		  handle_drag(s[2]);
