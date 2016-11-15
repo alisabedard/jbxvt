@@ -6,7 +6,6 @@
 #include "selection.h"
 #include "selend.h"
 #include "size.h"
-#define SE jbxvt.sel.end
 static void handle_drag(const struct JBDim rc)
 {
 	struct JBDim * e = jbxvt_get_selection_end_points();
@@ -22,6 +21,7 @@ static void save_current_end_points(struct JBDim * restrict s,
 	s[0] = e[0];
 	s[1] = e[1];
 	s[2] = jbxvt_pixels_to_chars(point);
+	jbxvt_fix_coordinates(s + 2);
 }
 //  Extend the selection.
 void jbxvt_extend_selection(xcb_connection_t * xc,
@@ -31,7 +31,6 @@ void jbxvt_extend_selection(xcb_connection_t * xc,
 		return; // no selection
 	struct JBDim s[3];
 	save_current_end_points(s, point);
-	jbxvt_fix_coordinates(s + 2);
 	if (drag)
 		  handle_drag(s[2]);
 	jbxvt_change_selection(xc, s, s + 1);
