@@ -14,13 +14,14 @@ static void handle_drag(const struct JBDim rc)
 	jbxvt_adjust_selection(&e[1]);
 }
 static void save_current_end_points(struct JBDim * restrict s,
-	const struct JBDim point)
+	struct JBDim point)
 {
 	struct JBDim * e = jbxvt_get_selection_end_points();
 	s[0] = e[0];
 	s[1] = e[1];
-	s[2] = jbxvt_pixels_to_chars(point);
-	jbxvt_fix_coordinates(s + 2);
+	point = jbxvt_pixels_to_chars(point);
+	jbxvt_fix_coordinates(&point);
+	s[2] = point;
 }
 //  Extend the selection.
 void jbxvt_extend_selection(xcb_connection_t * xc,
