@@ -192,6 +192,26 @@ static void key_scroll(xcb_connection_t * xc, const int8_t mod)
 		jbxvt_get_scroll() + mod);
 
 }
+// returns true if parent should return
+static bool shift_page_up_down_scroll(xcb_connection_t * restrict xc,
+	const uint16_t state, const int_fast16_t pcount, uint8_t * s)
+{
+	/* The following implements a hook into keyboard
+	   input for shift-pageup/dn scrolling and future
+	   features.  */
+	if (state == XCB_MOD_MASK_SHIFT && pcount > 2) {
+		LOG("Handling shift combination...");
+		int8_t mod = -10;
+		switch (s[2]) {
+		case '5':
+			mod = - mod;
+		case '6':
+			key_scroll(xc, mod);
+			return true;
+		}
+	}
+	return false;
+}
 //  Convert the keypress event into a string.
 uint8_t * jbxvt_lookup_key(xcb_connection_t * restrict xc,
 	void * restrict ev, int_fast16_t * restrict pcount)
@@ -207,20 +227,10 @@ uint8_t * jbxvt_lookup_key(xcb_connection_t * restrict xc,
 			for (int_fast16_t i = *pcount; i >= 0; --i)
 				LOG("s[%d]: 0x%x", i, s[i]);
 #endif//KEY_DEBUG
-			/* The following implements a hook into keyboard
-			   input for shift-pageup/dn scrolling and future
-			   features.  */
-			if (ke->state == XCB_MOD_MASK_SHIFT && *pcount > 2) {
-				LOG("Handling shift combination...");
-				int8_t mod = -10;
-				switch (s[2]) {
-				case '5':
-					mod = - mod;
-				case '6':
-					key_scroll(xc, mod);
-					*pcount = 0;
-					return NULL;
-				}
+			if (shift_page_up_down_scroll(xc, ke->state,
+				*pcount, s)) {
+				*pcount = 0;
+				return NULL;
 			}
 			return s;
 		}
