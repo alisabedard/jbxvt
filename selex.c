@@ -2,6 +2,7 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "selex.h"
 #include "change_selection.h"
+#include "libjb/util.h"
 #include "selection.h"
 #include "selend.h"
 #include "size.h"
@@ -19,9 +20,21 @@ static void save_current_end_points(struct JBDim * restrict s,
 	struct JBDim * e = jbxvt_get_selection_end_points();
 	s[0] = e[0];
 	s[1] = e[1];
-	point = jbxvt_pixels_to_chars(point);
-	jbxvt_fix_coordinates(&point);
 	s[2] = point;
+}
+// Get a char-sized JBDim structure fitting within the screen
+static struct JBDim jbxvt_get_constrained(struct JBDim rc)
+{
+	struct JBDim c = jbxvt_get_char_size();
+	if (c.w) {
+		JB_LIMIT(rc.x, c.w - 1, 0);
+	} else
+		rc.x = 0;
+	if (c.h) {
+		JB_LIMIT(rc.y, c.h - 1, 0);
+	} else
+		rc.y = 0;
+	return rc;
 }
 //  Extend the selection.
 void jbxvt_extend_selection(xcb_connection_t * xc,
@@ -30,7 +43,8 @@ void jbxvt_extend_selection(xcb_connection_t * xc,
 	if (!jbxvt_is_selected())
 		return; // no selection
 	struct JBDim s[3];
-	save_current_end_points(s, point);
+	save_current_end_points(s,
+		jbxvt_get_constrained(jbxvt_pixels_to_chars(point)));
 	if (drag)
 		  handle_drag(s[2]);
 	jbxvt_change_selection(xc, s, s + 1);

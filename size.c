@@ -1,32 +1,7 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "size.h"
 #include "font.h"
-#include "libjb/util.h"
 static struct JBDim size_in_pixels;
-/*  Fix the coordinates so that they are within the screen
-    and do not lie within empty space.  */
-void jbxvt_fix_coordinates(struct JBDim * restrict rc)
-{
-	struct JBDim c = jbxvt_get_char_size();
-	if (!c.w || !c.h)
-		return; // prevent segfault on bad window size.
-	JB_LIMIT(rc->x, c.w - 1, 0);
-	JB_LIMIT(rc->y, c.h - 1, 0);
-}
-// Get a char-sized JBDim structure fitting within the screen
-struct JBDim jbxvt_get_constrained(struct JBDim rc)
-{
-	struct JBDim c = jbxvt_get_char_size();
-	if (c.w)
-		JB_LIMIT(rc.x, c.w - 1, 0);
-	else
-		rc.x = 0;
-	if (c.h)
-		JB_LIMIT(rc.y, c.h - 1, 0);
-	else
-		rc.y = 0;
-	return rc;
-}
 void jbxvt_set_pixel_size(const struct JBDim size)
 {
 	size_in_pixels = size;
