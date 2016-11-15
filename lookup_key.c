@@ -116,7 +116,7 @@ static uint8_t * get_keycode_value(struct JBXVTKeyMaps * restrict
 {
 	for (struct JBXVTKeyMaps * km = keymaptable; km->km_keysym; ++km) {
 		if (km->km_keysym != keysym)
-			  continue;
+			continue;
 		struct JBXVTKeyStrings * ks = use_alternate
 			? &km->km_alt : &km->km_normal;
 		snprintf((char *)buf, KBUFSIZE, get_format(ks->ks_type),
@@ -151,7 +151,7 @@ static uint8_t shift(uint8_t c)
 		return c - 0x20; // c - SPACE
 	for (uint8_t i = 0; shift_map[i][0]; ++i) {
 		if (shift_map[i][0] == c)
-			  return shift_map[i][1];
+			return shift_map[i][1];
 	}
 	return c;
 }
@@ -185,6 +185,13 @@ static xcb_keysym_t get_keysym(xcb_connection_t * restrict c,
 	xcb_key_symbols_free(syms);
 	return k;
 }
+static void key_scroll(xcb_connection_t * xc, const int8_t mod)
+{
+	LOG("KEY scroll");
+	jbxvt_set_scroll(xc,
+		jbxvt_get_scroll() + mod);
+
+}
 //  Convert the keypress event into a string.
 uint8_t * jbxvt_lookup_key(xcb_connection_t * restrict xc,
 	void * restrict ev, int_fast16_t * restrict pcount)
@@ -201,7 +208,7 @@ uint8_t * jbxvt_lookup_key(xcb_connection_t * restrict xc,
 				LOG("s[%d]: 0x%x", i, s[i]);
 #endif//KEY_DEBUG
 			/* The following implements a hook into keyboard input
-			 for shift-pageup/dn scrolling and future features.  */
+			   for shift-pageup/dn scrolling and future features.  */
 			if (ke->state == XCB_MOD_MASK_SHIFT && *pcount > 2) {
 				LOG("Handling shift combination...");
 				int8_t mod = -10;
@@ -209,17 +216,14 @@ uint8_t * jbxvt_lookup_key(xcb_connection_t * restrict xc,
 				case '5':
 					mod = - mod;
 				case '6':
-					LOG("KEY scroll");
-					jbxvt_set_scroll(xc,
-						jbxvt_get_scroll() + mod);
-					goto do_not_display;
-					break;
+					key_scroll(xc, mod);
+					*pcount = 0;
+					return NULL;
 				}
 			}
 			return s;
 		}
 		if (k >= 0xffe0) { // Don't display non-printable chars
-	do_not_display:
 			*pcount = 0;
 			return NULL;
 		}
