@@ -13,6 +13,20 @@ void jbxvt_fix_coordinates(struct JBDim * restrict rc)
 	JB_LIMIT(rc->x, c.w - 1, 0);
 	JB_LIMIT(rc->y, c.h - 1, 0);
 }
+// Get a char-sized JBDim structure fitting within the screen
+struct JBDim jbxvt_get_constrained(struct JBDim rc)
+{
+	struct JBDim c = jbxvt_get_char_size();
+	if (c.w)
+		JB_LIMIT(rc.x, c.w - 1, 0);
+	else
+		rc.x = 0;
+	if (c.h)
+		JB_LIMIT(rc.y, c.h - 1, 0);
+	else
+		rc.y = 0;
+	return rc;
+}
 void jbxvt_set_pixel_size(const struct JBDim size)
 {
 	size_in_pixels = size;

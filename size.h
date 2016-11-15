@@ -7,9 +7,12 @@ struct JBDim jbxvt_chars_to_pixels(struct JBDim c)
 	__attribute__((pure));
 /*  Fix the coordinates so that they are within the screen
     and do not lie within empty space.  */
-void jbxvt_fix_coordinates(struct JBDim * restrict rc);
+void jbxvt_fix_coordinates(struct JBDim * restrict rc)
+	__attribute__((deprecated));
 // Return size module's stored size converted to characters
 struct JBDim jbxvt_get_char_size(void);
+// Get a char-sized JBDim structure fitting within the screen
+struct JBDim jbxvt_get_constrained(struct JBDim rc);
 // Return size module's stored pixel size
 struct JBDim jbxvt_get_pixel_size(void);
 // Convert pixel size/position to char size/position
