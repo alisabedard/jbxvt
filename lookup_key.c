@@ -212,6 +212,11 @@ static bool shift_page_up_down_scroll(xcb_connection_t * restrict xc,
 	}
 	return false;
 }
+__attribute__((const))
+static bool is_not_printable(const xcb_keysym_t k)
+{
+	return k >= 0xffe0;
+}
 //  Convert the keypress event into a string.
 uint8_t * jbxvt_lookup_key(xcb_connection_t * restrict xc,
 	void * restrict ev, int_fast16_t * restrict pcount)
@@ -234,7 +239,8 @@ uint8_t * jbxvt_lookup_key(xcb_connection_t * restrict xc,
 			}
 			return s;
 		}
-		if (k >= 0xffe0) { // Don't display non-printable chars
+		// Don't display non-printable chars:
+		if (is_not_printable(k)) {
 			*pcount = 0;
 			return NULL;
 		}
