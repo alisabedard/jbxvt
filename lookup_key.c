@@ -149,10 +149,9 @@ static uint8_t shift(uint8_t c)
 {
 	if (c >= 'a' && c <= 'z')
 		return c - 0x20; // c - SPACE
-	for (uint8_t i = 0; shift_map[i][0]; ++i) {
+	for (uint8_t i = 0; shift_map[i][0]; ++i)
 		if (shift_map[i][0] == c)
 			return shift_map[i][1];
-	}
 	return c;
 }
 static void apply_state(const uint16_t state, uint8_t * restrict kbuf)
@@ -225,35 +224,34 @@ static inline bool is_not_printable(const xcb_keysym_t k)
 {
 	return k >= 0xffe0;
 }
+#ifdef DEBUG_KEYS
+static void print_s(uint8_t * s, int16_t i)
+{
+	for (; i >= 0; --i)
+		LOG("s[%d]: 0x%x", i, s[i]);
+}
+#else//!DEBUG_KEYS
+#define print_s(s, i)
+#endif//DEBUG_KEYS
 static uint8_t * handle_keysym(xcb_connection_t * restrict xc,
 	uint8_t * restrict kbuf, int_fast16_t * restrict pcount,
 	const xcb_keysym_t k, const uint16_t ke_state)
 {
-	{ // * s scope
-		uint8_t * s = get_s(k, (uint8_t *)kbuf);
-		if (s) {
-			*pcount = strlen((const char *)s);
-#ifdef DEBUG_KEYS
-			for (int_fast16_t i = *pcount;
-				i >= 0; --i)
-				LOG("s[%d]: 0x%x", i, s[i]);
-#endif//DEBUG_KEYS
-			if (shift_page_up_down_scroll(xc,
-				ke_state, *pcount, s)) {
-				*pcount = 0;
-				return NULL;
-			}
-			return s;
-		}
+	uint8_t * s = get_s(k, (uint8_t *)kbuf);
+	if (s) {
+		*pcount = strlen((const char *)s);
+		print_s(s, *pcount);
+		if (shift_page_up_down_scroll(xc,
+			ke_state, *pcount, s))
+			return NULL;
+		return s;
 	}
-	// Don't display non-printable chars:
-	if (is_not_printable(k)) {
-		*pcount = 0;
+	if (is_not_printable(k))
 		return NULL;
-	}
-	kbuf[0] = k;
 	*pcount = 1;
-	return NULL;
+	kbuf[0] = k;
+	apply_state(ke_state, kbuf);
+	return kbuf;
 }
 //  Convert the keypress event into a string.
 uint8_t * jbxvt_lookup_key(xcb_connection_t * restrict xc,
@@ -261,16 +259,6 @@ uint8_t * jbxvt_lookup_key(xcb_connection_t * restrict xc,
 {
 	static uint8_t kbuf[KBUFSIZE];
 	xcb_key_press_event_t * ke = ev;
-	{ // * s scope
-		uint8_t * s = handle_keysym(xc, kbuf,
-			pcount, get_keysym(xc, ke), ke->state);
-		if (s)
-			return s;
-	}
-	if (*pcount) {
-		apply_state(ke->state, kbuf);
-		LOG("kbuf: 0x%hhx", kbuf[0]);
-		return kbuf;
-	}
-	return NULL;
+	return handle_keysym(xc, kbuf, pcount,
+		get_keysym(xc, ke), ke->state);
 }
