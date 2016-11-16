@@ -214,7 +214,7 @@ static bool shift_page_up_down_scroll(xcb_connection_t * restrict xc,
 	return false;
 }
 __attribute__((const))
-static bool is_not_printable(const xcb_keysym_t k)
+static inline bool is_not_printable(const xcb_keysym_t k)
 {
 	return k >= 0xffe0;
 }
