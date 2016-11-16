@@ -255,11 +255,14 @@ void jbxvt_esc(xcb_connection_t * xc,
 		tk->type = JBXVT_TOKEN_SOS;
 		break;
 	case 'Y':
-		tk->type = JBXVT_TOKEN_CUP;
-		// -32 to decode, + 1 to be vt100 compatible
-		tk->arg[1] = jbxvt_pop_char(xc, 0) - 31;
-		tk->arg[0] = jbxvt_pop_char(xc, 0) - 31;
-		tk->nargs = 2;
+		if (!jbxvt_get_modes()->decanm) { // vt52 mode
+			tk->type = JBXVT_TOKEN_CUP;
+			// -32 to decode, + 1 to be vt100 compatible
+			tk->arg[1] = jbxvt_pop_char(xc, 0) - 31;
+			tk->arg[0] = jbxvt_pop_char(xc, 0) - 31;
+			tk->nargs = 2;
+		}
+		break;
 	case 'Z':
 		if (jbxvt_get_modes()->decanm) // vt100+ mode
 			tk->type = JBXVT_TOKEN_ID;
