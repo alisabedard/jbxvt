@@ -204,12 +204,11 @@ static bool shift_page_up_down_scroll(xcb_connection_t * restrict xc,
 	   input for shift-pageup/dn scrolling and future
 	   features.  */
 	LOG("Handling shift combination...");
-	int8_t mod = -10;
-	switch (s[2]) {
-	case '5':
-		mod = - mod;
-	case '6':
-		page_key_scroll(xc, mod);
+	if (s[2] == '5') {
+		page_key_scroll(xc, -10);
+		return true;
+	} else if (s[2] == '6') {
+		page_key_scroll(xc, 10);
 		return true;
 	}
 	return false;
