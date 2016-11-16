@@ -185,7 +185,7 @@ static xcb_keysym_t get_keysym(xcb_connection_t * restrict c,
 	xcb_key_symbols_free(syms);
 	return k;
 }
-static void key_scroll(xcb_connection_t * xc, const int8_t mod)
+static void page_key_scroll(xcb_connection_t * xc, const int8_t mod)
 {
 	LOG("KEY scroll");
 	jbxvt_set_scroll(xc,
@@ -196,19 +196,21 @@ static void key_scroll(xcb_connection_t * xc, const int8_t mod)
 static bool shift_page_up_down_scroll(xcb_connection_t * restrict xc,
 	const uint16_t state, const int_fast16_t pcount, uint8_t * s)
 {
+	if (state != XCB_MOD_MASK_SHIFT)
+		return false;
+	if (pcount <= 2)
+		return false;
 	/* The following implements a hook into keyboard
 	   input for shift-pageup/dn scrolling and future
 	   features.  */
-	if (state == XCB_MOD_MASK_SHIFT && pcount > 2) {
-		LOG("Handling shift combination...");
-		int8_t mod = -10;
-		switch (s[2]) {
-		case '5':
-			mod = - mod;
-		case '6':
-			key_scroll(xc, mod);
-			return true;
-		}
+	LOG("Handling shift combination...");
+	int8_t mod = -10;
+	switch (s[2]) {
+	case '5':
+		mod = - mod;
+	case '6':
+		page_key_scroll(xc, mod);
+		return true;
 	}
 	return false;
 }
