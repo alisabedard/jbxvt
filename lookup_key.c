@@ -225,27 +225,32 @@ uint8_t * jbxvt_lookup_key(xcb_connection_t * restrict xc,
 	static uint8_t kbuf[KBUFSIZE];
 	{ // * ke scope
 		xcb_key_press_event_t * ke = ev;
-		const xcb_keysym_t k = get_keysym(xc, ke);
-		uint8_t * s = get_s(k, (uint8_t *)kbuf);
-		if (s) {
-			*pcount = strlen((const char *)s);
+		{ // k scope
+			const xcb_keysym_t k = get_keysym(xc, ke);
+			{ // * s scope
+				uint8_t * s = get_s(k, (uint8_t *)kbuf);
+				if (s) {
+					*pcount = strlen((const char *)s);
 #ifdef KEY_DEBUG
-			for (int_fast16_t i = *pcount; i >= 0; --i)
-				LOG("s[%d]: 0x%x", i, s[i]);
+					for (int_fast16_t i = *pcount;
+						i >= 0; --i)
+						LOG("s[%d]: 0x%x", i, s[i]);
 #endif//KEY_DEBUG
-			if (shift_page_up_down_scroll(xc, ke->state,
-				*pcount, s)) {
+					if (shift_page_up_down_scroll(xc,
+						ke->state, *pcount, s)) {
+						*pcount = 0;
+						return NULL;
+					}
+					return s;
+				}
+			}
+			// Don't display non-printable chars:
+			if (is_not_printable(k)) {
 				*pcount = 0;
 				return NULL;
 			}
-			return s;
+			kbuf[0] = k;
 		}
-		// Don't display non-printable chars:
-		if (is_not_printable(k)) {
-			*pcount = 0;
-			return NULL;
-		}
-		kbuf[0] = k;
 		apply_state(ke->state, kbuf);
 	}
 #ifdef KEY_DEBUG
