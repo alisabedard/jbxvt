@@ -178,10 +178,8 @@ static xcb_keysym_t get_keysym(xcb_connection_t * restrict c,
 {
 	xcb_key_symbols_t *syms = xcb_key_symbols_alloc(c);
 	xcb_keysym_t k = xcb_key_press_lookup_keysym(syms, ke, 2);
-#ifdef KEY_DEBUG
 	LOG("keycode: 0x%x, keysym: 0x%x, state: 0x%x",
 		ke->detail, k, ke->state);
-#endif//KEY_DEBUG
 	xcb_key_symbols_free(syms);
 	return k;
 }
@@ -226,11 +224,11 @@ static uint8_t * handle_keysym(xcb_connection_t * restrict xc,
 		uint8_t * s = get_s(k, (uint8_t *)kbuf);
 		if (s) {
 			*pcount = strlen((const char *)s);
-#ifdef KEY_DEBUG
+#ifdef DEBUG_KEYS
 			for (int_fast16_t i = *pcount;
 				i >= 0; --i)
 				LOG("s[%d]: 0x%x", i, s[i]);
-#endif//KEY_DEBUG
+#endif//DEBUG_KEYS
 			if (shift_page_up_down_scroll(xc,
 				ke_state, *pcount, s)) {
 				*pcount = 0;
@@ -253,18 +251,18 @@ uint8_t * jbxvt_lookup_key(xcb_connection_t * restrict xc,
 	void * restrict ev, int_fast16_t * restrict pcount)
 {
 	static uint8_t kbuf[KBUFSIZE];
-	{ // * ke scope
-		xcb_key_press_event_t * ke = ev;
-		{ // * s scope
-			uint8_t * s = handle_keysym(xc, kbuf,
-				pcount, get_keysym(xc, ke), ke->state);
-			if (s)
-				return s;
-		}
-		apply_state(ke->state, kbuf);
+	xcb_key_press_event_t * ke = ev;
+	{ // * s scope
+		uint8_t * s = handle_keysym(xc, kbuf,
+			pcount, get_keysym(xc, ke), ke->state);
+		if (s)
+			return s;
 	}
-#ifdef KEY_DEBUG
-	LOG("kbuf: 0x%hhx", kbuf[0]);
-#endif//KEY_DEBUG
-	return *pcount ? (uint8_t *)kbuf : NULL;
+	apply_state(ke->state, kbuf);
+	if (*pcount) {
+		apply_state(ke->state, kbuf);
+		LOG("kbuf: 0x%hhx", kbuf[0]);
+		return kbuf;
+	}
+	return NULL;
 }
