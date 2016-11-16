@@ -190,6 +190,16 @@ static void page_key_scroll(xcb_connection_t * xc, const int8_t mod)
 		jbxvt_get_scroll() + mod);
 
 }
+__attribute__((const))
+static inline bool is_page_up(const uint8_t v)
+{
+	return v == '5';
+}
+__attribute__((const))
+static inline bool is_page_down(const uint8_t v)
+{
+	return v == '6';
+}
 // returns true if parent should return
 static bool shift_page_up_down_scroll(xcb_connection_t * restrict xc,
 	const uint16_t state, const int_fast16_t pcount, uint8_t * s)
@@ -202,10 +212,10 @@ static bool shift_page_up_down_scroll(xcb_connection_t * restrict xc,
 	   input for shift-pageup/dn scrolling and future
 	   features.  */
 	LOG("Handling shift combination...");
-	if (s[2] == '5') {
+	if (is_page_up(s[2])) {
 		page_key_scroll(xc, -10);
 		return true;
-	} else if (s[2] == '6') {
+	} else if (is_page_down(s[2])) {
 		page_key_scroll(xc, 10);
 		return true;
 	}
@@ -258,7 +268,6 @@ uint8_t * jbxvt_lookup_key(xcb_connection_t * restrict xc,
 		if (s)
 			return s;
 	}
-	apply_state(ke->state, kbuf);
 	if (*pcount) {
 		apply_state(ke->state, kbuf);
 		LOG("kbuf: 0x%hhx", kbuf[0]);
