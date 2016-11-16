@@ -212,14 +212,13 @@ static bool shift_page_up_down_scroll(xcb_connection_t * restrict xc,
 	   input for shift-pageup/dn scrolling and future
 	   features.  */
 	LOG("Handling shift combination...");
-	if (is_page_up(s[2])) {
-		page_key_scroll(xc, -10);
-		return true;
-	} else if (is_page_down(s[2])) {
+	if (is_page_up(s[2]))
 		page_key_scroll(xc, 10);
-		return true;
-	}
-	return false;
+	else if (is_page_down(s[2]))
+		page_key_scroll(xc, -10);
+	else
+		return false;
+	return true; // if page up or down
 }
 __attribute__((const))
 static inline bool is_not_printable(const xcb_keysym_t k)
