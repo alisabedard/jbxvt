@@ -8,6 +8,20 @@
 #include "mode.h"
 #include "screen.h"
 #include <stdio.h>
+static int_fast16_t read_numeric_argument(xcb_connection_t * restrict xc,
+	struct JBXVTToken * restrict tk, uint_fast16_t * restrict i,
+	int_fast16_t c)
+{
+	uint_fast16_t n = 0;
+	while (c >= '0' && c <= '9') { // is a number
+		// Advance position and convert
+		n = n * 10 + c - '0';
+		c = jbxvt_pop_char(xc, 0); // next digit
+	}
+	if (*i < JBXVT_TOKEN_MAX_ARGS)
+		tk->arg[(*i)++] = n;
+	return c;
+}
 void jbxvt_csi(xcb_connection_t * xc,
 	int_fast16_t c, struct JBXVTToken * restrict tk)
 {
@@ -19,25 +33,16 @@ void jbxvt_csi(xcb_connection_t * xc,
 	//  read any numerical arguments
 	uint_fast16_t i = 0;
 	do {
-		{ // n scope
-			uint_fast16_t n = 0;
-			while (c >= '0' && c <= '9') { // is a number
-				// Advance position and convert
-				n = n * 10 + c - '0';
-				c = jbxvt_pop_char(xc, 0); // next digit
-			}
-			if (i < JBXVT_TOKEN_MAX_ARGS)
-				  tk->arg[i++] = n;
-		}
+		c = read_numeric_argument(xc, tk, &i, c);
 		if (c == JBXVT_TOKEN_ESC)
-			  jbxvt_push_char(c);
+			jbxvt_push_char(c);
 		if (c < ' ')
-			  return;
+			return;
 		if (c < '@')
-			  c = jbxvt_pop_char(xc, 0);
+			c = jbxvt_pop_char(xc, 0);
 	} while (c < '@' && c >= ' ');
 	if (c == JBXVT_TOKEN_ESC)
-		  jbxvt_push_char(c);
+		jbxvt_push_char(c);
 	tk->nargs = i;
 	tk->type = c;
 }
@@ -56,7 +61,7 @@ void jbxvt_end_cs(xcb_connection_t * xc,
 	register uint_fast16_t i = 0;
 	while ((c & 0177) >= ' ' && i < JBXVT_TOKEN_MAX_LENGTH) {
 		if (c >= ' ')
-			  tk->string[i++] = c;
+			tk->string[i++] = c;
 		c = jbxvt_pop_char(xc, 0);
 	}
 	tk->length = i;
