@@ -218,6 +218,36 @@ static inline bool is_not_printable(const xcb_keysym_t k)
 {
 	return k >= 0xffe0;
 }
+static uint8_t * handle_keysym(xcb_connection_t * restrict xc,
+	uint8_t * restrict kbuf, int_fast16_t * restrict pcount,
+	const xcb_keysym_t k, const uint16_t ke_state)
+{
+	{ // * s scope
+		uint8_t * s = get_s(k, (uint8_t *)kbuf);
+		if (s) {
+			*pcount = strlen((const char *)s);
+#ifdef KEY_DEBUG
+			for (int_fast16_t i = *pcount;
+				i >= 0; --i)
+				LOG("s[%d]: 0x%x", i, s[i]);
+#endif//KEY_DEBUG
+			if (shift_page_up_down_scroll(xc,
+				ke_state, *pcount, s)) {
+				*pcount = 0;
+				return NULL;
+			}
+			return s;
+		}
+	}
+	// Don't display non-printable chars:
+	if (is_not_printable(k)) {
+		*pcount = 0;
+		return NULL;
+	}
+	kbuf[0] = k;
+	*pcount = 1;
+	return NULL;
+}
 //  Convert the keypress event into a string.
 uint8_t * jbxvt_lookup_key(xcb_connection_t * restrict xc,
 	void * restrict ev, int_fast16_t * restrict pcount)
@@ -225,37 +255,16 @@ uint8_t * jbxvt_lookup_key(xcb_connection_t * restrict xc,
 	static uint8_t kbuf[KBUFSIZE];
 	{ // * ke scope
 		xcb_key_press_event_t * ke = ev;
-		{ // k scope
-			const xcb_keysym_t k = get_keysym(xc, ke);
-			{ // * s scope
-				uint8_t * s = get_s(k, (uint8_t *)kbuf);
-				if (s) {
-					*pcount = strlen((const char *)s);
-#ifdef KEY_DEBUG
-					for (int_fast16_t i = *pcount;
-						i >= 0; --i)
-						LOG("s[%d]: 0x%x", i, s[i]);
-#endif//KEY_DEBUG
-					if (shift_page_up_down_scroll(xc,
-						ke->state, *pcount, s)) {
-						*pcount = 0;
-						return NULL;
-					}
-					return s;
-				}
-			}
-			// Don't display non-printable chars:
-			if (is_not_printable(k)) {
-				*pcount = 0;
-				return NULL;
-			}
-			kbuf[0] = k;
+		{ // * s scope
+			uint8_t * s = handle_keysym(xc, kbuf,
+				pcount, get_keysym(xc, ke), ke->state);
+			if (s)
+				return s;
 		}
 		apply_state(ke->state, kbuf);
 	}
 #ifdef KEY_DEBUG
 	LOG("kbuf: 0x%hhx", kbuf[0]);
 #endif//KEY_DEBUG
-	*pcount = 1;
-	return (uint8_t *)kbuf;
+	return *pcount ? (uint8_t *)kbuf : NULL;
 }
