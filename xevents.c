@@ -37,8 +37,9 @@ static void key_press(xcb_connection_t * xc, void * e)
 {
 	int_fast16_t count = 0;
 	uint8_t * s = jbxvt_lookup_key(xc, e, &count);
-	jb_require(write(jbxvt_get_fd(), s, count) != -1,
-		"Could not write to command");
+	if (s)
+		jb_require(write(jbxvt_get_fd(), s, count) != -1,
+			"Could not write to command");
 }
 xcb_atom_t jbxvt_get_wm_del_win(xcb_connection_t * xc)
 {
