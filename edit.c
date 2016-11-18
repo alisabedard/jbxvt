@@ -60,18 +60,20 @@ static uint8_t get_count(int8_t count, const bool insert)
 		- jbxvt_get_screen()->cursor.x);
 	return count;
 }
-static void begin(xcb_connection_t * xc, int16_t * x,
+static void set_x(int16_t * restrict x, const int8_t count,
+	const struct JBDim c)
+{
+	const int16_t p = jbxvt_chars_to_pixels(c).x;
+	x[0] = p;
+	x[1] = p + count * jbxvt_get_font_size().width;
+}
+static void begin(xcb_connection_t * xc, int16_t * restrict x,
 	int8_t * restrict count, const bool insert)
 {
-	*count = get_count(*count, insert);
 	jbxvt_set_scroll(xc, 0);
 	jbxvt_draw_cursor(xc);
 	const struct JBDim c = jbxvt_get_screen()->cursor;
-	{ // p scope
-		const struct JBDim p = jbxvt_chars_to_pixels(c);
-		x[0] = p.x;
-		x[1] = p.x + *count * jbxvt_get_font_size().width;
-	}
+	set_x(x, *count = get_count(*count, insert), c);
 	if (!insert)
 		JB_SWAP(int16_t, x[0], x[1]);
 	jbxvt_check_selection(xc, c.y, c.y);
