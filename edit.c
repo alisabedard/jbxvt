@@ -38,12 +38,12 @@ static void copy_lines(const int16_t x, const int8_t count)
 {
 	struct JBXVTScreen * restrict screen = jbxvt_get_screen();
 	const int16_t y = screen->cursor.y;
-	uint8_t * s = screen->text[y];
+	uint8_t * t = screen->text[y];
 	uint32_t * r = screen->rend[y];
 	for (int_fast16_t w = jbxvt_get_char_size().w,
 		i = x + count; i < w; ++i) {
 		const int_fast16_t j = i - count;
-		s[i] = s[j];
+		t[i] = t[j];
 		r[i] = r[j];
 	}
 }
