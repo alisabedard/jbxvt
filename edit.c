@@ -13,7 +13,7 @@
 #include "size.h"
 #include "window.h"
 #include <string.h>
-static void copy_area(xcb_connection_t * xc,
+static void copy_area(xcb_connection_t * restrict xc,
 	const int16_t * restrict x, const int16_t y,
 	const uint16_t width)
 {
@@ -21,16 +21,22 @@ static void copy_area(xcb_connection_t * xc,
 	xcb_copy_area(xc, v, v, jbxvt_get_text_gc(xc), x[0], y,
 		x[1], y, width, jbxvt_get_font_size().height);
 }
-static void finalize(xcb_connection_t * xc,
+static void clear_area(xcb_connection_t * restrict xc, struct JBDim p,
+	const int8_t count)
+
+{
+	LOG("clear_area(xc, p = {.x = %d, .y = %d}, count = %d)",
+		p.x, p.y, count);
+	const struct JBDim f = jbxvt_get_font_size();
+	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc),
+		p.x, p.y, count * f.w, f.h);
+}
+static void finalize(xcb_connection_t * restrict xc,
 	const int16_t * restrict x, const struct JBDim p,
 	const uint16_t width, const int8_t count)
 {
 	copy_area(xc, x, p.y, width);
-	{ // f scope
-		const struct JBDim f = jbxvt_get_font_size();
-		xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc),
-			p.x, p.y, count * f.w, f.h);
-	}
+	clear_area(xc, p, count);
 	jbxvt_get_screen()->wrap_next = 0;
 	jbxvt_draw_cursor(xc);
 }
