@@ -15,8 +15,10 @@
 #define E(n) XCB_EVENT_MASK_##n
 #define EB(n) XCB_EVENT_MASK_BUTTON_##n
 enum EventMasks {
-	MW_EVENTS = E(KEY_PRESS) | E(FOCUS_CHANGE) | E(STRUCTURE_NOTIFY),
-	SUB_EVENTS = E(EXPOSURE) | EB(PRESS) | EB(RELEASE) | EB(MOTION)
+	JBXVT_MAIN_EVENT_MASK = E(KEY_PRESS) | E(FOCUS_CHANGE)
+		| E(STRUCTURE_NOTIFY),
+	JBXVT_CHILD_EVENT_MASK = E(EXPOSURE) | EB(PRESS) | EB(RELEASE)
+		| EB(MOTION)
 };
 #undef E
 #undef EB
@@ -27,7 +29,7 @@ static void create_main_window(xcb_connection_t * xc,
 	xcb_create_window(xc, 0, jbxvt_get_main_window(xc), root, position.x,
 		position.y, size.width, size.height, 0, 0, 0,
 		XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK, (uint32_t[]){
-		jbxvt_get_bg(), MW_EVENTS});
+		jbxvt_get_bg(), JBXVT_MAIN_EVENT_MASK});
 	jbxvt_set_pixel_size(size);
 }
 static void create_sb_window(xcb_connection_t * xc, const uint16_t height)
@@ -38,7 +40,7 @@ static void create_sb_window(xcb_connection_t * xc, const uint16_t height)
 		jbxvt_get_main_window(xc), -1, -1, JBXVT_SCROLLBAR_WIDTH - 1,
 		height, 1, 0, 0, XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL
 		| XCB_CW_EVENT_MASK | XCB_CW_CURSOR, (uint32_t[]){
-		jbxvt_get_bg(), jbxvt_get_fg(), SUB_EVENTS, c});
+		jbxvt_get_bg(), jbxvt_get_fg(), JBXVT_CHILD_EVENT_MASK, c});
 	xcb_free_cursor(xc, c);
 }
 static void create_vt_window(xcb_connection_t * xc, const struct JBDim sz,
@@ -48,7 +50,8 @@ static void create_vt_window(xcb_connection_t * xc, const struct JBDim sz,
 	xcb_create_window(xc, 0, jbxvt_get_vt_window(xc),
 		jbxvt_get_main_window(xc), sb ? JBXVT_SCROLLBAR_WIDTH : 0, 0,
 		sz.w, sz.h, 0, 0, 0, XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK
-		| XCB_CW_CURSOR, (uint32_t[]){ jbxvt_get_bg(), SUB_EVENTS, c});
+		| XCB_CW_CURSOR, (uint32_t[]){ jbxvt_get_bg(),
+		JBXVT_CHILD_EVENT_MASK, c});
 	xcb_free_cursor(xc, c);
 }
 static void set_name(xcb_connection_t * restrict xc,
