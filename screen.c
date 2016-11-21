@@ -22,19 +22,20 @@ struct JBXVTScreen * jbxvt_get_screen_at(const uint8_t i)
 {
 	return &screens[i];
 }
+static void efill_area(const struct JBDim c)
+{
+	for (uint8_t y = 0; y < c.h; ++y) {
+		memset(current->text[y], 'E', c.w);
+		memset(current->rend[y], 0, c.w << 2);
+	}
+}
 // Set all chars to 'E'
 void jbxvt_efill(xcb_connection_t * xc)
 {
 	LOG("jbxvt_efill");
 	// Move to cursor home in order for all characters to appear.
 	jbxvt_move(xc, 0, 0, 0);
-	{ // c scope
-		const struct JBDim c = jbxvt_get_char_size();
-		for (uint8_t y = 0; y < c.h; ++y) {
-			memset(current->text[y], 'E', c.w);
-			memset(current->rend[y], 0, c.w << 2);
-		}
-	}
+	efill_area(jbxvt_get_char_size());
 	jbxvt_repaint(xc);
 }
 //  Change between the alternate and the main screens
