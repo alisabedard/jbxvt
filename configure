@@ -52,6 +52,8 @@ case $ARCH in
 		EOF
 		;;
 	NETBSD)
+		CC=clang
+		echo NOTE:  NetBSD requires clang
 		cat >> $CFG <<- EOF
 		CFLAGS+=-D_NETBSD_SOURCE -D_BSD_SOURCE
 		CFLAGS+=-Wno-missing-field-initializers
