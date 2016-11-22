@@ -33,13 +33,13 @@ xcb_gcontext_t jbxvt_get_cursor_gc(xcb_connection_t * xc)
 }
 void jbxvt_save_cursor(void)
 {
-	saved_cursor = jbxvt_get_screen()->cursor;
+	saved_cursor = jbxvt_get_current_screen()->cursor;
 	saved_style = jbxvt_get_rstyle();
 }
 void jbxvt_restore_cursor(xcb_connection_t * xc)
 {
 	jbxvt_draw_cursor(xc);
-	jbxvt_get_screen()->cursor = saved_cursor;
+	jbxvt_get_current_screen()->cursor = saved_cursor;
 	jbxvt_zero_rstyle();
 	jbxvt_add_rstyle(saved_style);
 	jbxvt_draw_cursor(xc);
@@ -60,7 +60,7 @@ void jbxvt_draw_cursor(xcb_connection_t * xc)
 {
 	// Don't draw if scrolled, non-existent, or hidden
 	struct JBXVTScreen * current;
-	if (jbxvt_get_scroll() || !(current = jbxvt_get_screen())
+	if (jbxvt_get_scroll() || !(current = jbxvt_get_current_screen())
 		|| !jbxvt_get_modes()->dectcem)
 		return;
 	if ((current->cursor_visible ^= true) && is_blinking())

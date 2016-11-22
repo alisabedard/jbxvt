@@ -57,7 +57,7 @@ static void clear(int8_t count, const uint8_t rc,
 	}
 	{ // j scope, * s scope
 		const uint8_t j = rc + (up ? - count - 1 : count);
-		struct JBXVTScreen * restrict s = jbxvt_get_screen();
+		struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
 		s->text[j] = text[count];
 		s->rend[j] = rend[count];
 	}
@@ -70,7 +70,7 @@ static void adjust_saved_lines_top(const int_fast16_t n)
 }
 static void copy_saved_lines(const int_fast16_t n)
 {
-	struct JBXVTScreen * restrict s = jbxvt_get_screen();
+	struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
 	for (int_fast16_t i = n - 1; i >= 0; --i) {
 		struct JBXVTSavedLine * sl = saved_lines + n - i - 1;
 		sl->wrap = s->wrap[i];
@@ -125,7 +125,7 @@ static int8_t copy_screen_area(const int8_t i,
 	if(i >= count)
 		  return j;
 	{ // * s scope
-		struct JBXVTScreen * restrict s = jbxvt_get_screen();
+		struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
 		save[i] = s->text[j];
 		rend[i] = s->rend[j];
 	}
@@ -163,7 +163,7 @@ static void sc_dn(xcb_connection_t * xc,
 	const int16_t count, uint8_t ** save, uint32_t ** rend)
 {
 	{ // * s scope
-		struct JBXVTScreen * s = jbxvt_get_screen();
+		struct JBXVTScreen * s = jbxvt_get_current_screen();
 		for(int8_t j = copy_screen_area(0, row2, -1,
 			count, save, rend); j >= row1; --j)
 			  move_line(j, count, s);
@@ -175,7 +175,7 @@ static void sc_up(xcb_connection_t * xc,
 	const int16_t count, uint8_t ** save, uint32_t ** rend)
 {
 	{ // * s scope
-		struct JBXVTScreen * s = jbxvt_get_screen();
+		struct JBXVTScreen * s = jbxvt_get_current_screen();
 		if (s == jbxvt_get_screen_at(0) && row1 == 0)
 			add_scroll_history();
 		for(int8_t j = copy_screen_area(0, row1,

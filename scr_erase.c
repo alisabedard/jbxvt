@@ -20,11 +20,11 @@
 #endif//DEBUG_ERASE
 static inline int16_t get_x(void)
 {
-	return jbxvt_get_screen()->cursor.x;
+	return jbxvt_get_current_screen()->cursor.x;
 }
 static inline int16_t get_y(void)
 {
-	return jbxvt_get_screen()->cursor.y;
+	return jbxvt_get_current_screen()->cursor.y;
 }
 static inline uint16_t get_width(void)
 {
@@ -36,7 +36,7 @@ static inline uint16_t get_height(void)
 }
 static void del(xcb_connection_t * xc, uint16_t col, uint16_t width)
 {
-	struct JBXVTScreen * restrict s = jbxvt_get_screen();
+	struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
 	{ // cw scope
 		const uint16_t cw = get_width();
 		if (col + width > cw) // keep in screen
@@ -110,7 +110,7 @@ void jbxvt_erase_screen(xcb_connection_t * xc, const int8_t mode)
 	   functions in order to avoid side-effects on applications
 	   using a saved cursor position.  */
 	{ // *y scope, old_y scope
-		int16_t * y = &jbxvt_get_screen()->cursor.y;
+		int16_t * y = &jbxvt_get_current_screen()->cursor.y;
 		const int16_t old_y = *y;
 		for (int16_t l = range.start; l <= range.end; ++l) {
 			*y = l;

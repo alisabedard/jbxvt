@@ -19,17 +19,20 @@ static struct JBXVTScreen * jbxvt_get_screens(void)
 	static struct JBXVTScreen screens[2];
 	return screens;
 }
+// returns indexed screen, with i's validity sanitized
 struct JBXVTScreen * jbxvt_get_screen_at(const uint8_t i)
 {
-	return jbxvt_get_screens() + i;
+	// default to 0 if i is not 1
+	return jbxvt_get_screens() + (i == 1 ? 1 : 0);
 }
-struct JBXVTScreen * jbxvt_get_screen(void)
+struct JBXVTScreen * jbxvt_get_current_screen(void)
 {
+	// this, in effect, validates screen_index
 	return jbxvt_get_screen_at(screen_index);
 }
 static void efill_area(const struct JBDim c)
 {
-	struct JBXVTScreen * restrict current = jbxvt_get_screen();
+	struct JBXVTScreen * restrict current = jbxvt_get_current_screen();
 	for (int_fast16_t y = c.h - 1; y >= 0; --y) {
 		memset(current->text[y], 'E', c.w);
 		memset(current->rend[y], 0, c.w << 2);
@@ -70,6 +73,6 @@ void jbxvt_index_from(xcb_connection_t * xc,
 {
 	jbxvt_set_scroll(xc, 0);
 	jbxvt_draw_cursor(xc);
-	scroll(xc, top, jbxvt_get_screen()->margin.b, count);
+	scroll(xc, top, jbxvt_get_current_screen()->margin.b, count);
 	jbxvt_draw_cursor(xc);
 }

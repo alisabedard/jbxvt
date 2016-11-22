@@ -23,7 +23,7 @@ void jbxvt_tab(xcb_connection_t * xc)
 {
 	LOG("jbxvt_tab()");
 	jbxvt_set_scroll(xc, 0);
-	struct JBXVTScreen * restrict scr = jbxvt_get_screen();
+	struct JBXVTScreen * restrict scr = jbxvt_get_current_screen();
 	struct JBDim c = scr->cursor;
 	{ // text scope
 		uint8_t * restrict text = scr->text[c.y];

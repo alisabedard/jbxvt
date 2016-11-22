@@ -29,7 +29,7 @@
 #endif//!STRING_DEBUG
 static void handle_new_lines(xcb_connection_t * restrict xc, int8_t nlcount)
 {
-	struct JBXVTScreen * restrict s = jbxvt_get_screen();
+	struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
 	const int16_t y = s->cursor.y;
 	struct JBDim * m = &s->margin;
 	nlcount = y > m->b ? 0 : nlcount - m->b - y;
@@ -46,7 +46,7 @@ static void decsclm(void)
 }
 static void wrap(xcb_connection_t * restrict xc)
 {
-	struct JBXVTScreen * restrict s = jbxvt_get_screen();
+	struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
 	s->wrap_next = false;
 	const struct JBDim m = s->margin;
 	const int16_t y = s->cursor.y;
@@ -78,7 +78,7 @@ static void handle_insert(xcb_connection_t * restrict xc,
 	const uint8_t n, const struct JBDim p)
 {
 	LOG("handle_insert(n=%d, p={%d, %d})", n, p.x, p.y);
-	const struct JBXVTScreen * restrict s = jbxvt_get_screen();
+	const struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
 	const struct JBDim c = s->cursor;
 	const uint16_t sz = jbxvt_get_char_size().w - c.x;
 	move_data_in_memory(s->text[c.y], s->rend[c.y], n, c.x, sz);
@@ -149,7 +149,7 @@ void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str,
 	jbxvt_draw_cursor(xc);
 	if (nlcount > 0)
 		  handle_new_lines(xc, nlcount);
-	struct JBXVTScreen * restrict screen = jbxvt_get_screen();
+	struct JBXVTScreen * restrict screen = jbxvt_get_current_screen();
 	jbxvt_check_cursor_position();
 	while (len) {
 		if (test_action_char(xc, *str, screen)) {

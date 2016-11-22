@@ -16,7 +16,7 @@
 // Returns new cursor y value
 int16_t jbxvt_check_cursor_position(void)
 {
-	struct JBXVTScreen * restrict s = jbxvt_get_screen();
+	struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
 	struct JBDim * restrict c = &s->cursor;
 	{ // sz scope
 		struct JBDim sz = jbxvt_get_char_size();
@@ -47,7 +47,7 @@ void jbxvt_move(xcb_connection_t * xc,
 	LOG("jbxvt_move(x:%d, y:%d, relative:%d)", x, y, relative);
 	jbxvt_set_scroll(xc, 0);
 	jbxvt_draw_cursor(xc); // clear
-	struct JBXVTScreen * restrict s = jbxvt_get_screen();
+	struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
 	{ // c scope
 		struct JBDim c = s->cursor;
 		s->cursor = c = (struct JBDim) { .x = dim(c.x, x,

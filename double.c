@@ -7,7 +7,7 @@
 void jbxvt_set_double_width_line(xcb_connection_t * xc, const bool is_dwl)
 {
 	{ // s scope
-		struct JBXVTScreen * restrict s = jbxvt_get_screen();
+		struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
 		s->dwl[s->cursor.y] = is_dwl;
 	}
 	jbxvt_repaint(xc); // in case set mid-line

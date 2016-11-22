@@ -200,7 +200,7 @@ void jbxvt_esc(xcb_connection_t * xc,
 		tk->nargs = 1;
 		break;
 	case 'I':
-		jbxvt_index_from(xc, -1, jbxvt_get_screen()->cursor.y);
+		jbxvt_index_from(xc, -1, jbxvt_get_current_screen()->cursor.y);
 		tk->type = JBXVT_TOKEN_CUU;
 		break;
 	case 'J': // erase to end of line

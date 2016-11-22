@@ -88,7 +88,7 @@ void jbxvt_repaint(xcb_connection_t * xc)
 		++line, ++i) {
 		// Allocate enough space to process each column
 		uint8_t str[jbxvt_get_char_size().width];
-		struct JBXVTScreen * s = jbxvt_get_screen();
+		struct JBXVTScreen * s = jbxvt_get_current_screen();
 		p.y = repaint_generic(xc, p, filter_string(str, s->text[i]),
 			str, s->rend[i], s->dwl[i]);
 	}
