@@ -82,13 +82,13 @@ selection.o: selection.c selection.h JBXVTSelectionUnit.h libjb/JBDim.h \
  show_selection.h size.h window.h
 selend.o: selend.c selend.h libjb/JBDim.h sbar.h screen.h JBXVTScreen.h \
  config.h selection.h JBXVTSelectionUnit.h size.h
-selex.o: selex.c selex.h libjb/JBDim.h change_selection.h screen.h \
- JBXVTScreen.h config.h selection.h JBXVTSelectionUnit.h selend.h size.h
+selex.o: selex.c selex.h libjb/JBDim.h change_selection.h libjb/util.h \
+ selection.h JBXVTSelectionUnit.h selend.h size.h
 selreq.o: selreq.c selreq.h command.h libjb/JBDim.h libjb/util.h config.h \
  libjb/log.h selection.h JBXVTSelectionUnit.h window.h
 show_selection.o: show_selection.c show_selection.h cursor.h font.h \
  libjb/JBDim.h selection.h JBXVTSelectionUnit.h selend.h size.h window.h
-size.o: size.c size.h libjb/JBDim.h font.h libjb/util.h
+size.o: size.c size.h libjb/JBDim.h font.h
 tab.o: tab.c tab.h libjb/log.h screen.h JBXVTScreen.h config.h \
  libjb/JBDim.h sbar.h size.h
 tk_char.o: tk_char.c tk_char.h cmdtok.h JBXVTToken.h JBXVTTokenType.h \
