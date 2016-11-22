@@ -50,6 +50,14 @@ static uint16_t sanitize(uint8_t * str, uint16_t len)
 	str[j] = '\0';
 	return j;
 }
+static void copy(uint8_t * str, uint8_t * scr_text,
+	const int16_t start, const uint16_t len,
+	const uint16_t total)
+{
+	char * dest = (char *) str + total - 1;
+	char * src = (char *) scr_text + start;
+	strncpy(dest, src, len);
+}
 static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 	struct JBDim * restrict e)
 {
@@ -63,11 +71,10 @@ static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 		const int16_t start = i == e->index ? e->col : 0;
 		const int16_t end = i == j ? (e+1)->col
 			: jbxvt_get_char_size().width - 1;
-		const uint16_t len = end - start + 1;
+		const uint16_t len = end - start;
 		*str = realloc(*str, *total + len);
-		strncpy((char*)*str + *total,
-			(char*)jbxvt_get_current_screen()->text[i] + start,
-			len);
+		copy(*str, jbxvt_get_current_screen()->text[i],
+			start, len, *total);
 		*total += len;
 	}
 	*total = sanitize(*str, *total) + 1;
