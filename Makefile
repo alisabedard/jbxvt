@@ -63,5 +63,5 @@ cppcheck:
 	echo 'Results written to cppcheck.log'
 libjb: libjb/libjb.a
 libjb/libjb.a:
-	cd libjb && ${MAKE} libjb.a
+	cd libjb && ${MAKE} CC=${CC} libjb.a
 #EOF
