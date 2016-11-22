@@ -24,7 +24,7 @@ struct JBXVTScreen * jbxvt_get_screen_at(const uint8_t i)
 }
 static void efill_area(const struct JBDim c)
 {
-	for (uint8_t y = 0; y < c.h; ++y) {
+	for (int_fast16_t y = c.h - 1; y >= 0; --y) {
 		memset(current->text[y], 'E', c.w);
 		memset(current->rend[y], 0, c.w << 2);
 	}
