@@ -73,7 +73,8 @@ static void sbop(xcb_connection_t * xc, const int16_t y, const bool up)
 	if (jbxvt_get_mouse_tracked()) // let the application handle scrolling
 		return;
 	// xterm's behavior if alternate screen in use is to move the cursor
-	if (jbxvt_get_current_screen() == jbxvt_get_screen_at(0)) // first screen
+	if (jbxvt_get_current_screen()
+		== jbxvt_get_screen_at(0)) // first screen
 		jbxvt_set_scroll(xc, jbxvt_get_scroll()
 			+ (up ? -y : y) / jbxvt_get_font_size().h);
 	else

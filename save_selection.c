@@ -66,7 +66,8 @@ static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 		const uint16_t len = end - start + 1;
 		*str = realloc(*str, *total + len);
 		strncpy((char*)*str + *total,
-			(char*)jbxvt_get_current_screen()->text[i] + start, len);
+			(char*)jbxvt_get_current_screen()->text[i] + start,
+			len);
 		*total += len;
 	}
 	*total = sanitize(*str, *total) + 1;
