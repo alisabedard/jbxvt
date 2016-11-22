@@ -30,7 +30,7 @@ struct JBXVTScreen * jbxvt_get_current_screen(void)
 	// this, in effect, validates screen_index
 	return jbxvt_get_screen_at(screen_index);
 }
-static void efill_area(const struct JBDim c)
+static void set_area_to_e(const struct JBDim c)
 {
 	struct JBXVTScreen * restrict current = jbxvt_get_current_screen();
 	for (int_fast16_t y = c.h - 1; y >= 0; --y) {
@@ -38,7 +38,7 @@ static void efill_area(const struct JBDim c)
 		memset(current->rend[y], 0, c.w << 2);
 	}
 }
-static void home(xcb_connection_t * restrict xc)
+static inline void home(xcb_connection_t * restrict xc)
 {
 	jbxvt_move(xc, 0, 0, 0);
 }
@@ -48,7 +48,7 @@ void jbxvt_efill(xcb_connection_t * xc)
 	LOG("jbxvt_efill");
 	// Move to cursor home in order for all characters to appear.
 	home(xc);
-	efill_area(jbxvt_get_char_size());
+	set_area_to_e(jbxvt_get_char_size());
 	jbxvt_repaint(xc);
 }
 //  Change between the alternate and the main screens
