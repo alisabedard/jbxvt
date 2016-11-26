@@ -9,6 +9,7 @@
 #include "rstyle.h"
 #include "window.h"
 #include "xcb_screen.h"
+#include <stdlib.h>
 //#define DEBUG_PAINT
 #ifndef DEBUG_PAINT
 #undef LOG
