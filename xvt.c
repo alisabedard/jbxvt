@@ -200,10 +200,18 @@ static void reqtparam(const uint8_t t)
 }
 static void tbc(const uint8_t t)
 {
+	/* Note:  Attempting to simplify this results
+	   in vttest test failure.  */
 	if (t == 3)
 		jbxvt_set_tab(-1, false);
 	else if (!t)
 		jbxvt_set_tab(jbxvt_get_current_screen()->cursor.x, false);
+}
+static void handle_scroll(xcb_connection_t * xc, const int16_t arg)
+{
+	const struct JBDim m = jbxvt_get_current_screen() ->margin;
+	// scroll arg lines within margin m:
+	scroll(xc, m.top, m.bot, arg);
 }
 void jbxvt_parse_token(xcb_connection_t * xc)
 {
@@ -445,12 +453,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		t[0] = - t[0]; // fall through
 	case JBXVT_TOKEN_SU:
 		LOG("JBXVT_TOKEN_SU");
-		// scroll up n lines;
-		{ // m scope
-			const struct JBDim m = jbxvt_get_current_screen()
-				->margin;
-			scroll(xc, m.top, m.bot, t[0]);
-		}
+		handle_scroll(xc, t[0]);
 		break;
 	case JBXVT_TOKEN_SELINSRT:
 		LOG("JBXVT_TOKEN_SELINSRT");
