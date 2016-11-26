@@ -54,12 +54,13 @@ static void draw_text(xcb_connection_t * xc,
 // 9-bit color
 static pixel_t rgb_pixel(xcb_connection_t * xc, const uint16_t c)
 {
-	// Mask and scale to 8 bits.
-	uint16_t r = (c & 0700) >> 4, g = (c & 070) >> 2, b = c & 7;
-	//const uint8_t o = 13; // scale, leave 3 bits for octal
-	const uint8_t o = 12; // scale, leave 3 bits for octal
-	// Convert from 3 bit to 16 bit:
-	r <<= o; g <<= o; b <<= o;
+	enum {R_MASK = 0700, G_MASK = 070, B_MASK = 07,
+		R_SHIFT = 4, G_SHIFT = 2, B_SHIFT = 0,
+		SCALE = 12}; // scale, leave 3 bits for octal
+	// Mask and scale to 8 bits, then convert from 3 bit to 16 bit:
+	const uint16_t r = ((c & R_MASK) >> R_SHIFT) << SCALE;
+	const uint16_t g = ((c & G_MASK) >> G_SHIFT) << SCALE;
+	const uint16_t b = ((c & B_MASK) >> B_SHIFT) << SCALE;
 	const pixel_t p = jb_get_rgb_pixel(xc,
 		jbxvt_get_colormap(xc), r, g, b);
 	LOG("byte is 0x%x, r: 0x%x, g: 0x%x, b: 0x%x,"
