@@ -446,9 +446,11 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 	case JBXVT_TOKEN_SU:
 		LOG("JBXVT_TOKEN_SU");
 		// scroll up n lines;
-		LOG("JBXVT_TOKEN_SU");
-		scroll(xc, jbxvt_get_current_screen()->margin.top,
-			jbxvt_get_current_screen()->margin.bot, t[0]);
+		{ // m scope
+			const struct JBDim m = jbxvt_get_current_screen()
+				->margin;
+			scroll(xc, m.top, m.bot, t[0]);
+		}
 		break;
 	case JBXVT_TOKEN_SELINSRT:
 		LOG("JBXVT_TOKEN_SELINSRT");
