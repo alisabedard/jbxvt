@@ -23,6 +23,14 @@ static void dectcem(xcb_connection_t * restrict xc, const bool is_set)
 	jbxvt_get_modes()->dectcem = is_set;
 	jbxvt_draw_cursor(xc); // draw
 }
+static void change_screen(xcb_connection_t * restrict xc, const bool is_set)
+{
+	if (is_set)
+		jbxvt_save_cursor();
+	else
+		jbxvt_restore_cursor(xc);
+	jbxvt_change_screen(xc, is_set);
+}
 void jbxvt_dec_reset(xcb_connection_t * xc, struct JBXVTToken * restrict token)
 {
 	LOG("handle_reset(%d)", token->arg[0]);
@@ -124,11 +132,7 @@ void jbxvt_dec_reset(xcb_connection_t * xc, struct JBXVTToken * restrict token)
 		case 1047:
 		case 1048:
 		case 1049: // cursor restore and screen change
-			if (is_set)
-				jbxvt_save_cursor();
-			else
-				jbxvt_restore_cursor(xc);
-			jbxvt_change_screen(xc, is_set);
+			change_screen(xc, is_set);
 			break;
 		case 2004: // bracketed paste mode
 			LOG("bracketed paste mode");
