@@ -13,6 +13,11 @@
 #include "scroll.h"
 #include "size.h"
 #include <string.h>
+///#define JBXVT_DEBUG_SCREEN
+#ifndef JBXVT_DEBUG_SCREEN
+#undef LOG
+#define LOG(...)
+#endif//!JBXVT_DEBUG_SCREEN
 static uint8_t screen_index; // current screen
 static struct JBXVTScreen * jbxvt_get_screens(void)
 {
