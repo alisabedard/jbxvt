@@ -35,8 +35,16 @@ static void draw_text(xcb_connection_t * xc,
 	uint8_t * restrict str, uint16_t len,
 	struct JBDim * restrict p, uint32_t rstyle)
 {
-	xcb_image_text_8(xc, len, jbxvt_get_vt_window(xc),
-		jbxvt_get_text_gc(xc), p->x, p->y, (const char *)str);
+	// Cache frequently used values:
+	static xcb_window_t vt;
+	if (!vt)
+		vt = jbxvt_get_vt_window(xc);
+	static xcb_gc_t gc;
+	if (!gc)
+		gc = jbxvt_get_text_gc(xc);
+	// Draw the text:
+	xcb_image_text_8(xc, len, vt, gc, p->x, p->y,
+		(const char *)str);
 	++p->y; // Padding for underline, use underline for italic
 	if (((rstyle & JBXVT_RS_ITALIC)
 		&& (jbxvt_get_italic_font(xc)
@@ -49,7 +57,7 @@ static void draw_text(xcb_connection_t * xc,
 	}
 	if (rstyle & JBXVT_RS_CROSSED_OUT)
 		draw_underline(xc, len, *p,
-			-(jbxvt_get_font_size().h>>1));
+			-(jbxvt_get_font_size().h >> 1));
 }
 // 9-bit color
 static pixel_t rgb_pixel(xcb_connection_t * xc, const uint16_t c)
