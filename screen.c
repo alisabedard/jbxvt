@@ -59,6 +59,7 @@ void jbxvt_efill(xcb_connection_t * xc)
 //  Change between the alternate and the main screens
 void jbxvt_change_screen(xcb_connection_t * xc, const bool mode_high)
 {
+	LOG("jbxvt_change_screen(xc, mode_high: %d)", mode_high);
 	screen_index = mode_high ? 1 : 0;
 	jbxvt_get_modes()->charsel = 0;
 	/*  Do not call jbxvt_erase_screen(JBXVT_ERASE_ALL) here--It causes
