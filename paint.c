@@ -36,7 +36,8 @@ static void draw_text(xcb_connection_t * xc,
 	struct JBDim * restrict p, uint32_t rstyle)
 {
 	{ // vt, gc scope
-		// Cache frequently used values:
+		/* Cache frequently used values
+		   to avoid function call overhead. */
 		static xcb_window_t vt;
 		if (!vt)
 			vt = jbxvt_get_vt_window(xc);
@@ -61,16 +62,21 @@ static void draw_text(xcb_connection_t * xc,
 		draw_underline(xc, len, *p,
 			-(jbxvt_get_font_size().h >> 1));
 }
+__attribute__((const))
+static uint16_t get_channel(const uint16_t compressed_rgb,
+	const uint16_t mask, const uint8_t shift)
+{
+	enum { SCALE = 12 }; // scale, leave 3 bits for octal
+	return ((compressed_rgb & mask) >> shift) << SCALE;
+}
 // 9-bit color
 static pixel_t rgb_pixel(xcb_connection_t * xc, const uint16_t c)
 {
-	enum {R_MASK = 0700, G_MASK = 070, B_MASK = 07,
-		R_SHIFT = 4, G_SHIFT = 2, B_SHIFT = 0,
-		SCALE = 12}; // scale, leave 3 bits for octal
+	enum {R_MASK = 0700, G_MASK = 070, B_MASK = 07, R_SHIFT = 4,
+		G_SHIFT = 2, B_SHIFT = 0};
 	// Mask and scale to 8 bits, then convert from 3 bit to 16 bit:
-	const uint16_t r = ((c & R_MASK) >> R_SHIFT) << SCALE;
-	const uint16_t g = ((c & G_MASK) >> G_SHIFT) << SCALE;
-	const uint16_t b = ((c & B_MASK) >> B_SHIFT) << SCALE;
+	const uint16_t r = get_channel(c, R_MASK, R_SHIFT), g = get_channel(c,
+		G_MASK, G_SHIFT), b = get_channel(c, B_MASK, B_SHIFT);
 	const pixel_t p = jb_get_rgb_pixel(xc,
 		jbxvt_get_colormap(xc), r, g, b);
 	LOG("byte is 0x%x, r: 0x%x, g: 0x%x, b: 0x%x,"
