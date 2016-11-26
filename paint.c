@@ -71,7 +71,8 @@ static bool set_rstyle_colors(xcb_connection_t * xc,
 {
 	// Mask foreground colors, 9 bits offset by 6 bits
 	// Mask background colors, 9 bits offset by 15 bits
-	const uint8_t color[] = {rstyle >> 7, rstyle >> 16};
+	enum { FG_SHIFT = 7, BG_SHIFT = 16 };
+	const uint8_t color[] = {rstyle >> FG_SHIFT, rstyle >> BG_SHIFT};
 	const bool rgb[] = {rstyle & JBXVT_RS_FG_RGB,
 		rstyle & JBXVT_RS_BG_RGB};
 	const bool ind[] = {rstyle & JBXVT_RS_FG_INDEX,
