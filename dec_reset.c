@@ -16,6 +16,13 @@
 #undef LOG
 #define LOG(...)
 #endif
+static void dectcem(xcb_connection_t * restrict xc, const bool is_set)
+{
+	jbxvt_set_scroll(xc, 0);
+	jbxvt_draw_cursor(xc); // clear
+	jbxvt_get_modes()->dectcem = is_set;
+	jbxvt_draw_cursor(xc); // draw
+}
 void jbxvt_dec_reset(xcb_connection_t * xc, struct JBXVTToken * restrict token)
 {
 	LOG("handle_reset(%d)", token->arg[0]);
@@ -69,10 +76,7 @@ void jbxvt_dec_reset(xcb_connection_t * xc, struct JBXVTToken * restrict token)
 			m->lnm = is_set;
 			break;
 		case 25: // DECTCEM -- hide cursor
-			jbxvt_set_scroll(xc, 0);
-			jbxvt_draw_cursor(xc); // clear
-			jbxvt_get_modes()->dectcem = is_set;
-			jbxvt_draw_cursor(xc); // draw
+			dectcem(xc, is_set);
 			break;
 		case 30: // toggle scrollbar -- per rxvt
 			jbxvt_toggle_scrollbar(xc);
