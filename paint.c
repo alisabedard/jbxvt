@@ -35,16 +35,18 @@ static void draw_text(xcb_connection_t * xc,
 	uint8_t * restrict str, uint16_t len,
 	struct JBDim * restrict p, uint32_t rstyle)
 {
-	// Cache frequently used values:
-	static xcb_window_t vt;
-	if (!vt)
-		vt = jbxvt_get_vt_window(xc);
-	static xcb_gc_t gc;
-	if (!gc)
-		gc = jbxvt_get_text_gc(xc);
-	// Draw the text:
-	xcb_image_text_8(xc, len, vt, gc, p->x, p->y,
-		(const char *)str);
+	{ // vt, gc scope
+		// Cache frequently used values:
+		static xcb_window_t vt;
+		if (!vt)
+			vt = jbxvt_get_vt_window(xc);
+		static xcb_gc_t gc;
+		if (!gc)
+			gc = jbxvt_get_text_gc(xc);
+		// Draw the text:
+		xcb_image_text_8(xc, len, vt, gc, p->x, p->y,
+			(const char *)str);
+	}
 	++p->y; // Padding for underline, use underline for italic
 	if (((rstyle & JBXVT_RS_ITALIC)
 		&& (jbxvt_get_italic_font(xc)
