@@ -5,7 +5,7 @@
 #include "JBXVTTokenType.h"
 #include <stdint.h>
 enum JBXVTTokenLimits {
-	JBXVT_TOKEN_MAX_LENGTH =	63,	// max length of a string token
+	JBXVT_TOKEN_MAX_LENGTH =	63,		// max length of a string token
 	JBXVT_TOKEN_MAX_ARGS =	8	// max # of numeric arguments
 };
 /*  Structure used to represent a piece of input from the program

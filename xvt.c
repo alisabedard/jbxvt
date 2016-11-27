@@ -35,6 +35,18 @@
 #else
 #define TLOG(...)
 #endif//DEBUG_TOKENS
+// Return a default of 1 if arg is 0:
+__attribute__((const))
+static int16_t get_n(const int16_t arg)
+{
+	return arg ? arg : 1;
+}
+// Return the 0-based coordinate value:
+__attribute__((const))
+static int16_t get_0(int16_t arg)
+{
+	return get_n(arg) - 1;
+}
 static void handle_token_elr(struct JBXVTToken * restrict token)
 {
 	int16_t * restrict t = token->arg;
@@ -188,9 +200,9 @@ static void decstbm(struct JBXVTToken * restrict token)
 		return;
 	}
 	const bool rst = token->nargs < 2 || t[0] >= t[1];
-	jbxvt_get_current_screen()->margin = (struct JBDim){
-		.t = rst ? 0 : t[0] - 1,
-		.b = (rst ? jbxvt_get_char_size().h : t[1]) - 1};
+	struct JBDim * restrict m = jbxvt_get_margin();
+	m->top = rst ? 0 : get_0(t[0]);
+	m->bot = (rst ? jbxvt_get_char_size().h : get_n(t[1])) - 1;
 }
 static void reqtparam(const uint8_t t)
 {
@@ -217,18 +229,6 @@ static void handle_scroll(xcb_connection_t * xc, const int16_t arg)
 	const struct JBDim m = *jbxvt_get_margin();
 	// scroll arg lines within margin m:
 	scroll(xc, m.top, m.bot, arg);
-}
-// Return a default of 1 if arg is 0:
-__attribute__((const))
-static int16_t get_n(const int16_t arg)
-{
-	return arg ? arg : 1;
-}
-// Return the 0-based coordinate value:
-__attribute__((const))
-static int16_t get_0(int16_t arg)
-{
-	return get_n(arg) - 1;
 }
 // CUP and HVP, move cursor
 static void cup(xcb_connection_t * xc, int16_t * restrict t)
@@ -443,7 +443,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_RI: // Reverse index
 		LOG("JBXVT_TOKEN_RI");
-		jbxvt_index_from(xc, -n, jbxvt_get_current_screen()->margin.t);
+		jbxvt_index_from(xc, -n, jbxvt_get_margin()->top);
 		break;
 	case JBXVT_TOKEN_RIS: // reset to initial state
 		LOG("JBXVT_TOKEN_RIS");
