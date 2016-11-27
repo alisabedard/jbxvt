@@ -245,7 +245,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 	jbxvt_get_token(xc, &token);
 	int16_t * t = token.arg;
 	// n is sanitized for ops with optional args
-	int16_t n = token.nargs ? (t[0] ? t[0] : 1) : 1;
+	int16_t n = token.nargs ? (get_n(t[0])) : 1;
 	switch (token.type) {
 	case JBXVT_TOKEN_ALN: // screen alignment test
 		LOG("JBXVT_TOKEN_ALN");
@@ -256,7 +256,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_CHA: // cursor CHaracter Absolute column
 		LOG("JBXVT_TOKEN_CHA");
-		jbxvt_move(xc, t[0] - 1, 0, JBXVT_ROW_RELATIVE);
+		jbxvt_move(xc, get_0(t[0]), 0, JBXVT_ROW_RELATIVE);
 		break;
 	case JBXVT_TOKEN_CHAR: // don't log
 		jbxvt_handle_tk_char(xc, token.tk_char);
