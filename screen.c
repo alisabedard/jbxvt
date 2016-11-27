@@ -30,10 +30,16 @@ struct JBXVTScreen * jbxvt_get_screen_at(const uint8_t i)
 	// default to 0 if i is not 1
 	return jbxvt_get_screens() + (i == 1 ? 1 : 0);
 }
+// Returns a pointer to the current screen
 struct JBXVTScreen * jbxvt_get_current_screen(void)
 {
 	// this, in effect, validates screen_index
 	return jbxvt_get_screen_at(screen_index);
+}
+// Returns a pointer to the current screen's margin data
+struct JBDim * jbxvt_get_margin(void)
+{
+	return &jbxvt_get_current_screen()->margin;
 }
 static void set_area_to_e(const struct JBDim c)
 {

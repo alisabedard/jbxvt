@@ -10,6 +10,8 @@
 void jbxvt_change_screen(xcb_connection_t * xc, const bool mode_high);
 // Set all chars to 'E'
 void jbxvt_efill(xcb_connection_t * xc);
+// Returns a pointer to the current screen's margin data
+struct JBDim * jbxvt_get_margin(void);
 // returns indexed screen, with i's validity sanitized
 struct JBXVTScreen * jbxvt_get_screen_at(const uint8_t i);
 // Return a pointer to the current screen, statically stored

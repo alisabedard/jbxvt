@@ -210,11 +210,11 @@ static void tbc(const uint8_t t)
 	if (t == 3)
 		jbxvt_set_tab(-1, false);
 	else if (!t)
-		jbxvt_set_tab(jbxvt_get_current_screen()->cursor.x, false);
+		jbxvt_set_tab(jbxvt_get_x(), false);
 }
 static void handle_scroll(xcb_connection_t * xc, const int16_t arg)
 {
-	const struct JBDim m = jbxvt_get_current_screen() ->margin;
+	const struct JBDim m = *jbxvt_get_margin();
 	// scroll arg lines within margin m:
 	scroll(xc, m.top, m.bot, arg);
 }
@@ -222,7 +222,7 @@ static void handle_scroll(xcb_connection_t * xc, const int16_t arg)
 __attribute__((const))
 static int16_t get_n(const int16_t arg)
 {
-	return arg ? arg : 1; 
+	return arg ? arg : 1;
 }
 // Return the 0-based coordinate value:
 __attribute__((const))
@@ -246,9 +246,17 @@ static void vp(xcb_connection_t * xc, const uint16_t arg, const bool relative)
 	jbxvt_move(xc, 0, get_0(arg), JBXVT_COLUMN_RELATIVE | (relative
 		? JBXVT_ROW_RELATIVE : 0));
 }
+// print terminal id
 static void decid(void)
 {
 	dprintf(jbxvt_get_fd(), "%s?6c", jbxvt_get_csi()); // VT102
+}
+// set vt52 graphics mode
+static void gm52(const bool set)
+{
+	struct JBXVTPrivateModes * m = jbxvt_get_modes();
+	m->charsel = set ? 1 : 0;
+	m->gm52 = set;
 }
 void jbxvt_parse_token(xcb_connection_t * xc)
 {
@@ -327,7 +335,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_DL: // delete line
 		LOG("JBXVT_TOKEN_DL");
-		jbxvt_index_from(xc, n, jbxvt_get_current_screen()->cursor.y);
+		jbxvt_index_from(xc, n, jbxvt_get_y());
 		break;
 	case JBXVT_TOKEN_DSR: // request for information
 		LOG("JBXVT_TOKEN_DSR");
@@ -351,7 +359,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_ENTGM52: // vt52 graphics mode
 		LOG("JBXVT_TOKEN_ENTGM52");
-		jbxvt_get_modes()->gm52 = true;
+		gm52(true);
 		break;
 	case JBXVT_TOKEN_EOF:
 		LOG("JBXVT_TOKEN_EOF");
@@ -361,8 +369,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_EXTGM52: // exit vt52 graphics mode
 		LOG("JBXVT_TOKEN_EXTGM52");
-		jbxvt_get_modes()->charsel = 0;
-		jbxvt_get_modes()->gm52 = false;
+		gm52(false);
 		break;
 	case JBXVT_TOKEN_HOME:
 		LOG("JBXVT_TOKEN_HOME");
@@ -380,7 +387,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_HTS: // set tab stop at current position
 		LOG("JBXVT_TOKEN_HTS");
-		jbxvt_set_tab(jbxvt_get_current_screen()->cursor.x, true);
+		jbxvt_set_tab(jbxvt_get_x(), true);
 		break;
 	case JBXVT_TOKEN_ICH: // Insert blank characters
 		LOG("JBXVT_TOKEN_ICH");
@@ -388,10 +395,10 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_IL: // insert line
 		LOG("JBXVT_TOKEN_IL");
-		jbxvt_index_from(xc, -n, jbxvt_get_current_screen()->cursor.y);
+		jbxvt_index_from(xc, -n, jbxvt_get_y());
 		break;
 	case JBXVT_TOKEN_IND: // Index -- same as \n:
-		jbxvt_index_from(xc, n, jbxvt_get_current_screen()->margin.t);
+		jbxvt_index_from(xc, n, jbxvt_get_margin()->t);
 		break;
 	case JBXVT_TOKEN_LL:
 		LOG("JBXVT_TOKEN_LL");
@@ -404,7 +411,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 	case JBXVT_TOKEN_NEL: // next line
 		LOG("JBXVT_TOKEN_NEL");
 		// move to first position on next line down.
-		jbxvt_move(xc, 0, jbxvt_get_current_screen()->cursor.y + 1, 0);
+		jbxvt_move(xc, 0, jbxvt_get_y() + 1, 0);
 		break;
 	case JBXVT_TOKEN_OSC: // operating system command
 		LOG("FIXME JBXVT_TOKEN_OSC");
