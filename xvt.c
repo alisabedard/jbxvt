@@ -32,7 +32,7 @@
 #endif//DEBUG_TOKENS
 static void handle_token_elr(struct JBXVTToken * restrict token)
 {
-	int32_t * restrict t = token->arg;
+	int16_t * restrict t = token->arg;
 	struct JBXVTPrivateModes * restrict m = jbxvt_get_modes();
 	switch (t[0]) {
 	case 2:
@@ -47,7 +47,7 @@ static void handle_token_elr(struct JBXVTToken * restrict token)
 }
 static void handle_token_ll(struct JBXVTToken * restrict token)
 {
-	int32_t * restrict t = token->arg;
+	int16_t * restrict t = token->arg;
 	LOG("t[0]: %d, t[1]: %d", t[0], t[1]);
 	switch (t[1]) {
 	case 0:
@@ -64,7 +64,7 @@ static void handle_token_ll(struct JBXVTToken * restrict token)
 }
 static void handle_token_rqm(struct JBXVTToken * restrict token)
 {
-	int32_t * restrict t = token->arg;
+	int16_t * restrict t = token->arg;
 	if (token->private == '?') {
 		LOG("\tRQM Ps: %d", t[0]);
 		dprintf(jbxvt_get_fd(), "%s%d;%d$y", jbxvt_get_csi(),
@@ -93,7 +93,7 @@ static void handle_token_rqm(struct JBXVTToken * restrict token)
 		jbxvt_get_modes()->s8c1t = true;
 	}
 }
-static void handle_token_mc_private(int32_t * restrict t)
+static void handle_token_mc_private(int16_t * restrict t)
 {
 	switch (t[0]) {
 	case 4:
@@ -113,7 +113,7 @@ static void handle_token_mc_private(int32_t * restrict t)
 		LOG("print screen");
 	}
 }
-static void handle_token_mc_public(int32_t * restrict t)
+static void handle_token_mc_public(int16_t * restrict t)
 {
 	switch (t[0]) {
 	case 1:
@@ -135,7 +135,7 @@ static void handle_token_mc_public(int32_t * restrict t)
 }
 static void handle_token_mc(struct JBXVTToken * restrict token)
 {
-	int32_t * restrict t = token->arg;
+	int16_t * restrict t = token->arg;
 	if (token->private != '?')
 		handle_token_mc_private(t);
 	else
@@ -175,7 +175,7 @@ static void select_charset(const char c, const uint8_t i)
 }
 static void decstbm(struct JBXVTToken * restrict token)
 {
-	int32_t * restrict t = token->arg;
+	int16_t * restrict t = token->arg;
 	LOG("JBXVT_TOKEN_STBM args: %d, 0: %d, 1: %d",
 		(int)token->nargs, t[0], t[1]);
 	if (token->private == JBXVT_TOKEN_RESTOREPM) {
@@ -217,9 +217,9 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 {
 	struct JBXVTToken token;
 	jbxvt_get_token(xc, &token);
-	int32_t * t = token.arg;
+	int16_t * t = token.arg;
 	// n is sanitized for ops with optional args
-	int32_t n = token.nargs ? (t[0] ? t[0] : 1) : 1;
+	int16_t n = token.nargs ? (t[0] ? t[0] : 1) : 1;
 	switch (token.type) {
 	case JBXVT_TOKEN_ALN: // screen alignment test
 		LOG("JBXVT_TOKEN_ALN");
