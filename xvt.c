@@ -24,7 +24,7 @@
 #include "tab.h"
 #include "tk_char.h"
 #include "window.h"
-//#define JBXVT_DEBUG_XVT
+#define JBXVT_DEBUG_XVT
 #ifndef JBXVT_DEBUG_XVT
 #undef LOG
 #define LOG(...)
@@ -230,6 +230,7 @@ static int16_t get_0(int16_t arg)
 {
 	return get_n(arg) - 1;
 }
+// CUP and HVP, move cursor
 static void cup(xcb_connection_t * xc, int16_t * restrict t)
 {
 	// subtract 1 for 0-based coordinates
@@ -238,6 +239,12 @@ static void cup(xcb_connection_t * xc, int16_t * restrict t)
 	};
 	const int16_t row = get_0(t[ROW]), col = get_0(t[COL]);
 	jbxvt_move(xc, row, col, jbxvt_get_modes()->decom ? REL : 0);
+}
+// vertical position, absolute or relative
+static void vp(xcb_connection_t * xc, const uint16_t arg, const bool relative)
+{
+	jbxvt_move(xc, 0, get_0(arg), JBXVT_COLUMN_RELATIVE | (relative
+		? JBXVT_ROW_RELATIVE : 0));
 }
 void jbxvt_parse_token(xcb_connection_t * xc)
 {
@@ -525,12 +532,11 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_VPA: // vertical position absolute
 		LOG("JBXVT_TOKEN_VPA");
-		jbxvt_move(xc, 0, t[0] - 1, JBXVT_COLUMN_RELATIVE);
+		vp(xc, *t, false);
 		break;
 	case JBXVT_TOKEN_VPR: // vertical position relative
 		LOG("JBXVT_TOKEN_VPR");
-		jbxvt_move(xc, 0, t[0] - 1,
-			JBXVT_COLUMN_RELATIVE | JBXVT_ROW_RELATIVE);
+		vp(xc, *t, true);
 		break;
 	default:
 #ifdef DEBUG
