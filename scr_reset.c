@@ -37,8 +37,8 @@ static inline void fix_margins(const struct JBDim c)
 	   If so, set the bottom margin to the new bottom line.  */
 	if (c.height == jbxvt_get_char_size().height)
 		  return;
-	if (jbxvt_get_current_screen()->margin.b >= c.h)
-		  jbxvt_get_current_screen()->margin.b = c.h - 1;
+	if (jbxvt_get_margin()->bottom >= c.h)
+		  jbxvt_get_margin()->bottom = c.h - 1;
 }
 static void decscnm(xcb_connection_t * xc)
 {
