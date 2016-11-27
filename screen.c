@@ -85,6 +85,6 @@ void jbxvt_index_from(xcb_connection_t * xc,
 {
 	jbxvt_set_scroll(xc, 0);
 	jbxvt_draw_cursor(xc);
-	scroll(xc, top, jbxvt_get_current_screen()->margin.b, count);
+	scroll(xc, top, jbxvt_get_margin()->b, count);
 	jbxvt_draw_cursor(xc);
 }
