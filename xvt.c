@@ -24,6 +24,11 @@
 #include "tab.h"
 #include "tk_char.h"
 #include "window.h"
+//#define JBXVT_DEBUG_XVT
+#ifndef JBXVT_DEBUG_XVT
+#undef LOG
+#define LOG(...)
+#endif//!JBXVT_DEBUG_XVT
 //#define DEBUG_TOKENS
 #ifdef DEBUG_TOKENS
 #define TLOG(...) LOG(__VA_ARGS__)
@@ -161,7 +166,7 @@ static void handle_txtpar(xcb_connection_t * xc,
 static void select_charset(const char c, const uint8_t i)
 {
 	switch(c) {
-#define CS(l, cs, d) case l:LOG(d);\
+#define CS(l, cs, d) case l:TLOG(d);\
 		jbxvt_get_modes()->charset[i]=CHARSET_##cs;break;
 		CS('A', GB, "UK ASCII");
 		CS('0', SG0, "SG0: special graphics");
@@ -213,16 +218,25 @@ static void handle_scroll(xcb_connection_t * xc, const int16_t arg)
 	// scroll arg lines within margin m:
 	scroll(xc, m.top, m.bot, arg);
 }
+// Return a default of 1 if arg is 0:
 __attribute__((const))
-static int16_t get_n(int16_t arg)
+static int16_t get_n(const int16_t arg)
 {
 	return arg ? arg : 1; 
+}
+// Return the 0-based coordinate value:
+__attribute__((const))
+static int16_t get_0(int16_t arg)
+{
+	return get_n(arg) - 1;
 }
 static void cup(xcb_connection_t * xc, int16_t * restrict t)
 {
 	// subtract 1 for 0-based coordinates
-	const int16_t row = get_n(t[1]) - 1, col = get_n(t[0]) - 1;
-	enum { REL = JBXVT_ROW_RELATIVE | JBXVT_COLUMN_RELATIVE };
+	enum {
+		COL, ROW, REL = JBXVT_ROW_RELATIVE | JBXVT_COLUMN_RELATIVE,
+	};
+	const int16_t row = get_0(t[ROW]), col = get_0(t[COL]);
 	jbxvt_move(xc, row, col, jbxvt_get_modes()->decom ? REL : 0);
 }
 void jbxvt_parse_token(xcb_connection_t * xc)
