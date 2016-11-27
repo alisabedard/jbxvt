@@ -12,7 +12,7 @@
 #include "window.h"
 #include <stdbool.h>
 #include <string.h>
-static int16_t sbar_offset;
+static uint16_t sbar_offset; // how far up scrollbar is positioned
 static bool sbar_visible;
 int16_t jbxvt_get_scroll(void)
 {
