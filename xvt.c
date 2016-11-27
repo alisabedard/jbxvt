@@ -267,7 +267,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_CHA: // cursor CHaracter Absolute column
 		LOG("JBXVT_TOKEN_CHA");
-		jbxvt_move(xc, get_0(t[0]), 0, JBXVT_ROW_RELATIVE);
+		jbxvt_move(xc, get_0(*t), 0, JBXVT_ROW_RELATIVE);
 		break;
 	case JBXVT_TOKEN_CHAR: // don't log
 		jbxvt_handle_tk_char(xc, token.tk_char);
@@ -371,11 +371,11 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_HPA: // horizontal position absolute
 		LOG("JBXVT_TOKEN_HPA");
-		jbxvt_move(xc, t[0] - 1, 0, JBXVT_ROW_RELATIVE);
+		jbxvt_move(xc, get_0(*t), 0, JBXVT_ROW_RELATIVE);
 		break;
 	case JBXVT_TOKEN_HPR: // horizontal position relative
 		LOG("JBXVT_TOKEN_HPR");
-		jbxvt_move(xc, t[0] - 1, 0,
+		jbxvt_move(xc, get_0(*t), 0,
 			JBXVT_COLUMN_RELATIVE | JBXVT_ROW_RELATIVE);
 		break;
 	case JBXVT_TOKEN_HTS: // set tab stop at current position
@@ -427,7 +427,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_REQTPARAM: // request terminal parameters
 		LOG("JBXVT_TOKEN_REQTPARAM");
-		reqtparam(t[0]);
+		reqtparam(*t);
 		break;
 	case JBXVT_TOKEN_RESET:
 	case JBXVT_TOKEN_SET:
@@ -467,7 +467,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		LOG("JBXVT_TOKEN_SBGOTO");
 		/*  Move the display so that line represented
 		    by scrollbar value is at the top of the screen.  */
-		jbxvt_scroll_to(xc, t[0]);
+		jbxvt_scroll_to(xc, *t);
 		break;
 	case JBXVT_TOKEN_SC:
 		LOG("JBXVT_TOKEN_SC");
