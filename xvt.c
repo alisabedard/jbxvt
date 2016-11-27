@@ -246,6 +246,10 @@ static void vp(xcb_connection_t * xc, const uint16_t arg, const bool relative)
 	jbxvt_move(xc, 0, get_0(arg), JBXVT_COLUMN_RELATIVE | (relative
 		? JBXVT_ROW_RELATIVE : 0));
 }
+static void decid(void)
+{
+	dprintf(jbxvt_get_fd(), "%s?6c", jbxvt_get_csi()); // VT102
+}
 void jbxvt_parse_token(xcb_connection_t * xc)
 {
 	struct JBXVTToken token;
@@ -308,7 +312,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 	case JBXVT_TOKEN_DA:
 	case JBXVT_TOKEN_ID:
 		LOG("JBXVT_TOKEN_ID/DA");
-		dprintf(jbxvt_get_fd(), "%s?6c", jbxvt_get_csi()); // VT102
+		decid();
 		break;
 	case JBXVT_TOKEN_DCH:
 	case JBXVT_TOKEN_ECH:
@@ -471,23 +475,23 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_SCS0: //  SCS G0
 		LOG("JBXVT_TOKEN_SCS0");
-		select_charset(t[0], 0);
+		select_charset(*t, 0);
 		break;
 	case JBXVT_TOKEN_SCS1: //  SCS G1
 		LOG("JBXVT_TOKEN_SCS1");
-		select_charset(t[0], 1);
+		select_charset(*t, 1);
 		break;
 	case JBXVT_TOKEN_SD:
 		LOG("JBXVT_TOKEN_SD");
 		// scroll down n lines
-		t[0] = - t[0]; // fall through
+		*t = - *t; // fall through
 	case JBXVT_TOKEN_SU:
 		LOG("JBXVT_TOKEN_SU");
-		handle_scroll(xc, t[0]);
+		handle_scroll(xc, *t);
 		break;
 	case JBXVT_TOKEN_SELINSRT:
 		LOG("JBXVT_TOKEN_SELINSRT");
-		jbxvt_request_selection(xc, t[0]);
+		jbxvt_request_selection(xc, *t);
 		break;
 	case JBXVT_TOKEN_SPA: // start protected area
 		LOG("FIXME JBXVT_TOKEN_SPA");
