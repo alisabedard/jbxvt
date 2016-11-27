@@ -52,7 +52,7 @@ void jbxvt_move(xcb_connection_t * xc,
 		struct JBDim c = s->cursor;
 		s->cursor = c = (struct JBDim) { .x = dim(c.x, x,
 			relative & JBXVT_COLUMN_RELATIVE), .y = dim(c.y, y,
-				relative & JBXVT_ROW_RELAATIVE)};
+				relative & JBXVT_ROW_RELATIVE)};
 		c.y = jbxvt_check_cursor_position();
 		jbxvt_check_selection(xc, c.y, c.y);
 	}

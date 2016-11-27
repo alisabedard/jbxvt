@@ -213,6 +213,18 @@ static void handle_scroll(xcb_connection_t * xc, const int16_t arg)
 	// scroll arg lines within margin m:
 	scroll(xc, m.top, m.bot, arg);
 }
+__attribute__((const))
+static int16_t get_n(int16_t arg)
+{
+	return arg ? arg : 1; 
+}
+static void cup(xcb_connection_t * xc, int16_t * restrict t)
+{
+	// subtract 1 for 0-based coordinates
+	const int16_t row = get_n(t[1]) - 1, col = get_n(t[0]) - 1;
+	enum { REL = JBXVT_ROW_RELATIVE | JBXVT_COLUMN_RELATIVE };
+	jbxvt_move(xc, row, col, jbxvt_get_modes()->decom ? REL : 0);
+}
 void jbxvt_parse_token(xcb_connection_t * xc)
 {
 	struct JBXVTToken token;
@@ -230,7 +242,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_CHA: // cursor CHaracter Absolute column
 		LOG("JBXVT_TOKEN_CHA");
-		jbxvt_move(xc, t[0] - 1, 0, JBXVT_ROW_RELAATIVE);
+		jbxvt_move(xc, t[0] - 1, 0, JBXVT_ROW_RELATIVE);
 		break;
 	case JBXVT_TOKEN_CHAR: // don't log
 		jbxvt_handle_tk_char(xc, token.tk_char);
@@ -249,30 +261,27 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_CUB: // left
 		LOG("JBXVT_TOKEN_CUB");
-		jbxvt_move(xc, -n, 0, JBXVT_ROW_RELAATIVE
+		jbxvt_move(xc, -n, 0, JBXVT_ROW_RELATIVE
 			| JBXVT_COLUMN_RELATIVE);
 		break;
 	case JBXVT_TOKEN_CUD: // down
 		LOG("JBXVT_TOKEN_CUD");
-		jbxvt_move(xc, 0, n, JBXVT_ROW_RELAATIVE
+		jbxvt_move(xc, 0, n, JBXVT_ROW_RELATIVE
 			| JBXVT_COLUMN_RELATIVE);
 		break;
 	case JBXVT_TOKEN_CUF: // right
 		LOG("JBXVT_TOKEN_CUF");
-		jbxvt_move(xc, n, 0, JBXVT_ROW_RELAATIVE
+		jbxvt_move(xc, n, 0, JBXVT_ROW_RELATIVE
 			| JBXVT_COLUMN_RELATIVE);
 		break;
 	case JBXVT_TOKEN_CUP:
 	case JBXVT_TOKEN_HVP:
 		TLOG("JBXVT_TOKEN_HVP/JBXVT_TOKEN_CUP");
-		// subtract 1 for 0-based coordinates
-		jbxvt_move(xc, (t[1]?t[1]:1) - 1, n - 1,
-			jbxvt_get_modes()->decom ?  JBXVT_ROW_RELAATIVE
-			| JBXVT_COLUMN_RELATIVE : 0);
+		cup(xc, t);
 		break;
 	case JBXVT_TOKEN_CUU: // up
 		LOG("JBXVT_TOKEN_CUU");
-		jbxvt_move(xc, 0, -n, JBXVT_ROW_RELAATIVE
+		jbxvt_move(xc, 0, -n, JBXVT_ROW_RELATIVE
 			| JBXVT_COLUMN_RELATIVE);
 		break;
 	case JBXVT_TOKEN_DA:
@@ -337,12 +346,12 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_HPA: // horizontal position absolute
 		LOG("JBXVT_TOKEN_HPA");
-		jbxvt_move(xc, t[0] - 1, 0, JBXVT_ROW_RELAATIVE);
+		jbxvt_move(xc, t[0] - 1, 0, JBXVT_ROW_RELATIVE);
 		break;
 	case JBXVT_TOKEN_HPR: // horizontal position relative
 		LOG("JBXVT_TOKEN_HPR");
 		jbxvt_move(xc, t[0] - 1, 0,
-			JBXVT_COLUMN_RELATIVE | JBXVT_ROW_RELAATIVE);
+			JBXVT_COLUMN_RELATIVE | JBXVT_ROW_RELATIVE);
 		break;
 	case JBXVT_TOKEN_HTS: // set tab stop at current position
 		LOG("JBXVT_TOKEN_HTS");
@@ -507,7 +516,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 	case JBXVT_TOKEN_VPR: // vertical position relative
 		LOG("JBXVT_TOKEN_VPR");
 		jbxvt_move(xc, 0, t[0] - 1,
-			JBXVT_COLUMN_RELATIVE | JBXVT_ROW_RELAATIVE);
+			JBXVT_COLUMN_RELATIVE | JBXVT_ROW_RELATIVE);
 		break;
 	default:
 #ifdef DEBUG

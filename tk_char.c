@@ -35,11 +35,11 @@ void jbxvt_handle_tk_char(xcb_connection_t * xc, const uint8_t tk_char)
 		form_feed(xc);
 		break;
 	case '\r': // handle carriage return
-		jbxvt_move(xc, 0, 0, JBXVT_ROW_RELAATIVE);
+		jbxvt_move(xc, 0, 0, JBXVT_ROW_RELATIVE);
 		break;
 	case '\b': // handle a backspace
 		jbxvt_move(xc, -1, 0, JBXVT_COLUMN_RELATIVE
-			| JBXVT_ROW_RELAATIVE);
+			| JBXVT_ROW_RELATIVE);
 		break;
 	case '\t': // handle tab
 		jbxvt_tab(xc);

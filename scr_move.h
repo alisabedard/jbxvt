@@ -4,7 +4,7 @@
 #include <xcb/xcb.h>
 enum JBXVTMoveFlags {
 	JBXVT_COLUMN_RELATIVE = 1, // column movement is relative
-	JBXVT_ROW_RELAATIVE = 2  // row movement is relative
+	JBXVT_ROW_RELATIVE = 2  // row movement is relative
 };
 /*  Move the cursor to a new position.  The relative argument is a pair of
  *  flags that specify relative rather than absolute motion.  */

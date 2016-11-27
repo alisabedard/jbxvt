@@ -78,7 +78,7 @@ static void sbop(xcb_connection_t * xc, const int16_t y, const bool up)
 		jbxvt_set_scroll(xc, jbxvt_get_scroll()
 			+ (up ? -y : y) / jbxvt_get_font_size().h);
 	else
-		jbxvt_move(xc, 0, up ? -1 : 1, JBXVT_ROW_RELAATIVE
+		jbxvt_move(xc, 0, up ? -1 : 1, JBXVT_ROW_RELATIVE
 			| JBXVT_COLUMN_RELATIVE);
 }
 static void handle_button_release(xcb_connection_t * xc,
