@@ -9,7 +9,6 @@
 #include "screen.h"
 #include "scroll.h"
 #include "tab.h"
-#include "tk_char.h"
 #include <stdio.h>
 static void form_feed(xcb_connection_t * restrict xc)
 {
