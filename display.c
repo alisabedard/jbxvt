@@ -1,6 +1,8 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "display.h"
+#include <stdlib.h>
+#include <X11/cursorfont.h>
 #include "color.h"
 #include "config.h"
 #include "cursor.h"
@@ -10,8 +12,6 @@
 #include "size.h"
 #include "xcb_screen.h"
 #include "window.h"
-#include <stdlib.h>
-#include <X11/cursorfont.h>
 #define E(n) XCB_EVENT_MASK_##n
 #define EB(n) XCB_EVENT_MASK_BUTTON_##n
 enum EventMasks {

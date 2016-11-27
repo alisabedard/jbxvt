@@ -2,6 +2,8 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
 #include "sbar.h"
+#include <stdbool.h>
+#include <string.h>
 #include "config.h"
 #include "cursor.h"
 #include "libjb/util.h"
@@ -10,8 +12,6 @@
 #include "scroll.h"
 #include "size.h"
 #include "window.h"
-#include <stdbool.h>
-#include <string.h>
 static uint16_t sbar_offset; // how far up scrollbar is positioned
 static bool sbar_visible;
 int16_t jbxvt_get_scroll(void)

@@ -1,6 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "scr_erase.h"
+#include <string.h>
 #include "config.h"
 #include "cursor.h"
 #include "font.h"
@@ -12,7 +13,6 @@
 #include "selection.h"
 #include "size.h"
 #include "window.h"
-#include <string.h>
 #define DEBUG_ERASE
 #ifndef DEBUG_ERASE
 #undef LOG

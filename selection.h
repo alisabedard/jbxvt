@@ -2,10 +2,10 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #ifndef JBXVT_SELECTION_H
 #define JBXVT_SELECTION_H
-#include "JBXVTSelectionUnit.h"
-#include "libjb/JBDim.h"
 #include <stdbool.h>
 #include <xcb/xcb.h>
+#include "JBXVTSelectionUnit.h"
+#include "libjb/JBDim.h"
 struct JBXVTSelectionData {
 	uint8_t * text;
 	enum JBXVTSelectionUnit unit;

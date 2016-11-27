@@ -1,6 +1,9 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "cmdtok.h"
+#include <errno.h>
+#include <string.h>
+#include <unistd.h>
 #include "command.h"
 #include "cursor.h"
 #include "dcs.h"
@@ -9,9 +12,6 @@
 #include "libjb/xcb.h"
 #include "mode.h"
 #include "xevents.h"
-#include <errno.h>
-#include <string.h>
-#include <unistd.h>
 //  Flags used to control jbxvt_pop_char
 enum ComCharFlags {INPUT_BUFFER_EMPTY = 0x100,
 	GET_INPUT_ONLY=1, GET_XEVENTS_ONLY=2};

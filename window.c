@@ -1,6 +1,8 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "window.h"
+#include <stdlib.h>
+#include <string.h>
 #include "font.h"
 #include "libjb/util.h"
 #include "libjb/xcb.h"
@@ -8,8 +10,6 @@
 #include "scr_reset.h"
 #include "screen.h"
 #include "size.h"
-#include <stdlib.h>
-#include <string.h>
 xcb_window_t jbxvt_get_main_window(xcb_connection_t * xc)
 {
 	static xcb_window_t w;

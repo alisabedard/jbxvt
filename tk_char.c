@@ -1,5 +1,6 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "tk_char.h"
+#include <stdio.h>
 #include "cmdtok.h"
 #include "command.h"
 #include "cursor.h"
@@ -9,7 +10,6 @@
 #include "screen.h"
 #include "scroll.h"
 #include "tab.h"
-#include <stdio.h>
 static void form_feed(xcb_connection_t * restrict xc)
 {
 	const struct JBDim m = *jbxvt_get_margin();

@@ -2,6 +2,7 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.  */
 #include "screen.h"
+#include <string.h>
 #include "cursor.h"
 #include "libjb/log.h"
 #include "mode.h"
@@ -12,7 +13,6 @@
 #include "scr_reset.h"
 #include "scroll.h"
 #include "size.h"
-#include <string.h>
 ///#define JBXVT_DEBUG_SCREEN
 #ifndef JBXVT_DEBUG_SCREEN
 #undef LOG

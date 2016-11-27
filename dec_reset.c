@@ -1,6 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "dec_reset.h"
+#include <string.h>
 #include "cursor.h"
 #include "libjb/log.h"
 #include "libjb/util.h"
@@ -10,7 +11,6 @@
 #include "scr_move.h"
 #include "scr_reset.h"
 #include "screen.h"
-#include <string.h>
 #define DEBUG_RESET
 #ifndef DEBUG_RESET
 #undef LOG

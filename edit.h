@@ -2,7 +2,6 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #ifndef JBXVT_EDIT_H
 #define JBXVT_EDIT_H
-#include <stdint.h>
 #include <xcb/xcb.h>
 //  Insert count spaces from the current position.
 void jbxvt_insert_characters(xcb_connection_t * xc, int8_t count);

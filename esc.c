@@ -2,12 +2,12 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
 #include "esc.h"
+#include <stdio.h>
 #include "cmdtok.h"
 #include "command.h"
 #include "dcs.h"
 #include "mode.h"
 #include "screen.h"
-#include <stdio.h>
 static int_fast16_t read_numeric_argument(xcb_connection_t * restrict xc,
 	struct JBXVTToken * restrict tk, uint_fast16_t * restrict i,
 	int_fast16_t c)

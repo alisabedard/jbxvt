@@ -1,6 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "xevents.h"
+#include <unistd.h>
 #include "cmdtok.h"
 #include "command.h"
 #include "font.h"
@@ -17,7 +18,6 @@
 #include "selex.h"
 #include "selreq.h"
 #include "window.h"
-#include <unistd.h>
 static void handle_client_message(xcb_connection_t * xc,
 	xcb_client_message_event_t * e)
 {

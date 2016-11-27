@@ -1,6 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "paint.h"
+#include <stdlib.h>
 #include "color_index.h"
 #include "color.h"
 #include "double.h"
@@ -9,7 +10,6 @@
 #include "rstyle.h"
 #include "window.h"
 #include "xcb_screen.h"
-#include <stdlib.h>
 //#define DEBUG_PAINT
 #ifndef DEBUG_PAINT
 #undef LOG

@@ -2,8 +2,8 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #ifndef JBXVT_ESC_H
 #define JBXVT_ESC_H
-#include "JBXVTToken.h"
 #include <xcb/xcb.h>
+#include "JBXVTToken.h"
 void jbxvt_csi(xcb_connection_t * xc,
 	int_fast16_t c, struct JBXVTToken * restrict tk);
 void jbxvt_end_cs(xcb_connection_t * xc,

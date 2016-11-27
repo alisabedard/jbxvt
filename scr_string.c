@@ -2,6 +2,8 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
 #include "scr_string.h"
+#include <string.h>
+#include <unistd.h>
 #include "config.h"
 #include "cursor.h"
 #include "font.h"
@@ -20,8 +22,6 @@
 #include "size.h"
 #include "tab.h"
 #include "window.h"
-#include <string.h>
-#include <unistd.h>
 //#define STRING_DEBUG
 #ifndef STRING_DEBUG
 #undef LOG

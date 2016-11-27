@@ -2,6 +2,7 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
 #include "edit.h"
+#include <string.h>
 #include "cursor.h"
 #include "font.h"
 #include "libjb/log.h"
@@ -12,7 +13,6 @@
 #include "selection.h"
 #include "size.h"
 #include "window.h"
-#include <string.h>
 static void copy_area(xcb_connection_t * restrict xc,
 	const int16_t * restrict x, const int16_t y,
 	const uint16_t width)

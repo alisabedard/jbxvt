@@ -1,8 +1,8 @@
 // Copyright 2016, Jeffrey E. Bedard
 #ifndef JBXVT_COLOR_H
 #define JBXVT_COLOR_H
-#include "libjb/xcb.h"
 #include <xcb/xcb.h>
+#include "libjb/xcb.h"
 struct JBXVTColorOptions {
 	char * fg;
 	char * bg;

@@ -1,5 +1,8 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "command.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include "config.h"
 #include "cursor.h"
 #include "display.h"
@@ -7,9 +10,6 @@
 #include "window.h"
 #include "xevents.h"
 #include "xvt.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 static char ** parse_command_line(const int argc, char ** argv,
 	struct JBXVTOptions * o)
 {

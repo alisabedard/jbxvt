@@ -1,8 +1,8 @@
 // Copyright 2016, Jeffrey E. Bedard
 #ifndef JBXVT_CMDTOK_H
 #define JBXVT_CMDTOK_H
-#include "JBXVTToken.h"
 #include <xcb/xcb.h>
+#include "JBXVTToken.h"
 void jbxvt_get_token(xcb_connection_t * xc,
 	struct JBXVTToken * restrict tk);
 // Initialize the static command buffer and stack

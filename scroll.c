@@ -2,6 +2,7 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
 #include "scroll.h"
+#include <string.h>
 #include "font.h"
 #include "libjb/log.h"
 #include "libjb/util.h"
@@ -11,7 +12,6 @@
 #include "selection.h"
 #include "size.h"
 #include "window.h"
-#include <string.h>
 //#define SCROLL_DEBUG
 #ifndef SCROLL_DEBUG
 #undef LOG

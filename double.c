@@ -1,9 +1,9 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "double.h"
+#include <stdlib.h>
 #include "cursor.h"
 #include "repaint.h"
 #include "screen.h"
-#include <stdlib.h>
 void jbxvt_set_double_width_line(xcb_connection_t * xc, const bool is_dwl)
 {
 	{ // s scope

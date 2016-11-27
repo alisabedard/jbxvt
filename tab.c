@@ -1,10 +1,10 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "tab.h"
+#include <string.h>
 #include "libjb/log.h"
 #include "screen.h"
 #include "sbar.h"
 #include "size.h"
-#include <string.h>
 static bool tab_stops[JBXVT_MAX_COLUMNS];
 // Set tab stops:
 // -1 clears all, -2 sets default

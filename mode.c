@@ -1,7 +1,7 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "mode.h"
-#include "JBXVTPrivateModes.h"
 #include <string.h>
+#include "JBXVTPrivateModes.h"
 static struct JBXVTPrivateModes jbxvt_saved_mode;
 // Set default values for private modes
 struct JBXVTPrivateModes * jbxvt_get_modes(void)

@@ -3,7 +3,6 @@
 #ifndef JBXVT_TAB_H
 #define JBXVT_TAB_H
 #include <stdbool.h>
-#include <stdint.h>
 #include <xcb/xcb.h>
 void jbxvt_tab(xcb_connection_t * xc);
 // Do v tabs

@@ -1,13 +1,13 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "selreq.h"
+#include <stdlib.h>
+#include <unistd.h>
 #include "command.h"
 #include "config.h"
 #include "libjb/log.h"
 #include "selection.h"
 #include "window.h"
-#include <stdlib.h>
-#include <unistd.h>
 // Returns the length pasted
 static size_t paste(const uint8_t * data, const size_t length)
 {

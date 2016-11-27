@@ -3,9 +3,9 @@
     University of Kent at Canterbury.*/
 #ifndef SLINEST_H
 #define SLINEST_H
-#include "config.h"
 #include <stdbool.h>
 #include <stdint.h>
+#include "config.h"
 //  structure describing a saved line
 struct JBXVTSavedLine {
 	uint8_t text[JBXVT_MAX_COLUMNS];

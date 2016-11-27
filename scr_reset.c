@@ -1,6 +1,8 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "scr_reset.h"
+#include <string.h>
+#include <unistd.h>
 #include "color.h"
 #include "command.h"
 #include "config.h"
@@ -16,8 +18,6 @@
 #include "scroll.h"
 #include "size.h"
 #include "window.h"
-#include <string.h>
-#include <unistd.h>
 static void init_screen_elements(struct JBXVTScreen * restrict scr)
 {
 	scr->margin.bottom = jbxvt_get_char_size().height - 1;

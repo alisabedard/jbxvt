@@ -2,11 +2,6 @@
    Copyright 1992-94, 1997 John Bovey,
    University of Kent at Canterbury. */
 #include "command.h"
-#include "cmdtok.h"
-#include "libjb/file.h"
-#include "libjb/log.h"
-#include "size.h"
-#include "xevents.h"
 #include <fcntl.h>
 #include <signal.h>
 #include <stdlib.h>
@@ -40,6 +35,11 @@
 #include <string.h>
 #include <utmpx.h>
 #endif//POSIX_UTMP
+#include "cmdtok.h"
+#include "libjb/file.h"
+#include "libjb/log.h"
+#include "size.h"
+#include "xevents.h"
 static fd_t command_fd;
 static pid_t command_pid;
 fd_t jbxvt_get_fd(void)

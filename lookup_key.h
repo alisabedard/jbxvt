@@ -3,7 +3,6 @@
 #ifndef JBXVT_LOOKUP_KEY_H
 #define JBXVT_LOOKUP_KEY_H
 #include <stdbool.h>
-#include <stdint.h>
 #include <xcb/xcb.h>
 /*  Thanks to Rob McMullen for the following function key mapping tables
  *  and code.  */

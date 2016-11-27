@@ -1,10 +1,10 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "lookup_key.h"
+#include <string.h>
+#include <xcb/xcb_keysyms.h>
 #include "command.h"
 #include "libjb/log.h"
 #include "sbar.h"
-#include <string.h>
-#include <xcb/xcb_keysyms.h>
 //#define DEBUG_KEYS
 #ifndef DEBUG_KEYS
 #undef LOG

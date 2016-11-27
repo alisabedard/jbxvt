@@ -1,13 +1,13 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "save_selection.h"
+#include <stdlib.h>
+#include <string.h>
 #include "config.h"
 #include "libjb/log.h"
 #include "screen.h"
 #include "selend.h"
 #include "size.h"
-#include <stdlib.h>
-#include <string.h>
 static uint8_t get_next_char(uint8_t c)
 {
 	if (c == '\n')
