@@ -9,7 +9,7 @@ struct JBXVTOptions {
 	struct JBXVTFontOptions font;
 	struct JBDim size;
 	struct JBDim position;
-	int screen;
-	bool show_scrollbar;
+	uint8_t screen:7;
+	bool show_scrollbar:1;
 };
 #endif//!JBXVT_OPTIONS_H

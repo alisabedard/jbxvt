@@ -92,7 +92,7 @@ size.o: size.c size.h libjb/JBDim.h font.h
 tab.o: tab.c tab.h libjb/log.h screen.h JBXVTScreen.h config.h \
  libjb/JBDim.h sbar.h size.h
 tk_char.o: tk_char.c tk_char.h cmdtok.h JBXVTToken.h JBXVTTokenType.h \
- command.h libjb/JBDim.h libjb/util.h libjb/log.h mode.h \
+ command.h libjb/JBDim.h libjb/util.h cursor.h libjb/log.h mode.h \
  JBXVTPrivateModes.h scr_move.h screen.h JBXVTScreen.h config.h scroll.h \
  JBXVTSavedLine.h tab.h
 window.o: window.c window.h font.h libjb/JBDim.h libjb/util.h libjb/xcb.h \

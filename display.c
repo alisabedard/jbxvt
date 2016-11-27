@@ -84,7 +84,12 @@ static void setup_gcs(xcb_connection_t * xc, xcb_window_t w)
 xcb_connection_t * jbxvt_init_display(char * restrict name,
 	struct JBXVTOptions * restrict opt)
 {
-	xcb_connection_t * xc = jb_get_xcb_connection(NULL, &opt->screen);
+	xcb_connection_t * xc;
+	{ // screen scope
+		int screen = opt->screen;
+		xc = jb_get_xcb_connection(NULL, &screen);
+		opt->screen = screen;
+	}
 	jbxvt_init_colors(xc, &opt->color);
 	jbxvt_init_fonts(xc, &opt->font);
 	create_window(xc, jbxvt_get_root_window(xc), opt, (uint8_t *)name);
