@@ -14,8 +14,8 @@ struct JBXVTToken{
 	uint8_t string[JBXVT_TOKEN_MAX_LENGTH + 1];
 	enum JBXVTTokenType type;
 	union {
-		uint16_t private;	// non zero for priv ctl sequences
-		uint16_t nlcount;	// number of newlines in the string
+		uint8_t private;	// non zero for priv ctl sequences
+		uint8_t nlcount;	// number of newlines in the string
 	};
 	uint16_t length:12;		// length of string
 	uint8_t nargs:4;		// number of arguments passed
