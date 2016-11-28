@@ -510,6 +510,9 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		LOG("FIXME JBXVT_TOKEN_SS3");
 		break;
 	case JBXVT_TOKEN_STRING: // don't log
+#ifdef JBXVT_DEBUG_STRING
+		LOG("token.length: %d", token.length);
+#endif//JBXVT_DEBUG_STRING
 		jbxvt_string(xc, token.string, token.length,
 			token.nlcount);
 		break;
