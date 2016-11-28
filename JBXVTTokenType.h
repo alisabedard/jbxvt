@@ -107,6 +107,7 @@ enum JBXVTTokenType {
 	JBXVT_TOKEN_PNM = '>', // keypad to numeric mode
 	JBXVT_TOKEN_RESTOREPM = '?', // restore private modes
 	JBXVT_TOKEN_ESC = 033,
+	// 8-bit sequences:
 	JBXVT_TOKEN_IND = 0x84,
 	JBXVT_TOKEN_NEL = 0x85,
 	JBXVT_TOKEN_HTS = 0x88,
