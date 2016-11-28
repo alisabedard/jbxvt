@@ -12,46 +12,62 @@
 #include "size.h"
 #include "xcb_screen.h"
 #include "window.h"
-#define E(n) XCB_EVENT_MASK_##n
-#define EB(n) XCB_EVENT_MASK_BUTTON_##n
-enum EventMasks {
-	JBXVT_MAIN_EVENT_MASK = E(KEY_PRESS) | E(FOCUS_CHANGE)
-		| E(STRUCTURE_NOTIFY),
-	JBXVT_CHILD_EVENT_MASK = E(EXPOSURE) | EB(PRESS) | EB(RELEASE)
-		| EB(MOTION)
+enum {
+	CHILD_EVENT_MASK = XCB_EVENT_MASK_EXPOSURE
+		| XCB_EVENT_MASK_BUTTON_PRESS
+		| XCB_EVENT_MASK_BUTTON_RELEASE
+		| XCB_EVENT_MASK_BUTTON_MOTION,
+	COPY_FROM_PARENT = XCB_COPY_FROM_PARENT
 };
-#undef E
-#undef EB
 static void create_main_window(xcb_connection_t * xc,
 	const xcb_window_t root, const struct JBDim position,
 	const struct JBDim size)
 {
-	xcb_create_window(xc, 0, jbxvt_get_main_window(xc), root, position.x,
-		position.y, size.width, size.height, 0, 0, 0,
-		XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK, (uint32_t[]){
-		jbxvt_get_bg(), JBXVT_MAIN_EVENT_MASK});
+	enum {
+		VM = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK,
+		EMASK = XCB_EVENT_MASK_KEY_PRESS
+			| XCB_EVENT_MASK_FOCUS_CHANGE
+			| XCB_EVENT_MASK_STRUCTURE_NOTIFY,
+		CFP = COPY_FROM_PARENT
+	};
+	xcb_create_window(xc, CFP, jbxvt_get_main_window(xc), root,
+		position.x, position.y, size.width, size.height, 0, CFP,
+		CFP, VM, (uint32_t[]){jbxvt_get_bg(), EMASK});
 	jbxvt_set_pixel_size(size);
 }
 static void create_sb_window(xcb_connection_t * xc, const uint16_t height)
 {
-	const xcb_cursor_t c = jbxvt_get_cursor(xc,
-		XC_sb_v_double_arrow, 0, 0xffff);
-	xcb_create_window(xc, 0, jbxvt_get_scrollbar(xc),
-		jbxvt_get_main_window(xc), -1, -1, JBXVT_SCROLLBAR_WIDTH - 1,
-		height, 1, 0, 0, XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL
-		| XCB_CW_EVENT_MASK | XCB_CW_CURSOR, (uint32_t[]){
-		jbxvt_get_bg(), jbxvt_get_fg(), JBXVT_CHILD_EVENT_MASK, c});
+	enum {
+		CURSOR = XC_sb_v_double_arrow,
+		VM = XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL
+			| XCB_CW_EVENT_MASK | XCB_CW_CURSOR,
+		CFP = COPY_FROM_PARENT
+	};
+	const xcb_cursor_t c = jbxvt_get_cursor(xc, CURSOR, 0, 0xffff);
+	const xcb_rectangle_t r = { -1, -1,
+		JBXVT_SCROLLBAR_WIDTH - 1, height};
+	const xcb_window_t sb = jbxvt_get_scrollbar(xc),
+	      mw = jbxvt_get_main_window(xc);
+	xcb_create_window(xc, CFP, sb, mw, r.x, r.y, r.width, r.height,
+		1, CFP, CFP, VM, (uint32_t[]){jbxvt_get_bg(),
+		jbxvt_get_fg(), CHILD_EVENT_MASK, c});
 	xcb_free_cursor(xc, c);
 }
 static void create_vt_window(xcb_connection_t * xc, const struct JBDim sz,
 	const bool sb)
 {
+	enum {
+		CURSOR = XC_xterm,
+		VM = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK
+			| XCB_CW_CURSOR,
+		CFP = COPY_FROM_PARENT
+	};
 	const xcb_cursor_t c = jbxvt_get_cursor(xc, XC_xterm, 0xffff, 0);
-	xcb_create_window(xc, 0, jbxvt_get_vt_window(xc),
-		jbxvt_get_main_window(xc), sb ? JBXVT_SCROLLBAR_WIDTH : 0, 0,
-		sz.w, sz.h, 0, 0, 0, XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK
-		| XCB_CW_CURSOR, (uint32_t[]){ jbxvt_get_bg(),
-		JBXVT_CHILD_EVENT_MASK, c});
+	const xcb_window_t vt = jbxvt_get_vt_window(xc),
+	      mw = jbxvt_get_main_window(xc);
+	const int16_t x = sb ? JBXVT_SCROLLBAR_WIDTH : 0;
+	xcb_create_window(xc, CFP, vt, mw, x, 0, sz.w, sz.h, 0, CFP, CFP, VM,
+		(uint32_t[]){ jbxvt_get_bg(), CHILD_EVENT_MASK, c});
 	xcb_free_cursor(xc, c);
 }
 static void set_name(xcb_connection_t * restrict xc,
