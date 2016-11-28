@@ -8,7 +8,6 @@
 #include "cursor.h"
 #include "paint.h"
 #include "sbar.h"
-#include "screen.h"
 #include "size.h"
 #include "xcb_screen.h"
 #include "window.h"
