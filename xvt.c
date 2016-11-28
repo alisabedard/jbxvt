@@ -504,10 +504,12 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		LOG("FIXME JBXVT_TOKEN_SPA");
 		break;
 	case JBXVT_TOKEN_SS2:
-		LOG("FIXME JBXVT_TOKEN_SS2");
+		LOG("JBXVT_TOKEN_SS2");
+		jbxvt_get_modes()->ss2 = true;
 		break;
 	case JBXVT_TOKEN_SS3:
-		LOG("FIXME JBXVT_TOKEN_SS3");
+		LOG("JBXVT_TOKEN_SS3");
+		jbxvt_get_modes()->ss3 = true;
 		break;
 	case JBXVT_TOKEN_STRING: // don't log
 #ifdef JBXVT_DEBUG_STRING

@@ -4,11 +4,18 @@
 #include <stdbool.h>
 #include <stdint.h>
 enum JBXVTCharacterSet{
-	CHARSET_GB, CHARSET_ASCII, CHARSET_SG0, CHARSET_SG1, CHARSET_SG2
+	CHARSET_GB, CHARSET_ASCII, CHARSET_SG0, CHARSET_SG1, CHARSET_SG2,
+	CHARSET_SG3
 };
 struct JBXVTPrivateModes {
-	uint8_t charset[2];     // graphics mode char set
-	uint8_t charsel:1;	// charset index
+	/* Graphics mode character set storage array: Index 0 is primary,
+	   1 is secondary, and 2 is for shift (SS2/SS3): */
+	uint8_t charset[3];
+	/* Current character set index (into above array): We only allow
+	   0 and 1, thus the bit field width.  Index 2, the character
+	   set shift buffer, is kept invalid by limiting this width,
+	   thus protectecting it from access through this variable.  */
+	uint8_t charsel:1;
 	bool att610:1;		// stop blinking cursor
 	bool decanm:1;		// DECANM -- ANSI/VT52
 	bool decawm:1;		// DECAWM auto-wrap flag
@@ -38,5 +45,7 @@ struct JBXVTPrivateModes {
 	bool elr:1;		// locator report
 	bool elr_once:1;	// locator report once
 	bool elr_pixels:1;	// locator report in pixel format
+	bool ss2:1;		// use G2 charset on next character only
+	bool ss3:1;		// use G3 charset on next character only
 };
 #endif//!JBXVT_JBXVTPRIVATEMODES_H

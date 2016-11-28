@@ -108,12 +108,12 @@ enum JBXVTTokenType {
 	JBXVT_TOKEN_RESTOREPM = '?', // restore private modes
 	JBXVT_TOKEN_ESC = 033,
 	// 8-bit sequences:
-	JBXVT_TOKEN_IND = 0x84,
-	JBXVT_TOKEN_NEL = 0x85,
-	JBXVT_TOKEN_HTS = 0x88,
-	JBXVT_TOKEN_RI = 0x8d,
-	JBXVT_TOKEN_SS2 = 0x8e,
-	JBXVT_TOKEN_SS3 = 0x8f,
+	JBXVT_TOKEN_IND = 0x84, // index
+	JBXVT_TOKEN_NEL = 0x85, // next line
+	JBXVT_TOKEN_HTS = 0x88, // horizontal tab stop
+	JBXVT_TOKEN_RI = 0x8d, // reverse index
+	JBXVT_TOKEN_SS2 = 0x8e, // select G2 for next character only
+	JBXVT_TOKEN_SS3 = 0x8f, // select G3 for next character only
 	JBXVT_TOKEN_DCS = 0x90,
 	JBXVT_TOKEN_SPA = 0x96,
 	JBXVT_TOKEN_EPA = 0x97,

@@ -139,6 +139,37 @@ static void check_wrap(struct JBXVTScreen * restrict s)
 	if (s->cursor.x >= w)
 		s->wrap_next = !jbxvt_get_modes()->decawm;
 }
+static void clear_shift(struct JBXVTPrivateModes * restrict m)
+{
+	m->ss2 = false;
+	m->ss3 = false;
+}
+static bool test_shift(struct JBXVTPrivateModes * restrict m,
+	const bool shift, const enum JBXVTCharacterSet cs)
+{
+	if (shift) {
+		const uint8_t i = m->charsel; // current index
+		m->charset[2] = m->charset[i]; // save in shift buffer
+		m->charset[i] = cs; // set current to desired
+		clear_shift(m);
+		return true; // we have shifted
+	}
+	return false; // nothing changed
+}
+static bool handle_single_shift(void)
+{
+	struct JBXVTPrivateModes * m = jbxvt_get_modes();
+	if (test_shift(m, m->ss2, CHARSET_SG2))
+		return true; // we have shifted
+	if (test_shift(m, m->ss3, CHARSET_SG3))
+		return true; // ditto
+	return false; // nothing changed
+}
+static void recover_from_shift(void)
+{
+	struct JBXVTPrivateModes * m = jbxvt_get_modes();
+	m->charset[m->charsel] = m->charset[2];
+}
 /*  Display the string at the current position.
     nlcount is the number of new lines in the string.  */
 void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str,
@@ -171,8 +202,18 @@ void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str,
 			if (JB_UNLIKELY(mode->insert))
 				handle_insert(xc, 1, p);
 			uint8_t * t = screen->text[c->y] + c->x;
-			if (mode->charset[mode->charsel] > CHARSET_ASCII)
-				parse_special_charset(str, len);
+			const bool shifted = handle_single_shift();
+			if (shifted) {
+				parse_special_charset(str, 1);
+				recover_from_shift();
+			}
+			if (mode->charset[mode->charsel] > CHARSET_ASCII) {
+				if (shifted)
+					parse_special_charset(str + 1,
+						len - 1);
+				else
+					parse_special_charset(str, len);
+			}
 			// Render the string:
 			if (!screen->decpm) {
 				jbxvt_paint(xc, str, jbxvt_get_rstyle(),
