@@ -44,7 +44,7 @@ static void create_sb_window(xcb_connection_t * xc, const uint16_t height)
 		CFP = COPY_FROM_PARENT
 	};
 	const xcb_cursor_t c = jbxvt_get_cursor(xc, CURSOR, 0, 0xffff);
-	const xcb_rectangle_t r = { -1, -1,
+	const xcb_rectangle_t r = {-1, -1,
 		JBXVT_SCROLLBAR_WIDTH - 1, height};
 	const xcb_window_t sb = jbxvt_get_scrollbar(xc),
 	      mw = jbxvt_get_main_window(xc);
@@ -67,7 +67,7 @@ static void create_vt_window(xcb_connection_t * xc, const struct JBDim sz,
 	      mw = jbxvt_get_main_window(xc);
 	const int16_t x = sb ? JBXVT_SCROLLBAR_WIDTH : 0;
 	xcb_create_window(xc, CFP, vt, mw, x, 0, sz.w, sz.h, 0, CFP, CFP, VM,
-		(uint32_t[]){ jbxvt_get_bg(), CHILD_EVENT_MASK, c});
+		(uint32_t[]){jbxvt_get_bg(), CHILD_EVENT_MASK, c});
 	xcb_free_cursor(xc, c);
 }
 static void set_name(xcb_connection_t * restrict xc,
@@ -88,14 +88,16 @@ static void create_window(xcb_connection_t * xc, const xcb_window_t root,
 }
 static void setup_gcs(xcb_connection_t * xc, xcb_window_t w)
 {
+	enum {
+		TXT_VM = XCB_GC_FOREGROUND | XCB_GC_BACKGROUND
+			| XCB_GC_FONT,
+		CUR_VM = XCB_GC_FUNCTION | XCB_GC_PLANE_MASK
+	};
 	const pixel_t f = jbxvt_get_fg(), b = jbxvt_get_bg();
-	xcb_create_gc(xc, jbxvt_get_text_gc(xc), w,
-		XCB_GC_FOREGROUND | XCB_GC_BACKGROUND
-		| XCB_GC_FONT, (uint32_t[]){f, b,
-		jbxvt_get_normal_font(xc)});
-	xcb_create_gc(xc, jbxvt_get_cursor_gc(xc), w,
-		XCB_GC_FUNCTION | XCB_GC_PLANE_MASK, (uint32_t[]){
-		XCB_GX_INVERT, f ^ b});
+	xcb_create_gc(xc, jbxvt_get_text_gc(xc), w, TXT_VM,
+		(uint32_t[]){f, b, jbxvt_get_normal_font(xc)});
+	xcb_create_gc(xc, jbxvt_get_cursor_gc(xc), w, CUR_VM,
+		(uint32_t[]){XCB_GX_INVERT, f ^ b});
 }
 xcb_connection_t * jbxvt_init_display(char * restrict name,
 	struct JBXVTOptions * restrict opt)
