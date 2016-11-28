@@ -40,11 +40,11 @@ static void create_sb_window(xcb_connection_t * xc, const uint16_t height)
 		CURSOR = XC_sb_v_double_arrow,
 		VM = XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL
 			| XCB_CW_EVENT_MASK | XCB_CW_CURSOR,
-		CFP = COPY_FROM_PARENT
+		CFP = COPY_FROM_PARENT,
+		SB = JBXVT_SCROLLBAR_WIDTH
 	};
 	const xcb_cursor_t c = jbxvt_get_cursor(xc, CURSOR, 0, 0xffff);
-	const xcb_rectangle_t r = {-1, -1,
-		JBXVT_SCROLLBAR_WIDTH - 1, height};
+	const xcb_rectangle_t r = {-1, -1, SB - 1, height};
 	const xcb_window_t sb = jbxvt_get_scrollbar(xc),
 	      mw = jbxvt_get_main_window(xc);
 	xcb_create_window(xc, CFP, sb, mw, r.x, r.y, r.width, r.height,
@@ -59,12 +59,13 @@ static void create_vt_window(xcb_connection_t * xc, const struct JBDim sz,
 		CURSOR = XC_xterm,
 		VM = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK
 			| XCB_CW_CURSOR,
-		CFP = COPY_FROM_PARENT
+		CFP = COPY_FROM_PARENT,
+		SB = JBXVT_SCROLLBAR_WIDTH
 	};
 	const xcb_cursor_t c = jbxvt_get_cursor(xc, XC_xterm, 0xffff, 0);
 	const xcb_window_t vt = jbxvt_get_vt_window(xc),
 	      mw = jbxvt_get_main_window(xc);
-	const int16_t x = sb ? JBXVT_SCROLLBAR_WIDTH : 0;
+	const int16_t x = sb ? SB : 0;
 	xcb_create_window(xc, CFP, vt, mw, x, 0, sz.w, sz.h, 0, CFP, CFP, VM,
 		(uint32_t[]){jbxvt_get_bg(), CHILD_EVENT_MASK, c});
 	xcb_free_cursor(xc, c);
