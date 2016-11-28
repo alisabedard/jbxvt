@@ -2,7 +2,7 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "selex.h"
 #include "change_selection.h"
-#include "libjb/util.h"
+#include "libjb/macros.h"
 #include "selection.h"
 #include "selend.h"
 #include "size.h"

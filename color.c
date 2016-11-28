@@ -1,6 +1,6 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "color.h"
-#include "libjb/util.h"
+#include "libjb/macros.h"
 #include "paint.h"
 #include "xcb_screen.h"
 #include "window.h"

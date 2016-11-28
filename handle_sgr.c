@@ -3,7 +3,7 @@
 #include "handle_sgr.h"
 #include "color.h"
 #include "libjb/log.h"
-#include "libjb/util.h"
+#include "libjb/macros.h"
 #include "paint.h"
 #include "rstyle.h"
 //#define DEBUG_SGR

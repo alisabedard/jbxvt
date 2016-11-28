@@ -4,7 +4,7 @@
 #include <string.h>
 #include "cursor.h"
 #include "libjb/log.h"
-#include "libjb/util.h"
+#include "libjb/macros.h"
 #include "lookup_key.h"
 #include "mode.h"
 #include "sbar.h"

@@ -6,7 +6,7 @@
 #include "cursor.h"
 #include "font.h"
 #include "libjb/log.h"
-#include "libjb/util.h"
+#include "libjb/macros.h"
 #include "paint.h"
 #include "sbar.h"
 #include "screen.h"

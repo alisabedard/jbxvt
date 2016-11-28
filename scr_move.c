@@ -2,7 +2,7 @@
 #include "scr_move.h"
 #include "cursor.h"
 #include "libjb/log.h"
-#include "libjb/util.h"
+#include "libjb/macros.h"
 #include "mode.h"
 #include "sbar.h"
 #include "screen.h"

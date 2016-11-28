@@ -8,6 +8,7 @@
 #include "cursor.h"
 #include "font.h"
 #include "libjb/log.h"
+#include "libjb/macros.h"
 #include "libjb/time.h"
 #include "libjb/util.h"
 #include "mode.h"

@@ -2,7 +2,7 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "selection.h"
 #include "libjb/log.h"
-#include "libjb/util.h"
+#include "libjb/macros.h"
 #include "libjb/xcb.h"
 #include "save_selection.h"
 #include "selend.h"
