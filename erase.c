@@ -55,8 +55,7 @@ static void del(xcb_connection_t * restrict xc, uint16_t col, uint16_t width)
 		memset(s->text[y] + col, 0, width);
 		memset(s->rend[y] + col, 0, width << 2);
 		clear_area(xc, col, y, width);
-		s->wrap[y] = false;
-		s->dwl[y] = false;
+		s->wrap[y] = s->dwl[y] = false;
 	}
 	xcb_flush(xc);
 }
