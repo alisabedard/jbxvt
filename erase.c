@@ -19,14 +19,6 @@
 #undef LOG
 #define LOG(...)
 #endif//DEBUG_ERASE
-static inline int16_t get_x(void)
-{
-	return jbxvt_get_current_screen()->cursor.x;
-}
-static inline int16_t get_y(void)
-{
-	return jbxvt_get_current_screen()->cursor.y;
-}
 static inline uint16_t get_width(void)
 {
 	return jbxvt_get_char_size().width;
@@ -69,11 +61,11 @@ void jbxvt_erase_line(xcb_connection_t * xc, const int8_t mode)
 		del(xc, 0, get_width());
 		break;
 	case JBXVT_ERASE_BEFORE:
-		del(xc, 0, get_x());
+		del(xc, 0, jbxvt_get_x());
 		break;
 	case JBXVT_ERASE_AFTER:
 	default: {
-		const int16_t x = get_x();
+		const int16_t x = jbxvt_get_x();
 		del(xc, x, get_width() - x);
 	}
 	}
@@ -85,12 +77,12 @@ static bool assign_range(xcb_connection_t * restrict xc,
 	switch (mode) {
 		// offset by 1 to not include current line, handled later
 	case JBXVT_ERASE_AFTER:
-		range->start = get_y() + 1;
+		range->start = jbxvt_get_y() + 1;
 		range->end = jbxvt_get_char_size().h;
 		break;
 	case JBXVT_ERASE_BEFORE:
 		range->start = 0;
-		range->end = get_y() - 1;
+		range->end = jbxvt_get_y() - 1;
 		break;
 	case JBXVT_ERASE_SAVED:
 		jbxvt_clear_saved_lines(xc);
