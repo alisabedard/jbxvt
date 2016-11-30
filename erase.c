@@ -3,15 +3,11 @@
     University of Kent at Canterbury.*/
 #include "erase.h"
 #include <string.h>
-#include "config.h"
 #include "cursor.h"
 #include "font.h"
 #include "libjb/log.h"
 #include "sbar.h"
 #include "screen.h"
-#include "scroll.h"
-#include "scr_reset.h"
-#include "selection.h"
 #include "size.h"
 #include "window.h"
 #define DEBUG_ERASE
