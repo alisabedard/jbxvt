@@ -6,7 +6,7 @@
 #include "libjb/macros.h"
 #include "paint.h"
 #include "rstyle.h"
-//#define DEBUG_SGR
+#define DEBUG_SGR
 #ifndef DEBUG_SGR
 #undef LOG
 #define LOG(...)
@@ -15,9 +15,10 @@
 __attribute__((cold))
 static void encode_rgb(uint8_t color, uint8_t offset)
 {
-	color >>= 5;
-	color <<= 1;
-	jbxvt_add_rstyle(color << offset);
+	// 0xe0 masks the most significant 3 bits
+	const uint32_t val = (color & 0xe0) << offset >> 4;
+	LOG("encode_rgb(color: %d, offset: %d) val: 0x%x", color, offset, val);
+	jbxvt_add_rstyle(val);
 }
 /* c must be uint32_t to allow for shift and OR with rstyle. */
 static void sgrc(const uint32_t c, const bool fg)
