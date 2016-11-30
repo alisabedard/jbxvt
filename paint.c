@@ -59,8 +59,8 @@ static void draw_text(xcb_connection_t * xc,
 		draw_underline(xc, len, *p, -2);
 		draw_underline(xc, len, *p, 0);
 	}
-	/* Test against JBXVT_RS_BG_RGB here to prevent red background text from
-	 * being rendered crossed out.  */
+	/* Test against JBXVT_RS_BG_RGB here to prevent red background
+	   text from being rendered crossed out.  */
 	if (rstyle & JBXVT_RS_CROSSED_OUT && !(rstyle & JBXVT_RS_BG_RGB))
 		draw_underline(xc, len, *p,
 			-(jbxvt_get_font_size().h >> 1));
