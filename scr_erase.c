@@ -57,6 +57,7 @@ static void del(xcb_connection_t * xc, uint16_t col, uint16_t width)
 // Erase the specified portion of a line.
 void jbxvt_erase_line(xcb_connection_t * xc, const int8_t mode)
 {
+	LOG("jbxvt_erase_line(xc, mode: %d)", mode);
 	jbxvt_set_scroll(xc, 0);
 	switch (mode) {
 	case JBXVT_ERASE_ALL:
@@ -73,11 +74,8 @@ void jbxvt_erase_line(xcb_connection_t * xc, const int8_t mode)
 	}
 	jbxvt_draw_cursor(xc);
 }
-struct ErasureRange {
-	int16_t start, end;
-};
 static bool assign_range(xcb_connection_t * restrict xc,
-	const int8_t mode, struct ErasureRange * restrict range)
+	const int8_t mode, struct JBDim * restrict range)
 {
 	switch (mode) {
 		// offset by 1 to not include current line, handled later
@@ -103,7 +101,7 @@ static bool assign_range(xcb_connection_t * restrict xc,
 void jbxvt_erase_screen(xcb_connection_t * xc, const int8_t mode)
 {
 	LOG("jbxvt_erase_screen(mode=%d)", mode);
-	struct ErasureRange range;
+	struct JBDim range;
 	if (!assign_range(xc, mode, &range))
 		return;
 	/* Save cursor y locally instead of using save/restore cursor
