@@ -13,7 +13,7 @@
 #include "lookup_key.h"
 #include "mode.h"
 #include "sbar.h"
-#include "scr_erase.h"
+#include "erase.h"
 #include "scr_move.h"
 #include "scr_reset.h"
 #include "scr_string.h"

@@ -1,6 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
-    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-#include "scr_erase.h"
+    Copyright 1992, 1997 John Bovey,
+    University of Kent at Canterbury.*/
+#include "erase.h"
 #include <string.h>
 #include "config.h"
 #include "cursor.h"

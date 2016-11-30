@@ -8,7 +8,7 @@
 #include "mode.h"
 #include "repaint.h"
 #include "sbar.h"
-#include "scr_erase.h"
+#include "erase.h"
 #include "scr_move.h"
 #include "scr_reset.h"
 #include "scroll.h"
