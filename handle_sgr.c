@@ -6,7 +6,7 @@
 #include "libjb/macros.h"
 #include "paint.h"
 #include "rstyle.h"
-#define DEBUG_SGR
+//#define DEBUG_SGR
 #ifndef DEBUG_SGR
 #undef LOG
 #define LOG(...)
