@@ -7,6 +7,7 @@
 #include "double.h"
 #include "font.h"
 #include "libjb/log.h"
+#include "libjb/xcb.h" // for jb_get_rgb_pixel, pixel_t
 #include "rstyle.h"
 #include "window.h"
 #include "xcb_screen.h"
