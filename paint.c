@@ -87,7 +87,17 @@ static pixel_t rgb_pixel(xcb_connection_t * xc, const uint16_t c)
 		" pixel is 0x%x", c, r, g, b, p);
 	return p;
 }
-static bool set_rstyle_colors(xcb_connection_t * xc,
+static void rstyle_color(xcb_connection_t * restrict xc, const uint8_t *
+	restrict color, const bool * restrict ind, const bool * restrict rgb,
+	pixel_t (*set_pixel)(xcb_connection_t *, const pixel_t),
+	const uint8_t i)
+{
+	if (ind[i])
+		set_pixel(xc, jbxvt_color_index[color[i]]);
+	else if (rgb[i])
+		set_pixel(xc, rgb_pixel(xc, color[i]));
+}
+static bool set_rstyle_colors(xcb_connection_t * restrict xc,
 	const uint32_t rstyle)
 {
 	// Mask foreground colors, 9 bits offset by 7 bits
@@ -98,14 +108,8 @@ static bool set_rstyle_colors(xcb_connection_t * xc,
 		rstyle & JBXVT_RS_BG_RGB};
 	const bool ind[] = {rstyle & JBXVT_RS_FG_INDEX,
 		rstyle & JBXVT_RS_BG_INDEX};
-	if (ind[0])
-		jbxvt_set_fg_pixel(xc, jbxvt_color_index[color[0]]);
-	else if (rgb[0])
-		jbxvt_set_fg_pixel(xc, rgb_pixel(xc, color[0]));
-	if (ind[1])
-		jbxvt_set_bg_pixel(xc, jbxvt_color_index[color[1]]);
-	else if (rgb[1])
-		jbxvt_set_bg_pixel(xc, rgb_pixel(xc, color[1]));
+	rstyle_color(xc, color, ind, rgb, jbxvt_set_fg_pixel, 0);
+	rstyle_color(xc, color, ind, rgb, jbxvt_set_bg_pixel, 1);
 	return rgb[0] || rgb[1] || ind[0] || ind[1];
 }
 static void restore_colors(xcb_connection_t * restrict xc)
