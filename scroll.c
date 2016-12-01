@@ -41,9 +41,11 @@ static void clear_selection_at(const int16_t j)
 static void move_line(const int16_t j,
 	const int8_t count, struct JBXVTScreen * restrict s)
 {
-	const int16_t k = j + count;
+	const uint16_t k = j + count;
 	s->text[k] = s->text[j];
 	s->rend[k] = s->rend[j];
+	s->wrap[k] = s->wrap[j];
+	s->dwl[k] = s->dwl[j];
 	clear_selection_at(j);
 }
 static void clear(int8_t count, const uint8_t rc,
@@ -61,6 +63,8 @@ static void clear(int8_t count, const uint8_t rc,
 		struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
 		s->text[j] = text[count];
 		s->rend[j] = rend[count];
+		s->wrap[j] = false;
+		s->dwl[j] = false;
 	}
 	clear(count, rc, text, rend, up);
 }
