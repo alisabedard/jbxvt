@@ -108,6 +108,11 @@ static bool set_rstyle_colors(xcb_connection_t * xc,
 		jbxvt_set_bg_pixel(xc, rgb_pixel(xc, color[1]));
 	return rgb[0] || rgb[1] || ind[0] || ind[1];
 }
+static void restore_colors(xcb_connection_t * restrict xc)
+{
+	jbxvt_set_fg_pixel(xc, jbxvt_get_fg());
+	jbxvt_set_bg_pixel(xc, jbxvt_get_bg());
+}
 //  Paint the text using the rendition value at the screen position.
 void jbxvt_paint(xcb_connection_t * xc, uint8_t * restrict str,
 	uint32_t rstyle, uint16_t len, struct JBDim p, const bool dwl)
@@ -140,8 +145,6 @@ void jbxvt_paint(xcb_connection_t * xc, uint8_t * restrict str,
 		free(str);
 	if (font_mod)
 		font(xc, jbxvt_get_normal_font(xc)); // restore font
-	if (cmod) {
-		jbxvt_set_fg_pixel(xc, jbxvt_get_fg());
-		jbxvt_set_bg_pixel(xc, jbxvt_get_bg());
-	}
+	if (cmod)
+		restore_colors(xc);
 }
