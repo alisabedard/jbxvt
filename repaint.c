@@ -47,7 +47,7 @@ static int_fast16_t show_scroll_history(xcb_connection_t * xc,
 	paint_rvec_text(xc, sl->text, sl->rend, chars.width, *p, sl->dwl);
 	const struct JBDim f = jbxvt_get_font_size();
 	const int16_t x = sl->size * f.width;
-	const uint16_t w = (chars.width - sl->size) * f.width;
+	const uint16_t w = chars.width * f.width - x;
 	xcb_clear_area(xc, false, jbxvt_get_vt_window(xc), x, p->y, w,
 		f.height);
 	p->y += f.height;
