@@ -40,15 +40,12 @@ static uint16_t get_limited_width(const uint16_t col, uint16_t width)
 static void del(xcb_connection_t * restrict xc, uint16_t col, uint16_t width)
 {
 	width = get_limited_width(col, width);
-	{ // * s, y scope
-		struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
-		const int16_t y = s->cursor.y;
-		memset(s->text[y] + col, 0, width);
-		memset(s->rend[y] + col, 0, width << 2);
-		clear_area(xc, col, y, width);
-		s->wrap[y] = s->dwl[y] = false;
-	}
-	xcb_flush(xc);
+	struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
+	const int16_t y = s->cursor.y;
+	memset(s->text[y] + col, 0, width);
+	memset(s->rend[y] + col, 0, width << 2);
+	clear_area(xc, col, y, width);
+	s->wrap[y] = s->dwl[y] = false;
 }
 // Erase the specified portion of a line.
 void jbxvt_erase_line(xcb_connection_t * xc, const int8_t mode)
