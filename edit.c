@@ -26,22 +26,11 @@ static void copy_area(xcb_connection_t * restrict xc,
 	xcb_copy_area(xc, v, v, jbxvt_get_text_gc(xc), x[0], y,
 		x[1], y, width, jbxvt_get_font_size().height);
 }
-static void clear_area(xcb_connection_t * restrict xc, struct JBDim p,
-	const int8_t count)
-
-{
-	LOG("clear_area(xc, p = {.x = %d, .y = %d}, count = %d)",
-		p.x, p.y, count);
-	const struct JBDim f = jbxvt_get_font_size();
-	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc),
-		p.x, p.y, count * f.w, f.h);
-}
 static void finalize(xcb_connection_t * restrict xc,
 	const int16_t * restrict x, const struct JBDim p,
-	const uint16_t width, const int8_t count)
+	const uint16_t width)
 {
 	copy_area(xc, x, p.y, width);
-	clear_area(xc, p, count);
 	jbxvt_get_current_screen()->wrap_next = 0;
 	jbxvt_draw_cursor(xc);
 }
@@ -87,8 +76,7 @@ void jbxvt_insert_characters(xcb_connection_t * xc, const uint8_t count)
 	begin(xc, x, count);
 	const struct JBDim c = jbxvt_get_current_screen()->cursor;
 	copy_lines(c.x, count);
-	finalize(xc, x, jbxvt_chars_to_pixels(c),
-		get_width(count), count);
+	finalize(xc, x, jbxvt_chars_to_pixels(c), get_width(count));
 }
 static void copy_data_after_count(const uint8_t count,
 	const struct JBDim c)
@@ -126,5 +114,5 @@ void jbxvt_delete_characters(xcb_connection_t * xc, const uint8_t count)
 	c = jbxvt_chars_to_pixels(c);
 	const uint16_t width = get_width(count);
 	c.x += width;
-	finalize(xc, x, c, width, count);
+	finalize(xc, x, c, width);
 }
