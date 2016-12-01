@@ -2,6 +2,7 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
 #include "repaint.h"
+#include <stdlib.h>
 #include "font.h"
 #include "paint.h"
 #include "sbar.h"
@@ -43,7 +44,7 @@ static int_fast32_t repaint_generic(xcb_connection_t * xc,
 	if (!str || !len)
 		return p.y + f.height;
 	if (rend)
-		paint_rvec_text(xc, str, rend + 0, len, p, dwl);
+		paint_rvec_text(xc, str, rend, len, p, dwl);
 	else
 		jbxvt_paint(xc, str, 0, len, p, dwl);
 	p.x += len * f.width;
@@ -65,17 +66,6 @@ static int_fast16_t show_scroll_history(xcb_connection_t * xc,
 		sl->rend, sl->dwl);
 	return show_scroll_history(xc, p, line + 1, i - 1);
 }
-__attribute__((nonnull(1)))
-static uint_fast16_t filter_string(uint8_t * restrict buf,
-	uint8_t * restrict input)
-{
-	if (!input)
-		return 0;
-	uint_fast16_t x;
-	for (x = 0; x < jbxvt_get_char_size().width; ++x)
-		buf[x] = input[x] < ' ' ? ' ' : input[x];
-	return x;
-}
 // Repaint the screen
 void jbxvt_repaint(xcb_connection_t * xc)
 {
@@ -83,14 +73,17 @@ void jbxvt_repaint(xcb_connection_t * xc)
 	struct JBDim p = {};
 	int_fast32_t line = show_scroll_history(xc,
 		&p, 0, jbxvt_get_scroll() - 1);
+	const struct JBDim chars = jbxvt_get_char_size(), f =
+		jbxvt_get_font_size();
 	// Do the remainder from the current screen:
-	for (uint_fast16_t i = 0; line < jbxvt_get_char_size().height;
-		++line, ++i) {
-		// Allocate enough space to process each column
-		uint8_t str[jbxvt_get_char_size().width];
-		struct JBXVTScreen * s = jbxvt_get_current_screen();
-		p.y = repaint_generic(xc, p, filter_string(str, s->text[i]),
-			str, s->rend[i], s->dwl[i]);
+	struct JBXVTScreen * s = jbxvt_get_current_screen();
+	for (uint_fast16_t i = 0; line < chars.height; ++line, ++i) {
+		uint8_t * t = s->text[i];
+		for (int_fast16_t j = chars.width; j >= 0; --j)
+			if (t[j] < ' ')
+				t[j] = ' ';
+		paint_rvec_text(xc, t, s->rend[i], chars.width, p, s->dwl[i]);
+		p.y += f.height;
 	}
 	jbxvt_show_selection(xc);
 }
