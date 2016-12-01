@@ -52,7 +52,7 @@ static void decscnm(xcb_connection_t * xc)
 		last_was_rv = rv;
 	LOG("decscnm()");
 	jbxvt_reverse_screen_colors(xc);
-	jb_sleep(100);
+	jb_sleep(111);
 }
 static void init_screens(void)
 {
@@ -72,9 +72,9 @@ void jbxvt_reset(xcb_connection_t * xc)
 	struct JBDim c = jbxvt_get_char_size();
 	fix_margins(c);
 	init_screens();
-	int16_t * y = &jbxvt_get_current_screen()->cursor.y;
-	if (JB_LIKELY(jbxvt_get_current_screen() == jbxvt_get_screen_at(0))
-		&& *y >= c.h) {
+	struct JBXVTScreen * s = jbxvt_get_current_screen();
+	int16_t * y = &s->cursor.y;
+	if (JB_LIKELY(s == jbxvt_get_screen_at(0)) && *y >= c.h) {
 		jbxvt_scroll_primary_screen(*y - c.h + 1);
 		*y = c.h - 1;
 	}
