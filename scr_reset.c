@@ -72,11 +72,13 @@ void jbxvt_reset(xcb_connection_t * xc)
 	struct JBDim c = jbxvt_get_char_size();
 	fix_margins(c);
 	init_screens();
-	struct JBXVTScreen * s = jbxvt_get_current_screen();
-	int16_t * y = &s->cursor.y;
-	if (JB_LIKELY(s == jbxvt_get_screen_at(0)) && *y >= c.h) {
-		jbxvt_scroll_primary_screen(*y - c.h + 1);
-		*y = c.h - 1;
+	{ // * s, * y, vy scope
+		struct JBXVTScreen * s = jbxvt_get_current_screen();
+		int16_t * y = &s->cursor.y, vy = * y;
+		if (JB_LIKELY(s == jbxvt_get_screen_at(0)) && vy >= c.h) {
+			jbxvt_scroll_primary_screen(vy - c.h + 1);
+			*y = c.h - 1;
+		}
 	}
 	init_screen_elements(jbxvt_get_screen_at(0));
 	init_screen_elements(jbxvt_get_screen_at(1));
