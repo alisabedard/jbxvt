@@ -42,7 +42,12 @@ static inline void fix_margins(const struct JBDim c)
 	if (jbxvt_get_margin()->bottom >= c.h)
 		  jbxvt_get_margin()->bottom = c.h - 1;
 }
-static void decscnm(xcb_connection_t * xc)
+static void clear_window(xcb_connection_t * restrict xc)
+{
+	const struct JBDim p = jbxvt_get_pixel_size();
+	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), 0, 0, p.w, p.h);
+}
+static void decscnm(xcb_connection_t * restrict xc)
 {
 	static bool last_was_rv;
 	const bool rv = jbxvt_get_modes()->decscnm;
@@ -52,23 +57,26 @@ static void decscnm(xcb_connection_t * xc)
 		last_was_rv = rv;
 	LOG("decscnm()");
 	jbxvt_reverse_screen_colors(xc);
+	/* Clear area here to make visual bell effect in vi more apparent.  */
+	clear_window(xc);
+	xcb_flush(xc);
 	jb_sleep(111);
 }
 static void init_screens(void)
 {
 	static bool created;
 	if (!created) {
-		init(jbxvt_get_screen_at(0));
-		init(jbxvt_get_screen_at(1));
+		struct JBXVTScreen * s = jbxvt_get_screen_at(0);
+		init(s);
+		init(s + 1);
 		created = true;
 	}
 }
 /*  Reset the screen - called whenever the screen
     needs to be repaired completely.  */
-void jbxvt_reset(xcb_connection_t * xc)
+void jbxvt_reset(xcb_connection_t * restrict xc)
 {
 	LOG("jbxvt_reset()");
-	decscnm(xc);
 	struct JBDim c = jbxvt_get_char_size();
 	fix_margins(c);
 	init_screens();
@@ -90,7 +98,6 @@ void jbxvt_reset(xcb_connection_t * xc)
 	jbxvt_check_cursor_position();
 	jbxvt_draw_scrollbar(xc);
 	decscnm(xc);
-	xcb_flush(xc);
 	jbxvt_repaint(xc);
 	jbxvt_draw_cursor(xc);
 }
