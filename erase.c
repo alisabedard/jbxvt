@@ -47,6 +47,10 @@ static void del(xcb_connection_t * restrict xc, uint16_t col, uint16_t width)
 	clear_area(xc, col, y, width);
 	s->wrap[y] = s->dwl[y] = false;
 }
+static inline void del_after(xcb_connection_t * restrict xc, const int16_t x)
+{
+	del(xc, x, get_width() - x);
+}
 // Erase the specified portion of a line.
 void jbxvt_erase_line(xcb_connection_t * xc, const int8_t mode)
 {
@@ -54,16 +58,14 @@ void jbxvt_erase_line(xcb_connection_t * xc, const int8_t mode)
 	jbxvt_set_scroll(xc, 0);
 	switch (mode) {
 	case JBXVT_ERASE_ALL:
-		del(xc, 0, get_width());
+		del_after(xc, 0);
 		break;
 	case JBXVT_ERASE_BEFORE:
 		del(xc, 0, jbxvt_get_x());
 		break;
 	case JBXVT_ERASE_AFTER:
-	default: {
-		const int16_t x = jbxvt_get_x();
-		del(xc, x, get_width() - x);
-	}
+	default:
+		del_after(xc, jbxvt_get_x());
 	}
 	jbxvt_draw_cursor(xc);
 }
