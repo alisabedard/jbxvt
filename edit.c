@@ -49,11 +49,8 @@ static void set_x(int16_t * restrict x, const uint8_t count,
 static void begin(xcb_connection_t * restrict xc, int16_t * restrict x,
 	const uint8_t count)
 {
-	jbxvt_set_scroll(xc, 0);
 	jbxvt_draw_cursor(xc);
-	const struct JBDim c = jbxvt_get_current_screen()->cursor;
-	set_x(x, count, c);
-	jbxvt_check_selection(xc, c.y, c.y);
+	set_x(x, count, jbxvt_get_current_screen()->cursor);
 }
 //  Insert count spaces from the current position.
 void jbxvt_insert_characters(xcb_connection_t * xc, const uint8_t count)
