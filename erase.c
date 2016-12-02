@@ -10,7 +10,7 @@
 #include "screen.h"
 #include "size.h"
 #include "window.h"
-#define DEBUG_ERASE
+//#define DEBUG_ERASE
 #ifndef DEBUG_ERASE
 #undef LOG
 #define LOG(...)
