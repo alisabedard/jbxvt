@@ -34,19 +34,6 @@ static void finalize(xcb_connection_t * restrict xc,
 	jbxvt_get_current_screen()->wrap_next = 0;
 	jbxvt_draw_cursor(xc);
 }
-static void copy_lines(const int16_t x, const int8_t count)
-{
-	struct JBXVTScreen * restrict screen = jbxvt_get_current_screen();
-	const int16_t y = screen->cursor.y;
-	uint8_t * t = screen->text[y];
-	uint32_t * r = screen->rend[y];
-	for (int_fast16_t w = jbxvt_get_char_size().w,
-		i = x + count; i < w; ++i) {
-		const int_fast16_t j = i - count;
-		t[i] = t[j];
-		r[i] = r[j];
-	}
-}
 static uint16_t get_width(const uint8_t count)
 {
 	const uint16_t w = jbxvt_get_char_size().w - count - jbxvt_get_x();
@@ -75,7 +62,6 @@ void jbxvt_insert_characters(xcb_connection_t * xc, const uint8_t count)
 	int16_t x[2];
 	begin(xc, x, count);
 	const struct JBDim c = jbxvt_get_current_screen()->cursor;
-	copy_lines(c.x, count);
 	finalize(xc, x, jbxvt_chars_to_pixels(c), get_width(count));
 }
 static void copy_data_after_count(const uint8_t count,
@@ -93,14 +79,6 @@ static void copy_data_after_count(const uint8_t count,
 		memmove(i, i + count, diff << 2);
 	}
 }
-static void delete_source_data(const uint8_t count, const int16_t y)
-{
-	// delete the source data copied
-	const uint16_t c = jbxvt_get_char_size().w - count;
-	struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
-	memset(s->text[y] + c, 0, count);
-	memset(s->rend[y] + c, 0, count << 2);
-}
 //  Delete count characters from the current position.
 void jbxvt_delete_characters(xcb_connection_t * xc, const uint8_t count)
 {
@@ -110,7 +88,6 @@ void jbxvt_delete_characters(xcb_connection_t * xc, const uint8_t count)
 	JB_SWAP(int16_t, x[0], x[1]);
 	struct JBDim c = jbxvt_get_current_screen()->cursor;
 	copy_data_after_count(count, c);
-	delete_source_data(count, c.y);
 	c = jbxvt_chars_to_pixels(c);
 	const uint16_t width = get_width(count);
 	c.x += width;
