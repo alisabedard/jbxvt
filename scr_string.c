@@ -150,7 +150,8 @@ static bool test_shift(struct JBXVTPrivateModes * restrict m,
 {
 	if (shift) {
 		const uint8_t i = m->charsel; // current index
-		m->charset[2] = m->charset[i]; // save in shift buffer
+		m->charset[JBXVT_CHARSET_SHIFT_REGISTER]
+			= m->charset[i]; // save in shift buffer
 		m->charset[i] = cs; // set current to desired
 		clear_shift(m);
 		return true; // we have shifted
@@ -169,7 +170,7 @@ static bool handle_single_shift(void)
 static void recover_from_shift(void)
 {
 	struct JBXVTPrivateModes * m = jbxvt_get_modes();
-	m->charset[m->charsel] = m->charset[2];
+	m->charset[m->charsel] = m->charset[JBXVT_CHARSET_SHIFT_REGISTER];
 }
 /*  Display the string at the current position.
     nlcount is the number of new lines in the string.  */

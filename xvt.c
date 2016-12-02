@@ -480,13 +480,24 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		LOG("JBXVT_TOKEN_SC");
 		jbxvt_save_cursor();
 		break;
-	case JBXVT_TOKEN_SCS0: //  SCS G0
-		LOG("JBXVT_TOKEN_SCS0");
+	case JBXVT_TOKEN_CS_G0:
+		LOG("JBXVT_TOKEN_CS_G0");
 		select_charset(*t, 0);
 		break;
-	case JBXVT_TOKEN_SCS1: //  SCS G1
-		LOG("JBXVT_TOKEN_SCS1");
+	case JBXVT_TOKEN_CS_G1:
+	case JBXVT_TOKEN_CS_ALT_G1:
+		LOG("JBXVT_TOKEN_CS_G1");
 		select_charset(*t, 1);
+		break;
+	case JBXVT_TOKEN_CS_G2:
+	case JBXVT_TOKEN_CS_ALT_G2:
+		LOG("JBXVT_TOKEN_CS_G2");
+		select_charset(*t, 2);
+		break;
+	case JBXVT_TOKEN_CS_G3:
+	case JBXVT_TOKEN_CS_ALT_G3:
+		LOG("JBXVT_TOKEN_CS_G3");
+		select_charset(*t, 3);
 		break;
 	case JBXVT_TOKEN_SD:
 		LOG("JBXVT_TOKEN_SD");

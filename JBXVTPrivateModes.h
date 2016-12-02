@@ -5,17 +5,15 @@
 #include <stdint.h>
 enum JBXVTCharacterSet{
 	CHARSET_GB, CHARSET_ASCII, CHARSET_SG0, CHARSET_SG1, CHARSET_SG2,
-	CHARSET_SG3
+	CHARSET_SG3, JBXVT_CHARSET_SHIFT_REGISTER = 5
 };
 struct JBXVTPrivateModes {
-	/* Graphics mode character set storage array: Index 0 is primary,
-	   1 is secondary, and 2 is for shift (SS2/SS3): */
-	uint8_t charset[3];
-	/* Current character set index (into above array): We only allow
-	   0 and 1, thus the bit field width.  Index 2, the character
-	   set shift buffer, is kept invalid by limiting this width,
-	   thus protectecting it from access through this variable.  */
-	uint8_t charsel:1;
+	/* Character set registers: G[0-3], and one more
+	   for single-shift register:  */
+	uint8_t charset[6];
+	/* charsel is the index into charset[], indicating the current
+	   character set register in use.  */
+	uint8_t charsel:2;
 	bool att610:1;		// stop blinking cursor
 	bool decanm:1;		// DECANM -- ANSI/VT52
 	bool decawm:1;		// DECAWM auto-wrap flag

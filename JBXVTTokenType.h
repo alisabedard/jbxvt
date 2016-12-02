@@ -99,8 +99,14 @@ enum JBXVTTokenType {
 	JBXVT_TOKEN_SAVEPM = 's', // Save  (re)set mode values
 	JBXVT_TOKEN_REQTPARAM = 'x', // REQuest Terminal PARAMeters
 	JBXVT_TOKEN_ELR = 'z', // Enable Locator Reporting
-	JBXVT_TOKEN_SCS0 = '(', // set character set G0
-	JBXVT_TOKEN_SCS1 = ')', // set character set G1
+	JBXVT_TOKEN_CS_G0 = '(', // set character set G0
+	JBXVT_TOKEN_CS_G1 = ')', // set character set G1
+	JBXVT_TOKEN_CS_G2 = '*', // set character set G2
+	JBXVT_TOKEN_CS_G3 = '+', // set character set G3
+	JBXVT_TOKEN_CS_ALT_G1 = '-', // set character set G1
+	JBXVT_TOKEN_CS_ALT_G2 = '.', // set character set G2
+	JBXVT_TOKEN_CS_ALT_G3 = '/', // set character set G3
+
 	JBXVT_TOKEN_SC = '7', // save cursor position
 	JBXVT_TOKEN_RC = '8', // restore cursor position
 	JBXVT_TOKEN_PAM = '=', // keypad to applications mode
