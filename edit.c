@@ -49,6 +49,8 @@ static void set_x(int16_t * restrict x, const uint8_t count)
 void jbxvt_edit_characters(xcb_connection_t * xc, const uint8_t count,
 	const bool delete)
 {
+	LOG("jbxvt_edit_characters(count: %d, delete: %s)", count,
+		delete ? "true" : "false");
 	int16_t x[2];
 	set_x(x, count);
 	/* Whether or not x[0] and x[1] are swapped here is
