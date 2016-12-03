@@ -52,14 +52,17 @@ static void begin(xcb_connection_t * restrict xc, int16_t * restrict x,
 	jbxvt_draw_cursor(xc);
 	set_x(x, count, jbxvt_get_current_screen()->cursor);
 }
+static struct JBDim get_cursor(void)
+{
+	return jbxvt_chars_to_pixels(jbxvt_get_current_screen()->cursor);
+}
 //  Insert count spaces from the current position.
 void jbxvt_insert_characters(xcb_connection_t * xc, const uint8_t count)
 {
 	LOG("jbxvt_insert_characters(%d)", count);
 	int16_t x[2];
 	begin(xc, x, count);
-	const struct JBDim c = jbxvt_get_current_screen()->cursor;
-	finalize(xc, x, jbxvt_chars_to_pixels(c), get_width(count));
+	finalize(xc, x, get_cursor(), get_width(count));
 }
 //  Delete count characters from the current position.
 void jbxvt_delete_characters(xcb_connection_t * xc, const uint8_t count)
@@ -68,8 +71,7 @@ void jbxvt_delete_characters(xcb_connection_t * xc, const uint8_t count)
 	int16_t x[2];
 	begin(xc, x, count);
 	JB_SWAP(int16_t, x[0], x[1]);
-	struct JBDim c = jbxvt_get_current_screen()->cursor;
-	c = jbxvt_chars_to_pixels(c);
+	struct JBDim c = get_cursor();
 	const uint16_t width = get_width(count);
 	c.x += width;
 	finalize(xc, x, c, width);
