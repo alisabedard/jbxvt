@@ -325,7 +325,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 	case JBXVT_TOKEN_DCH:
 	case JBXVT_TOKEN_ECH:
 		LOG("JBXVT_TOKEN_ECH/JBXVT_TOKEN_DCH");
-		jbxvt_delete_characters(xc, n);
+		jbxvt_edit_characters(xc, n, true);
 		break;
 	case JBXVT_TOKEN_DHLT: // double height line -- top
 		LOG("FIXME JBXVT_TOKEN_DHLT");
@@ -391,7 +391,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_ICH: // Insert blank characters
 		LOG("JBXVT_TOKEN_ICH");
-		jbxvt_insert_characters(xc, n);
+		jbxvt_edit_characters(xc, n, false);
 		break;
 	case JBXVT_TOKEN_IL: // insert line
 		LOG("JBXVT_TOKEN_IL");

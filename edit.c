@@ -27,49 +27,33 @@ static void finalize(xcb_connection_t * restrict xc,
 	const int16_t * restrict x, const struct JBDim p,
 	const uint16_t width)
 {
+	jbxvt_draw_cursor(xc);
 	copy_area(xc, x, p.y, width);
 	jbxvt_get_current_screen()->wrap_next = 0;
 	jbxvt_draw_cursor(xc);
 }
-static uint16_t get_width(const uint8_t count)
+static inline uint16_t get_copy_width(const uint8_t count)
 {
 	const uint16_t w = jbxvt_get_char_size().w - count - jbxvt_get_x();
 	return w * jbxvt_get_font_size().width;
 }
-static void set_x(int16_t * restrict x, const uint8_t count,
-	const struct JBDim c)
+static inline struct JBDim get_cursor(void)
 {
-	const int16_t p = jbxvt_chars_to_pixels(c).x;
-	x[0] = p;
-	x[1] = p + count * jbxvt_get_font_size().width;
+	return jbxvt_chars_to_pixels(jbxvt_get_cursor());
 }
-static void begin(xcb_connection_t * restrict xc, int16_t * restrict x,
-	const uint8_t count)
+static void set_x(int16_t * restrict x, const uint8_t count)
 {
-	jbxvt_draw_cursor(xc);
-	set_x(x, count, jbxvt_get_current_screen()->cursor);
+	x[0] = get_cursor().x;
+	x[1] = x[0] + count * jbxvt_get_font_size().width;
 }
-static struct JBDim get_cursor(void)
+void jbxvt_edit_characters(xcb_connection_t * xc, const uint8_t count,
+	const bool delete)
 {
-	return jbxvt_chars_to_pixels(jbxvt_get_current_screen()->cursor);
-}
-//  Insert count spaces from the current position.
-void jbxvt_insert_characters(xcb_connection_t * xc, const uint8_t count)
-{
-	LOG("jbxvt_insert_characters(%d)", count);
 	int16_t x[2];
-	begin(xc, x, count);
-	finalize(xc, x, get_cursor(), get_width(count));
-}
-//  Delete count characters from the current position.
-void jbxvt_delete_characters(xcb_connection_t * xc, const uint8_t count)
-{
-	LOG("jbxvt_delete_characters(%d)", count);
-	int16_t x[2];
-	begin(xc, x, count);
-	JB_SWAP(int16_t, x[0], x[1]);
-	struct JBDim c = get_cursor();
-	const uint16_t width = get_width(count);
-	c.x += width;
-	finalize(xc, x, c, width);
+	set_x(x, count);
+	/* Whether or not x[0] and x[1] are swapped here is
+	   what determines insertion or deletion.  */
+	if (delete)
+		JB_SWAP(int16_t, x[0], x[1]);
+	finalize(xc, x, get_cursor(), get_copy_width(count));
 }
