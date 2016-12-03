@@ -19,7 +19,7 @@ static xcb_cursor_t get_cursor_from_font(xcb_connection_t * xc,
 	xcb_close_font(xc, fid);
 	return c;
 }
-xcb_cursor_t jbxvt_get_cursor(xcb_connection_t * xc, const uint16_t id,
+xcb_cursor_t jbxvt_get_xcb_cursor(xcb_connection_t * xc, const uint16_t id,
 	const uint16_t fg, const uint16_t bg)
 {
 	xcb_font_t f = xcb_generate_id(xc);

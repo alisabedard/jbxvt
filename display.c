@@ -43,7 +43,7 @@ static void create_sb_window(xcb_connection_t * xc, const uint16_t height)
 		CFP = COPY_FROM_PARENT,
 		SB = JBXVT_SCROLLBAR_WIDTH
 	};
-	const xcb_cursor_t c = jbxvt_get_cursor(xc, CURSOR, 0, 0xffff);
+	const xcb_cursor_t c = jbxvt_get_xcb_cursor(xc, CURSOR, 0, 0xffff);
 	const xcb_rectangle_t r = {-1, -1, SB - 1, height};
 	const xcb_window_t sb = jbxvt_get_scrollbar(xc),
 	      mw = jbxvt_get_main_window(xc);
@@ -62,7 +62,7 @@ static void create_vt_window(xcb_connection_t * xc, const struct JBDim sz,
 		CFP = COPY_FROM_PARENT,
 		SB = JBXVT_SCROLLBAR_WIDTH
 	};
-	const xcb_cursor_t c = jbxvt_get_cursor(xc, XC_xterm, 0xffff, 0);
+	const xcb_cursor_t c = jbxvt_get_xcb_cursor(xc, XC_xterm, 0xffff, 0);
 	const xcb_window_t vt = jbxvt_get_vt_window(xc),
 	      mw = jbxvt_get_main_window(xc);
 	const int16_t x = sb ? SB : 0;
