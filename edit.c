@@ -37,25 +37,16 @@ static inline uint16_t get_copy_width(const uint8_t count)
 	const uint16_t w = jbxvt_get_char_size().w - count - jbxvt_get_x();
 	return w * jbxvt_get_font_size().width;
 }
-static inline struct JBDim get_cursor(void)
-{
-	return jbxvt_chars_to_pixels(jbxvt_get_cursor());
-}
-static void set_x(int16_t * restrict x, const uint8_t count)
-{
-	x[0] = get_cursor().x;
-	x[1] = x[0] + count * jbxvt_get_font_size().width;
-}
 void jbxvt_edit_characters(xcb_connection_t * xc, const uint8_t count,
 	const bool delete)
 {
 	LOG("jbxvt_edit_characters(count: %d, delete: %s)", count,
 		delete ? "true" : "false");
-	int16_t x[2];
-	set_x(x, count);
+	const struct JBDim c = jbxvt_chars_to_pixels(jbxvt_get_cursor());
+	int16_t x[2] = {c.x, x[0] + count * jbxvt_get_font_size().width};
 	/* Whether or not x[0] and x[1] are swapped here is
 	   what determines insertion or deletion.  */
 	if (delete)
 		JB_SWAP(int16_t, x[0], x[1]);
-	finalize(xc, x, get_cursor(), get_copy_width(count));
+	finalize(xc, x, c, get_copy_width(count));
 }
