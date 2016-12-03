@@ -5,6 +5,7 @@
 #include <xcb/xcb.h>
 void jbxvt_blink_cursor(xcb_connection_t * xc);
 xcb_gcontext_t jbxvt_get_cursor_gc(xcb_connection_t * xc);
+struct JBDim jbxvt_get_cursor(void);
 int16_t jbxvt_get_x(void);
 int16_t jbxvt_get_y(void);
 void jbxvt_save_cursor(void);

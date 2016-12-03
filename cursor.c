@@ -90,11 +90,15 @@ void jbxvt_draw_cursor(xcb_connection_t * xc)
 	xcb_poly_fill_rectangle(xc, jbxvt_get_vt_window(xc),
 		jbxvt_get_cursor_gc(xc), 1, &r);
 }
+struct JBDim jbxvt_get_cursor(void)
+{
+	return jbxvt_get_current_screen()->cursor;
+}
 int16_t jbxvt_get_x(void)
 {
-	return jbxvt_get_current_screen()->cursor.x;
+	return jbxvt_get_cursor().x;
 }
 int16_t jbxvt_get_y(void)
 {
-	return jbxvt_get_current_screen()->cursor.y;
+	return jbxvt_get_cursor().y;
 }
