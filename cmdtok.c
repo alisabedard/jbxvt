@@ -125,7 +125,7 @@ static void handle_string_char(xcb_connection_t * xc,
 		jbxvt_push_char(c);
 }
 __attribute__((const))
-static uint8_t get_utf_bytes(uint8_t c)
+static uint8_t get_utf_bytes(const uint8_t c)
 {
 	if ((c & 0xf0) == 0xf0)
 		return 3;
