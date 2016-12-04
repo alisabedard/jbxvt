@@ -30,22 +30,21 @@ static void paint_rvec_text(xcb_connection_t * xc,
 __attribute__((nonnull))
 static int_fast16_t show_scroll_history(xcb_connection_t * xc,
 	struct JBDim * restrict p, const int_fast16_t line,
-	const int_fast16_t i)
+	const int_fast16_t i, const struct JBDim font_size)
 {
 	const struct JBDim chars = jbxvt_get_char_size();
 	if (line > chars.h || i < 0)
 		return line;
 	struct JBXVTSavedLine * sl = &jbxvt_get_saved_lines()[i];
 	paint_rvec_text(xc, sl->text, sl->rend, sl->size, *p, sl->dwl);
-	const struct JBDim f = jbxvt_get_font_size();
 	{ // x, w scope
-		const int16_t x = sl->size * f.width;
-		const uint16_t w = chars.width * f.width - x;
+		const int16_t x = sl->size * font_size.width;
+		const uint16_t w = chars.width * font_size.width - x;
 		xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), x, p->y,
-			w, f.height);
+			w, font_size.height);
 	}
-	p->y += f.height;
-	return show_scroll_history(xc, p, line + 1, i - 1);
+	p->y += font_size.height;
+	return show_scroll_history(xc, p, line + 1, i - 1, font_size);
 }
 static uint8_t * filter(uint8_t * restrict t, register int_fast16_t i)
 {
@@ -59,10 +58,10 @@ void jbxvt_repaint(xcb_connection_t * xc)
 {
 	//  First do any 'scrolled off' lines that are visible.
 	struct JBDim p = {};
-	int_fast32_t line = show_scroll_history(xc,
-		&p, 0, jbxvt_get_scroll() - 1);
 	const struct JBDim chars = jbxvt_get_char_size(),
 	      f = jbxvt_get_font_size();
+	int_fast32_t line = show_scroll_history(xc,
+		&p, 0, jbxvt_get_scroll() - 1, f);
 	// Do the remainder from the current screen:
 	struct JBXVTScreen * s = jbxvt_get_current_screen();
 	for (uint_fast16_t i = 0; line < chars.height;
