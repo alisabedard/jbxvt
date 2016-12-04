@@ -2,6 +2,7 @@
 #ifndef JBXVT_RSTYLE_H
 #define JBXVT_RSTYLE_H
 #include <stdint.h>
+typedef uint32_t rstyle_t;
 enum JBXVTRenderStyle {
 	JBXVT_RS_NONE = 0,
 	JBXVT_RS_BOLD = 1,
@@ -39,8 +40,8 @@ enum JBXVTRenderStyle {
 	JBXVT_RS_FG_INDEX = (1<<30),
 	JBXVT_RS_BG_INDEX = (1<<31),
 };
-void jbxvt_add_rstyle(const uint32_t val);
-void jbxvt_del_rstyle(const uint32_t val);
-uint32_t jbxvt_get_rstyle(void);
+void jbxvt_add_rstyle(const rstyle_t val);
+void jbxvt_del_rstyle(const rstyle_t val);
+rstyle_t jbxvt_get_rstyle(void);
 void jbxvt_zero_rstyle(void);
 #endif//!JBXVT_RSTYLE_H
