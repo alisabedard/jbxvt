@@ -6,10 +6,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include "config.h"
+#include "rstyle.h"
 //  structure describing a saved line
 struct JBXVTSavedLine {
 	uint8_t text[JBXVT_MAX_COLUMNS];
-	uint32_t rend[JBXVT_MAX_COLUMNS];
+	rstyle_t rend[JBXVT_MAX_COLUMNS];
 	uint16_t size:14;	// line length
 	bool wrap:1;		// wrap flag
 	bool dwl:1;		// double-width line

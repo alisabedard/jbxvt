@@ -5,10 +5,11 @@
 #include <stdbool.h>
 #include "config.h"
 #include "libjb/JBDim.h"
+#include "rstyle.h"
 /*  Structure describing the current state of the screen.  */
 struct JBXVTScreen {
 	uint8_t *text[JBXVT_MAX_ROWS];	// text
-	uint32_t *rend[JBXVT_MAX_ROWS];	// styles
+	rstyle_t *rend[JBXVT_MAX_ROWS];	// styles
 	bool wrap[JBXVT_MAX_ROWS];	// wrap flags
 	bool dwl[JBXVT_MAX_ROWS];	// double-width line flags
 	struct JBDim margin;	// scroll margins, top and bottom
