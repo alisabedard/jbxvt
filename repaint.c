@@ -10,7 +10,8 @@
 #include "show_selection.h"
 #include "size.h"
 #include "window.h"
-static uint_fast16_t get_render_length(const rstyle_t * rvec, const uint16_t len)
+static uint_fast16_t get_render_length(const rstyle_t * rvec,
+	const uint16_t len)
 {
 	uint_fast16_t i = 0;
 	while (i < len && rvec[i] == rvec[0])
@@ -18,14 +19,14 @@ static uint_fast16_t get_render_length(const rstyle_t * rvec, const uint16_t len
 	return i;
 }
 // Display the string using the render vector at the screen coordinates.
-static void paint_rvec_text(xcb_connection_t * xc,
-	uint8_t * str, const rstyle_t * rvec,
-	uint16_t len, struct JBDim p, const bool dwl, const uint8_t font_width)
+static void paint_rvec_text(xcb_connection_t * xc, uint8_t * str,
+	const rstyle_t * rvec, uint16_t len, struct JBDim p, const bool dwl,
+	const uint8_t font_width)
 {
 	for (uint_fast16_t i; len; len -= i, str += i, rvec += i, p.x += i *
 		font_width)
-		jbxvt_paint(xc, str, *rvec, i = get_render_length(rvec, len), p,
-			dwl);
+		jbxvt_paint(xc, str, *rvec, i = get_render_length(rvec, len),
+			p, dwl);
 }
 __attribute__((nonnull))
 static int_fast16_t show_scroll_history(xcb_connection_t * xc,
