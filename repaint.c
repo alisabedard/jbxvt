@@ -20,10 +20,10 @@ static uint_fast16_t get_render_length(const rstyle_t * rvec, const uint16_t len
 // Display the string using the render vector at the screen coordinates.
 static void paint_rvec_text(xcb_connection_t * xc,
 	uint8_t * str, const rstyle_t * rvec,
-	uint16_t len, struct JBDim p, const bool dwl)
+	uint16_t len, struct JBDim p, const bool dwl, const uint8_t font_width)
 {
-	const uint8_t fw = jbxvt_get_font_size().width;
-	for (uint_fast16_t i; len; len -= i, str += i, rvec += i, p.x += i * fw)
+	for (uint_fast16_t i; len; len -= i, str += i, rvec += i, p.x += i *
+		font_width)
 		jbxvt_paint(xc, str, *rvec, i = get_render_length(rvec, len), p,
 			dwl);
 }
@@ -36,7 +36,8 @@ static int_fast16_t show_scroll_history(xcb_connection_t * xc,
 	if (line > chars.h || i < 0)
 		return line;
 	struct JBXVTSavedLine * sl = &jbxvt_get_saved_lines()[i];
-	paint_rvec_text(xc, sl->text, sl->rend, sl->size, *p, sl->dwl);
+	paint_rvec_text(xc, sl->text, sl->rend, sl->size, *p, sl->dwl,
+		font_size.width);
 	{ // x, w scope
 		const int16_t x = sl->size * font_size.width;
 		const uint16_t w = chars.width * font_size.width - x;
@@ -67,6 +68,6 @@ void jbxvt_repaint(xcb_connection_t * xc)
 	for (uint_fast16_t i = 0; line < chars.height;
 		++line, ++i, p.y += f.height)
 		paint_rvec_text(xc, filter(s->text[i], chars.width),
-			s->rend[i], chars.width, p, s->dwl[i]);
+			s->rend[i], chars.width, p, s->dwl[i], f.width);
 	jbxvt_show_selection(xc);
 }
