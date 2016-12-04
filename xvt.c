@@ -16,7 +16,7 @@
 #include "erase.h"
 #include "scr_move.h"
 #include "scr_reset.h"
-#include "scr_string.h"
+#include "string.h"
 #include "screen.h"
 #include "scroll.h"
 #include "selreq.h"
