@@ -258,7 +258,7 @@ static void gm52(const bool set)
 	m->charsel = set ? 1 : 0;
 	m->gm52 = set;
 }
-void jbxvt_parse_token(xcb_connection_t * xc)
+bool jbxvt_parse_token(xcb_connection_t * xc)
 {
 	struct JBXVTToken token;
 	jbxvt_get_token(xc, &token);
@@ -363,7 +363,7 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 		break;
 	case JBXVT_TOKEN_EOF:
 		LOG("JBXVT_TOKEN_EOF");
-		exit(0);
+		return false;
 	case JBXVT_TOKEN_EPA:
 		LOG("FIXME JBXVT_TOKEN_EPA");
 		break;
@@ -571,9 +571,10 @@ void jbxvt_parse_token(xcb_connection_t * xc)
 			LOG("Unhandled token: %d (0x%x)",
 				token.type, token.type);
 			// Exit now so we can implement it!
-			exit(1);
+			return false;
 		}
 #endif//DEBUG
 		break;
 	}
+	return true;
 }

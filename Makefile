@@ -64,4 +64,6 @@ cppcheck:
 libjb: libjb/libjb.a
 libjb/libjb.a:
 	cd libjb && ${MAKE} CC=${CC} libjb.a
+splint:
+	splint -f splintrc jbxvt.c
 #EOF

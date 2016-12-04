@@ -79,7 +79,7 @@ static void set_default_options(struct JBXVTOptions * restrict o)
 	o->color.fg = JBXVT_FOREGROUND_COLOR;
 	o->size.cols = JBXVT_COLUMNS;
 	o->size.rows = JBXVT_ROWS;
-	o->position = (struct JBDim){};
+	o->position = (struct JBDim){0};
 	o->screen = 0;
 	o->show_scrollbar = false;
 }
@@ -115,8 +115,10 @@ static xcb_connection_t * handle_command(const int argc, char ** argv)
 int main(int argc, char ** argv)
 {
 	xcb_connection_t * xc = handle_command(argc, argv);
-	jbxvt_get_wm_del_win(xc); // initialize property
-	for (;;) // app loop
-		jbxvt_parse_token(xc);
+	(void)jbxvt_get_wm_del_win(xc); // initialize property
+	while (jbxvt_parse_token(xc))
+		;
+	xcb_disconnect(xc);
+	free(xc);
 	return 0;
 }
