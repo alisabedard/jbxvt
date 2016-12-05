@@ -73,7 +73,7 @@ static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 			: jbxvt_get_char_size().width - 1;
 		const uint16_t len = end - start;
 		*str = realloc(*str, *total + len);
-		copy(*str, jbxvt_get_current_screen()->text[i],
+		copy(*str, jbxvt_get_current_screen()->line[i].text,
 			start, len, *total);
 		*total += len;
 	}

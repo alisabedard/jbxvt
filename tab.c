@@ -26,7 +26,7 @@ void jbxvt_tab(xcb_connection_t * xc)
 	struct JBXVTScreen * restrict scr = jbxvt_get_current_screen();
 	struct JBDim c = scr->cursor;
 	{ // text scope
-		uint8_t * restrict text = scr->text[c.y];
+		uint8_t * restrict text = scr->line[c.y].text;
 		text[c.x] = ' ';
 		{ // cw scope
 			const uint16_t cw = jbxvt_get_char_size().w;

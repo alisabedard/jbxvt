@@ -45,8 +45,8 @@ static void set_area_to_e(const struct JBDim c)
 {
 	struct JBXVTScreen * restrict current = jbxvt_get_current_screen();
 	for (int_fast16_t y = c.h - 1; y >= 0; --y) {
-		memset(current->text[y], 'E', c.w);
-		memset(current->rend[y], 0, c.w << 2);
+		memset(current->line[y].text, 'E', c.w);
+		memset(current->line[y].rend, 0, c.w << 2);
 	}
 }
 static inline void home(xcb_connection_t * restrict xc)

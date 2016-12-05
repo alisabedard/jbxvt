@@ -51,7 +51,7 @@ static void wrap(xcb_connection_t * restrict xc)
 	s->wrap_next = false;
 	const struct JBDim m = s->margin;
 	const int16_t y = s->cursor.y;
-	s->wrap[y] = true;
+	s->line[y].wrap = true;
 	if (y >= m.b) {
 		decsclm();
 		scroll(xc, m.top, m.bottom, 1);
@@ -59,7 +59,7 @@ static void wrap(xcb_connection_t * restrict xc)
 		++s->cursor.y;
 }
 static void move_data_in_memory(uint8_t * restrict t,
-	uint32_t * restrict r, const uint8_t n, const int16_t x,
+	rstyle_t * restrict r, const uint8_t n, const int16_t x,
 	const uint16_t sz)
 {
 	memmove(t + x + n, t + x, sz);
@@ -79,10 +79,10 @@ static void handle_insert(xcb_connection_t * restrict xc,
 	const uint8_t n, const struct JBDim p)
 {
 	LOG("handle_insert(n=%d, p={%d, %d})", n, p.x, p.y);
-	const struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
+	struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
 	const struct JBDim c = s->cursor;
 	const uint16_t sz = jbxvt_get_char_size().w - c.x;
-	move_data_in_memory(s->text[c.y], s->rend[c.y], n, c.x, sz);
+	move_data_in_memory(s->line[c.y].text, s->line[c.y].rend, n, c.x, sz);
 	move_data_on_screen(xc, n, sz, p);
 }
 static void parse_special_charset(uint8_t * restrict str,
@@ -130,9 +130,9 @@ static void save_render_style(const int_fast16_t n,
 	struct JBXVTScreen * restrict s)
 {
 	const struct JBDim c = s->cursor;
-	const uint32_t r = jbxvt_get_rstyle();
+	const rstyle_t r = jbxvt_get_rstyle();
 	for (int_fast16_t i = n - 1; i >= 0; --i)
-		  s->rend[c.y][c.x + i] = r;
+		  s->line[c.y].rend[c.x + i] = r;
 }
 static void check_wrap(struct JBXVTScreen * restrict s)
 {
@@ -203,7 +203,7 @@ void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str,
 				= jbxvt_get_modes();
 			if (JB_UNLIKELY(mode->insert))
 				handle_insert(xc, 1, p);
-			uint8_t * t = screen->text[c->y] + c->x;
+			uint8_t * t = screen->line[c->y].text + c->x;
 			const bool shifted = handle_single_shift();
 			if (shifted) {
 				parse_special_charset(str, 1);
@@ -219,7 +219,7 @@ void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str,
 			// Render the string:
 			if (!screen->decpm) {
 				jbxvt_paint(xc, str, jbxvt_get_rstyle(),
-					1, p, screen->dwl[c->y]);
+					1, p, screen->line[c->y].dwl);
 				// Save scroll history:
 				*t = *str;
 			}

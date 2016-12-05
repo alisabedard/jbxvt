@@ -41,7 +41,7 @@ void jbxvt_selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
 }
 static uint16_t sel_s(struct JBDim * restrict se2, uint8_t ** s)
 {
-	*s = jbxvt_get_current_screen()->text[se2->index];
+	*s = jbxvt_get_current_screen()->line[se2->index].text;
 	return jbxvt_get_char_size().width;
 }
 static int16_t get_start_of_word(uint8_t * restrict s, int16_t i)
@@ -57,7 +57,7 @@ static void adj_sel_to_word(struct JBDim * include,
 		return; // protect against segfault if ends invalid
 	int16_t i;
 	{ // text scope
-		uint8_t * text = jbxvt_get_current_screen()->text[se1->index];
+		uint8_t * text = jbxvt_get_current_screen()->line[se1->index].text;
 		i = get_start_of_word(text, se1->col);
 		se1->col = i?i+1:0;
 		i = se2->col;

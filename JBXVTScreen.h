@@ -2,16 +2,17 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #ifndef SCREENST_H
 #define SCREENST_H
-#include <stdbool.h>
-#include "config.h"
+#include "JBXVTSavedLine.h"
 #include "libjb/JBDim.h"
-#include "rstyle.h"
 /*  Structure describing the current state of the screen.  */
 struct JBXVTScreen {
+	struct JBXVTSavedLine line[JBXVT_MAX_ROWS];
+#if 0
 	uint8_t *text[JBXVT_MAX_ROWS];	// text
 	rstyle_t *rend[JBXVT_MAX_ROWS];	// styles
 	bool wrap[JBXVT_MAX_ROWS];	// wrap flags
 	bool dwl[JBXVT_MAX_ROWS];	// double-width line flags
+#endif
 	struct JBDim margin;	// scroll margins, top and bottom
 	struct JBDim cursor;	// cursor position, row and column
 	bool wrap_next:1;	// wrap before the next printed character
