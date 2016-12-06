@@ -9,7 +9,6 @@
 #include "scroll.h"
 #include "show_selection.h"
 #include "size.h"
-#include "window.h"
 static uint_fast16_t get_render_length(const rstyle_t * rvec,
 	const uint16_t len)
 {
@@ -39,17 +38,26 @@ static uint8_t * filter(uint8_t * restrict t, register int_fast16_t i)
 static void paint(xcb_connection_t * xc, struct JBXVTSavedLine * l,
 	const struct JBDim p)
 {
-	paint_rvec_text(xc, filter(l->text, jbxvt_get_char_size().width),
-		l->rend, jbxvt_get_char_size().width, p, l->dwl);
+	const uint16_t w = jbxvt_get_char_size().width;
+	paint_rvec_text(xc, filter(l->text, w), l->rend, w, p, l->dwl);
 }
 static int show_history(xcb_connection_t * restrict xc, const int line,
 	const int top, struct JBDim * restrict p,
 	const struct JBDim font_size, const struct JBDim char_size)
 {
-	if (line >= char_size.height || top < 0)
+	const uint16_t ss = jbxvt_get_scroll_size();
+	const uint8_t h = char_size.height;
+	/* Check  top + h vs ss so that the following pointer arithmetic does not
+	 * go outside array bounds.  */
+	if (top + h >= ss)
+		return top;
+	/* This is the normal return condition of this recursive function:  */
+	if (line >= h || top < 0)
 		return line;
-	struct JBXVTSavedLine * l = jbxvt_get_saved_lines() +
-		jbxvt_get_scroll_size() - top - 1;
+	/* Use screen character height as an offset into the scroll history
+	 * buffer, as indicated by variable h.  Use -1 to convert size ss into an
+	 * index.  Use top as the iterator.  */
+	struct JBXVTSavedLine * l = jbxvt_get_saved_lines() + ss - top - 1 - h;
 	paint(xc, l, *p);
 	p->y += font_size.height;
 	return show_history(xc, line + 1, top - 1, p, font_size, char_size);
