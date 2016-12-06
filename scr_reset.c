@@ -26,15 +26,6 @@ static void init_screen_elements(struct JBXVTScreen * restrict scr)
 	scr->wrap_next = false;
 	scr->margin.top = 0;
 }
-#if 0
-static void init(struct JBXVTScreen * s)
-{
-	for (size_t y = 0; y < JBXVT_MAX_ROWS; ++y) {
-		s->line[y].text = calloc(1, JBXVT_MAX_COLUMNS);
-		s->line[y].rend = calloc(4, JBXVT_MAX_COLUMNS);
-	}
-}
-#endif
 static inline void fix_margins(const struct JBDim c)
 {
 	/* On screen resize, check if old margin was on the bottom line.
@@ -64,18 +55,6 @@ static void decscnm(xcb_connection_t * restrict xc)
 	xcb_flush(xc);
 	jb_sleep(111);
 }
-#if 0
-static void init_screens(void)
-{
-	static bool created;
-	if (!created) {
-		struct JBXVTScreen * s = jbxvt_get_screen_at(0);
-		init(s);
-		init(s + 1);
-		created = true;
-	}
-}
-#endif
 /*  Reset the screen - called whenever the screen
     needs to be repaired completely.  */
 void jbxvt_reset(xcb_connection_t * restrict xc)
@@ -84,8 +63,6 @@ void jbxvt_reset(xcb_connection_t * restrict xc)
 	struct JBDim c = jbxvt_get_char_size();
 	fix_margins(c);
 #if 0
-	init_screens();
-#endif
 	{ // * s, * y, vy scope
 		struct JBXVTScreen * s = jbxvt_get_current_screen();
 		int16_t * y = &s->cursor.y, vy = * y;
@@ -94,6 +71,7 @@ void jbxvt_reset(xcb_connection_t * restrict xc)
 			*y = c.h - 1;
 		}
 	}
+#endif
 	init_screen_elements(jbxvt_get_screen_at(0));
 	init_screen_elements(jbxvt_get_screen_at(1));
 	// Constrain dimensions:

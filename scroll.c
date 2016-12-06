@@ -14,24 +14,30 @@
 #include "size.h"
 #include "window.h"
 //#define DEBUG_SCROLL_HISTORY
-//#define SCROLL_DEBUG
+#define SCROLL_DEBUG
 #ifndef SCROLL_DEBUG
 #undef LOG
 #define LOG(...)
 #endif//!SCROLL_DEBUG
-static uint16_t scroll_top;
-static struct JBXVTSavedLine saved_lines[JBXVT_MAX_SCROLL];
+static struct JBXVTSavedLine * saved_lines;
+static uint16_t scroll_size;
 struct JBXVTSavedLine * jbxvt_get_saved_lines(void)
 {
+	if (!saved_lines) {
+		saved_lines = calloc(1, sizeof(struct JBXVTSavedLine));
+		scroll_size = 1;
+	}
 	return saved_lines;
 }
-void jbxvt_zero_scroll_top(void)
+void jbxvt_clear_scroll_history(void)
 {
-	scroll_top = 0;
+	free(saved_lines);
+	saved_lines = NULL;
+	scroll_size = 0;
 }
-uint16_t jbxvt_get_scroll_top(void)
+uint16_t jbxvt_get_scroll_size(void)
 {
-	return scroll_top;
+	return scroll_size;
 }
 static void clear_selection_at(const int16_t j)
 {
@@ -39,30 +45,13 @@ static void clear_selection_at(const int16_t j)
 	if (e[0].index == j || e[1].index == j)
 		jbxvt_clear_selection();
 }
-static void move_line(const int16_t j,
-	const int8_t count, struct JBXVTScreen * restrict s)
+static void move_line(const int16_t j, const int8_t count,
+	struct JBXVTScreen * restrict s)
 {
 	const uint16_t k = j + count;
 	struct JBXVTSavedLine * dest = s->line + k, * src = s->line + j;
 	memcpy(dest, src, sizeof(struct JBXVTSavedLine));
 	clear_selection_at(j);
-}
-static void adjust_saved_lines_top(const int_fast16_t n)
-{
-	scroll_top += n;
-	// Use -1 here to keep saved_lines[] array bounds.
-	scroll_top = JB_MIN(scroll_top, JBXVT_MAX_SCROLL - 1);
-}
-static void copy_saved_lines(const int_fast16_t n)
-{
-	struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
-	for (int_fast16_t i = n - 1; i >= 0; --i) {
-		struct JBXVTSavedLine * sl = saved_lines + n - i - 1;
-		struct JBXVTSavedLine * screen_line = s->line + i;
-		memcpy(sl, screen_line, sizeof(struct JBXVTSavedLine));
-		adjust_saved_lines_top(n);
-		clear_selection_at(i);
-	}
 }
 static void get_y(int16_t * restrict y, const uint8_t row1,
 	const int8_t count, const bool up)
@@ -90,16 +79,17 @@ static void copy_visible_area(xcb_connection_t * xc,
 #ifdef DEBUG_SCROLL_HISTORY
 static void print_scroll_history(void)
 {
-	for (uint16_t i = 0; i < scroll_top; ++i)
+	for (uint16_t i = 0; i < scroll_size; ++i)
 		puts((char *)saved_lines[i].text);
 }
 #endif//DEBUG_SCROLL_HISTORY
 static void add_scroll_history(void)
 {
 	struct JBXVTScreen * s = jbxvt_get_current_screen();
-	memcpy(&saved_lines[scroll_top], &s->line[s->cursor.y], sizeof (struct
-		JBXVTSavedLine));
-	adjust_saved_lines_top(1);
+	enum { SIZE = sizeof(struct JBXVTSavedLine) };
+	saved_lines = realloc(saved_lines, ++scroll_size * SIZE);
+	// - 1 for index instead of size
+	memcpy(&saved_lines[scroll_size - 1], &s->line[s->cursor.y], SIZE);
 }
 static int8_t copy_lines(const int8_t i, const int8_t j, const int8_t mod,
 	const int8_t count)
@@ -117,15 +107,6 @@ static void clear_line(xcb_connection_t * xc,
 	const uint8_t fh = jbxvt_get_font_size().height;
 	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), 0, y * fh,
 		jbxvt_get_pixel_size().width, count * fh);
-}
-void jbxvt_scroll_primary_screen(int16_t n)
-{
-	LOG("jbxvt_scroll_primary_screen(%d)", n);
-	copy_saved_lines(n);
-	struct JBXVTScreen * s = jbxvt_get_screen_at(0);
-	const uint16_t h = jbxvt_get_char_size().height;
-	for (int_fast16_t j = n; j < h; ++j)
-		move_line(j, -n, s);
 }
 static void clear(int8_t count, const uint8_t offset, const bool is_up)
 {

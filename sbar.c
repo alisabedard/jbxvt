@@ -34,7 +34,7 @@ static int16_t get_sz(const int16_t margin)
 {
 	const uint16_t ph = jbxvt_get_pixel_size().h;
 	return ph - ph * (sbar_offset + margin)
-		/ (jbxvt_get_scroll_top() + jbxvt_get_char_size().h);
+		/ (jbxvt_get_scroll_size() + jbxvt_get_char_size().h);
 }
 // Draw the scrollbar.
 void jbxvt_draw_scrollbar(xcb_connection_t * xc)
@@ -49,7 +49,7 @@ void jbxvt_draw_scrollbar(xcb_connection_t * xc)
 //  Change the value of the scrolled screen offset and repaint the screen
 void jbxvt_set_scroll(xcb_connection_t * xc, int16_t n)
 {
-	JB_LIMIT(n, jbxvt_get_scroll_top(), 0);
+	JB_LIMIT(n, jbxvt_get_scroll_size(), 0);
 	if (n == sbar_offset)
 		return;
 	sbar_offset = n;
@@ -62,14 +62,12 @@ void jbxvt_scroll_to(xcb_connection_t * xc, const int16_t y)
 {
 	const uint8_t ch = jbxvt_get_char_size().h;
 	const uint16_t ph = jbxvt_get_pixel_size().h;
-	jbxvt_set_scroll(xc, (ch + jbxvt_get_scroll_top())
+	jbxvt_set_scroll(xc, (ch + jbxvt_get_scroll_size())
 		* (ph - y) / ph - ch);
 }
 void jbxvt_clear_saved_lines(xcb_connection_t * xc)
 {
-	memset(jbxvt_get_saved_lines(), 0, sizeof(struct JBXVTSavedLine)
-		* JBXVT_MAX_SCROLL);
-	jbxvt_zero_scroll_top();
+	jbxvt_clear_scroll_history();
 	jbxvt_set_scroll(xc, 0);
 }
 void jbxvt_toggle_scrollbar(xcb_connection_t * xc)
