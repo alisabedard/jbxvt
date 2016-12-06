@@ -76,13 +76,20 @@ static void copy_visible_area(xcb_connection_t * xc,
 	// the above blocks the event queue, flush it
 	xcb_flush(xc);
 }
-#ifdef DEBUG_SCROLL_HISTORY
-static void print_scroll_history(void)
+// Restrict scroll history size to JBXVT_MAX_SCROLL:
+static void trim(void)
 {
-	for (uint16_t i = 0; i < scroll_size; ++i)
-		puts((char *)saved_lines[i].text);
+	if (scroll_size < JBXVT_MAX_SCROLL)
+		return;
+	enum { SZ = sizeof(struct JBXVTSavedLine)};
+	struct JBXVTSavedLine * new = malloc(JBXVT_MAX_SCROLL * SZ), * i;
+	const int diff = scroll_size - JBXVT_MAX_SCROLL;
+	i = saved_lines + diff;
+	memcpy(new, i, JBXVT_MAX_SCROLL * SZ);
+	free(saved_lines);
+	saved_lines = new;
+	scroll_size = JBXVT_MAX_SCROLL;
 }
-#endif//DEBUG_SCROLL_HISTORY
 static void add_scroll_history(void)
 {
 	struct JBXVTScreen * s = jbxvt_get_current_screen();
@@ -90,6 +97,7 @@ static void add_scroll_history(void)
 	saved_lines = realloc(saved_lines, ++scroll_size * SIZE);
 	// - 1 for index instead of size
 	memcpy(&saved_lines[scroll_size - 1], &s->line[s->cursor.y], SIZE);
+	trim();
 }
 static int8_t copy_lines(const int8_t i, const int8_t j, const int8_t mod,
 	const int8_t count)
@@ -156,6 +164,13 @@ static void sc_up(xcb_connection_t * xc,
 	}
 	sc_common(xc, row1, row2, count, true);
 }
+#ifdef DEBUG_SCROLL_HISTORY
+static void print_scroll_history(void)
+{
+	for (uint16_t i = 0; i < scroll_size; ++i)
+		puts((char *)saved_lines[i].text);
+}
+#endif//DEBUG_SCROLL_HISTORY
 /*  Scroll count lines from row1 to row2 inclusive.
     row1 should be <= row2.  Scrolling is up for
     a positive count and down for a negative count.
