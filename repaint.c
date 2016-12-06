@@ -48,7 +48,8 @@ static int show_history(xcb_connection_t * restrict xc, const int line,
 {
 	if (line >= char_size.height || top < 0)
 		return line;
-	struct JBXVTSavedLine * l = jbxvt_get_saved_lines() + top;
+	struct JBXVTSavedLine * l = jbxvt_get_saved_lines() +
+		jbxvt_get_scroll_size() - top - 1;
 	paint(xc, l, *p);
 	p->y += font_size.height;
 	return show_history(xc, line + 1, top - 1, p, font_size, char_size);
