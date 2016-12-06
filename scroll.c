@@ -163,7 +163,6 @@ static void sc_up(xcb_connection_t * xc,
 void scroll(xcb_connection_t * xc, const uint8_t row1,
 	const uint8_t row2, const int16_t count)
 {
-	LOG("scroll(%d, %d, %d)", row1, row2, count);
 	if (!count)
 		return;
 	(count > 0 ? sc_up : sc_dn)(xc, row1, row2 + 1, abs(count));
