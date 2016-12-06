@@ -79,9 +79,10 @@ static void copy_visible_area(xcb_connection_t * xc,
 // Restrict scroll history size to JBXVT_MAX_SCROLL:
 static void trim(void)
 {
-	if (scroll_size < JBXVT_MAX_SCROLL)
+	enum { SZ = sizeof(struct JBXVTSavedLine) };
+	// Only work when scroll_size is twice JBXVT_MAX_SCROLL
+	if (scroll_size < JBXVT_MAX_SCROLL << 1)
 		return;
-	enum { SZ = sizeof(struct JBXVTSavedLine)};
 	struct JBXVTSavedLine * new = malloc(JBXVT_MAX_SCROLL * SZ), * i;
 	const int diff = scroll_size - JBXVT_MAX_SCROLL;
 	i = saved_lines + diff;
