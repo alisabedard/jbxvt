@@ -126,8 +126,8 @@ static void clear(int8_t count, const uint8_t offset, const bool is_up)
 		sizeof(struct JBXVTSavedLine));
 	clear(count, offset, is_up);
 }
-static void sc_common(xcb_connection_t * xc, const uint8_t r1, const uint8_t r2,
-	const int16_t count, const bool up)
+static void sc_common(xcb_connection_t * xc, const uint8_t r1, const
+	uint8_t r2, const int16_t count, const bool up)
 {
 	if (up) // call this way to only have one branch
 		clear(count, r2, true);

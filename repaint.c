@@ -17,7 +17,8 @@ static uint_fast16_t get_render_length(const rstyle_t * rvec,
 		++i;
 	return i;
 }
-// Display the string using the render vector at the screen coordinates.
+// Display the string using the render vector at the screen
+// coordinates.
 static void paint_rvec_text(xcb_connection_t * restrict xc,
 	uint8_t * restrict str, const rstyle_t * restrict rvec, uint16_t len,
 	struct JBDim p, const bool dwl)
@@ -47,16 +48,18 @@ static int show_history(xcb_connection_t * restrict xc, const int line,
 {
 	const uint16_t ss = jbxvt_get_scroll_size();
 	const uint8_t h = char_size.height;
-	/* Check  top + h vs ss so that the following pointer arithmetic does not
-	 * go outside array bounds.  */
+	/* Check  top + h vs ss so that the following pointer
+	 * arithmetic does not go outside array bounds.  */
 	if (top + h >= ss)
 		return top;
-	/* This is the normal return condition of this recursive function:  */
+	/* This is the normal return condition of this recursive
+	 * function:  */
 	if (line >= h || top < 0)
 		return line;
-	/* Use screen character height as an offset into the scroll history
-	 * buffer, as indicated by variable h.  Use -1 to convert size ss into an
-	 * index.  Use top as the iterator.  */
+	/* Use screen character height as an offset into the scroll
+	 * history buffer, as indicated by variable h.  Use -1 to
+	 * convert size ss into an index.  Use top as the iterator.
+	 * */
 	struct JBXVTSavedLine * l = jbxvt_get_saved_lines() + ss - top - 1 - h;
 	paint(xc, l, *p);
 	p->y += font_size.height;
@@ -65,7 +68,7 @@ static int show_history(xcb_connection_t * restrict xc, const int line,
 // Repaint the screen
 void jbxvt_repaint(xcb_connection_t * xc)
 {
-	//  First do any 'scrolled off' lines that are visible.
+	// First do any 'scrolled off' lines that are visible.
 	struct JBDim p = {0};
 	const struct JBDim chars = jbxvt_get_char_size(),
 	      f = jbxvt_get_font_size();

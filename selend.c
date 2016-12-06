@@ -57,9 +57,10 @@ static void adj_sel_to_word(struct JBDim * include,
 		return; // protect against segfault if ends invalid
 	int16_t i;
 	{ // text scope
-		uint8_t * text = jbxvt_get_current_screen()->line[se1->index].text;
-		i = get_start_of_word(text, se1->col);
-		se1->col = i?i+1:0;
+		uint8_t * text =
+			jbxvt_get_current_screen()->line[se1->index].text;
+		i = get_start_of_word(text, se1->col); se1->col = i ?
+			i + 1 : 0;
 		i = se2->col;
 		if (se2 == include || !jbxvt_selcmp(se2,
 			&jbxvt_get_selection_end_points()[2]))
