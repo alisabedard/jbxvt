@@ -151,12 +151,8 @@ static void sc_up(xcb_connection_t * xc,
 	const int16_t count)
 {
 	struct JBXVTScreen * s = jbxvt_get_current_screen();
-	if (s == jbxvt_get_screen_at(0) && row1 == 0) {
+	if (s == jbxvt_get_screen_at(0) && row1 == 0)
 		add_scroll_history();
-		jb_assert(count == 1,
-			"Scroll count is not one:  "
-			"scroll history may be inaccurate.");
-	}
 	for(int8_t j = copy_lines(0, row1, 1, count); j < row2; ++j)
 		move_line(j, -count, s);
 	sc_common(xc, row1, row2, count, true);
