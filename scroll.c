@@ -69,9 +69,10 @@ static void copy_visible_area(xcb_connection_t * xc,
 	get_y(y, row1, count, up);
 	{ // vt scope
 		const xcb_window_t vt = jbxvt_get_vt_window(xc);
-		xcb_copy_area(xc, vt, vt, jbxvt_get_text_gc(xc), 0, y[0],
-			0, y[1], jbxvt_get_pixel_size().width,
-			(row2 - row1 - count) * jbxvt_get_font_size().h);
+		xcb_copy_area(xc, vt, vt, jbxvt_get_text_gc(xc), 0,
+			y[0], 0, y[1], jbxvt_get_pixel_size().width,
+			(row2 - row1 - count) *
+			jbxvt_get_font_size().h);
 	}
 	// the above blocks the event queue, flush it
 	xcb_flush(xc);
@@ -137,18 +138,16 @@ static void sc_common(xcb_connection_t * xc, const uint8_t r1, const
 	clear_line(xc, up ? (r2 - count) : r1, count);
 	jbxvt_draw_scrollbar(xc);
 }
-static void sc_dn(xcb_connection_t * xc,
-	const uint8_t row1, const uint8_t row2,
-	const int16_t count)
+static void sc_dn(xcb_connection_t * xc, const uint8_t row1, const
+	uint8_t row2, const int16_t count)
 {
 	struct JBXVTScreen * s = jbxvt_get_current_screen();
 	for(int8_t j = copy_lines(0, row2, -1, count); j >= row1; --j)
 		move_line(j, count, s);
 	sc_common(xc, row1, row2, count, false);
 }
-static void sc_up(xcb_connection_t * xc,
-	const uint8_t row1, const uint8_t row2,
-	const int16_t count)
+static void sc_up(xcb_connection_t * xc, const uint8_t row1, const
+	uint8_t row2, const int16_t count)
 {
 	struct JBXVTScreen * s = jbxvt_get_current_screen();
 	if (s == jbxvt_get_screen_at(0) && row1 == 0)
@@ -165,9 +164,9 @@ static void print_scroll_history(void)
 }
 #endif//DEBUG_SCROLL_HISTORY
 /*  Scroll count lines from row1 to row2 inclusive.
-    row1 should be <= row2.  Scrolling is up for
-    a positive count and down for a negative count.
-    count is limited to a maximum of SCROLL lines.  */
+    row1 should be <= row2.  Scrolling is up for a positive count and
+    down for a negative count.  count is limited to a maximum of
+    SCROLL lines.  */
 void scroll(xcb_connection_t * xc, const uint8_t row1,
 	const uint8_t row2, const int16_t count)
 {
