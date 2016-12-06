@@ -39,27 +39,9 @@ static uint8_t * filter(uint8_t * restrict t, register int_fast16_t i)
 static void paint(xcb_connection_t * xc, struct JBXVTSavedLine * l,
 	const struct JBDim p)
 {
-//	paint_rvec_text(xc, filter(l->text, l->size),
 	paint_rvec_text(xc, filter(l->text, jbxvt_get_char_size().width),
 		l->rend, jbxvt_get_char_size().width, p, l->dwl);
 }
-#if 0
-static int show_history(xcb_connection_t * restrict xc, const int line,
-	const int top, struct JBDim * restrict p)
-{
-	const struct JBDim c = jbxvt_get_char_size();
-	if (line > c.h || top < 0)
-		return line;
-	struct JBXVTSavedLine * l = jbxvt_get_saved_lines() + top;
-	//struct JBXVTSavedLine * l = jbxvt_get_saved_lines() + top;
-	paint(xc, l, *p);
-	{ // f scope
-		const struct JBDim f = jbxvt_get_font_size();
-		p->y += f.h;
-	}
-	return show_history(xc, line + 1, top - 1, p);
-}
-#endif
 static int show_history(xcb_connection_t * restrict xc, const int line,
 	const int top, struct JBDim * restrict p)
 {
