@@ -1,7 +1,7 @@
 include debug.mk
 CFLAGS+=-ggdb
 #CFLAGS+=--coverage
-CFLAGS+=-fsanitize=leak
+#CFLAGS+=-fsanitize=leak
 CFLAGS+=-fsanitize=shift
 CFLAGS+=-fsanitize=integer-divide-by-zero
 CFLAGS+=-fsanitize=unreachable
