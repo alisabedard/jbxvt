@@ -43,31 +43,28 @@ static void paint(xcb_connection_t * xc, struct JBXVTSavedLine * l,
 		l->rend, jbxvt_get_char_size().width, p, l->dwl);
 }
 static int show_history(xcb_connection_t * restrict xc, const int line,
-	const int top, struct JBDim * restrict p)
+	const int top, struct JBDim * restrict p,
+	const struct JBDim font_size, const struct JBDim char_size)
 {
-	const struct JBDim c = jbxvt_get_char_size();
-	if (line >= c.h || top < 0)
+	if (line >= char_size.height || top < 0)
 		return line;
 	struct JBXVTSavedLine * l = jbxvt_get_saved_lines() + top;
-	//struct JBXVTSavedLine * l = jbxvt_get_saved_lines() + top;
 	paint(xc, l, *p);
-	{ // f scope
-		const struct JBDim f = jbxvt_get_font_size();
-		p->y += f.h;
-	}
-	return show_history(xc, line + 1, top - 1, p);
+	p->y += font_size.height;
+	return show_history(xc, line + 1, top - 1, p, font_size, char_size);
 }
 // Repaint the screen
 void jbxvt_repaint(xcb_connection_t * xc)
 {
 	//  First do any 'scrolled off' lines that are visible.
 	struct JBDim p = {0};
-	const struct JBDim chars = jbxvt_get_char_size();
-	int line = show_history(xc, 0, jbxvt_get_scroll() - 1, &p);
+	const struct JBDim chars = jbxvt_get_char_size(),
+	      f = jbxvt_get_font_size();
+	int line = show_history(xc, 0, jbxvt_get_scroll() - 1, &p, f, chars);
 	// Do the remainder from the current screen:
 	struct JBXVTScreen * s = jbxvt_get_current_screen();
 	for (uint_fast16_t i = 0; line < chars.height;
-		++line, ++i, p.y += jbxvt_get_font_size().h)
+		++line, ++i, p.y += f.h)
 		paint(xc, s->line + i, p);
 	jbxvt_show_selection(xc);
 }
