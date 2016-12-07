@@ -1,8 +1,8 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
-#ifndef SLINEST_H
-#define SLINEST_H
+#ifndef JBXVT_JBXVTLINE_H
+#define JBXVT_JBXVTLINE_H
 #include <stdbool.h>
 #include <stdint.h>
 #include "config.h"
@@ -15,4 +15,4 @@ struct JBXVTLine {
 	bool wrap:1;		// wrap flag
 	bool dwl:1;		// double-width line
 };
-#endif//!SLINEST_H
+#endif//!JBXVT_JBXVTLINE_H
