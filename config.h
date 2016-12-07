@@ -3,7 +3,7 @@
 #ifndef JBXVT_CONFIG_H
 #define JBXVT_CONFIG_H
 // Overall release number of the current version:
-#define JBXVT_VERSION "0.6"
+#define JBXVT_VERSION "0.7"
 #define JBXVT_NORMAL_FONT \
 	"-*-terminus-medium-r-*-*-14-*-*-*-*-*-iso10646-*"
 #define JBXVT_BOLD_FONT \
