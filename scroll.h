@@ -4,8 +4,8 @@
 #define JBXVT_SCROLL_H
 #include <stdint.h>
 #include <xcb/xcb.h>
-#include "JBXVTSavedLine.h"
-struct JBXVTSavedLine * jbxvt_get_saved_lines(void);
+#include "JBXVTLine.h"
+struct JBXVTLine * jbxvt_get_saved_lines(void);
 uint16_t jbxvt_get_scroll_size(void);
 void jbxvt_clear_scroll_history(void);
 void scroll(xcb_connection_t * xc, const uint8_t row1,

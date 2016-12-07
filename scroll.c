@@ -19,12 +19,12 @@
 #undef LOG
 #define LOG(...)
 #endif//!SCROLL_DEBUG
-static struct JBXVTSavedLine * saved_lines;
+static struct JBXVTLine * saved_lines;
 static uint16_t scroll_size;
-struct JBXVTSavedLine * jbxvt_get_saved_lines(void)
+struct JBXVTLine * jbxvt_get_saved_lines(void)
 {
 	if (!saved_lines) {
-		saved_lines = calloc(1, sizeof(struct JBXVTSavedLine));
+		saved_lines = calloc(1, sizeof(struct JBXVTLine));
 		scroll_size = 1;
 	}
 	return saved_lines;
@@ -49,8 +49,8 @@ static void move_line(const int16_t j, const int8_t count,
 	struct JBXVTScreen * restrict s)
 {
 	const uint16_t k = j + count;
-	struct JBXVTSavedLine * dest = s->line + k, * src = s->line + j;
-	memcpy(dest, src, sizeof(struct JBXVTSavedLine));
+	struct JBXVTLine * dest = s->line + k, * src = s->line + j;
+	memcpy(dest, src, sizeof(struct JBXVTLine));
 	clear_selection_at(j);
 }
 static void get_y(int16_t * restrict y, const uint8_t row1,
@@ -80,11 +80,11 @@ static void copy_visible_area(xcb_connection_t * xc,
 // Restrict scroll history size to JBXVT_MAX_SCROLL:
 static void trim(void)
 {
-	enum { SZ = sizeof(struct JBXVTSavedLine) };
+	enum { SZ = sizeof(struct JBXVTLine) };
 	// Only work when scroll_size is twice JBXVT_MAX_SCROLL
 	if (scroll_size < JBXVT_MAX_SCROLL << 1)
 		return;
-	struct JBXVTSavedLine * new = malloc(JBXVT_MAX_SCROLL * SZ), * i;
+	struct JBXVTLine * new = malloc(JBXVT_MAX_SCROLL * SZ), * i;
 	const int diff = scroll_size - JBXVT_MAX_SCROLL;
 	i = saved_lines + diff;
 	memcpy(new, i, JBXVT_MAX_SCROLL * SZ);
@@ -95,7 +95,7 @@ static void trim(void)
 static void add_scroll_history(void)
 {
 	struct JBXVTScreen * s = jbxvt_get_current_screen();
-	enum { SIZE = sizeof(struct JBXVTSavedLine) };
+	enum { SIZE = sizeof(struct JBXVTLine) };
 	saved_lines = realloc(saved_lines, ++scroll_size * SIZE);
 	// - 1 for index instead of size
 	memcpy(&saved_lines[scroll_size - 1], &s->line[s->cursor.y], SIZE);
@@ -107,8 +107,8 @@ static int8_t copy_lines(const int8_t i, const int8_t j, const int8_t mod,
 	if (i >= count)
 		return j;
 	struct JBXVTScreen * s = jbxvt_get_current_screen();
-	struct JBXVTSavedLine * dest = s->line + i, * src = s->line + j;
-	memcpy(dest, src, sizeof(struct JBXVTSavedLine));
+	struct JBXVTLine * dest = s->line + i, * src = s->line + j;
+	memcpy(dest, src, sizeof(struct JBXVTLine));
 	return copy_lines(i + 1, j + mod, mod, count);
 }
 static void clear_line(xcb_connection_t * xc,
@@ -124,7 +124,7 @@ static void clear(int8_t count, const uint8_t offset, const bool is_up)
 		return;
 	const uint8_t j = offset + (is_up ? - count - 1 : count);
 	memset(jbxvt_get_current_screen()->line + j, 0,
-		sizeof(struct JBXVTSavedLine));
+		sizeof(struct JBXVTLine));
 	clear(count, offset, is_up);
 }
 static void sc_common(xcb_connection_t * xc, const uint8_t r1, const

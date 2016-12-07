@@ -36,7 +36,7 @@ static uint8_t * filter(uint8_t * restrict t, register int_fast16_t i)
 			t[i] = ' ';
 	return t;
 }
-static void paint(xcb_connection_t * xc, struct JBXVTSavedLine * l,
+static void paint(xcb_connection_t * xc, struct JBXVTLine * l,
 	const struct JBDim p)
 {
 	const uint16_t w = jbxvt_get_char_size().width;
@@ -60,7 +60,7 @@ static int show_history(xcb_connection_t * restrict xc, const int line,
 	 * history buffer, as indicated by variable h.  Use -1 to
 	 * convert size ss into an index.  Use top as the iterator.
 	 * */
-	struct JBXVTSavedLine * l = jbxvt_get_saved_lines() + ss - top - 1 - h;
+	struct JBXVTLine * l = jbxvt_get_saved_lines() + ss - top - 1 - h;
 	paint(xc, l, *p);
 	p->y += font_size.height;
 	return show_history(xc, line + 1, top - 1, p, font_size, char_size);

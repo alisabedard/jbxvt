@@ -8,7 +8,7 @@
 #include "config.h"
 #include "rstyle.h"
 //  structure describing a saved line
-struct JBXVTSavedLine {
+struct JBXVTLine {
 	uint8_t text[JBXVT_MAX_COLUMNS];
 	rstyle_t rend[JBXVT_MAX_COLUMNS];
 	uint16_t size:14;	// line length

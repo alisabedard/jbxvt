@@ -2,11 +2,11 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #ifndef SCREENST_H
 #define SCREENST_H
-#include "JBXVTSavedLine.h"
+#include "JBXVTLine.h"
 #include "libjb/JBDim.h"
 /*  Structure describing the current state of the screen.  */
 struct JBXVTScreen {
-	struct JBXVTSavedLine line[JBXVT_MAX_ROWS];
+	struct JBXVTLine line[JBXVT_MAX_ROWS];
 	struct JBDim margin;	// scroll margins, top and bottom
 	struct JBDim cursor;	// cursor position, row and column
 	bool wrap_next:1;	// wrap before the next printed character
