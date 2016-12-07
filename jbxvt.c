@@ -14,7 +14,7 @@ static char ** parse_command_line(const int argc, char ** argv,
 	struct JBXVTOptions * o)
 {
 	static const char * optstr = "B:b:C:c:D:d:eF:f:hI:R:S:svx:y:";
-	int8_t opt;
+	char opt;
 	while((opt=getopt(argc, argv, optstr)) != -1) {
 		switch (opt) {
 		case 'B': // bold font
@@ -70,26 +70,20 @@ usage:
 	return NULL;
 #endif//OPENBSD
 }
-static void set_default_options(struct JBXVTOptions * restrict o)
-{
-	o->font.normal = JBXVT_NORMAL_FONT;
-	o->font.bold = JBXVT_BOLD_FONT;
-	o->font.italic = JBXVT_ITALIC_FONT;
-	o->color.bg = JBXVT_BACKGROUND_COLOR;
-	o->color.fg = JBXVT_FOREGROUND_COLOR;
-	o->size.cols = JBXVT_COLUMNS;
-	o->size.rows = JBXVT_ROWS;
-	o->position = (struct JBDim){0};
-	o->screen = 0;
-	o->show_scrollbar = false;
-}
-
 static xcb_connection_t * handle_options(const int argc, char ** argv,
 	char *** com_argv)
 {
-	struct JBXVTOptions o;
-	set_default_options(&o);
-	// Override defaults
+	// Set defaults:
+	struct JBXVTOptions o = {
+		.font.normal = JBXVT_NORMAL_FONT,
+		.font.bold = JBXVT_BOLD_FONT,
+		.font.italic = JBXVT_ITALIC_FONT,
+		.color.bg = JBXVT_BACKGROUND_COLOR,
+		.color.fg = JBXVT_FOREGROUND_COLOR,
+		.size.cols = JBXVT_COLUMNS,
+		.size.rows = JBXVT_ROWS,
+	};
+	// Override defaults:
 	*com_argv = parse_command_line(argc, argv, &o);
 	/* jbxvt_init_display must come
 	   after parse_command_line */
@@ -98,8 +92,7 @@ static xcb_connection_t * handle_options(const int argc, char ** argv,
 static xcb_connection_t * handle_command(const int argc, char ** argv)
 {
 	char ** com_argv;
-	xcb_connection_t * xc = handle_options(argc,
-		argv, &com_argv);
+	xcb_connection_t * xc = handle_options(argc, argv, &com_argv);
 	jbxvt_set_tab(-2, false); // Set up the tab stops
 	jbxvt_map_window(xc);
 	jb_check(setenv("TERM", JBXVT_ENV_TERM, true) != -1,
@@ -109,9 +102,9 @@ static xcb_connection_t * handle_command(const int argc, char ** argv)
 	jbxvt_init_command_module(com_argv);
 	return xc;
 }
-/*  Run the command in a subprocess and return a file descriptor for the
- *  master end of the pseudo-teletype pair with the command talking to
- *  the slave.  */
+/*  Run the command in a subprocess and return a file descriptor for
+ *  the master end of the pseudo-teletype pair with the command
+ *  talking to the slave.  */
 int main(int argc, char ** argv)
 {
 	xcb_connection_t * xc = handle_command(argc, argv);
