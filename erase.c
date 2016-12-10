@@ -39,8 +39,9 @@ static void delete(xcb_connection_t * restrict xc, uint16_t col,
 	width = get_limited_width(col, width);
 	struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
 	const int16_t y = s->cursor.y;
-	memset(s->line[y].text + col, 0, width);
-	memset(s->line[y].rend + col, 0, width << 2);
+	struct JBXVTLine * restrict l = s->line + y;
+	memset(l->text + col, 0, width);
+	memset(l->rend + col, 0, width << 2);
 	clear_area(xc, col, y, width);
 	s->line[y].wrap = s->line[y].dwl = false;
 }
