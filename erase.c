@@ -26,14 +26,13 @@ static void clear_area(xcb_connection_t * restrict xc,
 	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), x * f.w, y * f.h,
 		width * f.w, f.h);
 }
-static uint16_t get_limited_width(const uint16_t col, uint16_t width)
+static uint16_t get_limited_width(const uint16_t col, const uint16_t width)
 {
 	const uint16_t cw = get_width();
-	if (col + width > cw) // keep in screen
-		width = cw - col;
-	return width;
+	// keep col + width within the screen width
+	return (col + width > cw) ? cw - col : width;
 }
-static void delete(xcb_connection_t * restrict xc, uint16_t col,
+static void delete(xcb_connection_t * restrict xc, const uint16_t col,
 	uint16_t width)
 {
 	width = get_limited_width(col, width);
