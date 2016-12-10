@@ -32,8 +32,10 @@ static void handle_new_lines(xcb_connection_t * restrict xc, int8_t nlcount)
 	struct JBDim * m = &s->margin;
 	nlcount = y > m->b ? 0 : nlcount - m->b - y;
 	JB_LIMIT(nlcount, y - m->top, 0);
-	scroll(xc, m->top, m->bottom, nlcount);
-	s->cursor.y -= nlcount;
+	if (nlcount) { // only worth doing if nlcount has a value:
+		scroll(xc, m->top, m->bottom, nlcount);
+		s->cursor.y -= nlcount;
+	}
 }
 static void decsclm(void)
 {
