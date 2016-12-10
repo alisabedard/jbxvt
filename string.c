@@ -2,6 +2,7 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
 //#undef DEBUG
+#define LOG_LEVEL 3
 #include "string.h"
 #include <string.h>
 #include <unistd.h>
@@ -173,7 +174,9 @@ static void recover_from_shift(void)
 void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str,
 	uint8_t len, int8_t nlcount)
 {
+#if LOG_LEVEL > 5
 	LOG("jbxvt_string(%s, len: %d, nlcount: %d)", str, len, nlcount);
+#endif//LOG_LEVEL>5
 	jbxvt_set_scroll(xc, 0);
 	jbxvt_draw_cursor(xc);
 	if (nlcount > 0)
