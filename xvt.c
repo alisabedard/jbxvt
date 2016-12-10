@@ -1,5 +1,6 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+//#undef DEBUG
 #include "xvt.h"
 #include "cmdtok.h"
 #include "command.h"
