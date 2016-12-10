@@ -43,7 +43,7 @@ static void delete(xcb_connection_t * restrict xc, uint16_t col,
 	memset(l->text + col, 0, width);
 	memset(l->rend + col, 0, width << 2);
 	clear_area(xc, col, y, width);
-	s->line[y].wrap = s->line[y].dwl = false;
+	l->wrap = l->dwl = false;
 }
 static inline void delete_after(xcb_connection_t * restrict xc,
 	const int16_t x)
