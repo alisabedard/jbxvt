@@ -70,25 +70,24 @@ void jbxvt_erase_line(xcb_connection_t * xc, const int8_t mode)
 static bool assign_range(xcb_connection_t * restrict xc,
 	const int8_t mode, struct JBDim * restrict range)
 {
+#define SETR(s, e) range->start = s; range->end = e;
 	switch (mode) {
 		// offset by 1 to not include current line, handled later
 	case JBXVT_ERASE_AFTER:
-		range->start = jbxvt_get_y() + 1;
-		range->end = jbxvt_get_char_size().h;
+		SETR(jbxvt_get_y() + 1, jbxvt_get_char_size().h);
 		break;
 	case JBXVT_ERASE_BEFORE:
-		range->start = 0;
-		range->end = jbxvt_get_y() - 1;
+		SETR(0, jbxvt_get_y() - 1);
 		break;
 	case JBXVT_ERASE_SAVED:
 		jbxvt_clear_saved_lines(xc);
 		return false;
 	default: // JBXVT_ERASE_ALL
-		range->start = 0;
-		range->end = get_height() - 1;
+		SETR(0, get_height() - 1);
 		break;
 	}
 	return true;
+#undef SETR
 }
 // Erase the specified portion of the screen.
 void jbxvt_erase_screen(xcb_connection_t * xc, const int8_t mode)
