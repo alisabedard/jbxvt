@@ -50,7 +50,7 @@ static int show_history(xcb_connection_t * restrict xc, const int line,
 	const uint8_t h = char_size.height;
 	/* Check  top + h vs ss so that the following pointer
 	 * arithmetic does not go outside array bounds.  */
-	if (top + h >= ss)
+	if (top > ss)
 		return top;
 	/* This is the normal return condition of this recursive
 	 * function:  */
@@ -60,7 +60,7 @@ static int show_history(xcb_connection_t * restrict xc, const int line,
 	 * history buffer, as indicated by variable h.  Use -1 to
 	 * convert size ss into an index.  Use top as the iterator.
 	 * */
-	struct JBXVTLine * l = jbxvt_get_saved_lines() + ss - top - 1 - h;
+	struct JBXVTLine * l = jbxvt_get_saved_lines() + ss - top - 1;
 	paint(xc, l, *p);
 	p->y += font_size.height;
 	return show_history(xc, line + 1, top - 1, p, font_size, char_size);
@@ -72,6 +72,7 @@ void jbxvt_repaint(xcb_connection_t * xc)
 	struct JBDim p = {0};
 	const struct JBDim chars = jbxvt_get_char_size(),
 	      f = jbxvt_get_font_size();
+	/* Subtract 1 from scroll offset to get index.  */
 	int line = show_history(xc, 0, jbxvt_get_scroll() - 1, &p, f, chars);
 	// Do the remainder from the current screen:
 	struct JBXVTScreen * s = jbxvt_get_current_screen();
