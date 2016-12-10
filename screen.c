@@ -74,6 +74,7 @@ void jbxvt_change_screen(xcb_connection_t * xc, const bool mode_high)
 	jbxvt_reset(xc);
 	home(xc);
 	jbxvt_erase_screen(xc, JBXVT_ERASE_AFTER);
+	jbxvt_clear_saved_lines(xc);
 }
 // Scroll from top to current bottom margin count lines, moving cursor
 void jbxvt_index_from(xcb_connection_t * xc,
