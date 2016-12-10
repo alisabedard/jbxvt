@@ -1,7 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
-#undef DEBUG
+//#undef DEBUG
 #include "erase.h"
 #include <string.h>
 #include "cursor.h"
@@ -11,11 +11,6 @@
 #include "screen.h"
 #include "size.h"
 #include "window.h"
-//#define DEBUG_ERASE
-#ifndef DEBUG_ERASE
-#undef LOG
-#define LOG(...)
-#endif//DEBUG_ERASE
 static inline uint16_t get_width(void)
 {
 	return jbxvt_get_char_size().width;
