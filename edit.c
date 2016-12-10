@@ -33,7 +33,7 @@ void jbxvt_edit_characters(xcb_connection_t * xc, const uint8_t count,
 		delete ? "true" : "false");
 	const struct JBDim c = jbxvt_chars_to_pixels(jbxvt_get_cursor()),
 	      f = jbxvt_get_font_size();
-	int16_t x[2] = {c.x, x[0] + count * jbxvt_get_font_size().width};
+	int16_t x[2] = {c.x, x[0] + count * f.width};
 	/* Whether or not x[0] and x[1] are swapped here is
 	   what determines insertion or deletion.  */
 	if (delete)
