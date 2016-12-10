@@ -160,7 +160,7 @@ void scroll(xcb_connection_t * xc, const uint8_t row1,
 	LOG("scroll(xc, row1: %d, row2: %d, count: %d)", row1, row2,
 		count);
 #endif//LOG_LEVEL>5
-	if (!count)
+	if (JB_UNLIKELY(!count))
 		return;
 	(JB_LIKELY(count > 0) ? sc_up : sc_dn)(xc, row1, row2 + 1, abs(count));
 	jbxvt_set_scroll(xc, 0);
