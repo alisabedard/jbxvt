@@ -162,7 +162,7 @@ void scroll(xcb_connection_t * xc, const uint8_t row1,
 #endif//LOG_LEVEL>5
 	if (!count)
 		return;
-	(count > 0 ? sc_up : sc_dn)(xc, row1, row2 + 1, abs(count));
+	(JB_LIKELY(count > 0) ? sc_up : sc_dn)(xc, row1, row2 + 1, abs(count));
 	jbxvt_set_scroll(xc, 0);
 #if LOG_LEVEL > 8
 	for (uint16_t i = 0; i < scroll_size; ++i)
