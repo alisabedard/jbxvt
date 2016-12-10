@@ -1,4 +1,5 @@
 // Copyright 2016, Jeffrey E. Bedard
+#undef DEBUG
 #include "scr_move.h"
 #include "cursor.h"
 #include "libjb/log.h"
