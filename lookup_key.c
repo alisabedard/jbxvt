@@ -1,15 +1,11 @@
 // Copyright 2016, Jeffrey E. Bedard
+#undef DEBUG
 #include "lookup_key.h"
 #include <string.h>
 #include <xcb/xcb_keysyms.h>
 #include "command.h"
 #include "libjb/log.h"
 #include "sbar.h"
-//#define DEBUG_KEYS
-#ifndef DEBUG_KEYS
-#undef LOG
-#define LOG(...)
-#endif
 static struct { // key modes
 	bool cursor, // app mode cursor keys
 	     keypad; // keypad keys

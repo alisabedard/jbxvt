@@ -1,5 +1,6 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+#undef DEBUG
 #include "cmdtok.h"
 #include <errno.h>
 #include <string.h>

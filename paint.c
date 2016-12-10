@@ -1,5 +1,6 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+#undef DEBUG
 #include "paint.h"
 #include <stdlib.h>
 #include "color_index.h"
@@ -11,11 +12,6 @@
 #include "rstyle.h"
 #include "window.h"
 #include "xcb_screen.h"
-//#define DEBUG_PAINT
-#ifndef DEBUG_PAINT
-#undef LOG
-#define LOG(...)
-#endif//!DEBUG_PAINT
 xcb_gcontext_t jbxvt_get_text_gc(xcb_connection_t * xc)
 {
 	static xcb_gcontext_t gc;

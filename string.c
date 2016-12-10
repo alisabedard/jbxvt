@@ -1,6 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
+#undef DEBUG
 #include "string.h"
 #include <string.h>
 #include <unistd.h>
@@ -23,11 +24,6 @@
 #include "size.h"
 #include "tab.h"
 #include "window.h"
-//#define STRING_DEBUG
-#ifndef STRING_DEBUG
-#undef LOG
-#define LOG(...)
-#endif//!STRING_DEBUG
 static void handle_new_lines(xcb_connection_t * restrict xc, int8_t nlcount)
 {
 	struct JBXVTScreen * restrict s = jbxvt_get_current_screen();

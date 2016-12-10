@@ -1,16 +1,12 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+#undef DEBUG
 #include "handle_sgr.h"
 #include "color.h"
 #include "libjb/log.h"
 #include "libjb/macros.h"
 #include "paint.h"
 #include "rstyle.h"
-//#define DEBUG_SGR
-#ifndef DEBUG_SGR
-#undef LOG
-#define LOG(...)
-#endif//!DEBUG_SGR
 // Convert 3 bit color to 9 bit color, store at offset
 __attribute__((cold))
 static void encode_rgb(uint8_t color, uint8_t offset)

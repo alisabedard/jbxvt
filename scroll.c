@@ -1,6 +1,8 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
+#undef DEBUG
+//#define DEBUG_SCROLL_HISTORY
 #include "scroll.h"
 #include <string.h>
 #include "font.h"
@@ -13,12 +15,6 @@
 #include "selection.h"
 #include "size.h"
 #include "window.h"
-//#define DEBUG_SCROLL_HISTORY
-#define SCROLL_DEBUG
-#ifndef SCROLL_DEBUG
-#undef LOG
-#define LOG(...)
-#endif//!SCROLL_DEBUG
 static struct JBXVTLine * saved_lines;
 static uint16_t scroll_size;
 struct JBXVTLine * jbxvt_get_saved_lines(void)
