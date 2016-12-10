@@ -1,6 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.  */
+#undef DEBUG
 #include "screen.h"
 #include <string.h>
 #include "cursor.h"
@@ -13,11 +14,6 @@
 #include "scr_reset.h"
 #include "scroll.h"
 #include "size.h"
-///#define JBXVT_DEBUG_SCREEN
-#ifndef JBXVT_DEBUG_SCREEN
-#undef LOG
-#define LOG(...)
-#endif//!JBXVT_DEBUG_SCREEN
 static uint8_t screen_index; // current screen
 static struct JBXVTScreen * jbxvt_get_screens(void)
 {

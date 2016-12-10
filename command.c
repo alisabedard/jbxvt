@@ -1,6 +1,7 @@
 /* Copyright 2016, Jeffrey E. Bedard
    Copyright 1992-94, 1997 John Bovey,
    University of Kent at Canterbury. */
+#undef DEBUG
 #include "command.h"
 #include <fcntl.h>
 #include <signal.h>

@@ -24,11 +24,6 @@
 #include "tab.h"
 #include "tk_char.h"
 #include "window.h"
-#define JBXVT_DEBUG_XVT
-#ifndef JBXVT_DEBUG_XVT
-#undef LOG
-#define LOG(...)
-#endif//!JBXVT_DEBUG_XVT
 //#define DEBUG_TOKENS
 #ifdef DEBUG_TOKENS
 #define TLOG(...) LOG(__VA_ARGS__)
