@@ -23,11 +23,22 @@ static void handle_client_message(xcb_connection_t * xc,
 {
 	if (e->format == 32 && e->data.data32[0]
 		== (unsigned long)jbxvt_get_wm_del_win(xc))
-		  exit(0);
+		exit(0);
 }
 static void handle_expose(xcb_connection_t * xc,
 	xcb_expose_event_t * e)
 {
+	{ // seq scope
+		/* Store the sequence statically here to ensure that
+		 * we are not processing the same expose event twice.
+		 * */
+		static uint16_t seq;
+		if (seq == e->sequence)
+			return;
+		seq = e->sequence;
+	}
+	LOG("handle_expose() e->count: %d, e->sequence: %d",
+		e->count, e->sequence);
 	if (e->window == jbxvt_get_scrollbar(xc))
 		jbxvt_draw_scrollbar(xc);
 	else
@@ -186,7 +197,7 @@ bool jbxvt_handle_xevents(xcb_connection_t * xc)
 		return false;
 	bool ret = true;
 	switch (event->response_type & ~0x80) {
-	// Put things to ignore here:
+		// Put things to ignore here:
 	case 0: // Unimplemented, undefined, no event
 	case 150: // Undefined
 	case XCB_KEY_RELEASE: // Unimplemented
