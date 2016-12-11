@@ -1,9 +1,12 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "save_selection.h"
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include "config.h"
+#include "JBXVTSelectionData.h"
+#include "libjb/JBDim.h"
 #include "libjb/log.h"
 #include "screen.h"
 #include "selend.h"
@@ -19,6 +22,9 @@ static uint8_t get_next_char(uint8_t c)
 static bool skip(uint8_t * restrict str, uint16_t * restrict i,
 	uint16_t * restrict j, const uint16_t len, const uint8_t null_ct)
 {
+	assert(str);
+	assert(i);
+	assert(j);
 	++*i;
 	if (str[*i] != '\0')
 		return false;
@@ -28,6 +34,7 @@ static bool skip(uint8_t * restrict str, uint16_t * restrict i,
 }
 static uint16_t sanitize(uint8_t * str, uint16_t len)
 {
+	assert(str);
 	uint16_t i = 0, j;
 	uint8_t null_ct = 0;
 	/* This conditional fixes insertion of rogue new lines
@@ -54,6 +61,8 @@ static void copy(uint8_t * str, uint8_t * scr_text,
 	const int16_t start, const uint16_t len,
 	const uint16_t total)
 {
+	assert(str);
+	assert(scr_text);
 	char * dest = (char *) str + total - 1;
 	char * src = (char *) scr_text + start;
 	strncpy(dest, src, len);
@@ -61,6 +70,9 @@ static void copy(uint8_t * str, uint8_t * scr_text,
 static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 	struct JBDim * restrict e)
 {
+	assert(str);
+	assert(total);
+	assert(e);
 	if ((e->index == (e+1)->index && e->col == (e+1)->col)
 		|| e->y < 1) // not within the screen area
 		return; // NULL selection
@@ -83,6 +95,7 @@ static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
     and save it as the current saved selection. */
 void jbxvt_save_selection(struct JBXVTSelectionData * sel)
 {
+	assert(sel);
 	const bool fwd = jbxvt_selcmp(sel->end, sel->end + 1) <= 0;
 	// properly order start and end points:
 	struct JBDim se[] = {sel->end[fwd ? 0 : 1],

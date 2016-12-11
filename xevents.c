@@ -5,6 +5,7 @@
 #include "cmdtok.h"
 #include "command.h"
 #include "font.h"
+#include "JBXVTSelectionUnit.h"
 #include "libjb/log.h"
 #include "libjb/xcb.h"
 #include "lookup_key.h"
