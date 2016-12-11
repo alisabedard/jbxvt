@@ -1,6 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 //#undef DEBUG
+#define LOG_LEVEL 3
 #include "xvt.h"
 #include "cmdtok.h"
 #include "command.h"
@@ -477,22 +478,30 @@ bool jbxvt_parse_token(xcb_connection_t * xc)
 		jbxvt_save_cursor();
 		break;
 	case JBXVT_TOKEN_CS_G0:
+#if LOG_LEVEL > 6
 		LOG("JBXVT_TOKEN_CS_G0");
+#endif//LOG_LEVEL>6
 		select_charset(*t, 0);
 		break;
 	case JBXVT_TOKEN_CS_G1:
 	case JBXVT_TOKEN_CS_ALT_G1:
+#if LOG_LEVEL > 6
 		LOG("JBXVT_TOKEN_CS_G1");
+#endif//LOG_LEVEL>6
 		select_charset(*t, 1);
 		break;
 	case JBXVT_TOKEN_CS_G2:
 	case JBXVT_TOKEN_CS_ALT_G2:
+#if LOG_LEVEL > 6
 		LOG("JBXVT_TOKEN_CS_G2");
+#endif//LOG_LEVEL>6
 		select_charset(*t, 2);
 		break;
 	case JBXVT_TOKEN_CS_G3:
 	case JBXVT_TOKEN_CS_ALT_G3:
+#if LOG_LEVEL > 6
 		LOG("JBXVT_TOKEN_CS_G3");
+#endif//LOG_LEVEL>6
 		select_charset(*t, 3);
 		break;
 	case JBXVT_TOKEN_SD:

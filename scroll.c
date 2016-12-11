@@ -2,7 +2,7 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
 //#undef DEBUG
-#define LOG_LEVEL 6
+#define LOG_LEVEL 3
 #include "scroll.h"
 #include <string.h>
 #include "cursor.h"

@@ -87,7 +87,6 @@ static void handle_insert(xcb_connection_t * restrict xc,
 static void parse_special_charset(uint8_t * restrict str,
 	const uint8_t len)
 {
-	LOG("CHARSET_SG0");
 	for (int_fast16_t i = len ; i >= 0; --i) {
 		uint8_t * ch = &str[i];
 		switch (*ch) {
