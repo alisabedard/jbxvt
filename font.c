@@ -10,15 +10,6 @@ struct JBDim jbxvt_get_font_size(void)
 {
 	return font_size;
 }
-xcb_cursor_t jbxvt_get_x_cursor(xcb_connection_t * xc,
-	const char * restrict name)
-{
-	xcb_cursor_context_t * ctx;
-	xcb_cursor_context_new(xc, jb_get_xcb_screen(xc), &ctx);
-	const xcb_cursor_t c = xcb_cursor_load_cursor(ctx, name);
-	xcb_cursor_context_free(ctx);
-	return c;
-}
 static void setup_font_metrics(xcb_connection_t * xc,
 	const xcb_query_font_cookie_t c)
 {
