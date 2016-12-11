@@ -1,6 +1,8 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
+//#undef DEBUG
+#define LOG_LEVEL 3
 #include "string.h"
 #include <string.h>
 #include <unistd.h>
@@ -23,11 +25,6 @@
 #include "size.h"
 #include "tab.h"
 #include "window.h"
-//#define STRING_DEBUG
-#ifndef STRING_DEBUG
-#undef LOG
-#define LOG(...)
-#endif//!STRING_DEBUG
 static void handle_new_lines(xcb_connection_t * restrict xc, int8_t nlcount)
 {
 	struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
@@ -35,8 +32,10 @@ static void handle_new_lines(xcb_connection_t * restrict xc, int8_t nlcount)
 	struct JBDim * m = &s->margin;
 	nlcount = y > m->b ? 0 : nlcount - m->b - y;
 	JB_LIMIT(nlcount, y - m->top, 0);
-	scroll(xc, m->top, m->bottom, nlcount);
-	s->cursor.y -= nlcount;
+	if (nlcount) { // only worth doing if nlcount has a value:
+		scroll(xc, m->top, m->bottom, nlcount);
+		s->cursor.y -= nlcount;
+	}
 }
 static void decsclm(void)
 {
@@ -177,7 +176,9 @@ static void recover_from_shift(void)
 void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str,
 	uint8_t len, int8_t nlcount)
 {
+#if LOG_LEVEL > 5
 	LOG("jbxvt_string(%s, len: %d, nlcount: %d)", str, len, nlcount);
+#endif//LOG_LEVEL>5
 	jbxvt_set_scroll(xc, 0);
 	jbxvt_draw_cursor(xc);
 	if (nlcount > 0)

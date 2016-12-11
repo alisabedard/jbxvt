@@ -1,6 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.  */
+#undef DEBUG
 #include "screen.h"
 #include <string.h>
 #include "cursor.h"
@@ -13,11 +14,6 @@
 #include "scr_reset.h"
 #include "scroll.h"
 #include "size.h"
-///#define JBXVT_DEBUG_SCREEN
-#ifndef JBXVT_DEBUG_SCREEN
-#undef LOG
-#define LOG(...)
-#endif//!JBXVT_DEBUG_SCREEN
 static uint8_t screen_index; // current screen
 static struct JBXVTScreen * jbxvt_get_screens(void)
 {
@@ -35,6 +31,11 @@ struct JBXVTScreen * jbxvt_get_current_screen(void)
 {
 	// this, in effect, validates screen_index
 	return jbxvt_get_screen_at(screen_index);
+}
+// Returns the specified row of the current screen
+struct JBXVTLine * jbxvt_get_line(const uint8_t row)
+{
+	return jbxvt_get_current_screen()->line + row;
 }
 // Returns a pointer to the current screen's margin data
 struct JBDim * jbxvt_get_margin(void)
@@ -78,6 +79,7 @@ void jbxvt_change_screen(xcb_connection_t * xc, const bool mode_high)
 	jbxvt_reset(xc);
 	home(xc);
 	jbxvt_erase_screen(xc, JBXVT_ERASE_AFTER);
+	jbxvt_clear_saved_lines(xc);
 }
 // Scroll from top to current bottom margin count lines, moving cursor
 void jbxvt_index_from(xcb_connection_t * xc,

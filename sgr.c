@@ -1,16 +1,14 @@
 /*  Copyright 2016, Jeffrey E. Bedard
-    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-#include "handle_sgr.h"
+    Copyright 1992, 1997 John Bovey,
+    University of Kent at Canterbury. */
+//#undef DEBUG
+#define LOG_LEVEL 3
+#include "sgr.h"
 #include "color.h"
+#include "JBXVTToken.h"
 #include "libjb/log.h"
 #include "libjb/macros.h"
-#include "paint.h"
 #include "rstyle.h"
-//#define DEBUG_SGR
-#ifndef DEBUG_SGR
-#undef LOG
-#define LOG(...)
-#endif//!DEBUG_SGR
 // Convert 3 bit color to 9 bit color, store at offset
 __attribute__((cold))
 static void encode_rgb(uint8_t color, uint8_t offset)
@@ -71,7 +69,9 @@ void jbxvt_handle_sgr(xcb_connection_t * xc,
 	bool bg_rgb_mode = false;
 	bool bg_index_mode = false;
 	for (uint_fast8_t i = 0; i < token->nargs; ++i) {
+#if LOG_LEVEL > 5
 		LOG("jbxvt_handle_sgr: arg[%d]: %d", i, token->arg[i]);
+#endif//LOG_LEVEL>5
 		if (rgb_or_index(token->arg[i], &fg_rgb_or_index,
 			&fg_index_mode, &fg_rgb_mode, true))
 			  continue;

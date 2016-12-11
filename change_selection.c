@@ -1,9 +1,11 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "change_selection.h"
+#include <assert.h>
 #include "config.h"
 #include "cursor.h"
 #include "font.h"
+#include "libjb/log.h"
 #include "screen.h"
 #include "selend.h"
 #include "selection.h"
@@ -56,6 +58,10 @@ static void change(xcb_connection_t * restrict xc, struct JBDim * se,
 void jbxvt_change_selection(xcb_connection_t * xc,
 	struct JBDim * restrict ose0, struct JBDim * restrict ose1)
 {
+	LOG("jbxvt_change_selection()");
+	assert(xc);
+	assert(ose0);
+	assert(ose1);
 	if (jbxvt_selcmp(ose0, ose1) > 0) {
 		struct JBDim * se = ose0;
 		ose0 = ose1;

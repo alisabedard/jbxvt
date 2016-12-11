@@ -4,15 +4,9 @@
 #define JBXVT_SELECTION_H
 #include <stdbool.h>
 #include <xcb/xcb.h>
-#include "JBXVTSelectionUnit.h"
-#include "libjb/JBDim.h"
-struct JBXVTSelectionData {
-	uint8_t * text;
-	enum JBXVTSelectionUnit unit;
-	struct JBDim end[3]; // end0, end1, anchor
-	uint16_t length:15;
-	bool on_screen:1;
-};
+enum JBXVTSelectionUnit;
+struct JBXVTSelectionData;
+struct JBDim;
 /*  Determine if the current selection overlaps row1-row2.
     If it does, then remove it from the screen.  */
 void jbxvt_check_selection(xcb_connection_t * xc,

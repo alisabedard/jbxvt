@@ -1,5 +1,6 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+//#undef DEBUG
 #include "xvt.h"
 #include "cmdtok.h"
 #include "command.h"
@@ -8,7 +9,6 @@
 #include "double.h"
 #include "dsr.h"
 #include "edit.h"
-#include "handle_sgr.h"
 #include "libjb/log.h"
 #include "lookup_key.h"
 #include "mode.h"
@@ -16,6 +16,7 @@
 #include "erase.h"
 #include "scr_move.h"
 #include "scr_reset.h"
+#include "sgr.h"
 #include "string.h"
 #include "screen.h"
 #include "scroll.h"
@@ -24,11 +25,6 @@
 #include "tab.h"
 #include "tk_char.h"
 #include "window.h"
-#define JBXVT_DEBUG_XVT
-#ifndef JBXVT_DEBUG_XVT
-#undef LOG
-#define LOG(...)
-#endif//!JBXVT_DEBUG_XVT
 //#define DEBUG_TOKENS
 #ifdef DEBUG_TOKENS
 #define TLOG(...) LOG(__VA_ARGS__)

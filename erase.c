@@ -1,6 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
+//#undef DEBUG
 #include "erase.h"
 #include <string.h>
 #include "cursor.h"
@@ -10,11 +11,6 @@
 #include "screen.h"
 #include "size.h"
 #include "window.h"
-//#define DEBUG_ERASE
-#ifndef DEBUG_ERASE
-#undef LOG
-#define LOG(...)
-#endif//DEBUG_ERASE
 static inline uint16_t get_width(void)
 {
 	return jbxvt_get_char_size().width;
@@ -30,23 +26,23 @@ static void clear_area(xcb_connection_t * restrict xc,
 	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), x * f.w, y * f.h,
 		width * f.w, f.h);
 }
-static uint16_t get_limited_width(const uint16_t col, uint16_t width)
+static uint16_t get_limited_width(const uint16_t col, const uint16_t width)
 {
 	const uint16_t cw = get_width();
-	if (col + width > cw) // keep in screen
-		width = cw - col;
-	return width;
+	// keep col + width within the screen width
+	return (col + width > cw) ? cw - col : width;
 }
-static void delete(xcb_connection_t * restrict xc, uint16_t col,
+static void delete(xcb_connection_t * restrict xc, const uint16_t col,
 	uint16_t width)
 {
 	width = get_limited_width(col, width);
 	struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
 	const int16_t y = s->cursor.y;
-	memset(s->line[y].text + col, 0, width);
-	memset(s->line[y].rend + col, 0, width << 2);
+	struct JBXVTLine * restrict l = s->line + y;
+	memset(l->text + col, 0, width);
+	memset(l->rend + col, 0, width << 2);
 	clear_area(xc, col, y, width);
-	s->line[y].wrap = s->line[y].dwl = false;
+	l->wrap = l->dwl = false;
 }
 static inline void delete_after(xcb_connection_t * restrict xc,
 	const int16_t x)
@@ -74,25 +70,24 @@ void jbxvt_erase_line(xcb_connection_t * xc, const int8_t mode)
 static bool assign_range(xcb_connection_t * restrict xc,
 	const int8_t mode, struct JBDim * restrict range)
 {
+#define SETR(s, e) range->start = s; range->end = e;
 	switch (mode) {
 		// offset by 1 to not include current line, handled later
 	case JBXVT_ERASE_AFTER:
-		range->start = jbxvt_get_y() + 1;
-		range->end = jbxvt_get_char_size().h;
+		SETR(jbxvt_get_y() + 1, jbxvt_get_char_size().h);
 		break;
 	case JBXVT_ERASE_BEFORE:
-		range->start = 0;
-		range->end = jbxvt_get_y() - 1;
+		SETR(0, jbxvt_get_y() - 1);
 		break;
 	case JBXVT_ERASE_SAVED:
 		jbxvt_clear_saved_lines(xc);
 		return false;
 	default: // JBXVT_ERASE_ALL
-		range->start = 0;
-		range->end = get_height() - 1;
+		SETR(0, get_height() - 1);
 		break;
 	}
 	return true;
+#undef SETR
 }
 // Erase the specified portion of the screen.
 void jbxvt_erase_screen(xcb_connection_t * xc, const int8_t mode)

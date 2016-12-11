@@ -1,8 +1,11 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
+//#undef DEBUG
+#define LOG_LEVEL 6
 #include "scroll.h"
 #include <string.h>
+#include "cursor.h"
 #include "font.h"
 #include "libjb/log.h"
 #include "libjb/macros.h"
@@ -13,20 +16,10 @@
 #include "selection.h"
 #include "size.h"
 #include "window.h"
-//#define DEBUG_SCROLL_HISTORY
-#define SCROLL_DEBUG
-#ifndef SCROLL_DEBUG
-#undef LOG
-#define LOG(...)
-#endif//!SCROLL_DEBUG
 static struct JBXVTLine * saved_lines;
 static uint16_t scroll_size;
 struct JBXVTLine * jbxvt_get_saved_lines(void)
 {
-	if (!saved_lines) {
-		saved_lines = calloc(1, sizeof(struct JBXVTLine));
-		scroll_size = 1;
-	}
 	return saved_lines;
 }
 void jbxvt_clear_scroll_history(void)
@@ -80,17 +73,17 @@ static void copy_visible_area(xcb_connection_t * xc,
 // Restrict scroll history size to JBXVT_MAX_SCROLL:
 static void trim(void)
 {
-	enum { SZ = sizeof(struct JBXVTLine) };
+	enum { SZ = sizeof(struct JBXVTLine), LIM = JBXVT_MAX_SCROLL };
 	// Only work when scroll_size is twice JBXVT_MAX_SCROLL
-	if (scroll_size < JBXVT_MAX_SCROLL << 1)
+	if (scroll_size < LIM << 1)
 		return;
-	struct JBXVTLine * new = malloc(JBXVT_MAX_SCROLL * SZ), * i;
-	const int diff = scroll_size - JBXVT_MAX_SCROLL;
+	struct JBXVTLine * new = malloc(LIM * SZ), * i;
+	const int diff = scroll_size - LIM;
 	i = saved_lines + diff;
-	memcpy(new, i, JBXVT_MAX_SCROLL * SZ);
+	memcpy(new, i, LIM * SZ);
 	free(saved_lines);
 	saved_lines = new;
-	scroll_size = JBXVT_MAX_SCROLL;
+	scroll_size = LIM;
 }
 static void add_scroll_history(void)
 {
@@ -156,13 +149,6 @@ static void sc_up(xcb_connection_t * xc, const uint8_t row1, const
 		move_line(j, -count, s);
 	sc_common(xc, row1, row2, count, true);
 }
-#ifdef DEBUG_SCROLL_HISTORY
-static void print_scroll_history(void)
-{
-	for (uint16_t i = 0; i < scroll_size; ++i)
-		puts((char *)saved_lines[i].text);
-}
-#endif//DEBUG_SCROLL_HISTORY
 /*  Scroll count lines from row1 to row2 inclusive.
     row1 should be <= row2.  Scrolling is up for a positive count and
     down for a negative count.  count is limited to a maximum of
@@ -170,11 +156,16 @@ static void print_scroll_history(void)
 void scroll(xcb_connection_t * xc, const uint8_t row1,
 	const uint8_t row2, const int16_t count)
 {
-	if (!count)
+#if LOG_LEVEL > 5
+	LOG("scroll(xc, row1: %d, row2: %d, count: %d)", row1, row2,
+		count);
+#endif//LOG_LEVEL>5
+	if (JB_UNLIKELY(!count))
 		return;
-	(count > 0 ? sc_up : sc_dn)(xc, row1, row2 + 1, abs(count));
+	(JB_LIKELY(count > 0) ? sc_up : sc_dn)(xc, row1, row2 + 1, abs(count));
 	jbxvt_set_scroll(xc, 0);
-#ifdef DEBUG_SCROLL_HISTORY
-	print_scroll_history();
-#endif//DEBUG_SCROLL_HISTORY
+#if LOG_LEVEL > 8
+	for (uint16_t i = 0; i < scroll_size; ++i)
+		puts((char *)saved_lines[i].text);
+#endif//LOG_LEVEL>10
 }

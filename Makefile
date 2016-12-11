@@ -11,7 +11,7 @@ objs=jbxvt.o lookup_key.o paint.o change_selection.o cmdtok.o esc.o
 objs+=cursor.o display.o repaint.o save_selection.o scr_move.o size.o
 objs+=sbar.o erase.o selex.o edit.o command.o selection.o dcs.o
 objs+=selreq.o scr_reset.o string.o screen.o scroll.o selend.o 
-objs+=xevents.o window.o xvt.o handle_sgr.o dec_reset.o show_selection.o
+objs+=xevents.o window.o xvt.o sgr.o dec_reset.o show_selection.o
 objs+=mouse.o double.o dsr.o font.o color.o tab.o rstyle.o tk_char.o
 objs+=xcb_screen.o mode.o
 extra+=color_index.h
@@ -65,3 +65,4 @@ libjb: libjb/libjb.a
 libjb/libjb.a:
 	cd libjb && ${MAKE} CC=${CC} libjb.a
 #EOF
+# DO NOT DELETE
