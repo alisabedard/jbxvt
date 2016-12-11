@@ -7,6 +7,7 @@
 #include "JBXVTSelectionData.h"
 #include "libjb/JBDim.h"
 #include "libjb/log.h"
+#include "libjb/macros.h"
 #include "screen.h"
 #include "selend.h"
 #include "size.h"
@@ -66,10 +67,16 @@ static void copy(uint8_t * str, uint8_t * scr_text,
 	char * src = (char *) scr_text + start;
 	strncpy(dest, src, len);
 }
-static bool is_on_screen(const struct JBDim p)
+static inline bool is_on_screen(const struct JBDim p)
 {
 	const struct JBDim c = jbxvt_get_char_size();
 	return p.x < c.x && p.y < c.y;
+}
+static void limit_anchor(struct JBDim * anchor)
+{
+	const struct JBDim c = jbxvt_get_char_size();
+	JB_LIMIT(anchor->x, c.x - 1, 0);
+	JB_LIMIT(anchor->y, c.y - 1, 0);
 }
 static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 	struct JBDim * restrict e)
@@ -78,8 +85,9 @@ static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 	assert(total);
 	assert(e);
 	// Make sure the selection falls within the screen area:
-	if (!is_on_screen(e[0]) || !is_on_screen(e[1]) || !is_on_screen(e[2]))
+	if (!is_on_screen(e[0]) || !is_on_screen(e[1]))
 		return; // Invalid end point found
+	limit_anchor(e + 2);
 	for (int_fast16_t i = e[0].index, j = e[1].index; i <= j; ++i) {
 		/* Use full screen width if not first or last lines of
 		   selection, otherwise use the col field in the respective
