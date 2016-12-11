@@ -8,9 +8,8 @@ struct JBXVTFontOptions {
 	char * bold;
 	char * italic;
 };
-// Returns 0 if cursor font cannot be opened.
-xcb_cursor_t jbxvt_get_xcb_cursor(xcb_connection_t * xc,
-	const uint16_t id, const uint16_t fg, const uint16_t bg);
+xcb_cursor_t jbxvt_get_x_cursor(xcb_connection_t * xc,
+	const char * restrict name);
 uint8_t jbxvt_get_font_ascent(void);
 struct JBDim jbxvt_get_font_size(void);
 xcb_font_t jbxvt_get_normal_font(xcb_connection_t * xc);

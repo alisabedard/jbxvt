@@ -1,6 +1,7 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "font.h"
 #include <stdlib.h>
+#include <xcb/xcb_cursor.h>
 #include "libjb/util.h"
 #include "libjb/xcb.h"
 static uint8_t font_ascent;
@@ -9,23 +10,14 @@ struct JBDim jbxvt_get_font_size(void)
 {
 	return font_size;
 }
-static xcb_cursor_t get_cursor_from_font(xcb_connection_t * xc,
-	const xcb_font_t fid, const uint16_t id,
-	const uint16_t fg, const uint16_t bg)
+xcb_cursor_t jbxvt_get_x_cursor(xcb_connection_t * xc,
+	const char * restrict name)
 {
-	xcb_cursor_t c = xcb_generate_id(xc);
-	xcb_create_glyph_cursor(xc, c, fid, fid,
-		id, id + 1, fg, fg, fg, bg, bg, bg);
-	xcb_close_font(xc, fid);
+	xcb_cursor_context_t * ctx;
+	xcb_cursor_context_new(xc, jb_get_xcb_screen(xc), &ctx);
+	const xcb_cursor_t c = xcb_cursor_load_cursor(ctx, name);
+	xcb_cursor_context_free(ctx);
 	return c;
-}
-xcb_cursor_t jbxvt_get_xcb_cursor(xcb_connection_t * xc, const uint16_t id,
-	const uint16_t fg, const uint16_t bg)
-{
-	xcb_font_t f = xcb_generate_id(xc);
-	if (!jb_open_font(xc, f, "cursor"))
-		return 0;
-	return get_cursor_from_font(xc, f, id, fg, bg);
 }
 static void setup_font_metrics(xcb_connection_t * xc,
 	const xcb_query_font_cookie_t c)
