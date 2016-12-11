@@ -4,7 +4,6 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include "config.h"
 #include "JBXVTSelectionData.h"
 #include "libjb/JBDim.h"
 #include "libjb/log.h"
@@ -67,16 +66,21 @@ static void copy(uint8_t * str, uint8_t * scr_text,
 	char * src = (char *) scr_text + start;
 	strncpy(dest, src, len);
 }
+static bool is_on_screen(const struct JBDim p)
+{
+	const struct JBDim c = jbxvt_get_char_size();
+	return p.x < c.x && p.y < c.y;
+}
 static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 	struct JBDim * restrict e)
 {
 	assert(str);
 	assert(total);
 	assert(e);
-	if ((e->index == (e+1)->index && e->col == (e+1)->col)
-		|| e->y < 1) // not within the screen area
-		return; // NULL selection
-	for (int_fast16_t i = e->index, j = (e+1)->index; i <= j; ++i) {
+	// Make sure the selection falls within the screen area:
+	if (!is_on_screen(e[0]) || !is_on_screen(e[1]) || !is_on_screen(e[2]))
+		return; // Invalid end point found
+	for (int_fast16_t i = e[0].index, j = e[1].index; i <= j; ++i) {
 		/* Use full screen width if not first or last lines of
 		   selection, otherwise use the col field in the respective
 		   end point.  */
@@ -90,6 +94,7 @@ static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 	}
 	*total = sanitize(*str, *total) + 1;
 	*str = realloc(*str, *total);
+	assert(str);
 }
 /*  Convert the currently marked screen selection as a text string
     and save it as the current saved selection. */
@@ -102,11 +107,13 @@ void jbxvt_save_selection(struct JBXVTSelectionData * sel)
 		sel->end[fwd ? 1 : 0]};
 	uint16_t total = 1;
 	uint8_t * str = malloc(total);
-	if (!str) // Cannot perform selection, malloc failed.
-		return;
+	assert(str);
 	handle_screensel(&str, &total, se);
 	if (!total)
 		return;
 	str[sel->length = --total] = 0; // null termination
 	sel->text = str;
+	LOG("jbxvt_save_selection() sel->text: %s, sel->unit: %d, "
+		"sel->length: %d", sel->text, sel->unit, sel->length);
+
 }
