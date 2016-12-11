@@ -63,7 +63,7 @@ scr_reset.o: scr_reset.c scr_reset.h color.h libjb/xcb.h command.h \
 screen.o: screen.c screen.h JBXVTScreen.h JBXVTLine.h config.h rstyle.h \
  libjb/JBDim.h cursor.h libjb/log.h mode.h JBXVTPrivateModes.h repaint.h \
  sbar.h erase.h scr_move.h scr_reset.h scroll.h size.h
-scroll.o: scroll.c scroll.h JBXVTLine.h config.h rstyle.h font.h \
+scroll.o: scroll.c scroll.h JBXVTLine.h config.h rstyle.h cursor.h font.h \
  libjb/JBDim.h libjb/log.h libjb/macros.h libjb/util.h paint.h sbar.h \
  screen.h JBXVTScreen.h selection.h JBXVTSelectionUnit.h size.h window.h
 selection.o: selection.c selection.h JBXVTSelectionUnit.h libjb/JBDim.h \
@@ -75,8 +75,8 @@ selex.o: selex.c selex.h libjb/JBDim.h change_selection.h libjb/macros.h \
  selection.h JBXVTSelectionUnit.h selend.h size.h
 selreq.o: selreq.c selreq.h command.h libjb/JBDim.h libjb/util.h config.h \
  libjb/log.h selection.h JBXVTSelectionUnit.h window.h
-sgr.o: sgr.c sgr.h color.h libjb/xcb.h libjb/log.h libjb/macros.h paint.h \
- libjb/JBDim.h rstyle.h
+sgr.o: sgr.c sgr.h color.h libjb/xcb.h JBXVTToken.h JBXVTTokenType.h \
+ libjb/log.h libjb/macros.h rstyle.h
 show_selection.o: show_selection.c show_selection.h cursor.h font.h \
  libjb/JBDim.h selection.h JBXVTSelectionUnit.h selend.h size.h window.h
 size.o: size.c size.h libjb/JBDim.h font.h
