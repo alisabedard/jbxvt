@@ -47,9 +47,10 @@ repaint.o: repaint.c repaint.h font.h libjb/JBDim.h paint.h sbar.h \
  screen.h JBXVTScreen.h JBXVTLine.h config.h rstyle.h scroll.h \
  show_selection.h size.h
 rstyle.o: rstyle.c rstyle.h
-save_selection.o: save_selection.c save_selection.h selection.h config.h \
+save_selection.o: save_selection.c save_selection.h selection.h \
  JBXVTSelectionData.h JBXVTSelectionUnit.h libjb/JBDim.h libjb/log.h \
- screen.h JBXVTScreen.h JBXVTLine.h rstyle.h selend.h size.h
+ libjb/macros.h screen.h JBXVTScreen.h JBXVTLine.h config.h rstyle.h \
+ selend.h size.h
 sbar.o: sbar.c sbar.h config.h cursor.h libjb/macros.h paint.h \
  libjb/JBDim.h repaint.h scroll.h JBXVTLine.h rstyle.h size.h window.h
 scr_move.o: scr_move.c scr_move.h cursor.h libjb/log.h libjb/macros.h \
