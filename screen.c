@@ -32,6 +32,11 @@ struct JBXVTScreen * jbxvt_get_current_screen(void)
 	// this, in effect, validates screen_index
 	return jbxvt_get_screen_at(screen_index);
 }
+// Returns the specified row of the current screen
+struct JBXVTLine * jbxvt_get_line(const uint8_t row)
+{
+	return jbxvt_get_current_screen()->line + row;
+}
 // Returns a pointer to the current screen's margin data
 struct JBDim * jbxvt_get_margin(void)
 {
