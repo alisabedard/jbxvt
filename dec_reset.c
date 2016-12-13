@@ -60,8 +60,7 @@ void jbxvt_dec_reset(xcb_connection_t * xc, struct JBXVTToken * restrict token)
 			/* According to the spec, the cursor is reset to
 			   the home position when this is changed.  */
 			m->decom = is_set;
-			jbxvt_move(xc, jbxvt_get_current_screen()->margin.top,
-				0, 0);
+			jbxvt_move(xc, jbxvt_get_margin()->top, 0, 0);
 			break;
 		case 7: // DECAWM
 		case 45: // reverse wrap-around mode?
