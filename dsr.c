@@ -2,6 +2,7 @@
 #include "dsr.h"
 #include "cmdtok.h"
 #include "command.h"
+#include "cursor.h"
 #include "libjb/log.h"
 #include "screen.h"
 void jbxvt_handle_dsr(const int16_t arg)
@@ -9,7 +10,8 @@ void jbxvt_handle_dsr(const int16_t arg)
 	LOG("handle_dsr(%d)", arg);
 	switch (arg) {
 	case 6 : { // CPR: cursor position report
-		const struct JBDim c = jbxvt_get_current_screen()->cursor;
+		LOG("CPR: cursor position report");
+		const struct JBDim c = jbxvt_get_cursor();
 		dprintf(jbxvt_get_fd(), "%s%d;%dR", jbxvt_get_csi(),
 			c.y + 1, c.x + 1);
 		break;
