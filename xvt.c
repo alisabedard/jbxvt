@@ -1,7 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 //#undef DEBUG
-#define LOG_LEVEL 3
+#define LOG_LEVEL 8
 #include "xvt.h"
 #include "cmdtok.h"
 #include "command.h"
@@ -26,12 +26,11 @@
 #include "tab.h"
 #include "tk_char.h"
 #include "window.h"
-//#define DEBUG_TOKENS
-#ifdef DEBUG_TOKENS
+#if LOG_LEVEL > 6
 #define TLOG(...) LOG(__VA_ARGS__)
-#else
+#else//LOG_LEVEL<=6
 #define TLOG(...)
-#endif//DEBUG_TOKENS
+#endif//LOG_LEVEL>6
 // Return a default of 1 if arg is 0:
 __attribute__((const))
 static int16_t get_n(const int16_t arg)
