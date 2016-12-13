@@ -61,10 +61,13 @@ void jbxvt_edit_characters(xcb_connection_t * xc,
 	if (delete)
 		JB_SWAP(uint8_t *, a, b);
 	l->wrap = false;
-	memmove(b, a, JBXVT_MAX_COLUMNS-count-x);
+	/* Perform the off-screen edit:  */
+	memmove(b, a, JBXVT_MAX_COLUMNS - count - x);
 #if LOG_LEVEL > 8
-	LOG("%s", l->text);
+	LOG("%s", l->text); /* show that the edit occurred in the
+			       off-screen buffer.  */
 #endif//LOG_LEVEL>8
+	/* Begin the on-screen edit.  */
 	const int16_t p[] = {a - t, b - t};
 #if LOG_LEVEL > 5
 	LOG("\tp[0]: %d, p[1]: %d", p[0], p[1]);
