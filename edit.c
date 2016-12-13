@@ -2,6 +2,7 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
 //#undef DEBUG
+#define LOG_LEVEL 5
 #include "edit.h"
 #include <string.h>
 #include "cursor.h"
@@ -23,7 +24,7 @@ static uint16_t get_copy_width(const uint8_t count,
 	const uint16_t w = cw - count - x - 1;
 	return w * font_width;
 }
-static uint16_t copy_area(xcb_connection_t * restrict xc,
+static void copy_area(xcb_connection_t * restrict xc,
 	const int16_t * restrict x, const uint8_t count)
 {
 	const xcb_window_t v = jbxvt_get_vt_window(xc);
@@ -33,12 +34,22 @@ static uint16_t copy_area(xcb_connection_t * restrict xc,
 	const xcb_gc_t gc = jbxvt_get_text_gc(xc);
 	const uint16_t px = f.w * x[1];
 	xcb_copy_area(xc, v, v, gc, f.w * x[0], y, px, y, w, f.h);
-	return w;
+}
+static void clear_area(xcb_connection_t * restrict xc, const int16_t x,
+	const int16_t y, const uint8_t count)
+{
+	const struct JBDim f = jbxvt_get_font_size();
+	const xcb_window_t v = jbxvt_get_vt_window(xc);
+	xcb_clear_area(xc, 0, v, x*f.w, y*f.h, count*f.w, f.h);
 }
 void jbxvt_edit_characters(xcb_connection_t * xc,
 	const uint8_t count, const bool delete)
 {
 	const int16_t x = jbxvt_get_x();
+	if (x + count >= JBXVT_MAX_COLUMNS) {
+		LOG("WARNING: attempted to write outside of buffer");
+		return; // Stay within bounds!
+	}
 	LOG("jbxvt_edit_characters(count: %d, delete: %s, x: %d)",
 		count, delete ? "true" : "false", x);
 	const int16_t y = jbxvt_get_y();
@@ -46,24 +57,20 @@ void jbxvt_edit_characters(xcb_connection_t * xc,
 	struct JBXVTLine * l = jbxvt_get_line(y);
 	uint8_t * t = l->text;
 	uint8_t * a = t + x;
-	if (x + count >= JBXVT_MAX_COLUMNS) {
-		LOG("\tWARNING: attempted to write outside of buffer");
-		return; // Stay within bounds!
-	}
 	uint8_t * b = a + count;
-	if (delete) {
+	if (delete)
 		JB_SWAP(uint8_t *, a, b);
-		l->wrap = false;
-	}
-	memmove(a, b, count);
+	l->wrap = false;
+	memmove(b, a, JBXVT_MAX_COLUMNS-count-x);
+#if LOG_LEVEL > 8
+	LOG("%s", l->text);
+#endif//LOG_LEVEL>8
 	const int16_t p[] = {a - t, b - t};
+#if LOG_LEVEL > 5
 	LOG("\tp[0]: %d, p[1]: %d", p[0], p[1]);
-	if (delete) {
-		const struct JBDim f = jbxvt_get_font_size();
-		const xcb_window_t v = jbxvt_get_vt_window(xc);
-		xcb_clear_area(xc, 0, v, x*f.w, y*f.h,
-			count*f.w, f.h);
-	}
-	copy_area(xc, p, count);
+#endif//LOG_LEVEL>5
+	if (delete)
+		clear_area(xc, x, y, count);
+	copy_area(xc, p, count); // must come after clear_area()
 	jbxvt_draw_cursor(xc);
 }
