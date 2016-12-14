@@ -66,8 +66,7 @@ static void adj_sel_to_word(struct JBDim * include,
 			  ++i;
 		text = get_text_at(se2);
 		for (const uint16_t len = jbxvt_get_char_size().width;
-			i < len && text[i] && text[i] != ' ' &&
-			text[i] != '\n'; ++i)
+			i < len && text[i] > ' '; ++i)
 			;
 	}
 	se2->col = i;
