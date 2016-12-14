@@ -2,6 +2,7 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
 #include "selend.h"
+#include <assert.h>
 #include "JBXVTLine.h"
 #include "JBXVTSelectionUnit.h"
 #include "libjb/JBDim.h"
@@ -30,6 +31,7 @@ int8_t jbxvt_selcmp(struct JBDim * restrict se1,
 void jbxvt_rc_to_selend(const int16_t row, const int16_t col,
 	struct JBDim * se)
 {
+	assert(se);
 	se->index = row - jbxvt_get_scroll();
 	se->col = col;
 }
@@ -37,6 +39,9 @@ void jbxvt_rc_to_selend(const int16_t row, const int16_t col,
 void jbxvt_selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
 	struct JBDim * restrict se)
 {
+	assert(rowp);
+	assert(colp);
+	assert(se);
 	if (jbxvt_is_selected()) {
 		*colp = se->col;
 		*rowp = se->row + jbxvt_get_scroll();
@@ -75,6 +80,7 @@ static void adj_sel_to_word(struct JBDim * include,
 // Make sure selection end point 0 comes before end point 1
 struct JBDim * jbxvt_order_selection_ends(struct JBDim * e)
 {
+	assert(e);
 	if (jbxvt_selcmp(e, e + 1) <= 0) {
 		// copy data, not addresses, here
 		const struct JBDim tmp = e[0];
@@ -88,6 +94,7 @@ struct JBDim * jbxvt_order_selection_ends(struct JBDim * e)
     is forced to be large enough to include it.  */
 void jbxvt_adjust_selection(struct JBDim * restrict include)
 {
+	assert(include);
 	const enum JBXVTSelectionUnit u = jbxvt_get_selection_unit();
 	if (u == JBXVT_SEL_UNIT_CHAR)
 		return;
