@@ -9,22 +9,17 @@
 #include "screen.h"
 #include "selection.h"
 #include "size.h"
-static int8_t cmp(const int8_t mod, struct JBDim * restrict se1,
-	struct JBDim * restrict se2)
-{
-	if (se1->index == se2->index)
-		return se1->col - se2->col;
-	return (se2->index - se1->index) * mod;
-}
 /*  Compare the two selections and return negtive,
     0 or positive depending on whether se2 is after,
     equal to or before se1.  */
 int8_t jbxvt_selcmp(struct JBDim * restrict se1,
 	struct JBDim * restrict se2)
 {
-	if (jbxvt_is_selected())
-		  return cmp(-1, se1, se2);
-	return 1;
+	if (!jbxvt_is_selected())
+		return 1;
+	if (se1->index == se2->index)
+		return se1->col - se2->col;
+	return se1->index - se2->index;
 }
 //  Convert a row and column coordinates into a selection endpoint.
 void jbxvt_rc_to_selend(const int16_t row, const int16_t col,
