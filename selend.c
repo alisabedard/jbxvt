@@ -50,7 +50,7 @@ static int16_t get_start_of_word(uint8_t * restrict s, int16_t i)
 {
 	return i && s[i] > ' ' ? get_start_of_word(s, i - 1) : i;
 }
-static void adj_sel_to_word(struct JBDim * include,
+static void adjust_to_word(struct JBDim * include,
 	struct JBDim * se1, struct JBDim * se2)
 {
 	if (se1->index < 0)
@@ -93,7 +93,7 @@ void jbxvt_adjust_selection(struct JBDim * restrict include)
 	struct JBDim * e = jbxvt_order_selection_ends(
 		jbxvt_get_selection_end_points());
 	if (u == JBXVT_SEL_UNIT_WORD)
-		  adj_sel_to_word(include, e, e + 1);
+		  adjust_to_word(include, e, e + 1);
 	else if (u == JBXVT_SEL_UNIT_LINE) {
 		e[0].col = 0;
 		e[1].col = jbxvt_get_char_size().width - 1;
