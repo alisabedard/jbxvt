@@ -49,9 +49,7 @@ static inline uint8_t * get_text_at(struct JBDim * endpoint)
 }
 static int16_t get_start_of_word(uint8_t * restrict s, int16_t i)
 {
-	while (i && s[i] > ' ')
-		  --i;
-	return i;
+	return i && s[i] > ' ' ? get_start_of_word(s, i - 1) : i;
 }
 static void adj_sel_to_word(struct JBDim * include,
 	struct JBDim * se1, struct JBDim * se2)
