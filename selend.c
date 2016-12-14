@@ -43,14 +43,13 @@ void jbxvt_selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
 		*rowp = se->row + jbxvt_get_scroll();
 	}
 }
-static uint16_t sel_s(struct JBDim * restrict se2, uint8_t ** s)
+static inline uint8_t * get_text_at(struct JBDim * endpoint)
 {
-	*s = jbxvt_get_current_screen()->line[se2->index].text;
-	return jbxvt_get_char_size().width;
+	return jbxvt_get_line(endpoint->index)->text;
 }
 static int16_t get_start_of_word(uint8_t * restrict s, int16_t i)
 {
-	while (i && s[i] != ' ')
+	while (i && s[i] > ' ')
 		  --i;
 	return i;
 }
@@ -58,20 +57,20 @@ static void adj_sel_to_word(struct JBDim * include,
 	struct JBDim * se1, struct JBDim * se2)
 {
 	if (se1->index < 0)
-		return; // protect against segfault if ends invalid
+		return; // protect against segfault if end is invalid
 	int16_t i;
 	{ // text scope
-		uint8_t * text =
-			jbxvt_get_current_screen()->line[se1->index].text;
-		i = get_start_of_word(text, se1->col); se1->col = i ?
-			i + 1 : 0;
+		uint8_t * text = get_text_at(se1);
+		se1->col = (i = get_start_of_word(text, se1->col))
+			? i + 1 : 0;
 		i = se2->col;
 		if (se2 == include || !jbxvt_selcmp(se2,
 			&jbxvt_get_selection_end_points()[2]))
 			  ++i;
-		for (const uint16_t len = sel_s(se2, &text);
-			i < len && text[i] && text[i] != ' '
-			&& text[i] != '\n'; ++i)
+		text = get_text_at(se2);
+		for (const uint16_t len = jbxvt_get_char_size().width;
+			i < len && text[i] && text[i] != ' ' &&
+			text[i] != '\n'; ++i)
 			;
 	}
 	se2->col = i;
