@@ -168,7 +168,9 @@ void scroll(xcb_connection_t * xc, const uint8_t row1,
 		count);
 #endif//LOG_LEVEL>5
 	if (JB_UNLIKELY(!count))
-		return;
+		return; // nothing to do
+	if (JB_UNLIKELY(row1 > row2))
+		return; // invalid
 	(JB_LIKELY(count > 0) ? sc_up : sc_dn)(xc, row1, row2 + 1, abs(count));
 	jbxvt_set_scroll(xc, 0);
 #if LOG_LEVEL > 8
