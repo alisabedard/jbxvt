@@ -1,11 +1,12 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "cursor.h"
+#include <stdbool.h>
 #include "JBXVTPrivateModes.h"
 #include "JBXVTScreen.h"
 #include "config.h"
 #include "font.h"
-#include "libjb/log.h"
+#include "libjb/JBDim.h"
 #include "mode.h"
 #include "repaint.h"
 #include "rstyle.h"

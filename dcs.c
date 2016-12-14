@@ -1,8 +1,9 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "dcs.h"
+#include <stdint.h>
 #include "JBXVTToken.h"
-#include "command.h"
+#include "JBXVTTokenType.h"
 #include "cmdtok.h"
 #include "libjb/log.h"
 static void check_st(xcb_connection_t * xc, struct JBXVTToken * t)

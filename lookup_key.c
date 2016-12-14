@@ -1,6 +1,7 @@
 // Copyright 2016, Jeffrey E. Bedard
 #undef DEBUG
 #include "lookup_key.h"
+#include <stdio.h>
 #include <string.h>
 #include <xcb/xcb_keysyms.h>
 #include "command.h"
