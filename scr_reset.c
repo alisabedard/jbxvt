@@ -63,6 +63,7 @@ static void decscnm(xcb_connection_t * restrict xc)
 void jbxvt_reset(xcb_connection_t * restrict xc)
 {
 	LOG("jbxvt_reset()");
+	jbxvt_resize_window(xc);
 	struct JBDim c = jbxvt_get_char_size();
 	fix_margins(c);
 	init_screen_elements(jbxvt_get_screen_at(0));
@@ -71,10 +72,10 @@ void jbxvt_reset(xcb_connection_t * restrict xc)
 	c.w = JB_MIN(c.w, JBXVT_MAX_COLUMNS);
 	c.h = JB_MIN(c.h, JBXVT_MAX_ROWS);
 	jbxvt_set_tty_size(c);
-	jbxvt_set_pixel_size(jbxvt_chars_to_pixels(c));
 	jbxvt_check_cursor_position();
 	jbxvt_draw_scrollbar(xc);
 	decscnm(xc);
 	jbxvt_repaint(xc);
 	jbxvt_draw_cursor(xc);
+	xcb_flush(xc);
 }
