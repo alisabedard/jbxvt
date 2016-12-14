@@ -2,9 +2,9 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #ifndef JBXVT_COMMAND_H
 #define JBXVT_COMMAND_H
-#include <xcb/xcb.h>
-#include "libjb/JBDim.h"
+#include <stdint.h>
 #include "libjb/util.h"
+struct JBDim;
 enum JBXVTCommandLimits {
 	KBUFSIZE =	8,		// size of keyboard mapping buffer
 	COM_BUF_SIZE =	UINT8_MAX,	// size of command read buffer
