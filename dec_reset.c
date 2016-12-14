@@ -2,6 +2,7 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #undef DEBUG
 #include "dec_reset.h"
+#include <assert.h>
 #include <stdbool.h>
 #include <sys/types.h>
 #include "JBXVTPrivateModes.h"
@@ -34,6 +35,8 @@ static void change_screen(xcb_connection_t * restrict xc, const bool is_set)
 }
 void jbxvt_dec_reset(xcb_connection_t * xc, struct JBXVTToken * restrict token)
 {
+	assert(xc);
+	assert(token);
 	LOG("handle_reset(%d)", token->arg[0]);
 	const bool is_set = token->type == JBXVT_TOKEN_SET;
 	struct JBXVTPrivateModes * m = jbxvt_get_modes();

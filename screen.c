@@ -3,6 +3,7 @@
     University of Kent at Canterbury.  */
 #undef DEBUG
 #include "screen.h"
+#include <assert.h>
 #include <string.h>
 #include "JBXVTPrivateModes.h"
 #include "JBXVTScreen.h"
@@ -68,6 +69,7 @@ void jbxvt_efill(xcb_connection_t * xc)
 //  Change between the alternate and the main screens
 void jbxvt_change_screen(xcb_connection_t * xc, const bool mode_high)
 {
+	assert(xc);
 	LOG("jbxvt_change_screen(xc, mode_high: %d)", mode_high);
 	screen_index = mode_high ? 1 : 0;
 	jbxvt_get_modes()->charsel = 0;
@@ -87,6 +89,7 @@ void jbxvt_change_screen(xcb_connection_t * xc, const bool mode_high)
 void jbxvt_index_from(xcb_connection_t * xc,
 	const int8_t count, const int16_t top)
 {
+	assert(xc);
 	jbxvt_set_scroll(xc, 0);
 	jbxvt_draw_cursor(xc);
 	scroll(xc, top, jbxvt_get_margin()->b, count);
