@@ -18,6 +18,7 @@
 #include "double.h"
 #include "dsr.h"
 #include "edit.h"
+#include "libjb/JBDim.h"
 #include "libjb/log.h"
 #include "lookup_key.h"
 #include "mode.h"
