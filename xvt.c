@@ -1,7 +1,9 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-//#undef DEBUG
-#define LOG_LEVEL 8
+#define LOG_LEVEL 2
+#if LOG_LEVEL == 0
+#undef DEBUG
+#endif//LOG_LEVEL
 #include "xvt.h"
 #include "cmdtok.h"
 #include "command.h"
