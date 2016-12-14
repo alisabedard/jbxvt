@@ -1,7 +1,6 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "cursor.h"
-#include <assert.h>
 #include <stdbool.h>
 #include "JBXVTPrivateModes.h"
 #include "JBXVTScreen.h"
@@ -20,7 +19,6 @@ static struct JBDim saved_cursor;
 static uint8_t cursor_attr = JBXVT_DEFAULT_CURSOR_ATTR;
 void jbxvt_blink_cursor(xcb_connection_t * xc)
 {
-	assert(xc);
 	if (!jbxvt_get_modes()->att610 && cursor_attr % 2) {
 		jbxvt_draw_cursor(xc); // blinking cursor
 		xcb_flush(xc);
@@ -33,7 +31,6 @@ void jbxvt_set_cursor_attr(const uint8_t val)
 }
 xcb_gcontext_t jbxvt_get_cursor_gc(xcb_connection_t * xc)
 {
-	assert(xc);
 	static xcb_gcontext_t gc;
 	return gc ? gc : (gc = xcb_generate_id(xc));
 }
@@ -44,7 +41,6 @@ void jbxvt_save_cursor(void)
 }
 void jbxvt_restore_cursor(xcb_connection_t * xc)
 {
-	assert(xc);
 	jbxvt_draw_cursor(xc);
 	jbxvt_get_current_screen()->cursor = saved_cursor;
 	jbxvt_zero_rstyle();
@@ -65,7 +61,6 @@ static bool is_blinking(void)
 }
 void jbxvt_draw_cursor(xcb_connection_t * xc)
 {
-	assert(xc);
 	// Don't draw if scrolled, non-existent, or hidden
 	struct JBXVTScreen * current;
 	if (jbxvt_get_scroll() || !(current = jbxvt_get_current_screen())

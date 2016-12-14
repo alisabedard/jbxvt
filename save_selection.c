@@ -1,7 +1,6 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "save_selection.h"
-#include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -25,9 +24,6 @@ static uint8_t get_next_char(uint8_t c)
 static bool skip(uint8_t * restrict str, uint16_t * restrict i,
 	uint16_t * restrict j, const uint16_t len, const uint8_t null_ct)
 {
-	assert(str);
-	assert(i);
-	assert(j);
 	++*i;
 	if (str[*i] != '\0')
 		return false;
@@ -37,7 +33,6 @@ static bool skip(uint8_t * restrict str, uint16_t * restrict i,
 }
 static uint16_t sanitize(uint8_t * str, uint16_t len)
 {
-	assert(str);
 	uint16_t i = 0, j;
 	uint8_t null_ct = 0;
 	/* This conditional fixes insertion of rogue new lines
@@ -64,8 +59,6 @@ static void copy(uint8_t * str, uint8_t * scr_text,
 	const int16_t start, const uint16_t len,
 	const uint16_t total)
 {
-	assert(str);
-	assert(scr_text);
 	char * dest = (char *) str + total - 1;
 	char * src = (char *) scr_text + start;
 	strncpy(dest, src, len);
@@ -84,9 +77,6 @@ static void limit_anchor(struct JBDim * anchor)
 static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 	struct JBDim * restrict e)
 {
-	assert(str);
-	assert(total);
-	assert(e);
 	// Make sure the selection falls within the screen area:
 	if (!is_on_screen(e[0]) || !is_on_screen(e[1]))
 		return; // Invalid end point found
@@ -105,20 +95,17 @@ static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 	}
 	*total = sanitize(*str, *total) + 1;
 	*str = realloc(*str, *total);
-	assert(str);
 }
 /*  Convert the currently marked screen selection as a text string
     and save it as the current saved selection. */
 void jbxvt_save_selection(struct JBXVTSelectionData * sel)
 {
-	assert(sel);
 	const bool fwd = jbxvt_selcmp(sel->end, sel->end + 1) <= 0;
 	// properly order start and end points:
 	struct JBDim se[] = {sel->end[fwd ? 0 : 1],
 		sel->end[fwd ? 1 : 0]};
 	uint16_t total = 1;
 	uint8_t * str = malloc(total);
-	assert(str);
 	handle_screensel(&str, &total, se);
 	if (!total)
 		return;
@@ -126,5 +113,4 @@ void jbxvt_save_selection(struct JBXVTSelectionData * sel)
 	sel->text = str;
 	LOG("jbxvt_save_selection() sel->text: %s, sel->unit: %d, "
 		"sel->length: %d", sel->text, sel->unit, sel->length);
-
 }

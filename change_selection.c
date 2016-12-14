@@ -1,7 +1,6 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "change_selection.h"
-#include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <sys/types.h>
@@ -62,9 +61,6 @@ void jbxvt_change_selection(xcb_connection_t * xc,
 	struct JBDim * restrict ose0, struct JBDim * restrict ose1)
 {
 	LOG("jbxvt_change_selection()");
-	assert(xc);
-	assert(ose0);
-	assert(ose1);
 	if (jbxvt_selcmp(ose0, ose1) > 0) {
 		struct JBDim * se = ose0;
 		ose0 = ose1;

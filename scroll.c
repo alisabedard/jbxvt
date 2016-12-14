@@ -17,6 +17,7 @@
 #include "libjb/log.h"
 #endif//LOG_LEVEL
 #include "libjb/macros.h"
+#include "libjb/util.h"
 #include "paint.h"
 #include "sbar.h"
 #include "screen.h"
@@ -85,6 +86,8 @@ static void trim(void)
 	if (scroll_size < LIM << 1)
 		return;
 	struct JBXVTLine * new = malloc(LIM * SZ), * i;
+	jb_require(new, "Cannot allocate memory for new scroll"
+		" history buffer");
 	const int diff = scroll_size - LIM;
 	i = saved_lines + diff;
 	memcpy(new, i, LIM * SZ);
@@ -97,6 +100,8 @@ static void add_scroll_history(void)
 	struct JBXVTScreen * s = jbxvt_get_current_screen();
 	enum { SIZE = sizeof(struct JBXVTLine) };
 	saved_lines = realloc(saved_lines, ++scroll_size * SIZE);
+	jb_require(saved_lines, "Cannot allocate memory"
+		" for scroll history");
 	// - 1 for index instead of size
 	memcpy(&saved_lines[scroll_size - 1], &s->line[s->cursor.y], SIZE);
 	trim();
