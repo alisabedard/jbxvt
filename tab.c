@@ -1,6 +1,8 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "tab.h"
 #include <string.h>
+#include "JBXVTScreen.h"
+#include "config.h"
 #include "libjb/log.h"
 #include "screen.h"
 #include "sbar.h"

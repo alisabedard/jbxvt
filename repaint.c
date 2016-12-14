@@ -2,6 +2,7 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
 #include "repaint.h"
+#include "JBXVTScreen.h"
 #include "font.h"
 #include "paint.h"
 #include "sbar.h"

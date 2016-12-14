@@ -2,9 +2,8 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #ifndef JBXVT_SCROLL_H
 #define JBXVT_SCROLL_H
-#include <stdint.h>
 #include <xcb/xcb.h>
-#include "JBXVTLine.h"
+struct JBXVTLine;
 struct JBXVTLine * jbxvt_get_saved_lines(void);
 uint16_t jbxvt_get_scroll_size(void);
 void jbxvt_clear_scroll_history(void);

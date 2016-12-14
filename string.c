@@ -8,6 +8,8 @@
 #include "string.h"
 #include <string.h>
 #include <unistd.h>
+#include "JBXVTPrivateModes.h"
+#include "JBXVTScreen.h"
 #include "config.h"
 #include "cursor.h"
 #include "font.h"

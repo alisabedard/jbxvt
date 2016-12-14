@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "JBXVTOptions.h"
 #include "config.h"
 #include "cursor.h"
 #include "display.h"

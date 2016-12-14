@@ -3,7 +3,7 @@
 #ifndef JBXVT_DEC_RESET_H
 #define JBXVT_DEC_RESET_H
 #include <xcb/xcb.h>
-#include "JBXVTToken.h"
+struct JBXVTToken;
 void jbxvt_dec_reset(xcb_connection_t * xc, struct JBXVTToken * restrict token)
 	__attribute__((nonnull));
 #endif//!JBXVT_DEC_RESET_H

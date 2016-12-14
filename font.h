@@ -2,7 +2,7 @@
 #ifndef JBXVT_NORMAL_FONT_H
 #define JBXVT_NORMAL_FONT_H
 #include <xcb/xcb.h>
-#include "libjb/JBDim.h"
+struct JBDim;
 struct JBXVTFontOptions {
 	char * normal;
 	char * bold;

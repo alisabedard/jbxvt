@@ -2,6 +2,7 @@
 #include "font.h"
 #include <stdlib.h>
 #include <xcb/xcb_cursor.h>
+#include "libjb/JBDim.h"
 #include "libjb/util.h"
 #include "libjb/xcb.h"
 static uint8_t font_ascent;

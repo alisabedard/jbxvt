@@ -1,6 +1,7 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "size.h"
 #include "font.h"
+#include "libjb/JBDim.h"
 static struct JBDim size_in_pixels;
 void jbxvt_set_pixel_size(const struct JBDim size)
 {

@@ -38,6 +38,7 @@
 #endif//POSIX_UTMP
 #include "cmdtok.h"
 #include "libjb/file.h"
+#include "libjb/JBDim.h"
 #include "libjb/log.h"
 #include "size.h"
 #include "xevents.h"

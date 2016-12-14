@@ -3,6 +3,9 @@
 #undef DEBUG
 #include "dec_reset.h"
 #include <string.h>
+#include "JBXVTPrivateModes.h"
+#include "JBXVTScreen.h"
+#include "JBXVTToken.h"
 #include "cursor.h"
 #include "libjb/log.h"
 #include "libjb/macros.h"

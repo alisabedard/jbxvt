@@ -5,6 +5,8 @@
 #include "scr_reset.h"
 #include <string.h>
 #include <unistd.h>
+#include "JBXVTPrivateModes.h"
+#include "JBXVTScreen.h"
 #include "color.h"
 #include "command.h"
 #include "config.h"

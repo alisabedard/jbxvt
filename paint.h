@@ -4,7 +4,7 @@
 #define JBXVT_PAINT_H
 #include <stdbool.h>
 #include <xcb/xcb.h>
-#include "libjb/JBDim.h"
+struct JBDim;
 xcb_gcontext_t jbxvt_get_text_gc(xcb_connection_t * xc);
 //  Paint the text using the rendition value at the screen position.
 void jbxvt_paint(xcb_connection_t * xc, uint8_t * restrict str,

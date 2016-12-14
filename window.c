@@ -3,6 +3,7 @@
 #include "window.h"
 #include <stdlib.h>
 #include <string.h>
+#include "JBXVTScreen.h"
 #include "font.h"
 #include "libjb/util.h"
 #include "libjb/xcb.h"

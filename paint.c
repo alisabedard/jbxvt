@@ -3,6 +3,7 @@
 #undef DEBUG
 #include "paint.h"
 #include <stdlib.h>
+#include "libjb/JBDim.h"
 #include "color_index.h"
 #include "color.h"
 #include "double.h"

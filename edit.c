@@ -5,6 +5,7 @@
 #define LOG_LEVEL 5
 #include "edit.h"
 #include <string.h>
+#include "JBXVTScreen.h"
 #include "cursor.h"
 #include "font.h"
 #include "libjb/log.h"

@@ -1,15 +1,13 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "double.h"
 #include <stdlib.h>
+#include "JBXVTScreen.h"
 #include "cursor.h"
 #include "repaint.h"
 #include "screen.h"
 void jbxvt_set_double_width_line(xcb_connection_t * xc, const bool is_dwl)
 {
-	{ // s scope
-		struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
-		s->line[s->cursor.y].dwl = is_dwl;
-	}
+	jbxvt_get_line(jbxvt_get_y())->dwl = is_dwl;
 	jbxvt_repaint(xc); // in case set mid-line
 	jbxvt_draw_cursor(xc); // clear stale cursor block
 }

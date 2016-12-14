@@ -1,7 +1,9 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "mouse.h"
+#include "JBXVTPrivateModes.h"
 #include "cmdtok.h"
 #include "command.h"
+#include "libjb/JBDim.h"
 #include "libjb/log.h"
 #include "mode.h"
 #include "size.h"

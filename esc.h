@@ -3,7 +3,7 @@
 #ifndef JBXVT_ESC_H
 #define JBXVT_ESC_H
 #include <xcb/xcb.h>
-#include "JBXVTToken.h"
+struct JBXVTToken;
 void jbxvt_csi(xcb_connection_t * xc,
 	int_fast16_t c, struct JBXVTToken * restrict tk);
 void jbxvt_end_cs(xcb_connection_t * xc,

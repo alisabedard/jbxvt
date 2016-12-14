@@ -9,13 +9,11 @@ void jbxvt_handle_dsr(const int16_t arg)
 {
 	LOG("handle_dsr(%d)", arg);
 	switch (arg) {
-	case 6 : { // CPR: cursor position report
+	case 6 :
 		LOG("CPR: cursor position report");
-		const struct JBDim c = jbxvt_get_cursor();
 		dprintf(jbxvt_get_fd(), "%s%d;%dR", jbxvt_get_csi(),
-			c.y + 1, c.x + 1);
+			jbxvt_get_y() + 1, jbxvt_get_y() + 1);
 		break;
-	}
 	case 7 :
 		//  Send the name of the display to the command.
 		dprintf(jbxvt_get_fd(), "%s\r", getenv("DISPLAY"));

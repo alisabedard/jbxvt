@@ -2,10 +2,12 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "xevents.h"
 #include <unistd.h>
+#include "JBXVTPrivateModes.h"
+#include "JBXVTSelectionUnit.h"
+#include "libjb/JBDim.h"
 #include "cmdtok.h"
 #include "command.h"
 #include "font.h"
-#include "JBXVTSelectionUnit.h"
 #include "libjb/log.h"
 #include "libjb/xcb.h"
 #include "lookup_key.h"

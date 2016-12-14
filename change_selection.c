@@ -5,6 +5,7 @@
 #include "config.h"
 #include "cursor.h"
 #include "font.h"
+#include "libjb/JBDim.h"
 #include "libjb/log.h"
 #include "screen.h"
 #include "selend.h"

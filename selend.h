@@ -1,7 +1,8 @@
+// Copyright 2017, Jeffrey E. Bedard <jefbed@gmail.com>
 #ifndef JBXVT_SELEND_H
 #define JBXVT_SELEND_H
-#include <stdbool.h>
-#include "libjb/JBDim.h"
+#include <stdint.h>
+struct JBDim;
 /*  Adjust the selection to a word or line boundary.
     If the include endpoint is non NULL then the selection
     is forced to be large enough to include it.  */

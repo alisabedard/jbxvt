@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include "JBXVTScreen.h"
 #include "JBXVTSelectionData.h"
 #include "libjb/JBDim.h"
 #include "libjb/log.h"

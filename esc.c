@@ -3,6 +3,9 @@
     University of Kent at Canterbury.*/
 #include "esc.h"
 #include <stdio.h>
+#include "JBXVTPrivateModes.h"
+#include "JBXVTScreen.h"
+#include "JBXVTToken.h"
 #include "cmdtok.h"
 #include "command.h"
 #include "dcs.h"

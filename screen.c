@@ -4,6 +4,8 @@
 #undef DEBUG
 #include "screen.h"
 #include <string.h>
+#include "JBXVTPrivateModes.h"
+#include "JBXVTScreen.h"
 #include "cursor.h"
 #include "libjb/log.h"
 #include "mode.h"

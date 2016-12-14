@@ -6,6 +6,7 @@
 #include <string.h>
 #include "config.h"
 #include "cursor.h"
+#include "libjb/JBDim.h"
 #include "libjb/macros.h"
 #include "paint.h"
 #include "repaint.h"

@@ -1,7 +1,7 @@
 // Copyright 2016, Jeffrey E. Bedard
 #ifndef JBXVT_SIZE_H
 #define JBXVT_SIZE_H
-#include "libjb/JBDim.h"
+struct JBDim;
 // Convert char size/position to pixel size/position
 struct JBDim jbxvt_chars_to_pixels(struct JBDim c)
 	__attribute__((pure));

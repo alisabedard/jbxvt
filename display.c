@@ -3,6 +3,7 @@
 #include "display.h"
 #include <stdlib.h>
 #include <X11/cursorfont.h>
+#include "JBXVTOptions.h"
 #include "color.h"
 #include "config.h"
 #include "cursor.h"
