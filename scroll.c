@@ -4,13 +4,19 @@
 //#undef DEBUG
 #define LOG_LEVEL 3
 #include "scroll.h"
+#include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
+#include <xcb/xproto.h>
+#include "JBXVTLine.h"
 #include "JBXVTScreen.h"
-#include "cursor.h"
+#include "config.h"
 #include "font.h"
+#include "libjb/JBDim.h"
+#if LOG_LEVEL > 0
 #include "libjb/log.h"
+#endif//LOG_LEVEL
 #include "libjb/macros.h"
-#include "libjb/util.h"
 #include "paint.h"
 #include "sbar.h"
 #include "screen.h"

@@ -2,9 +2,11 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "save_selection.h"
 #include <assert.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include "JBXVTScreen.h"
+#include "JBXVTLine.h"
 #include "JBXVTSelectionData.h"
 #include "libjb/JBDim.h"
 #include "libjb/log.h"

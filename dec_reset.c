@@ -2,11 +2,13 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #undef DEBUG
 #include "dec_reset.h"
-#include <string.h>
+#include <stdbool.h>
+#include <sys/types.h>
 #include "JBXVTPrivateModes.h"
-#include "JBXVTScreen.h"
 #include "JBXVTToken.h"
+#include "JBXVTTokenType.h"
 #include "cursor.h"
+#include "libjb/JBDim.h"
 #include "libjb/log.h"
 #include "libjb/macros.h"
 #include "lookup_key.h"

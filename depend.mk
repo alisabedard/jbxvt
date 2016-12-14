@@ -9,10 +9,9 @@ color.o: color.c color.h libjb/xcb.h libjb/macros.h paint.h xcb_screen.h \
 command.o: command.c command.h libjb/util.h cmdtok.h libjb/file.h \
  libjb/JBDim.h libjb/log.h size.h xevents.h
 cursor.o: cursor.c cursor.h JBXVTPrivateModes.h JBXVTScreen.h JBXVTLine.h \
- config.h rstyle.h libjb/JBDim.h font.h libjb/log.h mode.h repaint.h \
- sbar.h screen.h size.h window.h
-dcs.o: dcs.c dcs.h JBXVTToken.h JBXVTTokenType.h command.h libjb/util.h \
- cmdtok.h libjb/log.h
+ config.h rstyle.h libjb/JBDim.h font.h mode.h repaint.h sbar.h screen.h \
+ size.h window.h
+dcs.o: dcs.c dcs.h JBXVTToken.h JBXVTTokenType.h cmdtok.h libjb/log.h
 dec_reset.o: dec_reset.c dec_reset.h JBXVTPrivateModes.h JBXVTScreen.h \
  JBXVTLine.h config.h rstyle.h libjb/JBDim.h JBXVTToken.h \
  JBXVTTokenType.h cursor.h libjb/log.h libjb/macros.h lookup_key.h mode.h \

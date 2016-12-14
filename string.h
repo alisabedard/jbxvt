@@ -3,6 +3,7 @@
     University of Kent at Canterbury.*/
 #ifndef JBXVT_STRING_H
 #define JBXVT_STRING_H
+#include <stdint.h>
 #include <xcb/xcb.h>
 /*  Display the string at the current position.
     nlcount is the number of new lines in the string.  */

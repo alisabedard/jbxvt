@@ -2,13 +2,16 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
 #include "esc.h"
+#include <stdbool.h>
 #include <stdio.h>
 #include "JBXVTPrivateModes.h"
 #include "JBXVTScreen.h"
+#include "JBXVTTokenType.h"
 #include "JBXVTToken.h"
 #include "cmdtok.h"
 #include "command.h"
 #include "dcs.h"
+#include "libjb/JBDim.h"
 #include "mode.h"
 #include "screen.h"
 static int_fast16_t read_numeric_argument(xcb_connection_t * restrict xc,

@@ -1,5 +1,7 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "mouse.h"
+#include <stdio.h>
+#include <xcb/xproto.h>
 #include "JBXVTPrivateModes.h"
 #include "cmdtok.h"
 #include "command.h"

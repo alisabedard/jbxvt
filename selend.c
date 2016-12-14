@@ -2,8 +2,10 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
 #include "selend.h"
+#include "JBXVTLine.h"
 #include "JBXVTScreen.h"
 #include "JBXVTSelectionUnit.h"
+#include "libjb/JBDim.h"
 #include "sbar.h"
 #include "screen.h"
 #include "selection.h"

@@ -4,6 +4,7 @@
 #define JBXVT_XEVENTS_H
 #include <stdbool.h>
 #include <xcb/xcb.h>
+#include <xcb/xproto.h>
 xcb_atom_t jbxvt_get_wm_del_win(xcb_connection_t * xc);
 // Handle X event on queue.  Return true if event was handled.
 bool jbxvt_handle_xevents(xcb_connection_t * xc);

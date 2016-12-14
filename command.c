@@ -40,8 +40,8 @@
 #include "libjb/file.h"
 #include "libjb/JBDim.h"
 #include "libjb/log.h"
+#include "libjb/util.h"
 #include "size.h"
-#include "xevents.h"
 static fd_t command_fd;
 static pid_t command_pid;
 fd_t jbxvt_get_fd(void)

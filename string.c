@@ -6,20 +6,21 @@
 #undef DEBUG
 #endif
 #include "string.h"
+#include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
-#include <unistd.h>
+#include <xcb/xproto.h>
+#include "JBXVTLine.h"
 #include "JBXVTPrivateModes.h"
 #include "JBXVTScreen.h"
-#include "config.h"
 #include "cursor.h"
 #include "font.h"
+#include "libjb/JBDim.h"
 #include "libjb/log.h"
 #include "libjb/macros.h"
 #include "libjb/time.h"
-#include "libjb/util.h"
 #include "mode.h"
 #include "paint.h"
-#include "repaint.h"
 #include "rstyle.h"
 #include "sbar.h"
 #include "screen.h"

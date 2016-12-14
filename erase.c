@@ -4,11 +4,16 @@
 //#undef DEBUG
 #define LOG_LEVEL 6
 #include "erase.h"
+#include <stdbool.h>
 #include <string.h>
+#include <xcb/xproto.h>
+#include "JBXVTLine.h"
 #include "JBXVTScreen.h"
 #include "cursor.h"
 #include "font.h"
+#include "libjb/JBDim.h"
 #include "libjb/log.h"
+#include "rstyle.h"
 #include "sbar.h"
 #include "screen.h"
 #include "size.h"

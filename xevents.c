@@ -1,6 +1,10 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "xevents.h"
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include "JBXVTPrivateModes.h"
 #include "JBXVTSelectionUnit.h"
@@ -9,6 +13,7 @@
 #include "command.h"
 #include "font.h"
 #include "libjb/log.h"
+#include "libjb/util.h"
 #include "libjb/xcb.h"
 #include "lookup_key.h"
 #include "mode.h"

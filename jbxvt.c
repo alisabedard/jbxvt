@@ -1,12 +1,18 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "command.h"
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <xcb/xcb.h>
 #include "JBXVTOptions.h"
+#include "color.h"
 #include "config.h"
 #include "cursor.h"
 #include "display.h"
+#include "font.h"
+#include "libjb/JBDim.h"
+#include "libjb/util.h"
 #include "tab.h"
 #include "window.h"
 #include "xevents.h"
