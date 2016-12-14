@@ -1,5 +1,6 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+#undef DEBUG
 #include "dec_reset.h"
 #include <string.h>
 #include "cursor.h"
@@ -11,11 +12,6 @@
 #include "scr_move.h"
 #include "scr_reset.h"
 #include "screen.h"
-#define DEBUG_RESET
-#ifndef DEBUG_RESET
-#undef LOG
-#define LOG(...)
-#endif
 static void dectcem(xcb_connection_t * restrict xc, const bool is_set)
 {
 	jbxvt_set_scroll(xc, 0);
