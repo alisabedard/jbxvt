@@ -1,8 +1,10 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
-//#undef DEBUG
-#define LOG_LEVEL 5
+#define LOG_LEVEL 8
+#if LOG_LEVEL == 0
+#undef DEBUG
+#endif//LOG_LEVEL
 #include "edit.h"
 #include <string.h>
 #include "JBXVTScreen.h"
