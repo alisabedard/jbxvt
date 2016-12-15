@@ -1,8 +1,10 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
-//#undef DEBUG
-#define LOG_LEVEL 6
+#define LOG_LEVEL 9
+#if LOG_LEVEL == 0
+#undef DEBUG
+#endif//LOG_LEVEL
 #include "erase.h"
 #include <stdbool.h>
 #include <string.h>
@@ -46,18 +48,12 @@ static void delete(xcb_connection_t * restrict xc, const uint16_t col,
 	LOG("\tdelete(xc, col:%d, width: %d)", col, width);
 #endif//LOG_LEVEL>5
 	width = get_limited_width(col, width);
-	struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
-	const int16_t y = s->cursor.y;
-	struct JBXVTLine * restrict l = s->line + y;
+	const int16_t y = jbxvt_get_y();
+	struct JBXVTLine * l = jbxvt_get_line(y);
 	memset(l->text + col, 0, width);
 	memset(l->rend + col, 0, width << 2);
 	clear_area(xc, col, y, width);
 	l->wrap = l->dwl = false;
-}
-static inline void delete_after(xcb_connection_t * restrict xc,
-	const uint16_t col)
-{
-	delete(xc, col, get_width() - col);
 }
 #ifdef DEBUG
 static char * debug_mode(const int8_t mode)
@@ -83,14 +79,14 @@ void jbxvt_erase_line(xcb_connection_t * xc, const int8_t mode)
 	jbxvt_set_scroll(xc, 0);
 	switch (mode) {
 	case JBXVT_ERASE_ALL:
-		delete_after(xc, 0);
+		delete(xc, 0, get_width());
 		break;
 	case JBXVT_ERASE_BEFORE:
 		delete(xc, 0, jbxvt_get_x());
 		break;
 	case JBXVT_ERASE_AFTER:
 	default:
-		delete_after(xc, jbxvt_get_x());
+		delete(xc, jbxvt_get_x(), get_width());
 	}
 	jbxvt_draw_cursor(xc);
 }
