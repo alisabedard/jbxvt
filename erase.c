@@ -72,6 +72,19 @@ static char * debug_mode(const int8_t mode)
 	}
 }
 #endif//DEBUG
+static void jbxvt_erase_after(xcb_connection_t * xc)
+{
+	const int16_t y = jbxvt_get_y();
+	struct JBXVTLine * l = jbxvt_get_line(y);
+	uint8_t * t = l->text;
+	int16_t x = jbxvt_get_x();
+	delete(xc, x, get_width());
+	l->text[x] = 0;
+	l->size = x;
+#if LOG_LEVEL > 8
+	LOG("%s", t);
+#endif//LOG_LEVEL
+}
 // Erase the specified portion of a line.
 void jbxvt_erase_line(xcb_connection_t * xc, const int8_t mode)
 {
@@ -86,7 +99,7 @@ void jbxvt_erase_line(xcb_connection_t * xc, const int8_t mode)
 		break;
 	case JBXVT_ERASE_AFTER:
 	default:
-		delete(xc, jbxvt_get_x(), get_width());
+		jbxvt_erase_after(xc);
 	}
 	jbxvt_draw_cursor(xc);
 }
