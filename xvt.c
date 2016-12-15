@@ -308,7 +308,7 @@ bool jbxvt_parse_token(xcb_connection_t * xc)
 			| JBXVT_COLUMN_RELATIVE);
 		break;
 	case JBXVT_TOKEN_CUF: // right
-		LOG("JBXVT_TOKEN_CUF");
+		LOG("JBXVT_TOKEN_CUF: n: %d", n);
 		jbxvt_move(xc, n, 0, JBXVT_ROW_RELATIVE
 			| JBXVT_COLUMN_RELATIVE);
 		break;
