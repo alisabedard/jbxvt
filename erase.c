@@ -79,7 +79,7 @@ static void jbxvt_erase_after(xcb_connection_t * xc)
 	uint8_t * t = l->text;
 	int16_t x = jbxvt_get_x();
 	delete(xc, x, get_width());
-	l->text[x] = 0;
+	t[x] = 0;
 	l->size = x;
 #if LOG_LEVEL > 8
 	LOG("%s", t);
