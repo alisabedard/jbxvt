@@ -38,7 +38,7 @@ static void draw_text(xcb_connection_t * xc,
 		/* Cache frequently used values
 		   to avoid function call overhead. */
 		static xcb_window_t vt;
-		static xcb_gc_t gc;
+		static xcb_gcontext_t gc;
 		if (!vt) {
 			vt = jbxvt_get_vt_window(xc);
 			gc = jbxvt_get_text_gc(xc);

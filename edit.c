@@ -34,7 +34,7 @@ static void copy_area(xcb_connection_t * restrict xc,
 	const struct JBDim f = jbxvt_get_font_size();
 	const int16_t y = jbxvt_get_y() * f.height;
 	const uint16_t w = get_copy_width(count, f.w);
-	const xcb_gc_t gc = jbxvt_get_text_gc(xc);
+	const xcb_gcontext_t gc = jbxvt_get_text_gc(xc);
 	const uint16_t px = f.w * x[1];
 	xcb_copy_area(xc, v, v, gc, f.w * x[0], y, px, y, w, f.h);
 }
