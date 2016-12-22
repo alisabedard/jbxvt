@@ -73,6 +73,8 @@ void jbxvt_repaint(xcb_connection_t * xc)
 	struct JBDim p = {0};
 	const struct JBDim chars = jbxvt_get_char_size(),
 	      f = jbxvt_get_font_size();
+	if (chars.rows >= JBXVT_MAX_ROWS)
+		return; // invalid screen size, go no further.
 	/* Subtract 1 from scroll offset to get index.  */
 	int line = show_history(xc, 0, jbxvt_get_scroll() - 1, &p, f, chars);
 	// Do the remainder from the current screen:
