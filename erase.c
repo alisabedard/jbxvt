@@ -11,6 +11,7 @@
 #include <xcb/xproto.h>
 #include "JBXVTLine.h"
 #include "JBXVTScreen.h"
+#include "config.h"
 #include "cursor.h"
 #include "font.h"
 #include "libjb/JBDim.h"
@@ -19,6 +20,7 @@
 #include "sbar.h"
 #include "screen.h"
 #include "size.h"
+#include "string.h"
 #include "window.h"
 static inline uint16_t get_width(void)
 {
@@ -44,11 +46,11 @@ static uint16_t get_limited_width(const uint16_t col, const uint16_t width)
 static void delete(xcb_connection_t * restrict xc, const uint16_t col,
 	uint16_t width)
 {
+	const int16_t y = jbxvt_get_y();
 #if LOG_LEVEL > 5
-	LOG("\tdelete(xc, col:%d, width: %d)", col, width);
+	LOG("\tdelete(xc, row: %d, col:%d, width: %d)", y, col, width);
 #endif//LOG_LEVEL>5
 	width = get_limited_width(col, width);
-	const int16_t y = jbxvt_get_y();
 	struct JBXVTLine * l = jbxvt_get_line(y);
 	memset(l->text + col, 0, width);
 	memset(l->rend + col, 0, width << 2);
@@ -77,12 +79,25 @@ static void jbxvt_erase_after(xcb_connection_t * xc)
 	const int16_t y = jbxvt_get_y();
 	struct JBXVTLine * l = jbxvt_get_line(y);
 	uint8_t * t = l->text;
+	LOG("ORIGINAL LINE: %s", t);
 	int16_t x = jbxvt_get_x();
-	delete(xc, x, get_width());
-	t[x] = 0;
+	for (int i = 0; i < x; ++i) {
+		if (t[i] < ' ' || t[i] > 0x7e) {
+#ifdef DEBUG
+			fprintf(stderr, "Bad char 0x%x found!\n", t[i]);
+			fprintf(stderr, " At i=%d\n", i);
+#endif//DEBUG
+			t[i] = ' ';
+			++x;
+			break;
+		}
+	}
+	int w = get_width() - x;
+	delete(xc, x, w);
+//	t[x] = 0;
 	l->size = x;
 #if LOG_LEVEL > 8
-	LOG("%s", t);
+	LOG("(row: %d col: %d) %s", y, x, t);
 #endif//LOG_LEVEL
 }
 // Erase the specified portion of a line.

@@ -1,6 +1,6 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-#undef DEBUG
+//#undef DEBUG
 #include "paint.h"
 #include <stdlib.h>
 #include "libjb/JBDim.h"

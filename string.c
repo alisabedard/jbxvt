@@ -1,7 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
-#define LOG_LEVEL 0
+#define LOG_LEVEL 9
 #if LOG_LEVEL == 0
 #undef DEBUG
 #endif
