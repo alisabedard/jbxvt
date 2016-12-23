@@ -1,10 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
-#define LOG_LEVEL 9
-#if LOG_LEVEL == 0
 #undef DEBUG
-#endif//LOG_LEVEL
 #include "erase.h"
 #include <stdbool.h>
 #include <string.h>
@@ -16,20 +13,15 @@
 #include "font.h"
 #include "libjb/JBDim.h"
 #include "libjb/log.h"
+#include "paint.h"
 #include "rstyle.h"
 #include "sbar.h"
+#include "scr_move.h"
 #include "screen.h"
+#include "scroll.h"
 #include "size.h"
 #include "string.h"
 #include "window.h"
-static inline uint16_t get_width(void)
-{
-	return jbxvt_get_char_size().width;
-}
-static inline uint16_t get_height(void)
-{
-	return jbxvt_get_char_size().height;
-}
 static void clear_area(xcb_connection_t * restrict xc,
 	const int16_t x, const int16_t y, const uint16_t width)
 {
@@ -39,7 +31,7 @@ static void clear_area(xcb_connection_t * restrict xc,
 }
 static uint16_t get_limited_width(const uint16_t col, const uint16_t width)
 {
-	const int cw = get_width();
+	const int cw = jbxvt_get_char_size().width;
 	// keep col + width within the screen width
 	return (col + width > cw) ? cw - col : width;
 }
@@ -47,9 +39,7 @@ static void delete(xcb_connection_t * restrict xc, const uint16_t col,
 	uint16_t width)
 {
 	const int16_t y = jbxvt_get_y();
-#if LOG_LEVEL > 5
 	LOG("\tdelete(xc, row: %d, col:%d, width: %d)", y, col, width);
-#endif//LOG_LEVEL>5
 	width = get_limited_width(col, width);
 	struct JBXVTLine * l = jbxvt_get_line(y);
 	memset(l->text + col, 0, width);
@@ -76,30 +66,17 @@ static char * debug_mode(const int8_t mode)
 #endif//DEBUG
 static void jbxvt_erase_after(xcb_connection_t * xc)
 {
+	jbxvt_check_cursor_position();
 	const int16_t y = jbxvt_get_y();
 	struct JBXVTLine * l = jbxvt_get_line(y);
 	uint8_t * t = l->text;
-	LOG("ORIGINAL LINE: %s", t);
-	int16_t x = jbxvt_get_x();
-	for (int i = 0; i < x; ++i) {
-		if (t[i] < ' ' || t[i] > 0x7e) {
-#ifdef DEBUG
-			fprintf(stderr, "Bad char 0x%x found!\n", t[i]);
-			fprintf(stderr, " At i=%d\n", i);
-#endif//DEBUG
-			t[i] = ' ';
-			++x;
-			break;
-		}
-	}
-	int w = get_width() - x;
-	delete(xc, x, w);
-//	t[x] = 0;
+	const int16_t x = jbxvt_get_x();
+	delete(xc, x, jbxvt_get_char_size().width - x);
+	t[x] = 0;
 	l->size = x;
-#if LOG_LEVEL > 8
 	LOG("(row: %d col: %d) %s", y, x, t);
-#endif//LOG_LEVEL
 }
+
 // Erase the specified portion of a line.
 void jbxvt_erase_line(xcb_connection_t * xc, const int8_t mode)
 {
@@ -107,7 +84,7 @@ void jbxvt_erase_line(xcb_connection_t * xc, const int8_t mode)
 	jbxvt_set_scroll(xc, 0);
 	switch (mode) {
 	case JBXVT_ERASE_ALL:
-		delete(xc, 0, get_width());
+		delete(xc, 0, jbxvt_get_char_size().width);
 		break;
 	case JBXVT_ERASE_BEFORE:
 		delete(xc, 0, jbxvt_get_x());
@@ -134,7 +111,7 @@ static bool assign_range(xcb_connection_t * restrict xc,
 		jbxvt_clear_saved_lines(xc);
 		return false;
 	default: // JBXVT_ERASE_ALL
-		SETR(0, get_height() - 1);
+		SETR(0, jbxvt_get_char_size().height - 1);
 		break;
 	}
 	return true;
