@@ -54,7 +54,8 @@ static char ** parse_command_line(const int argc, char ** argv,
 			o->show_scrollbar=true;
 			break;
 		case 'v': // version
-			goto version;
+			printf("jbxvt %s\n", JBXVT_VERSION);
+			exit(0);
 		case 'x': // x position
 			o->position.x = atoi(optarg);
 			break;
@@ -63,19 +64,11 @@ static char ** parse_command_line(const int argc, char ** argv,
 			break;
 		case 'h': // help
 		default:
-			goto usage;
+			printf("%s -[%s]\n", argv[0], optstr);
+			exit(0);
 		}
 	}
 	return NULL;
-version:
-	printf("jbxvt %s\n", JBXVT_VERSION);
-	exit(0);
-usage:
-	printf("%s -[%s]\n", argv[0], optstr);
-	exit(0);
-#ifdef OPENBSD
-	return NULL;
-#endif//OPENBSD
 }
 static xcb_connection_t * handle_options(const int argc, char ** argv,
 	char *** com_argv)
