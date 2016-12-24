@@ -76,7 +76,7 @@ static int show_history(xcb_connection_t * restrict xc, const int line,
 void jbxvt_repaint(xcb_connection_t * xc)
 {
 	// First do any 'scrolled off' lines that are visible.
-	struct JBDim p = {0};
+	struct JBDim p = {{0},{0}};
 	const struct JBDim chars = jbxvt_get_char_size(),
 	      f = jbxvt_get_font_size();
 	if (chars.rows >= JBXVT_MAX_ROWS)

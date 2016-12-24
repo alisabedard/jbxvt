@@ -112,7 +112,7 @@ static xcb_connection_t * handle_command(const int argc, char ** argv)
 /*  Run the command in a subprocess and return a file descriptor for
  *  the master end of the pseudo-teletype pair with the command
  *  talking to the slave.  */
-int main(int argc, char ** argv)
+int jbxvt_main(int argc, char ** argv)
 {
 	xcb_connection_t * xc = handle_command(argc, argv);
 	(void)jbxvt_get_wm_del_win(xc); // initialize property
