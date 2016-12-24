@@ -6,11 +6,9 @@
 #include <unistd.h>
 #include <xcb/xcb.h>
 #include "JBXVTOptions.h"
-#include "color.h"
 #include "config.h"
 #include "cursor.h"
 #include "display.h"
-#include "font.h"
 #include "libjb/JBDim.h"
 #include "libjb/util.h"
 #include "tab.h"
