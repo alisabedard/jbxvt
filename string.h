@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <xcb/xcb.h>
 /*  Display the string at the current position.
-    nlcount is the number of new lines in the string.  */
-void jbxvt_string(xcb_connection_t * xc,
-	uint8_t * restrict str, uint8_t len, int8_t nlcount);
+    new_line_count is the number of new lines in the string.  */
+void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str, uint_fast16_t
+	len, const int8_t new_line_count);
 #endif//!JBXVT_STRING_H

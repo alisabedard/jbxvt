@@ -1,7 +1,8 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
-#undef DEBUG
+//#undef DEBUG
+//#define DEBUG_VERBOSE
 #include "string.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -27,16 +28,16 @@
 #include "size.h"
 #include "tab.h"
 #include "window.h"
-static void handle_new_lines(xcb_connection_t * restrict xc, int8_t nlcount)
+static void handle_new_lines(xcb_connection_t * restrict xc, int8_t new_line_count)
 {
 	struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
 	const int16_t y = s->cursor.y;
 	struct JBDim * m = &s->margin;
-	nlcount = y > m->b ? 0 : nlcount - m->b - y;
-	JB_LIMIT(nlcount, y - m->top, 0);
-	if (nlcount) { // only worth doing if nlcount has a value:
-		scroll(xc, m->top, m->bottom, nlcount);
-		s->cursor.y -= nlcount;
+	new_line_count = y > m->b ? 0 : new_line_count - m->b - y;
+	JB_LIMIT(new_line_count, y - m->top, 0);
+	if (new_line_count) { // only worth doing if new_line_count has a value:
+		scroll(xc, m->top, m->bottom, new_line_count);
+		s->cursor.y -= new_line_count;
 	}
 }
 static void decsclm(void)
@@ -76,20 +77,22 @@ static void move_data_on_screen(xcb_connection_t * xc,
 		p.x + n_width, p.y, sz * f.width - n_width, f.height);
 
 }
-static void handle_insert(xcb_connection_t * restrict xc,
-	const uint8_t n, const struct JBDim p)
+// Insert count characters space (not blanked) at point
+static void insert_characters(xcb_connection_t * restrict xc,
+	const uint8_t count, const struct JBDim point)
 {
-	LOG("handle_insert(n=%d, p={%d, %d})", n, p.x, p.y);
+	LOG("handle_insert(n=%d, p={%d, %d})", count, point.x, point.y);
 	struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
 	const struct JBDim c = s->cursor;
 	const uint16_t sz = jbxvt_get_char_size().w - c.x;
-	move_data_in_memory(s->line[c.y].text, s->line[c.y].rend, n, c.x, sz);
-	move_data_on_screen(xc, n, sz, p);
+	move_data_in_memory(s->line[c.y].text, s->line[c.y].rend,
+		count, c.x, sz);
+	move_data_on_screen(xc, count, sz, point);
 }
 static void parse_special_charset(uint8_t * restrict str,
-	const uint8_t len)
+	const uint_fast16_t len)
 {
-	for (int_fast16_t i = len ; i >= 0; --i) {
+	for (int_fast32_t i = len ; i >= 0; --i) {
 		uint8_t * ch = &str[i];
 		switch (*ch) {
 		case 'j':
@@ -173,15 +176,18 @@ static void recover_from_shift(void)
 	m->charset[m->charsel] = m->charset[JBXVT_CHARSET_SHIFT_REGISTER];
 }
 /*  Display the string at the current position.
-    nlcount is the number of new lines in the string.  */
-void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str,
-	uint8_t len, int8_t nlcount)
+    new_line_count is the number of new lines in the string.  */
+void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str, uint_fast16_t
+	len, const int8_t new_line_count)
 {
-	LOG("jbxvt_string(%s, len: %d, nlcount: %d)", str, len, nlcount);
+#ifdef DEBUG_VERBOSE
+	LOG("jbxvt_string(%s, len: %lu, new_line_count: %d)", str, len,
+		new_line_count);
+#endif//DEBUG_VERBOSE
 	jbxvt_set_scroll(xc, 0);
 	jbxvt_draw_cursor(xc);
-	if (nlcount > 0)
-		  handle_new_lines(xc, nlcount);
+	if (new_line_count > 0)
+		  handle_new_lines(xc, new_line_count);
 	struct JBXVTScreen * restrict screen = jbxvt_get_current_screen();
 	jbxvt_check_cursor_position();
 	while (len) {
@@ -190,44 +196,52 @@ void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str,
 			++str;
 			continue;
 		}
-		struct JBDim * c = &screen->cursor;
-		if (screen->wrap_next) {
-			wrap(xc);
-			c->x = 0;
+		{ // * c scope
+			struct JBDim * c = &screen->cursor;
+			if (screen->wrap_next) {
+				wrap(xc);
+				c->x = 0;
+			}
+			jbxvt_check_selection(xc, c->y, c->y);
+			{ // p, mode, * t, shifted scope
+				struct JBDim p
+					= jbxvt_chars_to_pixels(screen
+						->cursor);
+				struct JBXVTPrivateModes * restrict mode
+					= jbxvt_get_modes();
+				if (JB_UNLIKELY(mode->insert))
+					insert_characters(xc, 1, p);
+				uint8_t * t = screen->line[c->y].text + c->x;
+				const bool shifted = handle_single_shift();
+				if (shifted) {
+					parse_special_charset(str, 1);
+					recover_from_shift();
+				}
+				if (mode->charset[mode->charsel]
+					> CHARSET_ASCII) {
+					if (shifted)
+						parse_special_charset(str + 1,
+							len - 1);
+					else
+						parse_special_charset(str,
+							len);
+				}
+				// Render the string:
+				if (!screen->decpm) {
+					jbxvt_paint(xc, str,
+						jbxvt_get_rstyle(), 1, p,
+						screen->line[c->y].dwl);
+					// Save scroll history:
+					*t = *str;
+				}
+			}
+			/* save_render_style() depends on the current cursor
+			 * position, so it must be called before increment. */
+			save_render_style(1, screen);
+			++c->x;
 		}
-		jbxvt_check_selection(xc, c->y, c->y);
-		{
-			struct JBDim p
-				= jbxvt_chars_to_pixels(screen->cursor);
-			struct JBXVTPrivateModes * restrict mode
-				= jbxvt_get_modes();
-			if (JB_UNLIKELY(mode->insert))
-				handle_insert(xc, 1, p);
-			uint8_t * t = screen->line[c->y].text + c->x;
-			const bool shifted = handle_single_shift();
-			if (shifted) {
-				parse_special_charset(str, 1);
-				recover_from_shift();
-			}
-			if (mode->charset[mode->charsel] > CHARSET_ASCII) {
-				if (shifted)
-					parse_special_charset(str + 1,
-						len - 1);
-				else
-					parse_special_charset(str, len);
-			}
-			// Render the string:
-			if (!screen->decpm) {
-				jbxvt_paint(xc, str, jbxvt_get_rstyle(),
-					1, p, screen->line[c->y].dwl);
-				// Save scroll history:
-				*t = *str;
-			}
-		}
-		save_render_style(1, screen);
-		--len;
 		++str;
-		++c->x;
+		--len;
 		check_wrap(screen);
 	}
 	jbxvt_draw_cursor(xc);
