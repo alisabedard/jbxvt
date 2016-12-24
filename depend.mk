@@ -3,8 +3,8 @@ change_selection.o: change_selection.c change_selection.h cursor.h font.h \
 cmdtok.o: cmdtok.c cmdtok.h JBXVTPrivateModes.h JBXVTToken.h \
  JBXVTTokenType.h command.h libjb/util.h cursor.h dcs.h esc.h libjb/log.h \
  libjb/xcb.h mode.h xevents.h
-color.o: color.c color.h libjb/xcb.h JBXVTColorOptions.h libjb/macros.h \
- paint.h xcb_screen.h window.h
+color.o: color.c color.h libjb/xcb.h JBXVTOptions.h libjb/JBDim.h \
+ libjb/macros.h paint.h xcb_screen.h window.h
 command.o: command.c command.h libjb/util.h cmdtok.h libjb/file.h \
  libjb/JBDim.h libjb/log.h size.h
 cursor.o: cursor.c cursor.h JBXVTPrivateModes.h JBXVTScreen.h JBXVTLine.h \
@@ -14,9 +14,9 @@ dcs.o: dcs.c dcs.h JBXVTToken.h JBXVTTokenType.h cmdtok.h libjb/log.h
 dec_reset.o: dec_reset.c dec_reset.h JBXVTPrivateModes.h JBXVTToken.h \
  JBXVTTokenType.h cursor.h libjb/JBDim.h libjb/log.h libjb/macros.h \
  lookup_key.h mode.h sbar.h move.h scr_reset.h screen.h
-display.o: display.c display.h JBXVTOptions.h JBXVTColorOptions.h \
- JBXVTFontOptions.h libjb/JBDim.h color.h libjb/xcb.h config.h cursor.h \
- font.h paint.h sbar.h size.h window.h xcb_screen.h
+display.o: display.c display.h JBXVTOptions.h libjb/JBDim.h color.h \
+ libjb/xcb.h config.h cursor.h font.h paint.h sbar.h size.h window.h \
+ xcb_screen.h
 double.o: double.c double.h JBXVTLine.h config.h rstyle.h cursor.h \
  repaint.h screen.h
 dsr.o: dsr.c dsr.h cmdtok.h command.h libjb/util.h cursor.h libjb/log.h
@@ -29,11 +29,11 @@ erase.o: erase.c erase.h JBXVTLine.h config.h rstyle.h JBXVTScreen.h \
 esc.o: esc.c esc.h JBXVTPrivateModes.h JBXVTScreen.h JBXVTLine.h config.h \
  rstyle.h libjb/JBDim.h JBXVTTokenType.h JBXVTToken.h cmdtok.h command.h \
  libjb/util.h dcs.h mode.h screen.h
-font.o: font.c font.h JBXVTFontOptions.h libjb/JBDim.h libjb/util.h \
+font.o: font.c font.h JBXVTOptions.h libjb/JBDim.h libjb/util.h \
  libjb/xcb.h
-jbxvt.o: jbxvt.c command.h libjb/util.h JBXVTOptions.h \
- JBXVTColorOptions.h JBXVTFontOptions.h libjb/JBDim.h color.h libjb/xcb.h \
- config.h cursor.h display.h font.h tab.h window.h xevents.h xvt.h
+jbxvt.o: jbxvt.c command.h libjb/util.h JBXVTOptions.h libjb/JBDim.h \
+ color.h libjb/xcb.h config.h cursor.h display.h font.h tab.h window.h \
+ xevents.h xvt.h
 lookup_key.o: lookup_key.c lookup_key.h command.h libjb/util.h \
  libjb/log.h sbar.h
 mode.o: mode.c mode.h JBXVTPrivateModes.h

@@ -1,7 +1,7 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "font.h"
 #include <stdlib.h>
-#include "JBXVTFontOptions.h"
+#include "JBXVTOptions.h"
 #include "libjb/JBDim.h"
 #include "libjb/util.h"
 #include "libjb/xcb.h"
@@ -47,19 +47,19 @@ xcb_font_t jbxvt_get_italic_font(xcb_connection_t * xc)
 	return get_f(xc, &f);
 }
 void jbxvt_init_fonts(xcb_connection_t * xc,
-	struct JBXVTFontOptions * opt)
+	struct JBXVTOptions * opt)
 {
 	xcb_font_t f = jbxvt_get_normal_font(xc);
-	if (!jb_open_font(xc, f, opt->normal))
+	if (!jb_open_font(xc, f, opt->normal_font))
 		jb_require(jb_open_font(xc, f,
-			opt->normal = "fixed"), // fallback
+			opt->normal_font = "fixed"), // fallback
 			"Could not load the primary font");
 	xcb_query_font_cookie_t q = xcb_query_font(xc, f);
 	f = jbxvt_get_bold_font(xc);
-	if (!jb_open_font(xc, f, opt->bold))
-		jb_open_font(xc, f, opt->normal);
+	if (!jb_open_font(xc, f, opt->bold_font))
+		jb_open_font(xc, f, opt->normal_font);
 	f = jbxvt_get_italic_font(xc);
-	if (!jb_open_font(xc, f, opt->italic))
-		jb_open_font(xc, f, opt->normal);
+	if (!jb_open_font(xc, f, opt->italic_font))
+		jb_open_font(xc, f, opt->normal_font);
 	setup_font_metrics(xc, q);
 }

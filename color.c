@@ -2,7 +2,7 @@
 #include "color.h"
 #include <stdint.h>
 #include <xcb/xproto.h>
-#include "JBXVTColorOptions.h"
+#include "JBXVTOptions.h"
 #include "libjb/macros.h"
 #include "paint.h"
 #include "xcb_screen.h"
@@ -11,10 +11,10 @@ static struct {
 	pixel_t bg, fg, current_fg, current_bg;
 } color_data;
 void jbxvt_init_colors(xcb_connection_t * xc,
-	struct JBXVTColorOptions * opt)
+	struct JBXVTOptions * opt)
 {
-	color_data.fg = jbxvt_set_fg(xc, opt->fg);
-	color_data.bg = jbxvt_set_fg(xc, opt->bg);
+	color_data.fg = jbxvt_set_fg(xc, opt->foreground_color);
+	color_data.bg = jbxvt_set_fg(xc, opt->background_color);
 }
 void jbxvt_set_reverse_video(xcb_connection_t * xc)
 {

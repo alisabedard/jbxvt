@@ -114,8 +114,8 @@ xcb_connection_t * jbxvt_init_display(char * restrict name,
 		xc = jb_get_xcb_connection(NULL, &screen);
 		opt->screen = screen;
 	}
-	jbxvt_init_colors(xc, &opt->color);
-	jbxvt_init_fonts(xc, &opt->font);
+	jbxvt_init_colors(xc, opt);
+	jbxvt_init_fonts(xc, opt);
 	create_window(xc, jbxvt_get_root_window(xc), opt, (uint8_t *)name);
 	setup_gcs(xc, jbxvt_get_vt_window(xc));
 	return xc;

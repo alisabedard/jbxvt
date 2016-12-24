@@ -25,10 +25,10 @@ static char ** parse_command_line(const int argc, char ** argv,
 	while((opt=getopt(argc, argv, optstr)) != -1) {
 		switch (opt) {
 		case 'B': // bold font
-			o->font.bold = optarg;
+			o->bold_font = optarg;
 			break;
 		case 'b': // background color
-			o->color.bg = optarg;
+			o->background_color = optarg;
 			break;
 		case 'W': // width
 		case 'C': // columns
@@ -43,10 +43,10 @@ static char ** parse_command_line(const int argc, char ** argv,
 		case 'e': // exec
 			return argv + optind;
 		case 'F': // font
-			o->font.normal = optarg;
+			o->normal_font = optarg;
 			break;
 		case 'f': // foreground color
-			o->color.fg = optarg;
+			o->foreground_color = optarg;
 			break;
 		case 'H': // height
 		case 'R': // rows
@@ -84,11 +84,11 @@ static xcb_connection_t * handle_options(const int argc, char ** argv,
 {
 	// Set defaults:
 	struct JBXVTOptions o = {
-		.font.normal = JBXVT_NORMAL_FONT,
-		.font.bold = JBXVT_BOLD_FONT,
-		.font.italic = JBXVT_ITALIC_FONT,
-		.color.bg = JBXVT_BACKGROUND_COLOR,
-		.color.fg = JBXVT_FOREGROUND_COLOR,
+		.normal_font = JBXVT_NORMAL_FONT,
+		.bold_font = JBXVT_BOLD_FONT,
+		.italic_font = JBXVT_ITALIC_FONT,
+		.background_color = JBXVT_BACKGROUND_COLOR,
+		.foreground_color = JBXVT_FOREGROUND_COLOR,
 		.size.cols = JBXVT_COLUMNS,
 		.size.rows = JBXVT_ROWS,
 	};
