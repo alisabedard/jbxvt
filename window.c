@@ -1,15 +1,15 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "window.h"
+#include <stddef.h>
 #include <stdlib.h>
-#include <string.h>
-#include "JBXVTScreen.h"
+#include "config.h"
 #include "font.h"
+#include "libjb/JBDim.h"
 #include "libjb/util.h"
 #include "libjb/xcb.h"
 #include "sbar.h"
 #include "scr_reset.h"
-#include "screen.h"
 #include "size.h"
 xcb_window_t jbxvt_get_main_window(xcb_connection_t * xc)
 {
@@ -66,12 +66,12 @@ void jbxvt_resize_window(xcb_connection_t * xc)
 	jbxvt_set_pixel_size(p);
 }
 // Set main window property string
-void jbxvt_set_property(xcb_connection_t * xc, const xcb_atom_t prop,
-	const size_t sz, uint8_t * value)
+void jbxvt_set_property(xcb_connection_t * xc, const xcb_atom_t property,
+	const uint32_t data_len, uint8_t * data)
 {
 	xcb_change_property(xc, XCB_PROP_MODE_REPLACE,
-		jbxvt_get_main_window(xc), prop,
-		XCB_ATOM_STRING, 8, sz, value);
+		jbxvt_get_main_window(xc), property,
+		XCB_ATOM_STRING, 8, data_len, data);
 }
 // Change window or icon name:
 void jbxvt_change_name(xcb_connection_t * xc,

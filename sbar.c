@@ -3,7 +3,6 @@
     University of Kent at Canterbury.*/
 #include "sbar.h"
 #include <stdbool.h>
-#include <string.h>
 #include "config.h"
 #include "cursor.h"
 #include "libjb/JBDim.h"

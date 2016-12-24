@@ -8,6 +8,7 @@
 #include "command.h"
 #include "config.h"
 #include "libjb/log.h"
+#include "libjb/util.h"
 #include "selection.h"
 #include "window.h"
 // Returns the length pasted

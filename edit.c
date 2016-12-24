@@ -1,20 +1,21 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
-#define LOG_LEVEL 8
+#define LOG_LEVEL 3
 #if LOG_LEVEL == 0
 #undef DEBUG
 #endif//LOG_LEVEL
 #include "edit.h"
 #include <string.h>
-#include "JBXVTScreen.h"
+#include <xcb/xproto.h>
+#include "JBXVTLine.h"
+#include "config.h"
 #include "cursor.h"
 #include "font.h"
+#include "libjb/JBDim.h"
 #include "libjb/log.h"
 #include "libjb/macros.h"
 #include "paint.h"
-#include "repaint.h"
-#include "scr_reset.h"
 #include "screen.h"
 #include "selection.h"
 #include "size.h"

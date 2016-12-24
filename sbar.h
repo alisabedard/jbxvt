@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <xcb/xcb.h>
+#include <xcb/xproto.h>
 // Draw the scrollbar.
 void jbxvt_draw_scrollbar(xcb_connection_t * xc);
 // Get the current scroll position.

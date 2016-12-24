@@ -1,10 +1,14 @@
 // Copyright 2016, Jeffrey E. Bedard
 #undef DEBUG
 #include "scr_move.h"
+#include <stdbool.h>
 #include "JBXVTPrivateModes.h"
 #include "JBXVTScreen.h"
 #include "cursor.h"
+#include "libjb/JBDim.h"
+#ifdef DEBUG
 #include "libjb/log.h"
+#endif//DEBUG
 #include "libjb/macros.h"
 #include "mode.h"
 #include "sbar.h"

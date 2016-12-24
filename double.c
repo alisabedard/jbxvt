@@ -1,7 +1,7 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "double.h"
 #include <stdlib.h>
-#include "JBXVTScreen.h"
+#include "JBXVTLine.h"
 #include "cursor.h"
 #include "repaint.h"
 #include "screen.h"

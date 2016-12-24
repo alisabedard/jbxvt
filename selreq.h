@@ -4,6 +4,7 @@
 #ifndef JBXVT_SELREQ_H
 #define JBXVT_SELREQ_H
 #include <xcb/xcb.h>
+#include <xcb/xproto.h>
 //  Request the current primary selection
 void jbxvt_request_selection(xcb_connection_t * xc,
 	const xcb_timestamp_t t);

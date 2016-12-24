@@ -1,10 +1,11 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "dsr.h"
+#include <stdio.h> // for dprintf
+#include <stdlib.h> // for getenv
 #include "cmdtok.h"
 #include "command.h"
 #include "cursor.h"
 #include "libjb/log.h"
-#include "screen.h"
 void jbxvt_handle_dsr(const int16_t arg)
 {
 	LOG("handle_dsr(%d)", arg);

@@ -2,6 +2,7 @@
 #ifndef JBXVT_DOUBLE_H
 #define JBXVT_DOUBLE_H
 #include <stdbool.h>
+#include <stdint.h>
 #include <xcb/xcb.h>
 void jbxvt_set_double_width_line(xcb_connection_t * xc,
 	const bool is_dwl);

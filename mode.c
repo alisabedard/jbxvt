@@ -1,5 +1,6 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "mode.h"
+#include <stdbool.h>
 #include <string.h>
 #include "JBXVTPrivateModes.h"
 static struct JBXVTPrivateModes jbxvt_saved_mode;
