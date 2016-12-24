@@ -25,7 +25,7 @@
 #include "mode.h"
 #include "sbar.h"
 #include "erase.h"
-#include "scr_move.h"
+#include "move.h"
 #include "scr_reset.h"
 #include "sgr.h"
 #include "string.h"

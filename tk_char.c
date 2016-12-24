@@ -8,7 +8,7 @@
 #include "cursor.h"
 #include "libjb/log.h"
 #include "mode.h"
-#include "scr_move.h"
+#include "move.h"
 #include "screen.h"
 #include "scroll.h"
 #include "tab.h"

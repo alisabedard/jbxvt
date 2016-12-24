@@ -23,7 +23,7 @@
 #include "sbar.h"
 #include "screen.h"
 #include "scroll.h"
-#include "scr_move.h"
+#include "move.h"
 #include "selection.h"
 #include "size.h"
 #include "tab.h"

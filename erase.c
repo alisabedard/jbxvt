@@ -16,7 +16,7 @@
 #include "paint.h"
 #include "rstyle.h"
 #include "sbar.h"
-#include "scr_move.h"
+#include "move.h"
 #include "screen.h"
 #include "scroll.h"
 #include "size.h"

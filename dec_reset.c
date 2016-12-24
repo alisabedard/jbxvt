@@ -14,7 +14,7 @@
 #include "lookup_key.h"
 #include "mode.h"
 #include "sbar.h"
-#include "scr_move.h"
+#include "move.h"
 #include "scr_reset.h"
 #include "screen.h"
 static void dectcem(xcb_connection_t * restrict xc, const bool is_set)

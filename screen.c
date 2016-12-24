@@ -14,7 +14,7 @@
 #include "repaint.h"
 #include "sbar.h"
 #include "erase.h"
-#include "scr_move.h"
+#include "move.h"
 #include "scr_reset.h"
 #include "scroll.h"
 #include "size.h"

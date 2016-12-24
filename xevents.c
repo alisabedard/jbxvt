@@ -19,7 +19,7 @@
 #include "mode.h"
 #include "mouse.h"
 #include "sbar.h"
-#include "scr_move.h"
+#include "move.h"
 #include "scr_reset.h"
 #include "screen.h"
 #include "selection.h"
