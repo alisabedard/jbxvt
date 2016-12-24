@@ -35,9 +35,9 @@ echo CFLAGS+="-D${ARCH}" >> $CFG
 case $ARCH in
 	OPENBSD)
 		CC=clang
-		CXX=clang++
 		echo NOTE:  OpenBSD requires llvm
 		cat >> $CFG <<- EOF
+		CC=clang
 		PREFIX=/usr/local
 		ldflags+=-L/usr/X11R6/lib
 		ldflags+=-L/usr/local/lib
@@ -53,7 +53,6 @@ case $ARCH in
 		;;
 	NETBSD)
 		CC=clang
-		CXX=clang++
 		echo NOTE:  NetBSD requires clang
 		cat >> $CFG <<- EOF
 		CFLAGS+=-D_NETBSD_SOURCE -D_BSD_SOURCE
@@ -104,7 +103,7 @@ search() # 1: cmd 2: var
 	if [ "$CMD" ]; then
 		echo $CMD
 		echo "$2=$CMD" >> $CFG
-		export $2="$1"
+		export $2=$1
 		return 1
 	fi
 	echo not found
@@ -116,25 +115,20 @@ cc_err()
 	echo 'Please set CC to a valid C compiler command'
 	exit 1
 }
-cxx_err()
-{
-	echo 'Error: Cannot find a suitable compiler.'
-	echo 'Please set CXX to a valid C++ compiler command'
-	exit 1
-}
 if [ -z "$CC" ]; then
-	search clang CC && search gcc CC\
-		&& search cc CC && cc_err
+	if [ "$ARCH" = "LINUX" ]; then
+		search cc CC && search gcc CC && search clang CC\
+			&& cc_err
+	else
+		# Many BSD systems come with an old version of
+		# gcc without support of required language features.
+		# Search for clang first.
+		search search clang CC && search cc CC && search gcc CC\
+			&& cc_err
+	fi
 else
 	echo "CC defined as ${CC}"
 	echo "CC=${CC}" >> $CFG
-fi
-if [ -z "$CXX" ]; then
-	search clang++ CXX && search g++ CXX\
-		&& search c++ CXX && cc_err
-else
-	echo "CXX defined as ${CXX}"
-	echo "CXX=${CXX}" >> $CFG
 fi
 if $DEBUG; then
 	echo -n 'Enabling debug code... '

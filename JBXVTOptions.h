@@ -1,6 +1,8 @@
 // Copyright 2016, Jeffrey E. Bedard
 #ifndef JBXVT_OPTIONS_H
 #define JBXVT_OPTIONS_H
+#include <stdint.h>
+#include <stdbool.h>
 #include "JBXVTColorOptions.h"
 #include "JBXVTFontOptions.h"
 #include "libjb/JBDim.h"
