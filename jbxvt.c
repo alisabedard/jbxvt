@@ -17,66 +17,7 @@
 #include "window.h"
 #include "xevents.h"
 #include "xvt.h"
-static char ** parse_command_line(const int argc, char ** argv,
-	struct JBXVTOptions * o)
-{
-	static const char * optstr = "B:b:C:c:D:d:eF:f:hI:R:S:svx:y:";
-	char opt;
-	while((opt=getopt(argc, argv, optstr)) != -1) {
-		switch (opt) {
-		case 'B': // bold font
-			o->font.bold = optarg;
-			break;
-		case 'b': // background color
-			o->color.bg = optarg;
-			break;
-		case 'C': // columns
-			o->size.cols = atoi(optarg);
-			break;
-		case 'c': // cursor style
-			jbxvt_set_cursor_attr(atoi(optarg));
-			break;
-		case 'd': // screen number
-			o->screen = atoi(optarg);
-			break;
-		case 'e': // exec
-			return argv + optind;
-		case 'F': // font
-			o->font.normal = optarg;
-			break;
-		case 'f': // foreground color
-			o->color.fg = optarg;
-			break;
-		case 'R': // rows
-			o->size.rows = atoi(optarg);
-			break;
-		case 's': // use scrollbar
-			o->show_scrollbar=true;
-			break;
-		case 'v': // version
-			goto version;
-		case 'x': // x position
-			o->position.x = atoi(optarg);
-			break;
-		case 'y': // y position
-			o->position.y = atoi(optarg);
-			break;
-		case 'h': // help
-		default:
-			goto usage;
-		}
-	}
-	return NULL;
-version:
-	printf("jbxvt %s\n", JBXVT_VERSION);
-	exit(0);
-usage:
-	printf("%s -[%s]\n", argv[0], optstr);
-	exit(0);
-#ifdef OPENBSD
-	return NULL;
-#endif//OPENBSD
-}
+#if 0
 static xcb_connection_t * handle_options(const int argc, char ** argv,
 	char *** com_argv)
 {
@@ -96,6 +37,7 @@ static xcb_connection_t * handle_options(const int argc, char ** argv,
 	   after parse_command_line */
 	return jbxvt_init_display(argv[0], &o);
 }
+#endif
 static xcb_connection_t * handle_command(const int argc, char ** argv)
 {
 	char ** com_argv;
