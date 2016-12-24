@@ -20,7 +20,7 @@
 static char ** parse_command_line(const int argc, char ** argv,
 	struct JBXVTOptions * o)
 {
-	static const char * optstr = "B:b:C:c:D:d:eF:f:hI:R:S:svx:y:";
+	static const char * optstr = "B:b:C:c:D:d:eF:f:hH:I:R:S:svW:x:y:";
 	char opt;
 	while((opt=getopt(argc, argv, optstr)) != -1) {
 		switch (opt) {
@@ -30,6 +30,7 @@ static char ** parse_command_line(const int argc, char ** argv,
 		case 'b': // background color
 			o->color.bg = optarg;
 			break;
+		case 'W': // width
 		case 'C': // columns
 			o->size.cols = atoi(optarg);
 			break;
@@ -47,6 +48,7 @@ static char ** parse_command_line(const int argc, char ** argv,
 		case 'f': // foreground color
 			o->color.fg = optarg;
 			break;
+		case 'H': // height
 		case 'R': // rows
 			o->size.rows = atoi(optarg);
 			break;
