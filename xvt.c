@@ -1,6 +1,6 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
-#define LOG_LEVEL 9
+#define LOG_LEVEL 3
 #if LOG_LEVEL == 0
 #undef DEBUG
 #endif//LOG_LEVEL
@@ -58,11 +58,14 @@ static void handle_token_elr(struct JBXVTToken * restrict token)
 	struct JBXVTPrivateModes * restrict m = jbxvt_get_modes();
 	switch (t[0]) {
 	case 2:
+		LOG("ELR Once");
 		m->elr_once = true;
 	case 1:
+		LOG("ELR Mode");
 		m->elr = true;
 		break;
 	default:
+		LOG("ELR Disabled");
 		m->elr = m->elr_once = false;
 	}
 	m->elr_pixels = t[1] == 1;
@@ -140,6 +143,7 @@ static void handle_token_mc_public(int16_t * restrict t)
 	switch (t[0]) {
 	case 1:
 		LOG("print line containing cursor");
+		dprintf(jbxvt_get_fd(), "%d", jbxvt_get_y() + 1);
 		break;
 	case 4:
 		LOG("turn off autoprint mode");
