@@ -7,8 +7,7 @@
 struct JBXVTOptions {
 	char * foreground_color, * background_color,
 	     * normal_font, * bold_font, * italic_font;
-	struct JBDim size;
-	struct JBDim position;
+	struct JBDim size, position;
 	uint8_t screen:7;
 	bool show_scrollbar:1;
 };
