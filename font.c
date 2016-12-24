@@ -1,6 +1,7 @@
 // Copyright 2016, Jeffrey E. Bedard
 #include "font.h"
 #include <stdlib.h>
+#include "JBXVTFontOptions.h"
 #include "libjb/JBDim.h"
 #include "libjb/util.h"
 #include "libjb/xcb.h"

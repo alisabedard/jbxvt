@@ -3,10 +3,7 @@
 #define JBXVT_COLOR_H
 #include <xcb/xcb.h>
 #include "libjb/xcb.h"
-struct JBXVTColorOptions {
-	char * fg;
-	char * bg;
-};
+struct JBXVTColorOptions;
 // Set up initial color values for foreground and background pixels.
 void jbxvt_init_colors(xcb_connection_t * xc,
 	struct JBXVTColorOptions * opt);

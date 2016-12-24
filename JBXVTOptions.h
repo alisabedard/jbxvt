@@ -1,8 +1,8 @@
 // Copyright 2016, Jeffrey E. Bedard
 #ifndef JBXVT_OPTIONS_H
 #define JBXVT_OPTIONS_H
-#include "color.h"
-#include "font.h"
+#include "JBXVTColorOptions.h"
+#include "JBXVTFontOptions.h"
 #include "libjb/JBDim.h"
 struct JBXVTOptions {
 	struct JBXVTColorOptions color;

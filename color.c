@@ -2,6 +2,7 @@
 #include "color.h"
 #include <stdint.h>
 #include <xcb/xproto.h>
+#include "JBXVTColorOptions.h"
 #include "libjb/macros.h"
 #include "paint.h"
 #include "xcb_screen.h"
