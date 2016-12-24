@@ -1,10 +1,7 @@
 /*  Copyright 2016, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
-#define LOG_LEVEL 9
-#if LOG_LEVEL == 0
 #undef DEBUG
-#endif
 #include "string.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -180,9 +177,7 @@ static void recover_from_shift(void)
 void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str,
 	uint8_t len, int8_t nlcount)
 {
-#if LOG_LEVEL > 5
 	LOG("jbxvt_string(%s, len: %d, nlcount: %d)", str, len, nlcount);
-#endif//LOG_LEVEL>5
 	jbxvt_set_scroll(xc, 0);
 	jbxvt_draw_cursor(xc);
 	if (nlcount > 0)
