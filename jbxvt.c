@@ -93,8 +93,8 @@ static xcb_connection_t * init(const int argc, char ** argv)
 {
 	char ** com_argv;
 	xcb_connection_t * xc = handle_options(argc, argv, &com_argv);
-	jb_check(setenv("TERM", JBXVT_ENV_TERM, true) != -1,
-		"Could not set TERM environment variable");
+	if (setenv("TERM", JBXVT_ENV_TERM, true) < 0)
+		abort();
 	if (!com_argv)
 		com_argv = (char*[2]){getenv("SHELL")};
 	jbxvt_init_command_module(com_argv);
