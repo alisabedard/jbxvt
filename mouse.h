@@ -1,4 +1,4 @@
-// Copyright 2016, Jeffrey E. Bedard
+// Copyright 2017, Jeffrey E. Bedard
 #ifndef JBXVT_MOUSE_H
 #define JBXVT_MOUSE_H
 #include <stdbool.h>

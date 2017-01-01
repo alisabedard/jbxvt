@@ -1,4 +1,4 @@
-// Copyright 2016, Jeffrey E. Bedard
+// Copyright 2017, Jeffrey E. Bedard
 //  Tab to the next tab stop.
 #ifndef JBXVT_TAB_H
 #define JBXVT_TAB_H

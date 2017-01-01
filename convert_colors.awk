@@ -1,6 +1,6 @@
 #!/usr/bin/gawk -f
 
-# Copyright 2016, Jeffrey E. Bedard
+# Copyright 2017, Jeffrey E. Bedard
 
 # This utility converts colors listed in color_index.txt into the color_index
 # array, included with color_index.h
@@ -8,7 +8,7 @@
 # ./convert_colors.awk color_index.txt > color_index.h
 
 BEGIN {
-	print "/* Copyright 2016, Jeffrey E. Bedard */"
+	print "/* Copyright 2017, Jeffrey E. Bedard */"
 	print "#ifndef JBXVT_COLOR_INDEX_H"
 	print "#define JBXVT_COLOR_INDEX_H"
 	print "#include <stdint.h>"

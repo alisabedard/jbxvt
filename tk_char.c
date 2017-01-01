@@ -1,4 +1,4 @@
-// Copyright 2016, Jeffrey E. Bedard
+// Copyright 2017, Jeffrey E. Bedard
 #include "tk_char.h"
 #include <stdio.h>
 #include "JBXVTPrivateModes.h"

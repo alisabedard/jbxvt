@@ -1,4 +1,4 @@
-// Copyright 2016, Jeffrey E. Bedard
+// Copyright 2017, Jeffrey E. Bedard
 #ifndef JBXVT_JBXVTSELECTIONUNIT_H
 #define JBXVT_JBXVTSELECTIONUNIT_H
 //  The current selection unit

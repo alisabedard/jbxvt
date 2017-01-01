@@ -1,4 +1,4 @@
-// Copyright 2016, Jeffrey E. Bedard
+// Copyright 2017, Jeffrey E. Bedard
 #include "xcb_screen.h"
 #include "libjb/xcb.h"
 static xcb_screen_t * get_xcb_screen(xcb_connection_t * restrict xc)

@@ -1,4 +1,4 @@
-// Copyright 2016, Jeffrey E. Bedard
+// Copyright 2017, Jeffrey E. Bedard
 #ifndef JBXVT_MODE_H
 #define JBXVT_MODE_H
 // Get pointer to statically allocated mode data structure.

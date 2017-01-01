@@ -1,4 +1,4 @@
-// Copyright 2016, Jeffrey E. Bedard
+// Copyright 2017, Jeffrey E. Bedard
 #include "dsr.h"
 #include <stdio.h> // for dprintf
 #include <stdlib.h> // for getenv

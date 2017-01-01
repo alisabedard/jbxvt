@@ -1,4 +1,4 @@
-/*  Copyright 2016, Jeffrey E. Bedard
+/*  Copyright 2017, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #ifndef SCREENST_H
 #define SCREENST_H

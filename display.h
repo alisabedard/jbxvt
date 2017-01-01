@@ -1,4 +1,4 @@
-// Copyright 2016, Jeffrey E. Bedard
+// Copyright 2017, Jeffrey E. Bedard
 #ifndef JBXVT_DISPLAY_H
 #define JBXVT_DISPLAY_H
 #include <xcb/xcb.h>

@@ -1,4 +1,4 @@
-// Copyright 2016, Jeffrey E. Bedard
+// Copyright 2017, Jeffrey E. Bedard
 #ifndef JBXVT_JBXVTSELECTIONDATA_H
 #define JBXVT_JBXVTSELECTIONDATA_H
 #include <stdbool.h>

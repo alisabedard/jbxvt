@@ -1,4 +1,4 @@
-// Copyright 2016, Jeffrey E. Bedard
+// Copyright 2017, Jeffrey E. Bedard
 #include "mouse.h"
 #include <stdio.h>
 #include <xcb/xproto.h>

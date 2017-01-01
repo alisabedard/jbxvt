@@ -1,4 +1,4 @@
-/*  Copyright 2016, Jeffrey E. Bedard
+/*  Copyright 2017, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #ifndef JBXVT_TOKENTYPE_H
 #define JBXVT_TOKENTYPE_H
@@ -34,7 +34,7 @@ enum JBXVTTokenType {
 	JBXVT_TOKEN_SELDRAG = 2013, // drag the selection
 	JBXVT_TOKEN_SELINSRT = 2014, // insert the selection
 	JBXVT_TOKEN_SELWORD = 2015, // select a word
-	JBXVT_TOKEN_SELLINE = 2016, // select a line
+	JBXVT_TOKEN_SELLINE = 2017, // select a line
 	JBXVT_TOKEN_SELECT = 2017, // confirm the selection
 	JBXVT_TOKEN_SELCLEAR = 2018, // selection clear request
 	JBXVT_TOKEN_SELNOTIFY = 2019, // selection notify request

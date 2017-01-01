@@ -1,4 +1,4 @@
-# Copyright 2016, Jeffrey E. Bedard
+# Copyright 2017, Jeffrey E. Bedard
 CFLAGS+=-O0
 CFLAGS+=-DDEBUG
 CFLAGS+=-g

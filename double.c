@@ -1,4 +1,4 @@
-// Copyright 2016, Jeffrey E. Bedard
+// Copyright 2017, Jeffrey E. Bedard
 #include "double.h"
 #include <stdlib.h>
 #include "JBXVTLine.h"
