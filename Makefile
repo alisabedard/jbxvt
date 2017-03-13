@@ -13,7 +13,7 @@ objs+=sbar.o erase.o selex.o edit.o command.o selection.o dcs.o
 objs+=selreq.o scr_reset.o string.o screen.o scroll.o selend.o 
 objs+=xevents.o window.o xvt.o sgr.o dec_reset.o show_selection.o
 objs+=mouse.o double.o dsr.o font.o color.o tab.o rstyle.o tk_char.o
-objs+=xcb_screen.o mode.o
+objs+=xcb_screen.o mode.o button_events.o
 extra+=color_index.h
 ${exe}: libjb ${objs}
 	${CC} ${CFLAGS} -o ${exe} ${objs} ${static} ${ldflags}
