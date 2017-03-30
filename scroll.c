@@ -1,16 +1,11 @@
 /*  Copyright 2017, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
-//#undef DEBUG
 #define LOG_LEVEL 3
 #include "scroll.h"
-#include <stdbool.h>
-#include <stdlib.h>
 #include <string.h>
-#include <xcb/xproto.h>
 #include "JBXVTLine.h"
 #include "JBXVTScreen.h"
-#include "config.h"
 #include "font.h"
 #include "libjb/JBDim.h"
 #if LOG_LEVEL > 0
