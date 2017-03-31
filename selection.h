@@ -25,7 +25,7 @@ void jbxvt_make_selection(xcb_connection_t * xc);
 //  respond to a request for our current selection.
 void jbxvt_send_selection(xcb_connection_t * xc,
 	const xcb_time_t time, const uint32_t requestor,
-	const uint32_t target, const uint32_t property);
+	const uint32_t type, const uint32_t property);
 // start selection using specified unit:
 void jbxvt_start_selection(xcb_connection_t * xc,
 	const struct JBDim p, enum JBXVTSelectionUnit unit);

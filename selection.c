@@ -50,24 +50,30 @@ void jbxvt_make_selection(xcb_connection_t * xc)
 	xcb_set_selection_owner(xc, jbxvt_get_main_window(xc),
 		XCB_ATOM_PRIMARY, XCB_CURRENT_TIME);
 }
+static void change_property(xcb_connection_t * xc,
+	const xcb_window_t requestor, const xcb_atom_t property,
+	const xcb_atom_t type)
+{
+	xcb_change_property(xc, XCB_PROP_MODE_REPLACE, requestor,
+		property, type, 8, selection_data.length,
+		selection_data.text);
+}
 //  Respond to a request for our current selection.
 void jbxvt_send_selection(xcb_connection_t * xc,
 	const xcb_time_t time, const uint32_t requestor,
-	const uint32_t target, const uint32_t property)
+	const uint32_t type, const uint32_t property)
 {
 	LOG("jbxvt_send_selection, %d, %d, %d, %d", (int)time,
-		requestor, target, property);
+		requestor, type, property);
 	if (selection_data.text == NULL)
 		return; // nothing to send, prevent crash
 	xcb_selection_notify_event_t e = {
 		.response_type = XCB_SELECTION_NOTIFY,
-		.selection = XCB_ATOM_PRIMARY, .target = target,
+		.selection = XCB_ATOM_PRIMARY, .target = type,
 		.requestor = requestor, .time = time, .property
 			= property == XCB_NONE
-			? target : property}; // per ICCCM
-	xcb_change_property(xc, XCB_PROP_MODE_REPLACE, requestor,
-		property, target, 8, selection_data.length,
-		selection_data.text);
+			? type : property}; // per ICCCM
+	change_property(xc, requestor, property, type);
 	xcb_send_event(xc, true, requestor,
 		XCB_SELECTION_NOTIFY, (char *)&e);
 }
