@@ -1,13 +1,10 @@
 /*  Copyright 2017, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "save_selection.h"
-#include <stdbool.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include "JBXVTLine.h"
 #include "JBXVTSelectionData.h"
-#include "libjb/JBDim.h"
 #include "libjb/log.h"
 #include "libjb/macros.h"
 #include "screen.h"
