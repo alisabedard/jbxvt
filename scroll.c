@@ -112,11 +112,12 @@ static int8_t copy_lines(const int8_t i, const int8_t j, const int8_t mod,
 	memcpy(dest, src, sizeof(struct JBXVTLine));
 	return copy_lines(i + 1, j + mod, mod, count);
 }
-static void clear_line(xcb_connection_t * xc, const int16_t y)
+static void clear_line(xcb_connection_t * xc,
+	const int16_t y, const int8_t count)
 {
 	const uint8_t fh = jbxvt_get_font_size().height;
 	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), 0, y * fh,
-		jbxvt_get_pixel_size().width, fh);
+		jbxvt_get_pixel_size().width, count * fh);
 }
 static void clear(int8_t count, const uint8_t offset, const bool is_up)
 {
@@ -135,7 +136,7 @@ static void sc_common(xcb_connection_t * xc, const uint8_t r1, const
 	else
 		clear(count, r1, false);
 	copy_visible_area(xc, r1, r2, count, up);
-	clear_line(xc, up ? (r2 - count) : r1);
+	clear_line(xc, up ? (r2 - count) : r1, count);
 	jbxvt_draw_scrollbar(xc);
 }
 static void sc_dn(xcb_connection_t * xc, const uint8_t row1, const
