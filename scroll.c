@@ -41,13 +41,13 @@ static void clear_selection_at(const int16_t j)
 	if (e[0].index == j || e[1].index == j)
 		jbxvt_clear_selection();
 }
-static void move_line(const int16_t j, const int8_t count,
-	struct JBXVTScreen * restrict s)
+static void move_line(const int source, const int count,
+	struct JBXVTLine * restrict line_array)
 {
-	const uint16_t k = j + count;
-	struct JBXVTLine * dest = s->line + k, * src = s->line + j;
-	memcpy(dest, src, sizeof(struct JBXVTLine));
-	clear_selection_at(j);
+	const int dest = source + count;
+	memcpy(line_array + dest , line_array + source,
+		sizeof(struct JBXVTLine));
+	clear_selection_at(source);
 }
 static void get_y(int16_t * restrict y, const uint8_t row1,
 	const int8_t count, const bool up)
@@ -144,7 +144,7 @@ static void sc_dn(xcb_connection_t * xc, const uint8_t row1, const
 {
 	struct JBXVTScreen * s = jbxvt_get_current_screen();
 	for(int8_t j = copy_lines(0, row2, -1, count); j >= row1; --j)
-		move_line(j, count, s);
+		move_line(j, count, s->line);
 	sc_common(xc, row1, row2, count, false);
 }
 static void sc_up(xcb_connection_t * xc, const uint8_t row1, const
@@ -154,7 +154,7 @@ static void sc_up(xcb_connection_t * xc, const uint8_t row1, const
 	if (s == jbxvt_get_screen_at(0) && row1 == 0)
 		add_scroll_history();
 	for(int8_t j = copy_lines(0, row1, 1, count); j < row2; ++j)
-		move_line(j, -count, s);
+		move_line(j, -count, s->line);
 	sc_common(xc, row1, row2, count, true);
 }
 /*  Scroll count lines from row1 to row2 inclusive.
@@ -172,7 +172,8 @@ void scroll(xcb_connection_t * xc, const uint8_t row1,
 		return; // nothing to do
 	if (JB_UNLIKELY(row1 > row2))
 		return; // invalid
-	(JB_LIKELY(count > 0) ? sc_up : sc_dn)(xc, row1, row2 + 1, abs(count));
+	(JB_LIKELY(count > 0) ? sc_up : sc_dn)(xc, row1,
+		row2 + 1, abs(count));
 	jbxvt_set_scroll(xc, 0);
 #if LOG_LEVEL > 8
 	for (uint16_t i = 0; i < scroll_size; ++i)
