@@ -107,7 +107,8 @@ static int8_t copy_lines(const int8_t i, const int8_t j, const int8_t mod,
 	if (i >= count)
 		return j;
 	struct JBXVTScreen * s = jbxvt_get_current_screen();
-	struct JBXVTLine * dest = s->line + i, * src = s->line + j;
+	struct JBXVTLine * dest = s->line + i,
+			 * src = s->line + j;
 	memcpy(dest, src, sizeof(struct JBXVTLine));
 	return copy_lines(i + 1, j + mod, mod, count);
 }
