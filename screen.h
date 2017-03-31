@@ -3,7 +3,6 @@
 #ifndef JBXVT_SCREEN_H
 #define JBXVT_SCREEN_H
 #include <stdbool.h>
-#include <stdint.h>
 #include <xcb/xcb.h>
 //  Change between the alternate and the main screens
 //  mode_high is true for screen 2

@@ -3,11 +3,7 @@
 #undef DEBUG
 #include "cmdtok.h"
 #include <errno.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <sys/select.h>
 #include <unistd.h>
 #include "JBXVTPrivateModes.h"
 #include "JBXVTToken.h"
@@ -17,7 +13,6 @@
 #include "dcs.h"
 #include "esc.h"
 #include "libjb/log.h"
-#include "libjb/util.h"
 #include "libjb/xcb.h"
 #include "mode.h"
 #include "xevents.h"

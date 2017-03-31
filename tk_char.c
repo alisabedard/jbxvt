@@ -1,11 +1,10 @@
 // Copyright 2017, Jeffrey E. Bedard
 #include "tk_char.h"
-#include <stdio.h>
 #include "JBXVTPrivateModes.h"
-#include "libjb/JBDim.h"
 #include "cmdtok.h"
 #include "command.h"
 #include "cursor.h"
+#include "libjb/JBDim.h"
 #include "libjb/log.h"
 #include "mode.h"
 #include "move.h"

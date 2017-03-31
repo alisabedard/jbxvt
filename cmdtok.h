@@ -1,7 +1,6 @@
 // Copyright 2017, Jeffrey E. Bedard
 #ifndef JBXVT_CMDTOK_H
 #define JBXVT_CMDTOK_H
-#include <stdint.h>
 #include <xcb/xcb.h>
 struct JBXVTToken;
 void jbxvt_get_token(xcb_connection_t * xc,
