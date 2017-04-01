@@ -2,7 +2,6 @@
 #ifndef JBXVT_XCB_SCREEN_H
 #define JBXVT_XCB_SCREEN_H
 #include <xcb/xcb.h>
-#include <xcb/xproto.h>
 // Get default colormap for the screen
 xcb_colormap_t jbxvt_get_colormap(xcb_connection_t * xc);
 // Get the root window of the screen

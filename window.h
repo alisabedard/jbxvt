@@ -3,9 +3,7 @@
 #ifndef JBXVT_WINDOW_H
 #define JBXVT_WINDOW_H
 #include <stdbool.h>
-#include <stdint.h>
 #include <xcb/xcb.h>
-#include <xcb/xproto.h>
 xcb_window_t jbxvt_get_main_window(xcb_connection_t * xc);
 xcb_window_t jbxvt_get_vt_window(xcb_connection_t * xc);
 // Set main window property string

@@ -1,10 +1,8 @@
 // Copyright 2017, Jeffrey E. Bedard
 #include "command.h"
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <xcb/xcb.h>
 #include "JBXVTOptions.h"
 #include "config.h"
 #include "cursor.h"

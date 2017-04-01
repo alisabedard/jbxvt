@@ -1,7 +1,6 @@
 /*  Copyright 2017, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "window.h"
-#include <stddef.h>
 #include <stdlib.h>
 #include "config.h"
 #include "font.h"
