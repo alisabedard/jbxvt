@@ -18,6 +18,34 @@ case JBXVT_TOKEN_CNL:
 	LOG("JBXVT_TOKEN_CNL");
 	handle_JBXVT_TOKEN_CNL(xc, &token);
 	break;
+case JBXVT_TOKEN_CS_ALT_G1:
+	LOG("JBXVT_TOKEN_CS_ALT_G1");
+	handle_JBXVT_TOKEN_CS_ALT_G1(xc, &token);
+	break;
+case JBXVT_TOKEN_CS_ALT_G2:
+	LOG("JBXVT_TOKEN_CS_ALT_G2");
+	handle_JBXVT_TOKEN_CS_ALT_G2(xc, &token);
+	break;
+case JBXVT_TOKEN_CS_ALT_G3:
+	LOG("JBXVT_TOKEN_CS_ALT_G3");
+	handle_JBXVT_TOKEN_CS_ALT_G3(xc, &token);
+	break;
+case JBXVT_TOKEN_CS_G0:
+	LOG("JBXVT_TOKEN_CS_G0");
+	handle_JBXVT_TOKEN_CS_G0(xc, &token);
+	break;
+case JBXVT_TOKEN_CS_G1:
+	LOG("JBXVT_TOKEN_CS_G1");
+	handle_JBXVT_TOKEN_CS_G1(xc, &token);
+	break;
+case JBXVT_TOKEN_CS_G2:
+	LOG("JBXVT_TOKEN_CS_G2");
+	handle_JBXVT_TOKEN_CS_G2(xc, &token);
+	break;
+case JBXVT_TOKEN_CS_G3:
+	LOG("JBXVT_TOKEN_CS_G3");
+	handle_JBXVT_TOKEN_CS_G3(xc, &token);
+	break;
 case JBXVT_TOKEN_CUB:
 	LOG("JBXVT_TOKEN_CUB");
 	handle_JBXVT_TOKEN_CUB(xc, &token);
@@ -202,6 +230,18 @@ case JBXVT_TOKEN_SELINSRT:
 	LOG("JBXVT_TOKEN_SELINSRT");
 	handle_JBXVT_TOKEN_SELINSRT(xc, &token);
 	break;
+case JBXVT_TOKEN_SGR:
+	LOG("JBXVT_TOKEN_SGR");
+	handle_JBXVT_TOKEN_SGR(xc, &token);
+	break;
+case JBXVT_TOKEN_SS2:
+	LOG("JBXVT_TOKEN_SS2");
+	handle_JBXVT_TOKEN_SS2(xc, &token);
+	break;
+case JBXVT_TOKEN_SS3:
+	LOG("JBXVT_TOKEN_SS3");
+	handle_JBXVT_TOKEN_SS3(xc, &token);
+	break;
 case JBXVT_TOKEN_ST:
 	LOG("JBXVT_TOKEN_ST");
 	handle_JBXVT_TOKEN_ST(xc, &token);
@@ -213,6 +253,32 @@ case JBXVT_TOKEN_STBM:
 case JBXVT_TOKEN_SU:
 	LOG("JBXVT_TOKEN_SU");
 	handle_JBXVT_TOKEN_SU(xc, &token);
+	break;
+case JBXVT_TOKEN_SWL:
+	LOG("JBXVT_TOKEN_SWL");
+	handle_JBXVT_TOKEN_SWL(xc, &token);
+	break;
+case JBXVT_TOKEN_TBC:
+	LOG("JBXVT_TOKEN_TBC");
+	handle_JBXVT_TOKEN_TBC(xc, &token);
+	break;
+case JBXVT_TOKEN_TXTPAR:
+	LOG("JBXVT_TOKEN_TXTPAR");
+	handle_JBXVT_TOKEN_TXTPAR(xc, &token);
+	break;
+case JBXVT_TOKEN_VPA:
+	LOG("JBXVT_TOKEN_VPA");
+	handle_JBXVT_TOKEN_VPA(xc, &token);
+	break;
+case JBXVT_TOKEN_VPR:
+	LOG("JBXVT_TOKEN_VPR");
+	handle_JBXVT_TOKEN_VPR(xc, &token);
+	break;
+case JBXVT_TOKEN_CHAR:
+	handle_JBXVT_TOKEN_CHAR(xc, &token);
+	break;
+case JBXVT_TOKEN_STRING:
+	handle_JBXVT_TOKEN_STRING(xc, &token);
 	break;
 case JBXVT_TOKEN_APC:
 	LOG("FIXME: JBXVT_TOKEN_APC not implemented");

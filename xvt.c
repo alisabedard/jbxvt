@@ -53,22 +53,6 @@ static int16_t get_0(int16_t arg)
 {
 	return get_n(arg) - 1;
 }
-static void handle_txtpar(xcb_connection_t * xc,
-	struct JBXVTToken * restrict token)
-{
-	switch (token->arg[0]) {
-	case 0 :
-		jbxvt_change_name(xc, token->string, false);
-		jbxvt_change_name(xc, token->string, true);
-		break;
-	case 1 :
-		jbxvt_change_name(xc, token->string, true);
-		break;
-	case 2 :
-		jbxvt_change_name(xc, token->string, false);
-		break;
-	}
-}
 static void select_charset(const char c, const uint8_t i)
 {
 	switch(c) {
@@ -83,15 +67,6 @@ static void select_charset(const char c, const uint8_t i)
 		// fall through
 		CS('B', ASCII, "US ASCII");
 	}
-}
-static void tbc(const uint8_t t)
-{
-	/* Note:  Attempting to simplify this results
-	   in vttest test failure.  */
-	if (t == 3)
-		jbxvt_set_tab(-1, false);
-	else if (!t)
-		jbxvt_set_tab(jbxvt_get_x(), false);
 }
 static void handle_scroll(xcb_connection_t * xc, const int16_t arg)
 {
@@ -138,8 +113,10 @@ static int16_t get_arg(struct JBXVTToken * t)
 #define NOPARM_TOKEN() (void)token;
 #define NOPARM() NOPARM_XC(); NOPARM_TOKEN();
 #define HANDLE(name) static void handle_JBXVT_TOKEN_##name(PARMS)
-#define ALIAS(alias, source) static void \
-	(* handle_JBXVT_TOKEN_##alias)(PARMS) = handle_JBXVT_TOKEN_##source
+#define EXTERN_ALIAS(alias, source) static void \
+	(* handle_JBXVT_TOKEN_##alias)(PARMS) = source
+#define ALIAS(alias, source) EXTERN_ALIAS(alias, \
+	handle_JBXVT_TOKEN_##source)
 HANDLE(ALN) // screen alignment test
 {
 	NOPARM_TOKEN();
@@ -148,6 +125,10 @@ HANDLE(ALN) // screen alignment test
 HANDLE(CHA) // cursor character absolute column
 {
 	jbxvt_move(xc, get_0(token->arg[0]), 0, JBXVT_ROW_RELATIVE);
+}
+HANDLE(CHAR)
+{
+	jbxvt_handle_tk_char(xc, token->tk_char);
 }
 HANDLE(CHT) // change tab stop
 {
@@ -161,6 +142,29 @@ HANDLE(CNL) // cursor next line
 {
 	jbxvt_move(xc, 0, get_arg(token), 0);
 }
+HANDLE(CS_G0)
+{
+	NOPARM_XC();
+	select_charset(token->arg[0], 0);
+}
+HANDLE(CS_G1)
+{
+	NOPARM_XC();
+	select_charset(token->arg[0], 1);
+}
+ALIAS(CS_ALT_G1, CS_G1);
+HANDLE(CS_G2)
+{
+	NOPARM_XC();
+	select_charset(token->arg[0], 2);
+}
+ALIAS(CS_ALT_G2, CS_G2);
+HANDLE(CS_G3)
+{
+	NOPARM_XC();
+	select_charset(token->arg[0], 3);
+}
+ALIAS(CS_ALT_G3, CS_G3);
 HANDLE(CUB) // cursor back
 {
 	jbxvt_move(xc, -get_arg(token), 0, JBXVT_ROW_RELATIVE
@@ -475,6 +479,17 @@ HANDLE(SELINSRT)
 {
 	jbxvt_request_selection(xc, token->arg[0]);
 }
+EXTERN_ALIAS(SGR, jbxvt_handle_sgr);
+HANDLE(SS2)
+{
+	NOPARM();
+	jbxvt_get_modes()->ss2 = true;
+}
+HANDLE(SS3)
+{
+	NOPARM();
+	jbxvt_get_modes()->ss3 = true;
+}
 HANDLE(ST) // string terminator
 {
 	NOPARM();
@@ -495,80 +510,63 @@ HANDLE(STBM) // set top and bottom margins
 	m->top = rst ? 0 : get_0(t[0]);
 	m->bot = (rst ? jbxvt_get_char_size().h : get_n(t[1])) - 1;
 }
+HANDLE(STRING)
+{
+	jbxvt_string(xc, token->string, token->length, token->nlcount);
+}
 HANDLE(SU) // scroll up
 {
 	handle_scroll(xc, token->arg[0]);
+}
+HANDLE(SWL) // single width line
+{
+	NOPARM_TOKEN();
+	jbxvt_set_double_width_line(xc, false);
+}
+HANDLE(TBC) // tabulation clear
+{
+	NOPARM_XC();
+	const uint8_t t = token->arg[0];
+	/* Note:  Attempting to simplify this results
+	   in vttest test failure.  */
+	if (t == 3)
+		jbxvt_set_tab(-1, false);
+	else if (!t)
+		jbxvt_set_tab(jbxvt_get_x(), false);
+
+}
+HANDLE(TXTPAR) // change title bar or icon name
+{
+	switch (token->arg[0]) {
+	case 0 :
+		jbxvt_change_name(xc, token->string, false);
+		jbxvt_change_name(xc, token->string, true);
+		break;
+	case 1 :
+		jbxvt_change_name(xc, token->string, true);
+		break;
+	case 2 :
+		jbxvt_change_name(xc, token->string, false);
+		break;
+	}
+}
+HANDLE(VPA) // vertical position absolute
+{
+	vp(xc, token->arg[0], false);
+}
+HANDLE(VPR) // vertical position relative
+{
+	vp(xc, token->arg[0], true);
 }
 bool jbxvt_parse_token(xcb_connection_t * xc)
 {
 	struct JBXVTToken token;
 	jbxvt_get_token(xc, &token);
-	int16_t * t = token.arg;
-	// n is sanitized for ops with optional args
-	//int16_t n = get_arg(&token);
 	switch (token.type) {
-	case JBXVT_TOKEN_CHAR: // don't log
-		jbxvt_handle_tk_char(xc, token.tk_char);
-		break;
 	case JBXVT_TOKEN_EOF:
 		LOG("JBXVT_TOKEN_EOF");
 		return false;
 #include "cases.c"
-	case JBXVT_TOKEN_CS_G0:
-		select_charset(*t, 0);
-		break;
-	case JBXVT_TOKEN_CS_G1:
-	case JBXVT_TOKEN_CS_ALT_G1:
-		select_charset(*t, 1);
-		break;
-	case JBXVT_TOKEN_CS_G2:
-	case JBXVT_TOKEN_CS_ALT_G2:
-		select_charset(*t, 2);
-		break;
-	case JBXVT_TOKEN_CS_G3:
-	case JBXVT_TOKEN_CS_ALT_G3:
-		select_charset(*t, 3);
-		break;
-	case JBXVT_TOKEN_SS2:
-		LOG("JBXVT_TOKEN_SS2");
-		jbxvt_get_modes()->ss2 = true;
-		break;
-	case JBXVT_TOKEN_SS3:
-		LOG("JBXVT_TOKEN_SS3");
-		jbxvt_get_modes()->ss3 = true;
-		break;
-	case JBXVT_TOKEN_STRING: // don't log
-#ifdef JBXVT_DEBUG_STRING
-		LOG("token.length: %d", token.length);
-#endif//JBXVT_DEBUG_STRING
-		jbxvt_string(xc, token.string, token.length,
-			token.nlcount);
-		break;
-	case JBXVT_TOKEN_TXTPAR:
-		LOG("JBXVT_TOKEN_TXTPAR");
-		// change title or icon name
-		handle_txtpar(xc, &token);
-		break;
-	case JBXVT_TOKEN_SGR:
-		TLOG("JBXVT_TOKEN_SGR");
-		jbxvt_handle_sgr(xc, &token);
-		break;
-	case JBXVT_TOKEN_SWL: // single width line
-		LOG("JBXVT_TOKEN_SWL");
-		jbxvt_set_double_width_line(xc, false);
-		break;
-	case JBXVT_TOKEN_TBC: // Tabulation clear
-		LOG("JBXVT_TOKEN_TBC");
-		tbc(t[0]);
-		break;
-	case JBXVT_TOKEN_VPA: // vertical position absolute
-		LOG("JBXVT_TOKEN_VPA");
-		vp(xc, *t, false);
-		break;
-	case JBXVT_TOKEN_VPR: // vertical position relative
-		LOG("JBXVT_TOKEN_VPR");
-		vp(xc, *t, true);
-		break;
 	default:
 #ifdef DEBUG
 		if(token.type) { // Ignore JBXVT_TOKEN_NULL
