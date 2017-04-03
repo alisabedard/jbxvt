@@ -84,56 +84,6 @@ static void handle_token_rqm(struct JBXVTToken * restrict token)
 		jbxvt_get_modes()->s8c1t = true;
 	}
 }
-static void handle_token_mc_private(int16_t * restrict t)
-{
-	switch (t[0]) {
-	case 4:
-		LOG("turn off printer controller mode");
-		break;
-	case 5:
-		LOG("turn on printer controller mode");
-		break;
-	case 10:
-		LOG("html screen dump");
-		break;
-	case 11:
-		LOG("svg screen dump");
-		break;
-	case 0:
-	default:
-		LOG("print screen");
-	}
-}
-static void handle_token_mc_public(int16_t * restrict t)
-{
-	switch (t[0]) {
-	case 1:
-		LOG("print line containing cursor");
-		dprintf(jbxvt_get_fd(), "%d", jbxvt_get_y() + 1);
-		break;
-	case 4:
-		LOG("turn off autoprint mode");
-		break;
-	case 5:
-		LOG("turn on autoprint mode");
-		break;
-	case 10:
-		LOG("print composed display");
-		break;
-	case 11:
-		LOG("print all pages");
-		break;
-	}
-}
-static void handle_token_mc(struct JBXVTToken * restrict token)
-{
-	int16_t * restrict t = token->arg;
-	if (token->private != '?')
-		handle_token_mc_private(t);
-	else
-		handle_token_mc_public(t);
-
-}
 static void handle_txtpar(xcb_connection_t * xc,
 	struct JBXVTToken * restrict token)
 {
@@ -412,6 +362,57 @@ HANDLE(LL)
 		LOG("LL -- unimplemented");
 	}
 }
+static void handle_token_mc_private(int16_t * restrict t)
+{
+	switch (t[0]) {
+	case 4:
+		LOG("turn off printer controller mode");
+		break;
+	case 5:
+		LOG("turn on printer controller mode");
+		break;
+	case 10:
+		LOG("html screen dump");
+		break;
+	case 11:
+		LOG("svg screen dump");
+		break;
+	case 0:
+	default:
+		LOG("print screen");
+	}
+}
+static void handle_token_mc_public(int16_t * restrict t)
+{
+	switch (t[0]) {
+	case 1:
+		LOG("print line containing cursor");
+		dprintf(jbxvt_get_fd(), "%d", jbxvt_get_y() + 1);
+		break;
+	case 4:
+		LOG("turn off autoprint mode");
+		break;
+	case 5:
+		LOG("turn on autoprint mode");
+		break;
+	case 10:
+		LOG("print composed display");
+		break;
+	case 11:
+		LOG("print all pages");
+		break;
+	}
+}
+HANDLE(MC)
+{
+	(void)xc;
+	int16_t * restrict t = token->arg;
+	if (token->private == '?')
+		handle_token_mc_public(t);
+	else
+		handle_token_mc_private(t);
+
+}
 bool jbxvt_parse_token(xcb_connection_t * xc)
 {
 	struct JBXVTToken token;
@@ -427,10 +428,6 @@ bool jbxvt_parse_token(xcb_connection_t * xc)
 		LOG("JBXVT_TOKEN_EOF");
 		return false;
 #include "cases.c"
-	case JBXVT_TOKEN_MC:
-		LOG("JBXVT_TOKEN_MC");
-		handle_token_mc(&token);
-		break;
 	case JBXVT_TOKEN_NEL: // next line
 		LOG("JBXVT_TOKEN_NEL");
 		// move to first position on next line down.

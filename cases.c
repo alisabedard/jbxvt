@@ -122,6 +122,10 @@ case JBXVT_TOKEN_LL:
 	LOG("JBXVT_TOKEN_LL");
 	handle_JBXVT_TOKEN_LL(xc, &token);
 	break;
+case JBXVT_TOKEN_MC:
+	LOG("JBXVT_TOKEN_MC");
+	handle_JBXVT_TOKEN_MC(xc, &token);
+	break;
 case JBXVT_TOKEN_APC:
 	LOG("FIXME: JBXVT_TOKEN_APC not implemented");
 	break;
