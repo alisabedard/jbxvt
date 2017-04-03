@@ -129,17 +129,6 @@ static void decstbm(struct JBXVTToken * restrict token)
 	m->top = rst ? 0 : get_0(t[0]);
 	m->bot = (rst ? jbxvt_get_char_size().h : get_n(t[1])) - 1;
 }
-static void reqtparam(const uint8_t t)
-{
-	// Send REPTPARAM
-	const uint8_t sol = t + 2, par = 1, nbits = 1,
-	      flags = 0, clkmul = 1;
-	const uint16_t xspeed = 88, rspeed = 88;
-	dprintf(jbxvt_get_fd(), "%s[%d;%d;%d;%d;%d;%d;%dx", jbxvt_get_csi(),
-		sol, par, nbits, xspeed, rspeed, clkmul, flags);
-	LOG("ESC[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
-		xspeed, rspeed, clkmul, flags);
-}
 static void tbc(const uint8_t t)
 {
 	/* Note:  Attempting to simplify this results
@@ -189,8 +178,10 @@ static int16_t get_arg(struct JBXVTToken * t)
 	return t->nargs > 0 && t->arg[0] ? t->arg[0] : 1;
 }
 // Note:  Cast to (void) to avoid warnings about unused arguments
-#define HANDLE(name) static void handle_JBXVT_TOKEN_##name(xcb_connection_t \
-	* xc, struct JBXVTToken * token)
+#define PARMS xcb_connection_t * xc, struct JBXVTToken * token
+#define HANDLE(name) static void handle_JBXVT_TOKEN_##name(PARMS)
+#define ALIAS(alias, source) static void \
+	(* handle_JBXVT_TOKEN_##alias)(PARMS) = handle_JBXVT_TOKEN_##source
 HANDLE(ALN) // screen alignment test
 {
 	(void)token;
@@ -231,6 +222,7 @@ HANDLE(CUP) // cursor position (absolute)
 {
 	cup(xc, token->arg);
 }
+ALIAS(HVP, CUP); // horizontal vertical position
 HANDLE(CUU) // cursor up
 {
 	jbxvt_move(xc, 0, -get_arg(token), JBXVT_ROW_RELATIVE
@@ -283,14 +275,12 @@ HANDLE(DA) // DECID
 	(void)token;
 	decid();
 }
+ALIAS(ID, DA); // DECID
 HANDLE(DCH) // delete character
 {
 	jbxvt_edit_characters(xc, get_arg(token), true);
 }
-HANDLE(ECH) // erase character
-{
-	handle_JBXVT_TOKEN_DCH(xc, token);
-}
+ALIAS(ECH, DCH); // erase character
 HANDLE(ENTGM52) // enter vt52 graphics mode
 {
 	(void)xc;
@@ -324,17 +314,9 @@ HANDLE(HTS) // horizontal tab stop
 	(void)token;
 	jbxvt_set_tab(jbxvt_get_x(), true);
 }
-HANDLE(HVP) // horizontal and vertical position
-{
-	handle_JBXVT_TOKEN_CUP(xc, token);
-}
 HANDLE(ICH) // insert blank characters
 {
 	jbxvt_edit_characters(xc, get_arg(token), false);
-}
-HANDLE(ID) // DECID
-{
-	handle_JBXVT_TOKEN_DA(xc, token);
 }
 HANDLE(IL) // insert line
 {
@@ -436,6 +418,33 @@ HANDLE(PNM) // numeric key mode
 	(void)token;
 	jbxvt_set_keys(false, false);
 }
+HANDLE(RC)
+{
+	(void)token;
+	jbxvt_restore_cursor(xc);
+}
+HANDLE(REQTPARAM)
+{
+	(void)xc;
+	const uint8_t t = token->arg[0];
+	// Send REPTPARAM
+	const uint8_t sol = t + 2, par = 1, nbits = 1,
+	      flags = 0, clkmul = 1;
+	const uint16_t xspeed = 88, rspeed = 88;
+	dprintf(jbxvt_get_fd(), "%s[%d;%d;%d;%d;%d;%d;%dx", jbxvt_get_csi(),
+		sol, par, nbits, xspeed, rspeed, clkmul, flags);
+	LOG("ESC[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
+		xspeed, rspeed, clkmul, flags);
+}
+HANDLE(RESET)
+{
+	jbxvt_dec_reset(xc, token);
+}
+ALIAS(SET, RESET);
+HANDLE(RI) // reverse index
+{
+	jbxvt_index_from(xc, -get_arg(token), jbxvt_get_margin()->top);
+}
 bool jbxvt_parse_token(xcb_connection_t * xc)
 {
 	struct JBXVTToken token;
@@ -451,6 +460,7 @@ bool jbxvt_parse_token(xcb_connection_t * xc)
 		LOG("JBXVT_TOKEN_EOF");
 		return false;
 #include "cases.c"
+#if 0
 	case JBXVT_TOKEN_RC:
 		LOG("JBXVT_TOKEN_RC");
 		jbxvt_restore_cursor(xc);
@@ -469,6 +479,7 @@ bool jbxvt_parse_token(xcb_connection_t * xc)
 		jbxvt_index_from(xc, -get_arg(&token),
 			jbxvt_get_margin()->top);
 		break;
+#endif
 	case JBXVT_TOKEN_RIS: // reset to initial state
 		LOG("JBXVT_TOKEN_RIS");
 		jbxvt_get_modes()->dectcem = true;
