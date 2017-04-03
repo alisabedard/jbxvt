@@ -28,14 +28,16 @@
 #include "size.h"
 #include "tab.h"
 #include "window.h"
-static void handle_new_lines(xcb_connection_t * restrict xc, int8_t new_line_count)
+static void handle_new_lines(xcb_connection_t * restrict xc,
+	int8_t new_line_count)
 {
 	struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
 	const int16_t y = s->cursor.y;
 	struct JBDim * m = &s->margin;
 	new_line_count = y > m->b ? 0 : new_line_count - m->b - y;
 	JB_LIMIT(new_line_count, y - m->top, 0);
-	if (new_line_count) { // only worth doing if new_line_count has a value:
+	if (new_line_count) {
+		// only worth doing if new_line_count has a value:
 		scroll(xc, m->top, m->bottom, new_line_count);
 		s->cursor.y -= new_line_count;
 	}
