@@ -159,6 +159,7 @@ static void cleanup(void)
 #endif//USE_UTEMPTER
 	// Make sure child process exits
 	kill(command_pid, SIGHUP);
+	wait(NULL);
 }
 #if defined(NETBSD) || defined(OPENBSD)
 static void bsd_sigchld(int sig __attribute__((unused)))
@@ -169,18 +170,25 @@ static void bsd_sigchld(int sig __attribute__((unused)))
 	else
 		exit(0);
 }
+#else
+static void sigchld(int sig)
+{
+	LOG("The child process has exited");
+	wait(NULL);
+	exit(0);
+}
 #endif//NETBSD||OPENBSD
 static void attach_signals(void)
 {
 	// Attach relevant signals to ensure cleanup() executed:
-	signal(SIGHUP, &exit);
-	signal(SIGINT, &exit);
-	signal(SIGPIPE, &exit);
-	signal(SIGTERM, &exit);
+	signal(SIGHUP, exit);
+	signal(SIGINT, exit);
+	signal(SIGPIPE, exit);
+	signal(SIGTERM, exit);
 #if defined(NETBSD) || defined(OPENBSD)
-	signal(SIGCHLD, &bsd_sigchld);
+	signal(SIGCHLD, bsd_sigchld);
 #else//!NETBSD&&!OPENBSD
-	signal(SIGCHLD, &exit);
+	signal(SIGCHLD, sigchld);
 #endif//NETBSD||OPENBSD
 	// Attach exit handler cleanup().
 	atexit(cleanup);
