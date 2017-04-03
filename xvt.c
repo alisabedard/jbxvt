@@ -53,37 +53,6 @@ static int16_t get_0(int16_t arg)
 {
 	return get_n(arg) - 1;
 }
-static void handle_token_rqm(struct JBXVTToken * restrict token)
-{
-	int16_t * restrict t = token->arg;
-	if (token->private == '?') {
-		LOG("\tRQM Ps: %d", t[0]);
-		dprintf(jbxvt_get_fd(), "%s%d;%d$y", jbxvt_get_csi(),
-			t[0], 0); // FIXME:  Return actual value
-		return;
-	}
-	LOG("\tDECSCL 0: %d, 1: %d", t[0], t[1]);
-	switch (t[0]) {
-	case 62:
-		LOG("\t\tVT200");
-		break;
-	case 63:
-		LOG("\t\tVT300");
-		break;
-	case 0:
-	case 61:
-	default:
-		LOG("\t\tVT100");
-		break;
-	}
-	if (t[1] == 1) {
-		LOG("\t\t7-bit controls");
-		jbxvt_get_modes()->s8c1t = false;
-	} else {
-		LOG("\t\t8-bit controls");
-		jbxvt_get_modes()->s8c1t = true;
-	}
-}
 static void handle_txtpar(xcb_connection_t * xc,
 	struct JBXVTToken * restrict token)
 {
@@ -179,12 +148,15 @@ static int16_t get_arg(struct JBXVTToken * t)
 }
 // Note:  Cast to (void) to avoid warnings about unused arguments
 #define PARMS xcb_connection_t * xc, struct JBXVTToken * token
+#define NOPARM_XC() (void)xc;
+#define NOPARM_TOKEN() (void)token;
+#define NOPARM() NOPARM_XC(); NOPARM_TOKEN();
 #define HANDLE(name) static void handle_JBXVT_TOKEN_##name(PARMS)
 #define ALIAS(alias, source) static void \
 	(* handle_JBXVT_TOKEN_##alias)(PARMS) = handle_JBXVT_TOKEN_##source
 HANDLE(ALN) // screen alignment test
 {
-	(void)token;
+	NOPARM_TOKEN();
 	jbxvt_efill(xc);
 }
 HANDLE(CHA) // cursor character absolute column
@@ -234,12 +206,12 @@ HANDLE(DL) // delete line
 }
 HANDLE(DSR) // device status report
 {
-	(void)xc;
+	NOPARM_XC();
 	jbxvt_handle_dsr(token->arg[0]);
 }
 HANDLE(DWL) // double width line
 {
-	(void)token;
+	NOPARM_TOKEN();
 	jbxvt_set_double_width_line(xc, true);
 }
 HANDLE(ED) // erase display
@@ -252,7 +224,7 @@ HANDLE(EL) // erase line
 }
 HANDLE(ELR) // enable locator report
 {
-	(void)xc;
+	NOPARM_XC();
 	int16_t * restrict t = token->arg;
 	struct JBXVTPrivateModes * restrict m = jbxvt_get_modes();
 	switch (t[0]) {
@@ -271,8 +243,7 @@ HANDLE(ELR) // enable locator report
 }
 HANDLE(DA) // DECID
 {
-	(void)xc;
-	(void)token;
+	NOPARM();
 	decid();
 }
 ALIAS(ID, DA); // DECID
@@ -283,14 +254,12 @@ HANDLE(DCH) // delete character
 ALIAS(ECH, DCH); // erase character
 HANDLE(ENTGM52) // enter vt52 graphics mode
 {
-	(void)xc;
-	(void)token;
+	NOPARM();
 	gm52(true);
 }
 HANDLE(EXTGM52) // exit vt52 graphics mode
 {
-	(void)xc;
-	(void)token;
+	NOPARM();
 	gm52(false);
 }
 HANDLE(HOME)
@@ -310,8 +279,7 @@ HANDLE(HPR) // horizontal position relative
 }
 HANDLE(HTS) // horizontal tab stop
 {
-	(void)xc;
-	(void)token;
+	NOPARM();
 	jbxvt_set_tab(jbxvt_get_x(), true);
 }
 HANDLE(ICH) // insert blank characters
@@ -328,7 +296,7 @@ HANDLE(IND) // index (scroll)
 }
 HANDLE(LL)
 {
-	(void)xc;
+	NOPARM_XC();
 	int16_t * restrict t = token->arg;
 	LOG("t[0]: %d, t[1]: %d", t[0], t[1]);
 	switch (t[1]) {
@@ -387,7 +355,7 @@ static void handle_token_mc_public(int16_t * restrict t)
 }
 HANDLE(MC)
 {
-	(void)xc;
+	NOPARM_XC();
 	int16_t * restrict t = token->arg;
 	if (token->private == '?')
 		handle_token_mc_public(t);
@@ -397,35 +365,32 @@ HANDLE(MC)
 }
 HANDLE(NEL) // next line (move to the first position on the next line)
 {
-	(void)token;
+	NOPARM_TOKEN();
 	jbxvt_move(xc, 0, jbxvt_get_y() + 1, 0);
 }
 HANDLE(PAM) // application mode keys
 {
-	(void)xc;
-	(void)token;
+	NOPARM();
 	jbxvt_set_keys(true, false);
 }
 HANDLE(PM) // privacy message
 {
-	(void)xc;
-	(void)token;
+	NOPARM();
 	jbxvt_get_current_screen()->decpm = true;
 }
 HANDLE(PNM) // numeric key mode
 {
-	(void)xc;
-	(void)token;
+	NOPARM();
 	jbxvt_set_keys(false, false);
 }
 HANDLE(RC)
 {
-	(void)token;
+	NOPARM_TOKEN();
 	jbxvt_restore_cursor(xc);
 }
 HANDLE(REQTPARAM)
 {
-	(void)xc;
+	NOPARM_XC();
 	const uint8_t t = token->arg[0];
 	// Send REPTPARAM
 	const uint8_t sol = t + 2, par = 1, nbits = 1,
@@ -445,6 +410,63 @@ HANDLE(RI) // reverse index
 {
 	jbxvt_index_from(xc, -get_arg(token), jbxvt_get_margin()->top);
 }
+HANDLE(RIS) // reset to initial state
+{
+	NOPARM_TOKEN();
+	jbxvt_get_modes()->dectcem = true;
+	jbxvt_reset(xc);
+}
+HANDLE(RQM)
+{
+	(void)xc;
+	int16_t * restrict t = token->arg;
+	if (token->private == '?') {
+		LOG("\tRQM Ps: %d", t[0]);
+		dprintf(jbxvt_get_fd(), "%s%d;%d$y", jbxvt_get_csi(),
+			t[0], 0); // FIXME:  Return actual value
+		return;
+	}
+	LOG("\tDECSCL 0: %d, 1: %d", t[0], t[1]);
+	switch (t[0]) {
+	case 62:
+		LOG("\t\tVT200");
+		break;
+	case 63:
+		LOG("\t\tVT300");
+		break;
+	case 0:
+	case 61:
+	default:
+		LOG("\t\tVT100");
+		break;
+	}
+	if (t[1] == 1) {
+		LOG("\t\t7-bit controls");
+		jbxvt_get_modes()->s8c1t = false;
+	} else {
+		LOG("\t\t8-bit controls");
+		jbxvt_get_modes()->s8c1t = true;
+	}
+}
+static void set_s8c1t(const bool val)
+{
+	jbxvt_get_modes()->s8c1t = val;
+}
+HANDLE(S7C1T) // 7-bit control sequences
+{
+	NOPARM();
+	set_s8c1t(false);
+}
+HANDLE(S8C1T) // 8-bit control sequences
+{
+	NOPARM();
+	set_s8c1t(true);
+}
+HANDLE(SAVEPM) // save private modes
+{
+	NOPARM();
+	jbxvt_save_modes();
+}
 bool jbxvt_parse_token(xcb_connection_t * xc)
 {
 	struct JBXVTToken token;
@@ -460,47 +482,6 @@ bool jbxvt_parse_token(xcb_connection_t * xc)
 		LOG("JBXVT_TOKEN_EOF");
 		return false;
 #include "cases.c"
-#if 0
-	case JBXVT_TOKEN_RC:
-		LOG("JBXVT_TOKEN_RC");
-		jbxvt_restore_cursor(xc);
-		break;
-	case JBXVT_TOKEN_REQTPARAM: // request terminal parameters
-		LOG("JBXVT_TOKEN_REQTPARAM");
-		reqtparam(*t);
-		break;
-	case JBXVT_TOKEN_RESET:
-	case JBXVT_TOKEN_SET:
-		TLOG("JBXVT_TOKEN_RESET/JBXVT_TOKEN_SET");
-		jbxvt_dec_reset(xc, &token);
-		break;
-	case JBXVT_TOKEN_RI: // Reverse index
-		LOG("JBXVT_TOKEN_RI");
-		jbxvt_index_from(xc, -get_arg(&token),
-			jbxvt_get_margin()->top);
-		break;
-#endif
-	case JBXVT_TOKEN_RIS: // reset to initial state
-		LOG("JBXVT_TOKEN_RIS");
-		jbxvt_get_modes()->dectcem = true;
-		jbxvt_reset(xc);
-		break;
-	case JBXVT_TOKEN_RQM:
-		LOG("JBXVT_TOKEN_RQM");
-		handle_token_rqm(&token);
-		break;
-	case JBXVT_TOKEN_S7C1T: // 7-bit controls
-		LOG("JBXVT_TOKEN_S7C1T");
-		jbxvt_get_modes()->s8c1t = false;
-		break;
-	case JBXVT_TOKEN_S8C1T: // 8-bit controls
-		LOG("JBXVT_TOKEN_S8C1T");
-		jbxvt_get_modes()->s8c1t = true;
-		break;
-	case JBXVT_TOKEN_SAVEPM: // Save private modes
-		LOG("JBXVT_TOKEN_SAVEPM");
-		jbxvt_save_modes();
-		break;
 	case JBXVT_TOKEN_SBSWITCH:
 		LOG("JBXVT_TOKEN_SBSWITCH");
 		jbxvt_toggle_scrollbar(xc);

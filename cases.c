@@ -158,6 +158,26 @@ case JBXVT_TOKEN_RI:
 	LOG("JBXVT_TOKEN_RI");
 	handle_JBXVT_TOKEN_RI(xc, &token);
 	break;
+case JBXVT_TOKEN_RIS:
+	LOG("JBXVT_TOKEN_RIS");
+	handle_JBXVT_TOKEN_RIS(xc, &token);
+	break;
+case JBXVT_TOKEN_RQM:
+	LOG("JBXVT_TOKEN_RQM");
+	handle_JBXVT_TOKEN_RQM(xc, &token);
+	break;
+case JBXVT_TOKEN_S7C1T:
+	LOG("JBXVT_TOKEN_S7C1T");
+	handle_JBXVT_TOKEN_S7C1T(xc, &token);
+	break;
+case JBXVT_TOKEN_S8C1T:
+	LOG("JBXVT_TOKEN_S8C1T");
+	handle_JBXVT_TOKEN_S8C1T(xc, &token);
+	break;
+case JBXVT_TOKEN_SAVEPM:
+	LOG("JBXVT_TOKEN_SAVEPM");
+	handle_JBXVT_TOKEN_SAVEPM(xc, &token);
+	break;
 case JBXVT_TOKEN_SET:
 	LOG("JBXVT_TOKEN_SET");
 	handle_JBXVT_TOKEN_SET(xc, &token);
