@@ -126,6 +126,22 @@ case JBXVT_TOKEN_MC:
 	LOG("JBXVT_TOKEN_MC");
 	handle_JBXVT_TOKEN_MC(xc, &token);
 	break;
+case JBXVT_TOKEN_NEL:
+	LOG("JBXVT_TOKEN_NEL");
+	handle_JBXVT_TOKEN_NEL(xc, &token);
+	break;
+case JBXVT_TOKEN_PAM:
+	LOG("JBXVT_TOKEN_PAM");
+	handle_JBXVT_TOKEN_PAM(xc, &token);
+	break;
+case JBXVT_TOKEN_PM:
+	LOG("JBXVT_TOKEN_PM");
+	handle_JBXVT_TOKEN_PM(xc, &token);
+	break;
+case JBXVT_TOKEN_PNM:
+	LOG("JBXVT_TOKEN_PNM");
+	handle_JBXVT_TOKEN_PNM(xc, &token);
+	break;
 case JBXVT_TOKEN_APC:
 	LOG("FIXME: JBXVT_TOKEN_APC not implemented");
 	break;

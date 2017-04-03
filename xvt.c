@@ -413,6 +413,29 @@ HANDLE(MC)
 		handle_token_mc_private(t);
 
 }
+HANDLE(NEL) // next line (move to the first position on the next line)
+{
+	(void)token;
+	jbxvt_move(xc, 0, jbxvt_get_y() + 1, 0);
+}
+HANDLE(PAM) // application mode keys
+{
+	(void)xc;
+	(void)token;
+	jbxvt_set_keys(true, false);
+}
+HANDLE(PM) // privacy message
+{
+	(void)xc;
+	(void)token;
+	jbxvt_get_current_screen()->decpm = true;
+}
+HANDLE(PNM) // numeric key mode
+{
+	(void)xc;
+	(void)token;
+	jbxvt_set_keys(false, false);
+}
 bool jbxvt_parse_token(xcb_connection_t * xc)
 {
 	struct JBXVTToken token;
@@ -428,23 +451,6 @@ bool jbxvt_parse_token(xcb_connection_t * xc)
 		LOG("JBXVT_TOKEN_EOF");
 		return false;
 #include "cases.c"
-	case JBXVT_TOKEN_NEL: // next line
-		LOG("JBXVT_TOKEN_NEL");
-		// move to first position on next line down.
-		jbxvt_move(xc, 0, jbxvt_get_y() + 1, 0);
-		break;
-	case JBXVT_TOKEN_PAM: // application mode keys
-		LOG("JBXVT_TOKEN_PAM");
-		jbxvt_set_keys(true, false);
-		break;
-	case JBXVT_TOKEN_PM: // privacy message
-		LOG("JBXVT_TOKEN_PM");
-		jbxvt_get_current_screen()->decpm = true;
-		break;
-	case JBXVT_TOKEN_PNM: // numeric key mode
-		LOG("JBXVT_TOKEN_PNM");
-		jbxvt_set_keys(false, false);
-		break;
 	case JBXVT_TOKEN_RC:
 		LOG("JBXVT_TOKEN_RC");
 		jbxvt_restore_cursor(xc);
