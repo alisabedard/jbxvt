@@ -58,7 +58,7 @@ static void copy(uint8_t * str, uint8_t * scr_text,
 {
 	char * dest = (char *) str + total - 1;
 	char * src = (char *) scr_text + start;
-	strncpy(dest, src, len);
+	strncpy(dest, src, len + 1);
 }
 static inline bool is_on_screen(const struct JBDim p)
 {
