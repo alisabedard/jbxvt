@@ -178,9 +178,41 @@ case JBXVT_TOKEN_SAVEPM:
 	LOG("JBXVT_TOKEN_SAVEPM");
 	handle_JBXVT_TOKEN_SAVEPM(xc, &token);
 	break;
+case JBXVT_TOKEN_SBGOTO:
+	LOG("JBXVT_TOKEN_SBGOTO");
+	handle_JBXVT_TOKEN_SBGOTO(xc, &token);
+	break;
+case JBXVT_TOKEN_SBSWITCH:
+	LOG("JBXVT_TOKEN_SBSWITCH");
+	handle_JBXVT_TOKEN_SBSWITCH(xc, &token);
+	break;
+case JBXVT_TOKEN_SC:
+	LOG("JBXVT_TOKEN_SC");
+	handle_JBXVT_TOKEN_SC(xc, &token);
+	break;
+case JBXVT_TOKEN_SD:
+	LOG("JBXVT_TOKEN_SD");
+	handle_JBXVT_TOKEN_SD(xc, &token);
+	break;
 case JBXVT_TOKEN_SET:
 	LOG("JBXVT_TOKEN_SET");
 	handle_JBXVT_TOKEN_SET(xc, &token);
+	break;
+case JBXVT_TOKEN_SELINSRT:
+	LOG("JBXVT_TOKEN_SELINSRT");
+	handle_JBXVT_TOKEN_SELINSRT(xc, &token);
+	break;
+case JBXVT_TOKEN_ST:
+	LOG("JBXVT_TOKEN_ST");
+	handle_JBXVT_TOKEN_ST(xc, &token);
+	break;
+case JBXVT_TOKEN_STBM:
+	LOG("JBXVT_TOKEN_STBM");
+	handle_JBXVT_TOKEN_STBM(xc, &token);
+	break;
+case JBXVT_TOKEN_SU:
+	LOG("JBXVT_TOKEN_SU");
+	handle_JBXVT_TOKEN_SU(xc, &token);
 	break;
 case JBXVT_TOKEN_APC:
 	LOG("FIXME: JBXVT_TOKEN_APC not implemented");

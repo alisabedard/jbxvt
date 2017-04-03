@@ -84,20 +84,6 @@ static void select_charset(const char c, const uint8_t i)
 		CS('B', ASCII, "US ASCII");
 	}
 }
-static void decstbm(struct JBXVTToken * restrict token)
-{
-	int16_t * restrict t = token->arg;
-	LOG("JBXVT_TOKEN_STBM args: %d, 0: %d, 1: %d",
-		(int)token->nargs, t[0], t[1]);
-	if (token->private == JBXVT_TOKEN_RESTOREPM) {
-		jbxvt_restore_modes();
-		return;
-	}
-	const bool rst = token->nargs < 2 || t[0] >= t[1];
-	struct JBDim * restrict m = jbxvt_get_margin();
-	m->top = rst ? 0 : get_0(t[0]);
-	m->bot = (rst ? jbxvt_get_char_size().h : get_n(t[1])) - 1;
-}
 static void tbc(const uint8_t t)
 {
 	/* Note:  Attempting to simplify this results
@@ -467,6 +453,52 @@ HANDLE(SAVEPM) // save private modes
 	NOPARM();
 	jbxvt_save_modes();
 }
+HANDLE(SBGOTO) // Scroll to where token arg[0] is at top of screen.
+{
+	jbxvt_scroll_to(xc, token->arg[0]);
+}
+HANDLE(SBSWITCH)
+{
+	NOPARM_TOKEN();
+	jbxvt_toggle_scrollbar(xc);
+}
+HANDLE(SC)
+{
+	NOPARM();
+	jbxvt_save_cursor();
+}
+HANDLE(SD) // scroll down
+{
+	handle_scroll(xc, -token->arg[0]);
+}
+HANDLE(SELINSRT)
+{
+	jbxvt_request_selection(xc, token->arg[0]);
+}
+HANDLE(ST) // string terminator
+{
+	NOPARM();
+	jbxvt_get_current_screen()->decpm = false;
+}
+HANDLE(STBM) // set top and bottom margins
+{
+	NOPARM_XC();
+	int16_t * restrict t = token->arg;
+	LOG("JBXVT_TOKEN_STBM args: %d, 0: %d, 1: %d",
+		(int)token->nargs, t[0], t[1]);
+	if (token->private == JBXVT_TOKEN_RESTOREPM) {
+		jbxvt_restore_modes();
+		return;
+	}
+	const bool rst = token->nargs < 2 || t[0] >= t[1];
+	struct JBDim * restrict m = jbxvt_get_margin();
+	m->top = rst ? 0 : get_0(t[0]);
+	m->bot = (rst ? jbxvt_get_char_size().h : get_n(t[1])) - 1;
+}
+HANDLE(SU) // scroll up
+{
+	handle_scroll(xc, token->arg[0]);
+}
 bool jbxvt_parse_token(xcb_connection_t * xc)
 {
 	struct JBXVTToken token;
@@ -482,58 +514,20 @@ bool jbxvt_parse_token(xcb_connection_t * xc)
 		LOG("JBXVT_TOKEN_EOF");
 		return false;
 #include "cases.c"
-	case JBXVT_TOKEN_SBSWITCH:
-		LOG("JBXVT_TOKEN_SBSWITCH");
-		jbxvt_toggle_scrollbar(xc);
-		break;
-	case JBXVT_TOKEN_SBGOTO:
-		LOG("JBXVT_TOKEN_SBGOTO");
-		/*  Move the display so that line represented
-		    by scrollbar value is at the top of the screen.  */
-		jbxvt_scroll_to(xc, *t);
-		break;
-	case JBXVT_TOKEN_SC:
-		LOG("JBXVT_TOKEN_SC");
-		jbxvt_save_cursor();
-		break;
 	case JBXVT_TOKEN_CS_G0:
-#if LOG_LEVEL > 6
-		LOG("JBXVT_TOKEN_CS_G0");
-#endif//LOG_LEVEL>6
 		select_charset(*t, 0);
 		break;
 	case JBXVT_TOKEN_CS_G1:
 	case JBXVT_TOKEN_CS_ALT_G1:
-#if LOG_LEVEL > 6
-		LOG("JBXVT_TOKEN_CS_G1");
-#endif//LOG_LEVEL>6
 		select_charset(*t, 1);
 		break;
 	case JBXVT_TOKEN_CS_G2:
 	case JBXVT_TOKEN_CS_ALT_G2:
-#if LOG_LEVEL > 6
-		LOG("JBXVT_TOKEN_CS_G2");
-#endif//LOG_LEVEL>6
 		select_charset(*t, 2);
 		break;
 	case JBXVT_TOKEN_CS_G3:
 	case JBXVT_TOKEN_CS_ALT_G3:
-#if LOG_LEVEL > 6
-		LOG("JBXVT_TOKEN_CS_G3");
-#endif//LOG_LEVEL>6
 		select_charset(*t, 3);
-		break;
-	case JBXVT_TOKEN_SD:
-		LOG("JBXVT_TOKEN_SD");
-		// scroll down n lines
-		*t = - *t; // fall through
-	case JBXVT_TOKEN_SU:
-		LOG("JBXVT_TOKEN_SU");
-		handle_scroll(xc, *t);
-		break;
-	case JBXVT_TOKEN_SELINSRT:
-		LOG("JBXVT_TOKEN_SELINSRT");
-		jbxvt_request_selection(xc, *t);
 		break;
 	case JBXVT_TOKEN_SS2:
 		LOG("JBXVT_TOKEN_SS2");
@@ -558,14 +552,6 @@ bool jbxvt_parse_token(xcb_connection_t * xc)
 	case JBXVT_TOKEN_SGR:
 		TLOG("JBXVT_TOKEN_SGR");
 		jbxvt_handle_sgr(xc, &token);
-		break;
-	case JBXVT_TOKEN_ST: // string terminator
-		LOG("JBXVT_TOKEN_ST");
-		jbxvt_get_current_screen()->decpm = false;
-		break;
-	case JBXVT_TOKEN_STBM: // set top and bottom margins.
-		LOG("JBXVT_TOKEN_STBM");
-		decstbm(&token);
 		break;
 	case JBXVT_TOKEN_SWL: // single width line
 		LOG("JBXVT_TOKEN_SWL");
