@@ -136,8 +136,8 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	redir(2, ttyfd);
 	close(ttyfd);
 	set_ttymodes();
-	execvp(argv[0],argv); // Only returns on failure
-	exit(1); // An error has occurred, exit now
+	execvp(argv[0], argv); // Only returns on failure
+	exit(1); // An error has occurred, so exit now to prevent hang.
 }
 /*  Tell the teletype handler what size the window is.
     Called initially from the child and after a window
