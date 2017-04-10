@@ -137,7 +137,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	close(ttyfd);
 	set_ttymodes();
 	execvp(argv[0],argv); // Only returns on failure
-	exit(1); // prevent hang
+	exit(1); // An error has occurred, exit now
 }
 /*  Tell the teletype handler what size the window is.
     Called initially from the child and after a window
@@ -171,7 +171,7 @@ static void bsd_sigchld(int sig __attribute__((unused)))
 		exit(0);
 }
 #else
-static void sigchld(int sig)
+static void sigchld(int sig __attribute__((unused)))
 {
 	LOG("The child process has exited");
 	wait(NULL);
