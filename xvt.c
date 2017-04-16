@@ -112,11 +112,11 @@ static int16_t get_arg(struct JBXVTToken * t)
 #define NOPARM_XC() (void)xc;
 #define NOPARM_TOKEN() (void)token;
 #define NOPARM() NOPARM_XC(); NOPARM_TOKEN();
-#define HANDLE(name) static void handle_JBXVT_TOKEN_##name(PARMS)
+#define HANDLE(name) static void jbxvt_handle_JBXVT_TOKEN_##name(PARMS)
 #define EXTERN_ALIAS(alias, source) static void \
-	(* handle_JBXVT_TOKEN_##alias)(PARMS) = source
+	(* jbxvt_handle_JBXVT_TOKEN_##alias)(PARMS) = source
 #define ALIAS(alias, source) EXTERN_ALIAS(alias, \
-	handle_JBXVT_TOKEN_##source)
+	jbxvt_handle_JBXVT_TOKEN_##source)
 HANDLE(ALN) // screen alignment test
 {
 	NOPARM_TOKEN();
@@ -211,25 +211,6 @@ HANDLE(ED) // erase display
 HANDLE(EL) // erase line
 {
 	jbxvt_erase_line(xc, token->arg[0]); // don't use get_arg()
-}
-HANDLE(ELR) // enable locator report
-{
-	NOPARM_XC();
-	int16_t * restrict t = token->arg;
-	struct JBXVTPrivateModes * restrict m = jbxvt_get_modes();
-	switch (t[0]) {
-	case 2:
-		LOG("ELR Once");
-		m->elr_once = true;
-	case 1:
-		LOG("ELR Mode");
-		m->elr = true;
-		break;
-	default:
-		LOG("ELR Disabled");
-		m->elr = m->elr_once = false;
-	}
-	m->elr_pixels = t[1] == 1;
 }
 HANDLE(DA) // DECID
 {

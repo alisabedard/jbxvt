@@ -15,11 +15,11 @@ rm -f $OUT
 for NAME in $NAMES; do
 	NAME="JBXVT_TOKEN_${NAME}"
 	echo "case $NAME:\n\tLOG(\"$NAME\");" >> $OUT
-	echo "\thandle_${NAME}(xc, &token);\n\tbreak;" >> $OUT
+	echo "\tjbxvt_handle_${NAME}(xc, &token);\n\tbreak;" >> $OUT
 done
 for NAME in $NOLOG; do
 	NAME="JBXVT_TOKEN_${NAME}"
-	echo "case $NAME:\n\thandle_${NAME}(xc, &token);\n\tbreak;" >> $OUT
+	echo "case $NAME:\n\tjbxvt_handle_${NAME}(xc, &token);\n\tbreak;" >> $OUT
 done
 for STUB in $STUBS; do
 	STUB="JBXVT_TOKEN_${STUB}"

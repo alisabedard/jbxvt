@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include "JBXVTPrivateModes.h"
+#include "libjb/log.h"
 static struct JBXVTPrivateModes jbxvt_saved_mode;
 // Set default values for private modes
 struct JBXVTPrivateModes * jbxvt_get_modes(void)
@@ -24,4 +25,23 @@ void jbxvt_save_modes(void)
 {
 	memcpy(&jbxvt_saved_mode, jbxvt_get_modes(),
 		sizeof(struct JBXVTPrivateModes));
+}
+void jbxvt_handle_JBXVT_TOKEN_ELR(void * xc __attribute__((unused)),
+	struct JBXVTToken * token)
+{
+	int16_t * restrict t = token->arg;
+	struct JBXVTPrivateModes * restrict m = jbxvt_get_modes();
+	switch (t[0]) {
+	case 2:
+		LOG("ELR Once");
+		m->elr_once = true;
+	case 1:
+		LOG("ELR Mode");
+		m->elr = true;
+		break;
+	default:
+		LOG("ELR Disabled");
+		m->elr = m->elr_once = false;
+	}
+	m->elr_pixels = t[1] == 1;
 }
