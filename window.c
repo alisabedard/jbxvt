@@ -7,7 +7,6 @@
 #include "color.h"
 #include "config.h"
 #include "font.h"
-#include "libjb/JBDim.h"
 #include "libjb/util.h"
 #include "libjb/xcb.h"
 #include "sbar.h"

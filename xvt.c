@@ -5,9 +5,6 @@
 #undef DEBUG
 #endif//LOG_LEVEL
 #include "xvt.h"
-#include <stdint.h>
-#include <stdio.h>
-#include <sys/types.h>
 #include "JBXVTPrivateModes.h"
 #include "JBXVTScreen.h"
 #include "JBXVTToken.h"
