@@ -75,15 +75,6 @@ void jbxvt_set_property(xcb_connection_t * xc, const xcb_atom_t property,
 		jbxvt_get_main_window(xc), property,
 		XCB_ATOM_STRING, 8, data_len, data);
 }
-// Change window or icon name:
-void jbxvt_change_name(xcb_connection_t * xc,
-	uint8_t * restrict str, const bool icon)
-{
-	if (icon)
-		jb_set_icon_name(xc, jbxvt_get_main_window(xc), (char *)str);
-	else
-		jb_set_window_name(xc, jbxvt_get_main_window(xc), (char *)str);
-}
 enum {
 	CHILD_EVENT_MASK = XCB_EVENT_MASK_EXPOSURE
 		| XCB_EVENT_MASK_BUTTON_PRESS
@@ -142,11 +133,16 @@ static void create_vt_window(xcb_connection_t * xc, const struct JBDim sz,
 		(uint32_t[]){jbxvt_get_bg(), CHILD_EVENT_MASK, c});
 	xcb_free_cursor(xc, c);
 }
-static void set_name(xcb_connection_t * restrict xc,
-	uint8_t * restrict name)
+// Change window or icon name:
+static void chname(xcb_connection_t * xc,
+	uint8_t * restrict str, const bool window, const bool icon)
 {
-	jbxvt_change_name(xc, name, true);
-	jbxvt_change_name(xc, name, false);
+	const xcb_window_t w = jbxvt_get_main_window(xc);
+	char * cs = (char *)str;
+	if (window)
+		jb_set_window_name(xc, w, cs);
+	if (icon)
+		jb_set_icon_name(xc, w, cs);
 }
 // Create main window and the widget windows.
 void jbxvt_create_window(xcb_connection_t * xc, const xcb_window_t root,
@@ -156,22 +152,22 @@ void jbxvt_create_window(xcb_connection_t * xc, const xcb_window_t root,
 	create_main_window(xc, root, opt->position, sz);
 	create_sb_window(xc, sz.height);
 	create_vt_window(xc, sz, opt->show_scrollbar);
-	set_name(xc, name);
+	chname(xc, name, true, true);
 }
 // Handle the TXTPAR token to change the title bar or icon name.
 void jbxvt_handle_JBXVT_TOKEN_TXTPAR(xcb_connection_t * xc, struct JBXVTToken
 	* token)
 {
 	switch (token->arg[0]) {
-	case 0 :
-		jbxvt_change_name(xc, token->string, false);
-		jbxvt_change_name(xc, token->string, true);
+	case 1 : // change icon name:
+		chname(xc, token->string, false, true);
 		break;
-	case 1 :
-		jbxvt_change_name(xc, token->string, true);
+	case 2 : // change window name:
+		chname(xc, token->string, true, false);
 		break;
-	case 2 :
-		jbxvt_change_name(xc, token->string, false);
+	default:
+	case 0 : // change both:
+		chname(xc, token->string, true, true);
 		break;
 	}
 }
