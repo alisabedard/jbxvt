@@ -1,8 +1,8 @@
 // Copyright 2017, Jeffrey E. Bedard
 #include "mode.h"
-#include <stdbool.h>
 #include <string.h>
 #include "JBXVTPrivateModes.h"
+#include "JBXVTToken.h"
 #include "libjb/log.h"
 static struct JBXVTPrivateModes jbxvt_saved_mode;
 // Set default values for private modes

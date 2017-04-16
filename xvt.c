@@ -19,13 +19,14 @@
 #include "double.h"
 #include "dsr.h"
 #include "edit.h"
+#include "erase.h"
 #include "libjb/JBDim.h"
 #include "libjb/log.h"
 #include "lookup_key.h"
 #include "mode.h"
-#include "sbar.h"
-#include "erase.h"
+#include "mc.h"
 #include "move.h"
+#include "sbar.h"
 #include "scr_reset.h"
 #include "sgr.h"
 #include "string.h"
@@ -282,57 +283,6 @@ HANDLE(LL)
 	default: // LL
 		LOG("LL -- unimplemented");
 	}
-}
-static void handle_token_mc_private(int16_t * restrict t)
-{
-	switch (t[0]) {
-	case 4:
-		LOG("turn off printer controller mode");
-		break;
-	case 5:
-		LOG("turn on printer controller mode");
-		break;
-	case 10:
-		LOG("html screen dump");
-		break;
-	case 11:
-		LOG("svg screen dump");
-		break;
-	case 0:
-	default:
-		LOG("print screen");
-	}
-}
-static void handle_token_mc_public(int16_t * restrict t)
-{
-	switch (t[0]) {
-	case 1:
-		LOG("print line containing cursor");
-		dprintf(jbxvt_get_fd(), "%d", jbxvt_get_y() + 1);
-		break;
-	case 4:
-		LOG("turn off autoprint mode");
-		break;
-	case 5:
-		LOG("turn on autoprint mode");
-		break;
-	case 10:
-		LOG("print composed display");
-		break;
-	case 11:
-		LOG("print all pages");
-		break;
-	}
-}
-HANDLE(MC)
-{
-	NOPARM_XC();
-	int16_t * restrict t = token->arg;
-	if (token->private == '?')
-		handle_token_mc_public(t);
-	else
-		handle_token_mc_private(t);
-
 }
 HANDLE(NEL) // next line (move to the first position on the next line)
 {
