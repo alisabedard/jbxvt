@@ -24,6 +24,7 @@
 #include "mode.h"
 #include "mc.h"
 #include "move.h"
+#include "request.h"
 #include "sbar.h"
 #include "scr_reset.h"
 #include "sgr.h"
@@ -297,24 +298,8 @@ HANDLE(RC)
 	NOPARM_TOKEN();
 	jbxvt_restore_cursor(xc);
 }
-HANDLE(REQTPARAM)
-{
-	NOPARM_XC();
-	const uint8_t t = token->arg[0];
-	// Send REPTPARAM
-	const uint8_t sol = t + 2, par = 1, nbits = 1,
-	      flags = 0, clkmul = 1;
-	const uint16_t xspeed = 88, rspeed = 88;
-	dprintf(jbxvt_get_fd(), "%s[%d;%d;%d;%d;%d;%d;%dx", jbxvt_get_csi(),
-		sol, par, nbits, xspeed, rspeed, clkmul, flags);
-	LOG("ESC[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
-		xspeed, rspeed, clkmul, flags);
-}
-HANDLE(RESET)
-{
-	jbxvt_dec_reset(xc, token);
-}
-ALIAS(SET, RESET);
+EXTERN_ALIAS(RESET, jbxvt_dec_reset);
+EXTERN_ALIAS(SET, jbxvt_dec_reset);
 HANDLE(RI) // reverse index
 {
 	jbxvt_index_from(xc, -get_arg(token), jbxvt_get_margin()->top);
