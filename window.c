@@ -2,6 +2,9 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "window.h"
 #include <stdlib.h>
+#include "JBXVTOptions.h"
+#include "JBXVTToken.h"
+#include "color.h"
 #include "config.h"
 #include "font.h"
 #include "libjb/JBDim.h"
@@ -80,4 +83,95 @@ void jbxvt_change_name(xcb_connection_t * xc,
 		jb_set_icon_name(xc, jbxvt_get_main_window(xc), (char *)str);
 	else
 		jb_set_window_name(xc, jbxvt_get_main_window(xc), (char *)str);
+}
+enum {
+	CHILD_EVENT_MASK = XCB_EVENT_MASK_EXPOSURE
+		| XCB_EVENT_MASK_BUTTON_PRESS
+		| XCB_EVENT_MASK_BUTTON_RELEASE
+		| XCB_EVENT_MASK_BUTTON_MOTION,
+	COPY_FROM_PARENT = XCB_COPY_FROM_PARENT
+};
+static void create_main_window(xcb_connection_t * xc,
+	const xcb_window_t root, const struct JBDim position,
+	const struct JBDim size)
+{
+	enum {
+		VM = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK,
+		EMASK = XCB_EVENT_MASK_KEY_PRESS
+			| XCB_EVENT_MASK_FOCUS_CHANGE
+			| XCB_EVENT_MASK_STRUCTURE_NOTIFY,
+		CFP = COPY_FROM_PARENT
+	};
+	xcb_create_window(xc, CFP, jbxvt_get_main_window(xc), root,
+		position.x, position.y, size.width, size.height, 0, CFP,
+		CFP, VM, (uint32_t[]){jbxvt_get_bg(), EMASK});
+	jbxvt_set_pixel_size(size);
+}
+static void create_sb_window(xcb_connection_t * xc, const uint16_t height)
+{
+	enum {
+		VM = XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL
+			| XCB_CW_EVENT_MASK | XCB_CW_CURSOR,
+		CFP = COPY_FROM_PARENT,
+		SB = JBXVT_SCROLLBAR_WIDTH
+	};
+	const xcb_cursor_t c = jb_get_cursor(xc,
+		"sb_v_double_arrow");
+	const xcb_rectangle_t r = {-1, -1, SB - 1, height};
+	const xcb_window_t sb = jbxvt_get_scrollbar(xc),
+	      mw = jbxvt_get_main_window(xc);
+	xcb_create_window(xc, CFP, sb, mw, r.x, r.y, r.width, r.height,
+		1, CFP, CFP, VM, (uint32_t[]){jbxvt_get_bg(),
+		jbxvt_get_fg(), CHILD_EVENT_MASK, c});
+	xcb_free_cursor(xc, c);
+}
+static void create_vt_window(xcb_connection_t * xc, const struct JBDim sz,
+	const bool sb)
+{
+	enum {
+		VM = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK
+			| XCB_CW_CURSOR,
+		CFP = COPY_FROM_PARENT,
+		SB = JBXVT_SCROLLBAR_WIDTH
+	};
+	const xcb_cursor_t c = jb_get_cursor(xc, "xterm");
+	const xcb_window_t vt = jbxvt_get_vt_window(xc),
+	      mw = jbxvt_get_main_window(xc);
+	const int16_t x = sb ? SB : 0;
+	xcb_create_window(xc, CFP, vt, mw, x, 0, sz.w, sz.h, 0, CFP, CFP, VM,
+		(uint32_t[]){jbxvt_get_bg(), CHILD_EVENT_MASK, c});
+	xcb_free_cursor(xc, c);
+}
+static void set_name(xcb_connection_t * restrict xc,
+	uint8_t * restrict name)
+{
+	jbxvt_change_name(xc, name, true);
+	jbxvt_change_name(xc, name, false);
+}
+// Create main window and the widget windows.
+void jbxvt_create_window(xcb_connection_t * xc, const xcb_window_t root,
+	struct JBXVTOptions * restrict opt, uint8_t * restrict name)
+{
+	struct JBDim sz = jbxvt_chars_to_pixels(opt->size);
+	create_main_window(xc, root, opt->position, sz);
+	create_sb_window(xc, sz.height);
+	create_vt_window(xc, sz, opt->show_scrollbar);
+	set_name(xc, name);
+}
+// Handle the TXTPAR token to change the title bar or icon name.
+void jbxvt_handle_JBXVT_TOKEN_TXTPAR(xcb_connection_t * xc, struct JBXVTToken
+	* token)
+{
+	switch (token->arg[0]) {
+	case 0 :
+		jbxvt_change_name(xc, token->string, false);
+		jbxvt_change_name(xc, token->string, true);
+		break;
+	case 1 :
+		jbxvt_change_name(xc, token->string, true);
+		break;
+	case 2 :
+		jbxvt_change_name(xc, token->string, false);
+		break;
+	}
 }

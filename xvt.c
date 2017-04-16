@@ -12,6 +12,7 @@
 #include "JBXVTScreen.h"
 #include "JBXVTToken.h"
 #include "JBXVTTokenType.h"
+#include "cases.h"
 #include "cmdtok.h"
 #include "command.h"
 #include "cursor.h"
@@ -108,16 +109,6 @@ static int16_t get_arg(struct JBXVTToken * t)
 {
 	return t->nargs > 0 && t->arg[0] ? t->arg[0] : 1;
 }
-// Note:  Cast to (void) to avoid warnings about unused arguments
-#define PARMS xcb_connection_t * xc, struct JBXVTToken * token
-#define NOPARM_XC() (void)xc;
-#define NOPARM_TOKEN() (void)token;
-#define NOPARM() NOPARM_XC(); NOPARM_TOKEN();
-#define HANDLE(name) static void jbxvt_handle_JBXVT_TOKEN_##name(PARMS)
-#define EXTERN_ALIAS(alias, source) static void \
-	(* jbxvt_handle_JBXVT_TOKEN_##alias)(PARMS) = source
-#define ALIAS(alias, source) EXTERN_ALIAS(alias, \
-	jbxvt_handle_JBXVT_TOKEN_##source)
 HANDLE(ALN) // screen alignment test
 {
 	NOPARM_TOKEN();
@@ -465,21 +456,6 @@ HANDLE(TBC) // tabulation clear
 	else if (!t)
 		jbxvt_set_tab(jbxvt_get_x(), false);
 
-}
-HANDLE(TXTPAR) // change title bar or icon name
-{
-	switch (token->arg[0]) {
-	case 0 :
-		jbxvt_change_name(xc, token->string, false);
-		jbxvt_change_name(xc, token->string, true);
-		break;
-	case 1 :
-		jbxvt_change_name(xc, token->string, true);
-		break;
-	case 2 :
-		jbxvt_change_name(xc, token->string, false);
-		break;
-	}
 }
 HANDLE(VPA) // vertical position absolute
 {
