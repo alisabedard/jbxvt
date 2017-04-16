@@ -1,21 +1,11 @@
 /*  Copyright 2017, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "display.h"
-#include <stdbool.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <xcb/xproto.h>
 #include "JBXVTOptions.h"
 #include "color.h"
-#include "config.h"
 #include "cursor.h"
 #include "font.h"
-#include "libjb/JBDim.h"
-#include "libjb/xcb.h"
 #include "paint.h"
-#include "sbar.h"
-#include "size.h"
 #include "window.h"
 #include "xcb_screen.h"
 static void setup_gcs(xcb_connection_t * xc, xcb_window_t w)
