@@ -6,4 +6,5 @@ struct JBXVTToken;
 // Load LEDs, SCUSR and SCA
 void jbxvt_handle_JBXVT_TOKEN_LL(void * xc, struct JBXVTToken * token);
 void jbxvt_handle_JBXVT_TOKEN_REQTPARAM(void * xc, struct JBXVTToken * token);
+void jbxvt_handle_JBXVT_TOKEN_RQM(void * xc, struct JBXVTToken * token);
 #endif//!JBXVT_REQUEST_H

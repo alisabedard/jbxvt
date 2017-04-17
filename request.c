@@ -2,11 +2,13 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "request.h"
 #include <stdio.h>
+#include "JBXVTPrivateModes.h"
 #include "JBXVTToken.h"
 #include "cmdtok.h"
 #include "command.h"
 #include "cursor.h"
 #include "libjb/log.h"
+#include "mode.h"
 // Load LEDs, SCUSR and SCA
 void jbxvt_handle_JBXVT_TOKEN_LL(void * xc __attribute__((unused)),
 	struct JBXVTToken * token)
@@ -72,4 +74,36 @@ void jbxvt_handle_JBXVT_TOKEN_REQTPARAM(void * xc __attribute__((unused)),
 		sol, par, nbits, xspeed, rspeed, clkmul, flags);
 	LOG("ESC[%d;%d;%d;%d;%d;%d;%dx", sol, par, nbits,
 		xspeed, rspeed, clkmul, flags);
+}
+void jbxvt_handle_JBXVT_TOKEN_RQM(void * xc __attribute__((unused)),
+	struct JBXVTToken * token)
+{
+	int16_t * restrict t = token->arg;
+	if (token->private == '?') {
+		LOG("\tRQM Ps: %d", t[0]);
+		dprintf(jbxvt_get_fd(), "%s%d;%d$y", jbxvt_get_csi(),
+			t[0], 0); // FIXME:  Return actual value
+		return;
+	}
+	LOG("\tDECSCL 0: %d, 1: %d", t[0], t[1]);
+	switch (t[0]) {
+	case 62:
+		LOG("\t\tVT200");
+		break;
+	case 63:
+		LOG("\t\tVT300");
+		break;
+	case 0:
+	case 61:
+	default:
+		LOG("\t\tVT100");
+		break;
+	}
+	if (t[1] == 1) {
+		LOG("\t\t7-bit controls");
+		jbxvt_get_modes()->s8c1t = false;
+	} else {
+		LOG("\t\t8-bit controls");
+		jbxvt_get_modes()->s8c1t = true;
+	}
 }

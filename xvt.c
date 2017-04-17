@@ -292,38 +292,6 @@ HANDLE(RIS) // reset to initial state
 	jbxvt_get_modes()->dectcem = true;
 	jbxvt_reset(xc);
 }
-HANDLE(RQM)
-{
-	(void)xc;
-	int16_t * restrict t = token->arg;
-	if (token->private == '?') {
-		LOG("\tRQM Ps: %d", t[0]);
-		dprintf(jbxvt_get_fd(), "%s%d;%d$y", jbxvt_get_csi(),
-			t[0], 0); // FIXME:  Return actual value
-		return;
-	}
-	LOG("\tDECSCL 0: %d, 1: %d", t[0], t[1]);
-	switch (t[0]) {
-	case 62:
-		LOG("\t\tVT200");
-		break;
-	case 63:
-		LOG("\t\tVT300");
-		break;
-	case 0:
-	case 61:
-	default:
-		LOG("\t\tVT100");
-		break;
-	}
-	if (t[1] == 1) {
-		LOG("\t\t7-bit controls");
-		jbxvt_get_modes()->s8c1t = false;
-	} else {
-		LOG("\t\t8-bit controls");
-		jbxvt_get_modes()->s8c1t = true;
-	}
-}
 static void set_s8c1t(const bool val)
 {
 	jbxvt_get_modes()->s8c1t = val;
