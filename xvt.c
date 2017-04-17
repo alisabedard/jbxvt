@@ -279,6 +279,30 @@ HANDLE(LL) // Load LEDs
 		}
 		break;
 	default: // LL
+		switch (t[0]) {
+		default:
+		case 0:
+			LOG("LL clear all LEDs");
+			break;
+		case 1:
+			LOG("LL light num lock");
+			break;
+		case 2:
+			LOG("LL light caps lock");
+			break;
+		case 3:
+			LOG("LL light scroll lock");
+			break;
+		case 21:
+			LOG("LL extinguish num lock");
+			break;
+		case 22:
+			LOG("LL extinguish caps lock");
+			break;
+		case 23:
+			LOG("LL extinguish scroll lock");
+			break;
+		}
 		LOG("LL -- unimplemented");
 	}
 }
