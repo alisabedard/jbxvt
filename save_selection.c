@@ -56,6 +56,8 @@ static void copy(uint8_t * str, uint8_t * scr_text,
 	const int16_t start, const uint16_t len,
 	const uint16_t total)
 {
+	if (!len)
+		return; // prevent segmentation fault on empty data.
 	char * dest = (char *) str + total - 1;
 	char * src = (char *) scr_text + start;
 	strncpy(dest, src, len + 1);
