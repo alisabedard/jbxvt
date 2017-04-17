@@ -255,7 +255,7 @@ HANDLE(IND) // index (scroll)
 {
 	jbxvt_index_from(xc, get_arg(token), jbxvt_get_margin()->t);
 }
-HANDLE(LL)
+HANDLE(LL) // Load LEDs
 {
 	NOPARM_XC();
 	int16_t * restrict t = token->arg;
@@ -266,8 +266,17 @@ HANDLE(LL)
 		LOG("SCUSR");
 		jbxvt_set_cursor_attr(t[0]);
 		break;
-	case '"': // SCA
-		LOG("SCA -- unimplemented");
+	case '"': // SCA - Select Character protection Attribute
+		switch(t[0]) {
+		default:
+		case 0:
+		case 2: // DECSED and DECSEL can erase
+			LOG("SCA can erase");
+			break;
+		case 1: // DECSED and DECSEL cannot erase
+			LOG("SCA cannot erase");
+			break;
+		}
 		break;
 	default: // LL
 		LOG("LL -- unimplemented");
