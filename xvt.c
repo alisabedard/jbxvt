@@ -53,21 +53,6 @@ static int16_t get_0(int16_t arg)
 {
 	return get_n(arg) - 1;
 }
-static void select_charset(const char c, const uint8_t i)
-{
-	switch(c) {
-#define CS(l, cs, d) case l:TLOG(d);\
-		jbxvt_get_modes()->charset[i]=CHARSET_##cs;break;
-		CS('A', GB, "UK ASCII");
-		CS('0', SG0, "SG0: special graphics");
-		CS('1', SG1, "SG1: alt char ROM standard graphics");
-		CS('2', SG2, "SG2: alt char ROM special graphics");
-	default: // reset
-		LOG("Unknown character set");
-		// fall through
-		CS('B', ASCII, "US ASCII");
-	}
-}
 static void handle_scroll(xcb_connection_t * xc, const int16_t arg)
 {
 	const struct JBDim m = *jbxvt_get_margin();
@@ -132,28 +117,28 @@ HANDLE(CNL) // cursor next line
 {
 	jbxvt_move(xc, 0, get_arg(token), 0);
 }
-HANDLE(CS_G0)
+// Select character set per token parameter
+static void charset(const char c, const uint8_t i)
 {
-	NOPARM_XC();
-	select_charset(token->arg[0], 0);
+	switch(c) {
+#define CS(l, cs, d) case l:TLOG(d);\
+		jbxvt_get_modes()->charset[i]=CHARSET_##cs;break;
+		CS('A', GB, "UK ASCII");
+		CS('0', SG0, "SG0: special graphics");
+		CS('1', SG1, "SG1: alt char ROM standard graphics");
+		CS('2', SG2, "SG2: alt char ROM special graphics");
+	default: // reset
+		LOG("Unknown character set");
+		// fall through
+		CS('B', ASCII, "US ASCII");
+	}
+#undef CS
 }
-HANDLE(CS_G1)
-{
-	NOPARM_XC();
-	select_charset(token->arg[0], 1);
-}
+#define HANDLE_CS(num) HANDLE(CS_G##num){NOPARM_XC(); charset(token->arg[0],\
+	num);}
+HANDLE_CS(0); HANDLE_CS(1); HANDLE_CS(2); HANDLE_CS(3);
 ALIAS(CS_ALT_G1, CS_G1);
-HANDLE(CS_G2)
-{
-	NOPARM_XC();
-	select_charset(token->arg[0], 2);
-}
 ALIAS(CS_ALT_G2, CS_G2);
-HANDLE(CS_G3)
-{
-	NOPARM_XC();
-	select_charset(token->arg[0], 3);
-}
 ALIAS(CS_ALT_G3, CS_G3);
 HANDLE(CUB) // cursor back
 {
@@ -376,18 +361,6 @@ HANDLE(SWL) // single width line
 {
 	NOPARM_TOKEN();
 	jbxvt_set_double_width_line(xc, false);
-}
-HANDLE(TBC) // tabulation clear
-{
-	NOPARM_XC();
-	const uint8_t t = token->arg[0];
-	/* Note:  Attempting to simplify this results
-	   in vttest test failure.  */
-	if (t == 3)
-		jbxvt_set_tab(-1, false);
-	else if (!t)
-		jbxvt_set_tab(jbxvt_get_x(), false);
-
 }
 HANDLE(VPA) // vertical position absolute
 {
