@@ -81,9 +81,8 @@ static void decid(void)
 // set vt52 graphics mode
 static void gm52(const bool set)
 {
-	struct JBXVTPrivateModes * m = jbxvt_get_modes();
-	m->charsel = set ? 1 : 0;
-	m->gm52 = set;
+	struct JBXVTPrivateModes * restrict m = jbxvt_get_modes();
+	m->charsel = (m->gm52 = set) ? 1 : 0;
 }
 // Return value sanitized for tokens with optional arguments, defaulting to 1
 static int16_t get_arg(struct JBXVTToken * t)
