@@ -299,7 +299,7 @@ HANDLE(RC)
 	jbxvt_restore_cursor(xc);
 }
 EXTERN_ALIAS(RESET, jbxvt_dec_reset);
-EXTERN_ALIAS(SET, jbxvt_dec_reset);
+ALIAS(SET, RESET);
 HANDLE(RI) // reverse index
 {
 	jbxvt_index_from(xc, -get_arg(token), jbxvt_get_margin()->top);
