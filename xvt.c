@@ -51,12 +51,6 @@ static int16_t get_0(int16_t arg)
 {
 	return get_n(arg) - 1;
 }
-static void handle_scroll(xcb_connection_t * xc, const int16_t arg)
-{
-	const struct JBDim m = *jbxvt_get_margin();
-	// scroll arg lines within margin m:
-	scroll(xc, m.top, m.bot, arg);
-}
 // CUP and HVP, move cursor
 static void cup(xcb_connection_t * xc, int16_t * restrict t)
 {
@@ -137,20 +131,22 @@ HANDLE_CS(0); HANDLE_CS(1); HANDLE_CS(2); HANDLE_CS(3);
 ALIAS(CS_ALT_G1, CS_G1);
 ALIAS(CS_ALT_G2, CS_G2);
 ALIAS(CS_ALT_G3, CS_G3);
+// Move cursor relative to current position
+static void mv(xcb_connection_t * xc, const int16_t x, const int16_t y)
+{
+	jbxvt_move(xc, x, y, JBXVT_ROW_RELATIVE | JBXVT_COLUMN_RELATIVE);
+}
 HANDLE(CUB) // cursor back
 {
-	jbxvt_move(xc, -get_arg(token), 0, JBXVT_ROW_RELATIVE
-		| JBXVT_COLUMN_RELATIVE);
+	mv(xc, -get_arg(token), 0);
 }
 HANDLE(CUD) // cursor down
 {
-	jbxvt_move(xc, 0, get_arg(token), JBXVT_ROW_RELATIVE
-		| JBXVT_COLUMN_RELATIVE);
+	mv(xc, 0, get_arg(token));
 }
 HANDLE(CUF) // cursor forward
 {
-	jbxvt_move(xc, get_arg(token), 0, JBXVT_ROW_RELATIVE
-		| JBXVT_COLUMN_RELATIVE);
+	mv(xc, get_arg(token), 0);
 }
 HANDLE(CUP) // cursor position (absolute)
 {
@@ -159,8 +155,7 @@ HANDLE(CUP) // cursor position (absolute)
 ALIAS(HVP, CUP); // horizontal vertical position
 HANDLE(CUU) // cursor up
 {
-	jbxvt_move(xc, 0, -get_arg(token), JBXVT_ROW_RELATIVE
-		| JBXVT_COLUMN_RELATIVE);
+	mv(xc, 0, -get_arg(token));
 }
 HANDLE(DL) // delete line
 {
@@ -306,6 +301,12 @@ HANDLE(SC)
 {
 	NOPARM();
 	jbxvt_save_cursor();
+}
+static void handle_scroll(xcb_connection_t * xc, const int16_t arg)
+{
+	const struct JBDim m = *jbxvt_get_margin();
+	// scroll arg lines within margin m:
+	scroll(xc, m.top, m.bot, arg);
 }
 HANDLE(SD) // scroll down
 {
