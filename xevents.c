@@ -1,31 +1,40 @@
 /*  Copyright 2017, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "xevents.h"
+#include <stdlib.h>
 #include <unistd.h>
 #include "JBXVTPrivateModes.h"
-#include "libjb/JBDim.h"
 #include "button_events.h"
 #include "cmdtok.h"
 #include "command.h"
-#include "font.h"
+#include "libjb/JBDim.h"
 #include "libjb/log.h"
-#include "libjb/util.h"
 #include "libjb/xcb.h"
 #include "lookup_key.h"
 #include "mode.h"
 #include "mouse.h"
 #include "sbar.h"
 #include "scr_reset.h"
-#include "screen.h"
 #include "selection.h"
 #include "selex.h"
 #include "selreq.h"
 #include "window.h"
+static unsigned long wm_del_win(xcb_connection_t * xc)
+{
+	static unsigned long a;
+	if(!a) { // Init on first call:
+		a = jb_get_atom(xc, "WM_DELETE_WINDOW");
+		xcb_change_property(xc, XCB_PROP_MODE_REPLACE,
+			jbxvt_get_main_window(xc),
+			jb_get_atom(xc, "WM_PROTOCOLS"),
+			XCB_ATOM_ATOM, 32, 1, &a);
+	}
+	return a;
+}
 static void handle_client_message(xcb_connection_t * xc,
 	xcb_client_message_event_t * e)
 {
-	if (e->format == 32 && e->data.data32[0]
-		== (unsigned long)jbxvt_get_wm_del_win(xc))
+	if (e->format == 32 && e->data.data32[0] == wm_del_win(xc))
 		exit(0);
 }
 static void handle_expose(xcb_connection_t * xc,
@@ -54,18 +63,6 @@ static void key_press(xcb_connection_t * xc, void * e)
 	if (s)
 		jb_require(write(jbxvt_get_fd(), s, count) != -1,
 			"Could not write to command");
-}
-xcb_atom_t jbxvt_get_wm_del_win(xcb_connection_t * xc)
-{
-	static long unsigned int a;
-	if(!a) { // Init on first call:
-		a = jb_get_atom(xc, "WM_DELETE_WINDOW");
-		xcb_change_property(xc, XCB_PROP_MODE_REPLACE,
-			jbxvt_get_main_window(xc),
-			jb_get_atom(xc, "WM_PROTOCOLS"),
-			XCB_ATOM_ATOM, 32, 1, &a);
-	}
-	return a;
 }
 static void handle_motion_notify(xcb_connection_t * xc,
 	xcb_motion_notify_event_t * e)
@@ -108,13 +105,17 @@ bool jbxvt_handle_xevents(xcb_connection_t * xc)
 		return false;
 	bool ret = true;
 	switch (event->response_type & ~0x80) {
+	case XCB_MAP_NOTIFY: // handle here to ensure cursor filled.
+		// Set up the wm_sel_win property here.
+		wm_del_win(xc);
+		ret = false;
+		break;
 		// Put things to ignore here:
 	case 0: // Unimplemented, undefined, no event
 	case 150: // Undefined
 	case XCB_KEY_RELEASE: // Unimplemented
 	case XCB_NO_EXPOSURE: // Unimplemented
 	case XCB_REPARENT_NOTIFY: // handle here to ensure cursor filled.
-	case XCB_MAP_NOTIFY: // handle here to ensure cursor filled.
 		ret = false;
 		break;
 	case XCB_CONFIGURE_NOTIFY:

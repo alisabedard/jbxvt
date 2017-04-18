@@ -61,12 +61,6 @@ static void cup(xcb_connection_t * xc, int16_t * restrict t)
 	const int16_t row = get_0(t[ROW]), col = get_0(t[COL]);
 	jbxvt_move(xc, row, col, jbxvt_get_modes()->decom ? REL : 0);
 }
-// vertical position, absolute or relative
-static void vp(xcb_connection_t * xc, const uint16_t arg, const bool relative)
-{
-	jbxvt_move(xc, 0, get_0(arg), JBXVT_COLUMN_RELATIVE | (relative
-		? JBXVT_ROW_RELATIVE : 0));
-}
 // print terminal id
 static void decid(void)
 {
@@ -359,6 +353,12 @@ HANDLE(SWL) // single width line
 {
 	NOPARM_TOKEN();
 	jbxvt_set_double_width_line(xc, false);
+}
+// vertical position, absolute or relative
+static void vp(xcb_connection_t * xc, const uint16_t arg, const bool relative)
+{
+	jbxvt_move(xc, 0, get_0(arg), JBXVT_COLUMN_RELATIVE | (relative
+		? JBXVT_ROW_RELATIVE : 0));
 }
 HANDLE(VPA) // vertical position absolute
 {
