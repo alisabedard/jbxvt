@@ -2,8 +2,6 @@
 # Copyright 2017, Jeffrey E. Bedard
 f=File.open "color_index.txt", "r"
 o_name="color_index.h"
-#o=File.open o_name, "w"
-#File.delete(o_name)
 o=File.open o_name, "w"
 o.write "// Copyright 2017, Jeffrey E. Bedard\n" +
 	"#ifndef JBXVT_COLOR_INDEX_H\n" +
