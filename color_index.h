@@ -1,4 +1,4 @@
-/* Copyright 2017, Jeffrey E. Bedard */
+// Copyright 2017, Jeffrey E. Bedard
 #ifndef JBXVT_COLOR_INDEX_H
 #define JBXVT_COLOR_INDEX_H
 #include <stdint.h>
