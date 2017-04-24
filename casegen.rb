@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # Copyright 2017 Jeffrey E. Bedard
 out="cases.c"
-file = File.new(out, "w")
+file = File.new out, "w"
 tokens=%w(ALN CHA CHT CPL CNL CS_ALT_G1 CS_ALT_G2 CS_ALT_G3 CS_G0 CS_G1 CS_G2
 CS_G3 CUB CUD CUF CUP CUU DA DCH DL DSR DWL ECH ED EL ELR ENTGM52 EXTGM52 HOME
 HPA HPR HTS HVP ICH ID IL IND LL MC NEL PAM PM PNM RC REQTPARAM RESET RI RIS
