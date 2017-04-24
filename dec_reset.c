@@ -2,19 +2,16 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #undef DEBUG
 #include "dec_reset.h"
-#include <stdbool.h>
-#include <sys/types.h>
 #include "JBXVTPrivateModes.h"
 #include "JBXVTToken.h"
-#include "JBXVTTokenType.h"
 #include "cursor.h"
 #include "libjb/JBDim.h"
 #include "libjb/log.h"
 #include "libjb/macros.h"
 #include "lookup_key.h"
 #include "mode.h"
-#include "sbar.h"
 #include "move.h"
+#include "sbar.h"
 #include "scr_reset.h"
 #include "screen.h"
 static void dectcem(xcb_connection_t * restrict xc, const bool is_set)

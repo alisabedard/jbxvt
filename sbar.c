@@ -2,7 +2,6 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
 #include "sbar.h"
-#include <stdbool.h>
 #include "config.h"
 #include "cursor.h"
 #include "libjb/JBDim.h"

@@ -1,7 +1,6 @@
 /*  Copyright 2017, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "xevents.h"
-#include <stdlib.h>
 #include <unistd.h>
 #include "JBXVTPrivateModes.h"
 #include "button_events.h"

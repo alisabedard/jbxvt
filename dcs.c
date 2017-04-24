@@ -1,7 +1,6 @@
 /*  Copyright 2017, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "dcs.h"
-#include <stdint.h>
 #include "JBXVTToken.h"
 #include "JBXVTTokenType.h"
 #include "cmdtok.h"
