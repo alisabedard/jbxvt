@@ -2,7 +2,6 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #ifndef JBXVT_WINDOW_H
 #define JBXVT_WINDOW_H
-#include <stdbool.h>
 #include <xcb/xcb.h>
 struct JBXVTOptions;
 struct JBXVTToken;
