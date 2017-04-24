@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# Copyright 2017 Jeffrey E. Bedard
 out="cases.c"
 file = File.new(out, "w")
 tokens=%w(ALN CHA CHT CPL CNL CS_ALT_G1 CS_ALT_G2 CS_ALT_G3 CS_G0 CS_G1 CS_G2
