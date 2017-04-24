@@ -33,7 +33,7 @@ install: ${exe}
 	install -d ${docdest}
 	install ${exe}.1 ${docdest}
 depend:
-	./mkdepend
+	cc -E -MM *.c > depend.mk
 clean:
 	cd libjb && make clean
 	rm -f ${exe} *.o *.gcda *.gcno *.gcov libjb/*.gcda \
