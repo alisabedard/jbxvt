@@ -75,6 +75,7 @@ void jbxvt_set_property(xcb_connection_t * xc, const xcb_atom_t property,
 		XCB_ATOM_STRING, 8, data_len, data);
 }
 enum {
+	WINDOW_VM = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK,
 	CHILD_EVENT_MASK = XCB_EVENT_MASK_EXPOSURE
 		| XCB_EVENT_MASK_BUTTON_PRESS
 		| XCB_EVENT_MASK_BUTTON_RELEASE
@@ -86,7 +87,7 @@ static void create_main_window(xcb_connection_t * xc,
 	const struct JBDim size)
 {
 	enum {
-		VM = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK,
+		VM = WINDOW_VM,
 		EMASK = XCB_EVENT_MASK_KEY_PRESS
 			| XCB_EVENT_MASK_FOCUS_CHANGE
 			| XCB_EVENT_MASK_STRUCTURE_NOTIFY,
@@ -100,8 +101,7 @@ static void create_main_window(xcb_connection_t * xc,
 static void create_sb_window(xcb_connection_t * xc, const uint16_t height)
 {
 	enum {
-		VM = XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL
-			| XCB_CW_EVENT_MASK | XCB_CW_CURSOR,
+		VM = WINDOW_VM | XCB_CW_BORDER_PIXEL | XCB_CW_CURSOR,
 		CFP = COPY_FROM_PARENT,
 		SB = JBXVT_SCROLLBAR_WIDTH
 	};
@@ -119,8 +119,7 @@ static void create_vt_window(xcb_connection_t * xc, const struct JBDim sz,
 	const bool sb)
 {
 	enum {
-		VM = XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK
-			| XCB_CW_CURSOR,
+		VM = WINDOW_VM | XCB_CW_CURSOR,
 		CFP = COPY_FROM_PARENT,
 		SB = JBXVT_SCROLLBAR_WIDTH
 	};
