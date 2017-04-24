@@ -33,7 +33,9 @@ xcb_atom_t jbxvt_get_clipboard(xcb_connection_t * xc)
 }
 static inline void prop(xcb_connection_t * xc, const xcb_atom_t a)
 {
-	jbxvt_set_property(xc, a, selection_data.length, selection_data.text);
+	if (selection_data.text) // don't set NULL data
+		jbxvt_set_property(xc, a, selection_data.length,
+			selection_data.text);
 }
 //  Make the selection currently delimited by the selection end markers.
 void jbxvt_make_selection(xcb_connection_t * xc)
