@@ -17,7 +17,7 @@ static char ** parse_command_line(const int argc, char ** argv,
 	struct JBXVTOptions * o)
 {
 	static const char * optstr = "B:b:C:c:D:d:eF:f:hH:I:R:S:svW:x:y:";
-	char opt;
+	int opt;
 	while((opt=getopt(argc, argv, optstr)) != -1) {
 		switch (opt) {
 		case 'B': // bold font
