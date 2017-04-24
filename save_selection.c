@@ -10,48 +10,6 @@
 #include "screen.h"
 #include "selend.h"
 #include "size.h"
-static uint8_t get_next_char(uint8_t c)
-{
-	if (c == '\n')
-		return '\r';
-	else if (c < ' ' || c > 0x7e)
-		return ' ';
-	return c;
-}
-static bool skip(uint8_t * restrict str, uint16_t * restrict i,
-	uint16_t * restrict j, const uint16_t len, const uint8_t null_ct)
-{
-	++*i;
-	if (str[*i] != '\0')
-		return false;
-	if (*i >= len - 1)
-		return true;
-	return skip(str, i, j, len, null_ct);
-}
-static uint16_t sanitize(uint8_t * str, uint16_t len)
-{
-	uint16_t i = 0, j;
-	uint8_t null_ct = 0;
-	/* This conditional fixes insertion of rogue new lines
-	   before selection text.  This makes copying filenames
-	   and keys easier on the command line.  */
-	if (i < len && str[i] == '\0') {
-		++i;
-		--len;
-	}
-	for (j = 0; i < len; ++i, ++j) {
-		if (str[i] == '\0') {
-			++null_ct;
-			str[j] = '\r';
-			if (skip(str, &i, &j, len, null_ct))
-				return j;
-			--i;
-		} else
-			str[j] = get_next_char(str[i]);
-	}
-	str[j] = '\0';
-	return j;
-}
 static void copy(uint8_t * str, uint8_t * scr_text,
 	const int16_t start, const uint16_t len,
 	const uint16_t total)
@@ -92,7 +50,16 @@ static void handle_screensel(uint8_t ** str, uint16_t * restrict total,
 		copy(*str, jbxvt_get_line(i)->text, start, len, *total);
 		*total += len;
 	}
-	*total = sanitize(*str, *total) + 1;
+	uint8_t * restrict s = *str;
+	bool last_was_cr = false;
+	for (int_fast16_t i = 0; i < *total; ++i)
+		if (s[i] == '\0') {
+			if (!last_was_cr) {
+				s[i] = '\r';
+				last_was_cr = true;
+			}
+		} else
+			last_was_cr = false;
 	*str = realloc(*str, *total);
 }
 /*  Convert the currently marked screen selection as a text string
