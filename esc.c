@@ -2,7 +2,6 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
 #include "esc.h"
-#include <stdbool.h>
 #include <stdio.h>
 #include "JBXVTPrivateModes.h"
 #include "JBXVTScreen.h"
@@ -10,6 +9,7 @@
 #include "JBXVTToken.h"
 #include "cmdtok.h"
 #include "command.h"
+#include "cursor.h"
 #include "dcs.h"
 #include "libjb/JBDim.h"
 #include "mode.h"
@@ -206,7 +206,7 @@ void jbxvt_esc(xcb_connection_t * xc,
 		tk->nargs = 1;
 		break;
 	case 'I':
-		jbxvt_index_from(xc, -1, jbxvt_get_current_screen()->cursor.y);
+		jbxvt_index_from(xc, -1, jbxvt_get_y());
 		tk->type = JBXVT_TOKEN_CUU;
 		break;
 	case 'J': // erase to end of line
