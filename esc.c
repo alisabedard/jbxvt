@@ -4,14 +4,12 @@
 #include "esc.h"
 #include <stdio.h>
 #include "JBXVTPrivateModes.h"
-#include "JBXVTScreen.h"
-#include "JBXVTTokenType.h"
 #include "JBXVTToken.h"
+#include "JBXVTTokenType.h"
 #include "cmdtok.h"
 #include "command.h"
 #include "cursor.h"
 #include "dcs.h"
-#include "libjb/JBDim.h"
 #include "mode.h"
 #include "screen.h"
 static int_fast16_t read_numeric_argument(xcb_connection_t * restrict xc,
