@@ -100,6 +100,8 @@ static void create_main_window(xcb_connection_t * xc,
 }
 static void create_sb_window(xcb_connection_t * xc, const uint16_t height)
 {
+	if (height == 0)
+		return; // invalid size, don't bother
 	enum {
 		VM = WINDOW_VM | XCB_CW_BORDER_PIXEL | XCB_CW_CURSOR,
 		CFP = COPY_FROM_PARENT,
