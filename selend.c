@@ -87,7 +87,7 @@ void jbxvt_adjust_selection(struct JBDim * restrict include)
 		return;
 	struct JBDim * e = jbxvt_order_selection_ends(
 		jbxvt_get_selection_end_points());
-	if (u == JBXVT_SEL_UNIT_WORD)
+	if (include && u == JBXVT_SEL_UNIT_WORD)
 		  adjust_to_word(include, e, e + 1);
 	else if (u == JBXVT_SEL_UNIT_LINE) {
 		e[0].col = 0;
