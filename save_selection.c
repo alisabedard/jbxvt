@@ -57,13 +57,12 @@ void jbxvt_save_selection(struct JBXVTSelectionData * sel)
 		copy(str, jbxvt_get_line(i)->text, start, len, total);
 		total += len;
 	}
-	uint8_t * s = str;
 	bool last_was_cr = false;
 	// Substitute the first null terminator with a carriage return:
 	for (int_fast16_t i = 0; i < total; ++i)
-		if (s[i] == '\0') {
+		if (str[i] == '\0') {
 			if (!last_was_cr) {
-				s[i] = '\r';
+				str[i] = '\r';
 				last_was_cr = true;
 			}
 		} else
