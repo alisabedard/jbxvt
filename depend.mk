@@ -57,7 +57,7 @@ request.o: request.c request.h JBXVTPrivateModes.h JBXVTToken.h \
 rstyle.o: rstyle.c rstyle.h
 save_selection.o: save_selection.c save_selection.h JBXVTLine.h config.h \
  rstyle.h JBXVTSelectionData.h JBXVTSelectionUnit.h libjb/JBDim.h \
- libjb/log.h libjb/macros.h screen.h selend.h size.h
+ screen.h selend.h size.h
 sbar.o: sbar.c sbar.h config.h cursor.h libjb/JBDim.h libjb/macros.h \
  paint.h repaint.h scroll.h size.h window.h
 scr_reset.o: scr_reset.c scr_reset.h JBXVTPrivateModes.h JBXVTScreen.h \

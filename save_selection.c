@@ -5,10 +5,7 @@
 #include <string.h>
 #include "JBXVTLine.h"
 #include "JBXVTSelectionData.h"
-#include "libjb/log.h"
-#include "libjb/macros.h"
 #include "screen.h"
-#include "selection.h"
 #include "selend.h"
 #include "size.h"
 static void copy(uint8_t * str, uint8_t * scr_text,
@@ -30,12 +27,6 @@ static inline bool is_on_screen(const struct JBDim p)
     and save it as the current saved selection. */
 void jbxvt_save_selection(struct JBXVTSelectionData * sel)
 {
-	if ((sel->end[0].col == sel->end[1].col)
-		&& (sel->end[0].row == sel->end[1].row))
-	{
-		jbxvt_clear_selection();
-		return;
-	}
 	const bool fwd = jbxvt_selcmp(&sel->end[0], &sel->end[1]) <= 0;
 	// properly order start and end points:
 	struct JBDim e[] = {sel->end[fwd ? 0 : 1],
@@ -57,7 +48,6 @@ void jbxvt_save_selection(struct JBXVTSelectionData * sel)
 		str = realloc(str, total + len);
 		copy(str, jbxvt_get_line(i)->text, start, len, total);
 		total += len;
-		LOG("MARK");
 	}
 	uint8_t * s = str;
 	bool last_was_cr = false;
