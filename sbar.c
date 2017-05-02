@@ -60,9 +60,7 @@ void jbxvt_set_scroll(xcb_connection_t * xc, int16_t n)
 void jbxvt_scroll_to(xcb_connection_t * xc, const int16_t y)
 {
 	const uint8_t ch = jbxvt_get_char_size().h;
-	const uint16_t ph = jbxvt_get_pixel_size().h;
-	jbxvt_set_scroll(xc, (ch + jbxvt_get_scroll_size())
-		* (ph - y) / ph - ch);
+	jbxvt_set_scroll(xc, (ch + jbxvt_get_scroll_size()) * y / ch);
 }
 void jbxvt_clear_saved_lines(xcb_connection_t * xc)
 {
