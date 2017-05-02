@@ -82,6 +82,7 @@ void jbxvt_clear_selection(void)
 	if (selection_data.text)
 		free(selection_data.text);
 	selection_data.text = NULL;
+	selection_data.length = 0;
 	selection_data.on_screen = false;
 }
 //  start a selection using the specified unit.

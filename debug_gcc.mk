@@ -19,3 +19,6 @@ CFLAGS+=-Wsuggest-attribute=noreturn
 CFLAGS+=-Wsuggest-attribute=format
 CFLAGS+=-Wsuggest-final-types
 CFLAGS+=-Wmissing-format-attribute
+CFLAGS+=-fstack-protector-all
+#CFLAGS+=-fstack-check
+#CFLAGS+=-fPIC -pie
