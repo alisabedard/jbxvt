@@ -4,10 +4,7 @@
 //#undef DEBUG
 //#define DEBUG_VERBOSE
 #include "string.h"
-#include <stdbool.h>
-#include <stdint.h>
 #include <string.h>
-#include <xcb/xproto.h>
 #include "JBXVTLine.h"
 #include "JBXVTPrivateModes.h"
 #include "JBXVTScreen.h"
