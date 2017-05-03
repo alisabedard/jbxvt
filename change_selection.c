@@ -16,12 +16,12 @@ static void invert(xcb_connection_t * xc, const int16_t rs,
 	const struct JBDim csz = jbxvt_get_char_size(),
 	      fsz = jbxvt_get_font_size();
 	for (uint8_t row = row1; row <= row2; row++) {
-		const int16_t y = row * fsz.height;
-		const int16_t x1 = row == rs ? cs * fsz.w : 0;
-		const int16_t x2 = (row == re ? ce : csz.w) * fsz.w;
+		const int16_t x[] = {row == rs ? cs * fsz.w : 0,
+			(row == re ? ce : csz.w) * fsz.w};
 		xcb_poly_fill_rectangle(xc, jbxvt_get_vt_window(xc),
 			jbxvt_get_cursor_gc(xc), 1, &(xcb_rectangle_t){
-			.x = x1, .y = y, .width = x2 - x1, .height = fsz.h});
+			.x = x[0], .y = row * fsz.height,
+			.width = x[1] - x[0], .height = fsz.h});
 	}
 }
 static uint8_t get_row1(const int16_t rs)
