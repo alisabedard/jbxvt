@@ -14,14 +14,14 @@
 #include "sbar.h"
 #include "scr_reset.h"
 #include "screen.h"
-static void dectcem(xcb_connection_t * restrict xc, const bool is_set)
+static void dectcem(xcb_connection_t * xc, const bool is_set)
 {
 	jbxvt_set_scroll(xc, 0);
 	jbxvt_draw_cursor(xc); // clear
 	jbxvt_get_modes()->dectcem = is_set;
 	jbxvt_draw_cursor(xc); // draw
 }
-static void change_screen(xcb_connection_t * restrict xc, const bool is_set)
+static void change_screen(xcb_connection_t * xc, const bool is_set)
 {
 	if (is_set)
 		jbxvt_save_cursor();
@@ -29,7 +29,8 @@ static void change_screen(xcb_connection_t * restrict xc, const bool is_set)
 		jbxvt_restore_cursor(xc);
 	jbxvt_change_screen(xc, is_set);
 }
-void jbxvt_dec_reset(xcb_connection_t * xc, struct JBXVTToken * restrict token)
+void jbxvt_dec_reset(xcb_connection_t * xc,
+	struct JBXVTToken * restrict token)
 {
 	LOG("handle_reset(%d)", token->arg[0]);
 	const bool is_set = token->type == JBXVT_TOKEN_SET;
