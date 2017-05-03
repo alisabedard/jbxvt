@@ -24,14 +24,14 @@ static void invert(xcb_connection_t * xc, const int16_t rs,
 			.width = x[1] - x[0], .height = fsz.h});
 	}
 }
-static uint8_t get_row1(const int16_t rs)
+// Make sure the first row is not before the beginning of the screen.
+static inline uint8_t get_start_row(const int16_t rs)
 {
-	// Make sure the first row is not before the beginning of the screen.
 	return rs < 0 ? 0 : rs;
 }
-static uint8_t get_row2(const int16_t re)
+// Make sure last row is not past the end of the screen.
+static inline uint8_t get_end_row(const int16_t re)
 {
-	// Make sure last row is not past the end of the screen.
 	const uint16_t h = jbxvt_get_char_size().h;
 	return re >= h ? h - 1 : re;
 }
@@ -48,7 +48,7 @@ static void change(xcb_connection_t * restrict xc, struct JBDim * se,
 		jbxvt_selend_to_rc(&re, &ce, nn ? ose : se);
 	}
 	// Invert the changed area
-	invert(xc, rs, re, cs, ce, get_row1(rs), get_row2(re));
+	invert(xc, rs, re, cs, ce, get_start_row(rs), get_end_row(re));
 }
 /*  Repaint the displayed selection to reflect the new value.
     ose1 and ose2 are assumed to represent the currently
