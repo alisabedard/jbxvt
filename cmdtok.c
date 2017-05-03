@@ -5,7 +5,6 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
-#include "JBXVTPrivateModes.h"
 #include "JBXVTToken.h"
 #include "JBXVTTokenType.h"
 #include "command.h"
