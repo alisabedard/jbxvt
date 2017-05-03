@@ -27,14 +27,10 @@ static void save_current_end_points(struct JBDim * restrict s,
 static struct JBDim jbxvt_get_constrained(struct JBDim rc)
 {
 	struct JBDim c = jbxvt_get_char_size();
-	if (c.w) {
-		JB_LIMIT(rc.x, c.w - 1, 0);
-	} else
-		rc.x = 0;
-	if (c.h) {
-		JB_LIMIT(rc.y, c.h - 1, 0);
-	} else
-		rc.y = 0;
+	if (!c.w || !c.h)
+		return rc; // invalid constraint, return input
+	JB_LIMIT(rc.x, c.w - 1, 0);
+	JB_LIMIT(rc.y, c.h - 1, 0);
 	return rc;
 }
 //  Extend the selection.
