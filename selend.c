@@ -16,7 +16,7 @@ int8_t jbxvt_selcmp(struct JBDim * restrict se1,
 	struct JBDim * restrict se2)
 {
 	if (!jbxvt_is_selected())
-		return 1;
+		return 0;
 	if (se1->index == se2->index)
 		return se1->col - se2->col;
 	return se1->index - se2->index;
@@ -36,6 +36,12 @@ void jbxvt_selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
 		*colp = se->col;
 		*rowp = se->row + jbxvt_get_scroll();
 	}
+}
+// Convert the selection end point into a dimension structure
+struct JBDim jbxvt_get_selend_position(struct JBDim * restrict se)
+{
+	return (struct JBDim){.row = se->row + jbxvt_get_scroll(), .col =
+		se->col};
 }
 static inline uint8_t * get_text_at(struct JBDim * endpoint)
 {

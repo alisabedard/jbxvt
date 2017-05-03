@@ -34,9 +34,8 @@ void jbxvt_show_selection(xcb_connection_t * xc)
 	struct JBDim * e = jbxvt_get_selection_end_points();
 	if (!jbxvt_is_selected() || jbxvt_selcmp(&e[0], &e[1]) == 0)
 		return;
-	struct JBDim p[2] = {};
-	jbxvt_selend_to_rc(&p->y, &p->x, &e[0]);
-	jbxvt_selend_to_rc(&p[1].y, &p[1].x, &e[1]);
+	struct JBDim p[] = {jbxvt_get_selend_position(e),
+		jbxvt_get_selend_position(e+1)};
 	struct JBDim r[] = {{}, jbxvt_get_char_size()};
 	//  Obtain initial and final endpoints for the selection.
 	const bool fwd = p->y < p[1].y || (p->y == p[1].y && p->x <= p[1].x);

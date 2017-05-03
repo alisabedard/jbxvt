@@ -38,17 +38,19 @@ static inline uint8_t get_end_row(const int16_t re)
 static void change(xcb_connection_t * restrict xc, struct JBDim * se,
 	struct JBDim * ose)
 {
-	int16_t rs = 0, cs = 0, re = 0, ce = 0, n = jbxvt_selcmp(se, ose);
+	const int16_t n = jbxvt_selcmp(se, ose);
 	if (!n) // nothing selected
 		return;
 	// repaint the start.
+	struct JBDim start, end;
 	{ // nn scope
 		const bool nn = n < 0;
-		jbxvt_selend_to_rc(&rs, &cs, nn ? se : ose);
-		jbxvt_selend_to_rc(&re, &ce, nn ? ose : se);
+		start = jbxvt_get_selend_position(nn ? se : ose);
+		end = jbxvt_get_selend_position(nn ? ose : se);
 	}
 	// Invert the changed area
-	invert(xc, rs, re, cs, ce, get_start_row(rs), get_end_row(re));
+	invert(xc, start.row, end.row, start.col, end.col,
+		get_start_row(start.row), get_end_row(end.row));
 }
 /*  Repaint the displayed selection to reflect the new value.
     ose1 and ose2 are assumed to represent the currently
