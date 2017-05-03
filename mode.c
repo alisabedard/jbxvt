@@ -45,3 +45,8 @@ void jbxvt_handle_JBXVT_TOKEN_ELR(void * xc __attribute__((unused)),
 	}
 	m->elr_pixels = t[1] == 1;
 }
+// Return the current Control Sequence Initializer
+const char * jbxvt_get_csi(void)
+{
+	return jbxvt_get_modes()->s8c1t ? "\233" : "\033[";
+}

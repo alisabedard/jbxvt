@@ -16,7 +16,7 @@
 #include "libjb/xcb.h"
 #include "mode.h"
 #include "xevents.h"
-//  Flags used to control jbxvt_pop_char
+// Flags used to control jbxvt_pop_char
 enum ComCharFlags {INPUT_BUFFER_EMPTY = 0x100,
 	GET_INPUT_ONLY=1, GET_XEVENTS_ONLY=2};
 struct JBXVTCommandContainer {
@@ -281,10 +281,6 @@ void jbxvt_get_token(xcb_connection_t * xc, struct JBXVTToken * restrict tk)
 	default:
 		default_token(xc, tk, c);
 	}
-}
-const char * jbxvt_get_csi(void)
-{
-	return jbxvt_get_modes()->s8c1t ? "\233" : "\033[";
 }
 static void init_container(struct JBXVTCommandContainer * restrict c,
 	uint8_t * restrict buf)

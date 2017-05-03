@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include "JBXVTPrivateModes.h"
 #include "JBXVTToken.h"
-#include "cmdtok.h"
 #include "command.h"
 #include "cursor.h"
 #include "libjb/log.h"

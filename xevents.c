@@ -4,7 +4,6 @@
 #include <unistd.h>
 #include "JBXVTPrivateModes.h"
 #include "button_events.h"
-#include "cmdtok.h"
 #include "command.h"
 #include "libjb/JBDim.h"
 #include "libjb/log.h"

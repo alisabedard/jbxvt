@@ -2,7 +2,6 @@
 #include "mouse.h"
 #include <xcb/xproto.h>
 #include "JBXVTPrivateModes.h"
-#include "cmdtok.h"
 #include "command.h"
 #include "libjb/JBDim.h"
 #include "libjb/log.h"
