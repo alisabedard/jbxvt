@@ -1,8 +1,6 @@
 /*  Copyright 2017, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "selreq.h"
-#include <stdbool.h>
-#include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include "command.h"
