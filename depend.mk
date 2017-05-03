@@ -4,9 +4,9 @@ button_events.o: button_events.c button_events.h JBXVTSelectionUnit.h \
 cases.o: cases.c
 change_selection.o: change_selection.c change_selection.h cursor.h font.h \
  libjb/JBDim.h libjb/log.h selend.h selection.h size.h window.h
-cmdtok.o: cmdtok.c cmdtok.h JBXVTPrivateModes.h JBXVTToken.h \
- JBXVTTokenType.h command.h libjb/util.h cursor.h dcs.h esc.h libjb/log.h \
- libjb/xcb.h mode.h utf.h xevents.h
+cmdtok.o: cmdtok.c cmdtok.h JBXVTToken.h JBXVTTokenType.h command.h \
+ libjb/util.h cursor.h dcs.h esc.h libjb/log.h libjb/xcb.h mode.h utf.h \
+ xevents.h
 color.o: color.c color.h libjb/xcb.h JBXVTOptions.h libjb/JBDim.h \
  libjb/macros.h paint.h xcb_screen.h window.h
 command.o: command.c command.h libjb/util.h cmdtok.h libjb/file.h \
