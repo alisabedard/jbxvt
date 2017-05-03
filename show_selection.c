@@ -2,10 +2,6 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury. */
 #include "show_selection.h"
-#include <stdbool.h>
-#include <stdint.h>
-#include <sys/types.h>
-#include <xcb/xproto.h>
 #include "cursor.h"
 #include "font.h"
 #include "libjb/JBDim.h"
