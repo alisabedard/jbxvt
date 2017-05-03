@@ -26,26 +26,6 @@ uint8_t jbxvt_get_font_ascent(void)
 {
 	return font_ascent;
 }
-static xcb_font_t get_f(xcb_connection_t * restrict xc,
-	xcb_font_t * restrict f)
-{
-	return *f ? *f : (*f = xcb_generate_id(xc));
-}
-xcb_font_t jbxvt_get_normal_font(xcb_connection_t * xc)
-{
-	static xcb_font_t f;
-	return get_f(xc, &f);
-}
-xcb_font_t jbxvt_get_bold_font(xcb_connection_t * xc)
-{
-	static xcb_font_t f;
-	return get_f(xc, &f);
-}
-xcb_font_t jbxvt_get_italic_font(xcb_connection_t * xc)
-{
-	static xcb_font_t f;
-	return get_f(xc, &f);
-}
 void jbxvt_init_fonts(xcb_connection_t * xc,
 	struct JBXVTOptions * opt)
 {
@@ -63,3 +43,16 @@ void jbxvt_init_fonts(xcb_connection_t * xc,
 		jb_open_font(xc, f, opt->normal_font);
 	setup_font_metrics(xc, q);
 }
+static xcb_font_t get_f(xcb_connection_t * xc, xcb_font_t * restrict f)
+{
+	return *f ? *f : (*f = xcb_generate_id(xc));
+}
+#define DEFUN_GET_FONT(name) xcb_font_t name(xcb_connection_t * xc) \
+{\
+	static xcb_font_t f;\
+	return get_f(xc, &f);\
+}
+DEFUN_GET_FONT(jbxvt_get_normal_font);
+DEFUN_GET_FONT(jbxvt_get_bold_font);
+DEFUN_GET_FONT(jbxvt_get_italic_font);
+
