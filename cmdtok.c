@@ -15,6 +15,7 @@
 #include "libjb/log.h"
 #include "libjb/xcb.h"
 #include "mode.h"
+#include "utf.h"
 #include "xevents.h"
 // Flags used to control jbxvt_pop_char
 enum ComCharFlags {INPUT_BUFFER_EMPTY = 0x100,
@@ -128,92 +129,6 @@ static void handle_string_char(xcb_connection_t * xc,
 	if (c != INPUT_BUFFER_EMPTY)
 		jbxvt_push_char(c);
 }
-// Returns the number of additional bytes in the UTF encoded character
-__attribute__((const))
-static uint8_t get_utf_bytes(const uint8_t c)
-{
-	if ((c & 0xf0) == 0xf0)
-		return 3;
-	if ((c & 0xe0) == 0xe0)
-		return 2;
-	if ((c & 0xc0) == 0xc0)
-		return 1;
-	return 0;
-}
-// Handle 4-byte characters
-static void utf8_3(xcb_connection_t * xc,
-	struct JBXVTToken * restrict tk, int_fast16_t c) // 1
-{
-	LOG("utf8_3()\t0x%x\n", (unsigned int)c);
-	c = jbxvt_pop_char(xc, c); // 2
-	LOG("\t0x%x\n", (unsigned int)c);
-	c = jbxvt_pop_char(xc, c); // 3
-	LOG("\t0x%x\n", (unsigned int)c);
-	switch (c) {
-	default:
-		tk->type = JBXVT_TOKEN_NULL;
-	}
-}
-// Handle 3-byte characters
-static void utf8_2(xcb_connection_t * xc,
-	struct JBXVTToken * restrict tk, int_fast16_t c) // 1
-{
-	LOG("utf8_t()\t0x%x\n", (unsigned int)c);
-	int_fast16_t c2 = jbxvt_pop_char(xc, c); // take next byte
-	LOG("\t0x%x\n", (unsigned int)c2);
-	switch (c) {
-	case 0x80:
-		switch (c2) {
-		case 0x90:
-			jbxvt_push_char('-');
-			break;
-		default:
-			goto tk_null;
-		}
-		break;
-	case 0x94:
-		switch (c2) {
-		case 0x80:
-			jbxvt_push_char('-');
-			break;
-		case 0x82:
-			jbxvt_push_char('|');
-			break;
-		case 0xac:
-			jbxvt_push_char('+');
-			break;
-		default:
-			goto tk_null;
-		}
-		break;
-	case 0x96:
-		switch (c2) {
-		case 0xbd: // FIXME:  white down pointing triangle
-			jbxvt_push_char('V');
-			break;
-		default:
-			goto tk_null;
-		}
-	default:
-tk_null:
-		tk->type = JBXVT_TOKEN_NULL;
-	}
-}
-// Handle 2-byte characters
-static void utf8_1(struct JBXVTToken * restrict tk, int_fast16_t c) // 1
-{
-	LOG("utf8_1()\t0x%x\n", (unsigned int)c);
-	switch (c) {
-	default:
-		tk->type = JBXVT_TOKEN_NULL;
-	}
-}
-// Handle 1-byte characters
-static void utf8_0(struct JBXVTToken * restrict tk, int_fast16_t c)
-{
-	tk->type = JBXVT_TOKEN_CHAR;
-	tk->tk_char = c;
-}
 static void default_token(xcb_connection_t * xc,
 	struct JBXVTToken * restrict tk, int_fast16_t c)
 {
@@ -236,22 +151,22 @@ static void default_token(xcb_connection_t * xc,
 		return;
 	}
 	// Process individual characters and unicode:
-	uint8_t bytes = get_utf_bytes(c); // additional bytes to parse
+	uint8_t bytes = jbxvt_get_utf_bytes(c); // additional bytes to parse
 	switch (bytes) {
 	case 3:
 		LOG("UTF8, 3 additional bytes: \t0x%x\n", (unsigned int)c);
-		utf8_3(xc, tk, jbxvt_pop_char(xc, c));
+		jbxvt_parse_utf8_3(xc, tk, jbxvt_pop_char(xc, c));
 		break;
 	case 2:
 		LOG("UTF8, 2 additional bytes: \t0x%x\n", (unsigned int)c);
-		utf8_2(xc, tk, jbxvt_pop_char(xc, c));
+		jbxvt_parse_utf8_2(xc, tk, jbxvt_pop_char(xc, c));
 		break;
 	case 1:
 		LOG("UTF8, 1 additional byte: \t0x%x\n", (unsigned int)c);
-		utf8_1(tk, jbxvt_pop_char(xc, c));
+		jbxvt_parse_utf8_1(tk, jbxvt_pop_char(xc, c));
 		break;
 	case 0:
-		utf8_0(tk, c);
+		jbxvt_parse_utf8_0(tk, c);
 		break;
 	}
 }
