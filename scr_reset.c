@@ -3,8 +3,6 @@
     University of Kent at Canterbury.*/
 //#undef DEBUG
 #include "scr_reset.h"
-#include <string.h>
-#include <unistd.h>
 #include "JBXVTPrivateModes.h"
 #include "JBXVTScreen.h"
 #include "color.h"
@@ -15,12 +13,10 @@
 #include "libjb/macros.h"
 #include "libjb/time.h"
 #include "mode.h"
-#include "paint.h"
+#include "move.h"
 #include "repaint.h"
 #include "sbar.h"
-#include "move.h"
 #include "screen.h"
-#include "scroll.h"
 #include "size.h"
 #include "window.h"
 static void init_screen_elements(struct JBXVTScreen * restrict scr)

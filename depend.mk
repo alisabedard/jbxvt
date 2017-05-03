@@ -12,8 +12,8 @@ color.o: color.c color.h libjb/xcb.h JBXVTOptions.h libjb/JBDim.h \
 command.o: command.c command.h libjb/util.h cmdtok.h libjb/file.h \
  libjb/JBDim.h libjb/log.h size.h
 cursor.o: cursor.c cursor.h JBXVTPrivateModes.h JBXVTScreen.h JBXVTLine.h \
- config.h rstyle.h libjb/JBDim.h font.h mode.h repaint.h sbar.h screen.h \
- size.h window.h
+ config.h rstyle.h libjb/JBDim.h font.h libjb/macros.h mode.h repaint.h \
+ sbar.h screen.h size.h window.h
 dcs.o: dcs.c dcs.h JBXVTToken.h JBXVTTokenType.h cmdtok.h libjb/log.h
 dec_reset.o: dec_reset.c dec_reset.h JBXVTPrivateModes.h JBXVTToken.h \
  JBXVTTokenType.h cursor.h libjb/JBDim.h libjb/log.h libjb/macros.h \
@@ -63,7 +63,7 @@ sbar.o: sbar.c sbar.h config.h cursor.h libjb/JBDim.h libjb/macros.h \
 scr_reset.o: scr_reset.c scr_reset.h JBXVTPrivateModes.h JBXVTScreen.h \
  JBXVTLine.h config.h rstyle.h libjb/JBDim.h color.h libjb/xcb.h \
  command.h libjb/util.h cursor.h libjb/log.h libjb/macros.h libjb/time.h \
- mode.h paint.h repaint.h sbar.h move.h screen.h scroll.h size.h window.h
+ mode.h move.h repaint.h sbar.h screen.h size.h window.h
 screen.o: screen.c screen.h JBXVTPrivateModes.h JBXVTScreen.h JBXVTLine.h \
  config.h rstyle.h libjb/JBDim.h cursor.h erase.h libjb/log.h mode.h \
  move.h repaint.h sbar.h scr_reset.h scroll.h size.h
