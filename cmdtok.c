@@ -128,6 +128,7 @@ static void handle_string_char(xcb_connection_t * xc,
 	if (c != INPUT_BUFFER_EMPTY)
 		jbxvt_push_char(c);
 }
+// Returns the number of additional bytes in the UTF encoded character
 __attribute__((const))
 static uint8_t get_utf_bytes(const uint8_t c)
 {
@@ -139,6 +140,7 @@ static uint8_t get_utf_bytes(const uint8_t c)
 		return 1;
 	return 0;
 }
+// Handle 4-byte characters
 static void utf8_3(xcb_connection_t * xc,
 	struct JBXVTToken * restrict tk, int_fast16_t c) // 1
 {
@@ -152,6 +154,7 @@ static void utf8_3(xcb_connection_t * xc,
 		tk->type = JBXVT_TOKEN_NULL;
 	}
 }
+// Handle 3-byte characters
 static void utf8_2(xcb_connection_t * xc,
 	struct JBXVTToken * restrict tk, int_fast16_t c) // 1
 {
@@ -196,6 +199,7 @@ tk_null:
 		tk->type = JBXVT_TOKEN_NULL;
 	}
 }
+// Handle 2-byte characters
 static void utf8_1(struct JBXVTToken * restrict tk, int_fast16_t c) // 1
 {
 	LOG("utf8_1()\t0x%x\n", (unsigned int)c);
@@ -204,6 +208,7 @@ static void utf8_1(struct JBXVTToken * restrict tk, int_fast16_t c) // 1
 		tk->type = JBXVT_TOKEN_NULL;
 	}
 }
+// Handle 1-byte characters
 static void utf8_0(struct JBXVTToken * restrict tk, int_fast16_t c)
 {
 	tk->type = JBXVT_TOKEN_CHAR;
