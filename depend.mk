@@ -3,7 +3,7 @@ button_events.o: button_events.c button_events.h JBXVTSelectionUnit.h \
  screen.h selection.h selex.h selreq.h window.h
 cases.o: cases.c
 change_selection.o: change_selection.c change_selection.h cursor.h font.h \
- libjb/JBDim.h libjb/log.h selend.h selection.h size.h window.h
+ libjb/JBDim.h libjb/log.h selection.h selend.h size.h window.h
 cmdtok.o: cmdtok.c cmdtok.h JBXVTToken.h JBXVTTokenType.h command.h \
  libjb/util.h cursor.h dcs.h esc.h libjb/log.h libjb/xcb.h mode.h utf.h \
  xevents.h

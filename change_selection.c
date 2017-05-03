@@ -1,16 +1,12 @@
 /*  Copyright 2017, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "change_selection.h"
-#include <stdbool.h>
-#include <stdint.h>
-#include <sys/types.h>
-#include <xcb/xproto.h>
 #include "cursor.h"
 #include "font.h"
 #include "libjb/JBDim.h"
 #include "libjb/log.h"
-#include "selend.h"
 #include "selection.h"
+#include "selend.h"
 #include "size.h"
 #include "window.h"
 static void invert(xcb_connection_t * xc, const int16_t rs,
