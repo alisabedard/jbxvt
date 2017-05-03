@@ -2,15 +2,11 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
 #include "repaint.h"
-#include <stdbool.h>
-#include <stdint.h>
-#include "JBXVTLine.h"
 #include "JBXVTScreen.h"
 #include "config.h"
 #include "font.h"
 #include "libjb/JBDim.h"
 #include "paint.h"
-#include "rstyle.h"
 #include "sbar.h"
 #include "screen.h"
 #include "scroll.h"

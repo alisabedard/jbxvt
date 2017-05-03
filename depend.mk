@@ -48,8 +48,8 @@ move.o: move.c move.h JBXVTPrivateModes.h JBXVTScreen.h JBXVTLine.h \
  screen.h selection.h size.h
 paint.o: paint.c paint.h libjb/JBDim.h color_index.h color.h libjb/xcb.h \
  double.h font.h libjb/log.h rstyle.h window.h xcb_screen.h
-repaint.o: repaint.c repaint.h JBXVTLine.h config.h rstyle.h \
- JBXVTScreen.h libjb/JBDim.h font.h paint.h sbar.h screen.h scroll.h \
+repaint.o: repaint.c repaint.h JBXVTScreen.h JBXVTLine.h config.h \
+ rstyle.h libjb/JBDim.h font.h paint.h sbar.h screen.h scroll.h \
  show_selection.h size.h
 request.o: request.c request.h JBXVTPrivateModes.h JBXVTToken.h \
  JBXVTTokenType.h cmdtok.h command.h libjb/util.h cursor.h libjb/log.h \
