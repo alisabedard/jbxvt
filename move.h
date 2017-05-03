@@ -10,7 +10,4 @@ enum JBXVTMoveFlags {
  *  flags that specify relative rather than absolute motion.  */
 void jbxvt_move(xcb_connection_t * xc,
 	const int16_t x, const int16_t y, const uint8_t relative);
-// Ensure cursor coordinates are valid per screen and decom mode
-// Returns new cursor y value
-int16_t jbxvt_check_cursor_position(void);
 #endif//!JBXVT_SCR_MOVE_H
