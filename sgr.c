@@ -4,12 +4,8 @@
 //#undef DEBUG
 #define LOG_LEVEL 3
 #include "sgr.h"
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <sys/types.h>
-#include "color.h"
 #include "JBXVTToken.h"
+#include "color.h"
 #include "libjb/log.h"
 #include "libjb/macros.h"
 #include "rstyle.h"

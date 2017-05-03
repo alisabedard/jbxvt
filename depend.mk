@@ -78,7 +78,7 @@ selex.o: selex.c selex.h change_selection.h libjb/JBDim.h libjb/macros.h \
  selection.h selend.h size.h
 selreq.o: selreq.c selreq.h command.h libjb/util.h config.h libjb/log.h \
  selection.h window.h
-sgr.o: sgr.c sgr.h color.h libjb/xcb.h JBXVTToken.h JBXVTTokenType.h \
+sgr.o: sgr.c sgr.h JBXVTToken.h JBXVTTokenType.h color.h libjb/xcb.h \
  libjb/log.h libjb/macros.h rstyle.h
 show_selection.o: show_selection.c show_selection.h cursor.h font.h \
  libjb/JBDim.h selection.h selend.h size.h window.h
