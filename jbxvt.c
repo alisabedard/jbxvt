@@ -7,11 +7,8 @@
 #include "config.h"
 #include "cursor.h"
 #include "display.h"
-#include "libjb/JBDim.h"
-#include "libjb/util.h"
 #include "tab.h"
 #include "window.h"
-#include "xevents.h"
 #include "xvt.h"
 static char ** parse_command_line(const int argc, char ** argv,
 	struct JBXVTOptions * o)

@@ -34,7 +34,7 @@ esc.o: esc.c esc.h JBXVTPrivateModes.h JBXVTToken.h JBXVTTokenType.h \
 font.o: font.c font.h JBXVTOptions.h libjb/JBDim.h libjb/util.h \
  libjb/xcb.h
 jbxvt.o: jbxvt.c command.h libjb/util.h JBXVTOptions.h libjb/JBDim.h \
- config.h cursor.h display.h tab.h window.h xevents.h xvt.h
+ config.h cursor.h display.h tab.h window.h xvt.h
 lookup_key.o: lookup_key.c lookup_key.h command.h libjb/util.h \
  libjb/log.h sbar.h
 mc.o: mc.c mc.h JBXVTToken.h JBXVTTokenType.h command.h libjb/util.h \
