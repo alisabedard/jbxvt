@@ -8,16 +8,12 @@
 #include "color.h"
 #include "double.h"
 #include "font.h"
+#include "gc.h"
 #include "libjb/log.h"
 #include "libjb/xcb.h" // for jb_get_rgb_pixel, pixel_t
 #include "rstyle.h"
 #include "window.h"
 #include "xcb_screen.h"
-xcb_gcontext_t jbxvt_get_text_gc(xcb_connection_t * xc)
-{
-	static xcb_gcontext_t gc;
-	return gc ? gc : (gc = xcb_generate_id(xc));
-}
 static inline void font(xcb_connection_t * xc, const xcb_font_t f)
 {
 	xcb_change_gc(xc, jbxvt_get_text_gc(xc), XCB_GC_FONT, &f);

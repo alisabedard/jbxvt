@@ -6,6 +6,7 @@
 #include "JBXVTScreen.h"
 #include "config.h"
 #include "font.h"
+#include "gc.h"
 #include "libjb/JBDim.h"
 #include "libjb/macros.h"
 #include "mode.h"
@@ -50,11 +51,6 @@ void jbxvt_set_cursor_attr(const uint8_t val)
 {
 	if (val <= 8) // sanitize max (see below)
 		cursor_attr = val;
-}
-xcb_gcontext_t jbxvt_get_cursor_gc(xcb_connection_t * xc)
-{
-	static xcb_gcontext_t gc;
-	return gc ? gc : (gc = xcb_generate_id(xc));
 }
 void jbxvt_save_cursor(void)
 {

@@ -1,8 +1,8 @@
 /*  Copyright 2017, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "change_selection.h"
-#include "cursor.h"
 #include "font.h"
+#include "gc.h"
 #include "libjb/JBDim.h"
 #include "libjb/log.h"
 #include "selection.h"

@@ -1,13 +1,13 @@
 /*  Copyright 2017, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "display.h"
+#include "paint.h"
+#include "xcb_screen.h"
 #include "JBXVTOptions.h"
 #include "color.h"
-#include "cursor.h"
 #include "font.h"
-#include "paint.h"
+#include "gc.h"
 #include "window.h"
-#include "xcb_screen.h"
 static void setup_gcs(xcb_connection_t * xc, xcb_window_t w)
 {
 	enum {
