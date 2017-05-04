@@ -32,7 +32,8 @@ xcb_connection_t * jbxvt_init_display(char * restrict name,
 	}
 	jbxvt_init_colors(xc, opt);
 	jbxvt_init_fonts(xc, opt);
-	jbxvt_create_window(xc, jbxvt_get_root_window(xc), opt, (uint8_t *)name);
+	jbxvt_create_window(xc, jbxvt_get_root_window(xc),
+		opt, (uint8_t *)name);
 	setup_gcs(xc, jbxvt_get_vt_window(xc));
 	return xc;
 }
