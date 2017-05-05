@@ -3,6 +3,7 @@
 #ifndef JBXVT_CURSOR_H
 #define JBXVT_CURSOR_H
 #include <xcb/xcb.h>
+#include "libjb/JBDim.h"
 void jbxvt_blink_cursor(xcb_connection_t * xc);
 // Ensure cursor coordinates are valid per screen and decom mode
 // Returns new cursor y value
@@ -11,8 +12,14 @@ int16_t jbxvt_check_cursor_position(void);
 void jbxvt_draw_cursor(xcb_connection_t * xc)
 	__attribute__((nonnull));
 struct JBDim jbxvt_get_cursor(void);
-int16_t jbxvt_get_x(void);
-int16_t jbxvt_get_y(void);
+inline int16_t jbxvt_get_x(void)
+{
+	return jbxvt_get_cursor().x;
+}
+inline int16_t jbxvt_get_y(void)
+{
+	return jbxvt_get_cursor().y;
+}
 void jbxvt_restore_cursor(xcb_connection_t * xc)
 	__attribute__((nonnull));
 void jbxvt_save_cursor(void);

@@ -15,6 +15,8 @@
 static uint32_t saved_style;
 static struct JBDim saved_cursor;
 static uint8_t cursor_attr = JBXVT_DEFAULT_CURSOR_ATTR;
+extern inline int16_t jbxvt_get_x(void);
+extern inline int16_t jbxvt_get_y(void);
 void jbxvt_blink_cursor(xcb_connection_t * xc)
 {
 	if (!jbxvt_get_modes()->att610 && cursor_attr % 2) {
@@ -110,12 +112,4 @@ void jbxvt_draw_cursor(xcb_connection_t * xc)
 struct JBDim jbxvt_get_cursor(void)
 {
 	return jbxvt_get_current_screen()->cursor;
-}
-int16_t jbxvt_get_x(void)
-{
-	return jbxvt_get_cursor().x;
-}
-int16_t jbxvt_get_y(void)
-{
-	return jbxvt_get_cursor().y;
 }
