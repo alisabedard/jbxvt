@@ -65,15 +65,7 @@ void jbxvt_restore_cursor(xcb_connection_t * xc)
 }
 static bool is_blinking(void)
 {
-	switch (cursor_attr) {
-	case 0: // blinking block
-	case 1: // blinking block
-	case 3: // blinking underline
-	case 5: // blinking bar
-	case 7: // blinking overline
-		return true;
-	}
-	return false;
+	return cursor_attr && cursor_attr % 2;
 }
 void jbxvt_draw_cursor(xcb_connection_t * xc)
 {
