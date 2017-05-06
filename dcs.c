@@ -5,11 +5,14 @@
 #include "JBXVTTokenType.h"
 #include "cmdtok.h"
 #include "libjb/log.h"
-static void check_st(xcb_connection_t * xc, struct JBXVTToken * t)
+static void check_st(xcb_connection_t * xc, struct JBXVTToken * t,
+	const enum JBXVTTokenType new_type)
 {
 	int_fast16_t c = jbxvt_pop_char(xc, 0);
 	if (c != JBXVT_TOKEN_ST)
 		t->type = JBXVT_TOKEN_NULL;
+	else
+		t->type = new_type;
 }
 void jbxvt_dcs(xcb_connection_t * xc, struct JBXVTToken * t)
 {
@@ -30,40 +33,34 @@ void jbxvt_dcs(xcb_connection_t * xc, struct JBXVTToken * t)
 			c = jbxvt_pop_char(xc, 0); // next
 			switch (c) {
 			case 'p':
-				t->type = JBXVT_TOKEN_QUERY_SCA;
-				check_st(xc, t);
+				check_st(xc, t, JBXVT_TOKEN_QUERY_SCA);
 				break;
 			case 'q':
-				t->type = JBXVT_TOKEN_QUERY_SCL;
-				check_st(xc, t);
+				check_st(xc, t, JBXVT_TOKEN_QUERY_SCL);
 				break;
 			}
 		case 'm':
-			t->type = JBXVT_TOKEN_QUERY_SLRM;
-			check_st(xc, t);
+			check_st(xc, t, JBXVT_TOKEN_QUERY_SGR);
 			break;
 		case 'r':
-			t->type = JBXVT_TOKEN_QUERY_STBM;
-			check_st(xc, t);
+			check_st(xc, t, JBXVT_TOKEN_QUERY_STBM);
 			break;
 		case 's':
-			t->type = JBXVT_TOKEN_QUERY_SLRM;
-			check_st(xc, t);
+			check_st(xc, t, JBXVT_TOKEN_QUERY_SLRM);
 			break;
 		case ' ':
 			c = jbxvt_pop_char(xc, 0);
 			if (c != 'q')
 				return;
-			t->type = JBXVT_TOKEN_QUERY_SCUSR;
-			check_st(xc, t);
+			check_st(xc, t, JBXVT_TOKEN_QUERY_SCUSR);
 			break;
 		}
 		break;
-	case '+':
+	case '+': // Set/request termcap/terminfo data
 		c = jbxvt_pop_char(xc, 0);
 		switch (c) {
-		case 'p':
-		case 'q':
+		case 'p': // Set termcap/terminfo data
+		case 'q': // Request termcap/terminfo data
 			LOG("FIXME: termcap support unimplemented");
 		}
 		break;
