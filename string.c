@@ -10,6 +10,7 @@
 #include "JBXVTScreen.h"
 #include "cursor.h"
 #include "font.h"
+#include "gc.h"
 #include "libjb/JBDim.h"
 #include "libjb/log.h"
 #include "libjb/macros.h"

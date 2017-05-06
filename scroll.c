@@ -7,13 +7,13 @@
 #include "JBXVTLine.h"
 #include "JBXVTScreen.h"
 #include "font.h"
+#include "gc.h"
 #include "libjb/JBDim.h"
 #if LOG_LEVEL > 0
 #include "libjb/log.h"
 #endif//LOG_LEVEL
 #include "libjb/macros.h"
 #include "libjb/util.h"
-#include "paint.h"
 #include "sbar.h"
 #include "screen.h"
 #include "selection.h"

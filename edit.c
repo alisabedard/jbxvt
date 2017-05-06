@@ -7,16 +7,11 @@
 #endif//LOG_LEVEL
 #include "edit.h"
 #include <string.h>
-#include <xcb/xproto.h>
-#include "JBXVTLine.h"
-#include "config.h"
 #include "cursor.h"
 #include "font.h"
-#include "libjb/JBDim.h"
+#include "gc.h"
 #include "libjb/log.h"
 #include "libjb/macros.h"
-#include "paint.h"
-#include "screen.h"
 #include "selection.h"
 #include "size.h"
 #include "window.h"

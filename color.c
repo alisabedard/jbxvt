@@ -1,12 +1,10 @@
 // Copyright 2017, Jeffrey E. Bedard
 #include "color.h"
-#include <stdint.h>
-#include <xcb/xproto.h>
 #include "JBXVTOptions.h"
+#include "gc.h"
 #include "libjb/macros.h"
-#include "paint.h"
-#include "xcb_screen.h"
 #include "window.h"
+#include "xcb_screen.h"
 static struct {
 	pixel_t bg, fg, current_fg, current_bg;
 } color_data;
