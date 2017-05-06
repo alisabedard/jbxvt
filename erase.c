@@ -3,24 +3,12 @@
     University of Kent at Canterbury.*/
 #undef DEBUG
 #include "erase.h"
-#include <stdbool.h>
 #include <string.h>
-#include <xcb/xproto.h>
-#include "JBXVTLine.h"
-#include "JBXVTScreen.h"
-#include "config.h"
 #include "cursor.h"
 #include "font.h"
-#include "libjb/JBDim.h"
 #include "libjb/log.h"
-#include "paint.h"
-#include "rstyle.h"
 #include "sbar.h"
-#include "move.h"
-#include "screen.h"
-#include "scroll.h"
 #include "size.h"
-#include "string.h"
 #include "window.h"
 static void clear_area(xcb_connection_t * restrict xc,
 	const int16_t x, const int16_t y, const uint16_t width)

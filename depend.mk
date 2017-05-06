@@ -29,9 +29,9 @@ dsr.o: dsr.c dsr.h command.h libjb/util.h cursor.h JBXVTScreen.h \
 edit.o: edit.c edit.h JBXVTLine.h config.h rstyle.h cursor.h \
  JBXVTScreen.h libjb/JBDim.h screen.h font.h libjb/log.h libjb/macros.h \
  paint.h selection.h size.h window.h
-erase.o: erase.c erase.h JBXVTLine.h config.h rstyle.h JBXVTScreen.h \
- libjb/JBDim.h cursor.h screen.h font.h libjb/log.h paint.h sbar.h move.h \
- scroll.h size.h string.h window.h
+erase.o: erase.c erase.h cursor.h JBXVTScreen.h JBXVTLine.h config.h \
+ rstyle.h libjb/JBDim.h screen.h font.h libjb/log.h sbar.h size.h \
+ window.h
 esc.o: esc.c esc.h JBXVTPrivateModes.h JBXVTToken.h JBXVTTokenType.h \
  cmdtok.h command.h libjb/util.h cursor.h JBXVTScreen.h JBXVTLine.h \
  config.h rstyle.h libjb/JBDim.h screen.h dcs.h mode.h
