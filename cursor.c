@@ -2,19 +2,18 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "cursor.h"
 #include "JBXVTPrivateModes.h"
-#include "JBXVTScreen.h"
 #include "font.h"
 #include "gc.h"
 #include "libjb/macros.h"
 #include "mode.h"
 #include "repaint.h"
 #include "sbar.h"
-#include "screen.h"
 #include "size.h"
 #include "window.h"
 static uint32_t saved_style;
 static struct JBDim saved_cursor;
 static uint8_t cursor_attr = JBXVT_DEFAULT_CURSOR_ATTR;
+extern inline struct JBDim jbxvt_get_cursor(void);
 extern inline int16_t jbxvt_get_x(void);
 extern inline int16_t jbxvt_get_y(void);
 void jbxvt_blink_cursor(xcb_connection_t * xc)
@@ -100,8 +99,4 @@ void jbxvt_draw_cursor(xcb_connection_t * xc)
 	}
 	xcb_poly_fill_rectangle(xc, jbxvt_get_vt_window(xc),
 		jbxvt_get_cursor_gc(xc), 1, &r);
-}
-struct JBDim jbxvt_get_cursor(void)
-{
-	return jbxvt_get_current_screen()->cursor;
 }
