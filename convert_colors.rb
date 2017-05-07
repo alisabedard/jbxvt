@@ -7,7 +7,6 @@ o.write "// Copyright 2017, Jeffrey E. Bedard\n" +
 	"#define JBXVT_COLOR_INDEX_H\n" +
 	"#include <stdint.h>\n" +
 	"static uint32_t jbxvt_color_index[256] = {\n"
-#f=File.open "color_index.txt", "r"
 File.open "color_index.txt", "r" do |f|
 	f.each_line do |s|
 		s = s.split ':'
