@@ -29,22 +29,18 @@ static void sbop(xcb_connection_t * xc, const int16_t y, const bool up)
 void jbxvt_handle_button_release_event(xcb_connection_t * xc,
 	xcb_button_release_event_t * e)
 {
-	enum { SCROLL_INCREMENT = 64 };
+	enum { SCROLL_INCREMENT = 100 };
 	const xcb_window_t window = e->event;
 	const xcb_button_t button = e->detail;
 	if (window == jbxvt_get_scrollbar(xc))
 		switch (button) {
 		case 1:
-			sbop(xc, SCROLL_INCREMENT << 1, true);
-			break;
-		case 3:
-			sbop(xc, SCROLL_INCREMENT << 1, false);
-			break;
-		case 4:
-			sbop(xc, SCROLL_INCREMENT, false);
-			break;
 		case 5:
 			sbop(xc, SCROLL_INCREMENT, true);
+			break;
+		case 3:
+		case 4:
+			sbop(xc, SCROLL_INCREMENT, false);
 			break;
 		}
 	else if (jbxvt_get_mouse_tracked() && button <= 3)
