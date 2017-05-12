@@ -13,34 +13,36 @@
 #include "selex.h"
 #include "selreq.h"
 #include "window.h"
-static void sbop(xcb_connection_t * xc, const int16_t y, const bool up)
+static void sbop(xcb_connection_t * xc, const bool up)
 {
 	if (jbxvt_get_mouse_tracked()) // let the application handle scrolling
 		return;
 	// xterm's behavior if alternate screen in use is to move the cursor
+
 	if (jbxvt_get_current_screen()
-		== jbxvt_get_screen_at(0)) // first screen
+		== jbxvt_get_screen_at(0)) { // first screen
+		enum { SCROLL_INCREMENT = 100 };
 		jbxvt_set_scroll(xc, jbxvt_get_scroll()
-			+ (up ? -y : y) / jbxvt_get_font_size().h);
-	else
+			+ (up ? -SCROLL_INCREMENT : SCROLL_INCREMENT)
+			/ jbxvt_get_font_size().h);
+	} else
 		jbxvt_move(xc, 0, up ? -1 : 1, JBXVT_ROW_RELATIVE
 			| JBXVT_COLUMN_RELATIVE);
 }
 void jbxvt_handle_button_release_event(xcb_connection_t * xc,
 	xcb_button_release_event_t * e)
 {
-	enum { SCROLL_INCREMENT = 100 };
 	const xcb_window_t window = e->event;
 	const xcb_button_t button = e->detail;
 	if (window == jbxvt_get_scrollbar(xc))
 		switch (button) {
 		case 1:
 		case 5:
-			sbop(xc, SCROLL_INCREMENT, true);
+			sbop(xc, true);
 			break;
 		case 3:
 		case 4:
-			sbop(xc, SCROLL_INCREMENT, false);
+			sbop(xc, false);
 			break;
 		}
 	else if (jbxvt_get_mouse_tracked() && button <= 3)
@@ -58,10 +60,10 @@ void jbxvt_handle_button_release_event(xcb_connection_t * xc,
 			jbxvt_request_selection(xc, e->time);
 			break;
 		case 4:
-			sbop(xc, SCROLL_INCREMENT, false);
+			sbop(xc, false);
 			break;
 		case 5:
-			sbop(xc, SCROLL_INCREMENT, true);
+			sbop(xc, true);
 			break;
 		}
 	}
