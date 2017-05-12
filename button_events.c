@@ -2,9 +2,9 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "button_events.h"
 #include "JBXVTSelectionUnit.h"
-#include "libjb/JBDim.h"
 #include "command.h"
 #include "font.h"
+#include "libjb/JBDim.h"
 #include "mouse.h"
 #include "move.h"
 #include "sbar.h"
@@ -29,26 +29,31 @@ static void sbop(xcb_connection_t * xc, const int16_t y, const bool up)
 void jbxvt_handle_button_release_event(xcb_connection_t * xc,
 	xcb_button_release_event_t * e)
 {
-	const xcb_window_t w = e->event;
-	const struct JBDim b = {.x = e->event_x, .y = e->event_y};
-	const xcb_button_t d = e->detail;
-	if (w == jbxvt_get_scrollbar(xc))
-		switch (d) {
+	enum { SCROLL_INCREMENT = 64 };
+	const xcb_window_t window = e->event;
+	const xcb_button_t button = e->detail;
+	if (window == jbxvt_get_scrollbar(xc))
+		switch (button) {
 		case 1:
-		case 5:
-			sbop(xc, b.y, true);
+			sbop(xc, SCROLL_INCREMENT << 1, true);
 			break;
 		case 3:
+			sbop(xc, SCROLL_INCREMENT << 1, false);
+			break;
 		case 4:
-			sbop(xc, b.y, false);
+			sbop(xc, SCROLL_INCREMENT, false);
+			break;
+		case 5:
+			sbop(xc, SCROLL_INCREMENT, true);
 			break;
 		}
-	else if (jbxvt_get_mouse_tracked() && d <= 3)
+	else if (jbxvt_get_mouse_tracked() && button <= 3)
 		/* check less than or equal to 3, since xterm does not
 		   report mouse wheel release events.  */
-		jbxvt_track_mouse(d, e->state, b, JBXVT_RELEASE);
+		jbxvt_track_mouse(button, e->state, (struct JBDim){
+			.x = e->event_x, .y = e->event_y}, JBXVT_RELEASE);
 	else if (!(e->state & XCB_KEY_BUT_MASK_CONTROL)) {
-		switch (d) {
+		switch (button) {
 		case 1:
 		case 3:
 			jbxvt_make_selection(xc);
@@ -57,10 +62,10 @@ void jbxvt_handle_button_release_event(xcb_connection_t * xc,
 			jbxvt_request_selection(xc, e->time);
 			break;
 		case 4:
-			sbop(xc, b.y, false);
+			sbop(xc, SCROLL_INCREMENT, false);
 			break;
 		case 5:
-			sbop(xc, b.y, true);
+			sbop(xc, SCROLL_INCREMENT, true);
 			break;
 		}
 	}

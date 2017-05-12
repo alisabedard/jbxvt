@@ -1,5 +1,5 @@
 button_events.o: button_events.c button_events.h JBXVTSelectionUnit.h \
- libjb/JBDim.h command.h libjb/util.h font.h mouse.h move.h sbar.h \
+ command.h libjb/util.h font.h libjb/JBDim.h mouse.h move.h sbar.h \
  screen.h selection.h selex.h selreq.h window.h
 cases.o: cases.c
 change_selection.o: change_selection.c change_selection.h font.h gc.h \
