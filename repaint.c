@@ -70,6 +70,13 @@ static int show_history(xcb_connection_t * restrict xc, const int line,
 	p->y += font_size.height;
 	return show_history(xc, line + 1, top - 1, p, font_size, char_size);
 }
+static void draw_history_line(xcb_connection_t * xc, const int16_t y)
+{
+	const uint16_t width = jbxvt_get_pixel_size().width;
+	xcb_point_t onscreen_line[] = {{.y = y}, {.x = width, .y = y}};
+	xcb_poly_line(xc, XCB_COORD_MODE_ORIGIN, jbxvt_get_vt_window(xc),
+		jbxvt_get_cursor_gc(xc), 2, onscreen_line);
+}
 // Repaint the screen
 void jbxvt_repaint(xcb_connection_t * xc)
 {
@@ -79,18 +86,15 @@ void jbxvt_repaint(xcb_connection_t * xc)
 	      f = jbxvt_get_font_size();
 	if (chars.rows >= JBXVT_MAX_ROWS)
 		return; // invalid screen size, go no further.
-	/* Subtract 1 from scroll offset to get index.  */
+	// Subtract 1 from scroll offset to get index.
 	int line = show_history(xc, 0, jbxvt_get_scroll() - 1, &p, f, chars);
-	// Initialize onscreen_line here to save p.y:
-	const struct JBDim ps = jbxvt_chars_to_pixels(chars);
-	xcb_point_t onscreen_line[] = {{.y = p.y - 1},
-		{.x = ps.x, .y = p.y - 1}};
+	// Save the position where scroll history ends:
+	const int16_t history_end_y = p.y - 1;
 	// Do the remainder from the current screen:
 	struct JBXVTScreen * s = jbxvt_get_current_screen();
 	for (uint_fast16_t i = 0; line < chars.height;
 		++line, ++i, p.y += f.h)
 		paint(xc, s->line + i, p);
-	xcb_poly_line(xc, XCB_COORD_MODE_ORIGIN, jbxvt_get_vt_window(xc),
-		jbxvt_get_cursor_gc(xc), 2, onscreen_line);
+	draw_history_line(xc, history_end_y);
 	jbxvt_show_selection(xc);
 }
