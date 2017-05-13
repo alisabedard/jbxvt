@@ -84,7 +84,8 @@ void jbxvt_repaint(xcb_connection_t * xc)
 	line -= chars.height;
 	// Initialize onscreen_line here to save p.y:
 	const struct JBDim ps = jbxvt_chars_to_pixels(chars);
-	xcb_point_t onscreen_line[] = {{.y = p.y},{.x = ps.x, .y = p.y}};
+	xcb_point_t onscreen_line[] = {{.y = p.y - 1},
+		{.x = ps.x, .y = p.y - 1}};
 	// Do the remainder from the current screen:
 	struct JBXVTScreen * s = jbxvt_get_current_screen();
 	for (uint_fast16_t i = 0; line < chars.height;
