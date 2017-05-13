@@ -17,7 +17,7 @@ enum {	JBXVT_SCROLLBAR_WIDTH = 8, // width of scroll bar
 	JBXVT_MARGIN = 1, // gap between the text and the window edges
 	JBXVT_ROWS = 24, // default # rows
 	JBXVT_COLUMNS = 80, // default # columns
-	JBXVT_MAX_SCROLL = 200,
+	JBXVT_MAX_SCROLL = 1000,
 	// Set these to fit your display :
 	JBXVT_MAX_COLUMNS = 170, // max columns on screen
 	JBXVT_MAX_ROWS = 60, // max rows on screen
