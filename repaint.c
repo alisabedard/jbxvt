@@ -5,6 +5,7 @@
 #include "JBXVTScreen.h"
 #include "config.h"
 #include "font.h"
+#include "gc.h"
 #include "libjb/JBDim.h"
 #include "paint.h"
 #include "sbar.h"
@@ -12,6 +13,7 @@
 #include "scroll.h"
 #include "show_selection.h"
 #include "size.h"
+#include "window.h"
 static uint_fast16_t get_render_length(const rstyle_t * rvec,
 	const uint16_t len)
 {
@@ -79,10 +81,16 @@ void jbxvt_repaint(xcb_connection_t * xc)
 		return; // invalid screen size, go no further.
 	/* Subtract 1 from scroll offset to get index.  */
 	int line = show_history(xc, 0, jbxvt_get_scroll() - 1, &p, f, chars);
+	line -= chars.height;
+	// Initialize onscreen_line here to save p.y:
+	const struct JBDim ps = jbxvt_chars_to_pixels(chars);
+	xcb_point_t onscreen_line[] = {{.y = p.y},{.x = ps.x, .y = p.y}};
 	// Do the remainder from the current screen:
 	struct JBXVTScreen * s = jbxvt_get_current_screen();
 	for (uint_fast16_t i = 0; line < chars.height;
 		++line, ++i, p.y += f.h)
 		paint(xc, s->line + i, p);
+	xcb_poly_line(xc, XCB_COORD_MODE_ORIGIN, jbxvt_get_vt_window(xc),
+		jbxvt_get_cursor_gc(xc), 2, onscreen_line);
 	jbxvt_show_selection(xc);
 }
