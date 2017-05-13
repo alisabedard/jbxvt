@@ -82,7 +82,7 @@ static void draw_on_screen_lines(xcb_connection_t * xc, struct JBDim *
 {
 	struct JBXVTScreen * s = jbxvt_get_current_screen();
 	const uint8_t font_height = jbxvt_get_font_size().height;
-	for (uint_fast16_t i = 0; line < char_height;
+	for (uint_fast16_t i = 0; line <= char_height;
 		++line, ++i, position->y += font_height)
 		paint(xc, s->line + i, *position);
 }
