@@ -101,6 +101,7 @@ void jbxvt_repaint(xcb_connection_t * xc)
 	const int16_t history_end_y = p.y - 1;
 	// Do the remainder from the current screen:
 	draw_on_screen_lines(xc, &p, line, chars.height);
-	draw_history_line(xc, history_end_y);
+	if (history_end_y > 0)
+		draw_history_line(xc, history_end_y);
 	jbxvt_show_selection(xc);
 }
