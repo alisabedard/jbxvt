@@ -40,16 +40,6 @@ static void paint_RenderToken(xcb_connection_t * xc, struct RenderToken *
 			i = get_render_length(token->style, token->length),
 			token->position, token->is_double_width_line);
 }
-// Display the string using the render vector at the screen
-// coordinates.
-static void paint_rvec_text(xcb_connection_t * restrict xc,
-	uint8_t * restrict str, rstyle_t * restrict rvec, uint16_t len,
-	struct JBDim p, const bool dwl)
-{
-	struct RenderToken t = {.string = str, .style = rvec, .length = len,
-		.position = p, .is_double_width_line = dwl};
-	paint_RenderToken(xc, &t);
-}
 static uint8_t * filter(uint8_t * restrict t, register int_fast16_t i)
 {
 	while (--i >= 0)
@@ -58,10 +48,13 @@ static uint8_t * filter(uint8_t * restrict t, register int_fast16_t i)
 	return t;
 }
 static void paint(xcb_connection_t * xc, struct JBXVTLine * l,
-	const struct JBDim p)
+	const struct JBDim position)
 {
 	const uint16_t w = jbxvt_get_char_size().width;
-	paint_rvec_text(xc, filter(l->text, w), l->rend, w, p, l->dwl);
+	paint_RenderToken(xc, &(struct RenderToken){
+		.string = filter(l->text, w), .style =
+		l->rend, .length = w, .position = position,
+		.is_double_width_line = l->dwl});
 }
 static int show_history(xcb_connection_t * restrict xc, const int line,
 	const int top, struct JBDim * restrict p, const uint8_t font_height,
