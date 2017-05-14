@@ -64,6 +64,12 @@ struct HistoryContext {
 	uint16_t scroll_size;
 	uint8_t font_height, char_height;
 };
+static void increment_line(struct HistoryContext * restrict i)
+{
+	i->position->y += i->font_height;
+	++i->line;
+	--i->top;
+}
 static void show_history_r(struct HistoryContext * restrict i)
 {
 	if (i->scroll_size == 0)
@@ -81,9 +87,7 @@ static void show_history_r(struct HistoryContext * restrict i)
 	else // avoid function call and math overhead:
 		++i->line_data;
 	paint(i->xc, i->line_data, *i->position);
-	i->position->y += i->font_height;
-	++i->line;
-	--i->top;
+	increment_line(i);
 	return show_history_r(i);
 }
 static void draw_history_line(xcb_connection_t * xc, const int16_t y)
