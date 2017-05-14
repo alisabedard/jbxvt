@@ -47,8 +47,8 @@ static void paint(xcb_connection_t * xc, struct JBXVTLine * l,
 	const uint16_t w = jbxvt_get_char_size().width;
 	paint_rvec_text(xc, filter(l->text, w), l->rend, w, p, l->dwl);
 }
-static int32_t show_history(xcb_connection_t * restrict xc, const int32_t line,
-	const int32_t top, struct JBDim * restrict p, const uint8_t font_height,
+static int show_history(xcb_connection_t * restrict xc, const int line,
+	const int top, struct JBDim * restrict p, const uint8_t font_height,
 	const struct JBDim char_size)
 {
 	const uint16_t ss = jbxvt_get_scroll_size();
@@ -95,7 +95,7 @@ void jbxvt_repaint(xcb_connection_t * xc)
 		return; // invalid screen size, go no further.
 	struct JBDim p = {{0},{0}};
 	// Subtract 1 from scroll offset to get index.
-	int32_t line = show_history(xc, 0, jbxvt_get_scroll() - 1, &p,
+	int line = show_history(xc, 0, jbxvt_get_scroll() - 1, &p,
 		jbxvt_get_font_size().height, chars);
 	// Save the position where scroll history ends:
 	const int16_t history_end_y = p.y - 1;
