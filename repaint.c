@@ -57,7 +57,7 @@ static void paint(xcb_connection_t * xc, struct JBXVTLine * l,
 		l->rend, .length = w, .position = position,
 		.is_double_width_line = l->dwl});
 }
-struct HistoryIterator {
+struct HistoryContext {
 	xcb_connection_t * xc;
 	struct JBDim * position;
 	struct JBXVTLine * line_data;
@@ -65,7 +65,7 @@ struct HistoryIterator {
 	uint16_t scroll_size;
 	uint8_t font_height, char_height;
 };
-static int show_history_r(struct HistoryIterator * restrict i)
+static int show_history_r(struct HistoryContext * restrict i)
 {
 	if (i->scroll_size == 0)
 		i->scroll_size = jbxvt_get_scroll_size();
@@ -112,7 +112,7 @@ void jbxvt_repaint(xcb_connection_t * xc)
 		return; // invalid screen size, go no further.
 	struct JBDim p = {{0},{0}};
 	// Subtract 1 from scroll offset to get index.
-	const int line = show_history_r(&(struct HistoryIterator){.xc = xc,
+	const int line = show_history_r(&(struct HistoryContext){.xc = xc,
 		.position = &p, .font_height = jbxvt_get_font_size().height,
 		.char_height = chars.height, .top = jbxvt_get_scroll() - 1});
 	// Save the position where scroll history ends:
