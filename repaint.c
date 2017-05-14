@@ -14,31 +14,31 @@
 #include "show_selection.h"
 #include "size.h"
 #include "window.h"
-static uint_fast16_t get_render_length(const rstyle_t * rvec,
-	const uint16_t len)
-{
-	uint_fast16_t i = 0;
-	while (i < len && rvec[i] == rvec[0])
-		++i;
-	return i;
-}
 struct RenderToken {
 	uint8_t * string;
 	rstyle_t * style;
+	int length;
 	struct JBDim position;
-	uint16_t length;
 	const bool is_double_width_line;
 };
+static unsigned int get_length_of_style(struct RenderToken * restrict token)
+{
+	int i = 0;
+	while (i < token->length && token->style[i] ==
+		token->style[0])
+		++i;
+	return i;
+}
 // Display the string described by the RenderToken structure
 static void paint_RenderToken(xcb_connection_t * xc, struct RenderToken *
 	restrict token)
 {
 	const uint8_t font_width = jbxvt_get_font_size().width;
-	for (int i; token->length; token->length -= i, token->string += i,
+	for (int i; token->length > 0; token->length -= i, token->string += i,
 		token->style += i, token->position.x += i * font_width)
-		jbxvt_paint(xc, token->string, *token->style,
-			i = get_render_length(token->style, token->length),
-			token->position, token->is_double_width_line);
+		jbxvt_paint(xc, token->string, *token->style, i =
+			get_length_of_style(token), token->position,
+			token->is_double_width_line);
 }
 static uint8_t * filter(uint8_t * restrict t, register int_fast16_t i)
 {
