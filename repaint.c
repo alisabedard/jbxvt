@@ -7,6 +7,7 @@
 #include "font.h"
 #include "gc.h"
 #include "libjb/JBDim.h"
+#include "libjb/log.h"
 #include "paint.h"
 #include "sbar.h"
 #include "screen.h"
@@ -56,28 +57,35 @@ static void paint(xcb_connection_t * xc, struct JBXVTLine * l,
 		l->rend, .length = w, .position = position,
 		.is_double_width_line = l->dwl});
 }
-static int show_history(xcb_connection_t * restrict xc, const int line,
-	const int top, struct JBDim * restrict p, const uint8_t font_height,
-	const struct JBDim char_size)
+struct HistoryIterator {
+	xcb_connection_t * xc;
+	struct JBDim * position;
+	struct JBXVTLine * line_data;
+	int line, top;
+	uint16_t scroll_size;
+	uint8_t font_height, char_height;
+};
+static int show_history_r(struct HistoryIterator * restrict i)
 {
-	const uint16_t ss = jbxvt_get_scroll_size();
-	const uint8_t h = char_size.height;
-	/* Check  top + h vs ss so that the following pointer
-	 * arithmetic does not go outside array bounds.  */
-	if (top > ss)
-		return top;
-	/* This is the normal return condition of this recursive
-	 * function:  */
-	if (line >= h || top < 0)
-		return line;
-	/* Use screen character height as an offset into the scroll
-	 * history buffer, as indicated by variable h.  Use -1 to
-	 * convert size ss into an index.  Use top as the iterator.
-	 * */
-	struct JBXVTLine * l = jbxvt_get_saved_lines() + ss - top - 1;
-	paint(xc, l, *p);
-	p->y += font_height;
-	return show_history(xc, line + 1, top - 1, p, font_height, char_size);
+	if (i->scroll_size == 0)
+		i->scroll_size = jbxvt_get_scroll_size();
+	// This is the normal return condition of this recursive function:
+	if (i->top < 0)
+		return i->line;
+	/* Use i->top as the offset into the scroll history buffer, read from
+	 * bottom to top.  So we use the value of jbxvt_get_scroll_size() to
+	 * find the bottom of the buffer.  Then offset by -1 to base the index
+	 * on 0.  */
+	if (!i->line_data) // initialize once:
+		i->line_data = jbxvt_get_saved_lines() + i->scroll_size -
+			i->top - 1;
+	else // avoid function call and math overhead:
+		++i->line_data;
+	paint(i->xc, i->line_data, *i->position);
+	i->position->y += i->font_height;
+	++i->line;
+	--i->top;
+	return show_history_r(i);
 }
 static void draw_history_line(xcb_connection_t * xc, const int16_t y)
 {
@@ -104,8 +112,9 @@ void jbxvt_repaint(xcb_connection_t * xc)
 		return; // invalid screen size, go no further.
 	struct JBDim p = {{0},{0}};
 	// Subtract 1 from scroll offset to get index.
-	int line = show_history(xc, 0, jbxvt_get_scroll() - 1, &p,
-		jbxvt_get_font_size().height, chars);
+	const int line = show_history_r(&(struct HistoryIterator){.xc = xc,
+		.position = &p, .font_height = jbxvt_get_font_size().height,
+		.char_height = chars.height, .top = jbxvt_get_scroll() - 1});
 	// Save the position where scroll history ends:
 	const int16_t history_end_y = p.y - 1;
 	// Do the remainder from the current screen:
