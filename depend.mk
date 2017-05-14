@@ -56,8 +56,8 @@ move.o: move.c move.h JBXVTPrivateModes.h JBXVTScreen.h JBXVTLine.h \
 paint.o: paint.c paint.h libjb/JBDim.h color_index.h color.h libjb/xcb.h \
  double.h font.h gc.h libjb/log.h rstyle.h window.h xcb_screen.h
 repaint.o: repaint.c repaint.h JBXVTScreen.h JBXVTLine.h config.h \
- rstyle.h libjb/JBDim.h font.h paint.h sbar.h screen.h scroll.h \
- show_selection.h size.h
+ rstyle.h libjb/JBDim.h font.h gc.h paint.h sbar.h screen.h scroll.h \
+ show_selection.h size.h window.h
 request.o: request.c request.h JBXVTPrivateModes.h JBXVTToken.h \
  JBXVTTokenType.h command.h libjb/util.h cursor.h JBXVTScreen.h \
  JBXVTLine.h config.h rstyle.h libjb/JBDim.h screen.h libjb/log.h mode.h

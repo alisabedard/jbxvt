@@ -7,7 +7,6 @@
 #include "font.h"
 #include "gc.h"
 #include "libjb/JBDim.h"
-#include "libjb/log.h"
 #include "paint.h"
 #include "sbar.h"
 #include "screen.h"
@@ -65,13 +64,13 @@ struct HistoryContext {
 	uint16_t scroll_size;
 	uint8_t font_height, char_height;
 };
-static int show_history_r(struct HistoryContext * restrict i)
+static void show_history_r(struct HistoryContext * restrict i)
 {
 	if (i->scroll_size == 0)
 		i->scroll_size = jbxvt_get_scroll_size();
 	// This is the normal return condition of this recursive function:
 	if (i->top < 0)
-		return i->line;
+		return;
 	/* Use i->top as the offset into the scroll history buffer, read from
 	 * bottom to top.  So we use the value of jbxvt_get_scroll_size() to
 	 * find the bottom of the buffer.  Then offset by -1 to base the index
@@ -94,14 +93,13 @@ static void draw_history_line(xcb_connection_t * xc, const int16_t y)
 	xcb_poly_line(xc, XCB_COORD_MODE_ORIGIN, jbxvt_get_vt_window(xc),
 		jbxvt_get_cursor_gc(xc), 2, onscreen_line);
 }
-static void draw_on_screen_lines(xcb_connection_t * xc, struct JBDim *
-	restrict position, int line, const int char_height)
+// Display current lines after the rendered scroll history lines:
+static void draw_active_lines(struct HistoryContext * restrict c)
 {
-	struct JBXVTScreen * s = jbxvt_get_current_screen();
-	const uint8_t font_height = jbxvt_get_font_size().height;
-	for (uint_fast16_t i = 0; line <= char_height;
-		++line, ++i, position->y += font_height)
-		paint(xc, s->line + i, *position);
+	struct JBXVTLine * restrict line = jbxvt_get_current_screen()->line;
+	for (uint_fast16_t i = 0; c->line <= c->char_height;
+		++c->line, ++i, c->position->y += c->font_height)
+		paint(c->xc, line + i, *c->position);
 }
 // Repaint the screen
 void jbxvt_repaint(xcb_connection_t * xc)
@@ -112,13 +110,14 @@ void jbxvt_repaint(xcb_connection_t * xc)
 		return; // invalid screen size, go no further.
 	struct JBDim p = {{0},{0}};
 	// Subtract 1 from scroll offset to get index.
-	const int line = show_history_r(&(struct HistoryContext){.xc = xc,
+	struct HistoryContext history = {.xc = xc,
 		.position = &p, .font_height = jbxvt_get_font_size().height,
-		.char_height = chars.height, .top = jbxvt_get_scroll() - 1});
+		.char_height = chars.height, .top = jbxvt_get_scroll() - 1};
+	show_history_r(&history);
 	// Save the position where scroll history ends:
 	const int16_t history_end_y = p.y - 1;
 	// Do the remainder from the current screen:
-	draw_on_screen_lines(xc, &p, line, chars.height);
+	draw_active_lines(&history);
 	if (history_end_y > 0)
 		draw_history_line(xc, history_end_y);
 	jbxvt_show_selection(xc);
