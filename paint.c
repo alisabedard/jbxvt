@@ -24,9 +24,29 @@ static void draw_underline(xcb_connection_t * xc, uint16_t len,
 		(struct xcb_point_t[]){{p.x, p.y + offset},
 		{p.x + len * jbxvt_get_font_size().width, p.y + offset}});
 }
+static void handle_underline_styles(struct JBXVTPaintContext * c)
+{
+	xcb_connection_t * xc = c->xc;
+	const uint16_t len = c->length;
+	const rstyle_t rstyle = *c->style;
+	if (((rstyle & JBXVT_RS_ITALIC)
+		&& (jbxvt_get_italic_font(xc)
+		== jbxvt_get_normal_font(xc)))
+		|| (rstyle & JBXVT_RS_UNDERLINE))
+		draw_underline(xc, len, c->position, 0);
+	if (rstyle & JBXVT_RS_DOUBLE_UNDERLINE) {
+		draw_underline(xc, len, c->position, -2);
+		draw_underline(xc, len, c->position, 0);
+	}
+	/* Test against JBXVT_RS_BG_RGB here to prevent red background
+	   text from being rendered crossed out.  */
+	if (rstyle & JBXVT_RS_CROSSED_OUT && !(rstyle & JBXVT_RS_BG_RGB))
+		draw_underline(xc, len, c->position,
+			-(jbxvt_get_font_size().h >> 1));
+}
 static void draw_text(xcb_connection_t * xc,
 	uint8_t * restrict str, uint16_t len,
-	struct JBDim * restrict p, uint32_t rstyle)
+	struct JBDim * restrict p, rstyle_t rstyle)
 {
 	{ // vt, gc scope
 		/* Cache frequently used values
@@ -42,20 +62,8 @@ static void draw_text(xcb_connection_t * xc,
 			(const char *)str);
 	}
 	++p->y; // Padding for underline, use underline for italic
-	if (((rstyle & JBXVT_RS_ITALIC)
-		&& (jbxvt_get_italic_font(xc)
-		== jbxvt_get_normal_font(xc)))
-		|| (rstyle & JBXVT_RS_UNDERLINE))
-		draw_underline(xc, len, *p, 0);
-	if (rstyle & JBXVT_RS_DOUBLE_UNDERLINE) {
-		draw_underline(xc, len, *p, -2);
-		draw_underline(xc, len, *p, 0);
-	}
-	/* Test against JBXVT_RS_BG_RGB here to prevent red background
-	   text from being rendered crossed out.  */
-	if (rstyle & JBXVT_RS_CROSSED_OUT && !(rstyle & JBXVT_RS_BG_RGB))
-		draw_underline(xc, len, *p,
-			-(jbxvt_get_font_size().h >> 1));
+	handle_underline_styles(&(struct JBXVTPaintContext){.xc = xc,
+		.position = *p, .length = len, .style = &rstyle});
 }
 __attribute__((const))
 static uint16_t get_channel(const uint16_t compressed_rgb,
