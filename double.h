@@ -7,5 +7,5 @@
 void jbxvt_set_double_width_line(xcb_connection_t * xc,
 	const bool is_dwl);
 // Generate a double-width string.  Free the result!
-uint8_t * jbxvt_get_double_width_string(uint8_t * in_str, uint16_t * len);
+uint8_t * jbxvt_get_double_width_string(uint8_t * in_str, int * restrict len);
 #endif//!JBXVT_DOUBLE_H
