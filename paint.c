@@ -108,16 +108,22 @@ static void restore_colors(xcb_connection_t * restrict xc)
 	jbxvt_set_fg_pixel(xc, jbxvt_get_fg());
 	jbxvt_set_bg_pixel(xc, jbxvt_get_bg());
 }
-//  Paint the text using the rendition value at the screen position.
-static void jbxvt_paint_old(xcb_connection_t * xc, uint8_t * restrict str,
-	uint32_t rstyle, uint16_t len, struct JBDim p, const bool dwl)
+static bool is_reverse_video(const rstyle_t rs)
 {
+	return (rs & JBXVT_RS_RVID) || (rs & JBXVT_RS_BLINK);
+}
+void jbxvt_paint(struct JBXVTPaintContext * restrict c)
+{
+	/* Storage of p instead of using c->position directly fixes scroll
+	 * history display.  */
+	struct JBDim p = c->position;
+	const rstyle_t rstyle = *c->style;
 	// Check if there is nothing to render:
-	if (!str || len < 1 || rstyle & JBXVT_RS_INVISIBLE)
+	if (!c->string || c->length < 1 || rstyle & JBXVT_RS_INVISIBLE)
 		  return;
-	const bool rvid = (rstyle & JBXVT_RS_RVID)
-		|| (rstyle & JBXVT_RS_BLINK);
+	xcb_connection_t * xc = c->xc;
 	bool cmod = set_rstyle_colors(xc, rstyle);
+	const bool rvid = is_reverse_video(rstyle);
 	if (rvid) { // Reverse looked up colors.
 		jbxvt_set_reverse_video(xc);
 		cmod = true;
@@ -133,18 +139,13 @@ static void jbxvt_paint_old(xcb_connection_t * xc, uint8_t * restrict str,
 		font_mod = true;
 	}
 	// Draw text with background:
-	if (dwl) // remember to free returned string:
-		str = jbxvt_get_double_width_string(str, &len);
-	draw_text(xc, str, len, &p, rstyle);
-	if (dwl)
-		free(str);
+	if (c->is_double_width_line) // remember to free returned string:
+		c->string = jbxvt_get_double_width_string(c->string, &c->length);
+	draw_text(xc, c->string, c->length, &p, rstyle);
+	if (c->is_double_width_line)
+		free(c->string);
 	if (font_mod)
 		font(xc, jbxvt_get_normal_font(xc)); // restore font
 	if (cmod)
 		restore_colors(xc);
-}
-void jbxvt_paint(struct JBXVTPaintContext * restrict c)
-{
-	jbxvt_paint_old(c->xc, c->string, *c->style, c->length, c->position,
-		c->is_double_width_line);
 }
