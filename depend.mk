@@ -22,8 +22,8 @@ dec_reset.o: dec_reset.c dec_reset.h JBXVTPrivateModes.h JBXVTToken.h \
  move.h sbar.h scr_reset.h
 display.o: display.c display.h paint.h xcb_screen.h JBXVTOptions.h \
  libjb/JBDim.h color.h libjb/xcb.h font.h gc.h window.h
-double.o: double.c double.h JBXVTLine.h config.h rstyle.h cursor.h \
- JBXVTScreen.h libjb/JBDim.h screen.h repaint.h
+double.o: double.c double.h cursor.h JBXVTScreen.h JBXVTLine.h config.h \
+ rstyle.h libjb/JBDim.h screen.h repaint.h
 dsr.o: dsr.c dsr.h command.h libjb/util.h cursor.h JBXVTScreen.h \
  JBXVTLine.h config.h rstyle.h libjb/JBDim.h screen.h libjb/log.h mode.h
 edit.o: edit.c edit.h cursor.h JBXVTScreen.h JBXVTLine.h config.h \
