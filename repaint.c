@@ -2,11 +2,11 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
 #include "repaint.h"
+#include "JBXVTPaintContext.h"
 #include "JBXVTScreen.h"
 #include "config.h"
 #include "font.h"
 #include "gc.h"
-#include "libjb/JBDim.h"
 #include "paint.h"
 #include "sbar.h"
 #include "screen.h"
@@ -14,14 +14,7 @@
 #include "show_selection.h"
 #include "size.h"
 #include "window.h"
-struct RenderToken {
-	uint8_t * string;
-	rstyle_t * style;
-	int length;
-	struct JBDim position;
-	const bool is_double_width_line;
-};
-static unsigned int get_length_of_style(struct RenderToken * restrict token)
+static unsigned int get_length_of_style(struct JBXVTPaintContext * restrict token)
 {
 	int i = 0;
 	while (i < token->length && token->style[i] ==
@@ -29,16 +22,15 @@ static unsigned int get_length_of_style(struct RenderToken * restrict token)
 		++i;
 	return i;
 }
-// Display the string described by the RenderToken structure
-static void paint_RenderToken(xcb_connection_t * xc, struct RenderToken *
-	restrict token)
+// Display the string described by the JBXVTPaintContext structure
+static void paint_JBXVTPaintContext(struct JBXVTPaintContext * restrict token)
 {
 	const uint8_t font_width = jbxvt_get_font_size().width;
 	for (int i; token->length > 0; token->length -= i, token->string += i,
-		token->style += i, token->position.x += i * font_width)
-		jbxvt_paint(xc, token->string, *token->style, i =
-			get_length_of_style(token), token->position,
-			token->is_double_width_line);
+		token->style += i, token->position.x += i * font_width) {
+		i = get_length_of_style(token);
+		jbxvt_paint(token);
+	}
 }
 static uint8_t * filter(uint8_t * restrict t, register int_fast16_t i)
 {
@@ -51,10 +43,9 @@ static void paint(xcb_connection_t * xc, struct JBXVTLine * l,
 	const struct JBDim position)
 {
 	const uint16_t w = jbxvt_get_char_size().width;
-	paint_RenderToken(xc, &(struct RenderToken){
-		.string = filter(l->text, w), .style =
-		l->rend, .length = w, .position = position,
-		.is_double_width_line = l->dwl});
+	paint_JBXVTPaintContext(&(struct JBXVTPaintContext){ .xc = xc,
+		.string = filter(l->text, w), .style = l->rend, .length = w,
+		.position = position, .is_double_width_line = l->dwl});
 }
 struct HistoryContext {
 	xcb_connection_t * xc;

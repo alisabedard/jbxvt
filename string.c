@@ -6,18 +6,17 @@
 #include "string.h"
 #include <string.h>
 #include "JBXVTLine.h"
+#include "JBXVTPaintContext.h"
 #include "JBXVTPrivateModes.h"
 #include "JBXVTScreen.h"
 #include "cursor.h"
 #include "font.h"
 #include "gc.h"
-#include "libjb/JBDim.h"
 #include "libjb/log.h"
 #include "libjb/macros.h"
 #include "libjb/time.h"
 #include "mode.h"
 #include "paint.h"
-#include "rstyle.h"
 #include "sbar.h"
 #include "screen.h"
 #include "scroll.h"
@@ -228,9 +227,13 @@ void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str, uint_fast16_t
 				}
 				// Render the string:
 				if (!screen->decpm) {
-					jbxvt_paint(xc, str,
-						jbxvt_get_rstyle(), 1, p,
-						screen->line[c->y].dwl);
+					jbxvt_paint(&(struct
+						JBXVTPaintContext){.xc = xc,
+						.string = str, .style =
+						&(rstyle_t){jbxvt_get_rstyle()},
+						.length = 1, .position = p,
+						.is_double_width_line =
+						screen->line[c->y].dwl});
 					// Save scroll history:
 					*t = *str;
 				}

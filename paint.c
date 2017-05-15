@@ -3,15 +3,13 @@
 //#undef DEBUG
 #include "paint.h"
 #include <stdlib.h>
-#include "libjb/JBDim.h"
-#include "color_index.h"
+#include "JBXVTPaintContext.h"
 #include "color.h"
+#include "color_index.h"
 #include "double.h"
 #include "font.h"
 #include "gc.h"
 #include "libjb/log.h"
-#include "libjb/xcb.h" // for jb_get_rgb_pixel, pixel_t
-#include "rstyle.h"
 #include "window.h"
 #include "xcb_screen.h"
 static inline void font(xcb_connection_t * xc, const xcb_font_t f)
@@ -111,7 +109,7 @@ static void restore_colors(xcb_connection_t * restrict xc)
 	jbxvt_set_bg_pixel(xc, jbxvt_get_bg());
 }
 //  Paint the text using the rendition value at the screen position.
-void jbxvt_paint(xcb_connection_t * xc, uint8_t * restrict str,
+static void jbxvt_paint_old(xcb_connection_t * xc, uint8_t * restrict str,
 	uint32_t rstyle, uint16_t len, struct JBDim p, const bool dwl)
 {
 	// Check if there is nothing to render:
@@ -144,4 +142,9 @@ void jbxvt_paint(xcb_connection_t * xc, uint8_t * restrict str,
 		font(xc, jbxvt_get_normal_font(xc)); // restore font
 	if (cmod)
 		restore_colors(xc);
+}
+void jbxvt_paint(struct JBXVTPaintContext * restrict c)
+{
+	jbxvt_paint_old(c->xc, c->string, *c->style, c->length, c->position,
+		c->is_double_width_line);
 }
