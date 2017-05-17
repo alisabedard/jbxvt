@@ -35,6 +35,7 @@ void jbxvt_handle_JBXVT_TOKEN_ELR(void * xc __attribute__((unused)),
 	case 2:
 		LOG("ELR Once");
 		m->elr_once = true;
+		// FALLTHROUGH
 	case 1:
 		LOG("ELR Mode");
 		m->elr = true;
