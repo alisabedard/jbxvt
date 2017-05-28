@@ -116,8 +116,9 @@ static void cleanup(void)
 #ifdef USE_UTEMPTER
 	utempter_remove_added_record();
 #endif//USE_UTEMPTER
-	// Make sure child process exits
-	kill(command_pid, SIGHUP);
+	// Force the child to terminate.
+	kill(command_pid, SIGTERM);
+	// Wait for it.
 	wait(NULL);
 }
 static void child(char ** restrict argv, fd_t ttyfd)
