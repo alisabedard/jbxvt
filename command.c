@@ -1,7 +1,7 @@
 /* Copyright 2017, Jeffrey E. Bedard
    Copyright 1992-94, 1997 John Bovey,
    University of Kent at Canterbury. */
-#undef DEBUG
+//#undef DEBUG
 #include "command.h"
 #include <fcntl.h>
 #include <signal.h>
@@ -110,6 +110,16 @@ static void redir(const fd_t target, const fd_t ttyfd)
 	close(target);
 	fcntl(ttyfd, F_DUPFD, 0);
 }
+static void cleanup(void)
+{
+	LOG("cleanup(), pid: %d, command pid: %d", getpid(), command_pid);
+#ifdef USE_UTEMPTER
+	utempter_remove_added_record();
+#endif//USE_UTEMPTER
+	// Make sure child process exits
+	kill(command_pid, SIGHUP);
+	wait(NULL);
+}
 static void child(char ** restrict argv, fd_t ttyfd)
 {
 #if !defined(NETBSD) && !defined(OPENBSD)
@@ -151,33 +161,11 @@ void jbxvt_set_tty_size(const struct JBDim sz)
 		"Could not set ioctl TIOCSWINSZ");
 }
 #endif//etc
-static void cleanup(void)
-{
-	LOG("cleanup(), pid: %d, command pid: %d", getpid(), command_pid);
-#ifdef USE_UTEMPTER
-	utempter_remove_added_record();
-#endif//USE_UTEMPTER
-	// Make sure child process exits
-	kill(command_pid, SIGHUP);
-	wait(NULL);
-}
-#if defined(NETBSD) || defined(OPENBSD)
-static void bsd_sigchld(int sig __attribute__((unused)))
-{
-	static bool called;
-	if (!called)
-		called = true;
-	else
-		exit(0);
-}
-#else
 static void sigchld(int sig __attribute__((unused)))
 {
 	LOG("The child process has exited");
 	wait(NULL);
-	exit(0);
 }
-#endif//NETBSD||OPENBSD
 static void attach_signals(void)
 {
 	// Attach relevant signals to ensure cleanup() executed:
@@ -185,11 +173,7 @@ static void attach_signals(void)
 	signal(SIGINT, exit);
 	signal(SIGPIPE, exit);
 	signal(SIGTERM, exit);
-#if defined(NETBSD) || defined(OPENBSD)
-	signal(SIGCHLD, bsd_sigchld);
-#else//!NETBSD&&!OPENBSD
 	signal(SIGCHLD, sigchld);
-#endif//NETBSD||OPENBSD
 	// Attach exit handler cleanup().
 	atexit(cleanup);
 }
