@@ -13,6 +13,7 @@ CFLAGS+=-fsanitize=bool
 CFLAGS+=-fsanitize=enum
 CFLAGS+=-fsanitize=undefined
 CFLAGS+=-ftrapv
+CFLAGS+=-Wimplicit-fallthrough=0
 CFLAGS+=-Wsuggest-attribute=pure
 CFLAGS+=-Wsuggest-attribute=const
 CFLAGS+=-Wsuggest-attribute=noreturn
