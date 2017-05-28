@@ -118,8 +118,6 @@ static void cleanup(void)
 #endif//USE_UTEMPTER
 	// Force the child to terminate.
 	kill(command_pid, SIGTERM);
-	// Wait for it.
-	wait(NULL);
 }
 static void child(char ** restrict argv, fd_t ttyfd)
 {
