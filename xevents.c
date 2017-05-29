@@ -20,7 +20,7 @@
 static unsigned long wm_del_win(xcb_connection_t * xc)
 {
 	static unsigned long a;
-	if(!a) { // Init on first call:
+	if (!a) { // Init on first call:
 		a = jb_get_atom(xc, "WM_DELETE_WINDOW");
 		xcb_change_property(xc, XCB_PROP_MODE_REPLACE,
 			jbxvt_get_main_window(xc),
@@ -32,8 +32,12 @@ static unsigned long wm_del_win(xcb_connection_t * xc)
 static void handle_client_message(xcb_connection_t * xc,
 	xcb_client_message_event_t * e)
 {
-	if (e->format == 32 && e->data.data32[0] == wm_del_win(xc))
+	if (e->format == 32 && e->data.data32[0] == wm_del_win(xc)) {
+		LOG("WM_DEL_WIN");
 		exit(0);
+	} else {
+		LOG("not WM_DEL_WIN");
+	}
 }
 static void handle_expose(xcb_connection_t * xc,
 	xcb_expose_event_t * e)
@@ -98,20 +102,21 @@ static void handle_selection_request(xcb_connection_t * xc,
 bool jbxvt_handle_xevents(xcb_connection_t * xc)
 {
 	jb_check_x(xc);
+	static bool init;
+	if (!init) {
+		// Set up the wm_del_win property here.
+		wm_del_win(xc);
+	}
 	xcb_generic_event_t * event = xcb_poll_for_event(xc);
 	if (!event) // nothing to process
 		return false;
 	bool ret = true;
 	switch (event->response_type & ~0x80) {
-	case XCB_MAP_NOTIFY: // handle here to ensure cursor filled.
-		// Set up the wm_sel_win property here.
-		wm_del_win(xc);
-		ret = false;
-		break;
-		// Put things to ignore here:
+	// Put things to ignore here:
 	case 0: // Unimplemented, undefined, no event
 	case 150: // Undefined
 	case XCB_KEY_RELEASE: // Unimplemented
+	case XCB_MAP_NOTIFY:
 	case XCB_NO_EXPOSURE: // Unimplemented
 	case XCB_REPARENT_NOTIFY: // handle here to ensure cursor filled.
 		ret = false;
