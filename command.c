@@ -116,8 +116,8 @@ static void cleanup(void)
 #ifdef USE_UTEMPTER
 	utempter_remove_added_record();
 #endif//USE_UTEMPTER
-	// Force the child to terminate.
-	kill(command_pid, SIGTERM);
+	kill(command_pid, SIGHUP); // we are hanging up
+	wait(NULL); // wait on the child
 }
 static void child(char ** restrict argv, fd_t ttyfd)
 {
@@ -191,10 +191,12 @@ static fd_t run_command(char ** argv)
 #endif//POSIX_UTMPX
 	jb_check(fcntl(ptyfd, F_SETFL, O_NONBLOCK) != 1,
 		"Could not set file status flags on pty file descriptor");
-	attach_signals();
+	//attach_signals();
 	jb_require((command_pid = fork()) >= 0, "Could not start session");
 	if (command_pid == 0)
 		child(argv, ttyfd);
+	else
+		attach_signals();
 #ifdef POSIX_UTMPX
 	write_utmpx(command_pid, tty_name);
 #endif//POSIX_UTMPX
