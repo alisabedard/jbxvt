@@ -164,6 +164,7 @@ static void sigchld(int sig __attribute__((unused)))
 {
 	LOG("The child process has exited");
 	wait(NULL);
+	exit(0);
 }
 static void attach_signals(void)
 {
