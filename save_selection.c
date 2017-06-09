@@ -68,5 +68,6 @@ void jbxvt_save_selection(struct JBXVTSelectionData * sel)
 		} else
 			last_was_cr = false;
 	sel->text = str = realloc(str, total);
-	str[sel->length = --total] = 0; // null termination
+	if (str && total > 0) // avoid segmentation fault if total is invalid
+		str[sel->length = --total] = 0; // null termination
 }
