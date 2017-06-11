@@ -39,7 +39,9 @@ void jbxvt_save_selection(struct JBXVTSelectionData * sel)
 	// properly order start and end points:
 	struct JBDim e[] = {sel->end[fwd ? 0 : 1],
 		sel->end[fwd ? 1 : 0]};
-	uint16_t total = 1;
+	/* Use a normal int type for total to avoid overflow and failure to
+	 * detect decrement below 0. */
+	int total = 1;
 	uint8_t * str = malloc(total);
 	// Make sure the selection falls within the screen area:
 	if (is_not_on_screen(e))
