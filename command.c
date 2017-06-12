@@ -94,9 +94,10 @@ static void set_ttymodes(void)
 	//  Set the terminal using the standard System V termios interface
 	static struct termios term = {
 		.c_iflag = BRKINT | IGNPAR | ICRNL | IXON,
-		.c_oflag = OPOST | ONLCR, .c_cflag = B38400 | CREAD
-			| CLOCAL | CS8, .c_lflag = ISIG | IEXTEN
-			| ICANON | ECHO | ECHOE | ECHOK | ECHONL,
+		.c_oflag = OPOST | ONLCR,
+		.c_cflag = B38400 | CREAD | CS8,
+		.c_lflag = ISIG | IEXTEN | ICANON | ECHO
+			| ECHOE | ECHOK | ECHONL,
 		.c_cc = {[VINTR] = 003, [VQUIT] = 034, [VERASE] = 0177,
 			[VKILL] = 025, [VEOF] = 04, [VEOL] = 013,
 			[VSTART] = 021, [VSTOP] = 023, [VSUSP] = 032,
