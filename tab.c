@@ -45,8 +45,9 @@ void jbxvt_tab(xcb_connection_t * xc, const short count)
 		text[c.x] = ' ';
 		{ // cw scope
 			const uint16_t cw = jbxvt_get_char_size().w;
+			// Advance to the next valid tab stop
 			while (!tab_stops[++c.x] && c.x < cw)
-				text[c.x] = ' ';
+				;
 		}
 	}
 	scr->cursor.x = c.x;
