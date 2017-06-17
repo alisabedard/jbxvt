@@ -12,19 +12,26 @@
 #include "dcs.h"
 #include "mode.h"
 #include "screen.h"
+struct NumericArgument {
+	int16_t value, character;
+};
+struct NumericArgument accumulate(const struct NumericArgument a,
+	xcb_connection_t * restrict xc)
+{
+	const int16_t c = a.character;
+	return (c >= '0' && c <= '9') ? accumulate( (struct
+		NumericArgument){.value = a.value * 10 + c - '0',
+		.character = jbxvt_pop_char(xc, 0)}, xc) : a;
+}
 static int_fast16_t read_numeric_argument(xcb_connection_t * restrict xc,
 	struct JBXVTToken * restrict tk, uint_fast16_t * restrict i,
 	int_fast16_t c)
 {
-	uint_fast16_t n = 0;
-	while (c >= '0' && c <= '9') { // is a number
-		// Advance position and convert
-		n = n * 10 + c - '0';
-		c = jbxvt_pop_char(xc, 0); // next digit
-	}
+	const struct NumericArgument a = accumulate(
+		(struct NumericArgument){.character = c}, xc);
 	if (*i < JBXVT_TOKEN_MAX_ARGS)
-		tk->arg[(*i)++] = n;
-	return c;
+		tk->arg[(*i)++] = a.value;
+	return a.character;
 }
 void jbxvt_csi(xcb_connection_t * xc,
 	int_fast16_t c, struct JBXVTToken * restrict tk)
