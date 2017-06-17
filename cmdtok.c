@@ -57,7 +57,7 @@ static void poll_io(xcb_connection_t * xc,
 	else
 		jbxvt_blink_cursor(xc);
 }
-static bool get_buffered(int_fast16_t * val, const uint8_t flags)
+static bool get_buffered(int16_t * val, const uint8_t flags)
 {
 	if (cmdtok_stack.top > cmdtok_stack.data)
 		*val = *--cmdtok_stack.top;
@@ -76,9 +76,9 @@ static bool get_buffered(int_fast16_t * val, const uint8_t flags)
     is returned.  If flags and GET_XEVENTS_ONLY is true, then
     INPUT_BUFFER_EMPTY is returned when an X event arrives.
     This is the most often called function. */
-int_fast16_t jbxvt_pop_char(xcb_connection_t * xc, const uint8_t flags)
+int16_t jbxvt_pop_char(xcb_connection_t * xc, const uint8_t flags)
 {
-	int_fast16_t ret = 0;
+	int16_t ret = 0;
 	if (get_buffered(&ret, flags))
 		return ret;
 	xcb_flush(xc);
@@ -99,25 +99,24 @@ int_fast16_t jbxvt_pop_char(xcb_connection_t * xc, const uint8_t flags)
 }
 /*  Return true if the character is one
     that can be handled by jbxvt_string() */
-static inline bool is_string_char(register int_fast16_t c)
+static inline bool is_string_char(register int16_t c)
 {
 	return c < 0x7f && (c >= ' ' || c == '\n'
 		|| c == '\r' || c == '\t');
 }
 static void handle_string_char(xcb_connection_t * xc,
-	int_fast16_t c, struct JBXVTToken * restrict tk)
+	int16_t c, struct JBXVTToken * restrict tk)
 {
 	tk->type = JBXVT_TOKEN_STRING;
 	{ // i scope, s scope
-		uint_fast16_t i = 0;
+		int i = 0;
 		uint8_t * restrict s = tk->string;
 		{ // nl scope
-			uint_fast16_t nl = 0;
+			int nl = 0;
 			do {
-				s[i++] = c;
-				c = jbxvt_pop_char(xc, GET_INPUT_ONLY);
-				if (c == '\n')
+				if ((s[i++] = c) == '\n')
 					++nl;
+				c = jbxvt_pop_char(xc, GET_INPUT_ONLY);
 			} while (is_string_char(c)
 				&& i < JBXVT_TOKEN_MAX_LENGTH);
 			tk->nlcount = nl;
@@ -129,7 +128,7 @@ static void handle_string_char(xcb_connection_t * xc,
 		jbxvt_push_char(c);
 }
 static void default_token(xcb_connection_t * xc,
-	struct JBXVTToken * restrict tk, int_fast16_t c)
+	struct JBXVTToken * restrict tk, int16_t c)
 {
 	switch(c) { // handle 8-bit controls
 	case JBXVT_TOKEN_CSI: case JBXVT_TOKEN_DCS: case JBXVT_TOKEN_EPA:
@@ -173,7 +172,7 @@ static void default_token(xcb_connection_t * xc,
 void jbxvt_get_token(xcb_connection_t * xc, struct JBXVTToken * restrict tk)
 {
 	memset(tk, 0, sizeof(struct JBXVTToken));
-	const int_fast16_t c = jbxvt_pop_char(xc, GET_XEVENTS_ONLY);
+	const int16_t c = jbxvt_pop_char(xc, GET_XEVENTS_ONLY);
 	switch (c) {
 	case INPUT_BUFFER_EMPTY:
 		tk->type = JBXVT_TOKEN_NULL;
