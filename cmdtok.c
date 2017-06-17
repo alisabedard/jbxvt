@@ -81,7 +81,7 @@ int16_t jbxvt_pop_char(xcb_connection_t * xc, const uint8_t flags)
 	int16_t ret = 0;
 	if (get_buffered(&ret, flags))
 		return ret;
-	xcb_flush(xc);
+	xcb_flush(xc); // This is the primary xcb queue force
 	fd_set in;
 	do {
 		FD_ZERO(&in);
