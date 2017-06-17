@@ -6,9 +6,9 @@
 #include <xcb/xcb.h>
 struct JBXVTToken;
 void jbxvt_csi(xcb_connection_t * xc,
-	int_fast16_t c, struct JBXVTToken * restrict tk);
+	int16_t c, struct JBXVTToken * restrict tk);
 void jbxvt_end_cs(xcb_connection_t * xc,
-	int_fast16_t c, struct JBXVTToken * restrict tk);
+	int16_t c, struct JBXVTToken * restrict tk);
 void jbxvt_esc(xcb_connection_t * xc,
-	int_fast16_t c, struct JBXVTToken * restrict tk);
+	int16_t c, struct JBXVTToken * restrict tk);
 #endif//!JBXVT_ESC_H

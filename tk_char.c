@@ -44,7 +44,7 @@ void jbxvt_handle_tk_char(xcb_connection_t * xc, const uint8_t tk_char)
 			| JBXVT_ROW_RELATIVE);
 		break;
 	case '\t': // handle tab
-		jbxvt_tab(xc);
+		jbxvt_tab(xc, 1);
 		break;
 	case 005: // ENQ
 		dprintf(jbxvt_get_fd(), "%s?6c", jbxvt_get_csi()); // VT102

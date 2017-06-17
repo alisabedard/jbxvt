@@ -123,7 +123,7 @@ static bool test_action_char(xcb_connection_t * xc, const uint8_t c,
 		wrap(xc);
 		return true;
 	case '\t':
-		jbxvt_tab(xc);
+		jbxvt_tab(xc, 1);
 		return true;
 	}
 	return false;

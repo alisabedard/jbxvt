@@ -12,22 +12,31 @@
 #include "sbar.h"
 #include "size.h"
 static bool tab_stops[JBXVT_MAX_COLUMNS];
+// establish tab stop every 8 columns
+static void reset_tabs(const short i)
+{
+	if (i < JBXVT_MAX_COLUMNS) {
+		tab_stops[i] = (i % 8 == 0);
+		reset_tabs(i + 1);
+	}
+}
 // Set tab stops:
 // -1 clears all, -2 sets default
-void jbxvt_set_tab(int16_t i, const bool value)
+void jbxvt_set_tab(short i, const bool value)
 {
 	if (i == -1) // clear all
 		memset(&tab_stops, 0, JBXVT_MAX_COLUMNS);
-	else if (i == -2) // establish tab stop every 8 columns
-		for (i = 0; i < JBXVT_MAX_COLUMNS; ++i)
-			tab_stops[i] = (i % 8 == 0);
+	else if (i == -2)
+		reset_tabs(0);
 	else if (i >= 0) // assign
 		tab_stops[i] = value;
 }
 //  Tab to the next tab_stop.
-void jbxvt_tab(xcb_connection_t * xc)
+void jbxvt_tab(xcb_connection_t * xc, const short count)
 {
 	LOG("jbxvt_tab()");
+	if (count < 1)
+		return;
 	jbxvt_set_scroll(xc, 0);
 	struct JBXVTScreen * restrict scr = jbxvt_get_current_screen();
 	struct JBDim c = scr->cursor;
@@ -41,11 +50,7 @@ void jbxvt_tab(xcb_connection_t * xc)
 		}
 	}
 	scr->cursor.x = c.x;
-}
-void jbxvt_cht(xcb_connection_t * xc, int16_t v)
-{
-	while (v-- > 0)
-		jbxvt_tab(xc);
+	jbxvt_tab(xc, count - 1);
 }
 // Handle DECTBC:
 void jbxvt_handle_JBXVT_TOKEN_TBC(void * xc __attribute__((unused)),

@@ -90,9 +90,9 @@ HANDLE(CHAR)
 {
 	jbxvt_handle_tk_char(xc, token->tk_char);
 }
-HANDLE(CHT) // change tab stop
+HANDLE(CHT) // Cursor Horizontal Tab
 {
-	jbxvt_cht(xc, get_arg(token));
+	jbxvt_tab(xc, get_arg(token));
 }
 HANDLE(CPL) // cursor previous line
 {

@@ -23,9 +23,9 @@ struct NumericArgument accumulate(const struct NumericArgument a,
 		NumericArgument){.value = a.value * 10 + c - '0',
 		.character = jbxvt_pop_char(xc, 0)}, xc) : a;
 }
-static int_fast16_t read_numeric_argument(xcb_connection_t * restrict xc,
-	struct JBXVTToken * restrict tk, uint_fast16_t * restrict i,
-	int_fast16_t c)
+static int16_t read_numeric_argument(xcb_connection_t * restrict xc,
+	struct JBXVTToken * restrict tk, uint16_t * restrict i,
+	int16_t c)
 {
 	const struct NumericArgument a = accumulate(
 		(struct NumericArgument){.character = c}, xc);
@@ -34,7 +34,7 @@ static int_fast16_t read_numeric_argument(xcb_connection_t * restrict xc,
 	return a.character;
 }
 void jbxvt_csi(xcb_connection_t * xc,
-	int_fast16_t c, struct JBXVTToken * restrict tk)
+	int16_t c, struct JBXVTToken * restrict tk)
 {
 	c = jbxvt_pop_char(xc, 0);
 	if (c >= '<' && c <= '?') {
@@ -42,7 +42,7 @@ void jbxvt_csi(xcb_connection_t * xc,
 		c = jbxvt_pop_char(xc, 0);
 	}
 	//  read any numerical arguments
-	uint_fast16_t i = 0;
+	uint16_t i = 0;
 	do {
 		c = read_numeric_argument(xc, tk, &i, c);
 		if (c == JBXVT_TOKEN_ESC)
@@ -58,10 +58,10 @@ void jbxvt_csi(xcb_connection_t * xc,
 	tk->type = c;
 }
 void jbxvt_end_cs(xcb_connection_t * xc,
-	int_fast16_t c, struct JBXVTToken * restrict tk)
+	int16_t c, struct JBXVTToken * restrict tk)
 {
 	c = jbxvt_pop_char(xc, 0);
-	uint_fast16_t n = 0;
+	uint16_t n = 0;
 	while (c >= '0' && c <= '9') {
 		n = n * 10 + c - '0';
 		c = jbxvt_pop_char(xc, 0);
@@ -69,7 +69,7 @@ void jbxvt_end_cs(xcb_connection_t * xc,
 	tk->arg[0] = n;
 	tk->nargs = 1;
 	c = jbxvt_pop_char(xc, 0);
-	register uint_fast16_t i = 0;
+	register uint16_t i = 0;
 	while ((c & 0177) >= ' ' && i < JBXVT_TOKEN_MAX_LENGTH) {
 		if (c >= ' ')
 			tk->string[i++] = c;
@@ -80,7 +80,7 @@ void jbxvt_end_cs(xcb_connection_t * xc,
 	tk->type = JBXVT_TOKEN_TXTPAR;
 }
 void jbxvt_esc(xcb_connection_t * xc,
-	int_fast16_t c, struct JBXVTToken * restrict tk)
+	int16_t c, struct JBXVTToken * restrict tk)
 {
 	c = jbxvt_pop_char(xc, 0);
 	switch(c) {
