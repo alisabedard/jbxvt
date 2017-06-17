@@ -6,7 +6,6 @@
 #include <string.h>
 #include <unistd.h>
 #include "JBXVTToken.h"
-#include "JBXVTTokenType.h"
 #include "command.h"
 #include "cursor.h"
 #include "dcs.h"

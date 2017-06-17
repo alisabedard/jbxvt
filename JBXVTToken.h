@@ -3,7 +3,7 @@
 #ifndef JBXVT_JBXVTTOKEN_H
 #define JBXVT_JBXVTTOKEN_H
 #include <stdint.h>
-#include "JBXVTTokenType.h"
+#include "JBXVTTokenIndex.h"
 enum { JBXVT_TOKEN_MAX_LENGTH = 63, JBXVT_TOKEN_MAX_ARGS = 8 };
 /*  Structure used to represent a piece of input from the program
  *  or an interesting X event.  */
@@ -12,7 +12,7 @@ struct JBXVTToken{
 	int16_t arg[JBXVT_TOKEN_MAX_ARGS];
 	// text for string tokens:
 	uint8_t string[JBXVT_TOKEN_MAX_LENGTH + 1];
-	enum JBXVTTokenType type;
+	enum JBXVTTokenIndex type;
 	union {
 		// non-zero for private control sequences:
 		uint8_t private;

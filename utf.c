@@ -1,7 +1,6 @@
 // Copyright 2016-2017, Jeffrey E. Bedard
 #include "utf.h"
 #include "JBXVTToken.h"
-#include "JBXVTTokenType.h"
 #include "cmdtok.h"
 #include "libjb/log.h"
 // Returns the number of additional bytes in the UTF encoded character

@@ -2,11 +2,10 @@
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "dcs.h"
 #include "JBXVTToken.h"
-#include "JBXVTTokenType.h"
 #include "cmdtok.h"
 #include "libjb/log.h"
 static void check_st(xcb_connection_t * xc, struct JBXVTToken * t,
-	const enum JBXVTTokenType new_type)
+	const enum JBXVTTokenIndex new_type)
 {
 	int_fast16_t c = jbxvt_pop_char(xc, 0);
 	if (c != JBXVT_TOKEN_ST)
