@@ -1,9 +1,11 @@
 /*  Copyright 2017, Jeffrey E. Bedard
-    Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
+    Copyright 1992, 1997 John Bovey,
+    University of Kent at Canterbury.*/
 #ifndef JBXVT_TOKENTYPE_H
 #define JBXVT_TOKENTYPE_H
 // Reference man console_codes(4) and ctlseqs(ms)
 //  struct JBXVTToken types
+#if 0
 enum JBXVTTokenType {
 	JBXVT_TOKEN_NULL = 0, // null token to be ignored
 	// Tokens > 1000 are artificial.
@@ -131,4 +133,7 @@ enum JBXVTTokenType {
 	JBXVT_TOKEN_PM = 0x9e,	// Privacy message (ended by ESC \ (ST))
 	JBXVT_TOKEN_APC = 0x9f
 };
+#endif
+#include "JBXVTTokenIndex.h"
+#define JBXVTTokenType JBXVTTokenIndex
 #endif//!JBXVT_TOKENTYPE_H

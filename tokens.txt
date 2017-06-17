@@ -1,0 +1,112 @@
+ALN:x:screen alignment test (E-fill)
+ANSI1:x:ANSI conformance level 1
+ANSI2:x:ANSI conformance level 2
+ANSI3:x:ANSI conformance level 3
+APC:0x9f
+CHA:'G':cursor CHaracter Absolute column
+CHAR:x:single character
+CHT:0x49:cursor horizontal tab
+CNL:'E':cursor next line
+CPL:'F':cursor prev line
+CS_ALT_G1:'-':set character set G1
+CS_ALT_G2:'.':set character set G2
+CS_ALT_G3:'/':set character set G3
+CS_DEF:x:default character set
+CS_G0:'(':set character set G0
+CS_G1:')':set character set G1
+CS_G2:'*':set character set G2
+CS_G3:'+':set character set G3
+CSI:0x9b
+CS_UTF8:x:utf-8 character set
+CUB:'D':cursor back
+CUD:'B':cursor down
+CUF:'C':cursor back
+CUP:'H':position cursor
+CUU:'A':cursor up
+DA:'c':device attributes request
+DCH:'P':delete characters
+DCS:0x90
+DHLB:x:double height line, bottom half
+DHLT:x:double height line, top half
+DL:'M':delete lines
+DSR:'n':report status or position
+DWL:x:double width line
+ECH:'X':erase CHaracters
+ED:'J':erase to start or end of screen
+EL:'K':erase to start or end of line
+ELR:'z':Enable Locator Reporting
+ENTGM52:x:enter vt52 graphics mode (ESC F)
+ENTRY:x:cursor crossed window boundary
+EOF:x:end of file
+EPA:0x97
+ESC:033
+EXPOSE:x:exposure event
+EXTGM52:x:exit vt52 graphics mode (ESC G)
+FOCUS:x:keyboard focus event
+HOME:x:move cursor to home position
+HPA:'`':horizontal position absolute
+HPR:'a':horizontal position relative
+HTS:0x88:horizontal tab stop
+HVP:'f':horizontal and vertical position
+ICH:'@':insert characters
+ID:0x9a
+IL:'L':insert lines
+IND:0x84:index
+LL:'q':load LEDs
+MC:'i':media copy
+MEMLOCK:x:(HP) lock memory above cursor
+MEMUNLOCK:x:(HP) unlock memory above cursor
+NEL:0x85:next line
+NULL:0:token to be ignored
+OSC:0x9d
+PAM:'=':keypad to applications mode
+PM:0x9e:privacy message (ended by ESC \ (ST))
+PNM:'>':keypad to numeric mode
+QUERY_SCA:x:DSR cursor attributes
+QUERY_SCL:x
+QUERY_SCUSR:x
+QUERY_SGR:x:DSR SGR style
+QUERY_SLRM:x:DSR soft scroll mode
+QUERY_STBM:x:DSR scroll margins
+RC:'8':restore cursor position
+REQTPARAM:'x':REQuest Terminal PARAMeters
+RESET:'l':reset mode
+RESIZE:x:main window resized
+RESTOREPM:'?':restore private modes
+RI:0x8d:reverse index
+RIS:x:reset to initial state
+RQM:'p':request DEC private mode
+S7C1T:x:7-bit controls
+S8C1T:x:8-bit controls
+SAVEPM:'s':save private mode values
+SBDOWN:x:scroll bar down
+SBGOTO:x:set scroll bar position
+SBSWITCH:x:toggle scroll bar
+SBUP:x:scroll bar up
+SC:'7':save cursor position
+SD:'T':Scroll Down # lines
+SELCLEAR:x:selection clear request
+SELDRAG:x:drag selection
+SELECT:x:confirm the selection
+SELEXTND:x:extend selection
+SELINSRT:x:insert selection
+SELLINE:x:select a line
+SELNOTIFY:x:selection notify request
+SELREQUEST:x:selection request
+SELSTART:x:start selection
+SELWORD:x:select a word
+SET:'h':set mode
+SGR:'m':set graphics rendition
+SOS:0x98
+SPA:0x96
+SS2:0x8e:select G2 for next character only
+SS3:0x8f:select G3 for next character only
+ST:0x9c:string terminator
+STBM:'r':set top and bottom margins
+STRING:x:string of printable characters
+SU:'S':Scroll Up # lines
+SWL:x:single width line
+TBC:'g':tab clear
+TXTPAR:x:sequence with a text parameter
+VPA:'d':vertical position absolute
+VPR:'e':vertical position relative
