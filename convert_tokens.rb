@@ -34,11 +34,7 @@ def parse_line(str, out_file)
 	if str.length <= 1
 		return
 	end
-	if str[0] == "#" # comments:
-		comment out_file, str[1]
-	else
-		add_token out_file, str
-	end
+	add_token out_file, str
 end
 def write_footer(out_file)
 	out_file.write "};\n#endif//!JBXVT_JBXVTTOKENINDEX_H\n"
