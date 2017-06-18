@@ -1,0 +1,8 @@
+/*.o
+/tests/.*
+/*.log
+/*.out
+/*.sw?
+/jbxvt
+/tags
+/config.mk
