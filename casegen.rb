@@ -40,25 +40,31 @@ module CaseGenerator
 				get_break
 		end
 	end
-	def CaseGenerator.main
-		w = Writer.new
-		_tokens=%w(ALN CHA CHT CPL CNL CS_ALT_G1 CS_ALT_G2 CS_ALT_G3
+	def CaseGenerator.get_tokens
+		return %w(ALN CHA CHT CPL CNL CS_ALT_G1 CS_ALT_G2 CS_ALT_G3
 		CS_G0 CS_G1 CS_G2 CS_G3 CUB CUD CUF CUP CUU DA DCH DL DSR DWL
 		ECH ED EL ELR ENTGM52 EXTGM52 HOME HPA HPR HTS HVP ICH ID IL
 		IND LL MC NEL PAM PM PNM RC REQTPARAM RESET RI RIS RQM S7C1T
 		S8C1T SAVEPM SBGOTO SBSWITCH SC SD SET SELINSRT SGR SS2 SS3 ST
 		STBM SU SWL TBC TXTPAR VPA VPR)
-		_nolog_tokens=%w(CHAR STRING)
-		_stubs=%w(APC DHLT DHLB EPA OSC SOS SPA)
-		_tokens.each do |token|
+	end
+	def CaseGenerator.get_nolog_tokens
+		return %w(CHAR STRING)
+	end
+	def CaseGenerator.get_stubs
+		return %w(APC DHLT DHLB EPA OSC SOS SPA)
+	end
+	def CaseGenerator.main
+		w = Writer.new
+		get_tokens.each do |token|
 			c = Coder.new token
 			w.write c.get_logged
 		end
-		_nolog_tokens.each do |token|
+		get_nolog_tokens.each do |token|
 			c = Coder.new token
 			w.write c.get_not_logged
 		end
-		_stubs.each do |token|
+		get_stubs.each do |token|
 			c = Coder.new token
 			w.write c.get_stub
 		end
