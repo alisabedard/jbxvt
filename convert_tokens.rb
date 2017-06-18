@@ -16,12 +16,8 @@ def add_token(out_file, s)
 	out_file.write "\tJBXVT_TOKEN_#{s[0]} "
 	serialize s
 	out_file.write "= #{s[1]}"
-	if s[2] == nil || s[2].length <= 1
-		out_file.write ",\n"
-	else
-		out_file.write ", // #{s[2]}"
-	end
-
+	out_file.write (s[2] == nil || s[2].length <= 1) ?
+		",\n" : ", // #{s[2]}"
 end
 def get_output_file(output_name)
 	return File.open output_name, "w"
@@ -49,14 +45,17 @@ def parse_line(str, out_file)
 	end
 	add_token out_file, str
 end
-def parse(source_name, output_name)
-	out_file = get_output_file output_name
-	tag = write_header out_file
+def parse_source(source_name, out_file)
 	File.open source_name, "r" do |f|
 		f.each_line do |s|
 			parse_line s, out_file
 		end
 	end
+end
+def parse(source_name, output_name)
+	out_file = get_output_file output_name
+	tag = write_header out_file
+	parse_source source_name, out_file
 	write_footer out_file, tag
 end
 parse "tokens.txt", "JBXVTTokenIndex.h"
