@@ -8,9 +8,6 @@ module CaseGenerator
 		def write(string)
 			@file.write string
 		end
-		def newline
-			write "\n"
-		end
 	end
 	class Coder
 		def initialize(_token)
