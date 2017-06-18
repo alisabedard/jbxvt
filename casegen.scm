@@ -1,4 +1,5 @@
 (define copyright "Copyright 2017, Jeffrey E. Bedard")
+; Written for mit-scheme
 (define what_type? (lambda (type)
 	(cond ((char=? type #\l) 'logged)
 		((char=? type #\n) 'unlogged)
