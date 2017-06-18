@@ -5,7 +5,7 @@
 		((char=? type #\n) 'unlogged)
 		((char=? type #\s) 'stub)
 		(else 'bad))))
-; formt components:
+; format components:
 (define get_case (lambda (token)
 	(string-append "case " token ":\n")))
 (define get_log (lambda (message)
