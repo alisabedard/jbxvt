@@ -67,6 +67,7 @@ module CaseGenerator
 			w.write (Coder.new token).get_not_logged
 		end
 		get_stubs.each do |token|
+			print token + ":s\n"
 			w.write (Coder.new token).get_stub
 		end
 	end
