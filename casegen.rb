@@ -57,16 +57,13 @@ module CaseGenerator
 	def CaseGenerator.main
 		w = Writer.new
 		get_tokens.each do |token|
-			c = Coder.new token
-			w.write c.get_logged
+			w.write (Coder.new token).get_logged
 		end
 		get_nolog_tokens.each do |token|
-			c = Coder.new token
-			w.write c.get_not_logged
+			w.write (Coder.new token).get_not_logged
 		end
 		get_stubs.each do |token|
-			c = Coder.new token
-			w.write c.get_stub
+			w.write (Coder.new token).get_stub
 		end
 	end
 	if __FILE__ == $0
