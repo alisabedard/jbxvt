@@ -23,21 +23,28 @@ module CaseGenerator
 		def get_break
 			return "\tbreak;\n"
 		end
+		def get_logger
+			return "\tLOG(\"#{@token}\");\n"
+		end
+		def get_fixme
+			return "\tLOG(\"FIXME: #{@token}" +
+				" not implemented\");\n"
+		end
+		def get_handler
+			return "\tjbxvt_handle_#{@token}(xc, &token);\n"
+		end
+		def get_case
+			return "case #{@token}:\n" 
+		end
 		def get_logged
-			return "case #{@token}:\n" +
-				"\tLOG(\"#{@token}\");\n" +
-				"\tjbxvt_handle_#{@token}(xc, &token);\n" +
-				get_break
+			return get_case + get_logger +
+				get_handler + get_break
 		end
 		def get_not_logged
-			return "case #{@token}:\n" +
-				"\tjbxvt_handle_#{@token}(xc, &token);\n" +
-				get_break
+			return get_case + get_handler + get_break
 		end
 		def get_stub
-			return "case #{@token}:\n\tLOG(\"FIXME: " +
-				"#{@token} not implemented\");\n" +
-				get_break
+			return get_case + get_fixme + get_break
 		end
 	end
 	def CaseGenerator.get_tokens
