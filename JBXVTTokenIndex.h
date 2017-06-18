@@ -1,5 +1,5 @@
 // Copyright 2017, Jeffrey E. Bedard
-#ifndef JBXVT_JBXVTTOKENINDEX_H}
+#ifndef JBXVT_JBXVTTOKENINDEX_H
 #define JBXVT_JBXVTTOKENINDEX_H
 enum JBXVTTokenIndex {
 	JBXVT_TOKEN_ALN = 1000, // screen alignment test (E-fill)

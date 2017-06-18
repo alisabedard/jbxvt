@@ -28,7 +28,7 @@ def get_output_file(output_name)
 end
 def get_include_guard_header(tag)
 	return "// Copyright 2017, Jeffrey E. Bedard\n" +
-		"#ifndef #{tag}}\n#define #{tag}\n"
+		"#ifndef #{tag}\n#define #{tag}\n"
 end
 def write_header(out_file)
 	tag = "JBXVT_JBXVTTOKENINDEX_H"
