@@ -4,9 +4,6 @@ module Generate
 	def get_output_file(output_name)
 		return File.open output_name, "w"
 	end
-	def write_comment(output_file, text)
-		output_file.write "\t// #{text}"
-	end
 	def parse_line(out_file, str, &block)
 		str = str.split ':'
 		if str.length <= 1

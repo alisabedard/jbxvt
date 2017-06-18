@@ -23,9 +23,6 @@ def write_header(out_file, tag)
 	out_file.write get_guard_top(tag) +
 		"enum JBXVTTokenIndex {\n"
 end
-def write_footer(out_file, tag)
-	out_file.write "};\n" + get_guard_bottom(tag)
-end
 def parse(source_name, output_name)
 	out_file = get_output_file output_name
 	tag = get_tag "JBXVTTOKENINDEX"
