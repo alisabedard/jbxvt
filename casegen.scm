@@ -37,9 +37,5 @@
 (define casegen (lambda (in_file_name out_file_name) (let*
 	((i (open-input-file in_file_name))
 		(o (open-output-file out_file_name)))
-		(parse i o)
-		(close-port i)
-		(close-port o)
-		)))
+		(parse i o) (close-port i) (close-port o))))
 (casegen "cases.txt" "cases.c")
-
