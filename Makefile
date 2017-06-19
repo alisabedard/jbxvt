@@ -22,9 +22,10 @@ ${exe}: libjb ${objs}
 	rm -f ${exe}.tmp
 	tail -n 5 sz.log
 include depend.mk
+cases.c: cases.txt
+	scheme < casegen.scm
 color_index.h: color_index.txt
-	ruby convert_colors.rb
-	${AWK} -f convert_colors.awk color_index.txt > color_index.h
+	scheme < convert_colors.scm
 bindest=${DESTDIR}${PREFIX}/bin
 docdest=${DESTDIR}${PREFIX}/share/man/man1
 install: ${exe}

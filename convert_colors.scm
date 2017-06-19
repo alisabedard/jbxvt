@@ -1,0 +1,31 @@
+; Copyright 2017, Jeffrey E. Bedard
+(load "libconvert.scm")
+(define get_line (lambda (index value) (string-append
+	"\t[" index "] = 0x" value ",\n")))
+(define parse (lambda (in out) (let*
+	((line (read-line in)))
+	(if (not (eof-object? line))
+		(if (> (string-length line) 1)
+			(let* ((i (string-find-next-char line #\:))
+			(index (string-head line i))
+			(value (string-tail line (+ 1 i))))
+			(display (get_line index value) out)
+			(flush-output out)
+			(parse in out))
+			(parse in out))))))
+(define convert_colors (lambda (in_file_name out_file_name) (let*
+	((tag "COLOR_INDEX") (name "jbxvt_color_index")
+	(i (open-input-file in_file_name))
+	(o (open-output-file out_file_name)))
+	(set! master-prefix "0x")
+	(set! guard-prefix "JBXVT_") ; override JBWM_
+	(define tag "COLOR_INDEX")
+	(write-include-header tag o)
+	(display (add-c-include "<stdint.h>") o)
+	(begin-array-definition "uint32_t" "jbxvt_color_index" o)
+	(parse i o)
+	(end-c-definition o)
+	(write-include-fin tag o)
+	(close-port i)
+	(close-port o))))
+(convert_colors "color_index.txt" "color_index.h")

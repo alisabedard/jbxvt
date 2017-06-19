@@ -2,7 +2,7 @@
 #ifndef JBXVT_COLOR_INDEX_H
 #define JBXVT_COLOR_INDEX_H
 #include <stdint.h>
-static uint32_t jbxvt_color_index[256] = {
+static uint32_t jbxvt_color_index [] = {
 	[0] = 0x000000,
 	[1] = 0x800000,
 	[2] = 0x008000,
