@@ -21,14 +21,16 @@
 				(get_handler token))))
 			((equal? type 'unlogged) (get_handler token))
 			(else (get_fixme token))) "\tbreak;\n")))
+(define get_token (lambda (line i)
+	(string-append "JBXVT_TOKEN_" (string-head line i))))
+(define get_type (lambda (line i)
+	(what_type? (string-ref (string-tail line (+ 1 i)) 0))))
 (define parse (lambda (in out) (let*
-	((line (read-line in))) ; ----
+	((line (read-line in)))
 	(if (not (eof-object? line))
 		(let* ((i (string-find-next-char line #\:))
-			(token (string-head line i))
-			(type (string-ref (string-tail line (+ 1 i)) 0))
-			(type (what_type? type))
-			(token (string-append "JBXVT_TOKEN_" token)))
+			(token (get_token line i))
+			(type (get_type line i)))
 			(display (get_formatted token type) out)
 			(flush-output out) ; commit changes
 			(parse in out))))))
