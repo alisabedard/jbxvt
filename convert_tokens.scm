@@ -24,10 +24,9 @@
 				"\n") out)
 			(parse in out))))))
 (define convert_tokens (lambda (in_name out_name) (let*
-	((ig "JBXVTTOKENINDEX")
+	((ig "JBXVT_JBXVTTOKENINDEX")
 	(i (open-input-file in_name))
 	(o (open-output-file out_name)))
-	(set! guard-prefix "JBXVT_")
 	(begin-include ig o)
 	(begin-enum-definition "JBXVTTokenIndex" o)
 	(parse i o)
