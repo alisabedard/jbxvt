@@ -1,4 +1,13 @@
 (define copyright "// Copyright 2017, Jeffrey E. Bedard\n")
+; lisp-like operations on colon-separated strings:
+(define get-string-divider (lambda (str)
+	(string-find-next-char str #\:)))
+; returns original string if not a list
+(define string-car (lambda (str) (let ((i (get-string-divider str)))
+	(if i (string-head str i) str))))
+; returns "" when list empty
+(define string-cdr (lambda (str) (let ((i (get-string-divider str)))
+	(if i (string-tail str (+ 1 i)) ""))))
 ; The following prefix is applied to each entry
 (define master-prefix "_NET_")
 (define begin-array-definition (lambda (type name out)
@@ -22,9 +31,9 @@
 (define print-each (lambda (function data)
 	(function (car data) (cdr data))))
 (define add-c-include (lambda (name) (string-append "#include " name "\n")))
-(define write-include-header (lambda (ig out)
+(define begin-include (lambda (guard_tag out)
 	(display (string-append copyright
-		"#ifndef " (get-guard ig)
-		"#define " (get-guard ig)) out)))
-(define write-include-fin (lambda (ig out) (display (string-append "#endif//!"
-	(get-guard ig)) out)))
+		"#ifndef " (get-guard guard_tag)
+		"#define " (get-guard guard_tag)) out)))
+(define end-include (lambda (guard_tag out)
+	(display (string-append "#endif//!" (get-guard guard_tag)) out)))
