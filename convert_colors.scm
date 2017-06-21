@@ -1,5 +1,5 @@
 ; Copyright 2017, Jeffrey E. Bedard
-(load "libconvert.scm")
+(load "libjb/libconvert.scm")
 (define get_line (lambda (index value) (string-append
 	"\t[" index "] = 0x" value ",\n")))
 (define parse (lambda (in out) (let*
@@ -7,8 +7,9 @@
 	(if (not (eof-object? line))
 		(if (> (string-length line) 1)
 			(let* ((i (string-find-next-char line #\:))
-			(index (string-head line i))
-			(value (string-tail line (+ 1 i))))
+			(index (string-car line))
+			(value (string-cdr line)))
+;			(value (string-tail line (+ 1 i))))
 			(display (get_line index value) out)
 			(flush-output out)
 			(parse in out))
