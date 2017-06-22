@@ -51,9 +51,6 @@ static void handle_token_mc_public(int16_t * restrict t)
 void jbxvt_handle_JBXVT_TOKEN_MC(void * xc __attribute__((unused)),
 	struct JBXVTToken * token)
 {
-	int16_t * restrict t = token->arg;
-	if (token->private == '?')
-		handle_token_mc_public(t);
-	else
-		handle_token_mc_private(t);
+	(token->private == '?' ? handle_token_mc_public
+		: handle_token_mc_private)(token->arg);
 }
