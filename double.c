@@ -1,6 +1,7 @@
 // Copyright 2017, Jeffrey E. Bedard
 #include "double.h"
 #include <stdlib.h>
+#include <string.h>
 #include "cursor.h"
 #include "repaint.h"
 void jbxvt_set_double_width_line(xcb_connection_t * xc, const bool is_dwl)
@@ -9,19 +10,32 @@ void jbxvt_set_double_width_line(xcb_connection_t * xc, const bool is_dwl)
 	jbxvt_repaint(xc); // in case set mid-line
 	jbxvt_draw_cursor(xc); // clear stale cursor block
 }
+static void alt(const int i, const int in_length,
+	uint8_t * restrict out_str,
+	uint8_t * restrict in_str)
+{
+	if (i < in_length) {
+		out_str[0] = in_str[i];
+		alt(i + 1, in_length, out_str + 2, in_str);
+	}
+}
+static void space(const int i, uint8_t * restrict out_str)
+{
+	if (i > 0) {
+		if (i % 2)
+			out_str[i] = ' ';
+		space(i - 1, out_str);
+	}
+}
 // Generate a double-width string.  Free the result!
-uint8_t * jbxvt_get_double_width_string(uint8_t * in_str, int * restrict len)
+uint8_t * jbxvt_get_double_width_string(uint8_t * in_str, int * restrict
+	length_return)
 {
 	// save current length
-	const int l = *len;
+	const int in_length = *length_return, out_length = in_length << 1;
 	// double it and allocate buffer to match
-	uint8_t * o = malloc(*len <<= 1);
-	{ // * j scope
-		uint8_t * j = o;
-		for (int i = 0; i < l; ++i, j += 2) {
-			j[0] = in_str[i];
-			j[1] = ' ';
-		}
-	}
-	return o;
+	uint8_t * out_str = malloc(out_length);
+	space(out_length - 1, out_str);
+	alt(0, in_length, out_str, in_str);
+	return out_str;
 }
