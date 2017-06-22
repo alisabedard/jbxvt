@@ -10,5 +10,9 @@ void jbxvt_tab(xcb_connection_t * xc, const short count);
 void jbxvt_handle_JBXVT_TOKEN_TBC(void * xc, struct JBXVTToken * token);
 // Set tab stops:
 // -1 clears all, -2 sets default
+enum JBXVTSetTabOperations {
+	JBXVT_SET_TAB_CLEAR = -1,
+	JBXVT_SET_TAB_RESET = -2
+};
 void jbxvt_set_tab(short i, const bool value);
 #endif//!JBXVT_TAB_H

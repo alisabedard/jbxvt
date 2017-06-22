@@ -101,7 +101,7 @@ static xcb_connection_t * init(const int argc, char ** argv)
 int main(int argc, char ** argv)
 {
 	xcb_connection_t * xc = init(argc, argv);
-	jbxvt_set_tab(-2, false); // Set up the tab stops
+	jbxvt_set_tab(JBXVT_SET_TAB_RESET, false); // Set up the tab stops
 	jbxvt_map_window(xc);
 	while (jbxvt_parse_token(xc))
 		;
