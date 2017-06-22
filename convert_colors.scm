@@ -1,8 +1,8 @@
 ; Copyright 2017, Jeffrey E. Bedard
 (load "libjb/libconvert.scm")
-(define get_line (lambda (index value) (string-append
+(letrec ((get_line (lambda (index value) (string-append
 	"\t[" index "] = 0x" value ",\n")))
-(define parse (lambda (in out) (let*
+	(parse (lambda (in out) (let*
 	((line (read-line in)))
 	(if (not (eof-object? line))
 		(if (> (string-length line) 1)
@@ -13,7 +13,7 @@
 			(flush-output out)
 			(parse in out))
 			(parse in out))))))
-(define convert_colors (lambda (in_file_name out_file_name) (let*
+(convert_colors (lambda (in_file_name out_file_name) (let*
 	((tag "JBXVT_COLOR_INDEX") (varname "jbxvt_color_index")
 	(vartype "uint32_t") (include0 "<stdint.h>")
 	(i (open-input-file in_file_name))
@@ -25,5 +25,5 @@
 	(end-c-definition o)
 	(end-include tag o)
 	(close-port i)
-	(close-port o))))
-(convert_colors "color_index.txt" "color_index.h")
+	(close-port o)))))
+(convert_colors "color_index.txt" "color_index.h"))
