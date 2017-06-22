@@ -62,29 +62,34 @@ void jbxvt_request_selection(xcb_connection_t * xc,
 {
 	LOG("jbxvt_request_selection(timestamp: %d)", t);
 	if (paste_from(xc, XCB_ATOM_PRIMARY, t))
-		  return;
+		return;
 	if (paste_from(xc, jbxvt_get_clipboard(xc), t))
-		  return;
+		return;
 	if (paste_from(xc, XCB_ATOM_SECONDARY, t))
-		  return;
+		return;
+}
+static int paste_primary_chunk(xcb_connection_t * xc,
+	const xcb_atom_t property, int nread)
+{
+	xcb_get_property_reply_t * r = xcb_get_property_reply(xc,
+		get_prop(xc, property, nread), NULL);
+	if (!reply_is_invalid(r)) {
+		const int bytes_after = r->bytes_after;
+		nread += paste(xcb_get_property_value(r),
+			xcb_get_property_value_length(r));
+		free(r);
+		if (bytes_after > 0)
+			return paste_primary_chunk(xc, property, nread);
+	}
+	return nread;
 }
 //  Respond to a notification that a primary selection has been sent
-void jbxvt_paste_primary(xcb_connection_t * xc,
+int jbxvt_paste_primary(xcb_connection_t * xc,
 	const xcb_timestamp_t t, const xcb_window_t window,
 	const xcb_atom_t property)
 {
 	LOG("paste_primary(time: %d, win: %d, prop: %d)",
 		(int)t, (int)window, (int)property);
 	request_conversion(xc, window, property, t);
-	uint32_t nread = 0, bytes_after;
-	do {
-		xcb_get_property_reply_t * r = xcb_get_property_reply(xc,
-			get_prop(xc, property, nread), NULL);
-		if (reply_is_invalid(r))
-			return;
-		bytes_after = r->bytes_after;
-		nread += paste(xcb_get_property_value(r),
-			xcb_get_property_value_length(r));
-		free(r);
-	} while (bytes_after > 0);
+	return paste_primary_chunk(xc, property, 0);
 }
