@@ -91,7 +91,7 @@ static xcb_connection_t * init(const int argc, char ** argv)
 	if (setenv("TERM", JBXVT_ENV_TERM, true) < 0)
 		abort();
 	if (!com_argv)
-		com_argv = (char*[2]){getenv("SHELL")};
+		com_argv = (char*[2]){getenv(JBXVT_ENV_SHELL)};
 	jbxvt_init_command_module(com_argv);
 	return xc;
 }
