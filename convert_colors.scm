@@ -1,18 +1,15 @@
 ; Copyright 2017, Jeffrey E. Bedard
 (load "libjb/libconvert.scm")
-(letrec 
-	((format-line (lambda (index value) (string-append
-		"\t[" index "] = 0x" value ",\n")))
-	(parse (lambda (in out) (let*
-		((line (read-line in)))
-		(if (eof-object? line)
-			#f
-			(begin
-				(if (> (string-length line) 1)
-					(let* ((i (string-find-next-char
-						line #\:))
-						(index (string-car line))
-						(value (string-cdr line)))
+(letrec
+	((parse (lambda (in out) (let*
+		((line (read-line in))
+		(format-line (lambda (index value) (string-append
+			"\t[" index "] = 0x" value ",\n"))))
+		(if (eof-object? line) #f
+			(begin (if (> (string-length line) 1)
+				(let* ((i (string-find-next-char line #\:))
+					(index (string-car line))
+					(value (string-cdr line)))
 					(display (format-line
 						index value) out)
 					(flush-output out)))
