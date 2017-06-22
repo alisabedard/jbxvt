@@ -148,10 +148,13 @@ void jbxvt_paint(struct JBXVTPaintContext * restrict c)
 	}
 	// Draw text with background:
 	if (c->is_double_width_line) // remember to free returned string:
-		c->string = jbxvt_get_double_width_string(c->string, &c->length);
-	draw_text(xc, c->string, c->length, &p, rstyle);
-	if (c->is_double_width_line)
-		free(c->string);
+		c->string = jbxvt_get_double_width_string(c->string,
+			&c->length);
+	if (c->string) { // Check that we are operating on valid memory.
+		draw_text(xc, c->string, c->length, &p, rstyle);
+		if (c->is_double_width_line)
+			free(c->string);
+	}
 	if (font_mod)
 		font(xc, jbxvt_get_normal_font(xc)); // restore font
 	if (cmod)
