@@ -22,22 +22,20 @@ struct JBXVTCommandContainer {
 	uint8_t *next, *top, *data;
 };
 static struct JBXVTCommandContainer cmdtok_buffer, cmdtok_stack;
+// returns total file descriptor count (select's nfds)
+static uint8_t init_in_fdset(fd_set * restrict in_fdset)
+{
+	const fd_t fd = jbxvt_get_fd();
+	FD_SET(fd, in_fdset);
+	return fd + 1;
+}
 __attribute__((nonnull))
 static void poll_io(xcb_connection_t * xc,
 	fd_set * restrict in_fdset)
 { // xfd scope
 	const fd_t xfd = xcb_get_file_descriptor(xc);
 	{ // nfds scope
-		fd_t nfds;
-		{ // fd scope
-			const fd_t fd = jbxvt_get_fd();
-			nfds = fd + 1;
-#ifdef DEBUG_FDS
-			// nfds should be highest plus one
-			LOG("fd: %d, %d, %d\n", fd, xfd, nfds);
-#endif//DEBUG_FDS
-			FD_SET(fd, in_fdset);
-		}
+		const uint8_t nfds = init_in_fdset(in_fdset);
 		FD_SET(xfd, in_fdset);
 		fd_set out_fdset;
 		FD_ZERO(&out_fdset);
