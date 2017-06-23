@@ -59,7 +59,8 @@ void jbxvt_csi(xcb_connection_t * xc,
 static int get_arg(xcb_connection_t * xc, int n)
 {
 	const int c = jbxvt_pop_char(xc, 0);
-	return (c >= '0' && c <= '9') ?  get_arg(xc, n * 10 + c - '0') : n;
+	return (c >= '0' && c <= '9')
+		? get_arg(xc, n * 10 + c - '0') : n;
 }
 void jbxvt_end_cs(xcb_connection_t * xc,
 	int16_t c, struct JBXVTToken * restrict tk)
