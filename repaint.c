@@ -85,13 +85,14 @@ static void draw_history_line(xcb_connection_t * xc, const int16_t y)
 	xcb_poly_line(xc, XCB_COORD_MODE_ORIGIN, jbxvt_get_vt_window(xc),
 		jbxvt_get_cursor_gc(xc), 2, onscreen_line);
 }
-// Display current lines after the rendered scroll history lines:
-static void draw_active_lines(struct HistoryContext * restrict c)
+// Display current lines after the last rendered scroll history line (i):
+static void draw_active_lines_r(int i, struct HistoryContext * c)
 {
-	struct JBXVTLine * restrict line = jbxvt_get_current_screen()->line;
-	for (uint_fast16_t i = 0; c->line <= c->char_height;
-		++c->line, ++i, c->position->y += c->font_height)
-		paint(c->xc, line + i, *c->position);
+	if (i <= c->char_height) {
+		paint(c->xc, c->line_data + i, *c->position);
+		c->position->y += c->font_height;
+		draw_active_lines_r(i + 1, c);
+	}
 }
 // Repaint the screen
 void jbxvt_repaint(xcb_connection_t * xc)
@@ -109,7 +110,8 @@ void jbxvt_repaint(xcb_connection_t * xc)
 	// Save the position where scroll history ends:
 	const int16_t history_end_y = p.y - 1;
 	// Do the remainder from the current screen:
-	draw_active_lines(&history);
+	history.line_data = jbxvt_get_current_screen()->line;
+	draw_active_lines_r(history.line, &history);
 	if (history_end_y > 0)
 		draw_history_line(xc, history_end_y);
 	jbxvt_show_selection(xc);
