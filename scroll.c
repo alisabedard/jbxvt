@@ -178,5 +178,5 @@ void scroll(xcb_connection_t * xc, const uint8_t row1,
 #if LOG_LEVEL > 8
 	for (uint16_t i = 0; i < scroll_size; ++i)
 		puts((char *)saved_lines[i].text);
-#endif//LOG_LEVEL>10
+#endif//LOG_LEVEL>8
 }
