@@ -77,24 +77,37 @@ static bool get_buffered(int16_t * val, const uint8_t flags)
     This is the most often called function. */
 int16_t jbxvt_pop_char(xcb_connection_t * xc, const uint8_t flags)
 {
-	int16_t ret = 0;
+	int16_t l, ret = 0;
+	bool skip = false;
 	if (get_buffered(&ret, flags))
-		return ret;
-	xcb_flush(xc); // This is the primary xcb queue force
-	fd_set in;
-	do {
-		FD_ZERO(&in);
-		if (jbxvt_handle_xevents(xc) && (flags & GET_XEVENTS_ONLY))
-			return INPUT_BUFFER_EMPTY;
-		poll_io(xc, &in);
-	} while (!FD_ISSET(jbxvt_get_fd(), &in));
-	const uint8_t l = read(jbxvt_get_fd(),
-		cmdtok_buffer.data, COM_BUF_SIZE);
-	if (l < 1)
-		return errno == EWOULDBLOCK ? INPUT_BUFFER_EMPTY : EOF;
-	cmdtok_buffer.next = cmdtok_buffer.data;
-	cmdtok_buffer.top = cmdtok_buffer.data + l;
-	return *cmdtok_buffer.next++;
+		skip = true;
+	if (!skip) {
+		xcb_flush(xc); // This is the primary xcb queue force
+		fd_set in;
+		do {
+			FD_ZERO(&in);
+			if (jbxvt_handle_xevents(xc)
+				&& (flags & GET_XEVENTS_ONLY)) {
+				ret = INPUT_BUFFER_EMPTY;
+				skip = true;
+				break;
+			}
+			poll_io(xc, &in);
+		} while (!FD_ISSET(jbxvt_get_fd(), &in));
+	}
+	if (!skip) {
+		l = read(jbxvt_get_fd(), cmdtok_buffer.data, COM_BUF_SIZE);
+		if (l < 1) {
+			skip = true;
+			ret = errno == EWOULDBLOCK
+				? INPUT_BUFFER_EMPTY : EOF;
+		}
+	}
+	if (!skip) {
+		ret = *(cmdtok_buffer.next = cmdtok_buffer.data + 1);
+		cmdtok_buffer.top = cmdtok_buffer.data + l;
+	}
+	return ret;
 }
 /*  Return true if the character is one
     that can be handled by jbxvt_string() */
