@@ -25,11 +25,11 @@ static inline bool end_point_on_screen(const struct JBDim pos,
 	return pos.col < char_sz.col && pos.row < char_sz.row;
 }
 __attribute__((pure))
-static bool is_not_on_screen(const struct JBDim * restrict e)
+static bool on_screen(const struct JBDim * restrict e)
 {
 	const struct JBDim c = jbxvt_get_char_size();
-	return !end_point_on_screen(e[0], c)
-		|| !end_point_on_screen(e[1], c);
+	return end_point_on_screen(e[0], c)
+		&& end_point_on_screen(e[1], c);
 }
 struct CopyData {
 	struct JBDim * endpoints;
@@ -67,7 +67,7 @@ void jbxvt_save_selection(struct JBXVTSelectionData * sel)
 	/* Use a normal int type for total to avoid overflow and failure to
 	 * detect decrement below 0. */
 	// Make sure the selection falls within the screen area:
-	if (is_not_on_screen(e))
+	if (!on_screen(e))
 		return; // Invalid end point found
 	struct CopyData d = {.endpoints = e, .total = 1,
 		.char_width = jbxvt_get_char_size().width};
