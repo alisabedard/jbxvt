@@ -123,9 +123,9 @@ static uint8_t * get_keycode_value(struct JBXVTKeyMaps * restrict
 {
 	return keymaptable->km_keysym
 		? (keymaptable->km_keysym == keysym)
-		?  get_buffer(buf, keymaptable, use_alternate)
-			: get_keycode_value(keymaptable + 1, keysym,
-				buf, use_alternate)
+			?  get_buffer(buf, keymaptable, use_alternate)
+				: get_keycode_value(keymaptable + 1, keysym,
+					buf, use_alternate)
 		: NULL;
 }
 static uint8_t * get_s(const xcb_keysym_t keysym, uint8_t * restrict kbuf)
