@@ -56,16 +56,15 @@ void jbxvt_csi(xcb_connection_t * xc,
 	tk->nargs = i;
 	tk->type = c;
 }
+static int get_arg(xcb_connection_t * xc, int n)
+{
+	const int c = jbxvt_pop_char(xc, 0);
+	return (c >= '0' && c <= '9') ?  get_arg(xc, n * 10 + c - '0') : n;
+}
 void jbxvt_end_cs(xcb_connection_t * xc,
 	int16_t c, struct JBXVTToken * restrict tk)
 {
-	c = jbxvt_pop_char(xc, 0);
-	uint16_t n = 0;
-	while (c >= '0' && c <= '9') {
-		n = n * 10 + c - '0';
-		c = jbxvt_pop_char(xc, 0);
-	}
-	tk->arg[0] = n;
+	tk->arg[0] = get_arg(xc, 0);
 	tk->nargs = 1;
 	c = jbxvt_pop_char(xc, 0);
 	register uint16_t i = 0;
