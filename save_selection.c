@@ -77,9 +77,11 @@ void jbxvt_save_selection(struct JBXVTSelectionData * sel)
 	bool last_was_cr = false;
 	// Substitute the first null terminator with a carriage return:
 	for (int_fast16_t i = 0; i < d.total; ++i)
-		if (d.string[i] == '\0' && !last_was_cr) {
+		if (d.string[i] == '\0') {
+			if (!last_was_cr) {
 				d.string[i] = '\r';
 				last_was_cr = true;
+			}
 		} else
 			last_was_cr = false;
 	sel->text = d.string = realloc(d.string, d.total);
