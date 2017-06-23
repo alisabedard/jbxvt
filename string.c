@@ -232,10 +232,22 @@ static void draw_string_at_cursor_position(xcb_connection_t * xc,
 	save_render_style(1, screen);
 	++c->x;
 }
+static void draw_next_char(xcb_connection_t * xc,
+	struct JBXVTScreen * restrict screen, uint8_t * restrict str,
+	const int len)
+{
+	if (len > 0) {
+		if (!test_action_char(xc, *str, screen)) {
+			draw_string_at_cursor_position(xc, screen, str, len);
+			check_wrap(screen);
+		}
+		draw_next_char(xc, screen, str + 1, len - 1);
+	}
+}
 /*  Display the string at the current position.
     new_line_count is the number of new lines in the string.  */
-void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str, uint_fast16_t
-	len, const int8_t new_line_count)
+void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str, int len,
+	const int new_line_count)
 {
 #ifdef DEBUG_VERBOSE
 	LOG("jbxvt_string(%s, len: %lu, new_line_count: %d)", str, len,
@@ -247,16 +259,6 @@ void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str, uint_fast16_t
 		  handle_new_lines(xc, new_line_count);
 	struct JBXVTScreen * restrict screen = jbxvt_get_current_screen();
 	jbxvt_check_cursor_position();
-	while (len) {
-		if (test_action_char(xc, *str, screen)) {
-			--len;
-			++str;
-			continue;
-		}
-		draw_string_at_cursor_position(xc,screen, str, len);
-		++str;
-		--len;
-		check_wrap(screen);
-	}
+	draw_next_char(xc, screen, str, len);
 	jbxvt_draw_cursor(xc);
 }
