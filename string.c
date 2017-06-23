@@ -230,7 +230,8 @@ void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str, uint_fast16_t
 					jbxvt_paint(&(struct
 						JBXVTPaintContext){.xc = xc,
 						.string = str, .style =
-						&(rstyle_t){jbxvt_get_rstyle()},
+						&(rstyle_t){
+							jbxvt_get_rstyle()},
 						.length = 1, .position = p,
 						.is_double_width_line =
 						screen->line[c->y].dwl});
