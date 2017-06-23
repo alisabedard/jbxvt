@@ -10,6 +10,8 @@ void jbxvt_set_double_width_line(xcb_connection_t * xc, const bool is_dwl)
 	jbxvt_repaint(xc); // in case set mid-line
 	jbxvt_draw_cursor(xc); // clear stale cursor block
 }
+/* Disperse each character of the input string to every other character of the
+ * output string.  */
 static void alt(const int i, const int in_length,
 	uint8_t * restrict out_str,
 	uint8_t * restrict in_str)
@@ -19,6 +21,8 @@ static void alt(const int i, const int in_length,
 		alt(i + 1, in_length, out_str + 2, in_str);
 	}
 }
+/* Initialize every other character of the output string
+   to a space character. */
 static void space(const int i, uint8_t * restrict out_str)
 {
 	if (i > 0) {
