@@ -62,7 +62,7 @@ SC:l
 SD:l
 SELINSRT:l
 SET:l
-SGR:l
+SGR:n
 SOS:s
 SPA:s
 SS2:l

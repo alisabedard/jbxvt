@@ -249,7 +249,6 @@ case JBXVT_TOKEN_SET:
 	jbxvt_handle_JBXVT_TOKEN_SET(xc, &token);
 	break;
 case JBXVT_TOKEN_SGR:
-	LOG("JBXVT_TOKEN_SGR");
 	jbxvt_handle_JBXVT_TOKEN_SGR(xc, &token);
 	break;
 case JBXVT_TOKEN_SOS:
