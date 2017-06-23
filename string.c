@@ -89,9 +89,9 @@ static void insert_characters(xcb_connection_t * restrict xc,
 	move_data_on_screen(xc, count, sz, point);
 }
 static void parse_special_charset(uint8_t * restrict str,
-	const uint_fast16_t len)
+	const int len)
 {
-	for (int_fast32_t i = len ; i >= 0; --i) {
+	for (int i = len; i >= 0; --i) {
 		uint8_t * ch = &str[i];
 		switch (*ch) {
 		case 'j':
@@ -174,6 +174,49 @@ static void recover_from_shift(void)
 	struct JBXVTPrivateModes * m = jbxvt_get_modes();
 	m->charset[m->charsel] = m->charset[JBXVT_CHARSET_SHIFT_REGISTER];
 }
+static void draw_string_at_pixel_position(xcb_connection_t * xc,
+	struct JBXVTScreen * screen, uint8_t * restrict str,
+	const int len)
+{
+	struct JBDim p
+		= jbxvt_chars_to_pixels(screen
+			->cursor);
+	struct JBXVTPrivateModes * restrict mode
+		= jbxvt_get_modes();
+	if (JB_UNLIKELY(mode->insert))
+		insert_characters(xc, 1, p);
+	struct JBDim * c = &screen->cursor;
+	uint8_t * t = screen->line[c->y].text + c->x;
+	const bool shifted = handle_single_shift();
+	if (shifted) {
+		parse_special_charset(str, 1);
+		recover_from_shift();
+	}
+	if (mode->charset[mode->charsel]
+		> CHARSET_ASCII) {
+		if (shifted)
+			parse_special_charset(str + 1,
+				len - 1);
+		else
+			parse_special_charset(str,
+				len);
+	}
+	// Render the string:
+	if (!screen->decpm) {
+		jbxvt_paint(&(struct
+			JBXVTPaintContext){.xc = xc,
+			.string = str, .style =
+			&(rstyle_t){
+				jbxvt_get_rstyle()},
+			.length = 1, .position = p,
+			.is_double_width_line =
+			screen->line[c->y].dwl});
+		// Save scroll history:
+		*t = *str;
+	}
+
+}
+
 /*  Display the string at the current position.
     new_line_count is the number of new lines in the string.  */
 void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str, uint_fast16_t
@@ -202,43 +245,7 @@ void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str, uint_fast16_t
 				c->x = 0;
 			}
 			jbxvt_check_selection(xc, c->y, c->y);
-			{ // p, mode, * t, shifted scope
-				struct JBDim p
-					= jbxvt_chars_to_pixels(screen
-						->cursor);
-				struct JBXVTPrivateModes * restrict mode
-					= jbxvt_get_modes();
-				if (JB_UNLIKELY(mode->insert))
-					insert_characters(xc, 1, p);
-				uint8_t * t = screen->line[c->y].text + c->x;
-				const bool shifted = handle_single_shift();
-				if (shifted) {
-					parse_special_charset(str, 1);
-					recover_from_shift();
-				}
-				if (mode->charset[mode->charsel]
-					> CHARSET_ASCII) {
-					if (shifted)
-						parse_special_charset(str + 1,
-							len - 1);
-					else
-						parse_special_charset(str,
-							len);
-				}
-				// Render the string:
-				if (!screen->decpm) {
-					jbxvt_paint(&(struct
-						JBXVTPaintContext){.xc = xc,
-						.string = str, .style =
-						&(rstyle_t){
-							jbxvt_get_rstyle()},
-						.length = 1, .position = p,
-						.is_double_width_line =
-						screen->line[c->y].dwl});
-					// Save scroll history:
-					*t = *str;
-				}
-			}
+			draw_string_at_pixel_position(xc, screen, str, len);
 			/* save_render_style() depends on the current cursor
 			 * position, so it must be called before increment. */
 			save_render_style(1, screen);
