@@ -51,26 +51,27 @@ static int16_t get_start_of_word(uint8_t * restrict s, int16_t i)
 {
 	return i && s[i] > ' ' ? get_start_of_word(s, i - 1) : i;
 }
+static int find_word_end(const int i, const int len,
+	uint8_t * restrict text)
+{
+	return (i < len && text[i]  > ' ')
+		? find_word_end(i + 1, len, text) : i;
+}
 static void adjust_to_word(struct JBDim * include,
 	struct JBDim * se1, struct JBDim * se2)
 {
 	if (se1->index < 0)
 		return; // protect against segfault if end is invalid
-	int16_t i;
-	{ // text scope
-		uint8_t * text = get_text_at(se1);
-		se1->col = (i = get_start_of_word(text, se1->col))
-			? i + 1 : 0;
-		i = se2->col;
-		if (se2 == include || !jbxvt_selcmp(se2,
-			&jbxvt_get_selection_end_points()[2]))
-			  ++i;
-		text = get_text_at(se2);
-		for (const uint16_t len = jbxvt_get_char_size().width;
-			i < len && text[i] > ' '; ++i)
-			;
-	}
-	se2->col = i;
+	uint8_t * text = get_text_at(se1);
+	int i;
+	se1->col = (i = get_start_of_word(text, se1->col))
+		? i + 1 : 0;
+	i = se2->col;
+	if (se2 == include || !jbxvt_selcmp(se2,
+		&jbxvt_get_selection_end_points()[2]))
+		  ++i;
+	text = get_text_at(se2);
+	se2->col = find_word_end(i, jbxvt_get_char_size().width, text);
 }
 // Make sure selection end point 0 comes before end point 1
 struct JBDim * jbxvt_order_selection_ends(struct JBDim * e)
