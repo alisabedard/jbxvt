@@ -1,6 +1,6 @@
 /*  Copyright 2017, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury. */
-#undef DEBUG
+//#undef DEBUG
 #include "cmdtok.h"
 #include <errno.h>
 #include <string.h>
@@ -25,28 +25,27 @@ static struct JBXVTCommandContainer cmdtok_buffer, cmdtok_stack;
 __attribute__((nonnull))
 static void poll_io(xcb_connection_t * xc,
 	fd_set * restrict in_fdset)
-{
-	static fd_t fd, xfd;
-	static int nfds; // per man select(2)
-	/* Cache values here to reduce function call overhead.  */
-	if (!fd)
-		fd = jbxvt_get_fd();
-	if (!xfd)
-		xfd = xcb_get_file_descriptor(xc);
-	if (!nfds)
-		nfds = fd + 1;
+{ // xfd scope
+	const fd_t xfd = xcb_get_file_descriptor(xc);
+	{ // nfds scope
+		fd_t nfds;
+		{ // fd scope
+			const fd_t fd = jbxvt_get_fd();
+			nfds = fd + 1;
 #ifdef DEBUG_FDS
-	// nfds should be highest plus one
-	LOG("fd: %d, %d, %d\n", fd, xfd, nfds);
+			// nfds should be highest plus one
+			LOG("fd: %d, %d, %d\n", fd, xfd, nfds);
 #endif//DEBUG_FDS
-	FD_SET(fd, in_fdset);
-	FD_SET(xfd, in_fdset);
-	fd_set out_fdset;
-	FD_ZERO(&out_fdset);
-	if (select(nfds, in_fdset, &out_fdset, NULL,
-		&(struct timeval){.tv_usec = 500000}) == -1)
-		exit(1); /* exit is reached in case SHELL or -e
-			    command was not run successfully.  */
+			FD_SET(fd, in_fdset);
+		}
+		FD_SET(xfd, in_fdset);
+		fd_set out_fdset;
+		FD_ZERO(&out_fdset);
+		if (select(nfds, in_fdset, &out_fdset, NULL,
+			&(struct timeval){.tv_usec = 500000}) == -1)
+			exit(1); /* exit is reached in case SHELL or -e
+				    command was not run successfully.  */
+	}
 	/* If xfd has input, verify connection status.  Otherwise,
 	   call timer function.  In this case, hook into the
 	   cursor blink functionality.  FIXME:  Implement SGR blinking
