@@ -216,7 +216,22 @@ static void draw_string_at_pixel_position(xcb_connection_t * xc,
 	}
 
 }
-
+static void draw_string_at_cursor_position(xcb_connection_t * xc,
+	struct JBXVTScreen * screen, uint8_t * restrict str,
+	const int len)
+{
+	struct JBDim * c = &screen->cursor;
+	if (screen->wrap_next) {
+		wrap(xc);
+		c->x = 0;
+	}
+	jbxvt_check_selection(xc, c->y, c->y);
+	draw_string_at_pixel_position(xc, screen, str, len);
+	/* save_render_style() depends on the current cursor
+	 * position, so it must be called before increment. */
+	save_render_style(1, screen);
+	++c->x;
+}
 /*  Display the string at the current position.
     new_line_count is the number of new lines in the string.  */
 void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str, uint_fast16_t
@@ -238,19 +253,7 @@ void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str, uint_fast16_t
 			++str;
 			continue;
 		}
-		{ // * c scope
-			struct JBDim * c = &screen->cursor;
-			if (screen->wrap_next) {
-				wrap(xc);
-				c->x = 0;
-			}
-			jbxvt_check_selection(xc, c->y, c->y);
-			draw_string_at_pixel_position(xc, screen, str, len);
-			/* save_render_style() depends on the current cursor
-			 * position, so it must be called before increment. */
-			save_render_style(1, screen);
-			++c->x;
-		}
+		draw_string_at_cursor_position(xc,screen, str, len);
 		++str;
 		--len;
 		check_wrap(screen);
