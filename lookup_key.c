@@ -106,21 +106,27 @@ static char * get_format(const enum JBXVTKeySymType type)
 		return "%c";
 	}
 }
+static uint8_t * get_buffer(uint8_t * restrict buf,
+	struct JBXVTKeyMaps * restrict keymaptable,
+	const bool use_alternate)
+{
+	struct JBXVTKeyStrings * ks = use_alternate
+		? &keymaptable->km_alt : &keymaptable->km_normal;
+	snprintf((char *)buf, KBUFSIZE, get_format(ks->ks_type),
+		ks->ks_value);
+	return buf;
+}
 //  Look up function key keycode
 static uint8_t * get_keycode_value(struct JBXVTKeyMaps * restrict
-	keymaptable, xcb_keysym_t keysym,
-	uint8_t* buf, const int use_alternate)
+	keymaptable, xcb_keysym_t keysym, uint8_t* buf,
+	const bool use_alternate)
 {
-	for (struct JBXVTKeyMaps * km = keymaptable; km->km_keysym; ++km) {
-		if (km->km_keysym != keysym)
-			continue;
-		struct JBXVTKeyStrings * ks = use_alternate
-			? &km->km_alt : &km->km_normal;
-		snprintf((char *)buf, KBUFSIZE, get_format(ks->ks_type),
-			ks->ks_value);
-		return buf;
-	}
-	return NULL;
+	return keymaptable->km_keysym
+		? (keymaptable->km_keysym == keysym)
+		?  get_buffer(buf, keymaptable, use_alternate)
+			: get_keycode_value(keymaptable + 1, keysym,
+				buf, use_alternate)
+		: NULL;
 }
 static uint8_t * get_s(const xcb_keysym_t keysym, uint8_t * restrict kbuf)
 {
