@@ -1,14 +1,11 @@
 /*  Copyright 2017, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.  */
-#undef DEBUG
 #include "screen.h"
 #include <string.h>
 #include "JBXVTPrivateModes.h"
-#include "JBXVTScreen.h"
 #include "cursor.h"
 #include "erase.h"
-#include "libjb/JBDim.h"
 #include "libjb/log.h"
 #include "mode.h"
 #include "move.h"
@@ -45,12 +42,14 @@ struct JBDim * jbxvt_get_margin(void)
 {
 	return &jbxvt_get_current_screen()->margin;
 }
-static void set_area_to_e(const struct JBDim c)
+static void set_area_to_e(const int y, const struct JBDim c)
 {
-	struct JBXVTScreen * restrict current = jbxvt_get_current_screen();
-	for (int_fast16_t y = c.h - 1; y >= 0; --y) {
+	if (y < c.h) {
+		struct JBXVTScreen * restrict current
+			= jbxvt_get_current_screen();
 		memset(current->line[y].text, 'E', c.w);
 		memset(current->line[y].rend, 0, c.w << 2);
+		set_area_to_e(y + 1, c);
 	}
 }
 static inline void home(xcb_connection_t * restrict xc)
@@ -63,7 +62,7 @@ void jbxvt_efill(xcb_connection_t * xc)
 	LOG("jbxvt_efill");
 	// Move to cursor home in order for all characters to appear.
 	home(xc);
-	set_area_to_e(jbxvt_get_char_size());
+	set_area_to_e(0, jbxvt_get_char_size());
 	jbxvt_repaint(xc);
 }
 //  Change between the alternate and the main screens
