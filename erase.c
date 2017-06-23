@@ -55,8 +55,7 @@ static char * debug_mode(const int8_t mode)
 static void jbxvt_erase_after(xcb_connection_t * xc)
 {
 	jbxvt_check_cursor_position();
-	const int16_t y = jbxvt_get_y();
-	struct JBXVTLine * l = jbxvt_get_line(y);
+	struct JBXVTLine * l = jbxvt_get_line(jbxvt_get_y());
 	uint8_t * t = l->text;
 	const int16_t x = jbxvt_get_x();
 	delete(xc, x, jbxvt_get_char_size().width - x);
@@ -105,6 +104,18 @@ static bool assign_range(xcb_connection_t * restrict xc,
 	return true;
 #undef SETR
 }
+// Erase the lines specified by 
+void jbxvt_erase_next_line(xcb_connection_t * xc, int16_t * restrict y,
+	struct JBDim * range)
+{
+	if (range->start <= range->end) {
+		*y = range->start;
+		jbxvt_erase_line(xc, JBXVT_ERASE_ALL); // entire
+		jbxvt_draw_cursor(xc);
+		++range->start;
+		jbxvt_erase_next_line(xc, y, range);
+	}
+}
 // Erase the specified portion of the screen.
 void jbxvt_erase_screen(xcb_connection_t * xc, const int8_t mode)
 {
@@ -118,11 +129,7 @@ void jbxvt_erase_screen(xcb_connection_t * xc, const int8_t mode)
 	{ // *y scope, old_y scope
 		int16_t * y = &jbxvt_get_current_screen()->cursor.y;
 		const int16_t old_y = *y;
-		for (int16_t l = range.start; l <= range.end; ++l) {
-			*y = l;
-			jbxvt_erase_line(xc, JBXVT_ERASE_ALL); // entire
-			jbxvt_draw_cursor(xc);
-		}
+		jbxvt_erase_next_line(xc, y, &range);
 		*y = old_y;
 	}
 	// clear start of, end of, or entire current line, per mode
