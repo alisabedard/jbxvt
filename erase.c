@@ -106,7 +106,7 @@ static bool assign_range(xcb_connection_t * restrict xc,
 }
 // Erase the lines specified by 
 void jbxvt_erase_next_line(xcb_connection_t * xc, int16_t * restrict y,
-	struct JBDim * range)
+	struct JBDim * restrict range)
 {
 	if (range->start <= range->end) {
 		*y = range->start;
