@@ -32,11 +32,12 @@ static void space(const int i, uint8_t * restrict out_str)
 	}
 }
 // Generate a double-width string.  Free the result!
-uint8_t * jbxvt_get_double_width_string(uint8_t * in_str, int * restrict
+uint8_t * jbxvt_get_double_width_string(uint8_t * in_str, uint16_t * restrict
 	length_return)
 {
 	// save current length
 	const int in_length = *length_return, out_length = in_length << 1;
+	*length_return = out_length;
 	// double it and allocate buffer to match
 	uint8_t * out_str = malloc(out_length);
 	space(out_length - 1, out_str);

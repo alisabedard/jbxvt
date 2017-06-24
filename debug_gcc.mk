@@ -20,6 +20,11 @@ CFLAGS+=-Wsuggest-attribute=noreturn
 CFLAGS+=-Wsuggest-attribute=format
 CFLAGS+=-Wsuggest-final-types
 CFLAGS+=-Wmissing-format-attribute
+#CFLAGS+=-Wpadded
+CFLAGS+=-Wrestrict
+CFLAGS+=-Wredundant-decls
+CFLAGS+=-Wdisabled-optimization
+CFLAGS+=-Woverlength-strings
 CFLAGS+=-fstack-protector-all
 #CFLAGS+=-fstack-check
 #CFLAGS+=-fPIC -pie

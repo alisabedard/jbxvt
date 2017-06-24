@@ -48,9 +48,8 @@ struct HistoryContext {
 	xcb_connection_t * xc;
 	struct JBDim * position;
 	struct JBXVTLine * line_data;
-	int line, top;
-	uint16_t scroll_size;
-	uint8_t font_height, char_height;
+	int32_t line, top, scroll_size;
+	uint16_t char_height, font_height;
 };
 static void increment_line(struct HistoryContext * restrict i)
 {

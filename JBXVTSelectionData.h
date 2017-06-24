@@ -7,9 +7,10 @@
 #include "libjb/JBDim.h"
 struct JBXVTSelectionData {
 	uint8_t * text;
-	enum JBXVTSelectionUnit unit;
 	struct JBDim end[3]; // end0, end1, anchor
-	uint16_t length:15;
-	bool on_screen:1;
+	enum JBXVTSelectionUnit unit;
+	int32_t length;
+	uint32_t on_screen; /* Large type used for padding
+			       to alignment boundary.  */
 };
 #endif//!JBXVT_JBXVTSELECTIONDATA_H

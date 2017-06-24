@@ -16,6 +16,7 @@ struct InversionData {
 	xcb_window_t window;
 	xcb_gcontext_t gc;
 	uint16_t width_in_chars;
+	uint16_t pad;
 };
 static void invert_r(const uint8_t current,
 	struct InversionData * i)

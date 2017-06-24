@@ -45,5 +45,6 @@ struct JBXVTPrivateModes {
 	bool elr_pixels:1;	// locator report in pixel format
 	bool ss2:1;		// use G2 charset on next character only
 	bool ss3:1;		// use G3 charset on next character only
+	const int8_t __pad:7;
 };
 #endif//!JBXVT_JBXVTPRIVATEMODES_H

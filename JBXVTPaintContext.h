@@ -9,8 +9,9 @@ struct JBXVTPaintContext {
 	xcb_connection_t * xc;
 	uint8_t * string;
 	rstyle_t * style;
-	int length;
+	uint16_t length;
 	struct JBDim position;
-	const bool is_double_width_line;
+	bool is_double_width_line;
+	const uint8_t pad;
 };
 #endif//!JBXVT_JBXVTPAINTCONTEXT_H

@@ -34,8 +34,11 @@ static bool on_screen(const struct JBDim * restrict e)
 struct CopyData {
 	struct JBDim * endpoints;
 	uint8_t * string;
-	int total;
-	short char_width;
+	int32_t total;
+	int32_t char_width; /*  Large type used for alignment padding.
+				Signed type used to prevent mixing of signed
+				and unsigned type in conditional expression
+				later. */
 };
 static int copy_line(const int i, const int j, struct CopyData * restrict d)
 {
