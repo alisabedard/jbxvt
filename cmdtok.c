@@ -29,21 +29,23 @@ static uint8_t init_in_fdset(fd_set * restrict in_fdset)
 	FD_SET(fd, in_fdset);
 	return fd + 1;
 }
+static void select_for_in_fdset(const fd_t xfd, fd_set * restrict in_fdset)
+{
+	const uint8_t nfds = init_in_fdset(in_fdset);
+	FD_SET(xfd, in_fdset);
+	fd_set out_fdset;
+	FD_ZERO(&out_fdset);
+	if (select(nfds, in_fdset, &out_fdset, NULL,
+		&(struct timeval){.tv_usec = 500000}) == -1)
+		exit(1); /* exit is reached in case SHELL or -e
+			    command was not run successfully.  */
+}
 __attribute__((nonnull))
 static void poll_io(xcb_connection_t * xc,
 	fd_set * restrict in_fdset)
 { // xfd scope
 	const fd_t xfd = xcb_get_file_descriptor(xc);
-	{ // nfds scope
-		const uint8_t nfds = init_in_fdset(in_fdset);
-		FD_SET(xfd, in_fdset);
-		fd_set out_fdset;
-		FD_ZERO(&out_fdset);
-		if (select(nfds, in_fdset, &out_fdset, NULL,
-			&(struct timeval){.tv_usec = 500000}) == -1)
-			exit(1); /* exit is reached in case SHELL or -e
-				    command was not run successfully.  */
-	}
+	select_for_in_fdset(xfd, in_fdset);
 	/* If xfd has input, verify connection status.  Otherwise,
 	   call timer function.  In this case, hook into the
 	   cursor blink functionality.  FIXME:  Implement SGR blinking
