@@ -8,8 +8,12 @@ struct JBXVTOptions {
 	char * foreground_color, * background_color,
 	     * normal_font, * bold_font, * italic_font;
 	struct JBDim size, position;
-	int32_t screen;
-	bool show_scrollbar;
-	int __pad:24; // pad to alignment boundary
+	uint8_t screen:7;
+	bool show_scrollbar:1;
+#ifdef JBXVT_USE_PADDED
+	int8_t __pad[7]; // pad to alignment boundary
 };
+#else//!JBXVT_USE_PADDED
+} __attribute__((packed)); // saves 7 bytes
+#endif//JBXVT_USE_PADDED
 #endif//!JBXVT_JBXVTOPTIONS_H

@@ -73,8 +73,8 @@ scr_reset.o: scr_reset.c scr_reset.h JBXVTPrivateModes.h JBXVTScreen.h \
  JBXVTLine.h config.h rstyle.h libjb/JBDim.h color.h libjb/xcb.h \
  command.h libjb/util.h cursor.h screen.h libjb/log.h libjb/macros.h \
  libjb/time.h mode.h move.h repaint.h sbar.h size.h window.h
-screen.o: screen.c screen.h JBXVTPrivateModes.h JBXVTScreen.h JBXVTLine.h \
- config.h rstyle.h libjb/JBDim.h cursor.h erase.h libjb/log.h mode.h \
+screen.o: screen.c screen.h JBXVTPrivateModes.h cursor.h JBXVTScreen.h \
+ JBXVTLine.h config.h rstyle.h libjb/JBDim.h erase.h libjb/log.h mode.h \
  move.h repaint.h sbar.h scr_reset.h scroll.h size.h
 scroll.o: scroll.c scroll.h JBXVTLine.h config.h rstyle.h JBXVTScreen.h \
  libjb/JBDim.h font.h gc.h libjb/log.h libjb/macros.h libjb/util.h sbar.h \
