@@ -59,22 +59,28 @@ static void wrap(xcb_connection_t * restrict xc)
 	} else
 		++s->cursor.y;
 }
-static void move_data_on_screen(xcb_connection_t * xc,
-	const uint8_t n, const uint16_t sz, const struct JBDim p)
-{
-	const struct JBDim f = jbxvt_get_font_size();
-	const uint16_t n_width = n * f.width;
-	const xcb_window_t vt = jbxvt_get_vt_window(xc);
-	xcb_copy_area(xc, vt, vt, jbxvt_get_text_gc(xc), p.x, p.y,
-		p.x + n_width, p.y, sz * f.width - n_width, f.height);
-
-}
 struct MoveData {
-	uint8_t * text;
-	rstyle_t * style;
+	union {
+		uint8_t * text;
+		xcb_connection_t * xc;
+	};
+	union {
+		rstyle_t * style;
+		struct JBDim * restrict point;
+	};
 	size_t size;
 	int32_t index, offset;
 };
+static void move_visible(struct MoveData * restrict d)
+
+{
+	const struct JBDim f = jbxvt_get_font_size(),
+	      * restrict p = d->point;
+	const uint16_t n_width = d->offset * f.width;
+	const xcb_window_t vt = jbxvt_get_vt_window(d->xc);
+	xcb_copy_area(d->xc, vt, vt, jbxvt_get_text_gc(d->xc), p->x, p->y,
+		p->x + n_width, p->y, d->size * f.width - n_width, f.height);
+}
 static void move(struct MoveData * restrict d)
 {
 	memmove(d->text + d->index + d->offset,
@@ -84,17 +90,18 @@ static void move(struct MoveData * restrict d)
 }
 // Insert count characters space (not blanked) at point
 static void insert_characters(xcb_connection_t * restrict xc,
-	const uint8_t count, const struct JBDim point)
+	const uint8_t count, struct JBDim point)
 {
 	LOG("handle_insert(n=%d, p={%d, %d})", count, point.x, point.y);
 	struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
 	const struct JBDim c = s->cursor;
-	const uint16_t sz = jbxvt_get_char_size().w - c.x;
 	struct MoveData d = {.text = s->line[c.y].text,
 		.style = s->line[c.y].rend, .offset = count,
-		.index = c.x, .size = sz};
+		.index = c.x, .size = jbxvt_get_char_size().w - c.x};
 	move(&d);
-	move_data_on_screen(xc, count, sz, point);
+	d.xc = xc;
+	d.point = &point;
+	move_visible(&d);
 }
 static void parse_special_charset(uint8_t * restrict str,
 	const int len)
