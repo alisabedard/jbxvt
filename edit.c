@@ -31,7 +31,7 @@ static void copy_area(xcb_connection_t * restrict xc,
 	const int16_t y = jbxvt_get_y() * f.height;
 	const uint16_t w = get_copy_width(count, f.w);
 	const xcb_gcontext_t gc = jbxvt_get_text_gc(xc);
-	const uint16_t px = f.w * x[1];
+	const int16_t px = f.w * x[1];
 	xcb_copy_area(xc, v, v, gc, f.w * x[0], y, px, y, w, f.h);
 }
 static void clear_area(xcb_connection_t * restrict xc, const int16_t x,
@@ -60,8 +60,12 @@ void jbxvt_edit_characters(xcb_connection_t * xc,
 	if (delete)
 		JB_SWAP(uint8_t *, a, b);
 	l->wrap = false;
-	/* Perform the off-screen edit:  */
-	memmove(b, a, JBXVT_MAX_COLUMNS - count - x);
+	/* Validate the operation parameters, count and x, to prevent integer
+	 * overflow on the following memmove.  */
+	if ((count + x) < JBXVT_MAX_COLUMNS) {
+		// Perform the off-screen edit:
+		memmove(b, a, (size_t)(JBXVT_MAX_COLUMNS - count - x));
+	}
 #if LOG_LEVEL > 8
 	/* Show that the edit occurred in the off-screen buffer. */
 	LOG("%s", l->text);

@@ -23,15 +23,15 @@ static void invert_r(const uint8_t current,
 {
 	LOG("invert_r(current: %d, i)", current);
 	if (current <= i->end_point.row) {
-		const uint8_t fw = i->font_size.width, fh =
-			i->font_size.height;
+		const uint8_t fw = (uint8_t)i->font_size.width,
+		      fh = (uint8_t)i->font_size.height;
 		const int16_t x[] = {current == i->start_point.row ?
 			i->start_point.columns * fw : 0,
 			(current == i->end_point.row ? i->end_point.columns
 			 : i->width_in_chars) * fw};
 		xcb_poly_fill_rectangle(i->xc, i->window, i->gc, 1,
 			&(xcb_rectangle_t){.x = x[0], .y = current * fh,
-			.width = x[1] - x[0], .height = fh});
+			.width = (uint16_t)(x[1] - x[0]), .height = fh});
 		invert_r(current + 1, i);
 	}
 }
@@ -57,7 +57,7 @@ static void change(xcb_connection_t * restrict xc, struct JBDim * se,
 		.width_in_chars = jbxvt_get_char_size().width,
 	};
 	// Invert the changed area
-	invert_r(i.start_point.row, &i);
+	invert_r((uint8_t)i.start_point.row, &i);
 
 }
 /*  Repaint the displayed selection to reflect the new value.

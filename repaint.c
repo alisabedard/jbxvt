@@ -79,7 +79,7 @@ static void show_history_r(struct HistoryContext * restrict i)
 }
 static void draw_history_line(xcb_connection_t * xc, const int16_t y)
 {
-	const uint16_t width = jbxvt_get_pixel_size().width;
+	const int width = jbxvt_get_pixel_size().width;
 	xcb_point_t onscreen_line[] = {{.y = y}, {.x = width, .y = y}};
 	xcb_poly_line(xc, XCB_COORD_MODE_ORIGIN, jbxvt_get_vt_window(xc),
 		jbxvt_get_cursor_gc(xc), 2, onscreen_line);

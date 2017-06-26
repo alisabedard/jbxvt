@@ -14,15 +14,16 @@ __attribute__((cold))
 static void encode_rgb(uint8_t color, uint8_t offset)
 {
 	// 0xe0 masks the most significant 3 bits
-	const uint32_t val = (color & 0xe0) << offset >> 4;
-	LOG("encode_rgb(color: %d, offset: %d) val: 0x%x", color, offset, val);
+	const uint32_t val = (uint32_t)((color & 0xe0) << offset >> 4);
+	LOG("encode_rgb(color: %d, offset: %d) val: 0x%x", color, offset,
+		val);
 	jbxvt_add_rstyle(val);
 }
 /* c must be uint32_t to allow for shift and OR with rstyle. */
 static void sgrc(const uint32_t c, const bool fg)
 {
 	const uint8_t o = JB_LIKELY(fg) ? 7 : 16;
-	jbxvt_del_rstyle(0777 << o);
+	jbxvt_del_rstyle((rstyle_t)(0777 << o));
 	jbxvt_add_rstyle((fg ? JBXVT_RS_FG_INDEX
 		: JBXVT_RS_BG_INDEX) | c << o);
 }
@@ -45,7 +46,7 @@ static bool handle_color_encoding(const int32_t arg, const bool is_fg,
 {
 	static uint8_t rgb_count;
 	if (*index_mode) {
-		sgrc(arg, is_fg);
+		sgrc((uint32_t)arg, is_fg);
 		// exit mode after handling index
 		*index_mode = false;
 		return true;

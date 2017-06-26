@@ -307,7 +307,7 @@ HANDLE(SD) // scroll down
 }
 HANDLE(SELINSRT)
 {
-	jbxvt_request_selection(xc, token->arg[0]);
+	jbxvt_request_selection(xc, (xcb_timestamp_t)token->arg[0]);
 }
 EXTERN_ALIAS(SGR, jbxvt_handle_sgr);
 HANDLE(SS2)
@@ -356,16 +356,16 @@ HANDLE(SWL) // single width line
 // vertical position, absolute or relative
 static void vp(xcb_connection_t * xc, const uint16_t arg, const bool relative)
 {
-	jbxvt_move(xc, 0, get_0(arg), JBXVT_COLUMN_RELATIVE | (relative
-		? JBXVT_ROW_RELATIVE : 0));
+	jbxvt_move(xc, 0, get_0((int16_t)arg), JBXVT_COLUMN_RELATIVE |
+		(relative ? JBXVT_ROW_RELATIVE : 0));
 }
 HANDLE(VPA) // vertical position absolute
 {
-	vp(xc, token->arg[0], false);
+	vp(xc, (uint16_t)token->arg[0], false);
 }
 HANDLE(VPR) // vertical position relative
 {
-	vp(xc, token->arg[0], true);
+	vp(xc, (uint16_t)token->arg[0], true);
 }
 bool jbxvt_parse_token(xcb_connection_t * xc)
 {

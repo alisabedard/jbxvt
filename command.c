@@ -156,8 +156,11 @@ static void child(char ** restrict argv, fd_t ttyfd)
 && defined(HAVE_ASM_GENERIC_IOCTLS_H) && defined(TIOCSWINSZ)
 void jbxvt_set_tty_size(const struct JBDim sz)
 {
+	jb_check(sz.col > 0, "Column size invalid");
+	jb_check(sz.row > 0, "Row size invalid");
 	jb_check(ioctl(jbxvt_get_fd(), TIOCSWINSZ, &(struct winsize){
-		.ws_row = sz.row, .ws_col = sz.col}) != 1,
+		.ws_row = (short unsigned int)sz.row,
+		.ws_col = (short unsigned int)sz.col}) != 1,
 		"Could not set ioctl TIOCSWINSZ");
 }
 #endif//etc

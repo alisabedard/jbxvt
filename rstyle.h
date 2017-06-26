@@ -35,10 +35,10 @@ enum JBXVTRenderStyle {
 	JBXVT_RS_B7 = (1<<22),
 	JBXVT_RS_B8 = (1<<23),
 	// extended color support bits
-	JBXVT_RS_FG_RGB = (1<<28),
-	JBXVT_RS_BG_RGB = (1<<29),
-	JBXVT_RS_FG_INDEX = (1<<30),
-	JBXVT_RS_BG_INDEX = (1<<31),
+	JBXVT_RS_FG_RGB = (1<<27),
+	JBXVT_RS_BG_RGB = (1<<28),
+	JBXVT_RS_FG_INDEX = (1<<29),
+	JBXVT_RS_BG_INDEX = (1<<30),
 };
 void jbxvt_add_rstyle(const rstyle_t val);
 void jbxvt_del_rstyle(const rstyle_t val);

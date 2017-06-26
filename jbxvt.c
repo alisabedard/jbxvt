@@ -15,6 +15,8 @@ static char ** parse_command_line(const int argc, char ** argv,
 {
 	static const char * optstr = "B:b:C:c:D:d:eF:f:hH:I:R:S:svW:x:y:";
 	int opt;
+	int16_t optval;
+#define GET_OPTVAL() optval = (int16_t)atoi(optarg);
 	while((opt=getopt(argc, argv, optstr)) != -1) {
 		switch (opt) {
 		case 'B': // bold font
@@ -25,13 +27,16 @@ static char ** parse_command_line(const int argc, char ** argv,
 			break;
 		case 'W': // width
 		case 'C': // columns
-			o->size.cols = atoi(optarg);
+			GET_OPTVAL();
+			o->size.cols = optval;
 			break;
 		case 'c': // cursor style
-			jbxvt_set_cursor_attr(atoi(optarg));
+			GET_OPTVAL();
+			jbxvt_set_cursor_attr((uint8_t)optval);
 			break;
 		case 'd': // screen number
-			o->screen = atoi(optarg);
+			GET_OPTVAL();
+			o->screen = (uint8_t)optval;
 			break;
 		case 'e': // exec
 			return argv + optind;
@@ -43,19 +48,22 @@ static char ** parse_command_line(const int argc, char ** argv,
 			break;
 		case 'H': // height
 		case 'R': // rows
-			o->size.rows = atoi(optarg);
+			GET_OPTVAL();
+			o->size.rows = optval;
 			break;
 		case 's': // use scrollbar
-			o->show_scrollbar=true;
+			o->show_scrollbar = true;
 			break;
 		case 'v': // version
 			printf("jbxvt %s\n", JBXVT_VERSION);
 			exit(0);
 		case 'x': // x position
-			o->position.x = atoi(optarg);
+			GET_OPTVAL();
+			o->position.x = optval;
 			break;
 		case 'y': // y position
-			o->position.y = atoi(optarg);
+			GET_OPTVAL();
+			o->position.y = optval;
 			break;
 		case 'h': // help
 		default:

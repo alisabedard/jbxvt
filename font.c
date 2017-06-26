@@ -18,7 +18,7 @@ static void setup_font_metrics(xcb_connection_t * xc,
 		c, NULL);
 	jb_assert(r, "Cannot get font information");
 	font_ascent = r->font_ascent;
-	font_size.width = r->max_bounds.character_width;
+	font_size.width = (uint16_t)r->max_bounds.character_width;
 	font_size.height = r->font_ascent + r->font_descent;
 	free(r);
 }

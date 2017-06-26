@@ -238,21 +238,21 @@ static void print_s(uint8_t * s, int16_t i)
 #endif//DEBUG_KEYS
 static uint8_t * handle_keysym(xcb_connection_t * restrict xc,
 	uint8_t * restrict kbuf, int_fast16_t * restrict pcount,
-	const xcb_keysym_t k, const uint16_t ke_state)
+	const xcb_keysym_t key, const uint16_t ke_state)
 {
-	uint8_t * s = get_s(k, (uint8_t *)kbuf);
+	uint8_t * s = get_s(key, (uint8_t *)kbuf);
 	if (s) {
-		*pcount = strlen((const char *)s);
+		*pcount = jb_strlen((const char *)s);
 		print_s(s, *pcount);
 		if (shift_page_up_down_scroll(xc,
 			ke_state, *pcount, s))
 			return NULL;
 		return s;
 	}
-	if (is_not_printable(k))
+	if (is_not_printable(key))
 		return NULL;
 	*pcount = 1;
-	kbuf[0] = k;
+	kbuf[0] = (uint8_t)key;
 	apply_state(ke_state, kbuf);
 	return kbuf;
 }

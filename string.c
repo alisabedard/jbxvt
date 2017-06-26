@@ -73,7 +73,7 @@ struct MoveData {
 	uint8_t * text;
 	rstyle_t * style;
 	size_t size;
-	int16_t index, offset;
+	int32_t index, offset;
 };
 static void move(struct MoveData * restrict d)
 {

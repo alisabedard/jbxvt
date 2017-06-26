@@ -11,28 +11,28 @@
 #include "size.h"
 #include "window.h"
 static void clear_area(xcb_connection_t * restrict xc,
-	const int16_t x, const int16_t y, const uint16_t width)
+	const int16_t x, const int16_t y, const size_t width)
 {
 	const struct JBDim f = jbxvt_get_font_size();
 	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), x * f.w, y * f.h,
 		width * f.w, f.h);
 }
-static uint16_t get_limited_width(const uint16_t col, const uint16_t width)
+static size_t get_limited_width(const int16_t col, const int16_t width)
 {
 	const int cw = jbxvt_get_char_size().width;
 	// keep col + width within the screen width
-	return (col + width > cw) ? cw - col : width;
+	return (size_t)((col + width > cw) ? cw - col : width);
 }
-static void delete(xcb_connection_t * restrict xc, const uint16_t col,
-	uint16_t width)
+static void delete(xcb_connection_t * restrict xc, const int16_t col,
+	int16_t width)
 {
 	const int16_t y = jbxvt_get_y();
 	LOG("\tdelete(xc, row: %d, col:%d, width: %d)", y, col, width);
-	width = get_limited_width(col, width);
+	const size_t len = get_limited_width(col, width);
 	struct JBXVTLine * l = jbxvt_get_line(y);
-	memset(l->text + col, 0, width);
-	memset(l->rend + col, 0, width << 2);
-	clear_area(xc, col, y, width);
+	memset(l->text + col, 0, len);
+	memset(l->rend + col, 0, (size_t)(len << 2));
+	clear_area(xc, col, y, len);
 	l->wrap = l->dwl = false;
 }
 #ifdef DEBUG
@@ -71,7 +71,7 @@ void jbxvt_erase_line(xcb_connection_t * xc, const int8_t mode)
 	jbxvt_set_scroll(xc, 0);
 	switch (mode) {
 	case JBXVT_ERASE_ALL:
-		delete(xc, 0, jbxvt_get_char_size().width);
+		delete(xc, 0, (int16_t)jbxvt_get_char_size().width);
 		break;
 	case JBXVT_ERASE_BEFORE:
 		delete(xc, 0, jbxvt_get_x());
@@ -89,7 +89,7 @@ static bool assign_range(xcb_connection_t * restrict xc,
 	switch (mode) {
 		// offset by 1 to not include current line, handled later
 	case JBXVT_ERASE_AFTER:
-		SETR(jbxvt_get_y() + 1, jbxvt_get_char_size().h);
+		SETR(jbxvt_get_y() + 1, (int16_t)jbxvt_get_char_size().h);
 		break;
 	case JBXVT_ERASE_BEFORE:
 		SETR(0, jbxvt_get_y() - 1);

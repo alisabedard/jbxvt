@@ -40,12 +40,14 @@ static void handle_underline_styles(struct JBXVTPaintContext * c)
 	}
 	/* Test against JBXVT_RS_BG_RGB here to prevent red background
 	   text from being rendered crossed out.  */
-	if (rstyle & JBXVT_RS_CROSSED_OUT && !(rstyle & JBXVT_RS_BG_RGB))
-		draw_underline(xc, len, c->position,
-			-(jbxvt_get_font_size().h >> 1));
+	if (rstyle & JBXVT_RS_CROSSED_OUT && !(rstyle & JBXVT_RS_BG_RGB)) {
+		const uint16_t value = jbxvt_get_font_size().h >> 1;
+		const int8_t offset = (int8_t) -value;
+		draw_underline(xc, len, c->position, offset);
+	}
 }
 static void draw_text(xcb_connection_t * xc,
-	uint8_t * restrict str, uint16_t len,
+	uint8_t * restrict str, uint8_t len,
 	struct JBDim * restrict p, rstyle_t rstyle)
 {
 	{ // vt, gc scope
@@ -67,10 +69,13 @@ static void draw_text(xcb_connection_t * xc,
 }
 __attribute__((const))
 static uint16_t get_channel(const uint16_t compressed_rgb,
-	const uint16_t mask, const uint8_t shift)
+	const uint16_t mask, const uint8_t mutation)
 {
-	enum { SCALE = 12 }; // scale, leave 3 bits for octal
-	return ((compressed_rgb & mask) >> shift) << SCALE;
+	enum { SCALE = 12 };
+	const uint16_t overlaid = compressed_rgb & mask,
+	      transferred = overlaid >> mutation,
+	      scaled = (uint16_t)(transferred << 12);
+	return scaled;
 }
 // 9-bit color
 static pixel_t rgb_pixel(xcb_connection_t * xc, const uint16_t c)
@@ -102,7 +107,8 @@ static bool set_rstyle_colors(xcb_connection_t * restrict xc,
 	// Mask foreground colors, 9 bits offset by 7 bits
 	// Mask background colors, 9 bits offset by 16 bits
 	enum { FG_SHIFT = 7, BG_SHIFT = 16 };
-	const uint8_t color[] = {rstyle >> FG_SHIFT, rstyle >> BG_SHIFT};
+	const uint8_t color[] = {(uint8_t)(rstyle >> FG_SHIFT),
+		(uint8_t)(rstyle >> BG_SHIFT)};
 	const bool rgb[] = {rstyle & JBXVT_RS_FG_RGB,
 		rstyle & JBXVT_RS_BG_RGB};
 	const bool ind[] = {rstyle & JBXVT_RS_FG_INDEX,

@@ -63,7 +63,8 @@ static void key_press(xcb_connection_t * xc, void * e)
 	int_fast16_t count = 0;
 	uint8_t * s = jbxvt_lookup_key(xc, e, &count);
 	if (s)
-		jb_require(write(jbxvt_get_fd(), s, count) != -1,
+		jb_require(write(jbxvt_get_fd(), s,
+			(size_t)count) != -1,
 			"Could not write to command");
 }
 static void handle_motion_notify(xcb_connection_t * xc,

@@ -53,7 +53,7 @@ static bool paste_from(xcb_connection_t * xc,
 	if (reply_is_invalid(r))
 		return false;
 	paste(xcb_get_property_value(r),
-		xcb_get_property_value_length(r));
+		(size_t)xcb_get_property_value_length(r));
 	free(r);
 	return true;
 }
@@ -68,15 +68,15 @@ void jbxvt_request_selection(xcb_connection_t * xc,
 	if (paste_from(xc, XCB_ATOM_SECONDARY, t))
 		return;
 }
-static int paste_primary_chunk(xcb_connection_t * xc,
-	const xcb_atom_t property, int nread)
+static uint32_t paste_primary_chunk(xcb_connection_t * xc,
+	const xcb_atom_t property, uint32_t nread)
 {
 	xcb_get_property_reply_t * r = xcb_get_property_reply(xc,
 		get_prop(xc, property, nread), NULL);
 	if (!reply_is_invalid(r)) {
-		const int bytes_after = r->bytes_after;
+		const uint32_t bytes_after = r->bytes_after;
 		nread += paste(xcb_get_property_value(r),
-			xcb_get_property_value_length(r));
+			(size_t)xcb_get_property_value_length(r));
 		free(r);
 		if (bytes_after > 0)
 			return paste_primary_chunk(xc, property, nread);
@@ -84,7 +84,7 @@ static int paste_primary_chunk(xcb_connection_t * xc,
 	return nread;
 }
 //  Respond to a notification that a primary selection has been sent
-int jbxvt_paste_primary(xcb_connection_t * xc,
+uint32_t jbxvt_paste_primary(xcb_connection_t * xc,
 	const xcb_timestamp_t t, const xcb_window_t window,
 	const xcb_atom_t property)
 {

@@ -20,7 +20,7 @@
 #include "size.h"
 #include "window.h"
 static struct JBXVTLine * saved_lines;
-static uint16_t scroll_size;
+static int16_t scroll_size;
 struct JBXVTLine * jbxvt_get_saved_lines(void)
 {
 	return saved_lines;
@@ -31,7 +31,7 @@ void jbxvt_clear_scroll_history(void)
 	saved_lines = NULL;
 	scroll_size = 0;
 }
-uint16_t jbxvt_get_scroll_size(void)
+int16_t jbxvt_get_scroll_size(void)
 {
 	return scroll_size;
 }
@@ -94,15 +94,17 @@ static void add_scroll_history(void)
 {
 	struct JBXVTScreen * s = jbxvt_get_current_screen();
 	enum { SIZE = sizeof(struct JBXVTLine) };
-	saved_lines = realloc(saved_lines, ++scroll_size * SIZE);
+	saved_lines = realloc(saved_lines,
+		(size_t)(++scroll_size * SIZE));
 	jb_require(saved_lines, "Cannot allocate memory"
 		" for scroll history");
 	// - 1 for index instead of size
 	memcpy(&saved_lines[scroll_size - 1], &s->line[s->cursor.y], SIZE);
 	trim();
 }
-static int8_t copy_lines(const int8_t i, const int8_t j, const int8_t mod,
-	const int8_t count)
+// Returns the index into the source line array.
+static uint8_t copy_lines(const uint8_t i, const uint8_t j, const int8_t mod,
+	const uint8_t count)
 {
 	if (i >= count)
 		return j;
@@ -143,7 +145,7 @@ static void sc_dn(xcb_connection_t * xc, const uint8_t row1, const
 	uint8_t row2, const int16_t count)
 {
 	struct JBXVTScreen * s = jbxvt_get_current_screen();
-	for(int8_t j = copy_lines(0, row2, -1, count); j >= row1; --j)
+	for(uint8_t j = copy_lines(0, row2, -1, count); j >= row1; --j)
 		move_line(j, count, s->line);
 	sc_common(xc, row1, row2, count, false);
 }
@@ -153,7 +155,7 @@ static void sc_up(xcb_connection_t * xc, const uint8_t row1, const
 	struct JBXVTScreen * s = jbxvt_get_current_screen();
 	if (s == jbxvt_get_screen_at(0) && row1 == 0)
 		add_scroll_history();
-	for(int8_t j = copy_lines(0, row1, 1, count); j < row2; ++j)
+	for(uint8_t j = copy_lines(0, row1, 1, count); j < row2; ++j)
 		move_line(j, -count, s->line);
 	sc_common(xc, row1, row2, count, true);
 }

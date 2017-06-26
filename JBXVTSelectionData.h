@@ -9,8 +9,9 @@ struct JBXVTSelectionData {
 	uint8_t * text;
 	struct JBDim end[3]; // end0, end1, anchor
 	enum JBXVTSelectionUnit unit;
-	int32_t length;
-	uint32_t on_screen; /* Large type used for padding
+	uint32_t length;
+	bool on_screen; /* Large type used for padding
 			       to alignment boundary.  */
+	const int8_t __pad[3];
 };
 #endif//!JBXVT_JBXVTSELECTIONDATA_H

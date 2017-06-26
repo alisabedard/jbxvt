@@ -9,7 +9,7 @@
 #include "selend.h"
 #include "size.h"
 static void copy(uint8_t * str, uint8_t * scr_text,
-	const int16_t start, const uint16_t len,
+	const int16_t start, const size_t len,
 	const uint16_t total)
 {
 	if (!len)
@@ -34,26 +34,27 @@ static bool on_screen(const struct JBDim * restrict e)
 struct CopyData {
 	struct JBDim * endpoints;
 	uint8_t * string;
-	int32_t total;
-	int32_t char_width; /*  Large type used for alignment padding.
-				Signed type used to prevent mixing of signed
+	uint32_t total;
+	int32_t char_width; /*  Signed type used to prevent mixing of signed
 				and unsigned type in conditional expression
 				later. */
 };
-static int copy_line(const int i, const int j, struct CopyData * restrict d)
+static size_t copy_line(const int i, const int j, struct CopyData * restrict d)
 {
 	if (i <= j) {
 		/* Use full screen width if not first or last lines of
 		 * selection, otherwise use the col field in the respective
 		 * end point.  */
 		struct JBDim * restrict e = d->endpoints;
-		const int16_t start = i == e[0].index ? e[0].col : 0;
-		const int16_t end = i == j ? e[1].col : d->char_width - 1;
-		const uint16_t len = end - start;
-		const int new_total = d->total + len;
-		d->string = realloc(d->string, new_total);
+		const int16_t start = i == e[0].index ? e[0].col : 0,
+			end = i == j ? e[1].col : d->char_width - 1;
+		/* We are positive so long as window exists and has a
+		 * geometry, so the conversion to size_t is valid for len. */
+		const size_t len = (size_t)(end - start),
+		      new_total = d->total + len;
+		d->string = realloc(d->string, (size_t)new_total);
 		copy(d->string, jbxvt_get_line(i)->text, start,
-			len, d->total);
+			(size_t)len, d->total);
 		d->total = new_total;
 		return copy_line(i + 1, j, d);
 	}
@@ -73,13 +74,13 @@ void jbxvt_save_selection(struct JBXVTSelectionData * sel)
 	if (!on_screen(e))
 		return; // Invalid end point found
 	struct CopyData d = {.endpoints = e, .total = 1,
-		.char_width = jbxvt_get_char_size().width};
-	d.string = malloc(d.total);
+		.char_width = (int16_t)jbxvt_get_char_size().width};
+	d.string = malloc((size_t)d.total);
 	// Copy each line in the selection:
 	d.total = copy_line(e[0].index, e[1].index, &d);
 	bool last_was_cr = false;
 	// Substitute the first null terminator with a carriage return:
-	for (int_fast16_t i = 0; i < d.total; ++i)
+	for (size_t i = 0; i < d.total; ++i)
 		if (d.string[i] == '\0') {
 			if (!last_was_cr) {
 				d.string[i] = '\r';
