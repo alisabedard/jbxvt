@@ -59,13 +59,6 @@ static void wrap(xcb_connection_t * restrict xc)
 	} else
 		++s->cursor.y;
 }
-static void move_data_in_memory(uint8_t * restrict t,
-	rstyle_t * restrict r, const uint8_t n, const int16_t x,
-	const uint16_t sz)
-{
-	memmove(t + x + n, t + x, sz);
-	memmove(r + x + n, r + x, sz << 2);
-}
 static void move_data_on_screen(xcb_connection_t * xc,
 	const uint8_t n, const uint16_t sz, const struct JBDim p)
 {
@@ -76,6 +69,19 @@ static void move_data_on_screen(xcb_connection_t * xc,
 		p.x + n_width, p.y, sz * f.width - n_width, f.height);
 
 }
+struct MoveData {
+	uint8_t * text;
+	rstyle_t * style;
+	size_t size;
+	int16_t index, offset;
+};
+static void move(struct MoveData * restrict d)
+{
+	memmove(d->text + d->index + d->offset,
+		d->text + d->index, d->size);
+	memmove(d->style + d->index + d->offset,
+		d->style + d->index, d->size << 2);
+}
 // Insert count characters space (not blanked) at point
 static void insert_characters(xcb_connection_t * restrict xc,
 	const uint8_t count, const struct JBDim point)
@@ -84,8 +90,10 @@ static void insert_characters(xcb_connection_t * restrict xc,
 	struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
 	const struct JBDim c = s->cursor;
 	const uint16_t sz = jbxvt_get_char_size().w - c.x;
-	move_data_in_memory(s->line[c.y].text, s->line[c.y].rend,
-		count, c.x, sz);
+	struct MoveData d = {.text = s->line[c.y].text,
+		.style = s->line[c.y].rend, .offset = count,
+		.index = c.x, .size = sz};
+	move(&d);
 	move_data_on_screen(xc, count, sz, point);
 }
 static void parse_special_charset(uint8_t * restrict str,
