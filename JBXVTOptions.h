@@ -10,10 +10,5 @@ struct JBXVTOptions {
 	struct JBDim size, position;
 	uint8_t screen:7;
 	bool show_scrollbar:1;
-#ifdef JBXVT_USE_PADDED
-	int8_t __pad[7]; // pad to alignment boundary
-};
-#else//!JBXVT_USE_PADDED
-} __attribute__((packed)); // saves 7 bytes
-#endif//JBXVT_USE_PADDED
+} __attribute__((packed));
 #endif//!JBXVT_JBXVTOPTIONS_H
