@@ -97,7 +97,8 @@ static void insert_characters(xcb_connection_t * restrict xc,
 	const struct JBDim c = s->cursor;
 	struct MoveData d = {.text = s->line[c.y].text,
 		.style = s->line[c.y].rend, .offset = count,
-		.index = c.x, .size = jbxvt_get_char_size().w - c.x};
+		.index = c.x,
+		.size = (size_t)(jbxvt_get_char_size().w - c.x)};
 	move(&d);
 	d.xc = xc;
 	d.point = &point;
