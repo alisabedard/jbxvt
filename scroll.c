@@ -131,34 +131,38 @@ static void clear(int count, const int offset, const bool is_up)
 		sizeof(struct JBXVTLine));
 	clear(count, offset, is_up);
 }
-static void sc_common(xcb_connection_t * xc, const int r1, const
-	int r2, const int count, const bool up)
+struct ScrollData {
+	xcb_connection_t * connection;
+	int begin, end, count;
+	bool up;
+};
+static void sc_common(struct ScrollData * d)
 {
-	if (up) // call this way to only have one branch
-		clear(count, r2, true);
+	if (d->up) // call this way to only have one branch
+		clear(d->count, d->end, true);
 	else
-		clear(count, r1, false);
-	copy_visible_area(xc, r1, r2, count, up);
-	clear_line(xc, up ? (r2 - count) : r1, count);
+		clear(d->count, d->begin, false);
+	xcb_connection_t * xc = d->connection;
+	copy_visible_area(xc, d->begin, d->end, d->count, d->up);
+	clear_line(d->connection, d->up ? (d->end - d->count)
+		: d->begin, d->count);
 	jbxvt_draw_scrollbar(xc);
 }
-static void sc_dn(xcb_connection_t * xc, const int row1, const
-	int row2, const int count)
+static void sc_dn(struct ScrollData * d)
 {
-	struct JBXVTScreen * s = jbxvt_get_current_screen();
-	for(int j = copy_lines(0, row2, -1, count); j >= row1; --j)
-		move_line(j, count, s->line);
-	sc_common(xc, row1, row2, count, false);
+	struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
+	for(int j = copy_lines(0, d->end, -1, d->count); j >= d->begin; --j)
+		move_line(j, d->count, s->line);
+	sc_common(d);
 }
-static void sc_up(xcb_connection_t * xc, const int row1, const
-	int row2, const int count)
+static void sc_up(struct ScrollData * d)
 {
 	struct JBXVTScreen * s = jbxvt_get_current_screen();
-	if (s == jbxvt_get_screen_at(0) && row1 == 0)
+	if (s == jbxvt_get_screen_at(0) && d->begin == 0)
 		add_scroll_history();
-	for(int j = copy_lines(0, row1, 1, count); j < row2; ++j)
-		move_line(j, -count, s->line);
-	sc_common(xc, row1, row2, count, true);
+	for(int j = copy_lines(0, d->begin, 1, d->count); j < d->end; ++j)
+		move_line(j, -d->count, s->line);
+	sc_common(d);
 }
 /*  Scroll count lines from row1 to row2 inclusive.
     row1 should be <= row2.  Scrolling is up for a positive count and
@@ -175,8 +179,10 @@ void scroll(xcb_connection_t * xc, const int row1,
 		return; // nothing to do
 	if (JB_UNLIKELY(row1 > row2))
 		return; // invalid
-	(JB_LIKELY(count > 0) ? sc_up : sc_dn)(xc, row1,
-		row2 + 1, abs(count));
+	const bool is_up = JB_LIKELY(count > 0);
+	(is_up ? sc_up : sc_dn)(&(struct ScrollData){
+		.connection = xc, .begin = row1, .end = row2 + 1,
+		.count = abs(count), .up = is_up});
 	jbxvt_set_scroll(xc, 0);
 #if LOG_LEVEL > 8
 	for (int i = 0; i < scroll_size; ++i)
