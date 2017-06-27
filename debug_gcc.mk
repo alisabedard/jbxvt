@@ -1,7 +1,5 @@
 include debug.mk
 CFLAGS+=-ggdb
-#CFLAGS+=--coverage
-#CFLAGS+=-fsanitize=leak
 CFLAGS+=-fsanitize=shift
 CFLAGS+=-fsanitize=integer-divide-by-zero
 CFLAGS+=-fsanitize=unreachable
@@ -20,17 +18,12 @@ CFLAGS+=-Wsuggest-attribute=noreturn
 CFLAGS+=-Wsuggest-attribute=format
 CFLAGS+=-Wsuggest-final-types
 CFLAGS+=-Wmissing-format-attribute
-#CFLAGS+=-Wpadded
 CFLAGS+=-Wrestrict
 CFLAGS+=-Wredundant-decls
 CFLAGS+=-Wdisabled-optimization
 CFLAGS+=-Woverlength-strings
 CFLAGS+=-fstack-protector-all
-#CFLAGS+=-fstack-check
-#CFLAGS+=-fPIC -pie
-#CFLAGS+=-Wtraditional-conversion
 CFLAGS+=-Wshadow
 CFLAGS+=-Wsign-conversion
 CFLAGS+=-Wpacked
-#CFLAGS+=-Wpadded
 CFLAGS+=-Wpointer-sign
