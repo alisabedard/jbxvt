@@ -86,12 +86,11 @@ int16_t jbxvt_pop_char(xcb_connection_t * xc, const uint8_t flags)
 			FD_ZERO(&in);
 			if (jbxvt_handle_xevents(xc)
 				&& (flags & GET_XEVENTS_ONLY)) {
-				go_on = false;
+				go_on = false; // skip to return
 				ret = INPUT_BUFFER_EMPTY;
-				break;
-			}
-			poll_io(xc, &in);
-		} while (!FD_ISSET(jbxvt_get_fd(), &in));
+			} else
+				poll_io(xc, &in);
+		} while (go_on && !FD_ISSET(jbxvt_get_fd(), &in));
 		if (go_on) {
 			const uint8_t l = read(jbxvt_get_fd(),
 				cmdtok_buffer.data, COM_BUF_SIZE);
