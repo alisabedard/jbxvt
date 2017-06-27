@@ -20,7 +20,7 @@
 #include "size.h"
 #include "window.h"
 static struct JBXVTLine * saved_lines;
-static int scroll_size;
+static int16_t scroll_size;
 struct JBXVTLine * jbxvt_get_saved_lines(void)
 {
 	return saved_lines;
@@ -31,37 +31,37 @@ void jbxvt_clear_scroll_history(void)
 	saved_lines = NULL;
 	scroll_size = 0;
 }
-int jbxvt_get_scroll_size(void)
+int16_t jbxvt_get_scroll_size(void)
 {
 	return scroll_size;
 }
-static void clear_selection_at(const int j)
+static void clear_selection_at(const int16_t j)
 {
 	struct JBDim * e = jbxvt_get_selection_end_points();
 	if (e[0].index == j || e[1].index == j)
 		jbxvt_clear_selection();
 }
-static void move_line(const int source, const int count,
+static void move_line(const int16_t source, const int16_t count,
 	struct JBXVTLine * restrict line_array)
 {
-	const int dest = source + count;
+	const int16_t dest = source + count;
 	memcpy(line_array + dest , line_array + source,
 		sizeof(struct JBXVTLine));
 	clear_selection_at(source);
 }
-static void get_y(int * restrict y, const int row1,
-	const int count, const bool up)
+static void get_y(int16_t * restrict y, const int16_t row1,
+	const int16_t count, const bool up)
 {
-	const int fh = jbxvt_get_font_size().h;
-	const int a = row1 * fh;
+	const int16_t fh = jbxvt_get_font_size().h;
+	const int16_t a = row1 * fh;
 	*(up ? y + 1 : y) = a;
 	*(up ? y : y + 1) = a + count * fh;
 }
 static void copy_visible_area(xcb_connection_t * xc,
-	const int row1, const int row2,
-	const int count, const bool up)
+	const int16_t row1, const int16_t row2,
+	const int16_t count, const bool up)
 {
-	int y[2];
+	int16_t y[2];
 	get_y(y, row1, count, up);
 	{ // vt scope
 		const xcb_window_t vt = jbxvt_get_vt_window(xc);
@@ -83,7 +83,7 @@ static void trim(void)
 	struct JBXVTLine * new = malloc(LIM * SZ), * i;
 	jb_require(new, "Cannot allocate memory for new scroll"
 		" history buffer");
-	const int diff = scroll_size - LIM;
+	const int16_t diff = scroll_size - LIM;
 	i = saved_lines + diff;
 	memcpy(new, i, LIM * SZ);
 	free(saved_lines);
@@ -104,8 +104,8 @@ static void add_scroll_history(void)
 	memcpy(&saved_lines[scroll_size - 1], &s->line[s->cursor.y], SIZE);
 	trim();
 }
-static int copy_lines(const int i, const int j, const int mod,
-	const int count)
+static int16_t copy_lines(const int16_t i, const int16_t j, const int16_t mod,
+	const int16_t count)
 {
 	if (i >= count)
 		return j;
@@ -116,25 +116,26 @@ static int copy_lines(const int i, const int j, const int mod,
 	return copy_lines(i + 1, j + mod, mod, count);
 }
 static void clear_line(xcb_connection_t * xc,
-	const int y, const int count)
+	const int16_t y, const int16_t count)
 {
-	const int fh = jbxvt_get_font_size().height;
+	const int16_t fh = jbxvt_get_font_size().height;
 	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), 0, y * fh,
 		jbxvt_get_pixel_size().width, count * fh);
 }
-static void clear(int count, const int offset, const bool is_up)
+static void clear(int16_t count, const int16_t offset, const bool is_up)
 {
 	if (--count < 0)
 		return;
-	const int j = offset + (is_up ? - count - 1 : count);
+	const int16_t j = offset + (is_up ? - count - 1 : count);
 	memset(jbxvt_get_current_screen()->line + j, 0,
 		sizeof(struct JBXVTLine));
 	clear(count, offset, is_up);
 }
 struct ScrollData {
 	xcb_connection_t * connection;
-	int begin, end, count;
-	bool up;
+	int16_t begin, end;
+	int32_t count:31; // maintain alignment
+	bool up:1;
 };
 static void sc_common(struct ScrollData * d)
 {
@@ -151,7 +152,7 @@ static void sc_common(struct ScrollData * d)
 static void sc_dn(struct ScrollData * d)
 {
 	struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
-	for(int j = copy_lines(0, d->end, -1, d->count); j >= d->begin; --j)
+	for(int16_t j = copy_lines(0, d->end, -1, d->count); j >= d->begin; --j)
 		move_line(j, d->count, s->line);
 	sc_common(d);
 }
@@ -160,7 +161,7 @@ static void sc_up(struct ScrollData * d)
 	struct JBXVTScreen * s = jbxvt_get_current_screen();
 	if (s == jbxvt_get_screen_at(0) && d->begin == 0)
 		add_scroll_history();
-	for(int j = copy_lines(0, d->begin, 1, d->count); j < d->end; ++j)
+	for(int16_t j = copy_lines(0, d->begin, 1, d->count); j < d->end; ++j)
 		move_line(j, -d->count, s->line);
 	sc_common(d);
 }
@@ -168,8 +169,8 @@ static void sc_up(struct ScrollData * d)
     row1 should be <= row2.  Scrolling is up for a positive count and
     down for a negative count.  count is limited to a maximum of
     SCROLL lines.  */
-void scroll(xcb_connection_t * xc, const int row1,
-	const int row2, const int count)
+void scroll(xcb_connection_t * xc, const int16_t row1,
+	const int16_t row2, const int16_t count)
 {
 #if LOG_LEVEL > 5
 	LOG("scroll(xc, row1: %d, row2: %d, count: %d)", row1, row2,
@@ -185,7 +186,7 @@ void scroll(xcb_connection_t * xc, const int row1,
 		.count = abs(count), .up = is_up});
 	jbxvt_set_scroll(xc, 0);
 #if LOG_LEVEL > 8
-	for (int i = 0; i < scroll_size; ++i)
+	for (int16_t i = 0; i < scroll_size; ++i)
 		puts((char *)saved_lines[i].text);
 #endif//LOG_LEVEL>8
 }
