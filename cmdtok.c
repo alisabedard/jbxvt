@@ -78,12 +78,10 @@ static bool get_buffered(int16_t * val, const uint8_t flags)
 int16_t jbxvt_pop_char(xcb_connection_t * xc, const uint8_t flags)
 {
 	int16_t ret = 0;
-	bool go_on = true;
-	if (get_buffered(&ret, flags))
-		go_on = false;
-	if (go_on) {
+	if (!get_buffered(&ret, flags)) {
 		xcb_flush(xc); // This is the primary xcb queue force
 		fd_set in;
+		bool go_on = true;
 		do {
 			FD_ZERO(&in);
 			if (jbxvt_handle_xevents(xc)
@@ -94,16 +92,17 @@ int16_t jbxvt_pop_char(xcb_connection_t * xc, const uint8_t flags)
 			}
 			poll_io(xc, &in);
 		} while (!FD_ISSET(jbxvt_get_fd(), &in));
-	}
-	if (go_on) {
-		const uint8_t l = read(jbxvt_get_fd(),
-			cmdtok_buffer.data, COM_BUF_SIZE);
-		if (l < 1)
-			ret = errno == EWOULDBLOCK ? INPUT_BUFFER_EMPTY : EOF;
-		else {
-			cmdtok_buffer.next = cmdtok_buffer.data;
-			cmdtok_buffer.top = cmdtok_buffer.data + l;
-			ret = *cmdtok_buffer.next++;
+		if (go_on) {
+			const uint8_t l = read(jbxvt_get_fd(),
+				cmdtok_buffer.data, COM_BUF_SIZE);
+			if (l < 1)
+				ret = errno == EWOULDBLOCK
+					? INPUT_BUFFER_EMPTY : EOF;
+			else {
+				cmdtok_buffer.next = cmdtok_buffer.data;
+				cmdtok_buffer.top = cmdtok_buffer.data + l;
+				ret = *cmdtok_buffer.next++;
+			}
 		}
 	}
 	return ret;
