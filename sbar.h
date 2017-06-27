@@ -3,7 +3,9 @@
 #ifndef JBXVT_SBAR_H
 #define JBXVT_SBAR_H
 #include <stdbool.h>
+#include <stdint.h>
 #include <xcb/xcb.h>
+#include <xcb/xproto.h>
 // Draw the scrollbar.
 void jbxvt_draw_scrollbar(xcb_connection_t * xc);
 // Get the current scroll position.
@@ -13,7 +15,7 @@ xcb_window_t jbxvt_get_scrollbar(xcb_connection_t * c)
 	__attribute__((nonnull));
 bool jbxvt_get_scrollbar_visible(void);
 //  Change the value of the scrolled screen offset and repaint the screen
-void jbxvt_set_scroll(xcb_connection_t * xc, const int16_t new_offset);
+void jbxvt_set_scroll(xcb_connection_t * xc, int16_t n);
 // Scroll to the specified y position (in pixels)
 void jbxvt_scroll_to(xcb_connection_t * xc, const int16_t y);
 // Clear the scroll history
