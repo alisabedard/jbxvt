@@ -57,6 +57,7 @@ static void poll_io(xcb_connection_t * xc,
 }
 static bool get_buffered(int16_t * val, const uint8_t flags)
 {
+	bool rval = true;
 	if (cmdtok_stack.top > cmdtok_stack.data)
 		*val = *--cmdtok_stack.top;
 	else if (cmdtok_buffer.next < cmdtok_buffer.top)
@@ -64,8 +65,8 @@ static bool get_buffered(int16_t * val, const uint8_t flags)
 	else if (flags & GET_INPUT_ONLY)
 		*val = INPUT_BUFFER_EMPTY;
 	else
-		return false;
-	return true;
+		rval = false;
+	return rval;
 }
 /*  Return the next input character after first passing any
     keyboard input to the command.  If flags & GET_INPUT_ONLY
