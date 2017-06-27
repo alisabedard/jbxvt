@@ -6,7 +6,6 @@
 #include "cursor.h"
 #include "gc.h"
 #include "libjb/JBDim.h"
-#include "libjb/macros.h"
 #include "repaint.h"
 #include "scroll.h"
 #include "size.h"
@@ -46,12 +45,16 @@ void jbxvt_draw_scrollbar(xcb_connection_t * xc)
 		JBXVT_SCROLLBAR_WIDTH, get_sz(0) - top});
 }
 //  Change the value of the scrolled screen offset and repaint the screen
-void jbxvt_set_scroll(xcb_connection_t * xc, int16_t n)
+void jbxvt_set_scroll(xcb_connection_t * xc, int16_t new_offset)
 {
-	JB_LIMIT(n, jbxvt_get_scroll_size(), 0);
-	if (n == sbar_offset)
-		return;
-	sbar_offset = n;
+	if (new_offset < 0)
+		new_offset = 0;
+	{ // cmp scope
+		int16_t cmp = jbxvt_get_scroll_size();
+		if (new_offset > cmp)
+			new_offset = cmp;
+	}
+	sbar_offset = new_offset;
 	jbxvt_repaint(xc);
 	jbxvt_draw_cursor(xc);
 	jbxvt_draw_scrollbar(xc);
