@@ -210,6 +210,7 @@ static inline bool is_page_down(const uint8_t v)
 static bool shift_page_up_down_scroll(xcb_connection_t * restrict xc,
 	const uint16_t state, const int_fast16_t pcount, uint8_t * s)
 {
+	enum {SCROLL_AMOUNT = 10};
 	if (state != XCB_MOD_MASK_SHIFT)
 		return false;
 	if (pcount <= 2)
@@ -219,9 +220,9 @@ static bool shift_page_up_down_scroll(xcb_connection_t * restrict xc,
 	   features.  */
 	LOG("Handling shift combination...");
 	if (is_page_up(s[2]))
-		page_key_scroll(xc, 10);
+		page_key_scroll(xc, SCROLL_AMOUNT);
 	else if (is_page_down(s[2]))
-		page_key_scroll(xc, -10);
+		page_key_scroll(xc, -SCROLL_AMOUNT);
 	else
 		return false;
 	return true; // if page up or down
