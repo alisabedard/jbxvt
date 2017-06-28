@@ -50,10 +50,7 @@ static void poll_io(xcb_connection_t * xc,
 	   call timer function.  In this case, hook into the
 	   cursor blink functionality.  FIXME:  Implement SGR blinking
 	   text.  */
-	if (FD_ISSET(xfd, in_fdset))
-		jb_check_x(xc);
-	else
-		jbxvt_blink_cursor(xc);
+	(FD_ISSET(xfd, in_fdset) ? jb_check_x : jbxvt_blink_cursor)(xc);
 }
 static bool get_buffered(int16_t * val, const uint8_t flags)
 {
