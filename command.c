@@ -50,7 +50,7 @@ fd_t jbxvt_get_fd(void)
 }
 //  Attempt to create and write an entry to the utmp file
 #ifdef POSIX_UTMPX
-static void write_utmpx(const pid_t comm_pid, char * tty_name)
+static void write_utmpx(const pid_t comm_pid, char * restrict tty_name)
 {
 	setutxent();
 	struct utmpx utent = {.ut_type = USER_PROCESS, .ut_pid = comm_pid};
