@@ -148,7 +148,7 @@ static const uint8_t shift_map[][2] = {{'1', '!'}, {'2', '@'}, {'3', '#'},
 	{'\'', '"'}, {'[', '{'}, {']', '}'}, {'\\', '|'}, {'`', '~'},
 	{',', '<'}, {'.', '>'}, {'/', '?'}, {}};
 __attribute__((const))
-static uint8_t shift(uint8_t c)
+static uint8_t shift(const uint8_t c)
 {
 	if (c >= 'a' && c <= 'z')
 		return c - 0x20; // c - SPACE
