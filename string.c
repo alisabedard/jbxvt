@@ -108,23 +108,12 @@ static void parse_special_charset(uint8_t * restrict str,
 	const int len)
 {
 	for (int i = len; i >= 0; --i) {
-		uint8_t * ch = &str[i];
-		switch (*ch) {
-		case 'j':
-		case 'k':
-		case 'l':
-		case 'm':
-		case 't':
-		case 'u':
-			*ch = '+';
-			break;
-		case 'q':
-			*ch = '-';
-			break;
-		case 'x':
-			*ch = '|';
-			break;
-		}
+		if (str[i] < 'q')
+			str[i] = '+';
+		else if (str[i] != 'x')
+			str[i] = '-';
+		else // x
+			str[i] = '|';
 	}
 }
 static bool test_action_char(xcb_connection_t * xc, const uint8_t c,
