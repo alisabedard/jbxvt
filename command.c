@@ -120,6 +120,14 @@ static void cleanup(void)
 	kill(command_pid, SIGHUP); // we are hanging up
 	wait(NULL); // wait on the child
 }
+static void redirect_stdio(const fd_t ttyfd)
+{
+	// redirect stdin, stderr, and stdout:
+	redir(0, ttyfd);
+	redir(1, ttyfd);
+	redir(2, ttyfd);
+	close(ttyfd);
+}
 static void child(char ** restrict argv, fd_t ttyfd)
 {
 #if !defined(NETBSD) && !defined(OPENBSD)
@@ -140,11 +148,7 @@ static void child(char ** restrict argv, fd_t ttyfd)
 	ttyfd = jb_open(tty_name, O_RDWR);
 	jb_close(i);
 #endif//TIOCSCTTY
-	// redirect stdin, stderr, and stdout:
-	redir(0, ttyfd);
-	redir(1, ttyfd);
-	redir(2, ttyfd);
-	close(ttyfd);
+	redirect_stdio(ttyfd);
 	set_ttymodes();
 	execvp(argv[0], argv); // Only returns on failure
 	exit(1); // An error has occurred, so exit now to prevent hang.
