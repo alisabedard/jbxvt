@@ -12,7 +12,6 @@
 #include "esc.h"
 #include "libjb/log.h"
 #include "libjb/xcb.h"
-#include "mode.h"
 #include "utf.h"
 #include "xevents.h"
 // Flags used to control jbxvt_pop_char
