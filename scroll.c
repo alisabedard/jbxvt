@@ -52,7 +52,7 @@ static void move_line(const int16_t source, const int16_t count,
 static void get_y(int16_t * restrict y, const int16_t row1,
 	const int16_t count, const bool up)
 {
-	const int16_t fh = jbxvt_get_font_size().h;
+	const uint16_t fh = jbxvt_get_font_size().height;
 	const int16_t a = row1 * fh;
 	*(up ? y + 1 : y) = a;
 	*(up ? y : y + 1) = a + count * fh;
@@ -118,7 +118,7 @@ static int16_t copy_lines(const int16_t i, const int16_t j, const int16_t mod,
 static void clear_line(xcb_connection_t * xc,
 	const int16_t y, const int16_t count)
 {
-	const int16_t fh = jbxvt_get_font_size().height;
+	const uint16_t fh = jbxvt_get_font_size().height;
 	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), 0, y * fh,
 		jbxvt_get_pixel_size().width, count * fh);
 }
