@@ -182,13 +182,9 @@ static void draw_string_at_pixel_position(xcb_connection_t * xc,
 	struct JBXVTScreen * screen, uint8_t * restrict str,
 	const int len)
 {
-	struct JBDim p
-		= jbxvt_chars_to_pixels(screen
-			->cursor);
-	struct JBXVTPrivateModes * restrict mode
-		= jbxvt_get_modes();
-	if (JB_UNLIKELY(mode->insert))
-		insert_characters(xc, 1, p);
+	struct JBDim p = jbxvt_chars_to_pixels(screen ->cursor);
+	struct JBXVTPrivateModes * restrict mode = jbxvt_get_modes();
+	if (JB_UNLIKELY(mode->insert)) insert_characters(xc, 1, p);
 	struct JBDim * c = &screen->cursor;
 	uint8_t * t = screen->line[c->y].text + c->x;
 	const bool shifted = handle_single_shift();
@@ -196,24 +192,17 @@ static void draw_string_at_pixel_position(xcb_connection_t * xc,
 		parse_special_charset(str, 1);
 		recover_from_shift();
 	}
-	if (mode->charset[mode->charsel]
-		> CHARSET_ASCII) {
+	if (mode->charset[mode->charsel] > CHARSET_ASCII) {
 		if (shifted)
-			parse_special_charset(str + 1,
-				len - 1);
+			parse_special_charset(str + 1, len - 1);
 		else
-			parse_special_charset(str,
-				len);
+			parse_special_charset(str, len);
 	}
 	// Render the string:
 	if (!screen->decpm) {
-		jbxvt_paint(&(struct
-			JBXVTPaintContext){.xc = xc,
-			.string = str, .style =
-			&(rstyle_t){
-				jbxvt_get_rstyle()},
-			.length = 1, .position = p,
-			.is_double_width_line =
+		jbxvt_paint(&(struct JBXVTPaintContext){.xc = xc, .string =
+			str, .style = &(rstyle_t){ jbxvt_get_rstyle()},
+			.length = 1, .position = p, .is_double_width_line =
 			screen->line[c->y].dwl});
 		// Save scroll history:
 		*t = *str;
