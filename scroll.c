@@ -152,7 +152,8 @@ static void sc_common(struct ScrollData * d)
 static void sc_dn(struct ScrollData * d)
 {
 	struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
-	for(int16_t j = copy_lines(0, d->end, -1, d->count); j >= d->begin; --j)
+	for(int16_t j = copy_lines(0, d->end, -1, d->count);
+		j >= d->begin; --j)
 		move_line(j, d->count, s->line);
 	sc_common(d);
 }
