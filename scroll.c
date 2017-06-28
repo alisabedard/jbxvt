@@ -160,9 +160,10 @@ static void sc_dn(struct ScrollData * d)
 static void sc_up(struct ScrollData * d)
 {
 	struct JBXVTScreen * s = jbxvt_get_current_screen();
-	if (s == jbxvt_get_screen_at(0) && d->begin == 0)
+	if (s == jbxvt_get_screen_at(0) && d->begin < 1)
 		add_scroll_history();
-	for(int16_t j = copy_lines(0, d->begin, 1, d->count); j < d->end; ++j)
+	for(int16_t j = copy_lines(0, d->begin, 1, d->count);
+		j < d->end; ++j)
 		move_line(j, -d->count, s->line);
 	sc_common(d);
 }
