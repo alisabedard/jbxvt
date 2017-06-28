@@ -25,5 +25,8 @@ enum {	JBXVT_SCROLLBAR_WIDTH = 8, // width of scroll bar
 	JBXVT_PROP_SIZE = 1024, // selection property chunk size
 	JBXVT_SEL_KEY_DEL = 2000, // ms for kb input before selection
 	JBXVT_DEFAULT_CURSOR_ATTR = 2, // cursor style (solid block)
+	// The following value per the following:
+	// http://www.vt100.net/docs/vt100-ug/chapter3.html166666
+	JBXVT_SOFT_SCROLL_DELAY = 166,
 };
 #endif//!JBXVT_CONFIG_H

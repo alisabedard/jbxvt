@@ -41,10 +41,8 @@ static void handle_new_lines(xcb_connection_t * restrict xc,
 }
 static void decsclm(void)
 {
-	// Time value per the following:
-	// http://www.vt100.net/docs/vt100-ug/chapter3.html166666
 	if (jbxvt_get_modes()->decsclm)
-		jb_sleep(166);
+		jb_sleep(JBXVT_SOFT_SCROLL_DELAY);
 }
 static void wrap(xcb_connection_t * restrict xc)
 {
@@ -104,17 +102,18 @@ static void insert_characters(xcb_connection_t * restrict xc,
 	d.point = &point;
 	move_visible(&d);
 }
-static void parse_special_charset(uint8_t * restrict str,
-	const int len)
+static void parse_special_charset(uint8_t * restrict str, const int i)
 {
-	for (int i = len; i >= 0; --i) {
-		if (str[i] < 'q')
-			str[i] = '+';
-		else if (str[i] != 'x')
-			str[i] = '-';
-		else // x
-			str[i] = '|';
-	}
+	LOG("parse_special_charset(str, %d)", i);
+	if (i < 0)
+		return;
+	if (str[i] < 'q')
+		str[i] = '+';
+	else if (str[i] != 'x')
+		str[i] = '-';
+	else // x
+		str[i] = '|';
+	parse_special_charset(str, i - 1);
 }
 static bool test_action_char(xcb_connection_t * xc, const uint8_t c,
 	struct JBXVTScreen * restrict s)
