@@ -19,20 +19,11 @@
 #include "screen.h"
 #include "size.h"
 #include "window.h"
-static void init_screen_elements(struct JBXVTScreen * restrict scr)
-{
-	scr->margin.bottom = jbxvt_get_char_size().height - 1;
-	scr->wrap_next = false;
-	scr->margin.top = 0;
-}
 static inline void fix_margins(const struct JBDim c)
 {
 	/* On screen resize, check if old margin was on the bottom line.
 	   If so, set the bottom margin to the new bottom line.  */
-	if (c.height == jbxvt_get_char_size().height)
-		  return;
-	if (jbxvt_get_margin()->bottom >= c.h)
-		  jbxvt_get_margin()->bottom = c.h - 1;
+	jbxvt_get_margin()->bottom = c.height - 1;
 }
 static void clear_window(xcb_connection_t * restrict xc)
 {
@@ -62,11 +53,6 @@ void jbxvt_reset(xcb_connection_t * restrict xc)
 	jbxvt_resize_window(xc);
 	struct JBDim c = jbxvt_get_char_size();
 	fix_margins(c);
-	init_screen_elements(jbxvt_get_screen_at(0));
-	init_screen_elements(jbxvt_get_screen_at(1));
-	// Constrain dimensions:
-	c.w = JB_MIN(c.w, JBXVT_MAX_COLUMNS);
-	c.h = JB_MIN(c.h, JBXVT_MAX_ROWS);
 	jbxvt_set_tty_size(c);
 	jbxvt_check_cursor_position();
 	jbxvt_draw_scrollbar(xc);

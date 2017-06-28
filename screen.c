@@ -15,9 +15,21 @@
 #include "scroll.h"
 #include "size.h"
 static uint8_t screen_index; // current screen
+static void init_screen(struct JBXVTScreen * restrict scr)
+{
+	scr->margin.bottom = jbxvt_get_char_size().height - 1;
+	scr->wrap_next = false;
+	scr->margin.top = 0;
+}
 static struct JBXVTScreen * jbxvt_get_screens(void)
 {
 	static struct JBXVTScreen screens[2];
+	static bool init_done;
+	if (!init_done) {
+		init_screen(screens);
+		init_screen(screens + 1);
+		init_done = true;
+	}
 	return screens;
 }
 // returns indexed screen, with i's validity sanitized
