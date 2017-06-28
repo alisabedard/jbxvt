@@ -106,43 +106,39 @@ static char * get_format(const enum JBXVTKeySymType type)
 		return "%c";
 	}
 }
-struct KeyMapRequest {
-	uint8_t * restrict buffer;
-	struct JBXVTKeyMaps * restrict keymap_table;
-	xcb_keysym_t keysym;
-	bool use_alternate_keymap;
-	const int8_t __pad[3];
-};
-static uint8_t * get_buffer(struct KeyMapRequest * restrict r)
+static uint8_t * get_buffer(uint8_t * restrict buf,
+	struct JBXVTKeyMaps * restrict keymaptable,
+	const bool use_alternate)
 {
-	struct JBXVTKeyStrings * ks = r->use_alternate_keymap
-		? &r->keymap_table->km_alt : &r->keymap_table->km_normal;
-	snprintf((char *)r->buffer, KBUFSIZE, get_format(ks->ks_type),
+	struct JBXVTKeyStrings * ks = use_alternate
+		? &keymaptable->km_alt : &keymaptable->km_normal;
+	snprintf((char *)buf, KBUFSIZE, get_format(ks->ks_type),
 		ks->ks_value);
-	return r->buffer;
+	return buf;
 }
 //  Look up function key keycode
-static uint8_t * get_keycode_value(struct KeyMapRequest * restrict r)
+static uint8_t * get_keycode_value(struct JBXVTKeyMaps * restrict
+	keymaptable, xcb_keysym_t keysym, uint8_t* buf,
+	const bool use_alternate)
 {
-	return r->keymap_table->km_keysym
-		? (r->keymap_table++->km_keysym == r->keysym)
-			?  get_buffer(r) : get_keycode_value(r): NULL;
+	return keymaptable->km_keysym
+		? (keymaptable->km_keysym == keysym)
+			?  get_buffer(buf, keymaptable, use_alternate)
+				: get_keycode_value(keymaptable + 1, keysym,
+					buf, use_alternate)
+		: NULL;
 }
 static uint8_t * get_s(const xcb_keysym_t keysym, uint8_t * restrict kbuf)
 {
-	struct KeyMapRequest r = {.buffer = kbuf, .keysym = keysym};
 	if (xcb_is_function_key(keysym) || xcb_is_misc_function_key(keysym)
-		|| keysym == K_PD || keysym == K_PU) {
-		r.keymap_table = func_key_table;
-		r.use_alternate_keymap = false;
-	} else if (xcb_is_cursor_key(keysym) || xcb_is_pf_key(keysym)) {
-		r.keymap_table = other_key_table;
-		r.use_alternate_keymap = self.cursor;
-	} else {
-		r.keymap_table = kp_key_table;
-		r.use_alternate_keymap = self.keypad;
-	}
-	return get_keycode_value(&r);
+		|| keysym == K_PD || keysym == K_PU)
+		return get_keycode_value(func_key_table, keysym, kbuf,
+			false);
+	if (xcb_is_cursor_key(keysym) || xcb_is_pf_key(keysym))
+		return get_keycode_value(other_key_table, keysym,
+			kbuf, self.cursor);
+	return get_keycode_value(kp_key_table, keysym,
+		kbuf, self.keypad);
 }
 /* FIXME: Make this portable to non-US keyboards, or write a version
    or table for each type.  Perhaps use libxkbcommon-x11.  */
@@ -152,7 +148,7 @@ static const uint8_t shift_map[][2] = {{'1', '!'}, {'2', '@'}, {'3', '#'},
 	{'\'', '"'}, {'[', '{'}, {']', '}'}, {'\\', '|'}, {'`', '~'},
 	{',', '<'}, {'.', '>'}, {'/', '?'}, {}};
 __attribute__((const))
-static uint8_t shift(const uint8_t c)
+static uint8_t shift(uint8_t c)
 {
 	if (c >= 'a' && c <= 'z')
 		return c - 0x20; // c - SPACE
@@ -210,7 +206,6 @@ static inline bool is_page_down(const uint8_t v)
 static bool shift_page_up_down_scroll(xcb_connection_t * restrict xc,
 	const uint16_t state, const int_fast16_t pcount, uint8_t * s)
 {
-	enum {SCROLL_AMOUNT = 10};
 	if (state != XCB_MOD_MASK_SHIFT)
 		return false;
 	if (pcount <= 2)
@@ -220,9 +215,9 @@ static bool shift_page_up_down_scroll(xcb_connection_t * restrict xc,
 	   features.  */
 	LOG("Handling shift combination...");
 	if (is_page_up(s[2]))
-		page_key_scroll(xc, SCROLL_AMOUNT);
+		page_key_scroll(xc, 10);
 	else if (is_page_down(s[2]))
-		page_key_scroll(xc, -SCROLL_AMOUNT);
+		page_key_scroll(xc, -10);
 	else
 		return false;
 	return true; // if page up or down
