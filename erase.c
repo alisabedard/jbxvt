@@ -104,7 +104,7 @@ static bool assign_range(xcb_connection_t * restrict xc,
 	return true;
 #undef SETR
 }
-// Erase the lines specified by 
+// Erase the lines specified by range
 void jbxvt_erase_next_line(xcb_connection_t * xc, int16_t * restrict y,
 	struct JBDim * restrict range)
 {
