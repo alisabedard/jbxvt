@@ -116,6 +116,16 @@ void jbxvt_erase_next_line(xcb_connection_t * xc, int16_t * restrict y,
 		jbxvt_erase_next_line(xc, y, range);
 	}
 }
+static void erase_at_y(xcb_connection_t * xc, struct JBDim * restrict range)
+{
+	int16_t * restrict y = &jbxvt_get_current_screen()->cursor.y;
+	/* Save cursor y locally instead of using save/restore cursor
+	   functions in order to avoid side-effects on applications
+	   using a saved cursor position.  */
+	const int16_t old_y = *y;
+	jbxvt_erase_next_line(xc, y, range);
+	*y = old_y;
+}
 // Erase the specified portion of the screen.
 void jbxvt_erase_screen(xcb_connection_t * xc, const int8_t mode)
 {
@@ -123,15 +133,7 @@ void jbxvt_erase_screen(xcb_connection_t * xc, const int8_t mode)
 	struct JBDim range;
 	if (!assign_range(xc, mode, &range))
 		return;
-	/* Save cursor y locally instead of using save/restore cursor
-	   functions in order to avoid side-effects on applications
-	   using a saved cursor position.  */
-	{ // *y scope, old_y scope
-		int16_t * y = &jbxvt_get_current_screen()->cursor.y;
-		const int16_t old_y = *y;
-		jbxvt_erase_next_line(xc, y, &range);
-		*y = old_y;
-	}
+	erase_at_y(xc, &range);
 	// clear start of, end of, or entire current line, per mode
 	jbxvt_erase_line(xc, mode);
 }
