@@ -56,11 +56,11 @@ pixel_t jbxvt_get_bg(void)
 {
 	return color_data.bg;
 }
-pixel_t jbxvt_set_fg(xcb_connection_t * xc, const char * color)
+pixel_t jbxvt_set_fg(xcb_connection_t * xc, const char * restrict color)
 {
 	return set_x(xc, color, color_data.fg, &jbxvt_set_fg_pixel);
 }
-pixel_t jbxvt_set_bg(xcb_connection_t * xc, const char * color)
+pixel_t jbxvt_set_bg(xcb_connection_t * xc, const char * restrict color)
 {
 	return set_x(xc, color, color_data.bg, &jbxvt_set_bg_pixel);
 }
