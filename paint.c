@@ -29,10 +29,10 @@ static void handle_underline_styles(struct JBXVTPaintContext * restrict c)
 	xcb_connection_t * xc = c->xc;
 	const uint16_t len = c->length;
 	const rstyle_t rstyle = *c->style;
-	if (((rstyle & JBXVT_RS_ITALIC)
+	if ((rstyle & JBXVT_RS_UNDERLINE)
+		|| ((rstyle & JBXVT_RS_ITALIC)
 		&& (jbxvt_get_italic_font(xc)
-		== jbxvt_get_normal_font(xc)))
-		|| (rstyle & JBXVT_RS_UNDERLINE))
+		== jbxvt_get_normal_font(xc))))
 		draw_underline(xc, len, c->position, 0);
 	if (rstyle & JBXVT_RS_DOUBLE_UNDERLINE) {
 		draw_underline(xc, len, c->position, -2);
