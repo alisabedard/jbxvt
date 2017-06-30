@@ -1,6 +1,6 @@
 include debug.mk
 CFLAGS+=-ggdb
-CFLAGS+=-pg
+#CFLAGS+=-pg
 CFLAGS+=-fsanitize=shift
 CFLAGS+=-fsanitize=integer-divide-by-zero
 CFLAGS+=-fsanitize=unreachable
