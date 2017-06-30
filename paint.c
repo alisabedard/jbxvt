@@ -24,7 +24,7 @@ static void draw_underline(xcb_connection_t * xc, uint16_t len,
 		(struct xcb_point_t[]){{p.x, p.y + offset},
 		{p.x + len * jbxvt_get_font_size().width, p.y + offset}});
 }
-static void handle_underline_styles(struct JBXVTPaintContext * c)
+static void handle_underline_styles(struct JBXVTPaintContext * restrict c)
 {
 	xcb_connection_t * xc = c->xc;
 	const uint16_t len = c->length;
