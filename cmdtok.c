@@ -17,39 +17,25 @@
 // Flags used to control jbxvt_pop_char
 enum ComCharFlags {INPUT_BUFFER_EMPTY = 0x100,
 	GET_INPUT_ONLY=1, GET_XEVENTS_ONLY=2};
-struct JBXVTCommandContainer {
-	uint8_t *next, *top, *data;
-};
+struct JBXVTCommandContainer { uint8_t *next, *top, *data; };
 static struct JBXVTCommandContainer cmdtok_buffer, cmdtok_stack;
-// returns total file descriptor count (select's nfds)
-static uint8_t init_in_fdset(fd_set * restrict in_fdset)
+static void poll_io(xcb_connection_t * xc, fd_set * input_fdset)
 {
+	const fd_t xfd = xcb_get_file_descriptor(xc);
 	const fd_t fd = jbxvt_get_fd();
-	FD_SET(fd, in_fdset);
-	return fd + 1;
-}
-static void select_for_in_fdset(const fd_t xfd, fd_set * restrict in_fdset)
-{
-	const uint8_t nfds = init_in_fdset(in_fdset);
-	FD_SET(xfd, in_fdset);
-	fd_set out_fdset;
-	FD_ZERO(&out_fdset);
-	if (select(nfds, in_fdset, &out_fdset, NULL,
+	FD_ZERO(input_fdset);
+	FD_SET(fd, input_fdset);
+	FD_SET(xfd, input_fdset);
+	if (select(fd + 1, input_fdset, NULL, NULL,
 		&(struct timeval){.tv_usec = 500000}) == -1)
 		exit(1); /* exit is reached in case SHELL or -e
 			    command was not run successfully.  */
-}
-__attribute__((nonnull))
-static void poll_io(xcb_connection_t * xc,
-	fd_set * restrict in_fdset)
-{ // xfd scope
-	const fd_t xfd = xcb_get_file_descriptor(xc);
-	select_for_in_fdset(xfd, in_fdset);
+
 	/* If xfd has input, verify connection status.  Otherwise,
 	   call timer function.  In this case, hook into the
 	   cursor blink functionality.  FIXME:  Implement SGR blinking
 	   text.  */
-	(FD_ISSET(xfd, in_fdset) ? jb_check_x : jbxvt_blink_cursor)(xc);
+	(FD_ISSET(xfd, input_fdset) ? jb_check_x : jbxvt_blink_cursor)(xc);
 }
 static bool get_buffered(int16_t * val, const uint8_t flags)
 {
