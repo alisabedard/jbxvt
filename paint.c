@@ -50,20 +50,17 @@ static void draw_text(xcb_connection_t * xc,
 	uint8_t * restrict str, uint8_t len,
 	struct JBDim * restrict p, rstyle_t rstyle)
 {
-	{ // vt, gc scope
-		/* Cache frequently used values
-		   to avoid function call overhead. */
-		static xcb_window_t vt;
-		static xcb_gcontext_t gc;
-		if (!vt) {
-			vt = jbxvt_get_vt_window(xc);
-			gc = jbxvt_get_text_gc(xc);
-		}
-		// Draw the text:
-		xcb_image_text_8(xc, len, vt, gc, p->x, p->y,
-			(const char *)str);
+	/* Cache frequently used values
+	   to avoid function call overhead. */
+	static xcb_window_t vt;
+	static xcb_gcontext_t gc;
+	if (!vt) {
+		vt = jbxvt_get_vt_window(xc);
+		gc = jbxvt_get_text_gc(xc);
 	}
-	++p->y; // Padding for underline, use underline for italic
+	/* Draw the text.  Increment p->y for padding on underline.
+	   Use underline for italic */
+	xcb_image_text_8(xc, len, vt, gc, p->x, p->y++, (const char *)str);
 	handle_underline_styles(&(struct JBXVTPaintContext){.xc = xc,
 		.position = *p, .length = len, .style = &rstyle});
 }
