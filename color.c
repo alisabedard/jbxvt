@@ -29,17 +29,17 @@ void jbxvt_reverse_screen_colors(xcb_connection_t * xc)
 	xcb_change_window_attributes(xc, jbxvt_get_vt_window(xc),
 		XCB_CW_BACK_PIXEL, &color_data.bg);
 }
+#define GET_PIXEL(fgbg) return color_data.current_##fgbg = jb_set_##fgbg(\
+	xc, jbxvt_get_text_gc(xc), p);
 // not pure, has side-effects
 pixel_t jbxvt_set_fg_pixel(xcb_connection_t * xc, const pixel_t p)
 {
-	return color_data.current_fg
-		= jb_set_fg(xc, jbxvt_get_text_gc(xc), p);
+	GET_PIXEL(fg);
 }
 // not pure, has side-effects
 pixel_t jbxvt_set_bg_pixel(xcb_connection_t * xc, const pixel_t p)
 {
-	return color_data.current_bg
-		= jb_set_bg(xc, jbxvt_get_text_gc(xc), p);
+	GET_PIXEL(bg);
 }
 static pixel_t set_x(xcb_connection_t * xc, const char * color,
 	const pixel_t backup, pixel_t (*func)(xcb_connection_t *,
