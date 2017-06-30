@@ -91,15 +91,21 @@ static pixel_t rgb_pixel(xcb_connection_t * xc, const uint16_t c)
 		" pixel is 0x%x", c, r, g, b, p);
 	return p;
 }
-static void rstyle_color(xcb_connection_t * restrict xc, const uint8_t *
-	restrict color, const bool * restrict ind, const bool * restrict rgb,
-	pixel_t (*set_pixel)(xcb_connection_t *, const pixel_t),
-	const uint8_t i)
+struct ColorOperation {
+	xcb_connection_t * x_connection;
+	const uint8_t * color;
+	const bool * is_indexed, * is_rgb;
+	pixel_t (*set_pixel)(xcb_connection_t *, const pixel_t);
+	bool is_foreground;
+};
+static void set_color(struct ColorOperation * restrict o)
 {
-	if (ind[i])
-		set_pixel(xc, jbxvt_color_index[color[i]]);
-	else if (rgb[i])
-		set_pixel(xc, rgb_pixel(xc, color[i]));
+	const uint8_t i = o->is_foreground ? 0 : 1; // index into color[]
+	if (o->is_indexed[i])
+		o->set_pixel(o->x_connection, jbxvt_color_index[o->color[i]]);
+	else if (o->is_rgb[i])
+		o->set_pixel(o->x_connection, rgb_pixel(o->x_connection,
+			o->color[i]));
 }
 static bool set_rstyle_colors(xcb_connection_t * restrict xc,
 	const uint32_t rstyle)
@@ -113,8 +119,12 @@ static bool set_rstyle_colors(xcb_connection_t * restrict xc,
 		rstyle & JBXVT_RS_BG_RGB};
 	const bool ind[] = {rstyle & JBXVT_RS_FG_INDEX,
 		rstyle & JBXVT_RS_BG_INDEX};
-	rstyle_color(xc, color, ind, rgb, jbxvt_set_fg_pixel, 0);
-	rstyle_color(xc, color, ind, rgb, jbxvt_set_bg_pixel, 1);
+	struct ColorOperation o = {xc, color, ind, rgb, jbxvt_set_bg_pixel,
+		false};
+	set_color(&o);
+	o.set_pixel = jbxvt_set_fg_pixel;
+	o.is_foreground = true;
+	set_color(&o);
 	return rgb[0] || rgb[1] || ind[0] || ind[1];
 }
 static void restore_colors(xcb_connection_t * restrict xc)
