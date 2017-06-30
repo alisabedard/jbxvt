@@ -34,7 +34,7 @@ static void handle_underline_styles(struct JBXVTPaintContext * restrict c)
 		&& (jbxvt_get_italic_font(xc)
 		== jbxvt_get_normal_font(xc))))
 		draw_underline(xc, len, c->position, 0);
-	if (rstyle & JBXVT_RS_DOUBLE_UNDERLINE) {
+	else if (rstyle & JBXVT_RS_DOUBLE_UNDERLINE) {
 		draw_underline(xc, len, c->position, -2);
 		draw_underline(xc, len, c->position, 0);
 	}
@@ -124,7 +124,7 @@ static bool set_rstyle_colors(xcb_connection_t * restrict xc,
 	set_color(&o);
 	return rgb[0] || rgb[1] || ind[0] || ind[1];
 }
-static void restore_colors(xcb_connection_t * restrict xc)
+static inline void restore_colors(xcb_connection_t * restrict xc)
 {
 	jbxvt_set_fg_pixel(xc, jbxvt_get_fg());
 	jbxvt_set_bg_pixel(xc, jbxvt_get_bg());
