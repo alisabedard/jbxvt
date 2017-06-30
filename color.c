@@ -9,7 +9,7 @@ static struct {
 	pixel_t bg, fg, current_fg, current_bg;
 } color_data;
 void jbxvt_init_colors(xcb_connection_t * xc,
-	struct JBXVTOptions * opt)
+	struct JBXVTOptions * restrict opt)
 {
 	color_data.fg = jbxvt_set_fg(xc, opt->foreground_color);
 	color_data.bg = jbxvt_set_fg(xc, opt->background_color);
