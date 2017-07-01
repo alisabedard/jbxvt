@@ -32,7 +32,9 @@ static void paint_JBXVTPaintContext(struct JBXVTPaintContext * restrict token)
 		token->style += i, token->position.x += i * font_width)
 		jbxvt_paint(token);
 }
-static uint8_t * filter(uint8_t * restrict t, register int_fast16_t i)
+/* t is returned to allow chain calling.  Leave this iterative since this is
+ * called very frequently.   */
+static uint8_t * filter(uint8_t * restrict t, register int i)
 {
 	while (--i >= 0)
 		if (t[i] < ' ')
