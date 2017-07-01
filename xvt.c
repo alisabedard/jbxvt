@@ -46,6 +46,7 @@ static int16_t get_n(const int16_t arg)
 }
 // Return the 0-based coordinate value:
 __attribute__((const))
+
 static int16_t get_0(int16_t arg)
 {
 	return get_n(arg) - 1;

@@ -83,6 +83,7 @@ enum JBXVTTokenIndex {
 	JBXVT_TOKEN_S7C1T = 1027, // 7-bit controls
 	JBXVT_TOKEN_S8C1T = 1028, // 8-bit controls
 	JBXVT_TOKEN_SAVEPM = 's', // save private mode values
+	JBXVT_TOKEN_SASD = '}', // set active status display
 	JBXVT_TOKEN_SBDOWN = 1029, // scroll bar down
 	JBXVT_TOKEN_SBGOTO = 1030, // set scroll bar position
 	JBXVT_TOKEN_SBSWITCH = 1031, // toggle scroll bar
@@ -105,6 +106,7 @@ enum JBXVTTokenIndex {
 	JBXVT_TOKEN_SPA = 0x96,
 	JBXVT_TOKEN_SS2 = 0x8e, // select G2 for next character only
 	JBXVT_TOKEN_SS3 = 0x8f, // select G3 for next character only
+	JBXVT_TOKEN_SSDT = '~', // set status display type
 	JBXVT_TOKEN_ST = 0x9c, // string terminator
 	JBXVT_TOKEN_STBM = 'r', // set top and bottom margins
 	JBXVT_TOKEN_STRING = 1043, // string of printable characters

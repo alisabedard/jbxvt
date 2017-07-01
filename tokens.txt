@@ -79,6 +79,7 @@ RQM:'p':request DEC private mode
 S7C1T:x:7-bit controls
 S8C1T:x:8-bit controls
 SAVEPM:'s':save private mode values
+SASD:'}':set active status display
 SBDOWN:x:scroll bar down
 SBGOTO:x:set scroll bar position
 SBSWITCH:x:toggle scroll bar
@@ -101,6 +102,7 @@ SOS:0x98
 SPA:0x96
 SS2:0x8e:select G2 for next character only
 SS3:0x8f:select G3 for next character only
+SSDT:'~':set status display type
 ST:0x9c:string terminator
 STBM:'r':set top and bottom margins
 STRING:x:string of printable characters

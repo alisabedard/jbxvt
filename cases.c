@@ -224,6 +224,9 @@ case JBXVT_TOKEN_SAVEPM:
 	LOG("JBXVT_TOKEN_SAVEPM");
 	jbxvt_handle_JBXVT_TOKEN_SAVEPM(xc, &token);
 	break;
+case JBXVT_TOKEN_SASD:
+	LOG("FIXME: JBXVT_TOKEN_SASD not implemented.");
+	break;
 case JBXVT_TOKEN_SBGOTO:
 	LOG("JBXVT_TOKEN_SBGOTO");
 	jbxvt_handle_JBXVT_TOKEN_SBGOTO(xc, &token);
@@ -264,6 +267,9 @@ case JBXVT_TOKEN_SS2:
 case JBXVT_TOKEN_SS3:
 	LOG("JBXVT_TOKEN_SS3");
 	jbxvt_handle_JBXVT_TOKEN_SS3(xc, &token);
+	break;
+case JBXVT_TOKEN_SSDT:
+	LOG("FIXME: JBXVT_TOKEN_SSDT not implemented.");
 	break;
 case JBXVT_TOKEN_STBM:
 	LOG("JBXVT_TOKEN_STBM");
