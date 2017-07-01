@@ -53,34 +53,27 @@ struct HistoryContext {
 	xcb_connection_t * xc;
 	struct JBDim * position;
 	struct JBXVTLine * line_data;
-	int32_t line, top, scroll_size;
+	int32_t line, top;
 	uint16_t char_height, font_height;
 };
-static void increment_line(struct HistoryContext * restrict i)
-{
-	i->position->y += i->font_height;
-	++i->line;
-	--i->top;
-}
 static struct JBXVTLine * get_line(struct HistoryContext * restrict i)
 {
 	/* Use i->top as the offset into the scroll history buffer, read from
 	 * bottom to top.  So we use the value of jbxvt_get_scroll_size() to
 	 * find the bottom of the buffer.  Then offset by -1 to base the index
 	 * on 0.  */
-	return jbxvt_get_saved_lines() + i->scroll_size - i->top - 1;
+	return jbxvt_get_saved_lines() + jbxvt_get_scroll_size() - i->top - 1;
 }
 static void show_history_r(struct HistoryContext * restrict i)
 {
-	if (i->scroll_size == 0)
-		i->scroll_size = jbxvt_get_scroll_size();
-	// This is the normal return condition of this recursive function:
-	if (i->top < 0)
-		return;
-	i->line_data = get_line(i);
-	paint(i->xc, i->line_data, *i->position);
-	increment_line(i);
-	return show_history_r(i);
+	if (i->top >= 0) { // show remaining lines in history
+		i->line_data = get_line(i);
+		paint(i->xc, i->line_data, *i->position);
+		i->position->y += i->font_height;
+		++i->line;
+		--i->top; // one less line
+		show_history_r(i);
+	}
 }
 static void draw_history_line(xcb_connection_t * xc, const int16_t y)
 {
