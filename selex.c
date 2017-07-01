@@ -29,8 +29,8 @@ static struct JBDim jbxvt_get_constrained(struct JBDim rc)
 	struct JBDim c = jbxvt_get_char_size();
 	if (!c.w || !c.h)
 		return rc; // invalid constraint, return input
-	JB_LIMIT(rc.x, c.w - 1, 0);
-	JB_LIMIT(rc.y, c.h - 1, 0);
+	JB_LIMIT(rc.x, c.w, 0);
+	JB_LIMIT(rc.y, c.h, 0);
 	return rc;
 }
 //  Extend the selection.
