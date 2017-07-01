@@ -62,6 +62,14 @@ static void increment_line(struct HistoryContext * restrict i)
 	++i->line;
 	--i->top;
 }
+static struct JBXVTLine * get_line(struct HistoryContext * restrict i)
+{
+	/* Use i->top as the offset into the scroll history buffer, read from
+	 * bottom to top.  So we use the value of jbxvt_get_scroll_size() to
+	 * find the bottom of the buffer.  Then offset by -1 to base the index
+	 * on 0.  */
+	return jbxvt_get_saved_lines() + i->scroll_size - i->top - 1;
+}
 static void show_history_r(struct HistoryContext * restrict i)
 {
 	if (i->scroll_size == 0)
@@ -69,15 +77,7 @@ static void show_history_r(struct HistoryContext * restrict i)
 	// This is the normal return condition of this recursive function:
 	if (i->top < 0)
 		return;
-	/* Use i->top as the offset into the scroll history buffer, read from
-	 * bottom to top.  So we use the value of jbxvt_get_scroll_size() to
-	 * find the bottom of the buffer.  Then offset by -1 to base the index
-	 * on 0.  */
-	if (!i->line_data) // initialize once:
-		i->line_data = jbxvt_get_saved_lines() + i->scroll_size -
-			i->top - 1;
-	else // avoid function call and math overhead:
-		++i->line_data;
+	i->line_data = get_line(i);
 	paint(i->xc, i->line_data, *i->position);
 	increment_line(i);
 	return show_history_r(i);
@@ -90,7 +90,7 @@ static void draw_history_line(xcb_connection_t * xc, const int16_t y)
 		jbxvt_get_cursor_gc(xc), 2, onscreen_line);
 }
 // Display current lines after the last rendered scroll history line (i):
-static void draw_active_lines_r(int i, struct HistoryContext * c)
+static void draw_active_lines_r(const int i, struct HistoryContext * c)
 {
 	if (i <= c->char_height) {
 		paint(c->xc, c->line_data + i, *c->position);
