@@ -104,13 +104,13 @@ void jbxvt_start_selection(xcb_connection_t * xc,
 void jbxvt_check_selection(xcb_connection_t * xc,
 	const int16_t row1, const int16_t row2)
 {
-	if (!selection_data.on_screen)
-		return;
-	int16_t r1 = SE[0].index, r2 = SE[1].index;
-	if (r1 > r2)
-		JB_SWAP(int16_t, r1, r2);
-	if (row2 < r1 || row1 > r2)
-		return;
-	jbxvt_show_selection(xc);
-	selection_data.on_screen = false;
+	if (selection_data.on_screen) {
+		int16_t r1 = SE[0].index, r2 = SE[1].index;
+		if (r1 > r2)
+			JB_SWAP(int16_t, r1, r2);
+		if (row2 >= r1 && row1 <= r2) {
+			jbxvt_show_selection(xc);
+			selection_data.on_screen = false;
+		}
+	}
 }
