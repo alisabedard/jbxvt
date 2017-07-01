@@ -6,11 +6,8 @@
 		(= 1 (string-length in_value)))
 		(number->string (set! serial (1+ serial)))
 		in_value)))
-(define get-comment (lambda (line) (let
-	((value (string-cdr (string-cdr line))))
-	(if (equal? value "")
-		""
-		(string-append " // " value)))))
+(define get-comment (lambda (line)
+	(if (equal? line "") "" (string-append " // " line))))
 (define parse (lambda (in out)
 	(let* ((line (read-line in)))
 	(if (not (eof-object? line))
@@ -19,8 +16,7 @@
 			(display (string-append "\tJBXVT_TOKEN_"
 				(string-car line) " = "
 				(get-value value) ","
-				(if (equal? "" comment) ""
-					(string-append " // " comment))
+				(get-comment comment)
 				"\n") out)
 			(parse in out))))))
 (define convert_tokens (lambda (in_name out_name) (let*
