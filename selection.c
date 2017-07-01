@@ -64,17 +64,17 @@ void jbxvt_send_selection(xcb_connection_t * xc,
 {
 	LOG("jbxvt_send_selection, %d, %d, %d, %d", (int)time,
 		requestor, type, property);
-	if (!selection_data.text)
-		return; // nothing to send, prevent crash
-	change_property(xc, requestor, property, type);
-	xcb_selection_notify_event_t e = {
-		.response_type = XCB_SELECTION_NOTIFY,
-		.selection = XCB_ATOM_PRIMARY, .target = type,
-		.requestor = requestor, .time = time, .property
-			= property == XCB_NONE
-			? type : property}; // per ICCCM
-	xcb_send_event(xc, true, requestor,
-		XCB_SELECTION_NOTIFY, (char *)&e);
+	if (selection_data.text) { // verify data non-null
+		change_property(xc, requestor, property, type);
+		xcb_selection_notify_event_t e = {
+			.response_type = XCB_SELECTION_NOTIFY,
+			.selection = XCB_ATOM_PRIMARY, .target = type,
+			.requestor = requestor, .time = time, .property
+				= property == XCB_NONE
+				? type : property}; // per ICCCM
+		xcb_send_event(xc, true, requestor,
+			XCB_SELECTION_NOTIFY, (char *)&e);
+	}
 }
 //  Clear the current selection.
 void jbxvt_clear_selection(void)
