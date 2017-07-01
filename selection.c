@@ -31,11 +31,11 @@ xcb_atom_t jbxvt_get_clipboard(xcb_connection_t * xc)
 	static xcb_atom_t a;
 	return a ? a : (a = jb_get_atom(xc, "CLIPBOARD"));
 }
-static inline void prop(xcb_connection_t * xc, const xcb_atom_t a)
+static inline void change_own_property(xcb_connection_t * xc,
+	const xcb_atom_t property)
 {
-	if (selection_data.text) // don't set NULL data
-		jbxvt_set_property(xc, a, selection_data.length,
-			selection_data.text);
+	jbxvt_set_property(xc, property, selection_data.length,
+		selection_data.text);
 }
 //  Make the selection currently delimited by the selection end markers.
 void jbxvt_make_selection(xcb_connection_t * xc)
@@ -43,9 +43,11 @@ void jbxvt_make_selection(xcb_connection_t * xc)
 	LOG("jbxvt_make_selection");
 	jbxvt_save_selection(&selection_data);
 	/* Set all properties which may possibly be requested.  */
-	prop(xc, XCB_ATOM_PRIMARY);
-	prop(xc, XCB_ATOM_SECONDARY);
-	prop(xc, jbxvt_get_clipboard(xc));
+	if (selection_data.text) { // don't set NULL data
+		change_own_property(xc, XCB_ATOM_PRIMARY);
+		change_own_property(xc, XCB_ATOM_SECONDARY);
+		change_own_property(xc, jbxvt_get_clipboard(xc));
+	}
 	xcb_set_selection_owner(xc, jbxvt_get_main_window(xc),
 		XCB_ATOM_PRIMARY, XCB_CURRENT_TIME);
 }
