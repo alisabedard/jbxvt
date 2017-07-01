@@ -243,10 +243,6 @@ case JBXVT_TOKEN_SD:
 	LOG("JBXVT_TOKEN_SD");
 	jbxvt_handle_JBXVT_TOKEN_SD(xc, &token);
 	break;
-case JBXVT_TOKEN_SELINSRT:
-	LOG("JBXVT_TOKEN_SELINSRT");
-	jbxvt_handle_JBXVT_TOKEN_SELINSRT(xc, &token);
-	break;
 case JBXVT_TOKEN_SET:
 	LOG("JBXVT_TOKEN_SET");
 	jbxvt_handle_JBXVT_TOKEN_SET(xc, &token);
@@ -271,13 +267,13 @@ case JBXVT_TOKEN_SS3:
 case JBXVT_TOKEN_SSDT:
 	LOG("FIXME: JBXVT_TOKEN_SSDT not implemented.");
 	break;
-case JBXVT_TOKEN_STBM:
-	LOG("JBXVT_TOKEN_STBM");
-	jbxvt_handle_JBXVT_TOKEN_STBM(xc, &token);
-	break;
 case JBXVT_TOKEN_ST:
 	LOG("JBXVT_TOKEN_ST");
 	jbxvt_handle_JBXVT_TOKEN_ST(xc, &token);
+	break;
+case JBXVT_TOKEN_STBM:
+	LOG("JBXVT_TOKEN_STBM");
+	jbxvt_handle_JBXVT_TOKEN_STBM(xc, &token);
 	break;
 case JBXVT_TOKEN_STRING:
 	jbxvt_handle_JBXVT_TOKEN_STRING(xc, &token);

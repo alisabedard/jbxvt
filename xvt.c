@@ -306,10 +306,6 @@ HANDLE(SD) // scroll down
 {
 	handle_scroll(xc, -token->arg[0]);
 }
-HANDLE(SELINSRT)
-{
-	jbxvt_request_selection(xc, (xcb_timestamp_t)token->arg[0]);
-}
 EXTERN_ALIAS(SGR, jbxvt_handle_sgr);
 HANDLE(SS2)
 {

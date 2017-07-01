@@ -1,114 +1,114 @@
-ALN:x:screen alignment test (E-fill)
-ANSI1:x:ANSI conformance level 1
-ANSI2:x:ANSI conformance level 2
-ANSI3:x:ANSI conformance level 3
-APC:0x9f
-CHA:'G':cursor CHaracter Absolute column
-CHAR:x:single character
-CHT:0x49:cursor horizontal tab
-CNL:'E':cursor next line
-CPL:'F':cursor prev line
-CS_ALT_G1:'-':set character set G1
-CS_ALT_G2:'.':set character set G2
-CS_ALT_G3:'/':set character set G3
-CS_DEF:x:default character set
-CS_G0:'(':set character set G0
-CS_G1:')':set character set G1
-CS_G2:'*':set character set G2
-CS_G3:'+':set character set G3
-CSI:0x9b
-CS_UTF8:x:utf-8 character set
-CUB:'D':cursor back
-CUD:'B':cursor down
-CUF:'C':cursor back
-CUP:'H':position cursor
-CUU:'A':cursor up
-DA:'c':device attributes request
-DCH:'P':delete characters
-DCS:0x90
-DHLB:x:double height line, bottom half
-DHLT:x:double height line, top half
-DL:'M':delete lines
-DSR:'n':report status or position
-DWL:x:double width line
-ECH:'X':erase CHaracters
-ED:'J':erase to start or end of screen
-EL:'K':erase to start or end of line
-ELR:'z':Enable Locator Reporting
-ENTGM52:x:enter vt52 graphics mode (ESC F)
-ENTRY:x:cursor crossed window boundary
-EOF:x:end of file
-EPA:0x97
-ESC:033
-EXPOSE:x:exposure event
-EXTGM52:x:exit vt52 graphics mode (ESC G)
-FOCUS:x:keyboard focus event
-HOME:x:move cursor to home position
-HPA:'`':horizontal position absolute
-HPR:'a':horizontal position relative
-HTS:0x88:horizontal tab stop
-HVP:'f':horizontal and vertical position
-ICH:'@':insert characters
-ID:0x9a
-IL:'L':insert lines
-IND:0x84:index
-LL:'q':load LEDs
-MC:'i':media copy
-MEMLOCK:x:(HP) lock memory above cursor
-MEMUNLOCK:x:(HP) unlock memory above cursor
-NEL:0x85:next line
-NULL:0:token to be ignored
-OSC:0x9d
-PAM:'=':keypad to applications mode
-PM:0x9e:privacy message (ended by ESC \ (ST))
-PNM:'>':keypad to numeric mode
-QUERY_SCA:x:DSR cursor attributes
+ALN:x:l:screen alignment test (E-fill)
+ANSI1:x::ANSI conformance level 1
+ANSI2:x::ANSI conformance level 2
+ANSI3:x::ANSI conformance level 3
+APC:0x9f:s
+CHA:'G':l:cursor CHaracter Absolute column
+CHAR:x:n:single character
+CHT:0x49:l:cursor horizontal tab
+CNL:'E':l:cursor next line
+CPL:'F':l:cursor prev line
+CS_ALT_G1:'-':l:set character set G1
+CS_ALT_G2:'.':l:set character set G2
+CS_ALT_G3:'/':l:set character set G3
+CS_DEF:x::default character set
+CS_G0:'(':l:set character set G0
+CS_G1:')':l:set character set G1
+CS_G2:'*':l:set character set G2
+CS_G3:'+':l:set character set G3
+CSI:0x9b::control sequence intiator
+CS_UTF8:x::utf-8 character set
+CUB:'D':l:cursor back
+CUD:'B':l:cursor down
+CUF:'C':l:cursor back
+CUP:'H':l:position cursor
+CUU:'A':l:cursor up
+DA:'c':l:device attributes request
+DCH:'P':l:delete characters
+DCS:0x90::device control sequence
+DHLB:x:s:double height line, bottom half
+DHLT:x:s:double height line, top half
+DL:'M':l:delete lines
+DSR:'n':l:report status or position
+DWL:x:l:double width line
+ECH:'X':l:erase CHaracters
+ED:'J':l:erase to start or end of screen
+EL:'K':l:erase to start or end of line
+ELR:'z':l:Enable Locator Reporting
+ENTGM52:x:l:enter vt52 graphics mode (ESC F)
+ENTRY:x::cursor crossed window boundary
+EOF:x::end of file
+EPA:0x97:s:end of protected area
+ESC:033::escape
+EXPOSE:x::exposure event
+EXTGM52:x:l:exit vt52 graphics mode (ESC G)
+FOCUS:x::keyboard focus event
+HOME:x:l:move cursor to home position
+HPA:'`':l:horizontal position absolute
+HPR:'a':l:horizontal position relative
+HTS:0x88:l:horizontal tab stop
+HVP:'f':l:horizontal and vertical position
+ICH:'@':l:insert characters
+ID:0x9a:l
+IL:'L':l:insert lines
+IND:0x84:l:index
+LL:'q':l:load LEDs
+MC:'i':l:media copy
+MEMLOCK:x::(HP) lock memory above cursor
+MEMUNLOCK:x::(HP) unlock memory above cursor
+NEL:0x85:l:next line
+NULL:0::token to be ignored
+OSC:0x9d:s:operating system command
+PAM:'=':l:keypad to applications mode
+PM:0x9e:l:privacy message (ended by ESC \ (ST))
+PNM:'>':l:keypad to numeric mode
+QUERY_SCA:x::DSR cursor attributes
 QUERY_SCL:x
 QUERY_SCUSR:x
-QUERY_SGR:x:DSR SGR style
-QUERY_SLRM:x:DSR soft scroll mode
-QUERY_STBM:x:DSR scroll margins
-RC:'8':restore cursor position
-REQTPARAM:'x':REQuest Terminal PARAMeters
-RESET:'l':reset mode
-RESIZE:x:main window resized
-RESTOREPM:'?':restore private modes
-RI:0x8d:reverse index
-RIS:x:reset to initial state
-RQM:'p':request DEC private mode
-S7C1T:x:7-bit controls
-S8C1T:x:8-bit controls
-SAVEPM:'s':save private mode values
-SASD:'}':set active status display
-SBDOWN:x:scroll bar down
-SBGOTO:x:set scroll bar position
-SBSWITCH:x:toggle scroll bar
-SBUP:x:scroll bar up
-SC:'7':save cursor position
-SD:'T':Scroll Down # lines
-SELCLEAR:x:selection clear request
-SELDRAG:x:drag selection
-SELECT:x:confirm the selection
-SELEXTND:x:extend selection
-SELINSRT:x:insert selection
-SELLINE:x:select a line
-SELNOTIFY:x:selection notify request
-SELREQUEST:x:selection request
-SELSTART:x:start selection
-SELWORD:x:select a word
-SET:'h':set mode
-SGR:'m':set graphics rendition
-SOS:0x98
-SPA:0x96
-SS2:0x8e:select G2 for next character only
-SS3:0x8f:select G3 for next character only
-SSDT:'~':set status display type
-ST:0x9c:string terminator
-STBM:'r':set top and bottom margins
-STRING:x:string of printable characters
-SU:'S':Scroll Up # lines
-SWL:x:single width line
-TBC:'g':tab clear
-TXTPAR:x:sequence with a text parameter
-VPA:'d':vertical position absolute
-VPR:'e':vertical position relative
+QUERY_SGR:x::DSR SGR style
+QUERY_SLRM:x::DSR soft scroll mode
+QUERY_STBM:x::DSR scroll margins
+RC:'8':l:restore cursor position
+REQTPARAM:'x':l:REQuest Terminal PARAMeters
+RESET:'l':l:reset mode
+RESIZE:x::main window resized
+RESTOREPM:'?'::restore private modes
+RI:0x8d:l:reverse index
+RIS:x:l:reset to initial state
+RQM:'p':l:request DEC private mode
+S7C1T:x:l:7-bit controls
+S8C1T:x:l:8-bit controls
+SAVEPM:'s':l:save private mode values
+SASD:'}':s:set active status display
+SBDOWN:x::scroll bar down
+SBGOTO:x:l:set scroll bar position
+SBSWITCH:x:l:toggle scroll bar
+SBUP:x::scroll bar up
+SC:'7':l:save cursor position
+SD:'T':l:Scroll Down # lines
+SELCLEAR:x::selection clear request
+SELDRAG:x::drag selection
+SELECT:x::confirm the selection
+SELEXTND:x::extend selection
+SELINSRT:x::insert selection
+SELLINE:x::select a line
+SELNOTIFY:x::selection notify request
+SELREQUEST:x::selection request
+SELSTART:x::start selection
+SELWORD:x::select a word
+SET:'h':l:set mode
+SGR:'m':n:set graphics rendition
+SOS:0x98:s:start of string
+SPA:0x96:s:start of protected area
+SS2:0x8e:l:select G2 for next character only
+SS3:0x8f:l:select G3 for next character only
+SSDT:'~':s:set status display type
+ST:0x9c:l:string terminator
+STBM:'r':l:set top and bottom margins
+STRING:x:n:string of printable characters
+SU:'S':l:Scroll Up # lines
+SWL:x:l:single width line
+TBC:'g':l:tab clear
+TXTPAR:x:l:sequence with a text parameter
+VPA:'d':l:vertical position absolute
+VPR:'e':l:vertical position relative

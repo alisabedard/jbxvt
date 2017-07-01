@@ -61,7 +61,6 @@ SBGOTO:l
 SBSWITCH:l
 SC:l
 SD:l
-SELINSRT:l
 SET:l
 SGR:n
 SOS:s
@@ -69,8 +68,8 @@ SPA:s
 SS2:l
 SS3:l
 SSDT:s
-STBM:l
 ST:l
+STBM:l
 STRING:n
 SU:l
 SWL:l

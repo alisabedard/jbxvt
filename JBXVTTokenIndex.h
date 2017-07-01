@@ -20,7 +20,7 @@ enum JBXVTTokenIndex {
 	JBXVT_TOKEN_CS_G1 = ')', // set character set G1
 	JBXVT_TOKEN_CS_G2 = '*', // set character set G2
 	JBXVT_TOKEN_CS_G3 = '+', // set character set G3
-	JBXVT_TOKEN_CSI = 0x9b,
+	JBXVT_TOKEN_CSI = 0x9b, // control sequence intiator
 	JBXVT_TOKEN_CS_UTF8 = 1006, // utf-8 character set
 	JBXVT_TOKEN_CUB = 'D', // cursor back
 	JBXVT_TOKEN_CUD = 'B', // cursor down
@@ -29,7 +29,7 @@ enum JBXVTTokenIndex {
 	JBXVT_TOKEN_CUU = 'A', // cursor up
 	JBXVT_TOKEN_DA = 'c', // device attributes request
 	JBXVT_TOKEN_DCH = 'P', // delete characters
-	JBXVT_TOKEN_DCS = 0x90,
+	JBXVT_TOKEN_DCS = 0x90, // device control sequence
 	JBXVT_TOKEN_DHLB = 1007, // double height line, bottom half
 	JBXVT_TOKEN_DHLT = 1008, // double height line, top half
 	JBXVT_TOKEN_DL = 'M', // delete lines
@@ -42,8 +42,8 @@ enum JBXVTTokenIndex {
 	JBXVT_TOKEN_ENTGM52 = 1010, // enter vt52 graphics mode (ESC F)
 	JBXVT_TOKEN_ENTRY = 1011, // cursor crossed window boundary
 	JBXVT_TOKEN_EOF = 1012, // end of file
-	JBXVT_TOKEN_EPA = 0x97,
-	JBXVT_TOKEN_ESC = 033,
+	JBXVT_TOKEN_EPA = 0x97, // end of protected area
+	JBXVT_TOKEN_ESC = 033, // escape
 	JBXVT_TOKEN_EXPOSE = 1013, // exposure event
 	JBXVT_TOKEN_EXTGM52 = 1014, // exit vt52 graphics mode (ESC G)
 	JBXVT_TOKEN_FOCUS = 1015, // keyboard focus event
@@ -62,7 +62,7 @@ enum JBXVTTokenIndex {
 	JBXVT_TOKEN_MEMUNLOCK = 1018, // (HP) unlock memory above cursor
 	JBXVT_TOKEN_NEL = 0x85, // next line
 	JBXVT_TOKEN_NULL = 0, // token to be ignored
-	JBXVT_TOKEN_OSC = 0x9d,
+	JBXVT_TOKEN_OSC = 0x9d, // operating system command
 	JBXVT_TOKEN_PAM = '=', // keypad to applications mode
 	JBXVT_TOKEN_PM = 0x9e, // privacy message (ended by ESC \ (ST))
 	JBXVT_TOKEN_PNM = '>', // keypad to numeric mode
@@ -102,8 +102,8 @@ enum JBXVTTokenIndex {
 	JBXVT_TOKEN_SELWORD = 1042, // select a word
 	JBXVT_TOKEN_SET = 'h', // set mode
 	JBXVT_TOKEN_SGR = 'm', // set graphics rendition
-	JBXVT_TOKEN_SOS = 0x98,
-	JBXVT_TOKEN_SPA = 0x96,
+	JBXVT_TOKEN_SOS = 0x98, // start of string
+	JBXVT_TOKEN_SPA = 0x96, // start of protected area
 	JBXVT_TOKEN_SS2 = 0x8e, // select G2 for next character only
 	JBXVT_TOKEN_SS3 = 0x8f, // select G3 for next character only
 	JBXVT_TOKEN_SSDT = '~', // set status display type
