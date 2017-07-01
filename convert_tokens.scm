@@ -1,5 +1,5 @@
 ; Copyright 2017, Jeffrey E. Bedard
-(load "libconvert.scm")
+(load "libjb/libconvert.scm")
 (define serial 1000)
 (define get-value (lambda (in_value)
 	(if (boolean/and (equal? (string-ref in_value 0) #\x)
