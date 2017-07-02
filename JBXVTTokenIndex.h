@@ -82,8 +82,8 @@ enum JBXVTTokenIndex {
 	JBXVT_TOKEN_RQM = 'p', // request DEC private mode
 	JBXVT_TOKEN_S7C1T = 1027, // 7-bit controls
 	JBXVT_TOKEN_S8C1T = 1028, // 8-bit controls
-	JBXVT_TOKEN_SAVEPM = 's', // save private mode values
 	JBXVT_TOKEN_SASD = '}', // set active status display
+	JBXVT_TOKEN_SAVEPM = 's', // save private mode values
 	JBXVT_TOKEN_SBDOWN = 1029, // scroll bar down
 	JBXVT_TOKEN_SBGOTO = 1030, // set scroll bar position
 	JBXVT_TOKEN_SBSWITCH = 1031, // toggle scroll bar

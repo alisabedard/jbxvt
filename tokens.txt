@@ -78,8 +78,8 @@ RIS:x:l:reset to initial state
 RQM:'p':l:request DEC private mode
 S7C1T:x:l:7-bit controls
 S8C1T:x:l:8-bit controls
-SAVEPM:'s':l:save private mode values
 SASD:'}':s:set active status display
+SAVEPM:'s':l:save private mode values
 SBDOWN:x::scroll bar down
 SBGOTO:x:l:set scroll bar position
 SBSWITCH:x:l:toggle scroll bar

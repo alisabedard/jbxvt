@@ -220,12 +220,12 @@ case JBXVT_TOKEN_S8C1T:
 	LOG("JBXVT_TOKEN_S8C1T");
 	jbxvt_handle_JBXVT_TOKEN_S8C1T(xc, &token);
 	break;
+case JBXVT_TOKEN_SASD:
+	LOG("FIXME: JBXVT_TOKEN_SASD not implemented.");
+	break;
 case JBXVT_TOKEN_SAVEPM:
 	LOG("JBXVT_TOKEN_SAVEPM");
 	jbxvt_handle_JBXVT_TOKEN_SAVEPM(xc, &token);
-	break;
-case JBXVT_TOKEN_SASD:
-	LOG("FIXME: JBXVT_TOKEN_SASD not implemented.");
 	break;
 case JBXVT_TOKEN_SBGOTO:
 	LOG("JBXVT_TOKEN_SBGOTO");
