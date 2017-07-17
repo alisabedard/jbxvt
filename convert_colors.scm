@@ -18,7 +18,6 @@
 		((tag "JBXVT_COLOR_INDEX_H")
 		(i (open-input-file in_file_name))
 		(o (open-output-file out_file_name)))
-		(set-indent 0)
 		(begin-include tag o)
 		(display "#include <stdint.h>\n" o)
 		(begin-array-definition "uint32_t" "jbxvt_color_index" o)
