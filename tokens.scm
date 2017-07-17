@@ -39,7 +39,7 @@
 			(make-case name logging case_out_port)
 			(parse in out case_out_port))))))
 (define convert_tokens (lambda (in_name out_name cases_out_name) (let*
-	((guard "JBXVT_JBXVTTOKENINDEX")
+	((guard "JBXVT_JBXVTTOKENINDEX_H")
 	(i (open-input-file in_name))
 	(o (open-output-file out_name))
 	(c (open-output-file cases_out_name)))
