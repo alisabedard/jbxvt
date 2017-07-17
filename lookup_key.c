@@ -7,10 +7,10 @@
 #include "command.h"
 #include "libjb/log.h"
 #include "sbar.h"
-static struct { // key modes
-	bool cursor, // app mode cursor keys
-	     keypad; // keypad keys
-} self;
+enum KeyboardModes {
+	CURSOR_MODE = 1, KEYPAD_MODE = 2
+};
+uint8_t keyboard_mode;
 // Reference <X11/keysymdef.h>
 #define K_C(n) (0xff00 | n)
 #define K_INS K_C(0x63)
@@ -91,7 +91,11 @@ static struct JBXVTKeyMaps kp_key_table[]={
 // Set key mode for cursor keys if is_cursor, else for keypad keys
 void jbxvt_set_keys(const bool mode_high, const bool is_cursor)
 {
-	*(is_cursor ? &self.cursor : &self.keypad) = mode_high;
+	const uint8_t flag = is_cursor ? CURSOR_MODE : KEYPAD_MODE;
+	if (mode_high)
+		keyboard_mode |= flag;
+	else
+		keyboard_mode &= ~flag;
 }
 static char * get_format(const enum JBXVTKeySymType type)
 {
@@ -136,9 +140,9 @@ static uint8_t * get_s(const xcb_keysym_t keysym, uint8_t * restrict kbuf)
 			false);
 	if (xcb_is_cursor_key(keysym) || xcb_is_pf_key(keysym))
 		return get_keycode_value(other_key_table, keysym,
-			kbuf, self.cursor);
+			kbuf, keyboard_mode & CURSOR_MODE);
 	return get_keycode_value(kp_key_table, keysym,
-		kbuf, self.keypad);
+		kbuf, keyboard_mode & KEYPAD_MODE);
 }
 /* FIXME: Make this portable to non-US keyboards, or write a version
    or table for each type.  Perhaps use libxkbcommon-x11.  */
