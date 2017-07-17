@@ -14,15 +14,6 @@ struct JBXVTKeyStrings {
 	uint8_t ks_type;	// the way to generate the string (see below)
 	uint8_t ks_value;	// value used in creating the string
 };
-/*  Different values for ks_type which determine how the value is used to
- *  generate the string.  */
-enum JBXVTKeySymType {
-	KS_TYPE_NONE,		// No output
-	KS_TYPE_CHAR,           // as printf("%c",ks_value)
-	KS_TYPE_XTERM,          // as printf("\033[%d",ks_value)
-	KS_TYPE_APPKEY,         // as printf("\033O%c",ks_value)
-	KS_TYPE_NONAPP          // as printf("\033[%c",ks_value)
-};
 //  Structure used to map a keysym to a string.
 struct JBXVTKeyMaps {
 	xcb_keysym_t km_keysym;

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <xcb/xcb_keysyms.h>
+#include "JBXVTKeySymType.h"
 #include "command.h"
 #include "libjb/log.h"
 #include "sbar.h"
@@ -24,68 +25,68 @@ uint8_t keyboard_mode;
 #define K_PD K_N(6)
 //  Table of function key mappings
 static struct JBXVTKeyMaps func_key_table[] = {
-	{K_F(1),	{KS_TYPE_APPKEY,'P'},	{KS_TYPE_XTERM,11}},
-	{K_F(2),	{KS_TYPE_APPKEY,'Q'},	{KS_TYPE_XTERM,12}},
-	{K_F(3),	{KS_TYPE_APPKEY,'R'},	{KS_TYPE_XTERM,13}},
-	{K_F(4),	{KS_TYPE_APPKEY,'S'},	{KS_TYPE_XTERM,14}},
-	{K_F(5),	{KS_TYPE_XTERM,15}, {}},
-	{K_F(6),	{KS_TYPE_XTERM,17}, {}},
-	{K_F(7),	{KS_TYPE_XTERM,18}, {}},
-	{K_F(8),	{KS_TYPE_XTERM,19}, {}},
-	{K_F(9),	{KS_TYPE_XTERM,20}, {}},
-	{K_F(10),	{KS_TYPE_XTERM,21}, {}},
-	{K_F(11),	{KS_TYPE_XTERM,23}, {}},
-	{K_F(12),	{KS_TYPE_XTERM,24}, {}},
-	{K_INS,		{KS_TYPE_XTERM,2},  {}},
-	{K_DEL,		{KS_TYPE_XTERM,3},  {}},
-	{K_PU,		{KS_TYPE_XTERM,5},  {}},
-	{K_PD,		{KS_TYPE_XTERM,6},  {}},
+	{K_F(1),	{APPKEY_KS,'P'},	{XTERM_KS,11}},
+	{K_F(2),	{APPKEY_KS,'Q'},	{XTERM_KS,12}},
+	{K_F(3),	{APPKEY_KS,'R'},	{XTERM_KS,13}},
+	{K_F(4),	{APPKEY_KS,'S'},	{XTERM_KS,14}},
+	{K_F(5),	{XTERM_KS,15}, {}},
+	{K_F(6),	{XTERM_KS,17}, {}},
+	{K_F(7),	{XTERM_KS,18}, {}},
+	{K_F(8),	{XTERM_KS,19}, {}},
+	{K_F(9),	{XTERM_KS,20}, {}},
+	{K_F(10),	{XTERM_KS,21}, {}},
+	{K_F(11),	{XTERM_KS,23}, {}},
+	{K_F(12),	{XTERM_KS,24}, {}},
+	{K_INS,		{XTERM_KS,2},  {}},
+	{K_DEL,		{XTERM_KS,3},  {}},
+	{K_PU,		{XTERM_KS,5},  {}},
+	{K_PD,		{XTERM_KS,6},  {}},
 	{}
 };
 //  PC keys and VT100 keypad function keys
 static struct JBXVTKeyMaps other_key_table[]={
 	// regular:
-	{ K_N(2), {KS_TYPE_NONAPP,'A'},{KS_TYPE_APPKEY,'A'}}, // up
-	{ K_N(4), {KS_TYPE_NONAPP,'B'},{KS_TYPE_APPKEY,'B'}}, // down
-	{ K_N(3), {KS_TYPE_NONAPP,'C'},{KS_TYPE_APPKEY,'C'}}, // left
-	{ K_N(1), {KS_TYPE_NONAPP,'D'},{KS_TYPE_APPKEY,'D'}}, // right
-	{ K_N(0), {KS_TYPE_NONAPP,'h'},{KS_TYPE_APPKEY,'h'}}, // home
-	{ K_N(7), {KS_TYPE_NONAPP,'\0'},{KS_TYPE_APPKEY,'\0'}}, // end
+	{ K_N(2), {NONAPP_KS,'A'},{APPKEY_KS,'A'}}, // up
+	{ K_N(4), {NONAPP_KS,'B'},{APPKEY_KS,'B'}}, // down
+	{ K_N(3), {NONAPP_KS,'C'},{APPKEY_KS,'C'}}, // left
+	{ K_N(1), {NONAPP_KS,'D'},{APPKEY_KS,'D'}}, // right
+	{ K_N(0), {NONAPP_KS,'h'},{APPKEY_KS,'h'}}, // home
+	{ K_N(7), {NONAPP_KS,'\0'},{APPKEY_KS,'\0'}}, // end
 	// keypad:
-	{ KP_F(7), {KS_TYPE_NONAPP,'A'},{KS_TYPE_APPKEY,'A'}}, // up
-	{ KP_F(9), {KS_TYPE_NONAPP,'B'},{KS_TYPE_APPKEY,'B'}}, // down
-	{ KP_F(8), {KS_TYPE_NONAPP,'C'},{KS_TYPE_APPKEY,'C'}}, // left
-	{ KP_F(6), {KS_TYPE_NONAPP,'D'},{KS_TYPE_APPKEY,'D'}}, // right
-	{ KP_F(5), {KS_TYPE_NONAPP,'h'},{KS_TYPE_APPKEY,'h'}}, // home
-	{ KP_F(0xc), {KS_TYPE_NONAPP,'\0'},{KS_TYPE_APPKEY,'\0'}}, // end
-	{ KP_F(1), {KS_TYPE_APPKEY,'P'},{KS_TYPE_APPKEY,'P'}}, // f1
-	{ KP_F(2), {KS_TYPE_APPKEY,'Q'},{KS_TYPE_APPKEY,'Q'}}, // f2
-	{ KP_F(3), {KS_TYPE_APPKEY,'R'},{KS_TYPE_APPKEY,'R'}}, // f3
-	{ KP_F(4), {KS_TYPE_APPKEY,'S'},{KS_TYPE_APPKEY,'S'}}, // f4
+	{ KP_F(7), {NONAPP_KS,'A'},{APPKEY_KS,'A'}}, // up
+	{ KP_F(9), {NONAPP_KS,'B'},{APPKEY_KS,'B'}}, // down
+	{ KP_F(8), {NONAPP_KS,'C'},{APPKEY_KS,'C'}}, // left
+	{ KP_F(6), {NONAPP_KS,'D'},{APPKEY_KS,'D'}}, // right
+	{ KP_F(5), {NONAPP_KS,'h'},{APPKEY_KS,'h'}}, // home
+	{ KP_F(0xc), {NONAPP_KS,'\0'},{APPKEY_KS,'\0'}}, // end
+	{ KP_F(1), {APPKEY_KS,'P'},{APPKEY_KS,'P'}}, // f1
+	{ KP_F(2), {APPKEY_KS,'Q'},{APPKEY_KS,'Q'}}, // f2
+	{ KP_F(3), {APPKEY_KS,'R'},{APPKEY_KS,'R'}}, // f3
+	{ KP_F(4), {APPKEY_KS,'S'},{APPKEY_KS,'S'}}, // f4
 	{}
 };
 #define KP_N(n) K_C(0xb0 | n)
 //  VT100 numeric keypad keys
 static struct JBXVTKeyMaps kp_key_table[]={
-	{ KP_N(0),	{KS_TYPE_CHAR,'0'},	{KS_TYPE_APPKEY,'p'}},
-	{ KP_N(1),	{KS_TYPE_CHAR,'1'},	{KS_TYPE_APPKEY,'q'}},
-	{ KP_N(2),	{KS_TYPE_CHAR,'2'},	{KS_TYPE_APPKEY,'r'}},
-	{ KP_N(3),	{KS_TYPE_CHAR,'3'},	{KS_TYPE_APPKEY,'s'}},
-	{ KP_N(4),	{KS_TYPE_CHAR,'4'},	{KS_TYPE_APPKEY,'t'}},
-	{ KP_N(5),	{KS_TYPE_CHAR,'5'},	{KS_TYPE_APPKEY,'u'}},
-	{ KP_N(6),	{KS_TYPE_CHAR,'6'},	{KS_TYPE_APPKEY,'v'}},
-	{ KP_N(7),	{KS_TYPE_CHAR,'7'},	{KS_TYPE_APPKEY,'w'}},
-	{ KP_N(8),	{KS_TYPE_CHAR,'8'},	{KS_TYPE_APPKEY,'x'}},
-	{ KP_N(9),	{KS_TYPE_CHAR,'9'},	{KS_TYPE_APPKEY,'y'}},
-	{ K_C(0xab),{KS_TYPE_CHAR,'+'},{KS_TYPE_APPKEY,'k'}},
-	{ K_C(0xad),{KS_TYPE_CHAR,'-'},{KS_TYPE_APPKEY,'m'}},
-	{ K_C(0xaa),{KS_TYPE_CHAR,'*'},{KS_TYPE_APPKEY,'j'}},
-	{ K_C(0xaf),{KS_TYPE_CHAR,'/'},{KS_TYPE_APPKEY,'o'}},
-	{ K_C(0xac),{KS_TYPE_CHAR,','},{KS_TYPE_APPKEY,'l'}},
-	{ K_C(0xae),{KS_TYPE_CHAR,'.'},{KS_TYPE_APPKEY,'n'}},
-	{ K_C(0x8d),{KS_TYPE_CHAR,'\r'},{KS_TYPE_APPKEY,'M'}},
-	{ K_C(0x80),{KS_TYPE_CHAR,' '},{KS_TYPE_APPKEY,' '}},
-	{ K_C(0x89),{KS_TYPE_CHAR,'\t'},{KS_TYPE_APPKEY,'I'}},
+	{ KP_N(0),	{CHAR_KS,'0'},	{APPKEY_KS,'p'}},
+	{ KP_N(1),	{CHAR_KS,'1'},	{APPKEY_KS,'q'}},
+	{ KP_N(2),	{CHAR_KS,'2'},	{APPKEY_KS,'r'}},
+	{ KP_N(3),	{CHAR_KS,'3'},	{APPKEY_KS,'s'}},
+	{ KP_N(4),	{CHAR_KS,'4'},	{APPKEY_KS,'t'}},
+	{ KP_N(5),	{CHAR_KS,'5'},	{APPKEY_KS,'u'}},
+	{ KP_N(6),	{CHAR_KS,'6'},	{APPKEY_KS,'v'}},
+	{ KP_N(7),	{CHAR_KS,'7'},	{APPKEY_KS,'w'}},
+	{ KP_N(8),	{CHAR_KS,'8'},	{APPKEY_KS,'x'}},
+	{ KP_N(9),	{CHAR_KS,'9'},	{APPKEY_KS,'y'}},
+	{ K_C(0xab),{CHAR_KS,'+'},{APPKEY_KS,'k'}},
+	{ K_C(0xad),{CHAR_KS,'-'},{APPKEY_KS,'m'}},
+	{ K_C(0xaa),{CHAR_KS,'*'},{APPKEY_KS,'j'}},
+	{ K_C(0xaf),{CHAR_KS,'/'},{APPKEY_KS,'o'}},
+	{ K_C(0xac),{CHAR_KS,','},{APPKEY_KS,'l'}},
+	{ K_C(0xae),{CHAR_KS,'.'},{APPKEY_KS,'n'}},
+	{ K_C(0x8d),{CHAR_KS,'\r'},{APPKEY_KS,'M'}},
+	{ K_C(0x80),{CHAR_KS,' '},{APPKEY_KS,' '}},
+	{ K_C(0x89),{CHAR_KS,'\t'},{APPKEY_KS,'I'}},
 	{}
 };
 // Set key mode for cursor keys if is_cursor, else for keypad keys
@@ -100,11 +101,11 @@ void jbxvt_set_keys(const bool mode_high, const bool is_cursor)
 static char * get_format(const enum JBXVTKeySymType type)
 {
 	switch(type) {
-	case KS_TYPE_XTERM:
+	case XTERM_KS:
 		return "\033[%d~";
-	case KS_TYPE_APPKEY:
+	case APPKEY_KS:
 		return "\033O%c";
-	case KS_TYPE_NONAPP:
+	case NONAPP_KS:
 		return "\033[%c";
 	default:
 		return "%c";
