@@ -212,21 +212,20 @@ static bool shift_page_up_down_scroll(xcb_connection_t * restrict xc,
 	const uint16_t state, const int_fast16_t pcount, uint8_t * s)
 {
 	enum {SCROLL_AMOUNT = 10};
-	if (state != XCB_MOD_MASK_SHIFT)
-		return false;
-	if (pcount <= 2)
-		return false;
+	bool rval = true;
+	if (state != XCB_MOD_MASK_SHIFT || pcount <= 2)
+		rval = false
 	/* The following implements a hook into keyboard
 	   input for shift-pageup/dn scrolling and future
 	   features.  */
 	LOG("Handling shift combination...");
-	if (is_page_up(s[2]))
+	else if (is_page_up(s[2]))
 		page_key_scroll(xc, SCROLL_AMOUNT);
 	else if (is_page_down(s[2]))
 		page_key_scroll(xc, -SCROLL_AMOUNT);
 	else
-		return false;
-	return true; // if page up or down
+		rval = false;
+	return rval; // true if page up or page down
 }
 __attribute__((const))
 static inline bool is_not_printable(const xcb_keysym_t k)
@@ -250,8 +249,7 @@ static uint8_t * handle_keysym(xcb_connection_t * restrict xc,
 	if (s) {
 		*pcount = jb_strlen((const char *)s);
 		print_s(s, *pcount);
-		if (shift_page_up_down_scroll(xc,
-			ke_state, *pcount, s))
+		if (shift_page_up_down_scroll(xc, ke_state, *pcount, s))
 			s = NULL;
 	} else if (!is_not_printable(key)) { // is a printable character
 			*pcount = 1;
