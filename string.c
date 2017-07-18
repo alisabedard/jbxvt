@@ -167,11 +167,12 @@ static bool test_shift(struct JBXVTPrivateModes * restrict m,
 static bool handle_single_shift(void)
 {
 	struct JBXVTPrivateModes * m = jbxvt_get_modes();
+	bool rval = false;
 	if (test_shift(m, m->ss2, CHARSET_SG2))
-		return true; // we have shifted
-	if (test_shift(m, m->ss3, CHARSET_SG3))
-		return true; // ditto
-	return false; // nothing changed
+		rval = true; // we have shifted
+	else if (test_shift(m, m->ss3, CHARSET_SG3))
+		rval = true; // ditto
+	return rval; // nothing changed
 }
 static void recover_from_shift(void)
 {
