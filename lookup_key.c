@@ -44,7 +44,7 @@ static struct JBXVTKeyMaps func_key_table[] = {
 	{}
 };
 //  PC keys and VT100 keypad function keys
-static struct JBXVTKeyMaps other_key_table[]={
+static struct JBXVTKeyMaps other_key_table[] = {
 	// regular:
 	{ K_N(2), {NONAPP_KS,'A'},{APPKEY_KS,'A'}}, // up
 	{ K_N(4), {NONAPP_KS,'B'},{APPKEY_KS,'B'}}, // down
@@ -78,15 +78,15 @@ static struct JBXVTKeyMaps kp_key_table[]={
 	{ KP_N(7),	{CHAR_KS,'7'},	{APPKEY_KS,'w'}},
 	{ KP_N(8),	{CHAR_KS,'8'},	{APPKEY_KS,'x'}},
 	{ KP_N(9),	{CHAR_KS,'9'},	{APPKEY_KS,'y'}},
-	{ K_C(0xab),{CHAR_KS,'+'},{APPKEY_KS,'k'}},
-	{ K_C(0xad),{CHAR_KS,'-'},{APPKEY_KS,'m'}},
-	{ K_C(0xaa),{CHAR_KS,'*'},{APPKEY_KS,'j'}},
-	{ K_C(0xaf),{CHAR_KS,'/'},{APPKEY_KS,'o'}},
-	{ K_C(0xac),{CHAR_KS,','},{APPKEY_KS,'l'}},
-	{ K_C(0xae),{CHAR_KS,'.'},{APPKEY_KS,'n'}},
-	{ K_C(0x8d),{CHAR_KS,'\r'},{APPKEY_KS,'M'}},
-	{ K_C(0x80),{CHAR_KS,' '},{APPKEY_KS,' '}},
-	{ K_C(0x89),{CHAR_KS,'\t'},{APPKEY_KS,'I'}},
+	{ K_C(0xab),	{CHAR_KS,'+'},	{APPKEY_KS,'k'}},
+	{ K_C(0xad),	{CHAR_KS,'-'},	{APPKEY_KS,'m'}},
+	{ K_C(0xaa),	{CHAR_KS,'*'},	{APPKEY_KS,'j'}},
+	{ K_C(0xaf),	{CHAR_KS,'/'},	{APPKEY_KS,'o'}},
+	{ K_C(0xac),	{CHAR_KS,','},	{APPKEY_KS,'l'}},
+	{ K_C(0xae),	{CHAR_KS,'.'},	{APPKEY_KS,'n'}},
+	{ K_C(0x8d),	{CHAR_KS,'\r'},	{APPKEY_KS,'M'}},
+	{ K_C(0x80),	{CHAR_KS,' '},	{APPKEY_KS,' '}},
+	{ K_C(0x89),	{CHAR_KS,'\t'},	{APPKEY_KS,'I'}},
 	{}
 };
 // Set key mode for cursor keys if is_cursor, else for keypad keys
