@@ -252,15 +252,14 @@ static uint8_t * handle_keysym(xcb_connection_t * restrict xc,
 		print_s(s, *pcount);
 		if (shift_page_up_down_scroll(xc,
 			ke_state, *pcount, s))
-			return NULL;
-		return s;
+			s = NULL;
+	} else if (!is_not_printable(key)) { // is a printable character
+			*pcount = 1;
+			kbuf[0] = (uint8_t)key;
+			apply_state(ke_state, kbuf);
+			s = kbuf;
 	}
-	if (is_not_printable(key))
-		return NULL;
-	*pcount = 1;
-	kbuf[0] = (uint8_t)key;
-	apply_state(ke_state, kbuf);
-	return kbuf;
+	return s;
 }
 //  Convert the keypress event into a string.
 uint8_t * jbxvt_lookup_key(xcb_connection_t * restrict xc,
