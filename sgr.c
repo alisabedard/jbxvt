@@ -30,45 +30,44 @@ static void sgrc(const uint32_t c, const bool fg)
 static bool rgb_or_index(int32_t arg, bool * restrict either,
 	bool * restrict index, bool * restrict rgb, const bool is_fg)
 {
-	if (JB_LIKELY(!*either))
-		return false;
-	*either = false;
-	const bool i = arg != 2;
-	*(i?index:rgb) = true;
-	jbxvt_add_rstyle(JB_LIKELY(i) ? (is_fg ? JBXVT_RS_FG_INDEX
-		: JBXVT_RS_BG_INDEX) : (is_fg ? JBXVT_RS_FG_RGB
-		: JBXVT_RS_BG_RGB));
-	return true;
+	const bool rval = *either;
+	if (JB_UNLIKELY(rval)) {
+		*either = false;
+		const bool i = arg != 2;
+		*(i?index:rgb) = true;
+		jbxvt_add_rstyle(JB_LIKELY(i) ? (is_fg ? JBXVT_RS_FG_INDEX
+			: JBXVT_RS_BG_INDEX) : (is_fg ? JBXVT_RS_FG_RGB
+			: JBXVT_RS_BG_RGB));
+	}
+	return rval;
 }
 // continue if true
 static bool handle_color_encoding(const int32_t arg, const bool is_fg,
 	bool * restrict index_mode, bool * restrict rgb_mode)
 {
 	static uint8_t rgb_count;
+	bool rval = false;
 	if (*index_mode) {
 		sgrc((uint32_t)arg, is_fg);
 		// exit mode after handling index
 		*index_mode = false;
-		return true;
+		rval = true;
 	} else if (JB_UNLIKELY(*rgb_mode)) {
 		const uint8_t o = is_fg ? 0 : 9;
 		encode_rgb(arg, 12 - rgb_count * 3 + o);
 		// exit mode after 3 colors
 		if (++rgb_count > 2)
 			*rgb_mode = (rgb_count = 0);
-		return true;
+		rval = true;
 	}
-	return false;
+	return rval;
 }
 void jbxvt_handle_sgr(xcb_connection_t * xc,
 	struct JBXVTToken * restrict token)
 {
-	bool fg_rgb_or_index = false;
-	bool bg_rgb_or_index = false;
-	bool fg_rgb_mode = false;
-	bool fg_index_mode = false;
-	bool bg_rgb_mode = false;
-	bool bg_index_mode = false;
+	bool fg_rgb_or_index = false, bg_rgb_or_index = false, fg_rgb_mode =
+		false, fg_index_mode = false, bg_rgb_mode = false,
+		bg_index_mode = false;
 	for (uint_fast8_t i = 0; i < token->nargs; ++i) {
 #if LOG_LEVEL > 5
 		LOG("jbxvt_handle_sgr: arg[%d]: %d", i, token->arg[i]);
