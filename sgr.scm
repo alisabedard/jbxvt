@@ -12,8 +12,9 @@
 		     (if (char=? #\c (string-ref op 0))
 		      (string-append ", " comment) "")))
 
-(define format-comment (lambda (comment op) (let ((c (string-ref op 0)))
- (cond ((not (char=? c #\c)) (string-append " // " comment)) (else "")))))
+(define format-comment (lambda (cmt op)
+ (cond ((or (string=? op "c") (string=? cmt "")) "")
+ (else (string-append " // " cmt)))))
 
 (define get-op
  (lambda (op)
@@ -32,7 +33,7 @@
     (get-op op) "("
     (format-value value op)
     (format-sgrc comment op)
-    ");\n\t\tbreak;\n"))))
+    ");\n\t\tbreak;\n") out-port)))
 
 (define parse-sgr
  (lambda (i o)
@@ -47,7 +48,8 @@
 	     (value-cdr (string-cdr op-cdr))
 	     (comment (string-car value-cdr))
 	     (comment-cdr (string-cdr value-cdr)))
-   (format-line case-id op value comment o)
+   (if (> (string-length line) 0) ; not a blank line
+    (format-line case-id op value comment o))
    (parse-sgr i o))))
 
 (define convert-sgr 

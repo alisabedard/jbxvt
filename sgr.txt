@@ -1,0 +1,50 @@
+
+1:a:BOLD:Bold font
+2:c:250:true
+3:a:ITALIC:Italic font
+4:a:UNDERLINE:Underline
+5:a:BLINK:Blinking
+6:a:BLINK:Substituted for rapidly blinking
+7:a:RVID:Image negative
+8:a:INVISIBLE:Invisible text
+9:a:CROSSED_OUT:Crossed out
+17:a:BOLD:Alternative font
+21:a:DOUBLE_UNDERLINE:Doubly Underlined
+23:d:ITALIC:Not italic
+27:d:RVID:Image positive (rvid off)
+28:d:INVISIBLE:Not invisible
+29:d:CROSSED_OUT:Not crossed out
+30:c:0:true
+31:c:011:true
+32:c:012:true
+33:c:013:true
+34:c:014:true
+35:c:015:true
+36:c:016:true
+37:c:017:true
+39:c:017:true
+40:c:0:false
+41:c:011:false
+42:c:012:false
+43:c:013:false
+44:c:014:false
+45:c:015:false
+46:c:016:false
+47:c:017:false
+49:c:0:false
+90:c:0:true
+91:c:011:true
+92:c:012:true
+93:c:013:true
+94:c:014:true
+95:c:015:true
+96:c:016:true
+97:c:017:true
+100:c:010:false
+101:c:011:false
+102:c:012:false
+103:c:013:false
+104:c:014:false
+105:c:015:false
+106:c:016:false
+107:c:017:false
