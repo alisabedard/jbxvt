@@ -46,8 +46,6 @@ void jbxvt_csi(xcb_connection_t * xc,
 		c = read_numeric_argument(xc, tk, &i, c);
 		if (c == JBXVT_TOKEN_ESC)
 			jbxvt_push_char(c);
-		if (c < ' ')
-			return;
 		if (c < '@')
 			c = jbxvt_pop_char(xc, 0);
 	} while (c < '@' && c >= ' ');
