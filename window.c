@@ -12,16 +12,9 @@
 #include "sbar.h"
 #include "scr_reset.h"
 #include "size.h"
-xcb_window_t jbxvt_get_main_window(xcb_connection_t * xc)
-{
-	static xcb_window_t w;
-	return w ? w : (w = xcb_generate_id(xc));
-}
-xcb_window_t jbxvt_get_vt_window(xcb_connection_t * xc)
-{
-	static xcb_window_t w;
-	return w ? w : (w = xcb_generate_id(xc));
-}
+#include "xcb_id_getter.h"
+XCB_ID_GETTER(jbxvt_get_main_window);
+XCB_ID_GETTER(jbxvt_get_vt_window);
 //  Map the window
 void jbxvt_map_window(xcb_connection_t * xc)
 {

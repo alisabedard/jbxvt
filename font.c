@@ -8,6 +8,10 @@
 #include "xcb_id_getter.h"
 static uint8_t font_ascent;
 static struct JBDim font_size;
+#define FONT_GETTER(name) XCB_ID_GETTER(jbxvt_get_##name##_font)
+FONT_GETTER(normal);
+FONT_GETTER(bold);
+FONT_GETTER(italic);
 struct JBDim jbxvt_get_font_size(void)
 {
 	return font_size;
@@ -44,7 +48,3 @@ void jbxvt_init_fonts(xcb_connection_t * xc,
 		jb_open_font(xc, f, opt->normal_font);
 	setup_font_metrics(xc, q);
 }
-#define FONT_GETTER(name) XCB_ID_GETTER(jbxvt_get_##name##_font)
-FONT_GETTER(normal);
-FONT_GETTER(bold);
-FONT_GETTER(italic);

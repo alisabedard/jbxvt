@@ -11,8 +11,10 @@
 #include "scroll.h"
 #include "size.h"
 #include "window.h"
+#include "xcb_id_getter.h"
 static int16_t sbar_offset; // how far up scrollbar is positioned
 static bool sbar_visible;
+XCB_ID_GETTER(jbxvt_get_scrollbar);
 int16_t jbxvt_get_scroll(void)
 {
 	return sbar_offset;
@@ -20,13 +22,6 @@ int16_t jbxvt_get_scroll(void)
 bool jbxvt_get_scrollbar_visible(void)
 {
 	return sbar_visible;
-}
-xcb_window_t jbxvt_get_scrollbar(xcb_connection_t * c)
-{
-	static xcb_window_t sb;
-	if (sb)
-		return sb;
-	return sb = xcb_generate_id(c);
 }
 __attribute__((pure))
 static int16_t get_sz(const uint16_t margin)
