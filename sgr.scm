@@ -24,8 +24,9 @@
     ((char=? c #\c) 'color)
     ((char=? c #\d) 'del)))))
 
-(define get-c-function (lambda (op) (let ((f (get-op op)))
-	(cond ((eq? f 'add) "jbxvt_add_rstyle")
+(define get-c-function
+ (lambda (op) (let ((f (get-op op)))
+	       (cond ((eq? f 'add) "jbxvt_add_rstyle")
 		((eq? f 'color) "sgrc")
 		((eq? f 'del) "jbxvt_del_rstyle")
 		(else "UNKNOWN-C-FUNCTION")))))
