@@ -43,12 +43,6 @@
 	case 29: // Not crossed out
 		jbxvt_del_rstyle(JBXVT_RS_CROSSED_OUT);
 		break;
-	case 39:
-		sgrc(017, true);
-		break;
-	case 49:
-		sgrc(0, false);
-		break;
 	case 30:
 		sgrc(0, true);
 		break;
@@ -71,6 +65,9 @@
 		sgrc(016, true);
 		break;
 	case 37:
+		sgrc(017, true);
+		break;
+	case 39:
 		sgrc(017, true);
 		break;
 	case 40:
@@ -96,6 +93,9 @@
 		break;
 	case 47:
 		sgrc(017, false);
+		break;
+	case 49:
+		sgrc(0, false);
 		break;
 	case 90:
 		sgrc(0, true);
