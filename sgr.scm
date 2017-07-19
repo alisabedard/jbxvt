@@ -20,19 +20,22 @@
  (lambda (op)
   (let ((c (string-ref op 0)))
    (cond
-    ((char=? c #\a) "jbxvt_add_rstyle")
-    ((char=? c #\c) "sgrc")
-    ((char=? c #\d) "jbxvt_del_rstyle")
-    (else "unknown")))))
+    ((char=? c #\a) 'add)
+    ((char=? c #\c) 'color)
+    ((char=? c #\d) 'del)))))
+
+(define get-c-function (lambda (op) (let ((f (get-op op)))
+	(cond ((eq? f 'add) "jbxvt_add_rstyle")
+		((eq? f 'color) "sgrc")
+		((eq? f 'del) "jbxvt_del_rstyle")
+		(else "UNKNOWN-C-FUNCTION")))))
 
 (define format-line
  (lambda (case-id op value comment out-port)
     (display (string-append "\tcase " case-id ":"
-    (format-comment comment op)
-    "\n\t\t"
-    (get-op op) "("
-    (format-value value op)
-    (format-sgrc comment op)
+    (format-comment comment op) "\n\t\t"
+    (get-c-function op) "("
+    (format-value value op) (format-sgrc comment op)
     ");\n\t\tbreak;\n") out-port)))
 
 (define parse-sgr
