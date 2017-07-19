@@ -24,27 +24,31 @@
     ((char=? c #\d) "jbxvt_del_rstyle")
     (else "unknown")))))
 
-(define parse-sgr
- (lambda (i o)
-  (and-let* ((line (read-line i))
-  ((not (eof-object? line))) ; validate
-  ; Define the database file format:
-  (case-id (string-car line))
-  (case-id-cdr (string-cdr line))
-  (op (string-car case-id-cdr))
-  (op-cdr (string-cdr case-id-cdr))
-  (value (string-car op-cdr))
-  (value-cdr (string-cdr op-cdr))
-  (comment (string-car value-cdr))
-  (comment-cdr (string-cdr value-cdr)))
+(define format-line
+ (lambda (case-id op value comment out-port)
     (display (string-append "\tcase " case-id ":"
     (format-comment comment op)
     "\n\t\t"
     (get-op op) "("
     (format-value value op)
     (format-sgrc comment op)
-    ");\n\t\tbreak;\n"))
-    (parse-sgr i o))))
+    ");\n\t\tbreak;\n"))))
+
+(define parse-sgr
+ (lambda (i o)
+  (and-let* ((line (read-line i))
+	     ((not (eof-object? line))) ; validate
+	     ; Define the database file format:
+	     (case-id (string-car line))
+	     (case-id-cdr (string-cdr line))
+	     (op (string-car case-id-cdr))
+	     (op-cdr (string-cdr case-id-cdr))
+	     (value (string-car op-cdr))
+	     (value-cdr (string-cdr op-cdr))
+	     (comment (string-car value-cdr))
+	     (comment-cdr (string-cdr value-cdr)))
+   (format-line case-id op value comment o)
+   (parse-sgr i o))))
 
 (define convert-sgr 
  (lambda (in-filename out-filename)
