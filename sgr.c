@@ -90,85 +90,19 @@ void jbxvt_handle_sgr(xcb_connection_t * xc,
 			jbxvt_set_fg(xc, NULL);
 			jbxvt_set_bg(xc, NULL);
 			break;
-		case 1 :
-			jbxvt_add_rstyle(JBXVT_RS_BOLD);
-			break;
-		case 2: // faint foreground
-			sgrc(250, true);
-			break;
-		case 3:
-			jbxvt_add_rstyle(JBXVT_RS_ITALIC);
-			break;
-		case 4 :
-			jbxvt_add_rstyle(JBXVT_RS_UNDERLINE);
-			break;
-		case 5 :
-		case 6: // sub for rapidly blinking
-			jbxvt_add_rstyle(JBXVT_RS_BLINK);
-			break;
-		case 7: // Image negative
-			jbxvt_add_rstyle(JBXVT_RS_RVID);
-			break;
-		case 8: // Invisible text
-			jbxvt_add_rstyle(JBXVT_RS_INVISIBLE);
-			break;
-		case 9: // crossed out
-			jbxvt_add_rstyle(JBXVT_RS_CROSSED_OUT);
-			break;
-		case 17: // Alt font
-			jbxvt_add_rstyle(JBXVT_RS_BOLD);
-			break;
-		case 21: // doubly underlined
-			jbxvt_add_rstyle(JBXVT_RS_DOUBLE_UNDERLINE);
-			break;
-		case 23: // Not italic
-			jbxvt_del_rstyle(JBXVT_RS_ITALIC);
-			break;
+#include "sgr_cases.c"
 		case 24: // Underline none
 			jbxvt_del_rstyle(JBXVT_RS_UNDERLINE);
 			jbxvt_del_rstyle(JBXVT_RS_DOUBLE_UNDERLINE);
-			break;
-		case 27: // Image positive ( rvid off)
-			jbxvt_del_rstyle(JBXVT_RS_RVID);
-			break;
-		case 28: // not invisible
-			jbxvt_del_rstyle(JBXVT_RS_INVISIBLE);
-			break;
-		case 29: // Not crossed out
-			jbxvt_del_rstyle(JBXVT_RS_CROSSED_OUT);
 			break;
 		case 26: // reserved
 			break;
 		case 38: // extended fg colors
 			fg_rgb_or_index = true;
 			break;
-		case 39: // foreground reset, white
-			sgrc(017, true);
-			break;
 		case 48: // extended bg colors
 			bg_rgb_or_index = true;
 			break;
-		case 49: // background reset, black
-			sgrc(0, false);
-			break;
-		case 30: sgrc(0, true); break; // black
-		case 90: sgrc(010, true); break; // grey
-		case 31: case 91: sgrc(011, true); break;
-		case 32: case 92: sgrc(012, true); break;
-		case 33: case 93: sgrc(013, true); break;
-		case 34: case 94: sgrc(014, true); break;
-		case 35: case 95: sgrc(015, true); break;
-		case 36: case 96: sgrc(016, true); break;
-		case 37: case 97: sgrc(017, true); break;
-		case 40: sgrc(0, false); break;
-		case 100: sgrc(010, false); break;
-		case 41: case 101: sgrc(011, false); break;
-		case 42: case 102: sgrc(012, false); break;
-		case 43: case 103: sgrc(013, false); break;
-		case 44: case 104: sgrc(014, false); break;
-		case 45: case 105: sgrc(015, false); break;
-		case 46: case 106: sgrc(016, false); break;
-		case 47: case 107: sgrc(017, false); break;
 		default:
 			LOG("unhandled style %d", token->arg[i]);
 		}
