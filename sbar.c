@@ -44,12 +44,12 @@ void jbxvt_draw_scrollbar(xcb_connection_t * xc)
 void jbxvt_set_scroll(xcb_connection_t * xc, int16_t n)
 {
 	JB_LIMIT(n, jbxvt_get_scroll_size(), 0);
-	if (n == sbar_offset)
-		return;
-	sbar_offset = n;
-	jbxvt_repaint(xc);
-	jbxvt_draw_cursor(xc);
-	jbxvt_draw_scrollbar(xc);
+	if (n != sbar_offset) {
+		sbar_offset = n;
+		jbxvt_repaint(xc);
+		jbxvt_draw_cursor(xc);
+		jbxvt_draw_scrollbar(xc);
+	}
 }
 // Scroll to the specified y position (in pixels)
 void jbxvt_scroll_to(xcb_connection_t * xc, const int16_t y)
