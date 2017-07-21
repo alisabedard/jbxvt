@@ -3,9 +3,7 @@
 #ifndef JBXVT_SELECTION_H
 #define JBXVT_SELECTION_H
 #include <stdbool.h>
-#include <stdint.h>
 #include <xcb/xcb.h>
-#include <xcb/xproto.h>
 enum JBXVTSelectionUnit;
 struct JBDim;
 /*  Determine if the current selection overlaps row1-row2.
