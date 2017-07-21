@@ -44,14 +44,9 @@
   (and-let* ((line (read-line i))
 	     ((not (eof-object? line))) ; validate
 	     ; Define the database file format:
-	     (case-id (string-car line))
-	     (case-id-cdr (string-cdr line))
-	     (op (string-car case-id-cdr))
-	     (op-cdr (string-cdr case-id-cdr))
-	     (value (string-car op-cdr))
-	     (value-cdr (string-cdr op-cdr))
-	     (comment (string-car value-cdr))
-	     (comment-cdr (string-cdr value-cdr)))
+	     (l (string-list line))
+	     (case-id (car l)) (op (cadr l))
+	     (value (caddr l)) (comment (cdddr l)))
    (if (> (string-length line) 0) ; not a blank line
     (format-line case-id op value comment o))
    (parse-sgr i o))))
