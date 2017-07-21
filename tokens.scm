@@ -27,22 +27,19 @@
     (display-case name logging port)))))
 (define parse
  (lambda (in out case_out_port)
-  (let* ((line (read-line in)))
-   (if (not (eof-object? line))
-    ; Define the database file format:
-    (let* ((name (string-car line))
-	   (namecdr (string-cdr line))
-	   (value (string-car namecdr))
-	   (valuecdr (string-cdr namecdr))
-	   (logging (string-car valuecdr))
-	   (loggingcdr (string-cdr valuecdr))
-	   (comment (string-car loggingcdr))
-	   (commentcdr (string-cdr loggingcdr)))
-     (display (string-append "\tJBXVT_TOKEN_" name
-	       " = " (get-value value) ","
-	       (get-comment comment) "\n") out)
-     (make-case name logging case_out_port)
-     (parse in out case_out_port))))))
+  (and-let* ((line (read-line in))
+	     ((not (eof-object? line)))
+	     (l (string-list-fixed line 4))
+	     ; Define the database file format:
+	     (name (car l))
+	     (value (cadr l))
+	     (logging (caddr l))
+	     (comment (cadddr l)))
+   (display (string-append "\tJBXVT_TOKEN_" name
+	     " = " (get-value value) ","
+	     (get-comment comment) "\n") out)
+   (make-case name logging case_out_port)
+   (parse in out case_out_port))))
 (define convert_tokens
  (lambda (in_name out_name cases_out_name)
   (let*
