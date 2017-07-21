@@ -4,6 +4,7 @@
 //#undef DEBUG
 #define LOG_LEVEL 3
 #include "sgr.h"
+#include "JBXVTRenderStyle.h"
 #include "JBXVTToken.h"
 #include "color.h"
 #include "libjb/log.h"

@@ -4,6 +4,7 @@
 #include "paint.h"
 #include <stdlib.h>
 #include "JBXVTPaintContext.h"
+#include "JBXVTRenderStyle.h"
 #include "color.h"
 #include "color_index.h"
 #include "double.h"
