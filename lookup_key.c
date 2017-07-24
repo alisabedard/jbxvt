@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <xcb/xcb_keysyms.h>
+#include "JBXVTKeyMaps.h"
 #include "JBXVTKeySymType.h"
 #include "command.h"
 #include "libjb/log.h"
@@ -23,6 +24,8 @@ uint8_t keyboard_mode;
 #define K_N(n) K_C(0x50 | n)
 #define K_PU K_N(5)
 #define K_PD K_N(6)
+/*  Thanks to Rob McMullen for the following function key mapping tables and
+ *  code. */
 //  Table of function key mappings
 static struct JBXVTKeyMaps func_key_table[] = {
 	{K_F(1),	{APPKEY_KS,'P'},	{XTERM_KS,11}},
