@@ -16,7 +16,7 @@ enum KeyboardModes {
 uint8_t keyboard_mode;
 /*  Thanks to Rob McMullen for the following function key mapping tables and
  *  code. */
-#include "key_table.c"
+#include "key_tables.c"
 // Reference <X11/keysymdef.h>
 /* These macros allow easy generation of keysyms for comparisons.  */
 #define K_C(n) (0xff00 | n)

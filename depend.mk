@@ -41,8 +41,9 @@ gc.o: gc.c gc.h xcb_id_getter.h
 jbxvt.o: jbxvt.c command.h libjb/util.h JBXVTOptions.h libjb/JBDim.h \
  config.h cursor.h JBXVTScreen.h JBXVTLine.h rstyle.h screen.h display.h \
  tab.h window.h xvt.h
+key_tables.o: key_tables.c
 lookup_key.o: lookup_key.c lookup_key.h JBXVTKeyMaps.h JBXVTKeySymType.h \
- command.h libjb/util.h libjb/log.h sbar.h
+ command.h libjb/util.h libjb/log.h sbar.h key_tables.c
 mc.o: mc.c mc.h JBXVTToken.h JBXVTTokenIndex.h command.h libjb/util.h \
  cursor.h JBXVTScreen.h JBXVTLine.h config.h rstyle.h libjb/JBDim.h \
  screen.h libjb/log.h
