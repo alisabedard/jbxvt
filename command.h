@@ -5,12 +5,6 @@
 #include <stdint.h>
 #include "libjb/util.h"
 struct JBDim;
-enum JBXVTCommandLimits {
-	KBUFSIZE =	8,		// size of keyboard mapping buffer
-	COM_BUF_SIZE =	UINT8_MAX,	// size of command read buffer
-	COM_PUSH_MAX =	20,		// max # chars to put back to input queue
-	MP_INTERVAL =	500		// multi-press interval in ms
-};
 fd_t jbxvt_get_fd(void);
 /*  Initialise the command connection.  This should be called after the X
  *  server connection is established.  */

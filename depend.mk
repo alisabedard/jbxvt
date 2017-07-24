@@ -1,13 +1,13 @@
-button_events.o: button_events.c button_events.h JBXVTSelectionUnit.h \
- command.h libjb/util.h font.h libjb/JBDim.h mouse.h move.h sbar.h \
- screen.h selection.h selex.h selreq.h window.h
+button_events.o: button_events.c button_events.h JBXVTCommandLimits.h \
+ JBXVTSelectionUnit.h font.h libjb/JBDim.h mouse.h move.h sbar.h screen.h \
+ selection.h selex.h selreq.h window.h
 cases.o: cases.c
 change_selection.o: change_selection.c change_selection.h font.h gc.h \
  libjb/JBDim.h libjb/log.h selection.h selend.h size.h window.h
-cmdtok.o: cmdtok.c cmdtok.h JBXVTToken.h JBXVTTokenIndex.h command.h \
- libjb/util.h cursor.h JBXVTScreen.h JBXVTLine.h config.h rstyle.h \
- libjb/JBDim.h screen.h dcs.h esc.h libjb/log.h libjb/xcb.h utf.h \
- xevents.h
+cmdtok.o: cmdtok.c cmdtok.h JBXVTCommandLimits.h JBXVTToken.h \
+ JBXVTTokenIndex.h command.h libjb/util.h cursor.h JBXVTScreen.h \
+ JBXVTLine.h config.h rstyle.h libjb/JBDim.h screen.h dcs.h esc.h \
+ libjb/log.h libjb/xcb.h utf.h xevents.h
 color.o: color.c color.h libjb/xcb.h JBXVTOptions.h libjb/JBDim.h gc.h \
  libjb/macros.h window.h xcb_screen.h
 command.o: command.c command.h libjb/util.h cmdtok.h libjb/file.h \
@@ -42,8 +42,9 @@ jbxvt.o: jbxvt.c command.h libjb/util.h JBXVTOptions.h libjb/JBDim.h \
  config.h cursor.h JBXVTScreen.h JBXVTLine.h rstyle.h screen.h display.h \
  tab.h window.h xvt.h
 key_tables.o: key_tables.c
-lookup_key.o: lookup_key.c lookup_key.h JBXVTKeyMaps.h JBXVTKeySymType.h \
- command.h libjb/util.h libjb/log.h sbar.h key_tables.c
+lookup_key.o: lookup_key.c lookup_key.h JBXVTCommandLimits.h \
+ JBXVTKeyMaps.h JBXVTKeySymType.h libjb/log.h libjb/util.h sbar.h \
+ key_tables.c
 mc.o: mc.c mc.h JBXVTToken.h JBXVTTokenIndex.h command.h libjb/util.h \
  cursor.h JBXVTScreen.h JBXVTLine.h config.h rstyle.h libjb/JBDim.h \
  screen.h libjb/log.h

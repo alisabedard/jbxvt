@@ -2,13 +2,12 @@
 #undef DEBUG
 //#define LOOKUP_KEY_DUMP_TABLES
 #include "lookup_key.h"
-#include <stdio.h>
-#include <string.h>
 #include <xcb/xcb_keysyms.h>
+#include "JBXVTCommandLimits.h"
 #include "JBXVTKeyMaps.h"
 #include "JBXVTKeySymType.h"
-#include "command.h"
 #include "libjb/log.h"
+#include "libjb/util.h"
 #include "sbar.h"
 enum KeyboardModes {
 	CURSOR_MODE = 1, KEYPAD_MODE = 2
@@ -95,7 +94,7 @@ static uint8_t * get_buffer(uint8_t * restrict buf,
 {
 	uint8_t * ks = use_alternate
 		? keymaptable->km_alt : keymaptable->km_normal;
-	snprintf((char *)buf, KBUFSIZE, get_format(ks[0]), ks[1]);
+	snprintf((char *)buf, KEY_MAP_BUF_SIZE, get_format(ks[0]), ks[1]);
 	return buf;
 }
 //  Look up function key keycode
@@ -244,7 +243,7 @@ uint8_t * jbxvt_lookup_key(xcb_connection_t * restrict xc,
 	dump();
 	exit(0);
 #endif//LOOKUP_KEY_DUMP_TABLES
-	static uint8_t kbuf[KBUFSIZE];
+	static uint8_t kbuf[KEY_MAP_BUF_SIZE];
 	xcb_key_press_event_t * ke = ev;
 	return handle_keysym(xc, kbuf, pcount,
 		get_keysym(xc, ke), ke->state);

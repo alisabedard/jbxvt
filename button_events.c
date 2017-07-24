@@ -1,8 +1,8 @@
 /*  Copyright 2017, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 #include "button_events.h"
+#include "JBXVTCommandLimits.h"
 #include "JBXVTSelectionUnit.h"
-#include "command.h"
 #include "font.h"
 #include "libjb/JBDim.h"
 #include "mouse.h"
