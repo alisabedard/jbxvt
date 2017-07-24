@@ -1,0 +1,34 @@
+bold
+underline
+blink
+rvid
+italic
+invisible
+# colors:
+# foreground: index or 9 bit octal rgb
+f0
+f1
+f2
+f3
+f4
+f5
+f6
+f7
+f8
+# background: index or 9 bit octal rgb
+b0
+b1
+b2
+b3
+b4
+b5
+b6
+b7
+b8
+# extended color support bits
+crossed_out
+double_underline
+fg_rgb
+bg_rgb
+fg_index
+bg_index
