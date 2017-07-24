@@ -118,10 +118,9 @@ static uint8_t * get_buffer(uint8_t * restrict buf,
 	struct JBXVTKeyMaps * restrict keymaptable,
 	const bool use_alternate)
 {
-	struct JBXVTKeyStrings * ks = use_alternate
-		? &keymaptable->km_alt : &keymaptable->km_normal;
-	snprintf((char *)buf, KBUFSIZE, get_format(ks->ks_type),
-		ks->ks_value);
+	uint8_t * ks = use_alternate
+		? keymaptable->km_alt : keymaptable->km_normal;
+	snprintf((char *)buf, KBUFSIZE, get_format(ks[0]), ks[1]);
 	return buf;
 }
 //  Look up function key keycode
