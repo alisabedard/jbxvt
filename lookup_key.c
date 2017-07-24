@@ -1,5 +1,6 @@
 // Copyright 2017, Jeffrey E. Bedard
 #undef DEBUG
+//#define LOOKUP_KEY_DUMP_TABLES
 #include "lookup_key.h"
 #include <stdio.h>
 #include <string.h>
@@ -13,85 +14,59 @@ enum KeyboardModes {
 	CURSOR_MODE = 1, KEYPAD_MODE = 2
 };
 uint8_t keyboard_mode;
+/*  Thanks to Rob McMullen for the following function key mapping tables and
+ *  code. */
+#include "key_table.c"
 // Reference <X11/keysymdef.h>
+/* These macros allow easy generation of keysyms for comparisons.  */
 #define K_C(n) (0xff00 | n)
 #define K_INS K_C(0x63)
 #define K_DEL K_C(0x9f)
 #define K_F(n) (0xffbd + n)
 // Keypad keys:
-#define KP_F(n) K_C(0x90 | n)
+#define JBXVT_KEYSYM_FUNCTION(n) K_C(0x90 | n)
 // Regular keys:
 #define K_N(n) K_C(0x50 | n)
 #define K_PU K_N(5)
 #define K_PD K_N(6)
-/*  Thanks to Rob McMullen for the following function key mapping tables and
- *  code. */
-//  Table of function key mappings
-static struct JBXVTKeyMaps func_key_table[] = {
-	{K_F(1),	{APPKEY_KS,'P'},	{XTERM_KS,11}},
-	{K_F(2),	{APPKEY_KS,'Q'},	{XTERM_KS,12}},
-	{K_F(3),	{APPKEY_KS,'R'},	{XTERM_KS,13}},
-	{K_F(4),	{APPKEY_KS,'S'},	{XTERM_KS,14}},
-	{K_F(5),	{XTERM_KS,15}, {}},
-	{K_F(6),	{XTERM_KS,17}, {}},
-	{K_F(7),	{XTERM_KS,18}, {}},
-	{K_F(8),	{XTERM_KS,19}, {}},
-	{K_F(9),	{XTERM_KS,20}, {}},
-	{K_F(10),	{XTERM_KS,21}, {}},
-	{K_F(11),	{XTERM_KS,23}, {}},
-	{K_F(12),	{XTERM_KS,24}, {}},
-	{K_INS,		{XTERM_KS,2},  {}},
-	{K_DEL,		{XTERM_KS,3},  {}},
-	{K_PU,		{XTERM_KS,5},  {}},
-	{K_PD,		{XTERM_KS,6},  {}},
-	{}
-};
-//  PC keys and VT100 keypad function keys
-static struct JBXVTKeyMaps other_key_table[] = {
-	// regular:
-	{ K_N(2), {NONAPP_KS,'A'},{APPKEY_KS,'A'}}, // up
-	{ K_N(4), {NONAPP_KS,'B'},{APPKEY_KS,'B'}}, // down
-	{ K_N(3), {NONAPP_KS,'C'},{APPKEY_KS,'C'}}, // left
-	{ K_N(1), {NONAPP_KS,'D'},{APPKEY_KS,'D'}}, // right
-	{ K_N(0), {NONAPP_KS,'h'},{APPKEY_KS,'h'}}, // home
-	{ K_N(7), {NONAPP_KS,'\0'},{APPKEY_KS,'\0'}}, // end
-	// keypad:
-	{ KP_F(7), {NONAPP_KS,'A'},{APPKEY_KS,'A'}}, // up
-	{ KP_F(9), {NONAPP_KS,'B'},{APPKEY_KS,'B'}}, // down
-	{ KP_F(8), {NONAPP_KS,'C'},{APPKEY_KS,'C'}}, // left
-	{ KP_F(6), {NONAPP_KS,'D'},{APPKEY_KS,'D'}}, // right
-	{ KP_F(5), {NONAPP_KS,'h'},{APPKEY_KS,'h'}}, // home
-	{ KP_F(0xc), {NONAPP_KS,'\0'},{APPKEY_KS,'\0'}}, // end
-	{ KP_F(1), {APPKEY_KS,'P'},{APPKEY_KS,'P'}}, // f1
-	{ KP_F(2), {APPKEY_KS,'Q'},{APPKEY_KS,'Q'}}, // f2
-	{ KP_F(3), {APPKEY_KS,'R'},{APPKEY_KS,'R'}}, // f3
-	{ KP_F(4), {APPKEY_KS,'S'},{APPKEY_KS,'S'}}, // f4
-	{}
-};
-#define KP_N(n) K_C(0xb0 | n)
-//  VT100 numeric keypad keys
-static struct JBXVTKeyMaps kp_key_table[]={
-	{ KP_N(0),	{CHAR_KS,'0'},	{APPKEY_KS,'p'}},
-	{ KP_N(1),	{CHAR_KS,'1'},	{APPKEY_KS,'q'}},
-	{ KP_N(2),	{CHAR_KS,'2'},	{APPKEY_KS,'r'}},
-	{ KP_N(3),	{CHAR_KS,'3'},	{APPKEY_KS,'s'}},
-	{ KP_N(4),	{CHAR_KS,'4'},	{APPKEY_KS,'t'}},
-	{ KP_N(5),	{CHAR_KS,'5'},	{APPKEY_KS,'u'}},
-	{ KP_N(6),	{CHAR_KS,'6'},	{APPKEY_KS,'v'}},
-	{ KP_N(7),	{CHAR_KS,'7'},	{APPKEY_KS,'w'}},
-	{ KP_N(8),	{CHAR_KS,'8'},	{APPKEY_KS,'x'}},
-	{ KP_N(9),	{CHAR_KS,'9'},	{APPKEY_KS,'y'}},
-	{ K_C(0xab),	{CHAR_KS,'+'},	{APPKEY_KS,'k'}},
-	{ K_C(0xad),	{CHAR_KS,'-'},	{APPKEY_KS,'m'}},
-	{ K_C(0xaa),	{CHAR_KS,'*'},	{APPKEY_KS,'j'}},
-	{ K_C(0xaf),	{CHAR_KS,'/'},	{APPKEY_KS,'o'}},
-	{ K_C(0xac),	{CHAR_KS,','},	{APPKEY_KS,'l'}},
-	{ K_C(0xae),	{CHAR_KS,'.'},	{APPKEY_KS,'n'}},
-	{ K_C(0x8d),	{CHAR_KS,'\r'},	{APPKEY_KS,'M'}},
-	{ K_C(0x80),	{CHAR_KS,' '},	{APPKEY_KS,' '}},
-	{ K_C(0x89),	{CHAR_KS,'\t'},	{APPKEY_KS,'I'}},
-	{}
-};
+#ifdef LOOKUP_KEY_DUMP_TABLES
+static bool visible(const uint8_t c)
+{
+	return c > ' ' && c < '~';
+}
+static void serialize(const struct JBXVTKeyMaps * restrict k)
+{
+	if (k->km_keysym) {
+		const uint8_t n = k->km_normal[1], a = k->km_alt[1];
+		if (visible(n) && visible(a))
+			printf("\t{0x%x, {%d, '%c'}, {%d, '%c'}},\n",
+				k->km_keysym,
+				(int)k->km_normal[0], (int)k->km_normal[1],
+				(int)k->km_alt[0], (int)k->km_alt[1]);
+		else // mask in hex
+			printf("\t{0x%x, {%d, 0x%x}, {%d, 0x%x}},\n",
+				k->km_keysym,
+				(int)k->km_normal[0], (int)k->km_normal[1],
+				(int)k->km_alt[0], (int)k->km_alt[1]);
+
+		serialize(k+1);
+	} else
+		printf("\t{}\n};\n");
+}
+static void pr_header(const char * h)
+{
+	printf("static struct JBXVTKeyMaps %s[]={\n", h);
+}
+static void dump(void)
+{
+	pr_header("func_key_table");
+	serialize(func_key_table);
+	pr_header("other_key_table");
+	serialize(other_key_table);
+	pr_header("kp_key_table");
+	serialize(kp_key_table);
+}
+#endif// LOOKUP_KEY_DUMP_TABLES
 // Set key mode for cursor keys if is_cursor, else for keypad keys
 void jbxvt_set_keys(const bool mode_high, const bool is_cursor)
 {
@@ -265,6 +240,10 @@ static uint8_t * handle_keysym(xcb_connection_t * restrict xc,
 uint8_t * jbxvt_lookup_key(xcb_connection_t * restrict xc,
 	void * restrict ev, int_fast16_t * restrict pcount)
 {
+#ifdef LOOKUP_KEY_DUMP_TABLES
+	dump();
+	exit(0);
+#endif//LOOKUP_KEY_DUMP_TABLES
 	static uint8_t kbuf[KBUFSIZE];
 	xcb_key_press_event_t * ke = ev;
 	return handle_keysym(xc, kbuf, pcount,
