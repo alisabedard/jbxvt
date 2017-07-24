@@ -12,9 +12,10 @@
 		     (if (char=? #\c (string-ref op 0))
 		      (string-append ", " comment) "")))
 
-(define format-comment (lambda (cmt op)
- (cond ((or (string=? op "c") (string=? cmt "")) "")
- (else (string-append " // " cmt)))))
+(define format-comment
+ (lambda (cmt op)
+  (cond ((or (string=? op "c") (string=? cmt "")) "")
+   (else (string-append " // " cmt)))))
 
 (define get-op
  (lambda (op)
@@ -33,11 +34,11 @@
 
 (define format-line
  (lambda (case-id op value comment out-port)
-    (display (string-append "\tcase " case-id ":"
-    (format-comment comment op) "\n\t\t"
-    (get-c-function op) "("
-    (format-value value op) (format-sgrc comment op)
-    ");\n\t\tbreak;\n") out-port)))
+  (display (string-append "\tcase " case-id ":"
+	    (format-comment comment op) "\n\t\t"
+	    (get-c-function op) "("
+	    (format-value value op) (format-sgrc comment op)
+	    ");\n\t\tbreak;\n") out-port)))
 
 (define parse-sgr
  (lambda (i o)
@@ -46,7 +47,7 @@
 	     ; Define the database file format:
 	     (l (string-list line))
 	     (case-id (car l)) (op (cadr l))
-	     (value (caddr l)) (comment (cdddr l)))
+	     (value (caddr l)) (comment (cadddr l)))
    (if (> (string-length line) 0) ; not a blank line
     (format-line case-id op value comment o))
    (parse-sgr i o))))
