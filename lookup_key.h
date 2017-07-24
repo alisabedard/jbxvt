@@ -6,8 +6,6 @@
 #include <stdint.h>
 #include <xcb/xcb.h>
 #include <xcb/xproto.h>
-/*  Thanks to Rob McMullen for the following function key mapping tables and
- *  code. */
 // Set key mode for cursor keys if is_cursor, else for keypad keys
 void jbxvt_set_keys(const bool mode_high, const bool is_cursor);
 // Convert the keypress event into a string
