@@ -62,7 +62,7 @@ void jbxvt_restore_cursor(xcb_connection_t * xc)
 	jbxvt_add_rstyle(saved_style);
 	jbxvt_draw_cursor(xc);
 }
-static bool is_blinking(void)
+static inline bool is_blinking(void)
 {
 	return cursor_attr && cursor_attr % 2;
 }
