@@ -6,15 +6,19 @@
 #include "libjb/util.h"
 #include "libjb/xcb.h"
 #include "xcb_id_getter.h"
-static uint8_t font_ascent;
-static struct JBDim font_size;
+static uint8_t font_geometry[3]; // width, height, ascent
 #define FONT_GETTER(name) XCB_ID_GETTER(jbxvt_get_##name##_font)
 FONT_GETTER(normal);
 FONT_GETTER(bold);
 FONT_GETTER(italic);
 struct JBDim jbxvt_get_font_size(void)
 {
-	return font_size;
+	return (struct JBDim){.width = font_geometry[0], .height =
+		font_geometry[1]};
+}
+uint8_t jbxvt_get_font_ascent(void)
+{
+	return font_geometry[2];
 }
 static void setup_font_metrics(xcb_connection_t * xc,
 	const xcb_query_font_cookie_t c)
@@ -22,14 +26,11 @@ static void setup_font_metrics(xcb_connection_t * xc,
 	xcb_query_font_reply_t * r = xcb_query_font_reply(xc,
 		c, NULL);
 	jb_assert(r, "Cannot get font information");
-	font_ascent = r->font_ascent;
-	font_size.width = (uint16_t)r->max_bounds.character_width;
-	font_size.height = r->font_ascent + r->font_descent;
+	uint8_t * restrict g = font_geometry;
+	g[0] = r->max_bounds.character_width;
+	g[1] = r->font_ascent + r->font_descent;
+	g[2] = r->font_ascent;
 	free(r);
-}
-uint8_t jbxvt_get_font_ascent(void)
-{
-	return font_ascent;
 }
 void jbxvt_init_fonts(xcb_connection_t * xc,
 	struct JBXVTOptions * opt)
