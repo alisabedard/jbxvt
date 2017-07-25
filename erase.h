@@ -5,7 +5,7 @@
 #define JBXVT_ERASE_H
 #include <stdint.h>
 #include <xcb/xcb.h>
-enum {
+enum JBXVTEraseOperation {
 	JBXVT_ERASE_AFTER = 0,
 	JBXVT_ERASE_BEFORE = 1,
 	JBXVT_ERASE_ALL = 2,
