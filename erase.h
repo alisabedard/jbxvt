@@ -3,7 +3,6 @@
     University of Kent at Canterbury.*/
 #ifndef JBXVT_ERASE_H
 #define JBXVT_ERASE_H
-#include <stdint.h>
 #include <xcb/xcb.h>
 enum JBXVTEraseOperation {
 	JBXVT_ERASE_AFTER = 0,
