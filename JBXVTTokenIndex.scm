@@ -1,4 +1,5 @@
 ; Copyright 2017, Jeffrey E. Bedard
+; vim: sw=2
 ; token code x assigns a self-incrementing serial number to the token
 ; case logging codes:
 ;	""	do not generate a case
@@ -55,6 +56,4 @@
    (close-port i)
    (close-port o)
    (close-port c))))
-(convert_tokens "tokens.txt" "JBXVTTokenIndex.h" "cases.txt")
-(load "casegen.scm")
-; vim: sw=2
+(convert_tokens "JBXVTTokenIndex.txt" "JBXVTTokenIndex.h" "cases.txt")

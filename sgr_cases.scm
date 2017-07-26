@@ -60,4 +60,4 @@
    (close-port i)
    (close-port o))))
 
-(convert-sgr "sgr.txt" "sgr_cases.c")
+(convert-sgr "sgr_cases.txt" "sgr_cases.c")

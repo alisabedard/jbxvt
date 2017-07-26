@@ -22,10 +22,16 @@ ${exe}: libjb ${objs}
 	rm -f ${exe}.tmp
 	tail -n 5 sz.log
 include depend.mk
-cases.c: cases.txt
-	scheme < casegen.scm
-color_index.h: color_index.txt
+cases.c: cases.txt cases.scm
+	scheme < cases.scm
+JBXVTRenderStyle.h: JBXVTRenderStyle.txt JBXVTRenderStyle.scm
+	scheme < JBXVTRenderStyle.scm
+color_index.h: color_index.txt color_index.scm
 	scheme < convert_colors.scm
+JBXVTTokenIndex.h: JBXVTTokenIndex.txt JBXVTTokenIndex.scm
+	scheme < JBXVTTokenIndex.scm
+sgr_cases.c: sgr_cases.txt sgr_cases.scm
+	scheme < sgr_cases.scm
 bindest=${DESTDIR}${PREFIX}/bin
 docdest=${DESTDIR}${PREFIX}/share/man/man1
 install: ${exe}
@@ -41,6 +47,8 @@ clean:
 		libjb/*.gcno
 distclean: clean
 	rm -f config.mk gcov.log
+	rm -f cases.c JBXVTRenderStyle.h color_index.h JBXVTTokenIndex.h\
+		sgr_cases.c
 check:
 	tests/rgb
 	tests/sgr
