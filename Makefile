@@ -27,7 +27,7 @@ cases.c: cases.txt cases.scm
 JBXVTRenderStyle.h: JBXVTRenderStyle.txt JBXVTRenderStyle.scm
 	scheme < JBXVTRenderStyle.scm
 color_index.h: color_index.txt color_index.scm
-	scheme < convert_colors.scm
+	scheme < color_index.scm
 JBXVTTokenIndex.h: JBXVTTokenIndex.txt JBXVTTokenIndex.scm
 	scheme < JBXVTTokenIndex.scm
 sgr_cases.c: sgr_cases.txt sgr_cases.scm
