@@ -3,14 +3,15 @@
 (letrec
  ((format-line (lambda (index value)
 		(string-append "\t[" index "] = 0x" value ",\n")))
+  (handle-line (lambda (line o)
+		(if (> (string-length line) 1)
+		 (display (format-line (string-car line)
+			   (string-cdr line)) o))))
   (parse (lambda (i o)
 	  (and-let*
 	   ((line (read-line i))
 	    ((not (eof-object? line))))
-	   (if (> (string-length line) 1)
-	    (begin (display (format-line (string-car line)
-			     (string-cdr line)) o)
-	     (flush-output o)))
+	   (handle-line line o)
 	   (parse i o))))
   (convert_colors
    (lambda (in_file_name out_file_name)
