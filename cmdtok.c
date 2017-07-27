@@ -96,26 +96,31 @@ static inline bool is_string_char(register int16_t c)
 	return c < 0x7f && (c >= ' ' || c == '\n'
 		|| c == '\r' || c == '\t');
 }
+struct GetNewLinesData {
+	xcb_connection_t * xc;
+	uint8_t * s;
+	int new_lines, c, i;
+};
+static void get_newlines(struct GetNewLinesData * restrict nld)
+{
+	do {
+		if ((nld->s[nld->i++] = nld->c) == '\n')
+			++nld->new_lines;
+		nld->c = jbxvt_pop_char(nld->xc, GET_INPUT_ONLY);
+	} while (is_string_char(nld->c)
+		&& nld->i < JBXVT_TOKEN_MAX_LENGTH);
+}
 static void handle_string_char(xcb_connection_t * xc,
 	int16_t c, struct JBXVTToken * restrict tk)
 {
 	tk->type = JBXVT_TOKEN_STRING;
-	{ // i scope, s scope
-		int i = 0;
-		uint8_t * restrict s = tk->string;
-		{ // nl scope
-			int nl = 0;
-			do {
-				if ((s[i++] = c) == '\n')
-					++nl;
-				c = jbxvt_pop_char(xc, GET_INPUT_ONLY);
-			} while (is_string_char(c)
-				&& i < JBXVT_TOKEN_MAX_LENGTH);
-			tk->nlcount = nl;
-		}
-		tk->length = i;
-		s[i] = 0; // terminating NULL
-	}
+	struct GetNewLinesData nld = {.xc = xc, .s = tk->string,
+		.c =  c};
+	get_newlines(&nld);
+	tk->nlcount = nld.new_lines;
+	tk->length = nld.i;
+	c = nld.c;  // bring to this scope
+	nld.s[nld.i] = 0; // terminating NULL
 	if (c != INPUT_BUFFER_EMPTY)
 		jbxvt_push_char(c);
 }
