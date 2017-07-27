@@ -129,35 +129,39 @@ static void default_token(xcb_connection_t * xc,
 	case JBXVT_TOKEN_RI: case JBXVT_TOKEN_SOS: case JBXVT_TOKEN_SPA:
 	case JBXVT_TOKEN_SS2: case JBXVT_TOKEN_SS3: case JBXVT_TOKEN_ST:
 		tk->type = c;
-		return;
+		break;
 	case JBXVT_TOKEN_APC: // Retrieve and skip sequence
 		c = jbxvt_pop_char(xc, c);
 		c = jbxvt_pop_char(xc, c);
 		LOG("0x9f0x%x", (unsigned int)c);
-		return;
-	}
-	if (is_string_char(c)) {
-		handle_string_char(xc, c, tk);
-		return;
-	}
-	// Process individual characters and unicode:
-	uint8_t bytes = jbxvt_get_utf_bytes(c); // additional bytes to parse
-	switch (bytes) {
-	case 3:
-		LOG("UTF8, 3 additional bytes: \t0x%x\n", (unsigned int)c);
-		jbxvt_parse_utf8_3(xc, tk, jbxvt_pop_char(xc, c));
 		break;
-	case 2:
-		LOG("UTF8, 2 additional bytes: \t0x%x\n", (unsigned int)c);
-		jbxvt_parse_utf8_2(xc, tk, jbxvt_pop_char(xc, c));
-		break;
-	case 1:
-		LOG("UTF8, 1 additional byte: \t0x%x\n", (unsigned int)c);
-		jbxvt_parse_utf8_1(tk, jbxvt_pop_char(xc, c));
-		break;
-	case 0:
-		jbxvt_parse_utf8_0(tk, c);
-		break;
+	default:
+		if (is_string_char(c)) {
+			handle_string_char(xc, c, tk);
+		} else {
+			// Process individual characters and unicode:
+			// additional bytes to parse:
+			uint8_t bytes = jbxvt_get_utf_bytes(c);
+			switch (bytes) {
+			case 3:
+#define UTFLOG(n) LOG("UTF8, %d more bytes: \t0x%x\n", n, (unsigned int)c)
+#define POP() jbxvt_pop_char(xc, c)
+				UTFLOG(3);
+				jbxvt_parse_utf8_3(xc, tk, POP());
+				break;
+			case 2:
+				UTFLOG(2);
+				jbxvt_parse_utf8_2(xc, tk, POP());
+				break;
+			case 1:
+				UTFLOG(1);
+				jbxvt_parse_utf8_1(tk, POP());
+				break;
+			case 0:
+				jbxvt_parse_utf8_0(tk, c);
+				break;
+			}
+		}
 	}
 }
 //  Return an input token
