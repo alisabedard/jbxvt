@@ -105,15 +105,15 @@ static void insert_characters(xcb_connection_t * restrict xc,
 static void parse_special_charset(uint8_t * restrict str, const int i)
 {
 	LOG("parse_special_charset(str, %d)", i);
-	if (i < 0)
-		return;
-	if (str[i] < 'q')
-		str[i] = '+';
-	else if (str[i] != 'x')
-		str[i] = '-';
-	else // x
-		str[i] = '|';
-	parse_special_charset(str, i - 1);
+	if (i >= 0) {
+		if (str[i] < 'q')
+			str[i] = '+';
+		else if (str[i] != 'x')
+			str[i] = '-';
+		else // x
+			str[i] = '|';
+		parse_special_charset(str, i - 1);
+	}
 }
 static bool test_action_char(xcb_connection_t * xc, const uint8_t c,
 	struct JBXVTScreen * restrict s)
