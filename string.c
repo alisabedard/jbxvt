@@ -179,63 +179,73 @@ static void recover_from_shift(void)
 	struct JBXVTPrivateModes * m = jbxvt_get_modes();
 	m->charset[m->charsel] = m->charset[JBXVT_CHARSET_SHIFT_REGISTER];
 }
-static void draw_string_at_pixel_position(xcb_connection_t * xc,
-	struct JBXVTScreen * screen, uint8_t * restrict str,
-	const int len)
+struct DrawStringContext {
+	xcb_connection_t * connection;
+	struct JBXVTScreen * screen;
+	uint8_t * string;
+	int32_t length;
+};
+static void draw_string_at_pixel_position(struct DrawStringContext * restrict
+	dc)
 {
-	struct JBDim p = jbxvt_chars_to_pixels(screen ->cursor);
-	struct JBXVTPrivateModes * restrict mode = jbxvt_get_modes();
-	if (JB_UNLIKELY(mode->insert)) insert_characters(xc, 1, p);
-	struct JBDim * c = &screen->cursor;
-	uint8_t * t = screen->line[c->y].text + c->x;
+	struct JBXVTScreen * restrict s = dc->screen;
+	const struct JBDim * restrict c = &s->cursor;
+	const struct JBDim p = jbxvt_chars_to_pixels(*c);
+	const struct JBXVTPrivateModes * restrict mode = jbxvt_get_modes();
+	if (JB_UNLIKELY(mode->insert))
+		insert_characters(dc->connection, 1, p);
+	uint8_t * t = s->line[c->y].text + c->x;
 	const bool shifted = handle_single_shift();
 	if (shifted) {
-		parse_special_charset(str, 1);
+		parse_special_charset(dc->string, 1);
 		recover_from_shift();
 	}
 	if (mode->charset[mode->charsel] > CHARSET_ASCII) {
 		if (shifted)
-			parse_special_charset(str + 1, len - 1);
+			parse_special_charset(dc->string + 1,
+				dc->length - 1);
 		else
-			parse_special_charset(str, len);
+			parse_special_charset(dc->string, dc->length);
 	}
 	// Render the string:
-	if (!screen->decpm) {
-		jbxvt_paint(&(struct JBXVTPaintContext){.xc = xc, .string =
-			str, .style = &(rstyle_t){ jbxvt_get_rstyle()},
-			.length = 1, .position = p, .is_double_width_line =
-			screen->line[c->y].dwl});
+	if (!s->decpm) {
+		jbxvt_paint(&(struct JBXVTPaintContext){.xc = dc->connection,
+			.string = dc->string,
+			.style = &(rstyle_t){jbxvt_get_rstyle()},
+			.length = 1, .position = p,
+			.is_double_width_line = s->line[c->y].dwl});
 		// Save scroll history:
-		*t = *str;
+		*t = *dc->string;
 	}
 
 }
-static void draw_string_at_cursor_position(xcb_connection_t * xc,
-	struct JBXVTScreen * screen, uint8_t * restrict str,
-	const int len)
+static void draw_string_at_cursor_position(struct DrawStringContext * restrict
+	dsc)
 {
-	struct JBDim * c = &screen->cursor;
-	if (screen->wrap_next) {
-		wrap(xc);
+	struct JBXVTScreen * restrict s = dsc->screen;
+	struct JBDim * restrict c = &s->cursor;
+	if (s->wrap_next) {
+		wrap(dsc->connection);
 		c->x = 0;
 	}
-	jbxvt_check_selection(xc, c->y, c->y);
-	draw_string_at_pixel_position(xc, screen, str, len);
+	jbxvt_check_selection(dsc->connection, c->y, c->y);
+	draw_string_at_pixel_position(dsc);
 	/* save_render_style() depends on the current cursor
 	 * position, so it must be called before increment. */
-	save_render_style(1, screen);
+	save_render_style(1, s);
 	++c->x;
 }
-static void draw_next_char(xcb_connection_t * xc,
-	struct JBXVTScreen * restrict screen, uint8_t * restrict str,
-	const int len)
+static void draw_next_char(struct DrawStringContext * restrict dsc)
 {
-	if (len > 0) {
-		if (!test_action_char(xc, *str, screen)) {
-			draw_string_at_cursor_position(xc, screen, str, len);
-			check_wrap(screen);
+	if (dsc->length > 0) {
+		if (!test_action_char(dsc->connection, *dsc->string,
+			dsc->screen)) {
+			draw_string_at_cursor_position(dsc);
+			check_wrap(dsc->screen);
 		}
-		draw_next_char(xc, screen, str + 1, len - 1);
+		dsc->string++;
+		dsc->length--;
+		draw_next_char(dsc);
 	}
 }
 /*  Display the string at the current position.
@@ -251,8 +261,9 @@ void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str, int len,
 	jbxvt_draw_cursor(xc);
 	if (new_line_count > 0)
 		  handle_new_lines(xc, new_line_count);
-	struct JBXVTScreen * restrict screen = jbxvt_get_current_screen();
 	jbxvt_check_cursor_position();
-	draw_next_char(xc, screen, str, len);
+	struct DrawStringContext dsc = {.connection = xc, .screen =
+		jbxvt_get_current_screen(), .string = str, .length = len};
+	draw_next_char(&dsc);
 	jbxvt_draw_cursor(xc);
 }
