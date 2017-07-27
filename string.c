@@ -75,8 +75,9 @@ static void move_visible(struct MoveData * restrict d)
 	const struct JBDim f = jbxvt_get_font_size(),
 	      * restrict p = d->point;
 	const uint16_t n_width = d->offset * f.width;
-	const xcb_window_t vt = jbxvt_get_vt_window(d->xc);
-	xcb_copy_area(d->xc, vt, vt, jbxvt_get_text_gc(d->xc), p->x, p->y,
+	xcb_connection_t * xc = d->xc;
+	const xcb_window_t vt = jbxvt_get_vt_window(xc);
+	xcb_copy_area(xc, vt, vt, jbxvt_get_text_gc(xc), p->x, p->y,
 		p->x + n_width, p->y, d->size * f.width - n_width, f.height);
 }
 static void move(struct MoveData * restrict d)
