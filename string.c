@@ -154,25 +154,26 @@ static void clear_shift(struct JBXVTPrivateModes * restrict m)
 static bool test_shift(struct JBXVTPrivateModes * restrict m,
 	const bool shift, const enum JBXVTCharacterSet cs)
 {
+	bool rval = false; // nothing changed
 	if (shift) {
 		const uint8_t i = m->charsel; // current index
 		m->charset[JBXVT_CHARSET_SHIFT_REGISTER]
 			= m->charset[i]; // save in shift buffer
 		m->charset[i] = cs; // set current to desired
 		clear_shift(m);
-		return true; // we have shifted
+		rval = true; // we have shifted
 	}
-	return false; // nothing changed
+	return rval;
 }
 static bool handle_single_shift(void)
 {
 	struct JBXVTPrivateModes * m = jbxvt_get_modes();
-	bool rval = false;
+	bool rval = false; // nothing changed
 	if (test_shift(m, m->ss2, CHARSET_SG2))
 		rval = true; // we have shifted
 	else if (test_shift(m, m->ss3, CHARSET_SG3))
 		rval = true; // ditto
-	return rval; // nothing changed
+	return rval;
 }
 static void recover_from_shift(void)
 {
