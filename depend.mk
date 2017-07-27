@@ -96,10 +96,10 @@ sgr_cases.o: sgr_cases.c
 show_selection.o: show_selection.c show_selection.h font.h gc.h \
  libjb/JBDim.h selection.h selend.h size.h window.h
 size.o: size.c size.h font.h libjb/JBDim.h
-string.o: string.c string.h JBXVTLine.h config.h rstyle.h \
- JBXVTPaintContext.h libjb/JBDim.h JBXVTPrivateModes.h JBXVTScreen.h \
- cursor.h screen.h font.h gc.h libjb/log.h libjb/macros.h libjb/time.h \
- mode.h paint.h sbar.h scroll.h move.h selection.h size.h tab.h window.h
+string.o: string.c string.h JBXVTPaintContext.h libjb/JBDim.h rstyle.h \
+ JBXVTPrivateModes.h cursor.h JBXVTScreen.h JBXVTLine.h config.h screen.h \
+ font.h gc.h libjb/log.h libjb/macros.h libjb/time.h mode.h paint.h \
+ sbar.h scroll.h selection.h size.h tab.h window.h
 tab.o: tab.c tab.h JBXVTLine.h config.h rstyle.h JBXVTScreen.h \
  libjb/JBDim.h JBXVTToken.h JBXVTTokenIndex.h cursor.h screen.h \
  libjb/log.h sbar.h size.h

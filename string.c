@@ -5,10 +5,8 @@
 //#define DEBUG_VERBOSE
 #include "string.h"
 #include <string.h>
-#include "JBXVTLine.h"
 #include "JBXVTPaintContext.h"
 #include "JBXVTPrivateModes.h"
-#include "JBXVTScreen.h"
 #include "cursor.h"
 #include "font.h"
 #include "gc.h"
@@ -20,7 +18,6 @@
 #include "sbar.h"
 #include "screen.h"
 #include "scroll.h"
-#include "move.h"
 #include "selection.h"
 #include "size.h"
 #include "tab.h"
