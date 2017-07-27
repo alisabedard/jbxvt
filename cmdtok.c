@@ -131,8 +131,9 @@ static void default_token(xcb_connection_t * xc,
 		tk->type = c;
 		break;
 	case JBXVT_TOKEN_APC: // Retrieve and skip sequence
-		c = jbxvt_pop_char(xc, c);
-		c = jbxvt_pop_char(xc, c);
+#define POP() jbxvt_pop_char(xc, c)
+		c = POP();
+		c = POP();
 		LOG("0x9f0x%x", (unsigned int)c);
 		break;
 	default:
@@ -145,7 +146,6 @@ static void default_token(xcb_connection_t * xc,
 			switch (bytes) {
 			case 3:
 #define UTFLOG(n) LOG("UTF8, %d more bytes: \t0x%x\n", n, (unsigned int)c)
-#define POP() jbxvt_pop_char(xc, c)
 				UTFLOG(3);
 				jbxvt_parse_utf8_3(xc, tk, POP());
 				break;
