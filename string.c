@@ -183,6 +183,7 @@ struct DrawStringContext {
 	struct JBXVTScreen * screen;
 	uint8_t * string;
 	int32_t length;
+	uint8_t __pad[4];
 };
 static void draw_string_at_pixel_position(struct DrawStringContext * restrict
 	dc)

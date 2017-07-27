@@ -95,6 +95,7 @@ struct ColorOperation {
 	const bool * is_indexed, * is_rgb;
 	pixel_t (*set_pixel)(xcb_connection_t *, const pixel_t);
 	bool is_foreground;
+	uint8_t __pad[7];
 };
 static void set_color(struct ColorOperation * restrict o)
 {
@@ -118,7 +119,7 @@ static bool set_rstyle_colors(xcb_connection_t * restrict xc,
 	const bool ind[] = {rstyle & JBXVT_RS_FG_INDEX,
 		rstyle & JBXVT_RS_BG_INDEX};
 	struct ColorOperation o = {xc, color, ind, rgb, jbxvt_set_bg_pixel,
-		false};
+		false, {}};
 	set_color(&o);
 	o.set_pixel = jbxvt_set_fg_pixel;
 	o.is_foreground = true;

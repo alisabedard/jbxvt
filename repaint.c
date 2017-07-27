@@ -53,7 +53,7 @@ struct HistoryContext {
 	xcb_connection_t * xc;
 	struct JBDim * position;
 	struct JBXVTLine * line_data;
-	int32_t line, top;
+	int16_t line, top;
 	uint16_t char_height, font_height;
 };
 static struct JBXVTLine * get_line(struct HistoryContext * restrict i)

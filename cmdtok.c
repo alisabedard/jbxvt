@@ -99,7 +99,8 @@ static inline bool is_string_char(register int16_t c)
 struct GetNewLinesData {
 	xcb_connection_t * xc;
 	uint8_t * s;
-	int new_lines, c, i;
+	int32_t i;
+	int16_t new_lines, c;
 };
 static void get_newlines(struct GetNewLinesData * restrict nld)
 {
