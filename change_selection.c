@@ -11,12 +11,9 @@
 #include "window.h"
 struct InversionData {
 	xcb_connection_t * xc;
-	struct JBDim font_size;
-	struct JBDim start_point, end_point;
+	struct JBDim font_size, char_size, start_point, end_point;
 	xcb_window_t window;
 	xcb_gcontext_t gc;
-	uint16_t width_in_chars;
-	uint16_t pad;
 };
 static void invert_r(const uint8_t current,
 	struct InversionData * i)
@@ -28,7 +25,7 @@ static void invert_r(const uint8_t current,
 		const int16_t x[] = {current == i->start_point.row ?
 			i->start_point.columns * fw : 0,
 			(current == i->end_point.row ? i->end_point.columns
-			 : i->width_in_chars) * fw};
+			 : i->char_size.width) * fw};
 		xcb_poly_fill_rectangle(i->xc, i->window, i->gc, 1,
 			&(xcb_rectangle_t){.x = x[0], .y = current * fh,
 			.width = (uint16_t)(x[1] - x[0]), .height = fh});
@@ -51,10 +48,10 @@ static void change(xcb_connection_t * restrict xc, struct JBDim * se,
 	}
 	struct InversionData i = {.xc = xc,
 		.font_size = jbxvt_get_font_size(),
+		.char_size = jbxvt_get_char_size(),
 		.start_point = start, .end_point = end,
 		.window = jbxvt_get_vt_window(xc),
 		.gc = jbxvt_get_cursor_gc(xc),
-		.width_in_chars = jbxvt_get_char_size().width,
 	};
 	// Invert the changed area
 	invert_r((uint8_t)i.start_point.row, &i);
