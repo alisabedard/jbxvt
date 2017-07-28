@@ -3,12 +3,12 @@
 4:decsclm:slow scroll mode
 5:decscnm:reverse video mode
 7:decawm:autowrap mode
-45:decawm:autowrap mode
 9:mouse_x10:mouse tracking
 12:att610:blinking cursor
 18:decpff:print form feed mode
 20:lnm:new line mode
 40:allow_deccolm:allow 132 column mode
+45:decawm:autowrap mode
 1000:mouse_vt200:mouse tracking
 1001:mouse_vt200hl:vt200 highlight mode
 1002:mouse_btn_evt:mouse button event tracking

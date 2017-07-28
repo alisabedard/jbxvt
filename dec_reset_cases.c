@@ -19,10 +19,6 @@
 		LOG("DECAWM--autowrap mode");
 		m->decawm = is_set;
 		break;
-	case 45:
-		LOG("DECAWM--autowrap mode");
-		m->decawm = is_set;
-		break;
 	case 9:
 		LOG("MOUSE_X10--mouse tracking");
 		m->mouse_x10 = is_set;
@@ -42,6 +38,10 @@
 	case 40:
 		LOG("ALLOW_DECCOLM--allow 132 column mode");
 		m->allow_deccolm = is_set;
+		break;
+	case 45:
+		LOG("DECAWM--autowrap mode");
+		m->decawm = is_set;
 		break;
 	case 1000:
 		LOG("MOUSE_VT200--mouse tracking");
