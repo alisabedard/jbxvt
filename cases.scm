@@ -9,7 +9,8 @@
    (else 'bad))))
 ; format components:
 (define get_case (lambda (token) (string-append "case " token ":\n")))
-(define get_log (lambda (message) (string-append "\tLOG(\"" message "\");\n")))
+(define get_log (lambda (message) (string-append "\tLOG(\"" message
+				   "\");\n")))
 (define get_fixme
  (lambda (token) (get_log (string-append
 			   "FIXME: " token " not implemented."))))
