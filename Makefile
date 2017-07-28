@@ -42,6 +42,7 @@ install: ${exe}
 	install ${exe} ${bindest}
 	install -d ${docdest}
 	install ${exe}.1 ${docdest}
+	tic -xs jbxvt.terminfo
 depend:
 	cc -E -MM *.c > depend.mk
 clean:

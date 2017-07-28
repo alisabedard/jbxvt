@@ -10,7 +10,7 @@
 	"-*-terminus-bold-r-*-*-14-*-*-*-*-*-iso10646-*"
 #define JBXVT_ITALIC_FONT \
 	"-bitstream-charter-medium-i-*-*-14-*-*-*-*-*-*-*"
-#define JBXVT_ENV_TERM "xterm-256color" // TERM env var to set
+#define JBXVT_ENV_TERM "jbxvt"
 #define JBXVT_ENV_SHELL "SHELL"
 #define JBXVT_FOREGROUND_COLOR "white"
 #define JBXVT_BACKGROUND_COLOR "black"
