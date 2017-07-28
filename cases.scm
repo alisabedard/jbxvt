@@ -33,12 +33,11 @@
   (and-let*
    ((line (read-line in))
     ((not (eof-object? line))))
-   (let* ((i (string-find-next-char line #\:))
-	  (token (get_token line i))
+   (let ((i (string-find-next-char line #\:)))
+    (let ((token (get_token line i))
 	  (type (get_type line i)))
-    (display (get_formatted token type) out)
-    (flush-output out) ; commit changes
-    (parse in out)))))
+     (display (get_formatted token type) out)
+     (parse in out))))))
 (define casegen
  (lambda (in_file_name out_file_name)
   (let*
