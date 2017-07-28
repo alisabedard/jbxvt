@@ -32,6 +32,9 @@ JBXVTTokenIndex.h: JBXVTTokenIndex.txt JBXVTTokenIndex.scm
 	scheme < JBXVTTokenIndex.scm
 sgr_cases.c: sgr_cases.txt sgr_cases.scm
 	scheme < sgr_cases.scm
+dec_reset_cases.c: dec_reset_cases.txt dec_reset_cases.awk
+	awk -f dec_reset_cases.awk dec_reset_cases.txt > \
+		dec_reset_cases.c
 bindest=${DESTDIR}${PREFIX}/bin
 docdest=${DESTDIR}${PREFIX}/share/man/man1
 install: ${exe}

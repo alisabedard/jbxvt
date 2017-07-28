@@ -19,7 +19,8 @@ dcs.o: dcs.c dcs.h JBXVTToken.h JBXVTTokenIndex.h cmdtok.h libjb/log.h
 dec_reset.o: dec_reset.c dec_reset.h JBXVTPrivateModes.h JBXVTToken.h \
  JBXVTTokenIndex.h cursor.h JBXVTScreen.h JBXVTLine.h config.h rstyle.h \
  libjb/JBDim.h screen.h libjb/log.h libjb/macros.h lookup_key.h mode.h \
- move.h sbar.h scr_reset.h
+ move.h sbar.h scr_reset.h dec_reset_cases.c
+dec_reset_cases.o: dec_reset_cases.c
 display.o: display.c display.h paint.h xcb_screen.h JBXVTOptions.h \
  libjb/JBDim.h color.h libjb/xcb.h font.h gc.h window.h
 double.o: double.c double.h cursor.h JBXVTScreen.h JBXVTLine.h config.h \
