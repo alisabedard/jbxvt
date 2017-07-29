@@ -42,17 +42,6 @@ static void handle_client_message(xcb_connection_t * xc,
 static void handle_expose(xcb_connection_t * xc,
 	xcb_expose_event_t * e)
 {
-	{ // seq scope
-		/* Store the sequence statically here to ensure that
-		 * we are not processing the same expose event twice.
-		 * */
-		static uint16_t seq;
-		if (seq == e->sequence)
-			return;
-		seq = e->sequence;
-	}
-	LOG("handle_expose() e->count: %d, e->sequence: %d",
-		e->count, e->sequence);
 	if (e->window == jbxvt_get_scrollbar(xc))
 		jbxvt_draw_scrollbar(xc);
 	else
