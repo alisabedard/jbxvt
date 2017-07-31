@@ -10,7 +10,10 @@
 	"-*-terminus-bold-r-*-*-14-*-*-*-*-*-iso10646-*"
 #define JBXVT_ITALIC_FONT \
 	"-bitstream-charter-medium-i-*-*-14-*-*-*-*-*-*-*"
-#define JBXVT_ENV_TERM "jbxvt"
+/* FIXME:  Even though we provide a jbxvt terminfo entry, mouse tracking in
+ * vim does not work with it yet, so we continue to use the xterm entry
+ * bundled with the system's ncurses package.  */
+#define JBXVT_ENV_TERM "xterm"
 #define JBXVT_ENV_SHELL "SHELL"
 #define JBXVT_FOREGROUND_COLOR "white"
 #define JBXVT_BACKGROUND_COLOR "black"
