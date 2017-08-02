@@ -1,7 +1,6 @@
 /*  Copyright 2017, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
-#define LOG_LEVEL 3
 #include "scroll.h"
 #include <string.h>
 #include "JBXVTLine.h"
@@ -9,9 +8,7 @@
 #include "font.h"
 #include "gc.h"
 #include "libjb/JBDim.h"
-#if LOG_LEVEL > 0
 #include "libjb/log.h"
-#endif//LOG_LEVEL
 #include "libjb/macros.h"
 #include "libjb/util.h"
 #include "sbar.h"
@@ -49,29 +46,24 @@ static void move_line(const int16_t source, const int16_t count,
 		sizeof(struct JBXVTLine));
 	clear_selection_at(source);
 }
-static void get_y(int16_t * restrict y, const int16_t row1,
+static uint8_t get_y(int16_t * restrict y, const int16_t row1,
 	const int16_t count, const bool up)
 {
 	const uint8_t fh = jbxvt_get_font_size().height;
 	const int16_t a = row1 * fh;
 	*(up ? y + 1 : y) = a;
 	*(up ? y : y + 1) = a + count * fh;
+	return fh;
 }
-static void copy_visible_area(xcb_connection_t * xc,
-	const int16_t row1, const int16_t row2,
-	const int16_t count, const bool up)
+static void copy_visible_area(xcb_connection_t * xc, const int r1,
+	const int r2, const int count, const bool up)
 {
 	int16_t y[2];
-	get_y(y, row1, count, up);
-	{ // vt scope
-		const xcb_window_t vt = jbxvt_get_vt_window(xc);
-		xcb_copy_area(xc, vt, vt, jbxvt_get_text_gc(xc), 0,
-			y[0], 0, y[1], jbxvt_get_pixel_size().width,
-			(row2 - row1 - count) *
-			jbxvt_get_font_size().h);
-	}
-	// the above blocks the event queue, flush it
-	xcb_flush(xc);
+	const uint8_t fh = get_y(y, r1, count, up);
+	const xcb_window_t vt = jbxvt_get_vt_window(xc);
+	xcb_copy_area(xc, vt, vt, jbxvt_get_text_gc(xc), 0,
+		y[0], 0, y[1], jbxvt_get_pixel_size().width,
+		(r2 - r1 - count) * fh);
 }
 // Restrict scroll history size to JBXVT_MAX_SCROLL:
 static void trim(void)
@@ -122,14 +114,14 @@ static void clear_line(xcb_connection_t * xc,
 	xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), 0, y * fh,
 		jbxvt_get_pixel_size().width, count * fh);
 }
-static void clear(int16_t count, const int16_t offset, const bool is_up)
+static void clear(const int16_t count, const int16_t offset, const bool is_up)
 {
-	if (--count < 0)
-		return;
-	const int16_t j = offset + (is_up ? - count - 1 : count);
-	memset(jbxvt_get_current_screen()->line + j, 0,
-		sizeof(struct JBXVTLine));
-	clear(count, offset, is_up);
+	if (count >= 0) {
+		const int16_t j = offset + (is_up ? - count - 1 : count);
+		memset(jbxvt_get_current_screen()->line + j, 0,
+			sizeof(struct JBXVTLine));
+		clear(count - 1, offset, is_up);
+	}
 }
 struct ScrollData {
 	xcb_connection_t * connection;
@@ -140,9 +132,9 @@ struct ScrollData {
 static void sc_common(struct ScrollData * d)
 {
 	if (d->up) // call this way to only have one branch
-		clear(d->count, d->end, true);
+		clear(d->count - 1, d->end, true);
 	else
-		clear(d->count, d->begin, false);
+		clear(d->count - 1, d->begin, false);
 	xcb_connection_t * xc = d->connection;
 	copy_visible_area(xc, d->begin, d->end, d->count, d->up);
 	clear_line(d->connection, d->up ? (d->end - d->count)
@@ -174,10 +166,8 @@ static void sc_up(struct ScrollData * d)
 void scroll(xcb_connection_t * xc, const int16_t row1,
 	const int16_t row2, const int16_t count)
 {
-#if LOG_LEVEL > 5
 	LOG("scroll(xc, row1: %d, row2: %d, count: %d)", row1, row2,
 		count);
-#endif//LOG_LEVEL>5
 	if (JB_UNLIKELY(!count))
 		return; // nothing to do
 	if (JB_UNLIKELY(row1 > row2))
@@ -187,8 +177,4 @@ void scroll(xcb_connection_t * xc, const int16_t row1,
 		.connection = xc, .begin = row1, .end = row2 + 1,
 		.count = abs(count), .up = is_up});
 	jbxvt_set_scroll(xc, 0);
-#if LOG_LEVEL > 8
-	for (int16_t i = 0; i < scroll_size; ++i)
-		puts((char *)saved_lines[i].text);
-#endif//LOG_LEVEL>8
 }
