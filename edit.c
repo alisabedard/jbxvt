@@ -1,10 +1,6 @@
 /*  Copyright 2017, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
-#define LOG_LEVEL 3
-#if LOG_LEVEL == 0
-#undef DEBUG
-#endif//LOG_LEVEL
 #include "edit.h"
 #include <string.h>
 #include "cursor.h"
@@ -66,15 +62,9 @@ void jbxvt_edit_characters(xcb_connection_t * xc,
 		// Perform the off-screen edit:
 		memmove(b, a, (size_t)(JBXVT_MAX_COLUMNS - count - x));
 	}
-#if LOG_LEVEL > 8
-	/* Show that the edit occurred in the off-screen buffer. */
-	LOG("%s", l->text);
-#endif//LOG_LEVEL>8
 	/* Begin the on-screen edit.  */
 	const int16_t p[] = {a - t, b - t};
-#if LOG_LEVEL > 5
 	LOG("\tp[0]: %d, p[1]: %d", p[0], p[1]);
-#endif//LOG_LEVEL>5
 	if (delete)
 		clear_area(xc, x, y, count);
 	copy_area(xc, p, count); // must come after clear_area()
