@@ -79,6 +79,10 @@
 		LOG("MOUSE_URXVT--urxvt extended mouse mode");
 		m->mouse_urxvt = is_set;
 		break;
+	case 1034:
+		LOG("S8C1T--turn on or off meta mode (8-bit mode)");
+		m->s8c1t = is_set;
+		break;
 	case 2004:
 		LOG("BPASTE--bracketed paste mode");
 		m->bpaste = is_set;

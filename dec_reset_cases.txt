@@ -18,4 +18,5 @@
 1006:mouse_sgr:sgr extended mouse mode
 1007:mouse_alt_scroll:mouse alternate scroll
 1015:mouse_urxvt:urxvt extended mouse mode
+1034:s8c1t:turn on or off meta mode (8-bit mode)
 2004:bpaste:bracketed paste mode
