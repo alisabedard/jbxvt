@@ -1,4 +1,4 @@
-jbxvt|jbxvt terminal emulator,
+xterm-jbxvt|jbxvt terminal emulator,
 	am, bce, ccc, km, mc5i, mir, msgr, npc, xenl, xon,
 	colors#0x100, cols#80, it#8, lines#24, pairs#0x7fff, vt#3,
 	acsc=``aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~,
