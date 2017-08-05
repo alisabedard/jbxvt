@@ -19,12 +19,6 @@
 #include "screen.h"
 #include "size.h"
 #include "window.h"
-static inline void fix_margins(const struct JBDim c)
-{
-	/* On screen resize, check if old margin was on the bottom line.
-	   If so, set the bottom margin to the new bottom line.  */
-	jbxvt_get_margin()->bottom = c.height - 1;
-}
 static void clear_window(xcb_connection_t * restrict xc)
 {
 	const struct JBDim p = jbxvt_get_pixel_size();
@@ -51,8 +45,20 @@ void jbxvt_reset(xcb_connection_t * restrict xc)
 {
 	LOG("jbxvt_reset()");
 	jbxvt_resize_window(xc);
+	static struct JBDim old_size;
 	struct JBDim c = jbxvt_get_char_size();
-	fix_margins(c);
+	if (!(c.width == old_size.width && c.height == old_size.height))
+	{
+		/* On screen resize, check if old margin was on the bottom
+		 * line.  If so, set the bottom margin to the new bottom line.
+		 * */
+		struct JBDim * m = jbxvt_get_margin();
+		if (m->bottom == old_size.height - 1) {
+			m->bottom = c.height - 1;
+		}
+		old_size = c;
+	}
+
 	jbxvt_set_tty_size(c);
 	jbxvt_check_cursor_position();
 	jbxvt_draw_scrollbar(xc);
