@@ -11,10 +11,6 @@
 		LOG("DECSCLM--slow scroll mode");
 		m->decsclm = is_set;
 		break;
-	case 5:
-		LOG("DECSCNM--reverse video mode");
-		m->decscnm = is_set;
-		break;
 	case 7:
 		LOG("DECAWM--autowrap mode");
 		m->decawm = is_set;

@@ -20,8 +20,7 @@ static void dectcem(xcb_connection_t * xc, const bool is_set)
 	jbxvt_draw_cursor(xc); // clear
 	jbxvt_get_modes()->dectcem = is_set;
 	jbxvt_draw_cursor(xc); // draw
-}
-static void change_screen(xcb_connection_t * xc, const bool is_set)
+} static void change_screen(xcb_connection_t * xc, const bool is_set)
 {
 	if (is_set)
 		jbxvt_save_cursor();
@@ -41,7 +40,11 @@ void jbxvt_dec_reset(xcb_connection_t * xc,
 		case 1: // DECCKM: cursor key mode
 			jbxvt_set_keys(is_set, true);
 			break;
-		case 6 : // DECOM normal cursor mode
+		case 5: // DECSCNM: set reverse-video mode
+			m->decscnm = is_set;
+			jbxvt_reset(xc);
+			break;
+		case 6: // DECOM normal cursor mode
 			/* According to the spec, the cursor is reset to
 			   the home position when this is changed.  */
 			m->decom = is_set;
@@ -78,5 +81,4 @@ void jbxvt_dec_reset(xcb_connection_t * xc,
 			LOG("LNM linefeed/newline mode");
 			break;
 		}
-	jbxvt_reset(xc);
 }

@@ -1,7 +1,6 @@
 2:decanm:VT52/ANSI mode
 3:deccolm:80/132 column mode
 4:decsclm:slow scroll mode
-5:decscnm:reverse video mode
 7:decawm:autowrap mode
 9:mouse_x10:mouse tracking
 12:att610:blinking cursor
