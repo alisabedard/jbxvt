@@ -14,20 +14,16 @@
 #include "show_selection.h"
 #include "size.h"
 #include "window.h"
-static int get_length_of_style(register int i,
-	struct JBXVTPaintContext * restrict token)
+static int get_length_of_style_r(int i, struct JBXVTPaintContext * restrict t)
 {
-	const int length = token->length;
-	const rstyle_t style = token->style[0];
-	while (i < length && token->style[i] == style)
-		++i;
-	return i;
+	return i < t->length && t->style[i] == t->style[0]
+		? get_length_of_style_r(i + 1, t) : i;
 }
 // Display the string described by the JBXVTPaintContext structure
 static void paint_JBXVTPaintContext(struct JBXVTPaintContext * restrict token)
 {
 	const uint8_t font_width = jbxvt_get_font_size().width;
-	for (int i; token->length > 0; i = get_length_of_style(0, token),
+	for (int i; token->length > 0; i = get_length_of_style_r(0, token),
 		token->length -= i, token->string += i,
 		token->style += i, token->position.x += i * font_width)
 		jbxvt_paint(token);
