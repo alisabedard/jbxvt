@@ -367,10 +367,12 @@ bool jbxvt_parse_token(xcb_connection_t * xc)
 {
 	struct JBXVTToken token;
 	jbxvt_get_token(xc, &token);
+	bool rval = true; // keep going
 	switch (token.type) {
 	case JBXVT_TOKEN_EOF:
 		LOG("JBXVT_TOKEN_EOF");
-		return false;
+		rval = false; // stop token parsing loop, quit
+		break;
 #include "cases.c"
 	default:
 #ifdef DEBUG
@@ -378,10 +380,10 @@ bool jbxvt_parse_token(xcb_connection_t * xc)
 			LOG("Unhandled token: %d (0x%x)",
 				token.type, token.type);
 			// Exit now so we can implement it!
-			return false;
+			rval = false;
 		}
 #endif//DEBUG
 		break;
 	}
-	return true;
+	return rval;
 }
