@@ -330,11 +330,11 @@ HANDLE(STBM) // set top and bottom margins
 		(int)token->nargs, t[0], t[1]);
 	if (token->private == JBXVT_TOKEN_RESTOREPM) {
 		jbxvt_restore_modes();
-		return;
+	} else { // set margins
+		struct JBDim * restrict m = jbxvt_get_margin();
+		m->top = get_0(t[0]);
+		m->bot = get_0(t[1]);
 	}
-	struct JBDim * restrict m = jbxvt_get_margin();
-	m->top = get_0(t[0]);
-	m->bot = get_0(t[1]);
 }
 HANDLE(STRING)
 {
