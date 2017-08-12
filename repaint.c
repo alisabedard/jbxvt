@@ -7,6 +7,7 @@
 #include "config.h"
 #include "font.h"
 #include "gc.h"
+#include "libjb/log.h"
 #include "paint.h"
 #include "sbar.h"
 #include "screen.h"
@@ -99,6 +100,7 @@ void jbxvt_repaint(xcb_connection_t * xc)
 	struct HistoryContext history = {.xc = xc,
 		.position = &p, .font_height = jbxvt_get_font_size().height,
 		.char_height = chars.height, .top = jbxvt_get_scroll() - 1};
+	LOG("history.top: %d", history.top);
 	show_history_r(&history);
 	// Save the position where scroll history ends:
 	const int16_t history_end_y = p.y - 1;
