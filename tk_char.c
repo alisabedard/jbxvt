@@ -9,6 +9,7 @@
 #include "move.h"
 #include "screen.h"
 #include "scroll.h"
+#include "string.h"
 #include "tab.h"
 static void form_feed(xcb_connection_t * restrict xc)
 {
@@ -18,20 +19,12 @@ static void form_feed(xcb_connection_t * restrict xc)
 		dprintf(jbxvt_get_fd(), "FF");
 	scroll(xc, m.top, m.bottom, m.bottom - m.top);
 }
-static void vertical_tab(xcb_connection_t * restrict xc)
-{
-	const uint8_t mt = jbxvt_get_margin()->top;
-	for (uint8_t i = jbxvt_get_y(); i % 8; ++i)
-		  jbxvt_index_from(xc, 1, mt);
-}
 void jbxvt_handle_tk_char(xcb_connection_t * xc, const uint8_t tk_char)
 {
 	switch (tk_char) {
 	case '\n': // handle line feed
-		jbxvt_index_from(xc, 1, jbxvt_get_margin()->top);
-		break;
 	case 013: // vertical tab
-		vertical_tab(xc);
+		jbxvt_move(xc, 0, 1, JBXVT_ROW_RELATIVE);
 		break;
 	case '\f': // form feed
 		form_feed(xc);
