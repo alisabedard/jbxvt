@@ -24,7 +24,7 @@ objs+=xcb_screen.o mode.o button_events.o request.o
 extra+=color_index.h
 ${exe}: ${objs}
 	cd libjb && ${MAKE}
-	${cC} ${CFLAGS} -o ${exe} ${objs} ${static} ${ldflags}
+	${CC} ${CFLAGS} -o ${exe} ${objs} ${static} ${ldflags}
 	strip -o ${exe}.tmp ${exe}
 	ls -l ${exe}.tmp >> sz.log
 	rm -f ${exe}.tmp
