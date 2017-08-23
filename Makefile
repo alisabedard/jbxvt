@@ -3,6 +3,13 @@ include config.mk
 exe=jbxvt
 PREFIX=/usr
 AWK=/usr/bin/gawk
+
+# Defining scheme as the shell built-in echo allows jbxvt to build on systems
+# that do not have mit-scheme.  mit-scheme regeneration rules are only
+# necessary if one of the textual databases has been changed in development.
+SCHEME=echo
+#SCHEME=/usr/bin/mit-scheme
+
 CFLAGS+=-DUSE_LIKELY
 CFLAGS+=-D_XOPEN_SOURCE=700 --std=c11
 CFLAGS+=-Wall -Wextra
@@ -15,23 +22,24 @@ objs+=xevents.o window.o xvt.o sgr.o dec_reset.o show_selection.o
 objs+=mouse.o double.o dsr.o font.o color.o tab.o rstyle.o tk_char.o
 objs+=xcb_screen.o mode.o button_events.o request.o
 extra+=color_index.h
-${exe}: libjb ${objs}
-	${CC} ${CFLAGS} -o ${exe} ${objs} ${static} ${ldflags}
+${exe}: ${objs}
+	cd libjb && ${MAKE}
+	${cC} ${CFLAGS} -o ${exe} ${objs} ${static} ${ldflags}
 	strip -o ${exe}.tmp ${exe}
 	ls -l ${exe}.tmp >> sz.log
 	rm -f ${exe}.tmp
 	tail -n 5 sz.log
 include depend.mk
 cases.c: cases.txt cases.scm
-	scheme < cases.scm
+	${SCHEME} < cases.scm
 JBXVTRenderStyle.h: JBXVTRenderStyle.txt JBXVTRenderStyle.scm
-	scheme < JBXVTRenderStyle.scm
+	${SCHEME} < JBXVTRenderStyle.scm
 color_index.h: color_index.txt color_index.scm
-	scheme < color_index.scm
+	${SCHEME} < color_index.scm
 JBXVTTokenIndex.h: JBXVTTokenIndex.txt JBXVTTokenIndex.scm
-	scheme < JBXVTTokenIndex.scm
+	${SCHEME} < JBXVTTokenIndex.scm
 sgr_cases.c: sgr_cases.txt sgr_cases.scm
-	scheme < sgr_cases.scm
+	${SCHEME} < sgr_cases.scm
 dec_reset_cases.c: dec_reset_cases.txt dec_reset_cases.awk
 	awk -f dec_reset_cases.awk dec_reset_cases.txt > \
 		dec_reset_cases.c
@@ -77,8 +85,5 @@ cppcheck:
 		-D TIOCSCTTY -I /usr/include \
 		. 2> cppcheck.log
 	echo 'Results written to cppcheck.log'
-libjb: libjb/libjb.a
-libjb/libjb.a:
-	cd libjb && ${MAKE} CC=${CC} libjb.a
 #EOF
 # DO NOT DELETE
