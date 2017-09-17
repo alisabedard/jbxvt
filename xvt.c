@@ -33,11 +33,6 @@
 #include "tab.h"
 #include "tk_char.h"
 #include "window.h"
-#if LOG_LEVEL > 6
-#define TLOG(...) LOG(__VA_ARGS__)
-#else//LOG_LEVEL<=6
-#define TLOG(...)
-#endif//LOG_LEVEL>6
 // Return a default of 1 if arg is 0:
 __attribute__((const))
 static int16_t get_n(const int16_t arg)
@@ -95,7 +90,7 @@ HANDLE(CNL) // cursor next line
 static void charset(const char c, const uint8_t i)
 {
 	switch(c) {
-#define CS(l, cs, d) case l:TLOG(d);\
+#define CS(l, cs, d) case l:LOG(d);\
 		jbxvt_get_modes()->charset[i]=CHARSET_##cs;break;
 		CS('A', GB, "UK ASCII");
 		CS('0', SG0, "SG0: special graphics");
