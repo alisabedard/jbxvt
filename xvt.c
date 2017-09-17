@@ -61,17 +61,6 @@ static void cup(xcb_connection_t * xc, int16_t * restrict t)
 	const int16_t row = get_0(t[ROW]), col = get_0(t[COL]);
 	jbxvt_move(xc, row, col, jbxvt_get_modes()->decom ? REL : 0);
 }
-// print terminal id
-static void decid(void)
-{
-	dprintf(jbxvt_get_fd(), "%s?6c", jbxvt_get_csi()); // VT102
-}
-// set vt52 graphics mode
-static void gm52(const bool set)
-{
-	struct JBXVTPrivateModes * restrict m = jbxvt_get_modes();
-	m->charsel = (m->gm52 = set) ? 1 : 0;
-}
 // Return value sanitized for tokens with optional arguments, defaulting to 1
 static int16_t get_arg(struct JBXVTToken * t)
 {
@@ -176,7 +165,8 @@ HANDLE(EL) // erase line
 HANDLE(DA) // DECID
 {
 	NOPARM();
-	decid();
+	// print terminal id
+	dprintf(jbxvt_get_fd(), "%s?6c", jbxvt_get_csi()); // VT102
 }
 ALIAS(ID, DA); // DECID
 HANDLE(DCH) // delete character
@@ -184,6 +174,12 @@ HANDLE(DCH) // delete character
 	jbxvt_edit_characters(xc, get_arg(token), true);
 }
 ALIAS(ECH, DCH); // erase character
+// set vt52 graphics mode
+static void gm52(const bool set)
+{
+	struct JBXVTPrivateModes * restrict m = jbxvt_get_modes();
+	m->charsel = (m->gm52 = set) ? 1 : 0;
+}
 HANDLE(ENTGM52) // enter vt52 graphics mode
 {
 	NOPARM();
