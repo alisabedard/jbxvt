@@ -96,10 +96,11 @@ void jbxvt_repaint(xcb_connection_t * xc)
 	if (chars.rows >= JBXVT_MAX_ROWS)
 		return; // invalid screen size, go no further.
 	struct JBDim p = {{0},{0}};
-	// Subtract 1 from scroll offset to get index.
 	struct HistoryContext history = {.xc = xc,
 		.position = &p, .font_height = jbxvt_get_font_size().height,
-		.char_height = chars.height, .top = jbxvt_get_scroll() - 1};
+		.char_height = chars.height,
+		// Subtract 1 from scroll offset to get index.
+		.top = jbxvt_get_scroll() - 1};
 	LOG("history.top: %d", history.top);
 	show_history_r(&history);
 	// Save the position where scroll history ends:
