@@ -47,6 +47,8 @@ static void handle_underline_styles(struct JBXVTPaintContext * restrict c)
 		draw_underline(xc, len, c->position, offset);
 	}
 }
+/* FIXME:  Figure out a way to convert this to client side rendering in order
+ * to bring in proper support for UTF-8 code points.  */
 static void draw_text(xcb_connection_t * xc,
 	uint8_t * restrict str, uint8_t len,
 	struct JBDim * restrict p, rstyle_t rstyle)
