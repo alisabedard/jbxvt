@@ -78,10 +78,10 @@ tk_null:
 void jbxvt_parse_utf8_1(struct JBXVTToken * restrict tk, int_fast16_t c)
 {
 	LOG("utf8_1()\t0x%x\n", (unsigned int)c);
-	switch (c) {
-	default:
-		tk->type = JBXVT_TOKEN_NULL;
-	}
+#ifndef DEBUG
+	(void)c;
+#endif//!DEBUG
+	tk->type = JBXVT_TOKEN_NULL;
 }
 // Handle 1-byte characters
 void jbxvt_parse_utf8_0(struct JBXVTToken * restrict tk, int_fast16_t c)
