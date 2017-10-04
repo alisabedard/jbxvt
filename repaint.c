@@ -63,7 +63,7 @@ static struct JBXVTLine * get_line(struct HistoryContext * restrict i)
 }
 static void show_history_r(struct HistoryContext * restrict i)
 {
-	if (i->top >= 0) { // show remaining lines in history
+	if (i->top > 0) { // show remaining lines in history
 		i->line_data = get_line(i);
 		paint(i->xc, i->line_data, *i->position);
 		i->position->y += i->font_height;
@@ -72,6 +72,7 @@ static void show_history_r(struct HistoryContext * restrict i)
 		show_history_r(i);
 	}
 }
+// Draw a line to indicate the end of the scroll history.
 static void draw_history_line(xcb_connection_t * xc, const int16_t y)
 {
 	const int width = jbxvt_get_pixel_size().width;
@@ -96,8 +97,9 @@ void jbxvt_repaint(xcb_connection_t * xc)
 	if (chars.rows >= JBXVT_MAX_ROWS)
 		return; // invalid screen size, go no further.
 	struct JBDim p = {{0},{0}};
+	const struct JBDim f = jbxvt_get_font_size();
 	struct HistoryContext history = {.xc = xc,
-		.position = &p, .font_height = jbxvt_get_font_size().height,
+		.position = &p, .font_height = f.height,
 		.char_height = chars.height,
 		// Subtract 1 from scroll offset to get index.
 		.top = jbxvt_get_scroll() - 1};
