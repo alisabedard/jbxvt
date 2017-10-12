@@ -20,18 +20,22 @@ void jbxvt_handle_JBXVT_TOKEN_LL(void * xc __attribute__((unused)),
 		LOG("SCUSR");
 		jbxvt_set_cursor_attr(t[0]);
 		break;
-	case '"': // SCA - Select Character protection Attribute
+	case '"': { // SCA - Select Character protection Attribute
+		struct JBXVTPrivateModes * restrict m = jbxvt_get_modes();
 		switch(t[0]) {
 		default:
 		case 0:
-		case 2: // DECSED and DECSEL can erase
+		case 2: // DECSED and DECSEL can erase (default)
 			LOG("SCA can erase");
+			m->decsca = false;
 			break;
 		case 1: // DECSED and DECSEL cannot erase
 			LOG("SCA cannot erase");
+			m->decsca = true;
 			break;
 		}
 		break;
+	}
 	default: // LL
 		switch (t[0]) {
 		default:

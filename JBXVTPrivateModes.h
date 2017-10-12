@@ -21,6 +21,7 @@ struct JBXVTPrivateModes {
 	bool allow_deccolm:1;	// allow 132 column mode
 	bool decom:1;		// origin mode flag
 	bool decpff:1;		// DECPFF: print form feed
+	bool decsca:1;		// DECSED and DECSEL can erase
 	bool decsclm:1;		// DECSCLM: slow scroll mode
 	bool decscnm:1;		// DECSCNM: reverse-video mode
 	bool dectcem:1;		// DECTCEM -- show cursor
@@ -46,6 +47,6 @@ struct JBXVTPrivateModes {
 	bool elr_pixels:1;	// locator report in pixel format
 	bool ss2:1;		// use G2 charset on next character only
 	bool ss3:1;		// use G3 charset on next character only
-	const int8_t __pad:6;
+	const int8_t __pad:5;
 };
 #endif//!JBXVT_JBXVTPRIVATEMODES_H
