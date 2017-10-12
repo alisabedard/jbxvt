@@ -322,9 +322,10 @@ HANDLE(STBM) // set top and bottom margins
 	if (token->private == JBXVT_TOKEN_RESTOREPM) {
 		jbxvt_restore_modes();
 	} else { // set margins
+		const bool rst = token->nargs < 2 || t[0] >= t[1];
 		struct JBDim * restrict m = jbxvt_get_margin();
-		m->top = get_0(t[0]);
-		m->bot = get_0(t[1]);
+		m->top = rst ? 0 : get_0(t[0]);
+		m->bot = (rst ? jbxvt_get_char_size().h : get_n(t[1])) - 1;
 	}
 }
 HANDLE(STRING)
