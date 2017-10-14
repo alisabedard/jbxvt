@@ -50,9 +50,7 @@ void jbxvt_edit_characters(xcb_connection_t * xc,
 	const int16_t y = jbxvt_get_y();
 	jbxvt_check_selection(xc, y, y);
 	struct JBXVTLine * l = jbxvt_get_line(y);
-	uint8_t * t = l->text;
-	uint8_t * a = t + x;
-	uint8_t * b = a + count;
+	uint8_t * t = l->text, * a = t + x, * b = a + count;
 	if (delete)
 		JB_SWAP(uint8_t *, a, b);
 	l->wrap = false;
