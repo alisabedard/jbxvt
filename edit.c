@@ -25,10 +25,8 @@ static void copy_area(xcb_connection_t * restrict xc,
 	const xcb_window_t v = jbxvt_get_vt_window(xc);
 	const struct JBDim f = jbxvt_get_font_size();
 	const int16_t y = jbxvt_get_y() * f.height;
-	const uint16_t w = get_copy_width(count, f.w);
-	const xcb_gcontext_t gc = jbxvt_get_text_gc(xc);
-	const int16_t px = f.w * x[1];
-	xcb_copy_area(xc, v, v, gc, f.w * x[0], y, px, y, w, f.h);
+	xcb_copy_area(xc, v, v, jbxvt_get_text_gc(xc), f.w * x[0], y,
+		f.w * x[1], y, get_copy_width(count, f.w), f.h);
 }
 static void clear_area(xcb_connection_t * restrict xc, const int16_t x,
 	const int16_t y, const uint8_t count)
