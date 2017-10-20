@@ -14,10 +14,8 @@
 static uint16_t get_copy_width(const uint8_t count,
 	const uint8_t font_width)
 {
-	const uint16_t cw = jbxvt_get_char_size().w - 1;
-	const int16_t x = jbxvt_get_x();
-	const uint16_t w = cw - count - x - 1;
-	return w * font_width;
+	return font_width * (jbxvt_get_char_size().w - count
+		- jbxvt_get_x() - 2);
 }
 static void copy_area(xcb_connection_t * restrict xc,
 	const int16_t * restrict x, const uint8_t count)
