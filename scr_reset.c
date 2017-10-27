@@ -45,25 +45,12 @@ void jbxvt_reset(xcb_connection_t * restrict xc)
 {
 	LOG("jbxvt_reset()");
 	jbxvt_resize_window(xc);
-	static struct JBDim old_size;
-	struct JBDim c = jbxvt_get_char_size();
-	if (!(c.width == old_size.width && c.height == old_size.height))
-	{
-		/* On screen resize, check if old margin was on the bottom
-		 * line.  If so, set the bottom margin to the new bottom line.
-		 * */
-		struct JBDim * m = jbxvt_get_margin();
-		if (m->bottom == old_size.height - 1) {
-			m->bottom = c.height - 1;
-		}
-		old_size = c;
-	}
-
-	jbxvt_set_tty_size(c);
-	jbxvt_check_cursor_position();
+	jbxvt_repaint(xc);
+	struct JBDim csz = jbxvt_get_char_size();
+	jbxvt_set_tty_size(csz);
 	jbxvt_draw_scrollbar(xc);
 	decscnm(xc);
+	jbxvt_get_margin()->bottom = csz.height - 1;
 	jbxvt_repaint(xc);
 	jbxvt_draw_cursor(xc);
-	xcb_flush(xc);
 }
