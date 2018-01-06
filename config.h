@@ -13,11 +13,16 @@
 /* FIXME:  Even though we provide a jbxvt terminfo entry, mouse tracking in
  * vim does not work with it.  Set TERM to xterm before launching vim or fix
  * vim.  */
+#ifdef USE_JBXVT_TERMCAP
 #if !defined(FREEBSD)
 #define JBXVT_ENV_TERM "xterm-jbxvt"
-#else // FREEBSD
+#else//FREEBSD
 #define JBXVT_ENV_TERM "xterm"
-#endif
+#endif//!FREEBSD
+#define JBXVT_ENV_TERM "xterm-jbxvt"
+#else //!USE_JBXVT_TERMCAP
+#define JBXVT_ENV_TERM "xterm-256color"
+#endif//USE_JBXVT_TERMCAP
 #define JBXVT_ENV_SHELL "SHELL"
 #define JBXVT_FOREGROUND_COLOR "white"
 #define JBXVT_BACKGROUND_COLOR "black"
