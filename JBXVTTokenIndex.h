@@ -44,6 +44,7 @@ enum JBXVTTokenIndex {
 	JBXVT_TOKEN_EOF = 1012, // end of file
 	JBXVT_TOKEN_EPA = 0x97, // end of protected area
 	JBXVT_TOKEN_ESC = 033, // escape
+	JBXVT_TOKEN_EWMH = 't', // send EWMH (extended window manager hint)
 	JBXVT_TOKEN_EXPOSE = 1013, // exposure event
 	JBXVT_TOKEN_EXTGM52 = 1014, // exit vt52 graphics mode (ESC G)
 	JBXVT_TOKEN_FOCUS = 1015, // keyboard focus event
