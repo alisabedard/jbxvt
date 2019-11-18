@@ -45,10 +45,10 @@ dec_reset_cases.c: dec_reset_cases.txt dec_reset_cases.awk
 		dec_reset_cases.c
 bindest=${DESTDIR}${PREFIX}/bin
 docdest=${DESTDIR}${PREFIX}/share/man/man1
-terminfo:
-	tic -xs jbxvt.terminfo
-	chmod 0644 /usr/share/terminfo/x/xterm-jbxvt # Make it readable
-install: ${exe} terminfo
+#terminfo:
+#	tic -xs jbxvt.terminfo
+#	chmod 0644 /usr/share/terminfo/x/xterm-jbxvt # Make it readable
+install: ${exe}
 	install -d ${bindest}
 	install ${exe} ${bindest}
 	install -d ${docdest}
