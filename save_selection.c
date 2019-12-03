@@ -40,15 +40,6 @@ struct CopyData {
                             and unsigned type in conditional expression
                             later. */
 };
-struct CopyData * new_CopyData(){
-    struct CopyData *d;
-    d=malloc(sizeof(struct CopyData));
-    d->endpoints=NULL;
-    d->string=NULL;
-    d->total=0;
-    d->char_width=0;
-    return d;
-}
 static size_t copy_line(const int i, const int j,
         struct CopyData * restrict d)
 {
