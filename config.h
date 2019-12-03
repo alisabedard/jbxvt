@@ -16,7 +16,15 @@
 #ifdef USE_JBXVT_TERMCAP
 #define JBXVT_ENV_TERM "xterm-jbxvt"
 #else //!USE_JBXVT_TERMCAP
+#ifdef USE_JBXVT_XTERM_256
 #define JBXVT_ENV_TERM "xterm-256color"
+#else//!USE_JBXVT_XTERM_256
+#ifdef USE_JBXVT_VT100
+#define JBXVT_ENV_TERM "vt100"
+#else//!USE_JBXVT_VT100
+#define JBXVT_ENV_TERM "xterm"
+#endif//USE_JBXVT_VT100
+#endif//USE_JBXVT_XTERM_256
 #endif//USE_JBXVT_TERMCAP
 #define JBXVT_ENV_SHELL "SHELL"
 #define JBXVT_FOREGROUND_COLOR "white"
