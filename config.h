@@ -5,11 +5,11 @@
 // Overall release number of the current version:
 #define JBXVT_VERSION "0.9"
 #define JBXVT_NORMAL_FONT \
-	"-*-terminus-medium-r-*-*-14-*-*-*-*-*-iso10646-*"
+	"lucidasanstypewriter-12"
 #define JBXVT_BOLD_FONT \
-	"-*-terminus-bold-r-*-*-14-*-*-*-*-*-iso10646-*"
+	"lucidasanstypewriter-bold-12"
 #define JBXVT_ITALIC_FONT \
-	"-bitstream-charter-medium-i-*-*-14-*-*-*-*-*-*-*"
+	"lucidasanstypewriter-bold-12"
 /* FIXME:  Even though we provide a jbxvt terminfo entry, mouse tracking in
  * vim does not work with it.  Set TERM to xterm before launching vim or fix
  * vim.  */
@@ -21,7 +21,15 @@
 #endif//!FREEBSD
 #define JBXVT_ENV_TERM "xterm-jbxvt"
 #else //!USE_JBXVT_TERMCAP
+#ifdef USE_JBXVT_XTERM_256
 #define JBXVT_ENV_TERM "xterm-256color"
+#else//!USE_JBXVT_XTERM_256
+#ifdef USE_JBXVT_VT100
+#define JBXVT_ENV_TERM "vt100"
+#else//!USE_JBXVT_VT100
+#define JBXVT_ENV_TERM "xterm"
+#endif//USE_JBXVT_VT100
+#endif//USE_JBXVT_XTERM_256
 #endif//USE_JBXVT_TERMCAP
 #define JBXVT_ENV_SHELL "SHELL"
 #define JBXVT_FOREGROUND_COLOR "white"

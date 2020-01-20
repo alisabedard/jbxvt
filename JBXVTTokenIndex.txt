@@ -40,6 +40,7 @@ ENTRY:x::cursor crossed window boundary
 EOF:x::end of file
 EPA:0x97:s:end of protected area
 ESC:033::escape
+EWMH:'t':s:send EWMH (extended window manager hint)
 EXPOSE:x::exposure event
 EXTGM52:x:l:exit vt52 graphics mode (ESC G)
 FOCUS:x::keyboard focus event

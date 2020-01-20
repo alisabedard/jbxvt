@@ -30,6 +30,7 @@ EL:l
 ELR:l
 ENTGM52:l
 EPA:s
+EWMH:s
 EXTGM52:l
 HOME:l
 HPA:l

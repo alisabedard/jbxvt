@@ -121,6 +121,9 @@ case JBXVT_TOKEN_ENTGM52:
 case JBXVT_TOKEN_EPA:
 	LOG("FIXME: JBXVT_TOKEN_EPA not implemented.");
 	break;
+case JBXVT_TOKEN_EWMH:
+	LOG("FIXME: JBXVT_TOKEN_EWMH not implemented.");
+	break;
 case JBXVT_TOKEN_EXTGM52:
 	LOG("JBXVT_TOKEN_EXTGM52");
 	jbxvt_handle_JBXVT_TOKEN_EXTGM52(xc, &token);

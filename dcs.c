@@ -38,6 +38,7 @@ void jbxvt_dcs(xcb_connection_t * xc, struct JBXVTToken * t)
 				check_st(xc, t, JBXVT_TOKEN_QUERY_SCL);
 				break;
 			}
+                        // FALL THROUGH
 		case 'm':
 			check_st(xc, t, JBXVT_TOKEN_QUERY_SGR);
 			break;

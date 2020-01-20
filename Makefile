@@ -7,8 +7,8 @@ AWK=/usr/bin/gawk
 # Defining scheme as the shell built-in echo allows jbxvt to build on systems
 # that do not have mit-scheme.  mit-scheme regeneration rules are only
 # necessary if one of the textual databases has been changed in development.
-SCHEME=echo
-#SCHEME=/usr/bin/mit-scheme
+#SCHEME=echo
+SCHEME=/usr/bin/mit-scheme
 
 CFLAGS+=-DUSE_LIKELY
 CFLAGS+=-D_XOPEN_SOURCE=700 --std=c11
@@ -45,8 +45,7 @@ dec_reset_cases.c: dec_reset_cases.txt dec_reset_cases.awk
 		dec_reset_cases.c
 bindest=${DESTDIR}${PREFIX}/bin
 docdest=${DESTDIR}${PREFIX}/share/man/man1
-include terminfo.mk
-install: ${exe} terminfo
+install: ${exe}
 	install -d ${bindest}
 	install ${exe} ${bindest}
 	install -d ${docdest}
