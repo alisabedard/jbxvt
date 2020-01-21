@@ -7,8 +7,8 @@ AWK=/usr/bin/gawk
 # Defining scheme as the shell built-in echo allows jbxvt to build on systems
 # that do not have mit-scheme.  mit-scheme regeneration rules are only
 # necessary if one of the textual databases has been changed in development.
-#SCHEME=echo
-SCHEME=/usr/bin/mit-scheme
+SCHEME=echo
+#SCHEME=/usr/bin/mit-scheme
 
 CFLAGS+=-DUSE_LIKELY
 CFLAGS+=-D_XOPEN_SOURCE=700 --std=c11
@@ -23,7 +23,7 @@ objs+=mouse.o double.o dsr.o font.o color.o tab.o rstyle.o tk_char.o
 objs+=xcb_screen.o mode.o button_events.o request.o
 extra+=color_index.h
 ${exe}: ${objs}
-	cd libjb && ${MAKE}
+	cd libjb && ${MAKE} CC=${CC}
 	${CC} ${CFLAGS} -o ${exe} ${objs} ${static} ${ldflags}
 	strip -o ${exe}.tmp ${exe}
 	ls -l ${exe}.tmp >> sz.log
@@ -45,16 +45,13 @@ dec_reset_cases.c: dec_reset_cases.txt dec_reset_cases.awk
 		dec_reset_cases.c
 bindest=${DESTDIR}${PREFIX}/bin
 docdest=${DESTDIR}${PREFIX}/share/man/man1
-#terminfo:
-#	tic -xs jbxvt.terminfo
-#	chmod 0644 /usr/share/terminfo/x/xterm-jbxvt # Make it readable
 install: ${exe}
 	install -d ${bindest}
 	install ${exe} ${bindest}
 	install -d ${docdest}
 	install ${exe}.1 ${docdest}
 depend:
-	cc -E -MM *.c > depend.mk
+	${CC} -E -MM *.c > depend.mk
 clean:
 	cd libjb && make clean
 	rm -f ${exe} *.o *.gcda *.gcno *.gcov libjb/*.gcda \

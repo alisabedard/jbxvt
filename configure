@@ -32,6 +32,7 @@ else
 	echo "CFLAGS=$CFLAGS" >> $CFG
 fi
 echo CFLAGS+="-D${ARCH}" >> $CFG
+install -m 0644 terminfo.in terminfo.mk
 case $ARCH in
 	OPENBSD)
 		CC=clang
@@ -73,6 +74,7 @@ case $ARCH in
 		ldflags+=-L/usr/local/lib
 		PREFIX=/usr/local
 		EOF
+		install -m 0644 terminfo.in.freebsd terminfo.mk
 		;;
 esac
 echo -n 'Checking for libutempter... '

@@ -14,6 +14,11 @@
  * vim does not work with it.  Set TERM to xterm before launching vim or fix
  * vim.  */
 #ifdef USE_JBXVT_TERMCAP
+#if !defined(FREEBSD)
+#define JBXVT_ENV_TERM "xterm-jbxvt"
+#else//FREEBSD
+#define JBXVT_ENV_TERM "xterm"
+#endif//!FREEBSD
 #define JBXVT_ENV_TERM "xterm-jbxvt"
 #else //!USE_JBXVT_TERMCAP
 #ifdef USE_JBXVT_XTERM_256

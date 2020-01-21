@@ -1,0 +1,2 @@
+terminfo:
+	# Do nothing on FreeBSD
