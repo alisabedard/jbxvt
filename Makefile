@@ -1,4 +1,4 @@
-# Copyright 2017, Jeffrey E. Bedard
+# Copyright 2017-2020, Jeffrey E. Bedard
 include config.mk
 exe=jbxvt
 PREFIX=/usr
