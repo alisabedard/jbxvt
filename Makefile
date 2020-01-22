@@ -8,7 +8,8 @@ AWK=/usr/bin/gawk
 # that do not have mit-scheme.  mit-scheme regeneration rules are only
 # necessary if one of the textual databases has been changed in development.
 SCHEME=echo
-#SCHEME=/usr/bin/mit-scheme
+#SCHEME=/usr/bin/mit-scheme <
+#SCHEME=guile -s
 
 CFLAGS+=-DUSE_LIKELY
 CFLAGS+=-D_XOPEN_SOURCE=700 --std=c11
@@ -30,16 +31,16 @@ ${exe}: ${objs}
 	rm -f ${exe}.tmp
 	tail -n 5 sz.log
 include depend.mk
-cases.c: cases.txt cases.scm
-	${SCHEME} < cases.scm
+cases.c: cases.txt casegen.awk
+	awk -f casegen.awk cases.txt > cases.c
 JBXVTRenderStyle.h: JBXVTRenderStyle.txt JBXVTRenderStyle.scm
-	${SCHEME} < JBXVTRenderStyle.scm
+	${SCHEME} JBXVTRenderStyle.scm
 color_index.h: color_index.txt color_index.scm
-	${SCHEME} < color_index.scm
+	${SCHEME} color_index.scm
 JBXVTTokenIndex.h: JBXVTTokenIndex.txt JBXVTTokenIndex.scm
-	${SCHEME} < JBXVTTokenIndex.scm
+	${SCHEME} JBXVTTokenIndex.scm
 sgr_cases.c: sgr_cases.txt sgr_cases.scm
-	${SCHEME} < sgr_cases.scm
+	${SCHEME} sgr_cases.scm
 dec_reset_cases.c: dec_reset_cases.txt dec_reset_cases.awk
 	awk -f dec_reset_cases.awk dec_reset_cases.txt > \
 		dec_reset_cases.c
