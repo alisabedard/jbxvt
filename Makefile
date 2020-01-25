@@ -7,8 +7,8 @@ AWK=/usr/bin/gawk
 # Defining scheme as the shell built-in echo allows jbxvt to build on systems
 # that do not have mit-scheme.  mit-scheme regeneration rules are only
 # necessary if one of the textual databases has been changed in development.
-SCHEME=echo
-#SCHEME=/usr/bin/mit-scheme <
+#SCHEME=echo
+SCHEME=/usr/bin/mit-scheme <
 #SCHEME=guile -s
 
 CFLAGS+=-DUSE_LIKELY
@@ -33,8 +33,10 @@ ${exe}: ${objs}
 include depend.mk
 cases.c: cases.txt casegen.awk
 	awk -f casegen.awk cases.txt > cases.c
-JBXVTRenderStyle.h: JBXVTRenderStyle.txt JBXVTRenderStyle.scm
-	${SCHEME} JBXVTRenderStyle.scm
+JBXVTRenderStyle.h: JBXVTRenderStyle.txt rstylgen.sed
+	sed -f rstylgen.sed JBXVTRenderStyle.txt > JBXVTRenderStyle.h
+#JBXVTRenderStyle.h: JBXVTRenderStyle.txt JBXVTRenderStyle.scm
+#	${SCHEME} JBXVTRenderStyle.scm
 color_index.h: color_index.txt color_index.scm
 	${SCHEME} color_index.scm
 JBXVTTokenIndex.h: JBXVTTokenIndex.txt JBXVTTokenIndex.scm

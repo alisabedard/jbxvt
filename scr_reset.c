@@ -44,6 +44,7 @@ static void decscnm(xcb_connection_t * restrict xc)
 void jbxvt_reset(xcb_connection_t * restrict xc)
 {
 	LOG("jbxvt_reset()");
+        jbxvt_zero_rstyle();
 	jbxvt_resize_window(xc);
 	jbxvt_repaint(xc);
 	struct JBDim csz = jbxvt_get_char_size();

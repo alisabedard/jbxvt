@@ -1,4 +1,4 @@
-/*  Copyright 2017, Jeffrey E. Bedard
+/*  Copyright 2017-2020, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey, University of Kent at Canterbury.*/
 //#undef DEBUG
 #include "paint.h"
@@ -30,25 +30,24 @@ static void handle_underline_styles(struct JBXVTPaintContext * restrict c)
 	xcb_connection_t * xc = c->xc;
 	const uint16_t len = c->length;
 	const rstyle_t rstyle = *c->style;
-	if ((rstyle & JBXVT_RS_UNDERLINE)
-		|| ((rstyle & JBXVT_RS_ITALIC)
+	if ((rstyle & (1<<JBXVT_RS_UNDERLINE))
+		|| ((rstyle & (1<<JBXVT_RS_ITALIC))
 		&& (jbxvt_get_italic_font(xc)
 		== jbxvt_get_normal_font(xc))))
 		draw_underline(xc, len, c->position, 0);
-	else if (rstyle & JBXVT_RS_DOUBLE_UNDERLINE) {
+	else if (rstyle & (1<<JBXVT_RS_DOUBLE_UNDERLINE)) {
 		draw_underline(xc, len, c->position, -2);
 		draw_underline(xc, len, c->position, 0);
 	}
-	/* Test against JBXVT_RS_BG_RGB here to prevent red background
+	/* Test against (1<<JBXVT_RS_BG_RGB) here to prevent red background
 	   text from being rendered crossed out.  */
-	if (rstyle & JBXVT_RS_CROSSED_OUT && !(rstyle & JBXVT_RS_BG_RGB)) {
+	if (rstyle & (1<<JBXVT_RS_CROSSED_OUT)
+                && (rstyle ^ (1<<JBXVT_RS_BG_RGB))) {
 		const uint16_t value = jbxvt_get_font_size().h >> 1;
 		const int8_t offset = (int8_t) -value;
 		draw_underline(xc, len, c->position, offset);
 	}
 }
-/* FIXME:  Figure out a way to convert this to client side rendering in order
- * to bring in proper support for UTF-8 code points.  */
 static void draw_text(xcb_connection_t * xc,
 	uint8_t * restrict str, uint8_t len,
 	struct JBDim * restrict p, rstyle_t rstyle)
@@ -65,7 +64,8 @@ static void draw_text(xcb_connection_t * xc,
 	   Use underline for italic */
 	xcb_image_text_8(xc, len, vt, gc, p->x, p->y++, (const char *)str);
 	handle_underline_styles(&(struct JBXVTPaintContext){.xc = xc,
-		.position = *p, .length = len, .style = &rstyle});
+                .is_double_width_line=false,.position = *p, .length = len,
+                .style = &rstyle});
 }
 __attribute__((const))
 static uint16_t get_channel(const uint16_t compressed_rgb,
@@ -116,10 +116,10 @@ static bool set_rstyle_colors(xcb_connection_t * restrict xc,
 	enum { FG_SHIFT = 7, BG_SHIFT = 16 };
 	const uint8_t color[] = {(uint8_t)(rstyle >> FG_SHIFT),
 		(uint8_t)(rstyle >> BG_SHIFT)};
-	const bool rgb[] = {rstyle & JBXVT_RS_FG_RGB,
-		rstyle & JBXVT_RS_BG_RGB};
-	const bool ind[] = {rstyle & JBXVT_RS_FG_INDEX,
-		rstyle & JBXVT_RS_BG_INDEX};
+	const bool rgb[] = {rstyle & (1<<JBXVT_RS_FG_RGB),
+		rstyle & (1<<JBXVT_RS_BG_RGB)};
+	const bool ind[] = {rstyle & (1<<JBXVT_RS_FG_INDEX),
+		rstyle & (1<<JBXVT_RS_BG_INDEX)};
 	struct ColorOperation o = {xc, color, ind, rgb, jbxvt_set_bg_pixel,
 		false, {}};
 	set_color(&o);
@@ -133,9 +133,9 @@ static inline void restore_colors(xcb_connection_t * restrict xc)
 	jbxvt_set_fg_pixel(xc, jbxvt_get_fg());
 	jbxvt_set_bg_pixel(xc, jbxvt_get_bg());
 }
-static bool is_reverse_video(const rstyle_t rs)
+static inline bool is_reverse_video(const rstyle_t rs)
 {
-	return (rs & JBXVT_RS_RVID) || (rs & JBXVT_RS_BLINK);
+	return (rs & (1<<JBXVT_RS_RVID)) || (rs & (1<<JBXVT_RS_BLINK));
 }
 void jbxvt_paint(struct JBXVTPaintContext * restrict c)
 {
@@ -144,7 +144,7 @@ void jbxvt_paint(struct JBXVTPaintContext * restrict c)
 	struct JBDim p = c->position;
 	const rstyle_t rstyle = *c->style;
 	// Check if there is nothing to render:
-	if (!c->string || c->length < 1 || rstyle & JBXVT_RS_INVISIBLE)
+	if (!c->string || c->length < 1 || rstyle & (1<<JBXVT_RS_INVISIBLE))
 		  return;
 	xcb_connection_t * xc = c->xc;
 	bool cmod = set_rstyle_colors(xc, rstyle);
@@ -155,11 +155,11 @@ void jbxvt_paint(struct JBXVTPaintContext * restrict c)
 	}
 	p.y += jbxvt_get_font_ascent();
 	bool font_mod = false;
-	if (rstyle & JBXVT_RS_BOLD) {
+	if (rstyle & (1<<JBXVT_RS_BOLD)) {
 		font(xc, jbxvt_get_bold_font(xc));
 		font_mod = true;
 	}
-	if (rstyle & JBXVT_RS_ITALIC) {
+	if (rstyle & (1<<JBXVT_RS_ITALIC)) {
 		font(xc, jbxvt_get_italic_font(xc));
 		font_mod = true;
 	}
@@ -168,7 +168,7 @@ void jbxvt_paint(struct JBXVTPaintContext * restrict c)
 		c->string = jbxvt_get_double_width_string(c->string,
 			&c->length);
 	if (c->string) { // Check that we are operating on valid memory.
-		draw_text(xc, c->string, c->length, &p, rstyle);
+		draw_text(xc, c->string, c->length, &p,rstyle);
 		if (c->is_double_width_line)
 			free(c->string);
 	}

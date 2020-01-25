@@ -1,4 +1,4 @@
-/*  Copyright 2017, Jeffrey E. Bedard
+/*  Copyright 2017-2020, Jeffrey E. Bedard
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury. */
 //#undef DEBUG
@@ -18,15 +18,18 @@ static void encode_rgb(uint8_t color, uint8_t offset)
 	const uint32_t val = (uint32_t)((color & 0xe0) << offset >> 4);
 	LOG("encode_rgb(color: %d, offset: %d) val: 0x%x", color, offset,
 		val);
-	jbxvt_add_rstyle(val);
+	jbxvt_set_rstyle(jbxvt_get_rstyle()|val);
 }
 /* c must be uint32_t to allow for shift and OR with rstyle. */
 static void sgrc(const uint32_t c, const bool fg)
 {
-	const uint8_t o = JB_LIKELY(fg) ? 7 : 16;
-	jbxvt_del_rstyle((rstyle_t)(0777 << o));
-	jbxvt_add_rstyle((fg ? JBXVT_RS_FG_INDEX
-		: JBXVT_RS_BG_INDEX) | c << o);
+	uint8_t const o = JB_LIKELY(fg) ? 7 : 16;
+        rstyle_t const mask=(rstyle_t)0777<<o;
+        jbxvt_set_rstyle(jbxvt_get_rstyle()&~mask);
+        //jbxvt_set_rstyle(jbxvt_get_rstyle()&(rstyle_t)~(0777)<<o);
+        //jbxvt_zero_rstyle();
+        jbxvt_add_rstyle(fg?JBXVT_RS_FG_INDEX:JBXVT_RS_BG_INDEX);
+        jbxvt_set_rstyle(jbxvt_get_rstyle()|c<<o);
 }
 static bool rgb_or_index(int32_t arg, bool * restrict either,
 	bool * restrict index, bool * restrict rgb, const bool is_fg)
@@ -35,7 +38,7 @@ static bool rgb_or_index(int32_t arg, bool * restrict either,
 	if (JB_UNLIKELY(rval)) {
 		*either = false;
 		const bool i = arg != 2;
-		*(i?index:rgb) = true;
+                *(i?index:rgb) = true;
 		jbxvt_add_rstyle(JB_LIKELY(i) ? (is_fg ? JBXVT_RS_FG_INDEX
 			: JBXVT_RS_BG_INDEX) : (is_fg ? JBXVT_RS_FG_RGB
 			: JBXVT_RS_BG_RGB));
