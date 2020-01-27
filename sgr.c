@@ -26,8 +26,6 @@ static void sgrc(const uint32_t c, const bool fg)
 	uint8_t const o = JB_LIKELY(fg) ? 7 : 16;
         rstyle_t const mask=(rstyle_t)0777<<o;
         jbxvt_set_rstyle(jbxvt_get_rstyle()&~mask);
-        //jbxvt_set_rstyle(jbxvt_get_rstyle()&(rstyle_t)~(0777)<<o);
-        //jbxvt_zero_rstyle();
         jbxvt_add_rstyle(fg?JBXVT_RS_FG_INDEX:JBXVT_RS_BG_INDEX);
         jbxvt_set_rstyle(jbxvt_get_rstyle()|c<<o);
 }
