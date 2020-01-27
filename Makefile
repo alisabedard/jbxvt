@@ -35,10 +35,8 @@ cases.c: cases.txt casegen.awk
 	awk -f casegen.awk cases.txt > cases.c
 JBXVTRenderStyle.h: JBXVTRenderStyle.txt rstylgen.sed
 	sed -f rstylgen.sed JBXVTRenderStyle.txt > JBXVTRenderStyle.h
-#JBXVTRenderStyle.h: JBXVTRenderStyle.txt JBXVTRenderStyle.scm
-#	${SCHEME} JBXVTRenderStyle.scm
-color_index.h: color_index.txt color_index.scm
-	${SCHEME} color_index.scm
+color_index.h: color_index.txt cigen.sed
+	sed -f cigen.sed color_index.txt > color_index.h
 JBXVTTokenIndex.h: JBXVTTokenIndex.txt JBXVTTokenIndex.scm
 	${SCHEME} JBXVTTokenIndex.scm
 sgr_cases.c: sgr_cases.txt sgr_cases.scm
