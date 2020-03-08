@@ -37,74 +37,74 @@
 __attribute__((const))
 static int16_t get_n(const int16_t arg)
 {
-	return arg ? arg : 1;
+    return arg ? arg : 1;
 }
 // Return the 0-based coordinate value:
 __attribute__((const))
 
 static int16_t get_0(int16_t arg)
 {
-	return get_n(arg) - 1;
+    return get_n(arg) - 1;
 }
 // CUP and HVP, move cursor
 static void cup(xcb_connection_t * xc, int16_t * restrict t)
 {
-	// subtract 1 for 0-based coordinates
-	enum {
-		COL, ROW, REL = JBXVT_ROW_RELATIVE | JBXVT_COLUMN_RELATIVE,
-	};
-	const int16_t row = get_0(t[ROW]), col = get_0(t[COL]);
-	jbxvt_move(xc, row, col, jbxvt_get_modes()->decom ? REL : 0);
+    // subtract 1 for 0-based coordinates
+    enum {
+        COL, ROW, REL = JBXVT_ROW_RELATIVE | JBXVT_COLUMN_RELATIVE,
+    };
+    const int16_t row = get_0(t[ROW]), col = get_0(t[COL]);
+    jbxvt_move(xc, row, col, jbxvt_get_modes()->decom ? REL : 0);
 }
 // Return value sanitized for tokens with optional arguments, defaulting to 1
 static int16_t get_arg(struct JBXVTToken * t)
 {
-	return t->nargs > 0 && t->arg[0] ? t->arg[0] : 1;
+    return t->nargs > 0 && t->arg[0] ? t->arg[0] : 1;
 }
 HANDLE(ALN) // screen alignment test
 {
-	NOPARM_TOKEN();
-	jbxvt_efill(xc);
+    NOPARM_TOKEN();
+    jbxvt_efill(xc);
 }
 HANDLE(CHA) // cursor character absolute column
 {
-	jbxvt_move(xc, get_0(token->arg[0]), 0, JBXVT_ROW_RELATIVE);
+    jbxvt_move(xc, get_0(token->arg[0]), 0, JBXVT_ROW_RELATIVE);
 }
 HANDLE(CHAR)
 {
-	jbxvt_handle_tk_char(xc, token->tk_char);
+    jbxvt_handle_tk_char(xc, token->tk_char);
 }
 HANDLE(CHT) // Cursor Horizontal Tab
 {
-	jbxvt_tab(xc, get_arg(token));
+    jbxvt_tab(xc, get_arg(token));
 }
 HANDLE(CPL) // cursor previous line
 {
-	jbxvt_move(xc, 0, -get_arg(token), 0);
+    jbxvt_move(xc, 0, -get_arg(token), 0);
 }
 HANDLE(CNL) // cursor next line
 {
-	jbxvt_move(xc, 0, get_arg(token), 0);
+    jbxvt_move(xc, 0, get_arg(token), 0);
 }
 // Select character set per token parameter
 static void charset(const char c, const uint8_t i)
 {
-	switch(c) {
+    switch(c) {
 #define CS(l, cs, d) case l:LOG(d);\
-		jbxvt_get_modes()->charset[i]=CHARSET_##cs;break;
-		CS('A', GB, "UK ASCII");
-		CS('0', SG0, "SG0: special graphics");
-		CS('1', SG1, "SG1: alt char ROM standard graphics");
-		CS('2', SG2, "SG2: alt char ROM special graphics");
-	default: // reset
-		LOG("Unknown character set");
-		// fall through
-		CS('B', ASCII, "US ASCII");
-	}
+        jbxvt_get_modes()->charset[i]=CHARSET_##cs;break;
+        CS('A', GB, "UK ASCII");
+        CS('0', SG0, "SG0: special graphics");
+        CS('1', SG1, "SG1: alt char ROM standard graphics");
+        CS('2', SG2, "SG2: alt char ROM special graphics");
+    default: // reset
+        LOG("Unknown character set");
+        // fall through
+        CS('B', ASCII, "US ASCII");
+    }
 #undef CS
 }
 #define HANDLE_CS(num) HANDLE(CS_G##num){NOPARM_XC(); charset(token->arg[0],\
-	num);}
+    num);}
 HANDLE_CS(0); HANDLE_CS(1); HANDLE_CS(2); HANDLE_CS(3);
 ALIAS(CS_ALT_G1, CS_G1);
 ALIAS(CS_ALT_G2, CS_G2);
@@ -112,270 +112,270 @@ ALIAS(CS_ALT_G3, CS_G3);
 // Move cursor relative to current position
 static void mv(xcb_connection_t * xc, const int16_t x, const int16_t y)
 {
-	jbxvt_move(xc, x, y, JBXVT_ROW_RELATIVE | JBXVT_COLUMN_RELATIVE);
+    jbxvt_move(xc, x, y, JBXVT_ROW_RELATIVE | JBXVT_COLUMN_RELATIVE);
 }
 HANDLE(CUB) // cursor back
 {
-	mv(xc, -get_arg(token), 0);
+    mv(xc, -get_arg(token), 0);
 }
 HANDLE(CUD) // cursor down
 {
-	mv(xc, 0, get_arg(token));
+    mv(xc, 0, get_arg(token));
 }
 HANDLE(CUF) // cursor forward
 {
-	mv(xc, get_arg(token), 0);
+    mv(xc, get_arg(token), 0);
 }
 HANDLE(CUP) // cursor position (absolute)
 {
-	cup(xc, token->arg);
+    cup(xc, token->arg);
 }
 ALIAS(HVP, CUP); // horizontal vertical position
 HANDLE(CUU) // cursor up
 {
-	mv(xc, 0, -get_arg(token));
+    mv(xc, 0, -get_arg(token));
 }
 HANDLE(DL) // delete line
 {
-	jbxvt_index_from(xc, get_arg(token), jbxvt_get_y());
+    jbxvt_index_from(xc, get_arg(token), jbxvt_get_y());
 }
 HANDLE(DSR) // device status report
 {
-	NOPARM_XC();
-	jbxvt_handle_dsr(token->arg[0]);
+    NOPARM_XC();
+    jbxvt_handle_dsr(token->arg[0]);
 }
 HANDLE(DWL) // double width line
 {
-	NOPARM_TOKEN();
-	jbxvt_set_double_width_line(xc, true);
+    NOPARM_TOKEN();
+    jbxvt_set_double_width_line(xc, true);
 }
 HANDLE(ED) // erase display
 {
-	jbxvt_erase_screen(xc, token->arg[0]); // don't use get_arg()
+    jbxvt_erase_screen(xc, token->arg[0]); // don't use get_arg()
 }
 HANDLE(EL) // erase line
 {
-	jbxvt_erase_line(xc, token->arg[0]); // don't use get_arg()
+    jbxvt_erase_line(xc, token->arg[0]); // don't use get_arg()
 }
 HANDLE(DA) // DECID
 {
-	NOPARM();
-	// print terminal id
-	dprintf(jbxvt_get_fd(), "%s?6c", jbxvt_get_csi()); // VT102
+    NOPARM();
+    // print terminal id
+    dprintf(jbxvt_get_fd(), "%s?6c", jbxvt_get_csi()); // VT102
 }
 ALIAS(ID, DA); // DECID
 HANDLE(DCH) // delete character
 {
-	jbxvt_edit_characters(xc, get_arg(token), true);
+    jbxvt_edit_characters(xc, get_arg(token), true);
 }
 ALIAS(ECH, DCH); // erase character
 // set vt52 graphics mode
 static void gm52(const bool set)
 {
-	struct JBXVTPrivateModes * restrict m = jbxvt_get_modes();
-	m->charsel = (m->gm52 = set) ? 1 : 0;
+    struct JBXVTPrivateModes * restrict m = jbxvt_get_modes();
+    m->charsel = (m->gm52 = set) ? 1 : 0;
 }
 HANDLE(ENTGM52) // enter vt52 graphics mode
 {
-	NOPARM();
-	gm52(true);
+    NOPARM();
+    gm52(true);
 }
 HANDLE(EXTGM52) // exit vt52 graphics mode
 {
-	NOPARM();
-	gm52(false);
+    NOPARM();
+    gm52(false);
 }
 HANDLE(HOME)
 {
-	(void)token;
-	jbxvt_set_scroll(xc, 0);
-	jbxvt_move(xc, 0, 0, 0);
+    (void)token;
+    jbxvt_set_scroll(xc, 0);
+    jbxvt_move(xc, 0, 0, 0);
 }
 HANDLE(HPA) // horizontal position absolute
 {
-	jbxvt_move(xc, get_0(token->arg[0]), 0, JBXVT_ROW_RELATIVE);
+    jbxvt_move(xc, get_0(token->arg[0]), 0, JBXVT_ROW_RELATIVE);
 }
 HANDLE(HPR) // horizontal position relative
 {
-	jbxvt_move(xc, get_0(token->arg[0]), 0, JBXVT_COLUMN_RELATIVE
-		| JBXVT_ROW_RELATIVE);
+    jbxvt_move(xc, get_0(token->arg[0]), 0, JBXVT_COLUMN_RELATIVE
+        | JBXVT_ROW_RELATIVE);
 }
 HANDLE(HTS) // horizontal tab stop
 {
-	NOPARM();
-	jbxvt_set_tab(jbxvt_get_x(), true);
+    NOPARM();
+    jbxvt_set_tab(jbxvt_get_x(), true);
 }
 HANDLE(ICH) // insert blank characters
 {
-	jbxvt_edit_characters(xc, get_arg(token), false);
+    jbxvt_edit_characters(xc, get_arg(token), false);
 }
 HANDLE(IL) // insert line
 {
-	jbxvt_index_from(xc, -get_arg(token), jbxvt_get_y());
+    jbxvt_index_from(xc, -get_arg(token), jbxvt_get_y());
 }
 HANDLE(IND) // index (scroll)
 {
-	jbxvt_index_from(xc, get_arg(token), jbxvt_get_margin()->t);
+    jbxvt_index_from(xc, get_arg(token), jbxvt_get_margin()->t);
 }
 HANDLE(NEL) // next line (move to the first position on the next line)
 {
-	NOPARM_TOKEN();
-	jbxvt_move(xc, 0, jbxvt_get_y() + 1, 0);
+    NOPARM_TOKEN();
+    jbxvt_move(xc, 0, jbxvt_get_y() + 1, 0);
 }
 HANDLE(PAM) // application mode keys
 {
-	NOPARM();
-	jbxvt_set_keys(true, false);
+    NOPARM();
+    jbxvt_set_keys(true, false);
 }
 HANDLE(PM) // privacy message
 {
-	NOPARM();
-	jbxvt_get_current_screen()->decpm = true;
+    NOPARM();
+    jbxvt_get_current_screen()->decpm = true;
 }
 HANDLE(PNM) // numeric key mode
 {
-	NOPARM();
-	jbxvt_set_keys(false, false);
+    NOPARM();
+    jbxvt_set_keys(false, false);
 }
 HANDLE(RC)
 {
-	NOPARM_TOKEN();
-	jbxvt_restore_cursor(xc);
+    NOPARM_TOKEN();
+    jbxvt_restore_cursor(xc);
 }
 EXTERN_ALIAS(RESET, jbxvt_dec_reset);
 EXTERN_ALIAS(SET, jbxvt_dec_reset);
 HANDLE(RI) // reverse index
 {
-	jbxvt_index_from(xc, -get_arg(token), jbxvt_get_margin()->top);
+    jbxvt_index_from(xc, -get_arg(token), jbxvt_get_margin()->top);
 }
 HANDLE(RIS) // reset to initial state
 {
-	NOPARM_TOKEN();
-	jbxvt_get_modes()->dectcem = true;
-	jbxvt_reset(xc);
+    NOPARM_TOKEN();
+    jbxvt_get_modes()->dectcem = true;
+    jbxvt_reset(xc);
 }
 static void set_s8c1t(const bool val)
 {
-	jbxvt_get_modes()->s8c1t = val;
+    jbxvt_get_modes()->s8c1t = val;
 }
 HANDLE(S7C1T) // 7-bit control sequences
 {
-	NOPARM();
-	set_s8c1t(false);
+    NOPARM();
+    set_s8c1t(false);
 }
 HANDLE(S8C1T) // 8-bit control sequences
 {
-	NOPARM();
-	set_s8c1t(true);
+    NOPARM();
+    set_s8c1t(true);
 }
 HANDLE(SAVEPM) // save private modes
 {
-	NOPARM();
-	jbxvt_save_modes();
+    NOPARM();
+    jbxvt_save_modes();
 }
 HANDLE(SBGOTO) // Scroll to where token arg[0] is at top of screen.
 {
-	jbxvt_scroll_to(xc, token->arg[0]);
+    jbxvt_scroll_to(xc, token->arg[0]);
 }
 HANDLE(SBSWITCH)
 {
-	NOPARM_TOKEN();
-	jbxvt_toggle_scrollbar(xc);
+    NOPARM_TOKEN();
+    jbxvt_toggle_scrollbar(xc);
 }
 HANDLE(SC)
 {
-	NOPARM();
-	jbxvt_save_cursor();
+    NOPARM();
+    jbxvt_save_cursor();
 }
 static void handle_scroll(xcb_connection_t * xc, const int16_t arg)
 {
-	const struct JBDim m = *jbxvt_get_margin();
-	// scroll arg lines within margin m:
-	scroll(xc, m.top, m.bot, arg);
+    const struct JBDim m = *jbxvt_get_margin();
+    // scroll arg lines within margin m:
+    scroll(xc, m.top, m.bot, arg);
 }
 HANDLE(SD) // scroll down
 {
-	handle_scroll(xc, -token->arg[0]);
+    handle_scroll(xc, -token->arg[0]);
 }
 EXTERN_ALIAS(SGR, jbxvt_handle_sgr);
 HANDLE(SS2)
 {
-	NOPARM();
-	jbxvt_get_modes()->ss2 = true;
+    NOPARM();
+    jbxvt_get_modes()->ss2 = true;
 }
 HANDLE(SS3)
 {
-	NOPARM();
-	jbxvt_get_modes()->ss3 = true;
+    NOPARM();
+    jbxvt_get_modes()->ss3 = true;
 }
 HANDLE(ST) // string terminator
 {
-	NOPARM();
-	jbxvt_get_current_screen()->decpm = false;
+    NOPARM();
+    jbxvt_get_current_screen()->decpm = false;
 }
 HANDLE(STBM) // set top and bottom margins
 {
-	NOPARM_XC();
-	int16_t * restrict t = token->arg;
-	LOG("JBXVT_TOKEN_STBM args: %d, 0: %d, 1: %d",
-		(int)token->nargs, t[0], t[1]);
-	if (token->private == JBXVT_TOKEN_RESTOREPM) {
-		jbxvt_restore_modes();
-	} else { // set margins
-		const bool rst = token->nargs < 2 || t[0] >= t[1];
-		struct JBDim * restrict m = jbxvt_get_margin();
-		m->top = rst ? 0 : get_0(t[0]);
-		m->bot = (rst ? jbxvt_get_char_size().h : get_n(t[1])) - 1;
-	}
+    NOPARM_XC();
+    int16_t * restrict t = token->arg;
+    LOG("JBXVT_TOKEN_STBM args: %d, 0: %d, 1: %d",
+        (int)token->nargs, t[0], t[1]);
+    if (token->private == JBXVT_TOKEN_RESTOREPM) {
+        jbxvt_restore_modes();
+    } else { // set margins
+        const bool rst = token->nargs < 2 || t[0] >= t[1];
+        struct JBDim * restrict m = jbxvt_get_margin();
+        m->top = rst ? 0 : get_0(t[0]);
+        m->bot = (rst ? jbxvt_get_char_size().h : get_n(t[1])) - 1;
+    }
 }
 HANDLE(STRING)
 {
-	jbxvt_string(xc, token->string, token->length, token->nlcount);
+    jbxvt_string(xc, token->string, token->length, token->nlcount);
 }
 HANDLE(SU) // scroll up
 {
-	handle_scroll(xc, token->arg[0]);
+    handle_scroll(xc, token->arg[0]);
 }
 HANDLE(SWL) // single width line
 {
-	NOPARM_TOKEN();
-	jbxvt_set_double_width_line(xc, false);
+    NOPARM_TOKEN();
+    jbxvt_set_double_width_line(xc, false);
 }
 // vertical position, absolute or relative
 static void vp(xcb_connection_t * xc, const uint16_t arg, const bool relative)
 {
-	jbxvt_move(xc, 0, get_0((int16_t)arg), JBXVT_COLUMN_RELATIVE |
-		(relative ? JBXVT_ROW_RELATIVE : 0));
+    jbxvt_move(xc, 0, get_0((int16_t)arg), JBXVT_COLUMN_RELATIVE |
+        (relative ? JBXVT_ROW_RELATIVE : 0));
 }
 HANDLE(VPA) // vertical position absolute
 {
-	vp(xc, (uint16_t)token->arg[0], false);
+    vp(xc, (uint16_t)token->arg[0], false);
 }
 HANDLE(VPR) // vertical position relative
 {
-	vp(xc, (uint16_t)token->arg[0], true);
+    vp(xc, (uint16_t)token->arg[0], true);
 }
 bool jbxvt_parse_token(xcb_connection_t * xc)
 {
-	struct JBXVTToken token;
-	jbxvt_get_token(xc, &token);
-	bool rval = true; // keep going
-	switch (token.type) {
-	case JBXVT_TOKEN_EOF:
-		LOG("JBXVT_TOKEN_EOF");
-		rval = false; // stop token parsing loop, quit
-		break;
+    struct JBXVTToken token;
+    jbxvt_get_token(xc, &token);
+    bool rval = true; // keep going
+    switch (token.type) {
+    case JBXVT_TOKEN_EOF:
+        LOG("JBXVT_TOKEN_EOF");
+        rval = false; // stop token parsing loop, quit
+        break;
 #include "cases.c"
-	default:
+    default:
 #ifdef DEBUG
-		if(token.type) { // Ignore JBXVT_TOKEN_NULL
-			LOG("Unhandled token: %d (0x%x)",
-				token.type, token.type);
-			// Exit now so we can implement it!
-			rval = false;
-		}
+        if(token.type) { // Ignore JBXVT_TOKEN_NULL
+            LOG("Unhandled token: %d (0x%x)",
+                token.type, token.type);
+            // Exit now so we can implement it!
+            rval = false;
+        }
 #endif//DEBUG
-		break;
-	}
-	return rval;
+        break;
+    }
+    return rval;
 }

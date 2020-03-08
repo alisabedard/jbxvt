@@ -19,5 +19,5 @@ struct JBXVTScreen * jbxvt_get_screen_at(const uint8_t i);
 struct JBXVTScreen * jbxvt_get_current_screen(void);
 // Scroll from top to current bottom margin count lines, moving cursor
 void jbxvt_index_from(xcb_connection_t * xc,
-	const int8_t count, const int16_t top);
+    const int8_t count, const int16_t top);
 #endif//!JBXVT_SCREEN_H

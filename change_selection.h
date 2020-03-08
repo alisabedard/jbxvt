@@ -8,6 +8,6 @@ struct JBDim;
     to represent the currently displayed selection
     endpoints.  */
 void jbxvt_change_selection(xcb_connection_t * xc,
-	struct JBDim * restrict ose0,
-	struct JBDim * restrict ose1);
+    struct JBDim * restrict ose0,
+    struct JBDim * restrict ose1);
 #endif//!JBXVT_CHANGE_SELECTION_H

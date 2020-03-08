@@ -11,5 +11,5 @@ xcb_font_t jbxvt_get_normal_font(xcb_connection_t * xc);
 xcb_font_t jbxvt_get_bold_font(xcb_connection_t * xc);
 xcb_font_t jbxvt_get_italic_font(xcb_connection_t * xc);
 void jbxvt_init_fonts(xcb_connection_t * xc,
-	struct JBXVTOptions * opt);
+    struct JBXVTOptions * opt);
 #endif//!JBXVT_NORMAL_FONT_H

@@ -7,10 +7,10 @@
 #include <xcb/xproto.h>
 //  Request the current primary selection
 void jbxvt_request_selection(xcb_connection_t * xc,
-	const xcb_timestamp_t t);
+    const xcb_timestamp_t t);
 //  Respond to a notification that a primary selection has been sent
 // Returns the number of bytes read.
 uint32_t jbxvt_paste_primary(xcb_connection_t * xc,
-	const xcb_timestamp_t t, const xcb_window_t window,
-	const xcb_atom_t property);
+    const xcb_timestamp_t t, const xcb_window_t window,
+    const xcb_atom_t property);
 #endif//!JBXVT_SELREQ_H

@@ -9,7 +9,7 @@ struct JBDim;
 /*  Determine if the current selection overlaps row1-row2.
     If it does, then remove it from the screen.  */
 void jbxvt_check_selection(xcb_connection_t * xc,
-	const int16_t row1, const int16_t row2);
+    const int16_t row1, const int16_t row2);
 // clear the current selection:
 void jbxvt_clear_selection(void);
 //  Return the atom corresponding to "CLIPBOARD"
@@ -22,9 +22,9 @@ bool jbxvt_is_selected(void);
 void jbxvt_make_selection(xcb_connection_t * xc);
 //  respond to a request for our current selection.
 void jbxvt_send_selection(xcb_connection_t * xc,
-	const xcb_time_t time, const uint32_t requestor,
-	const uint32_t type, const uint32_t property);
+    const xcb_time_t time, const uint32_t requestor,
+    const uint32_t type, const uint32_t property);
 // start selection using specified unit:
 void jbxvt_start_selection(xcb_connection_t * xc,
-	const struct JBDim p, enum JBXVTSelectionUnit unit);
+    const struct JBDim p, enum JBXVTSelectionUnit unit);
 #endif//!JBXVT_SELECTION_H

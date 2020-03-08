@@ -6,7 +6,7 @@
 struct JBXVTOptions;
 // Set up initial color values for foreground and background pixels.
 void jbxvt_init_colors(xcb_connection_t * xc,
-	struct JBXVTOptions * restrict opt);
+    struct JBXVTOptions * restrict opt);
 pixel_t jbxvt_get_bg(void);
 pixel_t jbxvt_get_fg(void);
 void jbxvt_reverse_screen_colors(xcb_connection_t * xc);

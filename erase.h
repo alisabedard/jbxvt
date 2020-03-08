@@ -5,10 +5,10 @@
 #define JBXVT_ERASE_H
 #include <xcb/xcb.h>
 enum JBXVTEraseOperation {
-	JBXVT_ERASE_AFTER = 0,
-	JBXVT_ERASE_BEFORE = 1,
-	JBXVT_ERASE_ALL = 2,
-	JBXVT_ERASE_SAVED = 3
+    JBXVT_ERASE_AFTER = 0,
+    JBXVT_ERASE_BEFORE = 1,
+    JBXVT_ERASE_ALL = 2,
+    JBXVT_ERASE_SAVED = 3
 };
 // Erase the specified portion of a line.
 void jbxvt_erase_line(xcb_connection_t * xc, const int8_t mode);

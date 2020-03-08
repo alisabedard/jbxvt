@@ -7,5 +7,5 @@
 #include <xcb/xcb.h>
 struct JBDim;
 void jbxvt_extend_selection(xcb_connection_t * xc,
-	const struct JBDim p, const bool drag);
+    const struct JBDim p, const bool drag);
 #endif//!JBXVT_SELEX_H

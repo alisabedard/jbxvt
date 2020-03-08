@@ -13,10 +13,10 @@ struct JBDim jbxvt_get_selend_position(struct JBDim * restrict se);
 struct JBDim * jbxvt_order_selection_ends(struct JBDim * e);
 //  Convert a row and column coordinates into a selection endpoint.
 void jbxvt_rc_to_selend(const int16_t row, const int16_t col,
-	struct JBDim * se);
+    struct JBDim * se);
 /*  Compare the two selections and return negtive,
     0 or positive depending on whether se2 is after,
     equal to or before se1.  */
 int8_t jbxvt_selcmp(struct JBDim * restrict se1,
-	struct JBDim * restrict se2);
+    struct JBDim * restrict se2);
 #endif//!JBXVT_SELEND_H

@@ -4,7 +4,7 @@
 #define JBXVT_BUTTON_EVENTS_H
 #include <xcb/xcb.h>
 void jbxvt_handle_button_press_event(xcb_connection_t * xc,
-	xcb_button_press_event_t * e);
+    xcb_button_press_event_t * e);
 void jbxvt_handle_button_release_event(xcb_connection_t * xc,
-	xcb_button_release_event_t * e);
+    xcb_button_release_event_t * e);
 #endif//!JBXVT_BUTTON_EVENTS_H

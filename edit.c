@@ -12,55 +12,55 @@
 #include "size.h"
 #include "window.h"
 static uint16_t get_copy_width(const uint8_t count,
-	const uint8_t font_width)
+    const uint8_t font_width)
 {
-	return font_width * (jbxvt_get_char_size().w - count
-		- jbxvt_get_x() - 2);
+    return font_width * (jbxvt_get_char_size().w - count
+        - jbxvt_get_x() - 2);
 }
 static void copy_area(xcb_connection_t * restrict xc,
-	const int16_t * restrict x, const uint8_t count)
+    const int16_t * restrict x, const uint8_t count)
 {
-	const xcb_window_t v = jbxvt_get_vt_window(xc);
-	const struct JBDim f = jbxvt_get_font_size();
-	const int16_t y = jbxvt_get_y() * f.height;
-	xcb_copy_area(xc, v, v, jbxvt_get_text_gc(xc), f.w * x[0], y,
-		f.w * x[1], y, get_copy_width(count, f.w), f.h);
+    const xcb_window_t v = jbxvt_get_vt_window(xc);
+    const struct JBDim f = jbxvt_get_font_size();
+    const int16_t y = jbxvt_get_y() * f.height;
+    xcb_copy_area(xc, v, v, jbxvt_get_text_gc(xc), f.w * x[0], y,
+        f.w * x[1], y, get_copy_width(count, f.w), f.h);
 }
 static void clear_area(xcb_connection_t * restrict xc, const int16_t x,
-	const int16_t y, const uint8_t count)
+    const int16_t y, const uint8_t count)
 {
-	const struct JBDim f = jbxvt_get_font_size();
-	const xcb_window_t v = jbxvt_get_vt_window(xc);
-	xcb_clear_area(xc, 0, v, x*f.w, y*f.h, count*f.w, f.h);
+    const struct JBDim f = jbxvt_get_font_size();
+    const xcb_window_t v = jbxvt_get_vt_window(xc);
+    xcb_clear_area(xc, 0, v, x*f.w, y*f.h, count*f.w, f.h);
 }
 void jbxvt_edit_characters(xcb_connection_t * xc,
-	const uint8_t count, const bool delete)
+    const uint8_t count, const bool delete)
 {
-	const int16_t x = jbxvt_get_x();
-	if (x + count >= JBXVT_MAX_COLUMNS) {
-		LOG("WARNING: attempted to write outside of buffer");
-		return; // Stay within bounds!
-	}
-	LOG("jbxvt_edit_characters(count: %d, delete: %s, x: %d)",
-		count, delete ? "true" : "false", x);
-	const int16_t y = jbxvt_get_y();
-	jbxvt_check_selection(xc, y, y);
-	struct JBXVTLine * l = jbxvt_get_line(y);
-	uint8_t * t = l->text, * a = t + x, * b = a + count;
-	if (delete)
-		JB_SWAP(uint8_t *, a, b);
-	l->wrap = false;
-	/* Validate the operation parameters, count and x, to prevent integer
-	 * overflow on the following memmove.  */
-	if ((count + x) < JBXVT_MAX_COLUMNS) {
-		// Perform the off-screen edit:
-		memmove(b, a, (size_t)(JBXVT_MAX_COLUMNS - count - x));
-	}
-	/* Begin the on-screen edit.  */
-	const int16_t p[] = {a - t, b - t};
-	LOG("\tp[0]: %d, p[1]: %d", p[0], p[1]);
-	if (delete)
-		clear_area(xc, x, y, count);
-	copy_area(xc, p, count); // must come after clear_area()
-	jbxvt_draw_cursor(xc);
+    const int16_t x = jbxvt_get_x();
+    if (x + count >= JBXVT_MAX_COLUMNS) {
+        LOG("WARNING: attempted to write outside of buffer");
+        return; // Stay within bounds!
+    }
+    LOG("jbxvt_edit_characters(count: %d, delete: %s, x: %d)",
+        count, delete ? "true" : "false", x);
+    const int16_t y = jbxvt_get_y();
+    jbxvt_check_selection(xc, y, y);
+    struct JBXVTLine * l = jbxvt_get_line(y);
+    uint8_t * t = l->text, * a = t + x, * b = a + count;
+    if (delete)
+        JB_SWAP(uint8_t *, a, b);
+    l->wrap = false;
+    /* Validate the operation parameters, count and x, to prevent integer
+     * overflow on the following memmove.  */
+    if ((count + x) < JBXVT_MAX_COLUMNS) {
+        // Perform the off-screen edit:
+        memmove(b, a, (size_t)(JBXVT_MAX_COLUMNS - count - x));
+    }
+    /* Begin the on-screen edit.  */
+    const int16_t p[] = {a - t, b - t};
+    LOG("\tp[0]: %d, p[1]: %d", p[0], p[1]);
+    if (delete)
+        clear_area(xc, x, y, count);
+    copy_area(xc, p, count); // must come after clear_area()
+    jbxvt_draw_cursor(xc);
 }
