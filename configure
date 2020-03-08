@@ -7,153 +7,152 @@ OPT_STATIC_LIBJB=true
 # reset:
 rm -f "$CFG"; touch "$CFG"
 # parse command line:
-while getopts 'dhJu' opt
-do
-	case $opt in
-	d) DEBUG=true ;;
-	J) OPT_STATIC_LIBJB=true ;;
-	u) UTEMPTER=false ;;	
-	h|?)
-		for line in '-d enable debugging' \
-			'-h help' \
-			'-J use shared libjb' \
-			'-u disable libutempter'; do
-			echo $line
-		done
-		exit 1
-		;;
-	esac
-done 
+while getopts 'dhJu' opt; do
+    case $opt in
+        d) DEBUG=true ;;
+        J) OPT_STATIC_LIBJB=true ;;
+        u) UTEMPTER=false ;;
+        h|?)
+            for line in '-d enable debugging' \
+                    '-h help' \
+                    '-J use shared libjb' \
+                '-u disable libutempter'; do
+                echo $line
+            done
+            exit 1
+            ;;
+    esac
+done
 ARCH=`uname | tr 'a-z' 'A-Z'`
 echo "Configuring for $ARCH"
 if $DEBUG; then
-	echo "CFLAGS=" >> $CFG
+    echo "CFLAGS=" >> $CFG
 else
-	echo "CFLAGS=$CFLAGS" >> $CFG
+    echo "CFLAGS=$CFLAGS" >> $CFG
 fi
 echo CFLAGS+="-D${ARCH}" >> $CFG
 install -m 0644 terminfo.in terminfo.mk
 case $ARCH in
-	OPENBSD)
-		CC=clang
-		echo NOTE:  OpenBSD requires llvm
-		cat >> $CFG <<- EOF
-		CC=clang
-		PREFIX=/usr/local
-		ldflags+=-L/usr/X11R6/lib
-		ldflags+=-L/usr/local/lib
-		CFLAGS+=-D_BSD_SOURCE
-		CFLAGS+=-I/usr/X11R6/include 
-		CFLAGS+=-I/usr/local/include 
-		EOF
-		;;
-	LINUX) 
-		cat >> $CFG <<- EOF
-		CFLAGS+=-D_GNU_SOURCE
-		EOF
-		;;
-	NETBSD)
-		CC=clang
-		echo NOTE:  NetBSD requires clang
-		cat >> $CFG <<- EOF
-		CFLAGS+=-D_NETBSD_SOURCE -D_BSD_SOURCE
-		CFLAGS+=-Wno-missing-field-initializers
-		CFLAGS+=-I/usr/pkg/include
-		CFLAGS+=-I/usr/X11R7/include 
-		CFLAGS+=-I/usr/X11R6/include
-		ldflags+=-L/usr/pkg/lib -Wl,-R/usr/pkg/lib
-		ldflags+=-L/usr/X11R7/lib -Wl,-R/usr/X11R7/lib
-		ldflags+=-L/usr/X11R6/lib -Wl,-R/usr/X11R6/lib
-		PREFIX=/usr/local
-		EOF
-		;;
-	FREEBSD)
-		cat >> $CFG <<- EOF
-		CFLAGS+=-DFREEBSD -D_BSD_SOURCE -D__BSD_VISIBLE
-		CFLAGS+=-I/usr/local/include
-		ldflags+=-L/usr/local/lib
-		PREFIX=/usr/local
-		EOF
-		install -m 0644 terminfo.in.freebsd terminfo.mk
-		;;
+    OPENBSD)
+        CC=clang
+        echo NOTE:  OpenBSD requires llvm
+        cat >> $CFG <<- EOF
+        CC=clang
+        PREFIX=/usr/local
+        ldflags+=-L/usr/X11R6/lib
+        ldflags+=-L/usr/local/lib
+        CFLAGS+=-D_BSD_SOURCE
+        CFLAGS+=-I/usr/X11R6/include
+        CFLAGS+=-I/usr/local/include
+        EOF
+        ;;
+    LINUX)
+        cat >> $CFG <<- EOF
+        CFLAGS+=-D_GNU_SOURCE
+        EOF
+        ;;
+    NETBSD)
+        CC=clang
+        echo NOTE:  NetBSD requires clang
+        cat >> $CFG <<- EOF
+        CFLAGS+=-D_NETBSD_SOURCE -D_BSD_SOURCE
+        CFLAGS+=-Wno-missing-field-initializers
+        CFLAGS+=-I/usr/pkg/include
+        CFLAGS+=-I/usr/X11R7/include
+        CFLAGS+=-I/usr/X11R6/include
+        ldflags+=-L/usr/pkg/lib -Wl,-R/usr/pkg/lib
+        ldflags+=-L/usr/X11R7/lib -Wl,-R/usr/X11R7/lib
+        ldflags+=-L/usr/X11R6/lib -Wl,-R/usr/X11R6/lib
+        PREFIX=/usr/local
+        EOF
+        ;;
+    FREEBSD)
+        cat >> $CFG <<- EOF
+        CFLAGS+=-DFREEBSD -D_BSD_SOURCE -D__BSD_VISIBLE
+        CFLAGS+=-I/usr/local/include
+        ldflags+=-L/usr/local/lib
+        PREFIX=/usr/local
+        EOF
+        install -m 0644 terminfo.in.freebsd terminfo.mk
+        ;;
 esac
 echo -n 'Checking for libutempter... '
 if $UTEMPTER && [ -f /usr/lib/libutempter.so ]; then
-	echo found
-	cat >> $CFG <<- EOF
-	CFLAGS+=-DUSE_UTEMPTER
-	ldflags+=-lutempter
-	EOF
+    echo found
+    cat >> $CFG <<- EOF
+    CFLAGS+=-DUSE_UTEMPTER
+    ldflags+=-lutempter
+    EOF
 else
-	if $UTEMPTER; then
-		echo not found
-	else
-		echo disabled
-	fi
+    if $UTEMPTER; then
+        echo not found
+    else
+        echo disabled
+    fi
 fi
 echo -n 'Checking for asm-generic/ioctls.h... '
 if [ -f /usr/include/asm-generic/ioctls.h ]; then
-	echo found
-	echo 'CFLAGS+=-DHAVE_ASM_GENERIC_IOCTLS_H' >> $CFG
+    echo found
+    echo 'CFLAGS+=-DHAVE_ASM_GENERIC_IOCTLS_H' >> $CFG
 else
-	echo not found
+    echo not found
 fi
 search() # 1: cmd 2: var
 {
-	echo -n "Checking for $1... "
-	local CMD=`command -v $1`
-	if [ "$CMD" ]; then
-		echo $CMD
-		echo "$2=$CMD" >> $CFG
-		export $2=$1
-		return 1
-	fi
-	echo not found
-	return 0
+    echo -n "Checking for $1... "
+    local CMD=`command -v $1`
+    if [ "$CMD" ]; then
+        echo $CMD
+        echo "$2=$CMD" >> $CFG
+        export $2=$1
+        return 1
+    fi
+    echo not found
+    return 0
 }
 cc_err()
 {
-	echo 'Error: Cannot find a suitable compiler.'
-	echo 'Please set CC to a valid C compiler command'
-	exit 1
+    echo 'Error: Cannot find a suitable compiler.'
+    echo 'Please set CC to a valid C compiler command'
+    exit 1
 }
 if [ -z "$CC" ]; then
-	if [ "$ARCH" = "LINUX" ]; then
-		search cc CC && search gcc CC && search clang CC\
-			&& cc_err
-	else
-		# Many BSD systems come with an old version of
-		# gcc without support of required language features.
-		# Search for clang first.
-		search search clang CC && search cc CC && search gcc CC\
-			&& cc_err
-	fi
+    if [ "$ARCH" = "LINUX" ]; then
+        search cc CC && search gcc CC && search clang CC\
+        && cc_err
+    else
+        # Many BSD systems come with an old version of
+        # gcc without support of required language features.
+        # Search for clang first.
+        search search clang CC && search cc CC && search gcc CC\
+        && cc_err
+    fi
 else
-	echo "CC defined as ${CC}"
-	echo "CC=${CC}" >> $CFG
+    echo "CC defined as ${CC}"
+    echo "CC=${CC}" >> $CFG
 fi
 if $DEBUG; then
-	echo -n 'Enabling debug code... '
-	if [ "$CC" = "clang" ]; then
-		echo clang
-		echo 'include debug_clang.mk' >> $CFG
-	elif [ "$CC" = "gcc" ]; then
-		echo gcc
-		echo 'include debug_gcc.mk' >> $CFG
-	else
-		if [ "$ARCH" = "LINUX" ]; then
-			echo gcc
-			echo 'include debug_gcc.mk' >> $CFG
-		else
-			echo generic
-			echo 'include debug.mk' >> $CFG
-		fi
-	fi
+    echo -n 'Enabling debug code... '
+    if [ "$CC" = "clang" ]; then
+        echo clang
+        echo 'include debug_clang.mk' >> $CFG
+    elif [ "$CC" = "gcc" ]; then
+        echo gcc
+        echo 'include debug_gcc.mk' >> $CFG
+    else
+        if [ "$ARCH" = "LINUX" ]; then
+            echo gcc
+            echo 'include debug_gcc.mk' >> $CFG
+        else
+            echo generic
+            echo 'include debug.mk' >> $CFG
+        fi
+    fi
 fi
 if $OPT_STATIC_LIBJB; then
-	echo Using static libjb...
-	echo "static=libjb/libjb.a" >> ${CFG}
+    echo Using static libjb...
+    echo "static=libjb/libjb.a" >> ${CFG}
 else
-	echo Using shared libjb...
-	echo "ldflags+=-Llibjb libjb/libjb.so.1.0.0" >> ${CFG}
+    echo Using shared libjb...
+    echo "ldflags+=-Llibjb libjb/libjb.so.1.0.0" >> ${CFG}
 fi
