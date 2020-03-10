@@ -73,8 +73,10 @@ static void trim(void)
     if (scroll_size < LIM << 1)
         return;
     struct JBXVTLine * new = malloc(LIM * SZ), * i;
+#ifdef DEBUG
     jb_require(new, "Cannot allocate memory for new scroll"
         " history buffer");
+#endif // DEBUG
     const int16_t diff = scroll_size - LIM;
     i = saved_lines + diff;
     memcpy(new, i, LIM * SZ);
@@ -90,8 +92,10 @@ static void add_scroll_history(void)
         const size_t sz = ((size_t)++scroll_size * SIZE);
         saved_lines = realloc(saved_lines, sz);
     }
+#ifdef DEBUG
     jb_require(saved_lines, "Cannot allocate memory"
         " for scroll history");
+#endif // DEBUG
     // - 1 for index instead of size
     memcpy(&saved_lines[scroll_size - 1], &s->line[s->cursor.y], SIZE);
     trim();
