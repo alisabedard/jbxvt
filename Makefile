@@ -31,8 +31,6 @@ ${exe}: ${objs}
 	rm -f ${exe}.tmp
 	tail -n 5 sz.log
 include depend.mk
-cases.c: cases.txt casegen.awk
-	awk -f casegen.awk cases.txt > cases.c
 JBXVTRenderStyle.h: JBXVTRenderStyle.txt rstylgen.sed
 	sed -f rstylgen.sed JBXVTRenderStyle.txt > JBXVTRenderStyle.h
 color_index.h: color_index.txt cigen.sed
@@ -52,7 +50,7 @@ install: ${exe}
 	install -d ${docdest}
 	install ${exe}.1 ${docdest}
 depend:
-	${CC} -E -MM *.c > depend.mk
+	./mkdep.sh
 clean:
 	cd libjb && make clean
 	rm -f ${exe} *.o *.gcda *.gcno *.gcov libjb/*.gcda \
