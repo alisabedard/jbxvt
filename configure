@@ -4,17 +4,20 @@ CFG=config.mk
 DEBUG=false
 UTEMPTER=true
 OPT_STATIC_LIBJB=true
+GDB=false
 # reset:
 rm -f "$CFG"; touch "$CFG"
 # parse command line:
-while getopts 'dhJu' opt
+while getopts 'dghJu' opt
 do
 	case $opt in
 	d) DEBUG=true ;;
+        g) GDB=true ;;
 	J) OPT_STATIC_LIBJB=true ;;
 	u) UTEMPTER=false ;;	
 	h|?)
 		for line in '-d enable debugging' \
+                        '-g gdb' \
 			'-h help' \
 			'-J use shared libjb' \
 			'-u disable libutempter'; do
@@ -156,4 +159,8 @@ if $OPT_STATIC_LIBJB; then
 else
 	echo Using shared libjb...
 	echo "ldflags+=-Llibjb libjb/libjb.so.1.0.0" >> ${CFG}
+fi
+if $GDB; then
+    echo 'Enabling GDB options...'
+    echo 'CFLAGS+=-ggdb -Wall -W -Werror' >> ${CFG}
 fi
