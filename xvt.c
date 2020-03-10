@@ -62,28 +62,34 @@ static int16_t get_arg(struct JBXVTToken * t)
 {
     return t->nargs > 0 && t->arg[0] ? t->arg[0] : 1;
 }
-HANDLE(ALN) // screen alignment test
+static void jbxvt_handle_JBXVT_TOKEN_ALN(xcb_connection_t * xc,
+    struct JBXVTToken * token) // screen alignment test
 {
     NOPARM_TOKEN();
     jbxvt_efill(xc);
 }
-HANDLE(CHA) // cursor character absolute column
+static void jbxvt_handle_JBXVT_TOKEN_CHA(xcb_connection_t * xc,
+    struct JBXVTToken * token) // cursor character absolute column
 {
     jbxvt_move(xc, get_0(token->arg[0]), 0, JBXVT_ROW_RELATIVE);
 }
-HANDLE(CHAR)
+static void jbxvt_handle_JBXVT_TOKEN_CHAR(xcb_connection_t * xc,
+    struct JBXVTToken * token)
 {
     jbxvt_handle_tk_char(xc, token->tk_char);
 }
-HANDLE(CHT) // Cursor Horizontal Tab
+static void jbxvt_handle_JBXVT_TOKEN_CHT(xcb_connection_t * xc,
+    struct JBXVTToken * token) // Cursor Horizontal Tab
 {
     jbxvt_tab(xc, get_arg(token));
 }
-HANDLE(CPL) // cursor previous line
+static void jbxvt_handle_JBXVT_TOKEN_CPL(xcb_connection_t * xc,
+    struct JBXVTToken * token) // cursor previous line
 {
     jbxvt_move(xc, 0, -get_arg(token), 0);
 }
-HANDLE(CNL) // cursor next line
+static void jbxvt_handle_JBXVT_TOKEN_CNL(xcb_connection_t * xc,
+    struct JBXVTToken * token) // cursor next line
 {
     jbxvt_move(xc, 0, get_arg(token), 0);
 }
@@ -104,9 +110,26 @@ static void charset(const char c, const uint8_t i)
     }
 #undef CS
 }
-#define HANDLE_CS(num) HANDLE(CS_G##num){NOPARM_XC(); charset(token->arg[0],\
-    num);}
-HANDLE_CS(0); HANDLE_CS(1); HANDLE_CS(2); HANDLE_CS(3);
+static void jbxvt_handle_JBXVT_TOKEN_CS_G0(xcb_connection_t * xc,
+    struct JBXVTToken * token){
+    (void)xc;
+    charset(token->arg[0], 0);
+};
+static void jbxvt_handle_JBXVT_TOKEN_CS_G1(xcb_connection_t * xc,
+    struct JBXVTToken * token){
+    (void)xc;
+    charset(token->arg[0], 1);
+};
+static void jbxvt_handle_JBXVT_TOKEN_CS_G2(xcb_connection_t * xc,
+    struct JBXVTToken * token){
+    (void)xc;
+    charset(token->arg[0], 2);
+};
+static void jbxvt_handle_JBXVT_TOKEN_CS_G3(xcb_connection_t * xc,
+    struct JBXVTToken * token){
+    (void)xc;
+    charset(token->arg[0], 3);
+};
 ALIAS(CS_ALT_G1, CS_G1);
 ALIAS(CS_ALT_G2, CS_G2);
 ALIAS(CS_ALT_G3, CS_G3);
@@ -115,50 +138,62 @@ static void mv(xcb_connection_t * xc, const int16_t x, const int16_t y)
 {
     jbxvt_move(xc, x, y, JBXVT_ROW_RELATIVE | JBXVT_COLUMN_RELATIVE);
 }
-HANDLE(CUB) // cursor back
+static void jbxvt_handle_JBXVT_TOKEN_CUB(xcb_connection_t * xc,
+    struct JBXVTToken * token) // cursor back
 {
     mv(xc, -get_arg(token), 0);
 }
-HANDLE(CUD) // cursor down
+static void jbxvt_handle_JBXVT_TOKEN_CUD(xcb_connection_t * xc,
+    struct JBXVTToken * token) // cursor down
 {
     mv(xc, 0, get_arg(token));
 }
-HANDLE(CUF) // cursor forward
+static void jbxvt_handle_JBXVT_TOKEN_CUF(xcb_connection_t * xc,
+    struct JBXVTToken * token) // cursor forward
 {
     mv(xc, get_arg(token), 0);
 }
-HANDLE(CUP) // cursor position (absolute)
+// Set cursor position, absolute mode.
+static void jbxvt_handle_JBXVT_TOKEN_CUP(xcb_connection_t * xc,
+    struct JBXVTToken * token)
 {
     cup(xc, token->arg);
 }
 ALIAS(HVP, CUP); // horizontal vertical position
-HANDLE(CUU) // cursor up
+static void jbxvt_handle_JBXVT_TOKEN_CUU(xcb_connection_t * xc,
+    struct JBXVTToken * token) // cursor up
 {
     mv(xc, 0, -get_arg(token));
 }
-HANDLE(DL) // delete line
+static void jbxvt_handle_JBXVT_TOKEN_DL(xcb_connection_t * xc,
+    struct JBXVTToken * token) // delete line
 {
     jbxvt_index_from(xc, get_arg(token), jbxvt_get_y());
 }
-HANDLE(DSR) // device status report
+static void jbxvt_handle_JBXVT_TOKEN_DSR(xcb_connection_t * xc,
+    struct JBXVTToken * token) // device status report
 {
     NOPARM_XC();
     jbxvt_handle_dsr(token->arg[0]);
 }
-HANDLE(DWL) // double width line
+static void jbxvt_handle_JBXVT_TOKEN_DWL(xcb_connection_t * xc,
+    struct JBXVTToken * token) // double width line
 {
     NOPARM_TOKEN();
     jbxvt_set_double_width_line(xc, true);
 }
-HANDLE(ED) // erase display
+static void jbxvt_handle_JBXVT_TOKEN_ED(xcb_connection_t * xc,
+    struct JBXVTToken * token) // erase display
 {
     jbxvt_erase_screen(xc, token->arg[0]); // don't use get_arg()
 }
-HANDLE(EL) // erase line
+static void jbxvt_handle_JBXVT_TOKEN_EL(xcb_connection_t * xc,
+    struct JBXVTToken * token) // erase line
 {
     jbxvt_erase_line(xc, token->arg[0]); // don't use get_arg()
 }
-HANDLE(DA) // DECID
+static void jbxvt_handle_JBXVT_TOKEN_DA(xcb_connection_t * xc,
+    struct JBXVTToken * token) // DECID
 {
 #ifdef JBXVT_NO_DPRINTF
     uint8_t size;
@@ -177,7 +212,8 @@ HANDLE(DA) // DECID
 #endif // JBXVT_NO_DPRINTF
 }
 ALIAS(ID, DA); // DECID
-HANDLE(DCH) // delete character
+static void jbxvt_handle_JBXVT_TOKEN_DCH(xcb_connection_t * xc,
+    struct JBXVTToken * token) // delete character
 {
     jbxvt_edit_characters(xc, get_arg(token), true);
 }
@@ -188,80 +224,98 @@ static void gm52(const bool set)
     struct JBXVTPrivateModes * restrict m = jbxvt_get_modes();
     m->charsel = (m->gm52 = set) ? 1 : 0;
 }
-HANDLE(ENTGM52) // enter vt52 graphics mode
+static void jbxvt_handle_JBXVT_TOKEN_ENTGM52(xcb_connection_t * xc,
+    struct JBXVTToken * token) // enter vt52 graphics mode
 {
     NOPARM();
     gm52(true);
 }
-HANDLE(EXTGM52) // exit vt52 graphics mode
+static void jbxvt_handle_JBXVT_TOKEN_EXTGM52(xcb_connection_t * xc,
+    struct JBXVTToken * token) // exit vt52 graphics mode
 {
     NOPARM();
     gm52(false);
 }
-HANDLE(HOME)
+static void jbxvt_handle_JBXVT_TOKEN_HOME(xcb_connection_t * xc,
+    struct JBXVTToken * token)
 {
     (void)token;
     jbxvt_set_scroll(xc, 0);
     jbxvt_move(xc, 0, 0, 0);
 }
-HANDLE(HPA) // horizontal position absolute
+static void jbxvt_handle_JBXVT_TOKEN_HPA(xcb_connection_t * xc,
+    struct JBXVTToken * token) // horizontal position absolute
 {
     jbxvt_move(xc, get_0(token->arg[0]), 0, JBXVT_ROW_RELATIVE);
 }
-HANDLE(HPR) // horizontal position relative
+static void jbxvt_handle_JBXVT_TOKEN_HPR(xcb_connection_t * xc,
+    struct JBXVTToken * token) // horizontal position relative
 {
     jbxvt_move(xc, get_0(token->arg[0]), 0, JBXVT_COLUMN_RELATIVE
         | JBXVT_ROW_RELATIVE);
 }
-HANDLE(HTS) // horizontal tab stop
+static void jbxvt_handle_JBXVT_TOKEN_HTS(xcb_connection_t * xc,
+    struct JBXVTToken * token) // horizontal tab stop
 {
     NOPARM();
     jbxvt_set_tab(jbxvt_get_x(), true);
 }
-HANDLE(ICH) // insert blank characters
+static void jbxvt_handle_JBXVT_TOKEN_ICH(xcb_connection_t * xc,
+    struct JBXVTToken * token) // insert blank characters
 {
     jbxvt_edit_characters(xc, get_arg(token), false);
 }
-HANDLE(IL) // insert line
+static void jbxvt_handle_JBXVT_TOKEN_IL(xcb_connection_t * xc,
+    struct JBXVTToken * token) // insert line
 {
     jbxvt_index_from(xc, -get_arg(token), jbxvt_get_y());
 }
-HANDLE(IND) // index (scroll)
+// index
+static void jbxvt_handle_JBXVT_TOKEN_IND(xcb_connection_t * xc,
+    struct JBXVTToken * token)
 {
     jbxvt_index_from(xc, get_arg(token), jbxvt_get_margin()->t);
 }
-HANDLE(NEL) // next line (move to the first position on the next line)
+// next line (move to the first position on the next line
+static void jbxvt_handle_JBXVT_TOKEN_NEL(xcb_connection_t * xc,
+    struct JBXVTToken * token)
 {
     NOPARM_TOKEN();
     jbxvt_move(xc, 0, jbxvt_get_y() + 1, 0);
 }
-HANDLE(PAM) // application mode keys
+static void jbxvt_handle_JBXVT_TOKEN_PAM(xcb_connection_t * xc,
+    struct JBXVTToken * token) // application mode keys
 {
     NOPARM();
     jbxvt_set_keys(true, false);
 }
-HANDLE(PM) // privacy message
+static void jbxvt_handle_JBXVT_TOKEN_PM(xcb_connection_t * xc,
+    struct JBXVTToken * token) // privacy message
 {
     NOPARM();
     jbxvt_get_current_screen()->decpm = true;
 }
-HANDLE(PNM) // numeric key mode
+static void jbxvt_handle_JBXVT_TOKEN_PNM(xcb_connection_t * xc,
+    struct JBXVTToken * token) // numeric key mode
 {
     NOPARM();
     jbxvt_set_keys(false, false);
 }
-HANDLE(RC)
+static void jbxvt_handle_JBXVT_TOKEN_RC(xcb_connection_t * xc,
+    struct JBXVTToken * token)
 {
     NOPARM_TOKEN();
     jbxvt_restore_cursor(xc);
 }
 EXTERN_ALIAS(RESET, jbxvt_dec_reset);
 EXTERN_ALIAS(SET, jbxvt_dec_reset);
-HANDLE(RI) // reverse index
+static void jbxvt_handle_JBXVT_TOKEN_RI(xcb_connection_t * xc,
+    struct JBXVTToken * token) // reverse index
 {
     jbxvt_index_from(xc, -get_arg(token), jbxvt_get_margin()->top);
 }
-HANDLE(RIS) // reset to initial state
+static void jbxvt_handle_JBXVT_TOKEN_RIS(xcb_connection_t * xc,
+    struct JBXVTToken * token) // reset to initial state
 {
     NOPARM_TOKEN();
     jbxvt_get_modes()->dectcem = true;
@@ -271,31 +325,37 @@ static void set_s8c1t(const bool val)
 {
     jbxvt_get_modes()->s8c1t = val;
 }
-HANDLE(S7C1T) // 7-bit control sequences
+static void jbxvt_handle_JBXVT_TOKEN_S7C1T(xcb_connection_t * xc,
+    struct JBXVTToken * token) // 7-bit control sequences
 {
     NOPARM();
     set_s8c1t(false);
 }
-HANDLE(S8C1T) // 8-bit control sequences
+static void jbxvt_handle_JBXVT_TOKEN_S8C1T(xcb_connection_t * xc,
+    struct JBXVTToken * token) // 8-bit control sequences
 {
     NOPARM();
     set_s8c1t(true);
 }
-HANDLE(SAVEPM) // save private modes
+static void jbxvt_handle_JBXVT_TOKEN_SAVEPM(xcb_connection_t * xc,
+    struct JBXVTToken * token) // save private modes
 {
     NOPARM();
     jbxvt_save_modes();
 }
-HANDLE(SBGOTO) // Scroll to where token arg[0] is at top of screen.
+static void jbxvt_handle_JBXVT_TOKEN_SBGOTO(xcb_connection_t * xc,
+    struct JBXVTToken * token) // Scroll to where token arg[0] is at top of screen.
 {
     jbxvt_scroll_to(xc, token->arg[0]);
 }
-HANDLE(SBSWITCH)
+static void jbxvt_handle_JBXVT_TOKEN_SBSWITCH(xcb_connection_t * xc,
+    struct JBXVTToken * token)
 {
     NOPARM_TOKEN();
     jbxvt_toggle_scrollbar(xc);
 }
-HANDLE(SC)
+static void jbxvt_handle_JBXVT_TOKEN_SC(xcb_connection_t * xc,
+    struct JBXVTToken * token)
 {
     NOPARM();
     jbxvt_save_cursor();
@@ -306,27 +366,32 @@ static void handle_scroll(xcb_connection_t * xc, const int16_t arg)
     // scroll arg lines within margin m:
     scroll(xc, m.top, m.bot, arg);
 }
-HANDLE(SD) // scroll down
+static void jbxvt_handle_JBXVT_TOKEN_SD(xcb_connection_t * xc,
+    struct JBXVTToken * token) // scroll down
 {
     handle_scroll(xc, -token->arg[0]);
 }
 EXTERN_ALIAS(SGR, jbxvt_handle_sgr);
-HANDLE(SS2)
+static void jbxvt_handle_JBXVT_TOKEN_SS2(xcb_connection_t * xc,
+    struct JBXVTToken * token)
 {
     NOPARM();
     jbxvt_get_modes()->ss2 = true;
 }
-HANDLE(SS3)
+static void jbxvt_handle_JBXVT_TOKEN_SS3(xcb_connection_t * xc,
+    struct JBXVTToken * token)
 {
     NOPARM();
     jbxvt_get_modes()->ss3 = true;
 }
-HANDLE(ST) // string terminator
+static void jbxvt_handle_JBXVT_TOKEN_ST(xcb_connection_t * xc,
+    struct JBXVTToken * token) // string terminator
 {
     NOPARM();
     jbxvt_get_current_screen()->decpm = false;
 }
-HANDLE(STBM) // set top and bottom margins
+static void jbxvt_handle_JBXVT_TOKEN_STBM(xcb_connection_t * xc,
+    struct JBXVTToken * token) // set top and bottom margins
 {
     NOPARM_XC();
     int16_t * restrict t = token->arg;
@@ -341,15 +406,18 @@ HANDLE(STBM) // set top and bottom margins
         m->bot = (rst ? jbxvt_get_char_size().h : get_n(t[1])) - 1;
     }
 }
-HANDLE(STRING)
+static void jbxvt_handle_JBXVT_TOKEN_STRING(xcb_connection_t * xc,
+    struct JBXVTToken * token)
 {
     jbxvt_string(xc, token->string, token->length, token->nlcount);
 }
-HANDLE(SU) // scroll up
+static void jbxvt_handle_JBXVT_TOKEN_SU(xcb_connection_t * xc,
+    struct JBXVTToken * token) // scroll up
 {
     handle_scroll(xc, token->arg[0]);
 }
-HANDLE(SWL) // single width line
+static void jbxvt_handle_JBXVT_TOKEN_SWL(xcb_connection_t * xc,
+    struct JBXVTToken * token) // single width line
 {
     NOPARM_TOKEN();
     jbxvt_set_double_width_line(xc, false);
@@ -360,11 +428,13 @@ static void vp(xcb_connection_t * xc, const uint16_t arg, const bool relative)
     jbxvt_move(xc, 0, get_0((int16_t)arg), JBXVT_COLUMN_RELATIVE |
         (relative ? JBXVT_ROW_RELATIVE : 0));
 }
-HANDLE(VPA) // vertical position absolute
+static void jbxvt_handle_JBXVT_TOKEN_VPA(xcb_connection_t * xc,
+    struct JBXVTToken * token) // vertical position absolute
 {
     vp(xc, (uint16_t)token->arg[0], false);
 }
-HANDLE(VPR) // vertical position relative
+static void jbxvt_handle_JBXVT_TOKEN_VPR(xcb_connection_t * xc,
+    struct JBXVTToken * token) // vertical position relative
 {
     vp(xc, (uint16_t)token->arg[0], true);
 }
