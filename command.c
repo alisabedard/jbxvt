@@ -52,21 +52,18 @@ fd_t jbxvt_get_fd(void)
 #ifdef POSIX_UTMPX
 static void write_utmpx(const pid_t comm_pid, char * restrict tty_name)
 {
+    struct timeval tv;
     setutxent();
     struct utmpx utent = {.ut_type = USER_PROCESS, .ut_pid = comm_pid};
     // + 5 to remove "/dev/"
-#define UCP(fld, str) strncpy(utent.fld, str, sizeof(utent.fld))
-    UCP(ut_line, tty_name + 5);
-    UCP(ut_user, getenv("USER"));
-    UCP(ut_host, getenv("DISPLAY"));
-#undef UCP
-    struct timeval tv;
+    strncpy(utent.ut_line, tty_name + 5, sizeof(utent.ut_line));
+    strncpy(utent.ut_user, getenv("USER"), sizeof(utent.ut_user));
+    strncpy(utent.ut_host, getenv("DISPLAY"), sizeof(utent.ut_host));
     // Does not return an error:
     gettimeofday(&tv, NULL);
     utent.ut_tv.tv_sec = tv.tv_sec;
     utent.ut_tv.tv_usec = tv.tv_usec;
-    jb_check(pututxline(&utent), "Could not write utmp entry "
-        "(are you a member of the utmp group?)");
+    pututxline(&utent);
     endutxent();
 }
 #endif//POSIX_UTMPX
