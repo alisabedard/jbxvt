@@ -9,24 +9,24 @@ GDB=false
 rm -f "$CFG"; touch "$CFG"
 # parse command line:
 while getopts 'dghJu' opt
-do
+	do
 	case $opt in
-	d) DEBUG=true ;;
-        g) GDB=true ;;
-	J) OPT_STATIC_LIBJB=true ;;
-	u) UTEMPTER=false ;;	
-	h|?)
-		for line in '-d enable debugging' \
-                        '-g gdb' \
-			'-h help' \
-			'-J use shared libjb' \
-			'-u disable libutempter'; do
-			echo $line
-		done
-		exit 1
-		;;
+		d) DEBUG=true ;;
+		g) GDB=true ;;
+		J) OPT_STATIC_LIBJB=true ;;
+		u) UTEMPTER=false ;;
+		h|?)
+			for line in '-d enable debugging' \
+					'-g gdb' \
+					'-h help' \
+					'-J use shared libjb' \
+					'-u disable libutempter'; do
+				echo $line
+			done
+			exit 1
+			;;
 	esac
-done 
+done
 ARCH=`uname | tr 'a-z' 'A-Z'`
 echo "Configuring for $ARCH"
 if $DEBUG; then
@@ -45,11 +45,11 @@ case $ARCH in
 		ldflags+=-L/usr/X11R6/lib
 		ldflags+=-L/usr/local/lib
 		CFLAGS+=-D_BSD_SOURCE
-		CFLAGS+=-I/usr/X11R6/include 
-		CFLAGS+=-I/usr/local/include 
+		CFLAGS+=-I/usr/X11R6/include
+		CFLAGS+=-I/usr/local/include
 		EOF
 		;;
-	LINUX) 
+	LINUX)
 		cat >> $CFG <<- EOF
 		CFLAGS+=-D_GNU_SOURCE
 		EOF
@@ -61,7 +61,7 @@ case $ARCH in
 		CFLAGS+=-D_NETBSD_SOURCE -D_BSD_SOURCE
 		CFLAGS+=-Wno-missing-field-initializers
 		CFLAGS+=-I/usr/pkg/include
-		CFLAGS+=-I/usr/X11R7/include 
+		CFLAGS+=-I/usr/X11R7/include
 		CFLAGS+=-I/usr/X11R6/include
 		ldflags+=-L/usr/pkg/lib -Wl,-R/usr/pkg/lib
 		ldflags+=-L/usr/X11R7/lib -Wl,-R/usr/X11R7/lib
@@ -159,6 +159,6 @@ else
 	echo "ldflags+=-Llibjb libjb/libjb.so.1.0.0" >> ${CFG}
 fi
 if $GDB; then
-    echo 'Enabling GDB options...'
-    echo 'CFLAGS+=-ggdb -Wall -W -Werror' >> ${CFG}
+	echo 'Enabling GDB options...'
+	echo 'CFLAGS+=-ggdb -Wall -W -Werror' >> ${CFG}
 fi
