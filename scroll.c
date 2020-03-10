@@ -51,8 +51,8 @@ static uint8_t get_y(int16_t * restrict y, const int16_t row1,
 {
     const uint8_t fh = jbxvt_get_font_size().height;
     const int16_t a = row1 * fh;
-    *(up ? y + 1 : y) = a;
-    *(up ? y : y + 1) = a + count * fh;
+    y[up ? 1 : 0] = a;
+    y[up ? 0 : 1] = count * fh + a;
     return fh;
 }
 static void copy_visible_area(xcb_connection_t * xc, const int r1,
