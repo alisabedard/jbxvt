@@ -1,3 +1,0 @@
-terminfo:
-	tic -xs jbxvt.terminfo
-	chmod 0644 /usr/share/terminfo/x/xterm-jbxvt # Make it readable
