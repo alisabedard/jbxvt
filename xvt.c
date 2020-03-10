@@ -33,6 +33,7 @@
 #include "tab.h"
 #include "tk_char.h"
 #include "window.h"
+#include <unistd.h>
 // Return a default of 1 if arg is 0:
 __attribute__((const))
 static int16_t get_n(const int16_t arg)
@@ -159,9 +160,21 @@ HANDLE(EL) // erase line
 }
 HANDLE(DA) // DECID
 {
+#ifdef JBXVT_NO_DPRINTF
+    uint8_t size;
+    fd_t const fd  = jbxvt_get_fd();
     NOPARM();
+    size = 0;
+    char const *csi = csi = jbxvt_get_csi();
+    while(csi[++size])
+        ;
+    write(fd, csi, size);
+    write(fd, "?6c", 3);
+#else // ! JBXVT_NO_DPRINTF
     // print terminal id
+    NOPARM();
     dprintf(jbxvt_get_fd(), "%s?6c", jbxvt_get_csi()); // VT102
+#endif // JBXVT_NO_DPRINTF
 }
 ALIAS(ID, DA); // DECID
 HANDLE(DCH) // delete character
