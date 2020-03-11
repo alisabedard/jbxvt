@@ -1,5 +1,5 @@
 // Copyright 2017, Jeffrey E. Bedard
-#undef DEBUG
+//#undef DEBUG
 #include "move.h"
 #include <stdbool.h>
 #include "JBXVTPrivateModes.h"
@@ -22,13 +22,11 @@ static inline int16_t dim(const int16_t cursor,
     return relative ? cursor + delta : JB_MAX(delta, 0);
 }
 #ifdef DEBUG
-static void debug_move(int16_t x, int16_t y, uint8_t relative)
-{
 #define BSTR(v, f) (v & f ? 'T' : 'F')
 #define RSTR(r) BSTR(relative, JBXVT_##r##_RELATIVE)
-    LOG("jbxvt_move(x: %d, y: %d, row: %c, col: %c)", x,
-        y, RSTR(ROW), RSTR(COLUMN));
-}
+#define debug_move(x, y, relative) LOG( \
+    "jbxvt_move(x: %d, y: %d, row: %c, col: %c)", \
+    x, y, RSTR(ROW), RSTR(COLUMN))
 #else//!DEBUG
 #define debug_move(x, y, r)
 #endif//DEBUG
@@ -44,8 +42,8 @@ void jbxvt_move(xcb_connection_t * xc,
     { // c scope
         struct JBDim c = s->cursor;
         { // cr, rr scope
-            const bool cr = relative & JBXVT_COLUMN_RELATIVE,
-                  rr = relative & JBXVT_ROW_RELATIVE;
+            const bool cr = (relative & JBXVT_COLUMN_RELATIVE) > 0,
+                  rr = (relative & JBXVT_ROW_RELATIVE) > 0;
             s->cursor = c = (struct JBDim) {
                 .x = dim(c.x, x, cr),
                 .y = dim(c.y, y, rr)};
