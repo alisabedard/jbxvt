@@ -50,19 +50,26 @@ fd_t jbxvt_get_fd(void)
 }
 /*   Attempt to create and write an entry to the utmp file */
 #ifdef POSIX_UTMPX
-static void write_utmpx(const pid_t comm_pid, char * restrict tty_name)
+static void populate_utent(struct utmpx * restrict utent,
+    char * restrict tty_name, pid_t const pid)
 {
     struct timeval tv;
-    setutxent();
-    struct utmpx utent = {.ut_type = USER_PROCESS, .ut_pid = comm_pid};
+    utent->ut_type = USER_PROCESS;
+    utent->ut_pid = pid;
     /*  + 5 to remove "/dev/" */
-    strncpy(utent.ut_line, tty_name + 5, sizeof(utent.ut_line));
-    strncpy(utent.ut_user, getenv("USER"), sizeof(utent.ut_user));
-    strncpy(utent.ut_host, getenv("DISPLAY"), sizeof(utent.ut_host));
+    strncpy(utent->ut_line, tty_name + 5, sizeof(utent->ut_line));
+    strncpy(utent->ut_user, getenv("USER"), sizeof(utent->ut_user));
+    strncpy(utent->ut_host, getenv("DISPLAY"), sizeof(utent->ut_host));
     /*  Does not return an error: */
     gettimeofday(&tv, NULL);
-    utent.ut_tv.tv_sec = tv.tv_sec;
-    utent.ut_tv.tv_usec = tv.tv_usec;
+    utent->ut_tv.tv_sec = tv.tv_sec;
+    utent->ut_tv.tv_usec = tv.tv_usec;
+}
+static void write_utmpx(const pid_t comm_pid, char * restrict tty_name)
+{
+    struct utmpx utent;
+    setutxent();
+    populate_utent(&utent, tty_name, comm_pid);
     pututxline(&utent);
     endutxent();
 }
