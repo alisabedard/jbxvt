@@ -12,8 +12,8 @@
 /*  Compare the two selections and return negtive,
     0 or positive depending on whether se2 is after,
     equal to or before se1.  */
-int8_t jbxvt_selcmp(struct JBDim * restrict se1,
-    struct JBDim * restrict se2)
+int8_t jbxvt_selcmp(struct JBDim * se1,
+    struct JBDim * se2)
 {
     if (!jbxvt_is_selected())
         return 0;
@@ -29,8 +29,8 @@ void jbxvt_rc_to_selend(const int16_t row, const int16_t col,
     se->col = col;
 }
 //  Convert the selection into a row and column.
-void jbxvt_selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
-    struct JBDim * restrict se)
+void jbxvt_selend_to_rc(int16_t * rowp, int16_t * colp,
+    struct JBDim * se)
 {
     if (jbxvt_is_selected()) {
         *colp = se->col;
@@ -38,7 +38,7 @@ void jbxvt_selend_to_rc(int16_t * restrict rowp, int16_t * restrict colp,
     }
 }
 // Convert the selection end point into a dimension structure
-struct JBDim jbxvt_get_selend_position(struct JBDim * restrict se)
+struct JBDim jbxvt_get_selend_position(struct JBDim * se)
 {
     return (struct JBDim){.row = se->row + jbxvt_get_scroll(), .col =
         se->col};
@@ -47,12 +47,12 @@ static inline uint8_t * get_text_at(struct JBDim * endpoint)
 {
     return jbxvt_get_line(endpoint->index)->text;
 }
-static int16_t get_start_of_word(uint8_t * restrict s, int16_t i)
+static int16_t get_start_of_word(uint8_t * s, int16_t i)
 {
     return i && s[i] > ' ' ? get_start_of_word(s, i - 1) : i;
 }
 static int find_word_end(const int i, const int len,
-    uint8_t * restrict text)
+    uint8_t * text)
 {
     return (i < len && text[i]  > ' ')
         ? find_word_end(i + 1, len, text) : i;
@@ -87,7 +87,7 @@ struct JBDim * jbxvt_order_selection_ends(struct JBDim * e)
 /*  Adjust the selection to a word or line boundary.
     If the include endpoint is non NULL then the selection
     is forced to be large enough to include it.  */
-void jbxvt_adjust_selection(struct JBDim * restrict include)
+void jbxvt_adjust_selection(struct JBDim * include)
 {
     const enum JBXVTSelectionUnit u = jbxvt_get_selection_unit();
     if (u == JBXVT_SEL_UNIT_CHAR)

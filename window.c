@@ -25,7 +25,7 @@ void jbxvt_map_window(xcb_connection_t * xc)
     jbxvt_resize_window(xc);
     jbxvt_reset(xc); // update size
 }
-static struct JBDim get_geometry_reply(xcb_connection_t * restrict xc,
+static struct JBDim get_geometry_reply(xcb_connection_t * xc,
     const xcb_get_geometry_cookie_t c)
 {
     xcb_get_geometry_reply_t * r = xcb_get_geometry_reply(xc, c, NULL);
@@ -34,7 +34,7 @@ static struct JBDim get_geometry_reply(xcb_connection_t * restrict xc,
     free(r);
     return geo;
 }
-static struct JBDim get_geometry(xcb_connection_t * restrict xc)
+static struct JBDim get_geometry(xcb_connection_t * xc)
 {
     struct JBDim geo = get_geometry_reply(xc,
         xcb_get_geometry(xc, jbxvt_get_main_window(xc)));
@@ -128,7 +128,7 @@ static void create_vt_window(xcb_connection_t * xc, const struct JBDim sz,
 }
 // Change window or icon name:
 static void chname(xcb_connection_t * xc,
-    uint8_t * restrict str, const bool window, const bool icon)
+    uint8_t * str, const bool window, const bool icon)
 {
     const xcb_window_t w = jbxvt_get_main_window(xc);
     char * cs = (char *)str;
@@ -139,7 +139,7 @@ static void chname(xcb_connection_t * xc,
 }
 // Create main window and the widget windows.
 void jbxvt_create_window(xcb_connection_t * xc, const xcb_window_t root,
-    struct JBXVTOptions * restrict opt, uint8_t * restrict name)
+    struct JBXVTOptions * opt, uint8_t * name)
 {
     struct JBDim sz = jbxvt_chars_to_pixels(opt->size);
     create_main_window(xc, root, opt->position, sz);

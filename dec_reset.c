@@ -29,7 +29,7 @@ static void dectcem(xcb_connection_t * xc, const bool is_set)
     jbxvt_change_screen(xc, is_set);
 }
 void jbxvt_dec_reset(xcb_connection_t * xc,
-    struct JBXVTToken * restrict token)
+    struct JBXVTToken * token)
 {
     LOG("handle_reset(%d)", token->arg[0]);
     const bool is_set = token->type == JBXVT_TOKEN_SET;

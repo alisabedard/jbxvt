@@ -26,7 +26,7 @@ static inline bool end_point_on_screen(const struct JBDim pos,
     return pos.col < char_sz.col && pos.row < char_sz.row;
 }
     __attribute__((pure))
-static bool on_screen(const struct JBDim * restrict e)
+static bool on_screen(const struct JBDim * e)
 {
     const struct JBDim c = jbxvt_get_char_size();
     return end_point_on_screen(e[0], c)
@@ -41,14 +41,14 @@ struct CopyData {
                             later. */
 };
 static size_t copy_line(const int i, const int j,
-        struct CopyData * restrict d)
+        struct CopyData * d)
 {
     size_t r;
     if (i <= j) {
         /* Use full screen width if not first or last lines of
          * selection, otherwise use the col field in the respective
          * end point.  */
-        struct JBDim * restrict e = d->endpoints;
+        struct JBDim * e = d->endpoints;
         const int16_t start = i == e[0].index ? e[0].col : 0,
               end = i == j ? e[1].col : d->char_width - 1;
         /* We are positive so long as window exists and has a

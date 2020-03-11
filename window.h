@@ -7,7 +7,7 @@ struct JBXVTOptions;
 struct JBXVTToken;
 // Create main window and the widget windows.
 void jbxvt_create_window(xcb_connection_t * xc, const xcb_window_t root,
-    struct JBXVTOptions * restrict opt, uint8_t * restrict name);
+    struct JBXVTOptions * opt, uint8_t * name);
 xcb_window_t jbxvt_get_main_window(xcb_connection_t * xc);
 xcb_window_t jbxvt_get_vt_window(xcb_connection_t * xc);
 // Handle the TXTPAR token to change the title bar or icon name.

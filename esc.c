@@ -15,15 +15,15 @@ struct NumericArgument {
     int16_t value, character;
 };
 struct NumericArgument accumulate(const struct NumericArgument a,
-    xcb_connection_t * restrict xc)
+    xcb_connection_t * xc)
 {
     const int16_t c = a.character;
     return (c >= '0' && c <= '9') ? accumulate( (struct
         NumericArgument){.value = a.value * 10 + c - '0',
         .character = jbxvt_pop_char(xc, 0)}, xc) : a;
 }
-static int16_t read_numeric_argument(xcb_connection_t * restrict xc,
-    struct JBXVTToken * restrict tk, uint16_t * restrict i,
+static int16_t read_numeric_argument(xcb_connection_t * xc,
+    struct JBXVTToken * tk, uint16_t * i,
     int16_t c)
 {
     const struct NumericArgument a = accumulate(
@@ -33,7 +33,7 @@ static int16_t read_numeric_argument(xcb_connection_t * restrict xc,
     return a.character;
 }
 void jbxvt_csi(xcb_connection_t * xc,
-    int16_t c, struct JBXVTToken * restrict tk)
+    int16_t c, struct JBXVTToken * tk)
 {
     c = jbxvt_pop_char(xc, 0);
     if (c >= '<' && c <= '?') {
@@ -61,7 +61,7 @@ static int get_arg(xcb_connection_t * xc, int n)
         ? get_arg(xc, n * 10 + c - '0') : n;
 }
 void jbxvt_end_cs(xcb_connection_t * xc,
-    int16_t c, struct JBXVTToken * restrict tk)
+    int16_t c, struct JBXVTToken * tk)
 {
     tk->arg[0] = get_arg(xc, 0);
     tk->nargs = 1;
@@ -77,7 +77,7 @@ void jbxvt_end_cs(xcb_connection_t * xc,
     tk->type = JBXVT_TOKEN_TXTPAR;
 }
 void jbxvt_esc(xcb_connection_t * xc,
-    int16_t c, struct JBXVTToken * restrict tk)
+    int16_t c, struct JBXVTToken * tk)
 {
     c = jbxvt_pop_char(xc, 0);
     switch(c) {

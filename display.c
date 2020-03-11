@@ -21,8 +21,8 @@ static void setup_gcs(xcb_connection_t * xc, xcb_window_t w)
     xcb_create_gc(xc, jbxvt_get_cursor_gc(xc), w, CUR_VM,
         (uint32_t[]){XCB_GX_INVERT, f ^ b});
 }
-xcb_connection_t * jbxvt_init_display(char * restrict name,
-    struct JBXVTOptions * restrict opt)
+xcb_connection_t * jbxvt_init_display(char * name,
+    struct JBXVTOptions * opt)
 {
     xcb_connection_t * xc;
     { // screen scope

@@ -38,7 +38,7 @@ void jbxvt_move(xcb_connection_t * xc,
     debug_move(x, y, relative);
     jbxvt_set_scroll(xc, 0);
     jbxvt_draw_cursor(xc); // clear
-    struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
+    struct JBXVTScreen * s = jbxvt_get_current_screen();
     { // c scope
         struct JBDim c = s->cursor;
         { // cr, rr scope

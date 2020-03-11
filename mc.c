@@ -6,7 +6,7 @@
 #include "command.h"
 #include "cursor.h"
 #include "libjb/log.h"
-static void handle_token_mc_private(int16_t * restrict t)
+static void handle_token_mc_private(int16_t * t)
 {
     switch (t[0]) {
     case 4:
@@ -26,7 +26,7 @@ static void handle_token_mc_private(int16_t * restrict t)
         LOG("print screen");
     }
 }
-static void handle_token_mc_public(int16_t * restrict t)
+static void handle_token_mc_public(int16_t * t)
 {
     switch (t[0]) {
     case 1:

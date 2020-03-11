@@ -63,7 +63,7 @@ static void track_mouse_x10(uint8_t b, struct JBDim p)
 // return true if the parent should return
 static bool handle_release(uint8_t * b, const bool wheel)
 {
-    struct JBXVTPrivateModes * restrict m = jbxvt_get_modes();
+    struct JBXVTPrivateModes * m = jbxvt_get_modes();
     if (m->mouse_x10 || wheel)
         // wheel and x10 release untracked
         return true;
@@ -97,12 +97,12 @@ void jbxvt_track_mouse(uint8_t b, uint32_t state, struct JBDim p,
 }
 bool jbxvt_get_mouse_motion_tracked(void)
 {
-    struct JBXVTPrivateModes * restrict m = jbxvt_get_modes();
+    struct JBXVTPrivateModes * m = jbxvt_get_modes();
     return m->mouse_btn_evt || m->mouse_any_evt;
 }
 bool jbxvt_get_mouse_tracked(void)
 {
-    struct JBXVTPrivateModes * restrict m = jbxvt_get_modes();
+    struct JBXVTPrivateModes * m = jbxvt_get_modes();
     return m->mouse_x10 || m->mouse_vt200 || m->mouse_vt200hl
         || m->mouse_ext || m->mouse_sgr || m->mouse_urxvt
         || jbxvt_get_mouse_motion_tracked();

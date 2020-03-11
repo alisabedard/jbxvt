@@ -39,14 +39,14 @@ static void clear_selection_at(const int16_t j)
         jbxvt_clear_selection();
 }
 static void move_line(const int16_t source, const int16_t count,
-    struct JBXVTLine * restrict line_array)
+    struct JBXVTLine * line_array)
 {
     const int16_t dest = source + count;
     memcpy(line_array + dest , line_array + source,
         sizeof(struct JBXVTLine));
     clear_selection_at(source);
 }
-static uint8_t get_y(int16_t * restrict y, const int16_t row1,
+static uint8_t get_y(int16_t * y, const int16_t row1,
     const int16_t count, const bool up)
 {
     const uint8_t fh = jbxvt_get_font_size().height;
@@ -147,7 +147,7 @@ static void sc_common(struct ScrollData * d)
 }
 static void sc_dn(struct ScrollData * d)
 {
-    struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
+    struct JBXVTScreen * s = jbxvt_get_current_screen();
     for(int16_t j = copy_lines(0, d->end, -1, d->count);
         j >= d->begin; --j)
         move_line(j, d->count, s->line);

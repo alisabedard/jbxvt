@@ -15,7 +15,7 @@
 #include "scroll.h"
 #include "size.h"
 static uint8_t screen_index; // current screen
-static void init_screen(struct JBXVTScreen * restrict scr)
+static void init_screen(struct JBXVTScreen * scr)
 {
     scr->margin.bottom = jbxvt_get_char_size().height - 1;
     scr->wrap_next = false;
@@ -57,14 +57,14 @@ struct JBDim * jbxvt_get_margin(void)
 static void set_area_to_e(const int y, const struct JBDim c)
 {
     if (y < c.h) {
-        struct JBXVTScreen * restrict current
+        struct JBXVTScreen * current
             = jbxvt_get_current_screen();
         memset(current->line[y].text, 'E', c.w);
         memset(current->line[y].rend, 0, (size_t)(c.w << 2));
         set_area_to_e(y + 1, c);
     }
 }
-static inline void home(xcb_connection_t * restrict xc)
+static inline void home(xcb_connection_t * xc)
 {
     jbxvt_move(xc, 0, 0, 0);
 }

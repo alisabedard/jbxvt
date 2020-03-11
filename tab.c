@@ -38,10 +38,10 @@ void jbxvt_tab(xcb_connection_t * xc, const short count)
     if (count < 1)
         return;
     jbxvt_set_scroll(xc, 0);
-    struct JBXVTScreen * restrict scr = jbxvt_get_current_screen();
+    struct JBXVTScreen * scr = jbxvt_get_current_screen();
     struct JBDim c = scr->cursor;
     { // text scope
-        uint8_t * restrict text = scr->line[c.y].text;
+        uint8_t * text = scr->line[c.y].text;
         text[c.x] = ' ';
         { // cw scope
             const uint16_t cw = jbxvt_get_char_size().w;

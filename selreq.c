@@ -17,7 +17,7 @@ static size_t paste(const uint8_t * data, const size_t length)
             "Cannot paste");
     return length;
 }
-static bool reply_is_invalid(xcb_get_property_reply_t * restrict r)
+static bool reply_is_invalid(xcb_get_property_reply_t * r)
 {
     if (!r) // no reply received, invalid
         return true;
@@ -34,7 +34,7 @@ static xcb_get_property_cookie_t get_prop(xcb_connection_t * xc,
     return xcb_get_property(xc, false, jbxvt_get_main_window(xc),
         clipboard, XCB_ATOM_ANY, already_read / 4, JBXVT_PROP_SIZE);
 }
-static void request_conversion(xcb_connection_t * restrict xc,
+static void request_conversion(xcb_connection_t * xc,
     const xcb_window_t win, const xcb_atom_t cb, const xcb_timestamp_t t)
 {
     xcb_convert_selection(xc, win, cb,

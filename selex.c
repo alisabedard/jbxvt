@@ -15,7 +15,7 @@ static void handle_drag(const struct JBDim rc)
     jbxvt_rc_to_selend(rc.row, rc.col, &e[1]);
     jbxvt_adjust_selection(&e[1]);
 }
-static void save_current_end_points(struct JBDim * restrict s,
+static void save_current_end_points(struct JBDim * s,
     const struct JBDim point)
 {
     struct JBDim * e = jbxvt_get_selection_end_points();

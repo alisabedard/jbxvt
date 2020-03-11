@@ -33,7 +33,7 @@ static bool visible(const uint8_t c)
 {
     return c > ' ' && c < '~';
 }
-static void serialize(const struct JBXVTKeyMaps * restrict k)
+static void serialize(const struct JBXVTKeyMaps * k)
 {
     if (k->km_keysym) {
         const uint8_t n = k->km_normal[1], a = k->km_alt[1];
@@ -88,8 +88,8 @@ static char * get_format(const enum JBXVTKeySymType type)
         return "%c";
     }
 }
-static uint8_t * get_buffer(uint8_t * restrict buf,
-    struct JBXVTKeyMaps * restrict keymaptable,
+static uint8_t * get_buffer(uint8_t * buf,
+    struct JBXVTKeyMaps * keymaptable,
     const bool use_alternate)
 {
     uint8_t * ks = use_alternate
@@ -109,7 +109,7 @@ static uint8_t * get_keycode_value(struct JBXVTKeyMaps * restrict
                     buf, use_alternate)
         : NULL;
 }
-static uint8_t * get_s(const xcb_keysym_t keysym, uint8_t * restrict kbuf)
+static uint8_t * get_s(const xcb_keysym_t keysym, uint8_t * kbuf)
 {
     if (xcb_is_function_key(keysym) || xcb_is_misc_function_key(keysym)
         || keysym == K_PD || keysym == K_PU)
@@ -138,7 +138,7 @@ static uint8_t shift(const uint8_t c)
             return shift_map[i][1];
     return c;
 }
-static void apply_state(const uint16_t state, uint8_t * restrict kbuf)
+static void apply_state(const uint16_t state, uint8_t * kbuf)
 {
     switch (state) {
     case XCB_MOD_MASK_SHIFT:
@@ -156,8 +156,8 @@ static void apply_state(const uint16_t state, uint8_t * restrict kbuf)
         break;
     }
 }
-static xcb_keysym_t get_keysym(xcb_connection_t * restrict c,
-    xcb_key_press_event_t * restrict ke)
+static xcb_keysym_t get_keysym(xcb_connection_t * c,
+    xcb_key_press_event_t * ke)
 {
     xcb_key_symbols_t *syms = xcb_key_symbols_alloc(c);
     xcb_keysym_t k = xcb_key_press_lookup_keysym(syms, ke, 2);
@@ -184,7 +184,7 @@ static inline bool is_page_down(const uint8_t v)
     return v == '6';
 }
 // returns true if parent should return
-static bool shift_page_up_down_scroll(xcb_connection_t * restrict xc,
+static bool shift_page_up_down_scroll(xcb_connection_t * xc,
     const uint16_t state, const int_fast16_t pcount, uint8_t * s)
 {
     enum {SCROLL_AMOUNT = 10};
@@ -217,8 +217,8 @@ static void print_s(uint8_t * s, int16_t i)
 #else//!DEBUG_KEYS
 #define print_s(s, i)
 #endif//DEBUG_KEYS
-static uint8_t * handle_keysym(xcb_connection_t * restrict xc,
-    uint8_t * restrict kbuf, int_fast16_t * restrict pcount,
+static uint8_t * handle_keysym(xcb_connection_t * xc,
+    uint8_t * kbuf, int_fast16_t * pcount,
     const xcb_keysym_t key, const uint16_t ke_state)
 {
     uint8_t * s = get_s(key, (uint8_t *)kbuf);
@@ -236,8 +236,8 @@ static uint8_t * handle_keysym(xcb_connection_t * restrict xc,
     return s;
 }
 //  Convert the keypress event into a string.
-uint8_t * jbxvt_lookup_key(xcb_connection_t * restrict xc,
-    void * restrict ev, int_fast16_t * restrict pcount)
+uint8_t * jbxvt_lookup_key(xcb_connection_t * xc,
+    void * ev, int_fast16_t * pcount)
 {
 #ifdef LOOKUP_KEY_DUMP_TABLES
     dump();

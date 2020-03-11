@@ -29,8 +29,8 @@ static void sgrc(const uint32_t c, const bool fg)
         jbxvt_add_rstyle(fg?JBXVT_RS_FG_INDEX:JBXVT_RS_BG_INDEX);
         jbxvt_set_rstyle(jbxvt_get_rstyle()|c<<o);
 }
-static bool rgb_or_index(int32_t arg, bool * restrict either,
-    bool * restrict index, bool * restrict rgb, const bool is_fg)
+static bool rgb_or_index(int32_t arg, bool * either,
+    bool * index, bool * rgb, const bool is_fg)
 {
     const bool rval = *either;
     if (JB_UNLIKELY(rval)) {
@@ -45,7 +45,7 @@ static bool rgb_or_index(int32_t arg, bool * restrict either,
 }
 // continue if true
 static bool handle_color_encoding(const int32_t arg, const bool is_fg,
-    bool * restrict index_mode, bool * restrict rgb_mode)
+    bool * index_mode, bool * rgb_mode)
 {
     static uint8_t rgb_count;
     bool rval = false;
@@ -65,7 +65,7 @@ static bool handle_color_encoding(const int32_t arg, const bool is_fg,
     return rval;
 }
 void jbxvt_handle_sgr(xcb_connection_t * xc,
-    struct JBXVTToken * restrict token)
+    struct JBXVTToken * token)
 {
     bool fg_rgb_or_index = false, bg_rgb_or_index = false, fg_rgb_mode =
         false, fg_index_mode = false, bg_rgb_mode = false,

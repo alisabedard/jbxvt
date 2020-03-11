@@ -29,8 +29,8 @@ void jbxvt_save_modes(void)
 void jbxvt_handle_JBXVT_TOKEN_ELR(void * xc __attribute__((unused)),
     struct JBXVTToken * token)
 {
-    int16_t * restrict t = token->arg;
-    struct JBXVTPrivateModes * restrict m = jbxvt_get_modes();
+    int16_t * t = token->arg;
+    struct JBXVTPrivateModes * m = jbxvt_get_modes();
     switch (t[0]) {
     case 2:
         LOG("ELR Once");

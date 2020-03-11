@@ -26,7 +26,7 @@ static void setup_font_metrics(xcb_connection_t * xc,
     xcb_query_font_reply_t * r = xcb_query_font_reply(xc,
         c, NULL);
     jb_assert(r, "Cannot get font information");
-    uint8_t * restrict g = font_geometry;
+    uint8_t * g = font_geometry;
     g[0] = r->max_bounds.character_width;
     g[1] = r->font_ascent + r->font_descent;
     g[2] = r->font_ascent;

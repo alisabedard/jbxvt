@@ -17,7 +17,7 @@ uint8_t jbxvt_get_utf_bytes(const uint8_t c)
 }
 // Handle 4-byte characters
 void jbxvt_parse_utf8_3(xcb_connection_t * xc,
-    struct JBXVTToken * restrict tk, int_fast16_t c)
+    struct JBXVTToken * tk, int_fast16_t c)
 {
     LOG("utf8_3()\t0x%x\n", (unsigned int)c);
     c = jbxvt_pop_char(xc, c); // 2
@@ -31,7 +31,7 @@ void jbxvt_parse_utf8_3(xcb_connection_t * xc,
 }
 // Handle 3-byte characters
 void jbxvt_parse_utf8_2(xcb_connection_t * xc,
-    struct JBXVTToken * restrict tk, int_fast16_t c)
+    struct JBXVTToken * tk, int_fast16_t c)
 {
     LOG("utf8_t()\t0x%x\n", (unsigned int)c);
     int_fast16_t c2 = jbxvt_pop_char(xc, c); // take next byte
@@ -75,7 +75,7 @@ tk_null:
     }
 }
 // Handle 2-byte characters
-void jbxvt_parse_utf8_1(struct JBXVTToken * restrict tk, int_fast16_t c)
+void jbxvt_parse_utf8_1(struct JBXVTToken * tk, int_fast16_t c)
 {
     LOG("utf8_1()\t0x%x\n", (unsigned int)c);
 #ifndef DEBUG
@@ -84,7 +84,7 @@ void jbxvt_parse_utf8_1(struct JBXVTToken * restrict tk, int_fast16_t c)
     tk->type = JBXVT_TOKEN_NULL;
 }
 // Handle 1-byte characters
-void jbxvt_parse_utf8_0(struct JBXVTToken * restrict tk, int_fast16_t c)
+void jbxvt_parse_utf8_0(struct JBXVTToken * tk, int_fast16_t c)
 {
     tk->type = JBXVT_TOKEN_CHAR;
     tk->tk_char = c;

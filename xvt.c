@@ -48,7 +48,7 @@ static int16_t get_0(int16_t arg)
     return get_n(arg) - 1;
 }
 // CUP and HVP, move cursor
-static void cup(xcb_connection_t * xc, int16_t * restrict t)
+static void cup(xcb_connection_t * xc, int16_t * t)
 {
     // subtract 1 for 0-based coordinates
     enum {
@@ -221,7 +221,7 @@ ALIAS(ECH, DCH); // erase character
 // set vt52 graphics mode
 static void gm52(const bool set)
 {
-    struct JBXVTPrivateModes * restrict m = jbxvt_get_modes();
+    struct JBXVTPrivateModes * m = jbxvt_get_modes();
     m->charsel = (m->gm52 = set) ? 1 : 0;
 }
 static void jbxvt_handle_JBXVT_TOKEN_ENTGM52(xcb_connection_t * xc,
@@ -394,14 +394,14 @@ static void jbxvt_handle_JBXVT_TOKEN_STBM(xcb_connection_t * xc,
     struct JBXVTToken * token) // set top and bottom margins
 {
     NOPARM_XC();
-    int16_t * restrict t = token->arg;
+    int16_t * t = token->arg;
     LOG("JBXVT_TOKEN_STBM args: %d, 0: %d, 1: %d",
         (int)token->nargs, t[0], t[1]);
     if (token->private == JBXVT_TOKEN_RESTOREPM) {
         jbxvt_restore_modes();
     } else { // set margins
         const bool rst = token->nargs < 2 || t[0] >= t[1];
-        struct JBDim * restrict m = jbxvt_get_margin();
+        struct JBDim * m = jbxvt_get_margin();
         m->top = rst ? 0 : get_0(t[0]);
         m->bot = (rst ? jbxvt_get_char_size().h : get_n(t[1])) - 1;
     }

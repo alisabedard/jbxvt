@@ -4,5 +4,5 @@
 #define JBXVT_PAINT_H
 struct JBXVTPaintContext;
 // Paint the text described by paint context c.
-void jbxvt_paint(struct JBXVTPaintContext * restrict c);
+void jbxvt_paint(struct JBXVTPaintContext * c);
 #endif//!JBXVT_PAINT_H

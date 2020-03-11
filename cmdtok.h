@@ -4,7 +4,7 @@
 #include <xcb/xcb.h>
 struct JBXVTToken;
 void jbxvt_get_token(xcb_connection_t * xc,
-    struct JBXVTToken * restrict tk);
+    struct JBXVTToken * tk);
 // Initialize the static command buffer and stack
 void jbxvt_init_cmdtok(void);
 int16_t jbxvt_pop_char(xcb_connection_t * xc,

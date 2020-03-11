@@ -50,8 +50,8 @@ fd_t jbxvt_get_fd(void)
 }
 /*   Attempt to create and write an entry to the utmp file */
 #ifdef POSIX_UTMPX
-static void populate_utent(struct utmpx * restrict utent,
-    char * restrict tty_name, pid_t const pid)
+static void populate_utent(struct utmpx * utent,
+    char * tty_name, pid_t const pid)
 {
     struct timeval tv;
     utent->ut_type = USER_PROCESS;
@@ -65,7 +65,7 @@ static void populate_utent(struct utmpx * restrict utent,
     utent->ut_tv.tv_sec = tv.tv_sec;
     utent->ut_tv.tv_usec = tv.tv_usec;
 }
-static void write_utmpx(const pid_t comm_pid, char * restrict tty_name)
+static void write_utmpx(const pid_t comm_pid, char * tty_name)
 {
     struct utmpx utent;
     setutxent();
@@ -79,8 +79,8 @@ static void write_utmpx(const pid_t comm_pid, char * restrict tty_name)
  *  successful then the master and slave file descriptors are returned
  *  via the arguments.
  */
-static char * get_pseudo_tty(int * restrict pmaster,
-    int * restrict pslave)
+static char * get_pseudo_tty(int * pmaster,
+    int * pslave)
 {
     const fd_t mfd = *pmaster = posix_openpt(O_RDWR);
     jb_require(mfd >= 0, "Could not open ptty");
@@ -132,7 +132,7 @@ static void redirect_stdio(const fd_t ttyfd)
     redir(2, ttyfd);
     close(ttyfd);
 }
-static void child(char ** restrict argv, fd_t ttyfd)
+static void child(char ** argv, fd_t ttyfd)
 {
 #if !defined(NETBSD) && !defined(OPENBSD)
     const pid_t pgid = setsid();
@@ -219,7 +219,7 @@ static fd_t run_command(char ** argv)
 }
 /*  Initialize the command connection.  This should
     be called after the X server connection is established.  */
-void jbxvt_init_command_module(char ** restrict argv)
+void jbxvt_init_command_module(char ** argv)
 {
     /*   Enable the delete window protocol: */
     command_fd = run_command(argv);

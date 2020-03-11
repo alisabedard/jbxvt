@@ -27,13 +27,13 @@ void jbxvt_blink_cursor(xcb_connection_t * xc)
 // Returns new cursor y value
 int16_t jbxvt_check_cursor_position(void)
 {
-    struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
-    struct JBDim * restrict c = &s->cursor;
+    struct JBXVTScreen * s = jbxvt_get_current_screen();
+    struct JBDim * c = &s->cursor;
     { // sz scope
         struct JBDim sz = jbxvt_get_char_size();
         --sz.w; --sz.h;
         { // m scope
-            struct JBDim * restrict m = &s->margin;
+            struct JBDim * m = &s->margin;
             m->top = JB_MAX(m->top, 0); // Sanitize margins
             m->bottom = JB_MIN(m->bottom, sz.h);
             if (jbxvt_get_modes()->decom) // Implement DECOM

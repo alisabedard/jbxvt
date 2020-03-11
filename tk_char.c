@@ -11,7 +11,7 @@
 #include "scroll.h"
 #include "string.h"
 #include "tab.h"
-static void form_feed(xcb_connection_t * restrict xc)
+static void form_feed(xcb_connection_t * xc)
 {
     const struct JBDim m = *jbxvt_get_margin();
     jbxvt_move(xc, 0, m.top, 0);

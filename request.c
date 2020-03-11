@@ -12,7 +12,7 @@
 void jbxvt_handle_JBXVT_TOKEN_LL(void * xc __attribute__((unused)),
     struct JBXVTToken * token)
 {
-    int16_t * restrict t = token->arg;
+    int16_t * t = token->arg;
     LOG("t[0]: %d, t[1]: %d", t[0], t[1]);
     switch (t[1]) {
     case 0:
@@ -21,7 +21,7 @@ void jbxvt_handle_JBXVT_TOKEN_LL(void * xc __attribute__((unused)),
         jbxvt_set_cursor_attr(t[0]);
         break;
     case '"': { // SCA - Select Character protection Attribute
-        struct JBXVTPrivateModes * restrict m = jbxvt_get_modes();
+        struct JBXVTPrivateModes * m = jbxvt_get_modes();
         switch(t[0]) {
         default:
         case 0:
@@ -81,7 +81,7 @@ void jbxvt_handle_JBXVT_TOKEN_REQTPARAM(void * xc __attribute__((unused)),
 void jbxvt_handle_JBXVT_TOKEN_RQM(void * xc __attribute__((unused)),
     struct JBXVTToken * token)
 {
-    int16_t * restrict t = token->arg;
+    int16_t * t = token->arg;
     if (token->private == '?') {
         LOG("\tRQM Ps: %d", t[0]);
         dprintf(jbxvt_get_fd(), "%s%d;%d$y", jbxvt_get_csi(),

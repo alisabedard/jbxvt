@@ -17,8 +17,8 @@ static uint16_t get_copy_width(const uint8_t count,
     return font_width * (jbxvt_get_char_size().w - count
         - jbxvt_get_x() - 2);
 }
-static void copy_area(xcb_connection_t * restrict xc,
-    const int16_t * restrict x, const uint8_t count)
+static void copy_area(xcb_connection_t * xc,
+    const int16_t * x, const uint8_t count)
 {
     const xcb_window_t v = jbxvt_get_vt_window(xc);
     const struct JBDim f = jbxvt_get_font_size();
@@ -26,7 +26,7 @@ static void copy_area(xcb_connection_t * restrict xc,
     xcb_copy_area(xc, v, v, jbxvt_get_text_gc(xc), f.w * x[0], y,
         f.w * x[1], y, get_copy_width(count, f.w), f.h);
 }
-static void clear_area(xcb_connection_t * restrict xc, const int16_t x,
+static void clear_area(xcb_connection_t * xc, const int16_t x,
     const int16_t y, const uint8_t count)
 {
     const struct JBDim f = jbxvt_get_font_size();

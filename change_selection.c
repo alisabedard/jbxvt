@@ -32,7 +32,7 @@ static void invert_r(const uint8_t current,
         invert_r(current + 1, i);
     }
 }
-static void change(xcb_connection_t * restrict xc, struct JBDim * se,
+static void change(xcb_connection_t * xc, struct JBDim * se,
     struct JBDim * ose)
 {
     LOG("change()");
@@ -61,7 +61,7 @@ static void change(xcb_connection_t * restrict xc, struct JBDim * se,
     ose1 and ose2 are assumed to represent the currently
     displayed selection endpoints.  */
 void jbxvt_change_selection(xcb_connection_t * xc,
-    struct JBDim * restrict ose0, struct JBDim * restrict ose1)
+    struct JBDim * ose0, struct JBDim * ose1)
 {
     LOG("jbxvt_change_selection()");
     if (jbxvt_selcmp(ose0, ose1) > 0) {

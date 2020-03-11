@@ -19,12 +19,12 @@
 #include "screen.h"
 #include "size.h"
 #include "window.h"
-static void clear_window(xcb_connection_t * restrict xc)
+static void clear_window(xcb_connection_t * xc)
 {
     const struct JBDim p = jbxvt_get_pixel_size();
     xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), 0, 0, p.w, p.h);
 }
-static void decscnm(xcb_connection_t * restrict xc)
+static void decscnm(xcb_connection_t * xc)
 {
     static bool last_was_rv;
     const bool rv = jbxvt_get_modes()->decscnm;
@@ -41,7 +41,7 @@ static void decscnm(xcb_connection_t * restrict xc)
 }
 /*  Reset the screen - called whenever the screen
     needs to be repaired completely.  */
-void jbxvt_reset(xcb_connection_t * restrict xc)
+void jbxvt_reset(xcb_connection_t * xc)
 {
     LOG("jbxvt_reset()");
         jbxvt_zero_rstyle();

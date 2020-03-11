@@ -25,7 +25,7 @@ static void draw_underline(xcb_connection_t * xc, uint16_t len,
         (struct xcb_point_t[]){{p.x, p.y + offset},
         {p.x + len * jbxvt_get_font_size().width, p.y + offset}});
 }
-static void handle_underline_styles(struct JBXVTPaintContext * restrict c)
+static void handle_underline_styles(struct JBXVTPaintContext * c)
 {
     xcb_connection_t * xc = c->xc;
     const uint16_t len = c->length;
@@ -49,8 +49,8 @@ static void handle_underline_styles(struct JBXVTPaintContext * restrict c)
     }
 }
 static void draw_text(xcb_connection_t * xc,
-    uint8_t * restrict str, uint8_t len,
-    struct JBDim * restrict p, rstyle_t rstyle)
+    uint8_t * str, uint8_t len,
+    struct JBDim * p, rstyle_t rstyle)
 {
     /* Cache frequently used values
        to avoid function call overhead. */
@@ -99,7 +99,7 @@ struct ColorOperation {
     bool is_foreground;
     uint8_t __pad[7];
 };
-static void set_color(struct ColorOperation * restrict o)
+static void set_color(struct ColorOperation * o)
 {
     const uint8_t i = o->is_foreground ? 0 : 1; // index into color[]
     if (o->is_indexed[i])
@@ -108,7 +108,7 @@ static void set_color(struct ColorOperation * restrict o)
         o->set_pixel(o->x_connection, rgb_pixel(o->x_connection,
             o->color[i]));
 }
-static bool set_rstyle_colors(xcb_connection_t * restrict xc,
+static bool set_rstyle_colors(xcb_connection_t * xc,
     const uint32_t rstyle)
 {
     // Mask foreground colors, 9 bits offset by 7 bits
@@ -128,7 +128,7 @@ static bool set_rstyle_colors(xcb_connection_t * restrict xc,
     set_color(&o);
     return rgb[0] || rgb[1] || ind[0] || ind[1];
 }
-static inline void restore_colors(xcb_connection_t * restrict xc)
+static inline void restore_colors(xcb_connection_t * xc)
 {
     jbxvt_set_fg_pixel(xc, jbxvt_get_fg());
     jbxvt_set_bg_pixel(xc, jbxvt_get_bg());
@@ -137,7 +137,7 @@ static inline bool is_reverse_video(const rstyle_t rs)
 {
     return (rs & (1<<JBXVT_RS_RVID)) || (rs & (1<<JBXVT_RS_BLINK));
 }
-void jbxvt_paint(struct JBXVTPaintContext * restrict c)
+void jbxvt_paint(struct JBXVTPaintContext * c)
 {
     /* Storage of p instead of using c->position directly fixes scroll
      * history display.  */

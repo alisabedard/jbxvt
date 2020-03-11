@@ -12,8 +12,8 @@ void jbxvt_set_double_width_line(xcb_connection_t * xc, const bool is_dwl){
 /* Disperse each character of the input string to every other character of the
  * output string.  */
 static void alt(const int i, const int in_length,
-        uint8_t * restrict out_str,
-        uint8_t * restrict in_str) {
+        uint8_t * out_str,
+        uint8_t * in_str) {
     if (i < in_length) {
         out_str[0] = in_str[i];
         alt(i + 1, in_length, out_str + 2, in_str);
@@ -21,7 +21,7 @@ static void alt(const int i, const int in_length,
 }
 /* Initialize every other character of the output string
    to a space character. */
-static void space(const int i, uint8_t * restrict out_str) {
+static void space(const int i, uint8_t * out_str) {
     if (i > 0) {
         if (i % 2)
             out_str[i] = ' ';

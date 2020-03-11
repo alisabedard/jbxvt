@@ -6,6 +6,6 @@
 #include <stdint.h>
 #include <xcb/xcb.h>
 // Insert or delete count spaces from the current position.
-void jbxvt_edit_characters(xcb_connection_t * restrict xc,
+void jbxvt_edit_characters(xcb_connection_t * xc,
     const uint8_t count, const bool delete);
 #endif//!JBXVT_EDIT_H

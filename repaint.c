@@ -15,13 +15,13 @@
 #include "show_selection.h"
 #include "size.h"
 #include "window.h"
-static int get_length_of_style_r(int i, struct JBXVTPaintContext * restrict t)
+static int get_length_of_style_r(int i, struct JBXVTPaintContext * t)
 {
     return i < t->length && t->style[i] == t->style[0]
         ? get_length_of_style_r(i + 1, t) : i;
 }
 // Display the string described by the JBXVTPaintContext structure
-static void paint_JBXVTPaintContext(struct JBXVTPaintContext * restrict token)
+static void paint_JBXVTPaintContext(struct JBXVTPaintContext * token)
 {
     const uint8_t font_width = jbxvt_get_font_size().width;
     for (int i; token->length > 0; i = get_length_of_style_r(0, token),
@@ -31,7 +31,7 @@ static void paint_JBXVTPaintContext(struct JBXVTPaintContext * restrict token)
 }
 /* t is returned to allow chain calling.  Leave this iterative since this is
  * called very frequently.   */
-static uint8_t * filter(uint8_t * restrict t, register int i)
+static uint8_t * filter(uint8_t * t, register int i)
 {
     while (--i >= 0)
         if (t[i] < ' ')
@@ -53,7 +53,7 @@ struct HistoryContext {
     int16_t line, top;
     uint16_t char_height, font_height;
 };
-static struct JBXVTLine * get_line(struct HistoryContext * restrict i)
+static struct JBXVTLine * get_line(struct HistoryContext * i)
 {
     /* Use i->top as the offset into the scroll history buffer, read from
      * bottom to top.  So we use the value of jbxvt_get_scroll_size() to
@@ -61,7 +61,7 @@ static struct JBXVTLine * get_line(struct HistoryContext * restrict i)
      * on 0.  */
     return jbxvt_get_saved_lines() + jbxvt_get_scroll_size() - i->top - 1;
 }
-static void show_history_r(struct HistoryContext * restrict i)
+static void show_history_r(struct HistoryContext * i)
 {
     if (i->top > 0) { // show remaining lines in history
         i->line_data = get_line(i);

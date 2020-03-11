@@ -102,7 +102,7 @@ struct GetNewLinesData {
     int32_t i;
     int16_t new_lines, c;
 };
-static void get_newlines(struct GetNewLinesData * restrict nld)
+static void get_newlines(struct GetNewLinesData * nld)
 {
     do {
         if ((nld->s[nld->i++] = nld->c) == '\n')
@@ -112,7 +112,7 @@ static void get_newlines(struct GetNewLinesData * restrict nld)
         && nld->i < JBXVT_TOKEN_MAX_LENGTH);
 }
 static void handle_string_char(xcb_connection_t * xc,
-    int16_t c, struct JBXVTToken * restrict tk)
+    int16_t c, struct JBXVTToken * tk)
 {
     tk->type = JBXVT_TOKEN_STRING;
     struct GetNewLinesData nld = {.xc = xc, .s = tk->string,
@@ -126,7 +126,7 @@ static void handle_string_char(xcb_connection_t * xc,
         jbxvt_push_char(c);
 }
 static void default_token(xcb_connection_t * xc,
-    struct JBXVTToken * restrict tk, int16_t c)
+    struct JBXVTToken * tk, int16_t c)
 {
     switch(c) { // handle 8-bit controls
     case JBXVT_TOKEN_CSI: case JBXVT_TOKEN_DCS: case JBXVT_TOKEN_EPA:
@@ -171,7 +171,7 @@ static void default_token(xcb_connection_t * xc,
     }
 }
 //  Return an input token
-void jbxvt_get_token(xcb_connection_t * xc, struct JBXVTToken * restrict tk)
+void jbxvt_get_token(xcb_connection_t * xc, struct JBXVTToken * tk)
 {
     memset(tk, 0, sizeof(struct JBXVTToken));
     const int16_t c = jbxvt_pop_char(xc, GET_XEVENTS_ONLY);
@@ -197,8 +197,8 @@ void jbxvt_get_token(xcb_connection_t * xc, struct JBXVTToken * restrict tk)
         default_token(xc, tk, c);
     }
 }
-static void init_container(struct JBXVTCommandContainer * restrict c,
-    uint8_t * restrict buf)
+static void init_container(struct JBXVTCommandContainer * c,
+    uint8_t * buf)
 {
     c->data = c->next = c->top = buf;
 }
