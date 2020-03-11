@@ -110,7 +110,7 @@ static void set_ttymodes(void)
     tcsetattr(0, TCSANOW, &term);
     jbxvt_set_tty_size(jbxvt_get_char_size());
 }
-static void redir(const fd_t target, const fd_t ttyfd)
+static inline void redir(const fd_t target, const fd_t ttyfd)
 {
     close(target);
     fcntl(ttyfd, F_DUPFD, 0);
