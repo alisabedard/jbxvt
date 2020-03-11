@@ -10,20 +10,20 @@
 #include "sbar.h"
 #include "size.h"
 #include "window.h"
-static void clear_area(xcb_connection_t * restrict xc,
-    const int16_t x, const int16_t y, const size_t width)
+static void clear_area(xcb_connection_t * xc,
+    int16_t x, int16_t y, int16_t width)
 {
     const struct JBDim f = jbxvt_get_font_size();
     xcb_clear_area(xc, 0, jbxvt_get_vt_window(xc), x * f.w, y * f.h,
         width * f.w, f.h);
 }
-static size_t get_limited_width(const int16_t col, const int16_t width)
+static inline size_t get_limited_width(const int16_t col, const int16_t width)
 {
-    const int cw = jbxvt_get_char_size().width;
+    uint16_t const cw = jbxvt_get_char_size().width;
     // keep col + width within the screen width
     return (size_t)((col + width > cw) ? cw - col : width);
 }
-static void delete(xcb_connection_t * restrict xc, const int16_t col,
+static void delete(xcb_connection_t * xc, const int16_t col,
     int16_t width)
 {
     const int16_t y = jbxvt_get_y();
@@ -76,14 +76,14 @@ void jbxvt_erase_line(xcb_connection_t * xc, const int8_t mode)
     case JBXVT_ERASE_BEFORE:
         delete(xc, 0, jbxvt_get_x());
         break;
-    case JBXVT_ERASE_AFTER:
     default:
+    case JBXVT_ERASE_AFTER:
         jbxvt_erase_after(xc);
     }
     jbxvt_draw_cursor(xc);
 }
-static bool assign_range(xcb_connection_t * restrict xc,
-    const int8_t mode, struct JBDim * restrict range)
+static bool assign_range(xcb_connection_t * xc,
+    const int8_t mode, struct JBDim * range)
 {
 #define SETR(s, e) range->start = s; range->end = e;
     switch (mode) {
@@ -105,8 +105,8 @@ static bool assign_range(xcb_connection_t * restrict xc,
 #undef SETR
 }
 // Erase the lines specified by range
-void jbxvt_erase_next_line(xcb_connection_t * xc, int16_t * restrict y,
-    struct JBDim * restrict range)
+void jbxvt_erase_next_line(xcb_connection_t * xc, int16_t * y,
+    struct JBDim * range)
 {
     if (range->start <= range->end) {
         *y = range->start;
@@ -116,9 +116,9 @@ void jbxvt_erase_next_line(xcb_connection_t * xc, int16_t * restrict y,
         jbxvt_erase_next_line(xc, y, range);
     }
 }
-static void erase_at_y(xcb_connection_t * xc, struct JBDim * restrict range)
+static void erase_at_y(xcb_connection_t * xc, struct JBDim * range)
 {
-    int16_t * restrict y = &jbxvt_get_current_screen()->cursor.y;
+    int16_t * y = &jbxvt_get_current_screen()->cursor.y;
     /* Save cursor y locally instead of using save/restore cursor
        functions in order to avoid side-effects on applications
        using a saved cursor position.  */
