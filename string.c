@@ -22,10 +22,10 @@
 #include "size.h"
 #include "tab.h"
 #include "window.h"
-static void handle_new_lines(xcb_connection_t * restrict xc,
+static void handle_new_lines(xcb_connection_t * xc,
     int8_t new_line_count)
 {
-    struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
+    struct JBXVTScreen * s = jbxvt_get_current_screen();
     const int16_t y = s->cursor.y;
     struct JBDim * m = &s->margin;
     new_line_count = y > m->b ? 0 : new_line_count - m->b - y;
@@ -41,9 +41,9 @@ static void decsclm(void)
     if (jbxvt_get_modes()->decsclm)
         jb_sleep(JBXVT_SOFT_SCROLL_DELAY);
 }
-static void wrap(xcb_connection_t * restrict xc)
+static void wrap(xcb_connection_t * xc)
 {
-    struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
+    struct JBXVTScreen * s = jbxvt_get_current_screen();
     s->wrap_next = false;
     const struct JBDim m = s->margin;
     const int16_t y = s->cursor.y;
@@ -61,23 +61,23 @@ struct MoveData {
     };
     union {
         rstyle_t * style;
-        struct JBDim * restrict point;
+        struct JBDim * point;
     };
     size_t size;
     int32_t index, offset;
 };
-static void move_visible(struct MoveData * restrict d)
+static void move_visible(struct MoveData * d)
 
 {
     const struct JBDim f = jbxvt_get_font_size(),
-          * restrict p = d->point;
-    const uint16_t n_width = d->offset * f.width;
+          * p = d->point;
+    uint16_t n_width = d->offset * f.width;
     xcb_connection_t * xc = d->xc;
     const xcb_window_t vt = jbxvt_get_vt_window(xc);
     xcb_copy_area(xc, vt, vt, jbxvt_get_text_gc(xc), p->x, p->y,
         p->x + n_width, p->y, d->size * f.width - n_width, f.height);
 }
-static void move(struct MoveData * restrict d)
+static void move(struct MoveData * d)
 {
     memmove(d->text + d->index + d->offset,
         d->text + d->index, d->size);
@@ -85,11 +85,11 @@ static void move(struct MoveData * restrict d)
         d->style + d->index, d->size << 2);
 }
 // Insert count characters space (not blanked) at point
-static void insert_characters(xcb_connection_t * restrict xc,
+static void insert_characters(xcb_connection_t * xc,
     const uint8_t count, struct JBDim point)
 {
     LOG("handle_insert(n=%d, p={%d, %d})", count, point.x, point.y);
-    struct JBXVTScreen * restrict s = jbxvt_get_current_screen();
+    struct JBXVTScreen * s = jbxvt_get_current_screen();
     const struct JBDim c = s->cursor;
     struct MoveData d = {.text = s->line[c.y].text,
         .style = s->line[c.y].rend, .offset = count,
@@ -100,7 +100,7 @@ static void insert_characters(xcb_connection_t * restrict xc,
     d.point = &point;
     move_visible(&d);
 }
-static void parse_special_charset(uint8_t * restrict str, const int i)
+static void parse_special_charset(uint8_t * str, const int i)
 {
     LOG("parse_special_charset(str, %d)", i);
     if (i >= 0) {
@@ -114,7 +114,7 @@ static void parse_special_charset(uint8_t * restrict str, const int i)
     }
 }
 static bool test_action_char(xcb_connection_t * xc, const uint8_t c,
-    struct JBXVTScreen * restrict s)
+    struct JBXVTScreen * s)
 {
     switch(c) {
     case '\r':
@@ -131,25 +131,25 @@ static bool test_action_char(xcb_connection_t * xc, const uint8_t c,
     return false;
 }
 static void save_render_style(const int_fast16_t n,
-    struct JBXVTScreen * restrict s)
+    struct JBXVTScreen * s)
 {
     const struct JBDim c = s->cursor;
     const rstyle_t r = jbxvt_get_rstyle();
     for (int_fast16_t i = n - 1; i >= 0; --i)
           s->line[c.y].rend[c.x + i] = r;
 }
-static void check_wrap(struct JBXVTScreen * restrict s)
+static void check_wrap(struct JBXVTScreen * s)
 {
     const uint16_t w = jbxvt_get_char_size().w;
     if (s->cursor.x >= w)
         s->wrap_next = !jbxvt_get_modes()->decawm;
 }
-static void clear_shift(struct JBXVTPrivateModes * restrict m)
+static void clear_shift(struct JBXVTPrivateModes * m)
 {
     m->ss2 = false;
     m->ss3 = false;
 }
-static bool test_shift(struct JBXVTPrivateModes * restrict m,
+static bool test_shift(struct JBXVTPrivateModes * m,
     const bool shift, const enum JBXVTCharacterSet cs)
 {
     bool rval = false; // nothing changed
@@ -188,10 +188,10 @@ struct DrawStringContext {
 static void draw_string_at_pixel_position(struct DrawStringContext * restrict
     dc)
 {
-    struct JBXVTScreen * restrict s = dc->screen;
-    const struct JBDim * restrict c = &s->cursor;
+    struct JBXVTScreen * s = dc->screen;
+    const struct JBDim * c = &s->cursor;
     const struct JBDim p = jbxvt_chars_to_pixels(*c);
-    const struct JBXVTPrivateModes * restrict mode = jbxvt_get_modes();
+    const struct JBXVTPrivateModes * mode = jbxvt_get_modes();
     if (JB_UNLIKELY(mode->insert))
         insert_characters(dc->connection, 1, p);
     uint8_t * t = s->line[c->y].text + c->x;
@@ -222,8 +222,8 @@ static void draw_string_at_pixel_position(struct DrawStringContext * restrict
 static void draw_string_at_cursor_position(struct DrawStringContext * restrict
     dsc)
 {
-    struct JBXVTScreen * restrict s = dsc->screen;
-    struct JBDim * restrict c = &s->cursor;
+    struct JBXVTScreen * s = dsc->screen;
+    struct JBDim * c = &s->cursor;
     if (s->wrap_next) {
         wrap(dsc->connection);
         c->x = 0;
@@ -235,7 +235,7 @@ static void draw_string_at_cursor_position(struct DrawStringContext * restrict
     save_render_style(1, s);
     ++c->x;
 }
-static void draw_next_char(struct DrawStringContext * restrict dsc)
+static void draw_next_char(struct DrawStringContext * dsc)
 {
     if (dsc->length > 0) {
         if (!test_action_char(dsc->connection, *dsc->string,
@@ -250,7 +250,7 @@ static void draw_next_char(struct DrawStringContext * restrict dsc)
 }
 /*  Display the string at the current position.
     new_line_count is the number of new lines in the string.  */
-void jbxvt_string(xcb_connection_t * xc, uint8_t * restrict str, int len,
+void jbxvt_string(xcb_connection_t * xc, uint8_t * str, int len,
     const int new_line_count)
 {
 #ifdef DEBUG_VERBOSE
