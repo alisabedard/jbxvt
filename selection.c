@@ -34,7 +34,6 @@ static inline void set_selection_property(xcb_connection_t * xc,
 }
 //  Make the selection currently delimited by the selection end markers.
 void jbxvt_make_selection(xcb_connection_t * xc) {
-    LOG("jbxvt_make_selection");
     jbxvt_save_selection(&selection_data);
     /* Set all properties which may possibly be requested.  */
     if (selection_data.text) { // don't set NULL data
@@ -56,8 +55,10 @@ static void change_property(xcb_connection_t * xc,
 void jbxvt_send_selection(xcb_connection_t * xc,
         const xcb_time_t time, const uint32_t requestor,
         const uint32_t type, const uint32_t property) {
+#ifdef JBXVT_DEBUG_SELECTION
     LOG("jbxvt_send_selection, %d, %d, %d, %d", (int)time,
             requestor, type, property);
+#endif // JBXVT_DEBUG_SELECTION
     if (selection_data.text) { // verify data non-null
         change_property(xc, requestor, property, type);
         xcb_selection_notify_event_t e = {

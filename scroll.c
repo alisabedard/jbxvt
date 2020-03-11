@@ -170,8 +170,10 @@ static void sc_up(struct ScrollData * d)
 void scroll(xcb_connection_t * xc, const int16_t row1,
     const int16_t row2, const int16_t count)
 {
+#ifdef JBXVT_DEBUG_SCROLL
     LOG("scroll(xc, row1: %d, row2: %d, count: %d)", row1, row2,
         count);
+#endif // JBXVT_DEBUG_SCROLL
     if (JB_UNLIKELY(!count))
         return; // nothing to do
     if (JB_UNLIKELY(row1 > row2))

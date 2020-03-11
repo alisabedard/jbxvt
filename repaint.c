@@ -103,7 +103,9 @@ void jbxvt_repaint(xcb_connection_t * xc)
         .char_height = chars.height,
         // Subtract 1 from scroll offset to get index.
         .top = jbxvt_get_scroll() - 1};
+#ifdef JBXVT_DEBUG_HISTORY
     LOG("history.top: %d", history.top);
+#endif // JBXVT_DEBUG_HISTORY
     show_history_r(&history);
     // Save the position where scroll history ends:
     const int16_t history_end_y = p.y - 1;
