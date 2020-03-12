@@ -38,7 +38,7 @@ static void clear_selection_at(const int16_t j)
     if (e[0].index == j || e[1].index == j)
         jbxvt_clear_selection();
 }
-static void move_line(const int16_t source, const int16_t count,
+static inline void move_line(const int16_t source, const int16_t count,
     struct JBXVTLine * line_array)
 {
     const int16_t dest = source + count;
@@ -46,7 +46,7 @@ static void move_line(const int16_t source, const int16_t count,
         sizeof(struct JBXVTLine));
     clear_selection_at(source);
 }
-static uint8_t get_y(int16_t * y, const int16_t row1,
+static inline uint8_t get_y(int16_t * y, const int16_t row1,
     const int16_t count, const bool up)
 {
     const uint8_t fh = jbxvt_get_font_size().height;
@@ -111,7 +111,7 @@ static int16_t copy_lines(const int16_t i, const int16_t j, const int16_t mod,
     memcpy(dest, src, sizeof(struct JBXVTLine));
     return copy_lines(i + 1, j + mod, mod, count);
 }
-static void clear_line(xcb_connection_t * xc,
+static inline void clear_line(xcb_connection_t * xc,
     const int16_t y, const int16_t count)
 {
     const uint8_t fh = jbxvt_get_font_size().height;
@@ -129,9 +129,10 @@ static void clear(const int16_t count, const int16_t offset, const bool is_up)
 }
 struct ScrollData {
     xcb_connection_t * connection;
-    int16_t begin, end;
-    int32_t count:31; // maintain alignment
-    bool up:1;
+    int16_t begin;
+    int16_t end;
+    int16_t count;
+    bool up;
 };
 static void sc_common(struct ScrollData * d)
 {
