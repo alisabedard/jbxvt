@@ -16,7 +16,6 @@ void jbxvt_set_rstyle(const rstyle_t val)
 }
 void jbxvt_del_rstyle(const uint8_t val)
 {
-//    rstyle_value&=~(1<<val);
     rstyle_value&=((rstyle_t)~(1<<val));
 }
 rstyle_t jbxvt_get_rstyle(void)
