@@ -8,7 +8,8 @@
 void jbxvt_move(xcb_connection_t * xc,
     const int16_t x, const int16_t y, const uint8_t relative)
 {
-    struct JBXVTScreen * s = jbxvt_get_current_screen();
+    struct JBXVTScreen * s;
+    s = jbxvt_get_current_screen();
     jbxvt_draw_cursor(xc);
     s->cursor.x = relative & JBXVT_COLUMN_RELATIVE ? s->cursor.x + x : x;
     s->cursor.y = relative & JBXVT_ROW_RELATIVE ? s->cursor.y + y : y;
