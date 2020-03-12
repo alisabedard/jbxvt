@@ -171,17 +171,17 @@ static void sc_up(struct ScrollData * d)
 void scroll(xcb_connection_t * xc, const int16_t row1,
     const int16_t row2, const int16_t count)
 {
-#ifdef JBXVT_DEBUG_SCROLL
-    LOG("scroll(xc, row1: %d, row2: %d, count: %d)", row1, row2,
-        count);
-#endif // JBXVT_DEBUG_SCROLL
-    if (JB_UNLIKELY(!count))
-        return; // nothing to do
-    if (JB_UNLIKELY(row1 > row2))
-        return; // invalid
-    const bool is_up = JB_LIKELY(count > 0);
-    (is_up ? sc_up : sc_dn)(&(struct ScrollData){
-        .connection = xc, .begin = row1, .end = row2 + 1,
-        .count = abs(count), .up = is_up});
-    jbxvt_set_scroll(xc, 0);
+    if (count && row1 < row2) {
+        struct ScrollData sd;
+        sd.connection = xc;
+        sd.begin = row1;
+        sd.end = row2 + 1;
+        sd.count = abs(count);
+        sd.up = count > 0;
+        if (sd.up)
+            sc_up(&sd);
+        else
+            sc_dn(&sd);
+        jbxvt_set_scroll(xc, 0);
+    }
 }
