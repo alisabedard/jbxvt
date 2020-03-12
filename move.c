@@ -12,5 +12,6 @@ void jbxvt_move(xcb_connection_t * xc,
     jbxvt_draw_cursor(xc);
     s->cursor.x = relative & JBXVT_COLUMN_RELATIVE ? s->cursor.x + x : x;
     s->cursor.y = relative & JBXVT_ROW_RELATIVE ? s->cursor.y + y : y;
+    s->wrap_next = false;
     jbxvt_draw_cursor(xc);
 }
