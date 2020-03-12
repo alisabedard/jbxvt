@@ -2,20 +2,19 @@
     Copyright 1992, 1997 John Bovey,
     University of Kent at Canterbury.*/
 #include "scroll.h"
-#include <string.h>
 #include "JBXVTLine.h"
 #include "JBXVTScreen.h"
 #include "font.h"
 #include "gc.h"
 #include "libjb/JBDim.h"
-#include "libjb/log.h"
-#include "libjb/macros.h"
 #include "libjb/util.h"
 #include "sbar.h"
 #include "screen.h"
 #include "selection.h"
 #include "size.h"
 #include "window.h"
+#include <stdlib.h>
+#include <string.h>
 static struct JBXVTLine * saved_lines;
 static int16_t scroll_size;
 struct JBXVTLine * jbxvt_get_saved_lines(void)
