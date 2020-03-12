@@ -7,7 +7,8 @@ void jbxvt_zero_rstyle(void)
 }
 void jbxvt_add_rstyle(const uint8_t val)
 {
-    rstyle_value |= (rstyle_t)(1<<val);
+    if (val != 128)
+        rstyle_value |= (rstyle_t)(1<<val);
 }
 void jbxvt_set_rstyle(const rstyle_t val)
 {
