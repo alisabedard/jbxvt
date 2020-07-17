@@ -16,7 +16,7 @@ bool jb_xcb_cookie_has_error(xcb_connection_t * x, const xcb_void_cookie_t c)
   free(e);
   return true;
 }
-static void xerr(xcb_connection_t * x, const char * msg)
+static _Noreturn void xerr(xcb_connection_t * x, const char * msg)
 {
   xcb_disconnect(x);
   if (errno)
@@ -75,7 +75,7 @@ pixel_t jb_get_pixel(xcb_connection_t * x, const xcb_colormap_t cmap,
   return p;
 }
 pixel_t jb_get_rgb_pixel(xcb_connection_t * x, const xcb_colormap_t cm,
-  const int16_t r, const int16_t g, const int16_t b)
+  const uint16_t r, const uint16_t g, const uint16_t b)
 {
   xcb_alloc_color_cookie_t c = xcb_alloc_color(x, cm, r, g, b);
   xcb_alloc_color_reply_t * rpl = xcb_alloc_color_reply(x, c, NULL);
