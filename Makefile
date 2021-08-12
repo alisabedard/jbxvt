@@ -57,8 +57,6 @@ clean:
 		libjb/*.gcno
 distclean: clean
 	rm -f config.mk gcov.log
-	rm -f cases.c JBXVTRenderStyle.h color_index.h JBXVTTokenIndex.h\
-		sgr_cases.c
 check:
 	tests/rgb
 	tests/sgr
