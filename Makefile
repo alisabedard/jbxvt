@@ -56,7 +56,7 @@ clean:
 	rm -f ${exe} *.o *.gcda *.gcno *.gcov libjb/*.gcda \
 		libjb/*.gcno
 distclean: clean
-	rm -f config.mk gcov.log
+	rm -f config.mk gcov.log *~
 check:
 	tests/rgb
 	tests/sgr
@@ -79,5 +79,7 @@ cppcheck:
 		-D TIOCSCTTY -I /usr/include \
 		. 2> cppcheck.log
 	echo 'Results written to cppcheck.log'
+tar.gz: distclean
+	cd .. && tar czvf jbxvt.tar.gz jbxvt
 #EOF
 # DO NOT DELETE
